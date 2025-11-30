@@ -1,0 +1,77 @@
+{#
+  Evidence Pack Cover Page
+
+  Variables:
+  - scenarioData: scenario object from scenarios.yaml
+  - session: evaluation session data
+  - persona: persona type
+#}
+
+<div class="ndx-evidence-pack__cover print-avoid-break">
+  <h1 class="govuk-heading-xl ndx-evidence-pack__cover-title">
+    AWS Evaluation Evidence Pack
+  </h1>
+
+  <p class="govuk-heading-l ndx-evidence-pack__cover-subtitle">
+    {{ scenarioData.name }}
+  </p>
+
+  <p class="govuk-body-l">
+    {{ scenarioData.headline }}
+  </p>
+
+  <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+  <dl class="govuk-summary-list govuk-summary-list--no-border ndx-evidence-pack__cover-meta">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key govuk-!-width-one-third">
+        Council
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ session.council_name }}
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key govuk-!-width-one-third">
+        Evaluation Date
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ session.evaluation_date }}
+      </dd>
+    </div>
+    {% if session.evaluator_name %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key govuk-!-width-one-third">
+        Evaluator
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ session.evaluator_name }}
+        {% if session.evaluator_role %}
+          <br>
+          <span class="govuk-body-s">{{ session.evaluator_role }}</span>
+        {% endif %}
+      </dd>
+    </div>
+    {% endif %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key govuk-!-width-one-third">
+        Perspective
+      </dt>
+      <dd class="govuk-summary-list__value">
+        <strong class="govuk-tag govuk-tag--{{ persona | personaColor }}">
+          {{ persona | capitalize | replace("-", " ") }}
+        </strong>
+      </dd>
+    </div>
+  </dl>
+
+  <div class="govuk-!-margin-top-8">
+    <p class="govuk-body-s">
+      Generated from <strong>NDX:Try AWS</strong> evaluation platform
+      <br>
+      Innovation Sandbox environment
+      <br>
+      Report ID: {{ scenarioData.id }}-{{ session.evaluation_date | replace("-", "") }}-{{ persona }}
+    </p>
+  </div>
+</div>

@@ -1,0 +1,325 @@
+# Sample Data Configuration for NDX:Try AWS Scenarios
+# Defines scenario-specific data generation parameters and volumes
+
+version: "1.0.0"
+generatedAt: "2025-11-28"
+
+# Global configuration
+global:
+  defaultSeed: 42
+  defaultCouncilName: "Sample City Council"
+  defaultRegion: "Sample Region"
+  sampleMarker: "SAMPLE"
+
+# Scenario-specific configurations
+scenarios:
+  # Scenario 1: Council Chatbot - Amazon Bedrock
+  council-chatbot:
+    id: "council-chatbot"
+    name: "Council Chatbot"
+    dataTypes:
+      - knowledgeBase
+      - faqs
+      - residents
+    configuration:
+      councilName: "Birmingham City Council"
+      region: "West Midlands"
+      dataVolume: 100
+      seed: 42
+    knowledgeBase:
+      documents:
+        - title: "Waste Collection Services"
+          category: "Waste & Recycling"
+          content: "Information about bin collection schedules, recycling guidelines, and bulky waste disposal."
+          wordCount: 500
+        - title: "Council Tax Information"
+          category: "Council Tax"
+          content: "Council tax bands, payment methods, discounts, and exemptions for Birmingham residents."
+          wordCount: 750
+        - title: "Housing Applications"
+          category: "Housing"
+          content: "How to apply for council housing, eligibility criteria, and waiting list information."
+          wordCount: 600
+        - title: "Highways Maintenance"
+          category: "Highways"
+          content: "Report potholes, street lighting faults, and pavement repairs in Birmingham."
+          wordCount: 450
+    faqs:
+      count: 20
+      categories: ["Waste & Recycling", "Council Tax", "Housing", "Highways"]
+
+  # Scenario 2: Planning Application Search - Amazon Kendra
+  planning-applications:
+    id: "planning-applications"
+    name: "Planning Application Search"
+    dataTypes:
+      - planningApplications
+      - documents
+      - addresses
+    configuration:
+      councilName: "Manchester City Council"
+      region: "Greater Manchester"
+      dataVolume: 50
+      seed: 43
+    planningApplications:
+      count: 50
+      statuses: ["Submitted", "Under Review", "Approved", "Rejected"]
+      types:
+        - "House Extension"
+        - "Loft Conversion"
+        - "Change of Use"
+        - "New Build"
+        - "Conservation Area Works"
+    documents:
+      typesPerApplication:
+        - "Application Form"
+        - "Site Plan"
+        - "Design Statement"
+        - "Supporting Documents"
+      averageSize: "2MB"
+      totalDocuments: 200
+
+  # Scenario 3: FOI Request Management - Amazon Bedrock + QuickSight
+  foi-requests:
+    id: "foi-requests"
+    name: "FOI Request Management"
+    dataTypes:
+      - foiRequests
+      - departments
+      - analytics
+    configuration:
+      councilName: "Leeds City Council"
+      region: "West Yorkshire"
+      dataVolume: 150
+      seed: 44
+    foiRequests:
+      count: 150
+      statuses: ["Received", "In Progress", "Responded", "Closed", "Overdue"]
+      categories:
+        - "Finance & Budget"
+        - "Environmental Health"
+        - "Social Services"
+        - "Education"
+        - "Planning & Development"
+      responseTimeTargets: [20, 40, 60]  # days
+    departments:
+      - "Finance"
+      - "Environmental Health"
+      - "Social Services"
+      - "Education"
+      - "Planning"
+      - "Highways"
+      - "Waste Management"
+
+  # Scenario 4: IoT Sensor Data Analytics - AWS IoT Core + QuickSight
+  iot-sensors:
+    id: "iot-sensors"
+    name: "IoT Sensor Data Analytics"
+    dataTypes:
+      - sensorReadings
+      - devices
+      - locations
+    configuration:
+      councilName: "Birmingham City Council"
+      region: "West Midlands"
+      dataVolume: 1000
+      seed: 45
+    sensors:
+      types:
+        - type: "Air Quality"
+          metrics: ["PM2.5", "PM10", "NO2", "O3"]
+          units: ["μg/m³", "μg/m³", "μg/m³", "μg/m³"]
+          readingInterval: 300  # seconds
+        - type: "Noise Level"
+          metrics: ["dB"]
+          units: ["decibels"]
+          readingInterval: 600
+        - type: "Traffic Flow"
+          metrics: ["Vehicle Count", "Average Speed"]
+          units: ["vehicles/hour", "mph"]
+          readingInterval: 900
+        - type: "Parking Occupancy"
+          metrics: ["Occupied Spaces", "Total Spaces"]
+          units: ["count", "count"]
+          readingInterval: 300
+      devices:
+        count: 50
+        locations:
+          - "City Centre"
+          - "Edgbaston"
+          - "Moseley"
+          - "Selly Oak"
+          - "Erdington"
+      readings:
+        total: 1000
+        timeRange: 7  # days
+        samplesPerDevice: 20
+
+  # Scenario 5: Public Announcements - Amazon Polly
+  text-to-speech:
+    id: "text-to-speech"
+    name: "Public Announcements (Text-to-Speech)"
+    dataTypes:
+      - announcements
+      - templates
+    configuration:
+      councilName: "Manchester City Council"
+      region: "Greater Manchester"
+      dataVolume: 30
+      seed: 46
+    announcements:
+      count: 30
+      categories:
+        - "Service Disruption"
+        - "Public Events"
+        - "Road Closures"
+        - "Weather Alerts"
+        - "Community Updates"
+      templates:
+        - category: "Service Disruption"
+          template: "SAMPLE: {service} will be temporarily unavailable on {date} from {startTime} to {endTime}. We apologise for any inconvenience."
+        - category: "Public Events"
+          template: "SAMPLE: {eventName} will take place at {location} on {date} from {startTime}. {details}"
+        - category: "Road Closures"
+          template: "SAMPLE: {roadName} will be closed on {date} from {startTime} to {endTime} for {reason}. Please use alternative routes."
+        - category: "Weather Alerts"
+          template: "SAMPLE: {alertType} warning issued for {area} on {date}. {details}"
+        - category: "Community Updates"
+          template: "SAMPLE: {updateTitle}. {details} For more information, visit our website or call {phoneNumber}."
+      languages: ["en-GB"]
+      voices: ["Amy", "Emma", "Brian"]
+
+  # Scenario 6: Council Data Dashboard - Amazon QuickSight
+  quicksight-dashboard:
+    id: "quicksight-dashboard"
+    name: "Council Data Dashboard"
+    dataTypes:
+      - serviceRequests
+      - residents
+      - metrics
+    configuration:
+      councilName: "Leeds City Council"
+      region: "West Yorkshire"
+      dataVolume: 200
+      seed: 47
+    datasets:
+      serviceRequests:
+        count: 200
+        timeRange: 90  # days
+        categories: ["Waste & Recycling", "Highways", "Housing", "Council Tax"]
+        metrics:
+          - "Total Requests"
+          - "Resolved Requests"
+          - "Average Resolution Time"
+          - "Requests by Category"
+          - "Requests by Status"
+          - "Requests by Priority"
+      residents:
+        count: 100
+        demographics:
+          - "Age Groups"
+          - "Wards"
+          - "Property Types"
+      performance:
+        kpis:
+          - name: "Service Request Resolution Rate"
+            target: 85
+            actual: 82
+          - name: "Average Response Time"
+            target: 48  # hours
+            actual: 52
+          - name: "Customer Satisfaction"
+            target: 90
+            actual: 88
+
+# Data volume limits (cost control)
+limits:
+  maxResidents: 1000
+  maxServiceRequests: 1000
+  maxDocuments: 500
+  maxSensorReadings: 10000
+  maxAnnouncements: 100
+  maxPlanningApplications: 100
+  maxFOIRequests: 200
+
+# Seeding performance targets
+performance:
+  maxSeedingTime: 60  # seconds
+  warningThreshold: 45  # seconds
+  retryAttempts: 3
+  retryDelay: 2  # seconds
+
+# Sample Data Explanation Panels (Story 12.2)
+# Contextual explanations for sample data across all scenarios
+sampleDataExplanation:
+  council-chatbot:
+    title: "Council Chatbot Sample Data"
+    summary: "About this sample data"
+    keyInfo:
+      purpose: "Pre-loaded for immediate exploration"
+      costIndicator: "✓ Free - no AWS charges"
+    expandedContent:
+      description: "Simulated council FAQ data for demonstration"
+      represents: "Typical UK council citizen enquiries and responses"
+      disclaimer: "This is fictional data with no connection to any real council system"
+      methodology: "Generated from anonymised GOV.UK content patterns"
+
+  planning-ai:
+    title: "Planning Application Sample Data"
+    summary: "About this sample data"
+    keyInfo:
+      purpose: "Pre-loaded for immediate exploration"
+      costIndicator: "✓ Free - no AWS charges"
+    expandedContent:
+      description: "Simulated planning application documents"
+      represents: "Typical UK council planning submissions"
+      disclaimer: "This is fictional data with no connection to any real council system"
+      methodology: "Generated from public planning portal formats"
+
+  foi-redaction:
+    title: "FOI Request Sample Data"
+    summary: "About this sample data"
+    keyInfo:
+      purpose: "Pre-loaded for immediate exploration"
+      costIndicator: "✓ Free - no AWS charges"
+    expandedContent:
+      description: "Simulated Freedom of Information request documents"
+      represents: "Typical UK council FOI submissions and responses"
+      disclaimer: "This is fictional data with no connection to any real council system"
+      methodology: "Generated from anonymised FOI request patterns"
+
+  smart-car-park:
+    title: "Smart Car Park Sample Data"
+    summary: "About this sample data"
+    keyInfo:
+      purpose: "Pre-loaded for immediate exploration"
+      costIndicator: "✓ Free - no AWS charges"
+    expandedContent:
+      description: "Simulated IoT sensor readings from car park occupancy sensors"
+      represents: "Typical UK council car park monitoring data"
+      disclaimer: "This is fictional data with no connection to any real council system"
+      methodology: "Generated from IoT sensor data patterns"
+
+  text-to-speech:
+    title: "Text-to-Speech Sample Data"
+    summary: "About this sample data"
+    keyInfo:
+      purpose: "Pre-loaded for immediate exploration"
+      costIndicator: "✓ Free - no AWS charges"
+    expandedContent:
+      description: "Simulated public announcement templates"
+      represents: "Typical UK council public communications"
+      disclaimer: "This is fictional data with no connection to any real council system"
+      methodology: "Generated from GOV.UK announcement patterns"
+
+  quicksight-dashboard:
+    title: "QuickSight Dashboard Sample Data"
+    summary: "About this sample data"
+    keyInfo:
+      purpose: "Pre-loaded for immediate exploration"
+      costIndicator: "✓ Free - no AWS charges"
+    expandedContent:
+      description: "Simulated council service request and performance data"
+      represents: "Typical UK council operational metrics"
+      disclaimer: "This is fictional data with no connection to any real council system"
+      methodology: "Generated from council service data patterns"

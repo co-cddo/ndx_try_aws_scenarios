@@ -1,0 +1,294 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: View Real-Time Occupancy Data - Smart Car Park Walkthrough"
+description: Explore the CloudWatch dashboard widgets showing live car park occupancy metrics
+currentStep: 2
+totalSteps: 4
+timeEstimate: "2 minutes"
+scenarioId: smart-car-park
+---
+
+{#
+  Step 2: View Real-Time Occupancy Data (AC-3.5.2, AC-3.5.4)
+  - Examine dashboard widgets
+  - Understand current occupancy metrics
+  - Observe real-time data updates
+#}
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "View Real-Time Occupancy Data" %}
+{% set stepDescription = "Explore the dashboard widgets to understand current car park occupancy across all zones." %}
+{% set timeEstimate = "2 minutes" %}
+{# Load screenshots from YAML data - Story 13.6 #}
+{% set screenshotData = screenshots["smart-car-park"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 2) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "You can see current occupancy percentage",
+  "Zone breakdown shows Ground, Level 1, Level 2 data",
+  "Available spaces count is visible",
+  "Historical trends show 24-hour patterns"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Understanding the dashboard widgets</h3>
+
+<p class="govuk-body">
+  Your CloudWatch dashboard contains several widgets, each showing different aspects of
+  car park occupancy. Let's explore what each widget tells you:
+</p>
+
+<div class="ndx-widget-guide govuk-!-margin-top-4">
+  <h4 class="govuk-heading-s">1. Available Spaces Right Now</h4>
+  <div class="ndx-widget-card">
+    <p class="govuk-body">
+      <strong>Widget type:</strong> Number (large display)
+    </p>
+    <p class="govuk-body">
+      <strong>What it shows:</strong> The current count of available (empty) parking spaces across
+      the entire car park
+    </p>
+    <p class="govuk-body">
+      <strong>What to look for:</strong> This number updates in real-time as sensors detect vehicles
+      entering and leaving. In our simulation, expect to see 5-25 available spaces depending on
+      time of day patterns.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Example:</strong> If you see "18 available", that means 18 out of 50 spaces are currently empty,
+        so occupancy is 64% (32 spaces occupied).
+      </p>
+    </div>
+  </div>
+
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">2. Total Occupancy Over Time</h4>
+  <div class="ndx-widget-card">
+    <p class="govuk-body">
+      <strong>Widget type:</strong> Line graph
+    </p>
+    <p class="govuk-body">
+      <strong>What it shows:</strong> Occupancy percentage (0-100%) over the last 24 hours
+    </p>
+    <p class="govuk-body">
+      <strong>What to look for:</strong> Peak hours (85% occupancy around 8-10am, 12-2pm, 5-7pm),
+      off-peak periods (60% occupancy), and overnight (20% occupancy). The line should show clear
+      daily patterns.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Insight:</strong> Consistent peak patterns help predict future demand. If 8-10am is
+        always busy, you can guide overflow traffic to nearby car parks during those hours.
+      </p>
+    </div>
+  </div>
+
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">3. Occupancy by Zone</h4>
+  <div class="ndx-widget-card">
+    <p class="govuk-body">
+      <strong>Widget type:</strong> Stacked area chart
+    </p>
+    <p class="govuk-body">
+      <strong>What it shows:</strong> Number of occupied spaces in each zone (Ground Floor, Level 1, Level 2)
+      stacked on top of each other
+    </p>
+    <p class="govuk-body">
+      <strong>What to look for:</strong> Ground Floor typically fills first (90% occupancy at peak),
+      followed by Level 1 (87%), then Level 2 (73%). This shows user preference for lower floors
+      and accessible spaces.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Operational insight:</strong> Knowing which zones fill first helps optimize signage
+        ("Level 2 has spaces") and pricing (charge more for Ground Floor during peak hours).
+      </p>
+    </div>
+  </div>
+
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">4. Average Parking Duration</h4>
+  <div class="ndx-widget-card">
+    <p class="govuk-body">
+      <strong>Widget type:</strong> Number (minutes)
+    </p>
+    <p class="govuk-body">
+      <strong>What it shows:</strong> How long, on average, vehicles stay parked
+    </p>
+    <p class="govuk-body">
+      <strong>What to look for:</strong> In our simulation, expect ~90-180 minutes (1.5 to 3 hours).
+      Shorter durations indicate quick turnover (good for revenue), longer durations suggest all-day parkers.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Revenue optimization:</strong> If average duration is too long, consider time limits
+        or tiered pricing (first 2 hours £3, then £5/hour) to encourage turnover.
+      </p>
+    </div>
+  </div>
+
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">5. Sensor Status Table</h4>
+  <div class="ndx-widget-card">
+    <p class="govuk-body">
+      <strong>Widget type:</strong> Table
+    </p>
+    <p class="govuk-body">
+      <strong>What it shows:</strong> Last reading timestamp and battery level for each of the 50 sensors
+    </p>
+    <p class="govuk-body">
+      <strong>What to look for:</strong> All sensors should show recent timestamps (within last 5 minutes).
+      Battery levels should be above 20%. Any sensor showing stale data (>30 min old) may need maintenance.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Maintenance alert:</strong> CloudWatch alarms automatically notify facilities team
+        when sensors go offline or batteries run low.
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Watch for real-time updates</h3>
+
+<p class="govuk-body">
+  The dashboard is set to auto-refresh every 10 seconds. Watch the widgets closely:
+</p>
+
+<ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+  <li>
+    <strong>Available spaces number should change</strong> - As the IoT simulator publishes new
+    sensor readings, you'll see the count update
+  </li>
+  <li>
+    <strong>Line graphs extend to the right</strong> - New data points are added to the trailing
+    edge of the time series
+  </li>
+  <li>
+    <strong>Zone chart colors shift</strong> - Stacked area heights adjust as occupancy changes
+    per zone
+  </li>
+  <li>
+    <strong>No page refresh needed</strong> - CloudWatch handles updates automatically in the background
+  </li>
+</ul>
+
+<div class="govuk-inset-text govuk-!-margin-top-3">
+  <p class="govuk-body">
+    <strong>Behind the scenes:</strong> Every time a sensor detects a vehicle entering or leaving,
+    it publishes an MQTT message to AWS IoT Core. Lambda processes the message and updates CloudWatch
+    metrics within 2-5 seconds. Your dashboard shows these updates 10 seconds later at most.
+  </p>
+</div>
+
+{# Troubleshooting section #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text govuk-!-font-size-19">
+      <strong>Something went wrong?</strong> Troubleshooting help
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <h4 class="govuk-heading-s">Dashboard shows "No data available"</h4>
+    <p class="govuk-body">Possible solutions:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>
+        <strong>Wait 30-60 seconds</strong> - The IoT simulator may still be initializing. Click
+        the refresh button (circular arrow icon, top-right) after waiting.
+      </li>
+      <li>
+        <strong>Check DynamoDB table</strong> - Open the <a href="https://console.aws.amazon.com/dynamodb/" target="_blank" rel="noopener noreferrer" class="govuk-link">DynamoDB console</a>,
+        find the table named <code>SmartCarPark-SensorReadings</code>, and verify it has ~1000 items.
+      </li>
+      <li>
+        <strong>Verify Lambda is running</strong> - Open the <a href="https://console.aws.amazon.com/lambda/" target="_blank" rel="noopener noreferrer" class="govuk-link">Lambda console</a>,
+        find <code>IoTSimulator</code>, and check Recent invocations shows activity.
+      </li>
+    </ul>
+
+    <h4 class="govuk-heading-s govuk-!-margin-top-4">Data is stale (not updating)</h4>
+    <p class="govuk-body">Possible solutions:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>
+        <strong>Check auto-refresh is enabled</strong> - Look for "Auto refresh" toggle in top-right,
+        ensure it's ON and set to 10 seconds
+      </li>
+      <li>
+        <strong>Verify IoT simulator is still running</strong> - The simulator may have stopped.
+        Go to Lambda console, find <code>IoTSimulator</code>, click "Test" to manually restart it.
+      </li>
+      <li>
+        <strong>Check CloudWatch Logs</strong> - Open Logs for <code>ProcessSensorData</code> Lambda
+        to see if it's receiving and processing sensor messages
+      </li>
+    </ul>
+
+    <h4 class="govuk-heading-s govuk-!-margin-top-4">Numbers don't match expected patterns</h4>
+    <p class="govuk-body">Possible causes:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>
+        <strong>Simulation randomness</strong> - The IoT simulator uses random occupancy changes
+        within typical patterns. Your data may vary from the examples shown.
+      </li>
+      <li>
+        <strong>Time zone differences</strong> - Peak hours are based on simulated data timestamps,
+        not your local time. Check the graph time axis to understand the pattern.
+      </li>
+    </ul>
+  </div>
+</details>
+
+{# Navigation #}
+<div class="ndx-walkthrough-nav govuk-!-margin-top-8">
+  <a href="/walkthroughs/smart-car-park/step-1/" class="govuk-link ndx-walkthrough-nav__back">
+    ← Back to Step 1
+  </a>
+  <a href="/walkthroughs/smart-car-park/step-3/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    Continue to Step 3: Understand IoT Data Flow
+  </a>
+</div>
+
+<style>
+  .ndx-widget-guide {
+    margin-top: 30px;
+  }
+
+  .ndx-widget-card {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-widget-card p:last-child {
+    margin-bottom: 0;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-walkthrough-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-nav__back {
+    font-size: 19px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-walkthrough-nav {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ndx-walkthrough-nav__back {
+      margin-bottom: 15px;
+    }
+  }
+</style>

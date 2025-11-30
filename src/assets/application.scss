@@ -1,0 +1,13 @@
+// Import GOV.UK Frontend with configuration
+@use "pkg:govuk-frontend/dist/govuk" with (
+  $govuk-assets-path: "/assets/",
+  $govuk-global-styles: true,
+  $govuk-new-organisation-colours: true,
+  $govuk-new-typography-scale: true
+);
+
+// Import GOV.UK Eleventy Plugin components
+@forward "pkg:@x-govuk/govuk-eleventy-plugin";
+
+// Note: Custom NDX:Try styles are loaded separately via stylesheets config
+// in eleventy.config.js - the SCSS @import wasn't resolving correctly

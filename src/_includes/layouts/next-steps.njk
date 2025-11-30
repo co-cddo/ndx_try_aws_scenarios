@@ -1,0 +1,96 @@
+---
+layout: page
+---
+{#
+  Next Steps Page Layout
+
+  This layout displays the "What's Next" guidance based on the user's
+  evaluation outcome (would_implement value from localStorage).
+
+  Three pathways:
+  - proceed (would_implement = 'yes')
+  - maybe (would_implement = 'maybe' or no data)
+  - not_now (would_implement = 'no')
+
+  Expects front matter:
+    title: string
+    description: string
+    scenario: string (scenario ID from scenarios.yaml)
+#}
+
+{% set scenarioData = scenarios.scenarios | selectattr("id", "equalto", scenario) | first %}
+
+{% if not scenarioData %}
+  <div class="govuk-error-summary" data-module="govuk-error-summary">
+    <h2 class="govuk-error-summary__title">Scenario not found</h2>
+    <div class="govuk-error-summary__body">
+      <p>The scenario "{{ scenario }}" could not be found.</p>
+      <p><a href="/scenarios/" class="govuk-link">Browse all scenarios</a></p>
+    </div>
+  </div>
+{% else %}
+
+{# Breadcrumb navigation #}
+<div class="govuk-breadcrumbs">
+  <ol class="govuk-breadcrumbs__list">
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/">Home</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/scenarios/">Scenarios</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="{{ scenarioData.url }}">{{ scenarioData.name }}</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/evidence-pack/?scenario={{ scenarioData.id }}">Evidence Pack</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      What's Next
+    </li>
+  </ol>
+</div>
+
+{# Incomplete evaluation banner - shown when no session data exists #}
+<div class="govuk-notification-banner govuk-notification-banner--warning" role="region" aria-labelledby="incomplete-banner-title" data-incomplete-banner hidden>
+  <div class="govuk-notification-banner__header">
+    <h2 class="govuk-notification-banner__title" id="incomplete-banner-title">
+      Incomplete evaluation
+    </h2>
+  </div>
+  <div class="govuk-notification-banner__content">
+    <p class="govuk-notification-banner__heading">
+      You haven't completed the evaluation reflection form yet.
+    </p>
+    <p class="govuk-body">
+      To get personalized next steps guidance, please complete your evaluation first.
+    </p>
+    <p class="govuk-body">
+      <a href="/evidence-pack/?scenario={{ scenarioData.id }}" class="govuk-link">Complete your evaluation</a>
+    </p>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {# Page title #}
+    <span class="govuk-caption-l">{{ scenarioData.name }}</span>
+    <h1 class="govuk-heading-l">What's Next?</h1>
+  </div>
+</div>
+
+{# Include the main Next Steps guidance component #}
+{% include "components/next-steps-guidance.njk" %}
+
+{# Link back to Evidence Pack #}
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/evidence-pack/?scenario={{ scenarioData.id }}" class="govuk-link">
+      View your Evidence Pack
+    </a>
+  </p>
+</div>
+
+{% endif %}
+
+<script src="/assets/js/next-steps.js" defer></script>

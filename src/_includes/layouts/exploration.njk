@@ -1,0 +1,114 @@
+---
+layout: page
+---
+{#
+  Exploration Layout (Story 6.1)
+
+  Layout for exploration pages with:
+  - Sticky header with "Simplify for me" toggle
+  - Persona selector (Visual-First vs Console+Code)
+  - Activity grid with completion tracking
+  - Mobile responsive design
+
+  Expects front matter:
+    title: string
+    description: string
+    scenarioId: string
+    explorationData: object (from _data/exploration/{scenarioId}.yaml)
+#}
+
+{% set scenarioId = scenarioId if scenarioId is defined else "council-chatbot" %}
+{% set explorationData = exploration[scenarioId] if exploration[scenarioId] else {} %}
+
+{# Phase Navigator - Story 12.1 #}
+{% include "components/phase-navigator.njk" %}
+
+{# Breadcrumb navigation - Story 14.6 #}
+{% set breadcrumbType = 'exploration' %}
+{% set explorationSection = explorationSection if explorationSection is defined else '' %}
+{% include "components/breadcrumb.njk" %}
+
+{# Sticky header with toggle #}
+<div class="ndx-exploration-header" data-exploration-header>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l govuk-!-margin-bottom-2">{{ title }}</h1>
+      <p class="govuk-body-l govuk-!-margin-bottom-0">{{ description }}</p>
+    </div>
+    <div class="govuk-grid-column-one-third ndx-exploration-header__actions">
+      {% include "components/exploration/simplify-toggle.njk" %}
+    </div>
+  </div>
+</div>
+
+{# Completion banner - hidden until 3+ activities completed #}
+<div class="ndx-completion-banner" data-essential-complete hidden>
+  <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title">
+    <div class="govuk-notification-banner__header">
+      <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+        Essential exploration complete
+      </h2>
+    </div>
+    <div class="govuk-notification-banner__content">
+      <p class="govuk-notification-banner__heading">
+        You've completed essential exploration activities.
+        <a class="govuk-notification-banner__link" href="/evidence-pack/{{ scenarioId }}/">Generate your Evidence Pack</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+{# Main content #}
+<main class="govuk-main-wrapper" id="main-content" role="main" data-scenario-id="{{ scenarioId }}">
+  {{ content | safe }}
+</main>
+
+{# Learning summary - shown at bottom of exploration #}
+{% if showLearningSummary %}
+  {% include "components/exploration/learning-summary.njk" %}
+{% endif %}
+
+<style>
+  .ndx-exploration-header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    padding: 20px 0;
+    border-bottom: 1px solid #b1b4b6;
+    margin-bottom: 30px;
+    z-index: 100;
+  }
+
+  .ndx-exploration-header__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .ndx-completion-banner {
+    margin-bottom: 30px;
+  }
+
+  /* Simplified mode styles */
+  .ndx-simplified .ndx-activity-card__technical {
+    display: none;
+  }
+
+  .ndx-simplified .ndx-console-content {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .ndx-exploration-header {
+      position: static;
+    }
+
+    .ndx-exploration-header__actions {
+      margin-top: 15px;
+      justify-content: flex-start;
+    }
+  }
+</style>
+
+<script src="/assets/js/phase-state.js" defer></script>
+<script src="/assets/js/exploration-state.js" defer></script>

@@ -1,0 +1,47 @@
+{#
+  Error Messages Component
+
+  Displays common CloudFormation deployment errors with user-friendly
+  explanations and troubleshooting steps.
+
+  Used in scenario detail pages to help users resolve deployment issues.
+#}
+
+<h4 class="govuk-heading-s">Common deployment issues</h4>
+
+<div class="govuk-accordion" data-module="govuk-accordion" id="error-messages-accordion">
+  {% for error in errorMessages.errorMappings %}
+    <div class="govuk-accordion__section">
+      <div class="govuk-accordion__section-header">
+        <h4 class="govuk-accordion__section-heading">
+          <span class="govuk-accordion__section-button" id="error-heading-{{ loop.index }}">
+            {{ error.userMessage | escape | truncate(60) }}
+          </span>
+        </h4>
+      </div>
+      <div id="error-content-{{ loop.index }}" class="govuk-accordion__section-content">
+        <p class="govuk-body">{{ error.userMessage | escape }}</p>
+        {% if error.troubleshootingSteps %}
+          <p class="govuk-body"><strong>What to try:</strong></p>
+          <ol class="govuk-list govuk-list--number">
+            {% for step in error.troubleshootingSteps %}
+              <li>{{ step | escape }}</li>
+            {% endfor %}
+          </ol>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Still having problems?</strong><br>
+    If you encounter an error not listed here, please <a href="/contact/" class="govuk-link">contact us</a> with:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>The scenario you were trying to deploy</li>
+    <li>The error message from CloudFormation</li>
+    <li>The CloudFormation stack name (if available)</li>
+  </ul>
+</div>

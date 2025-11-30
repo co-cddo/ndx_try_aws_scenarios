@@ -1,0 +1,192 @@
+# Planning Sample Documents Data
+# Story 3.3 - AC-3.3.1, AC-3.3.3, AC-3.3.4
+#
+# Sample planning application documents for AI extraction walkthrough.
+# Each document includes metadata and expected AI-extracted fields.
+
+planningSampleDocuments:
+  - id: "planning-app-001"
+    title: "House Extension Application"
+    type: "Householder"
+    applicant: "James Smith"
+    address: "42 High Street, Birmingham, B15 2AB"
+    description: "Single storey rear extension (4m x 5m)"
+    documentUrl: "/assets/documents/planning/sample-house-extension.pdf"
+    thumbnailUrl: "/assets/images/planning/sample-house-extension-thumb.png"
+    fileSize: "1.2 MB"
+    timeToProcess: "8-12 seconds"
+    fields:
+      - name: "Applicant Name"
+        extracted: "James Smith"
+        confidence: "99%"
+      - name: "Site Address"
+        extracted: "42 High Street, Birmingham, B15 2AB"
+        confidence: "98%"
+      - name: "Application Type"
+        extracted: "Householder Application"
+        confidence: "97%"
+      - name: "Development Description"
+        extracted: "Single storey rear extension measuring 4 metres by 5 metres"
+        confidence: "96%"
+      - name: "Application Reference"
+        extracted: "APP/2024/001234"
+        confidence: "99%"
+    wowFactors:
+      - "Extracted 5 key fields in under 10 seconds"
+      - "Accurately identified UK-specific address format"
+      - "Understood planning terminology (Householder, extension)"
+
+  - id: "planning-app-002"
+    title: "Change of Use Application"
+    type: "Full Application"
+    applicant: "Amelia Jones"
+    address: "18 Station Road, Manchester, M1 4BN"
+    description: "Change of use from retail (A1) to restaurant (A3)"
+    documentUrl: "/assets/documents/planning/sample-change-of-use.pdf"
+    thumbnailUrl: "/assets/images/planning/sample-change-of-use-thumb.png"
+    fileSize: "2.8 MB"
+    timeToProcess: "12-18 seconds"
+    fields:
+      - name: "Applicant Name"
+        extracted: "Amelia Jones"
+        confidence: "99%"
+      - name: "Site Address"
+        extracted: "18 Station Road, Manchester, M1 4BN"
+        confidence: "98%"
+      - name: "Application Type"
+        extracted: "Full Application - Change of Use"
+        confidence: "98%"
+      - name: "Current Use"
+        extracted: "Retail (A1 Use Class)"
+        confidence: "97%"
+      - name: "Proposed Use"
+        extracted: "Restaurant (A3 Use Class)"
+        confidence: "97%"
+      - name: "Floor Area"
+        extracted: "145 square metres"
+        confidence: "95%"
+    wowFactors:
+      - "Identified both current AND proposed use classes"
+      - "Extracted floor area with units (square metres)"
+      - "Distinguished between multiple address formats in document"
+
+  - id: "planning-app-003"
+    title: "New Dwelling Application"
+    type: "Outline"
+    applicant: "Thomas Williams"
+    address: "Land adjacent to 7 Oak Lane, Leeds, LS6 2QR"
+    description: "Outline application for erection of 1 dwelling"
+    documentUrl: "/assets/documents/planning/sample-new-dwelling.pdf"
+    thumbnailUrl: "/assets/images/planning/sample-new-dwelling-thumb.png"
+    fileSize: "3.5 MB"
+    timeToProcess: "15-20 seconds"
+    fields:
+      - name: "Applicant Name"
+        extracted: "Thomas Williams"
+        confidence: "99%"
+      - name: "Site Address"
+        extracted: "Land adjacent to 7 Oak Lane, Leeds, LS6 2QR"
+        confidence: "97%"
+      - name: "Application Type"
+        extracted: "Outline Application"
+        confidence: "98%"
+      - name: "Number of Dwellings"
+        extracted: "1"
+        confidence: "96%"
+      - name: "Development Description"
+        extracted: "Erection of one detached dwelling house"
+        confidence: "95%"
+      - name: "Site Area"
+        extracted: "0.25 hectares"
+        confidence: "94%"
+    wowFactors:
+      - "Handled complex address (land adjacent to...)"
+      - "Extracted numerical data (dwelling count, site area)"
+      - "Recognized planning-specific terminology (erection, outline)"
+
+# ROI Calculation Data
+roiCalculation:
+  scenario: "Planning Application Processing"
+  currentState:
+    applicationsPerYear: 200
+    minutesPerApplication: 45
+    totalHoursPerYear: 150
+  withAI:
+    timeSavingsPercentage: 75
+    hoursSavedPerYear: 112.5
+    hourlyRate: 25
+    annualSavings: 2812.50
+  committeePitch:
+    headline: "Free up 112 hours annually with AI document processing"
+    bullets:
+      - "Currently spending 150 hours/year manually entering planning application data"
+      - "AI extraction reduces this to 37.5 hours - a 75% time saving"
+      - "Cost benefit: £2,812 per year in staff time saved"
+      - "Officers can focus on decision-making, not data entry"
+  additionalBenefits:
+    - "Reduced human error in data transcription"
+    - "Consistent field extraction across all applications"
+    - "Faster application processing times for residents"
+    - "24/7 processing capability without additional staff"
+
+# Troubleshooting Common Issues
+troubleshooting:
+  fileTooLarge:
+    title: "File too large (max 10MB)"
+    symptoms:
+      - "Upload fails immediately"
+      - "Error message mentions file size"
+    solutions:
+      - "Check file size in file manager"
+      - "Use PDF compression tool to reduce size"
+      - "Try splitting multi-page documents"
+      - "Remove unnecessary images or scans"
+    preventiveMeasure: "Keep planning documents under 10MB by using moderate resolution scans"
+
+  wrongFormat:
+    title: "Wrong file format (PDF, JPEG, PNG only)"
+    symptoms:
+      - "Upload rejected with format error"
+      - "File extension not .pdf, .jpg, .jpeg, or .png"
+    solutions:
+      - "Convert Word documents to PDF first"
+      - "Export scanned images as PDF"
+      - "Use PDF export from planning software"
+    preventiveMeasure: "Save planning applications as PDF for best compatibility"
+
+  processingTimeout:
+    title: "Processing timeout (over 30 seconds)"
+    symptoms:
+      - "Upload succeeds but extraction never completes"
+      - "Spinner continues indefinitely"
+    solutions:
+      - "Refresh the page and try again"
+      - "Check document isn't corrupted"
+      - "Try with a different sample document"
+      - "Check AWS CloudWatch logs for Lambda errors"
+    preventiveMeasure: "Use clean, well-structured PDF documents"
+
+  apiErrors:
+    title: "API errors (500, 503 responses)"
+    symptoms:
+      - "Error message mentions server error"
+      - "Intermittent failures"
+    solutions:
+      - "Wait 1-2 minutes and retry"
+      - "Check AWS service health dashboard"
+      - "Verify Lambda function has correct IAM permissions"
+      - "Check Textract API quotas not exceeded"
+    preventiveMeasure: "Monitor AWS service quotas and set up CloudWatch alarms"
+
+  extractionInaccurate:
+    title: "Extracted fields don't match document"
+    symptoms:
+      - "Wrong applicant name extracted"
+      - "Address incomplete or incorrect"
+      - "Fields missing entirely"
+    solutions:
+      - "Check source document quality (not blurry, skewed)"
+      - "Ensure text is machine-readable (not handwritten)"
+      - "Verify document uses standard planning application format"
+      - "Try re-uploading with higher quality scan"
+    preventiveMeasure: "Use typed documents with clear text, avoid handwritten applications"

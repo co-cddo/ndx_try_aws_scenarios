@@ -1,0 +1,123 @@
+---
+layout: layouts/exploration
+title: "How Does It Work? - Architecture Tour"
+description: "Visual and console tours of PII detection and redaction"
+scenarioId: foi-redaction
+eleventyNavigation:
+  key: foi-redaction-architecture
+  parent: foi-redaction-explore
+  title: Architecture
+---
+
+{# Story 8.3: FOI Redaction Architecture Tour Page #}
+
+{% set scenarioId = "foi-redaction" %}
+{% set explorationData = exploration[scenarioId] %}
+{% set activities = explorationData.activities %}
+
+{% set visualTour = null %}
+{% set consoleTour = null %}
+{% for activity in activities %}
+  {% if activity.id == "arch-visual" %}{% set visualTour = activity %}{% endif %}
+  {% if activity.id == "arch-console" %}{% set consoleTour = activity %}{% endif %}
+{% endfor %}
+
+{% include "components/exploration/fallback-banner.njk" %}
+
+<section class="ndx-architecture-intro" aria-labelledby="intro-heading">
+  <h2 class="govuk-heading-l" id="intro-heading">How PII Detection Works</h2>
+  <p class="govuk-body-l">
+    Choose your path: a visual tour with diagrams,
+    or a hands-on console tour exploring the AWS infrastructure.
+  </p>
+</section>
+
+<div class="govuk-tabs" data-module="govuk-tabs">
+  <h2 class="govuk-tabs__title">Architecture Tours</h2>
+  <ul class="govuk-tabs__list" role="tablist">
+    <li class="govuk-tabs__list-item govuk-tabs__list-item--selected" role="presentation">
+      <a class="govuk-tabs__tab" href="#visual-tour" id="tab_visual-tour" role="tab" aria-controls="visual-tour" aria-selected="true">Visual Tour</a>
+    </li>
+    <li class="govuk-tabs__list-item" role="presentation">
+      <a class="govuk-tabs__tab" href="#console-tour" id="tab_console-tour" role="tab" aria-controls="console-tour" aria-selected="false">Console Tour</a>
+    </li>
+  </ul>
+
+  <div class="govuk-tabs__panel" id="visual-tour" role="tabpanel" aria-labelledby="tab_visual-tour">
+    {% if visualTour %}
+      <h3 class="govuk-heading-m">{{ visualTour.title }}</h3>
+      <p class="govuk-body">{{ visualTour.learning }}</p>
+      <p class="govuk-body-s"><span class="govuk-tag govuk-tag--blue">{{ visualTour.time_estimate }}</span></p>
+      <ol class="ndx-visual-tour-steps">
+        {% for step in visualTour.steps %}
+          <li class="ndx-visual-tour-step">
+            <div class="ndx-visual-tour-step__number" aria-hidden="true">{{ loop.index }}</div>
+            <div class="ndx-visual-tour-step__content">
+              <h4 class="govuk-heading-s">{{ step.title }}</h4>
+              <p class="govuk-body">{{ step.description }}</p>
+            </div>
+          </li>
+        {% endfor %}
+      </ol>
+      <button type="button" class="govuk-button govuk-button--secondary" onclick="completeActivity('{{ scenarioId }}', '{{ visualTour.id }}')">Mark Visual Tour Complete</button>
+    {% endif %}
+  </div>
+
+  <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="console-tour" role="tabpanel" aria-labelledby="tab_console-tour">
+    {% if consoleTour %}
+      <h3 class="govuk-heading-m">{{ consoleTour.title }}</h3>
+      <p class="govuk-body">{{ consoleTour.learning }}</p>
+      <p class="govuk-body-s">
+        <span class="govuk-tag govuk-tag--purple">{{ consoleTour.time_estimate }}</span>
+        <span class="govuk-tag govuk-tag--grey">Requires deployed stack</span>
+      </p>
+      <ol class="ndx-console-tour-steps">
+        {% for step in consoleTour.steps %}
+          <li class="ndx-console-tour-step">
+            <h4 class="govuk-heading-s">{{ step.title }}</h4>
+            <p class="govuk-body"><strong>What to look for:</strong> {{ step.what_to_look_for }}</p>
+            <div class="ndx-console-tour-step__actions">
+              <a href="{{ step.console_url }}" target="_blank" rel="noopener noreferrer" class="govuk-button govuk-button--secondary">Open AWS Console</a>
+            </div>
+          </li>
+        {% endfor %}
+      </ol>
+      <button type="button" class="govuk-button govuk-button--secondary" onclick="completeActivity('{{ scenarioId }}', '{{ consoleTour.id }}')">Mark Console Tour Complete</button>
+    {% endif %}
+  </div>
+</div>
+
+<section class="ndx-architecture-next" aria-labelledby="next-heading">
+  <h2 class="govuk-heading-l" id="next-heading">What's Next?</h2>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-s">Test the Limits</h3>
+        <p class="govuk-body-s">Push the boundaries to understand edge cases.</p>
+        <a href="/walkthroughs/{{ scenarioId }}/explore/limits/" class="govuk-link">Try challenges</a>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-s">Production Guidance</h3>
+        <p class="govuk-body-s">Learn what changes for FOI compliance.</p>
+        <a href="/walkthroughs/{{ scenarioId }}/explore/production/" class="govuk-link">View guidance</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ndx-architecture-intro { margin-bottom: 30px; }
+  .ndx-visual-tour-steps { list-style: none; padding: 0; margin: 30px 0; }
+  .ndx-visual-tour-step { display: flex; gap: 20px; margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px solid #b1b4b6; }
+  .ndx-visual-tour-step:last-child { border-bottom: none; }
+  .ndx-visual-tour-step__number { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #1d70b8; color: #fff; border-radius: 50%; font-weight: 700; font-size: 18px; flex-shrink: 0; }
+  .ndx-visual-tour-step__content { flex: 1; }
+  .ndx-console-tour-steps { list-style: none; padding: 0; margin: 30px 0; }
+  .ndx-console-tour-step { padding: 20px; background: #f3f2f1; margin-bottom: 20px; border-left: 4px solid #505a5f; }
+  .ndx-console-tour-step__actions { margin: 15px 0; }
+  .ndx-architecture-next { margin-top: 60px; padding-top: 40px; border-top: 4px solid #1d70b8; }
+  .ndx-next-card { padding: 20px; background: #f8f8f8; height: 100%; }
+  @media (max-width: 768px) { .ndx-visual-tour-step { flex-direction: column; } .ndx-next-card { margin-bottom: 20px; } }
+</style>

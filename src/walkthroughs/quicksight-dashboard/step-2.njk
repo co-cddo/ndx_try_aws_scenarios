@@ -1,0 +1,223 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Explore Service Metrics Overview - QuickSight Dashboard Walkthrough"
+description: View KPI cards, charts, and tables showing council service performance
+currentStep: 2
+totalSteps: 4
+timeEstimate: "3 minutes"
+scenarioId: quicksight-dashboard
+---
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Explore Service Metrics Overview" %}
+{% set stepDescription = "Examine the dashboard widgets to understand council service performance across 9 service areas and 8 regions." %}
+{% set timeEstimate = "3 minutes" %}
+{# Load screenshots from YAML data - Story 13.8 #}
+{% set screenshotData = screenshots["quicksight-dashboard"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 2) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "You understand what each KPI card represents",
+  "You can read the Cases by Service Area bar chart",
+  "You can read the Satisfaction by Service Area bar chart",
+  "You explore the Service Performance Breakdown table"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Understanding the KPI cards</h3>
+
+<p class="govuk-body">
+  At the top of the dashboard, you'll see 3 KPI (Key Performance Indicator) cards showing critical metrics:
+</p>
+
+<div class="ndx-kpi-explanation">
+  <h4 class="govuk-heading-s">KPI Card 1: Total Cases Received</h4>
+  <p class="govuk-body"><strong>Value:</strong> 267,334</p>
+  <p class="govuk-body"><strong>Meaning:</strong> Total number of service requests received across all service areas and regions</p>
+  <p class="govuk-body"><strong>Why this matters:</strong> Gives an overall picture of service demand. This represents real council workload that staff must handle.</p>
+
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">KPI Card 2: Average Resolution Rate</h4>
+  <p class="govuk-body"><strong>Value:</strong> 0.85 (85%)</p>
+  <p class="govuk-body"><strong>Meaning:</strong> 85% of cases received were successfully resolved</p>
+  <p class="govuk-body"><strong>Why this matters:</strong> High resolution rates mean residents receive effective service. 85% is a strong performance indicator.</p>
+
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">KPI Card 3: Average Satisfaction Score</h4>
+  <p class="govuk-body"><strong>Value:</strong> 4.15 out of 5</p>
+  <p class="govuk-body"><strong>Meaning:</strong> Average satisfaction rating from post-interaction surveys</p>
+  <p class="govuk-body"><strong>Why this matters:</strong> Overall satisfaction indicator across all council services. 4.15/5 is "Good to Very Good" (industry benchmark: 3.5-4.0/5).</p>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Reading the Cases by Service Area chart</h3>
+
+<p class="govuk-body">
+  The horizontal bar chart shows case volumes for each of the 9 service areas:
+</p>
+
+<ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+  <li><strong>Environmental Health:</strong> Highest volume (~33K cases) - noise complaints, pest control, food hygiene</li>
+  <li><strong>Parking:</strong> Second highest (~32K cases) - permits, fines, enforcement</li>
+  <li><strong>Highways:</strong> (~31K cases) - potholes, street lighting, road repairs</li>
+  <li><strong>Customer Services:</strong> (~30K cases) - general enquiries, signposting</li>
+  <li><strong>Housing:</strong> (~30K cases) - repairs, tenancy, allocations</li>
+  <li><strong>Waste Collection:</strong> (~29K cases) - missed bins, bulky waste, recycling</li>
+  <li><strong>Planning Applications:</strong> (~29K cases) - applications, enforcement, appeals</li>
+  <li><strong>Council Tax:</strong> (~28K cases) - billing, discounts, payments</li>
+  <li><strong>Benefits:</strong> (~27K cases) - housing benefit, council tax support</li>
+</ul>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Insight:</strong> Environmental Health and Parking generate the most cases. Service managers can use this
+    pattern to allocate resources appropriately across service areas.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Reading the Satisfaction by Service Area chart</h3>
+
+<p class="govuk-body">
+  The second horizontal bar chart compares satisfaction scores across service areas:
+</p>
+
+<ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+  <li><strong>Environmental Health:</strong> Highest satisfaction (~4.4/5)</li>
+  <li><strong>Benefits:</strong> Strong satisfaction (~4.3/5)</li>
+  <li><strong>Customer Services:</strong> Good satisfaction (~4.2/5)</li>
+  <li><strong>Council Tax:</strong> Good satisfaction (~4.2/5)</li>
+  <li><strong>Parking:</strong> Moderate satisfaction (~4.1/5)</li>
+  <li><strong>Waste Collection:</strong> Moderate satisfaction (~4.1/5)</li>
+  <li><strong>Planning Applications:</strong> Lower satisfaction (~4.0/5)</li>
+</ul>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Insight:</strong> Environmental Health achieves highest satisfaction despite handling high volume.
+    Planning Applications has lower satisfaction - possibly due to longer processing times or complex decisions.
+    This suggests opportunities for improvement in the planning service.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Exploring the Service Performance Breakdown table</h3>
+
+<p class="govuk-body">
+  The detailed table shows performance metrics broken down by service area AND region:
+</p>
+
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--s">Sample data from the table</caption>
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">service_area</th>
+      <th scope="col" class="govuk-table__header">region</th>
+      <th scope="col" class="govuk-table__header">cases_received</th>
+      <th scope="col" class="govuk-table__header">cases_resolved</th>
+      <th scope="col" class="govuk-table__header">satisfaction</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Benefits</th>
+      <td class="govuk-table__cell">East Midlands</td>
+      <td class="govuk-table__cell">3,631</td>
+      <td class="govuk-table__cell">3,074</td>
+      <td class="govuk-table__cell">4.05</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Council Tax</th>
+      <td class="govuk-table__cell">East Midlands</td>
+      <td class="govuk-table__cell">3,759</td>
+      <td class="govuk-table__cell">3,161</td>
+      <td class="govuk-table__cell">4.27</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Housing</th>
+      <td class="govuk-table__cell">London</td>
+      <td class="govuk-table__cell">3,798</td>
+      <td class="govuk-table__cell">3,222</td>
+      <td class="govuk-table__cell">4.38</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Highways</th>
+      <td class="govuk-table__cell">North East</td>
+      <td class="govuk-table__cell">4,361</td>
+      <td class="govuk-table__cell">3,750</td>
+      <td class="govuk-table__cell">4.10</td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="govuk-body">
+  The table includes data from 8 regions: East Midlands, London, North East, North West, South East, South West, West Midlands, and Yorkshire.
+</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Power of detailed tables:</strong> Officers can now see regional variations without requesting custom reports.
+    Housing in London (4.38 satisfaction) outperforms Housing in North West (3.88) - why? This prompts useful questions.
+  </p>
+</div>
+
+{% include "components/wow-moment.njk" %}
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Reflection: What questions can you answer?</h3>
+
+<p class="govuk-body">
+  Just by looking at this dashboard for 3 minutes, you can now answer:
+</p>
+
+<ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+  <li>"How many total cases are we handling?" → 267,334 across all services</li>
+  <li>"What's our overall resolution rate?" → 85% (0.85)</li>
+  <li>"Which service area has the most demand?" → Environmental Health (~33K cases)</li>
+  <li>"Which service has the highest satisfaction?" → Environmental Health (4.4/5)</li>
+  <li>"How does Housing perform in London vs North West?" → London 4.38 vs North West 3.88</li>
+</ul>
+
+<p class="govuk-body">
+  <strong>Without QuickSight:</strong> Each of these questions would require a separate ticket to IT, 3-7 day wait for Excel report.<br>
+  <strong>With QuickSight:</strong> All answers visible in 3 minutes of dashboard exploration.
+</p>
+
+<div class="ndx-walkthrough-nav govuk-!-margin-top-8">
+  <a href="/walkthroughs/quicksight-dashboard/step-1/" class="govuk-link ndx-walkthrough-nav__back">
+    ← Back to Step 1
+  </a>
+  <a href="/walkthroughs/quicksight-dashboard/step-3/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    Continue to Step 3
+  </a>
+</div>
+
+<style>
+  .ndx-kpi-explanation {
+    padding: 20px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-kpi-explanation h4 {
+    margin-bottom: 10px;
+  }
+
+  .ndx-walkthrough-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-nav__back {
+    font-size: 19px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-walkthrough-nav {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ndx-walkthrough-nav__back {
+      margin-bottom: 15px;
+    }
+  }
+</style>

@@ -1,0 +1,171 @@
+# Quiz Configuration for NDX:Try Scenario Selector
+# This file is validated against schemas/quiz-config.schema.json during build
+
+questions:
+  - id: challenge
+    text: "What's your main challenge?"
+    hint: "Select the area where your council needs the most help"
+    options:
+      - id: ai-automation
+        label: "AI & Automation"
+        description: "Chatbots, document processing, intelligent workflows"
+        weights:
+          council-chatbot: 5
+          planning-ai: 4
+          foi-redaction: 3
+          text-to-speech: 2
+          quicksight-dashboard: 1
+          smart-car-park: 0
+      - id: iot-smart-city
+        label: "IoT & Smart City"
+        description: "Sensors, real-time monitoring, connected infrastructure"
+        weights:
+          smart-car-park: 5
+          quicksight-dashboard: 2
+          council-chatbot: 0
+          planning-ai: 0
+          foi-redaction: 0
+          text-to-speech: 0
+      - id: analytics-data
+        label: "Analytics & Data"
+        description: "Dashboards, reporting, data-driven decisions"
+        weights:
+          quicksight-dashboard: 5
+          planning-ai: 3
+          foi-redaction: 2
+          council-chatbot: 1
+          smart-car-park: 1
+          text-to-speech: 0
+      - id: compliance-governance
+        label: "Compliance & Governance"
+        description: "FOI requests, data protection, regulatory compliance"
+        weights:
+          foi-redaction: 5
+          planning-ai: 3
+          quicksight-dashboard: 2
+          council-chatbot: 1
+          text-to-speech: 1
+          smart-car-park: 0
+      - id: customer-service
+        label: "Contact Center & Customer Service"
+        description: "Resident queries, accessibility, communication"
+        weights:
+          council-chatbot: 5
+          text-to-speech: 4
+          quicksight-dashboard: 2
+          foi-redaction: 1
+          planning-ai: 1
+          smart-car-park: 0
+      - id: not-sure
+        label: "Not sure - show me everything"
+        action: gallery
+
+  - id: time
+    text: "How much time do you have today?"
+    hint: "This helps us recommend scenarios that fit your schedule"
+    options:
+      - id: quick
+        label: "Under 15 minutes"
+        description: "Quick evaluation - beginner-friendly scenarios"
+        weights:
+          council-chatbot: 5
+          text-to-speech: 5
+          foi-redaction: 3
+          planning-ai: 1
+          quicksight-dashboard: 1
+          smart-car-park: 0
+      - id: medium
+        label: "15-30 minutes"
+        description: "Standard evaluation - intermediate scenarios"
+        weights:
+          foi-redaction: 5
+          planning-ai: 5
+          quicksight-dashboard: 5
+          council-chatbot: 3
+          text-to-speech: 3
+          smart-car-park: 2
+      - id: extended
+        label: "30+ minutes"
+        description: "Deep dive - advanced scenarios"
+        weights:
+          smart-car-park: 5
+          planning-ai: 4
+          quicksight-dashboard: 4
+          foi-redaction: 3
+          council-chatbot: 2
+          text-to-speech: 2
+      - id: not-sure
+        label: "Not sure - show me everything"
+        action: gallery
+
+  - id: role
+    text: "What's your role?"
+    hint: "We'll tailor the recommendations to your perspective"
+    options:
+      - id: cto
+        label: "CTO / Technical Lead"
+        description: "Technical architecture and implementation focus"
+        weights:
+          planning-ai: 5
+          smart-car-park: 5
+          quicksight-dashboard: 4
+          foi-redaction: 3
+          council-chatbot: 3
+          text-to-speech: 2
+      - id: service-manager
+        label: "Service Manager"
+        description: "Service delivery and operational improvements"
+        weights:
+          council-chatbot: 5
+          foi-redaction: 5
+          text-to-speech: 4
+          quicksight-dashboard: 3
+          planning-ai: 2
+          smart-car-park: 2
+      - id: developer
+        label: "Developer"
+        description: "Hands-on implementation and technical evaluation"
+        weights:
+          planning-ai: 5
+          smart-car-park: 5
+          council-chatbot: 4
+          foi-redaction: 3
+          quicksight-dashboard: 2
+          text-to-speech: 2
+      - id: finance
+        label: "Finance / Procurement"
+        description: "Cost analysis and business case evaluation"
+        weights:
+          quicksight-dashboard: 5
+          council-chatbot: 4
+          text-to-speech: 4
+          foi-redaction: 3
+          planning-ai: 2
+          smart-car-park: 2
+      - id: not-sure
+        label: "Not sure - show me everything"
+        action: gallery
+
+# Recommendation algorithm configuration
+recommendation_algorithm:
+  method: weighted_sum
+  threshold: 3
+  max_results: 3
+
+# Labels for generating reasoning text
+labels:
+  challenge:
+    ai-automation: "AI and automation"
+    iot-smart-city: "IoT and smart city solutions"
+    analytics-data: "analytics and data"
+    compliance-governance: "compliance and governance"
+    customer-service: "customer service improvements"
+  time:
+    quick: "under 15 minutes"
+    medium: "15-30 minutes"
+    extended: "30+ minutes"
+  role:
+    cto: "a CTO or Technical Lead"
+    service-manager: "a Service Manager"
+    developer: "a Developer"
+    finance: "Finance or Procurement"

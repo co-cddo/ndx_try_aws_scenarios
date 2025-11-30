@@ -1,0 +1,65 @@
+{
+  "name": "ndx-try-aws-scenarios",
+  "version": "1.0.0",
+  "description": "NDX:Try AWS Scenarios Portal - Zero-cost evaluation platform for UK local government",
+  "type": "module",
+  "scripts": {
+    "start": "eleventy --serve",
+    "build": "npm run validate:schema && eleventy",
+    "validate:schema": "node scripts/validate-schema.js",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:watch": "vitest",
+    "test:a11y": "pa11y-ci",
+    "test:a11y:full": "node scripts/run-accessibility-tests.js",
+    "test:lighthouse": "lhci autorun",
+    "test:screenshots": "playwright test tests/screenshot-capture.spec.ts",
+    "test:visual": "playwright test tests/visual-regression.spec.ts",
+    "test:playwright": "playwright test",
+    "clean": "rm -rf _site",
+    "optimize-images": "node scripts/optimize-images.js",
+    "check:screenshots": "node scripts/check-screenshots.js"
+  },
+  "keywords": [
+    "govuk",
+    "eleventy",
+    "aws",
+    "local-government",
+    "uk-councils"
+  ],
+  "author": "NDX Partnership",
+  "license": "MIT",
+  "dependencies": {
+    "@x-govuk/govuk-eleventy-plugin": "^7.0.0",
+    "govuk-frontend": "5.13.0"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0",
+    "@aws-sdk/client-cloudformation": "^3.600.0",
+    "@aws-sdk/client-cloudwatch": "^3.600.0",
+    "@aws-sdk/client-dynamodb": "^3.940.0",
+    "@aws-sdk/client-lambda": "^3.940.0",
+    "@aws-sdk/client-s3": "^3.600.0",
+    "@aws-sdk/client-sns": "^3.600.0",
+    "@aws-sdk/client-sts": "^3.600.0",
+    "@axe-core/playwright": "^4.11.0",
+    "@lhci/cli": "^0.14.0",
+    "@playwright/test": "^1.49.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "axios": "^1.6.0",
+    "http-server": "^14.1.1",
+    "js-yaml": "^4.1.0",
+    "pa11y-ci": "^3.1.0",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0",
+    "sharp": "^0.34.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.9.3",
+    "vitest": "^1.0.0",
+    "yaml": "^2.6.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

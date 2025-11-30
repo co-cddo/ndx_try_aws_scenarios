@@ -1,0 +1,319 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Select Council Announcement - Text-to-Speech Walkthrough"
+description: Choose a sample announcement to convert to audio
+currentStep: 2
+totalSteps: 4
+timeEstimate: "1 minute"
+scenarioId: text-to-speech
+---
+
+{#
+  Step 2: Select Sample Council Announcement (AC-3.6.1)
+  - Review sample announcements
+  - Select one for conversion
+  - Paste into Polly interface
+#}
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Select a Council Announcement" %}
+{% set stepDescription = "Choose from four sample council announcements representing different communication needs." %}
+{% set timeEstimate = "1 minute" %}
+{# Load screenshots from YAML data - Story 13.7 #}
+{% set screenshotData = screenshots["text-to-speech"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 2) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "You've reviewed all 4 sample announcements",
+  "Selected one that matches your council's communication needs",
+  "Copied the announcement text",
+  "Pasted text into Polly interface (ready for Step 3)"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Choose your announcement</h3>
+
+<p class="govuk-body">
+  We've prepared 4 realistic council announcements covering different priorities and use cases.
+  Pick the one most relevant to your council's needs:
+</p>
+
+<div class="ndx-announcements-list">
+  {% for announcement in sampleAnnouncements %}
+    <div class="ndx-announcement-item">
+      <h4 class="govuk-heading-s">
+        {{ loop.index }}. {{ announcement.title }}
+        <span class="govuk-tag" style="margin-left: 10px;">{{ announcement.category }}</span>
+      </h4>
+
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <div class="ndx-announcement-text">
+            <p class="govuk-body-s" style="margin-bottom: 10px;">
+              <strong>Full text:</strong>
+            </p>
+            <p class="govuk-body-s" style="font-style: italic; background-color: #ffffff; padding: 15px; border: 1px solid #b1b4b6;">
+              {{ announcement.text }}
+            </p>
+          </div>
+        </div>
+
+        <div class="govuk-grid-column-one-third">
+          <dl class="govuk-summary-list govuk-summary-list--no-border">
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">Length</dt>
+              <dd class="govuk-summary-list__value">{{ announcement.characterCount }} chars</dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">Cost</dt>
+              <dd class="govuk-summary-list__value">{{ announcement.estimatedCost }}</dd>
+            </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">Duration</dt>
+              <dd class="govuk-summary-list__value">{{ announcement.estimatedDuration }}</dd>
+            </div>
+          </dl>
+
+          <div class="govuk-inset-text govuk-!-margin-top-3" style="padding: 10px;">
+            <p class="govuk-body-s" style="margin-bottom: 5px;"><strong>Use case:</strong></p>
+            <p class="govuk-body-s" style="margin-bottom: 0;">{{ announcement.useCase }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="govuk-!-margin-top-3">
+        <button type="button" class="govuk-button govuk-button--secondary" data-announcement-id="{{ announcement.id }}" onclick="copyAnnouncementText('{{ announcement.id }}', this)">
+          Copy text to clipboard
+        </button>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Paste into Polly</h3>
+
+<p class="govuk-body">
+  After copying your chosen announcement:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Return to the Polly console tab</strong>
+    <p class="govuk-body">
+      Switch back to the browser tab with Amazon Polly open (from Step 1)
+    </p>
+  </li>
+
+  <li>
+    <strong>Clear the text input area</strong>
+    <p class="govuk-body">
+      Delete any test text from Step 1 so the input area is empty
+    </p>
+  </li>
+
+  <li>
+    <strong>Paste the announcement text</strong>
+    <p class="govuk-body">
+      Use Ctrl+V (Windows) or Cmd+V (Mac) to paste. The announcement should appear in the text box.
+    </p>
+  </li>
+
+  <li>
+    <strong>Verify character count</strong>
+    <p class="govuk-body">
+      Below the text input, you should see "X characters" matching the expected count for your
+      chosen announcement (e.g., 427 characters for bin collection changes).
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Why character count matters:</strong> Amazon Polly charges £0.016 per 1000 characters
+    for neural voices. A 500-character announcement costs £0.008 (less than 1 penny). Knowing the
+    character count helps you estimate costs for your council's announcements.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Understanding announcement categories</h3>
+
+<div class="ndx-category-guide">
+  <h4 class="govuk-heading-s">Service Disruption (e.g., Bin Collection Changes)</h4>
+  <ul class="govuk-list govuk-list--bullet govuk-body-s">
+    <li><strong>Frequency:</strong> Weekly or bi-weekly</li>
+    <li><strong>Urgency:</strong> Standard (24-48 hours notice)</li>
+    <li><strong>Best voice:</strong> Amy (conversational, friendly)</li>
+    <li><strong>Typical length:</strong> 300-500 characters</li>
+    <li><strong>Delivery channels:</strong> Website, email alerts, phone hotline</li>
+  </ul>
+</div>
+
+<div class="ndx-category-guide govuk-!-margin-top-3">
+  <h4 class="govuk-heading-s">Emergency Alert (e.g., Weather Warning)</h4>
+  <ul class="govuk-list govuk-list--bullet govuk-body-s">
+    <li><strong>Frequency:</strong> Rare (a few times per year)</li>
+    <li><strong>Urgency:</strong> Urgent (immediate action required)</li>
+    <li><strong>Best voice:</strong> Brian (authoritative, clear)</li>
+    <li><strong>Typical length:</strong> 400-600 characters</li>
+    <li><strong>Delivery channels:</strong> Website banner, phone hotline, social media, SMS</li>
+  </ul>
+</div>
+
+<div class="ndx-category-guide govuk-!-margin-top-3">
+  <h4 class="govuk-heading-s">Committee Announcement (e.g., Planning Meeting)</h4>
+  <ul class="govuk-list govuk-list--bullet govuk-body-s">
+    <li><strong>Frequency:</strong> Monthly</li>
+    <li><strong>Urgency:</strong> Standard (7-14 days notice)</li>
+    <li><strong>Best voice:</strong> Emma (formal, professional)</li>
+    <li><strong>Typical length:</strong> 500-700 characters</li>
+    <li><strong>Delivery channels:</strong> Website, legal notices, email to stakeholders</li>
+  </ul>
+</div>
+
+<div class="ndx-category-guide govuk-!-margin-top-3">
+  <h4 class="govuk-heading-s">Public Health (e.g., Vaccination Clinics)</h4>
+  <ul class="govuk-list govuk-list--bullet govuk-body-s">
+    <li><strong>Frequency:</strong> Seasonal or campaign-based</li>
+    <li><strong>Urgency:</strong> Standard (ongoing information)</li>
+    <li><strong>Best voice:</strong> Amy or Emma (reassuring, informative)</li>
+    <li><strong>Typical length:</strong> 400-600 characters</li>
+    <li><strong>Delivery channels:</strong> Website, community centers, phone hotline, posters</li>
+  </ul>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Think about your council</h3>
+
+<div class="ndx-reflection-box">
+  <p class="govuk-body">
+    <strong>Reflection prompt:</strong> Which type of announcement does your council publish most frequently?
+  </p>
+  <p class="govuk-body">
+    Consider whether you publish more:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Routine service updates (bin collections, road closures, library hours)</li>
+    <li>Emergency alerts (weather, public safety, service outages)</li>
+    <li>Formal committee notices (planning, licensing, consultations)</li>
+    <li>Public health information (vaccinations, health campaigns, environmental health)</li>
+  </ul>
+  <p class="govuk-body">
+    Understanding your mix helps estimate ROI - if you publish 50 service updates and 10 emergency
+    alerts per year, text-to-speech saves 60 × £200 = £12,000 annually vs studio recording.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Copy to clipboard button not working
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the copy button doesn't work:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Manually select the announcement text (click and drag to highlight)</li>
+      <li>Use Ctrl+C (Windows) or Cmd+C (Mac) to copy</li>
+      <li>Check browser allows clipboard access (some browsers block this for security)</li>
+      <li>Try a different browser (Chrome, Firefox, Safari all support clipboard API)</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Character count in Polly doesn't match expected
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If character count is different:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check you pasted the full text (not just part of it)</li>
+      <li>Verify you didn't accidentally include extra spaces or line breaks</li>
+      <li>Small differences (±5 characters) are fine - formatting may vary slightly</li>
+      <li>If significantly different (>10 characters), re-copy and re-paste</li>
+    </ul>
+  </div>
+</details>
+
+<div class="govuk-!-margin-top-6">
+  <p class="govuk-body">
+    Once your chosen announcement text is pasted into Polly, you're ready to generate audio with different voices.
+  </p>
+</div>
+
+<style>
+  .ndx-announcements-list {
+    margin: 30px 0;
+  }
+
+  .ndx-announcement-item {
+    margin-bottom: 40px;
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-announcement-item h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-announcement-text {
+    margin-bottom: 15px;
+  }
+
+  .ndx-category-guide {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-category-guide h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-reflection-box {
+    padding: 25px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-reflection-box p:last-child {
+    margin-bottom: 0;
+  }
+</style>
+
+<script>
+  // Copy announcement text to clipboard
+  function copyAnnouncementText(announcementId, button) {
+    {% for announcement in sampleAnnouncements %}
+    if (announcementId === '{{ announcement.id }}') {
+      var text = {{ announcement.text | dump | safe }};
+
+      navigator.clipboard.writeText(text).then(function() {
+        // Success feedback
+        var originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.classList.add('govuk-button--success');
+
+        setTimeout(function() {
+          button.textContent = originalText;
+          button.classList.remove('govuk-button--success');
+        }, 2000);
+      }).catch(function(err) {
+        // Fallback: show text in alert for manual copy
+        alert('Copy this text:\n\n' + text);
+      });
+    }
+    {% endfor %}
+  }
+</script>

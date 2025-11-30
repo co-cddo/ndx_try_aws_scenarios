@@ -1,0 +1,426 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - FOI Redaction"
+description: You've completed the FOI Redaction walkthrough
+currentStep: 6
+totalSteps: 5
+scenarioId: foi-redaction
+---
+
+{#
+  Completion Page (Story 3.4)
+  - Key takeaways summary
+  - Generate Evidence Pack link (placeholder for Epic 4)
+  - Try Another Scenario link
+  - Cleanup reminder
+#}
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">
+    Walkthrough complete
+  </h1>
+  <div class="govuk-panel__body">
+    You've experienced AI-powered PII detection and redaction for FOI requests
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  Congratulations! In just 10 minutes, you've seen how AI can reduce FOI redaction time by 80%
+  while improving compliance. What would have taken weeks to pilot, you've experienced hands-on
+  right now.
+</p>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Automatic PII detection
+    </h3>
+    <p class="govuk-body">
+      AI read your FOI response and automatically detected names, addresses, phone numbers, email
+      addresses, and National Insurance numbers. No manual line-by-line review required.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: 30 minutes of manual review reduced to 15 seconds
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      95-99% confidence scores
+    </h3>
+    <p class="govuk-body">
+      Confidence scores showed 95-99% accuracy on typed documents. You saw how to use thresholds
+      to auto-redact high confidence detections and flag lower scores for human review.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Balanced automation with accuracy - trust the AI on high confidence, review edge cases
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Context-aware intelligence
+    </h3>
+    <p class="govuk-body">
+      AI understood context - "Manchester" in an address is PII, but "Manchester City Council"
+      is not. It recognized UK postcodes, phone formats, and National Insurance number patterns.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Smart redaction, not just keyword matching - reduces false positives
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Compliance protection
+    </h3>
+    <p class="govuk-body">
+      Complete audit trail of detected PII, confidence scores, and redaction decisions. Demonstrates
+      due diligence to ICO and reduces risk of accidental personal data disclosure.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: GDPR compliance and ICO transparency - provable systematic approach
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">Committee-ready talking points</h2>
+
+<p class="govuk-body">
+  Use these points when presenting to decision-makers:
+</p>
+
+<div class="ndx-committee-language">
+  <h3 class="govuk-heading-s">The problem</h3>
+  <p class="govuk-body">
+    "FOI officers currently spend 30 minutes per request manually reviewing documents line-by-line
+    to find and redact personal information. With 500 FOI requests per year, that's 250 hours of
+    valuable officer time spent on repetitive redaction work. This creates bottlenecks in meeting
+    the 20-day FOI response deadline and increases risk of missed PII due to review fatigue."
+  </p>
+
+  <h3 class="govuk-heading-s">The solution</h3>
+  <p class="govuk-body">
+    "AI-powered PII detection automatically scans FOI response documents and identifies names,
+    addresses, phone numbers, emails, and National Insurance numbers in under 30 seconds with
+    95-99% accuracy. High-confidence detections can be auto-redacted, while edge cases are
+    flagged for quick human review (5-10 seconds per item). This reduces redaction time by 80%."
+  </p>
+
+  <h3 class="govuk-heading-s">The value</h3>
+  <p class="govuk-body">
+    "Annual time savings of 200 hours - equivalent to 5 weeks of FOI officer capacity - freed for
+    complex exemption decisions and policy work. Cost benefit of £5,000 per year in staff time.
+    Compliance benefit: consistent PII detection reduces risk of accidental disclosure and provides
+    audit trail for ICO transparency. Faster FOI response times improve public service delivery."
+  </p>
+
+  <h3 class="govuk-heading-s">The risk</h3>
+  <p class="govuk-body">
+    "Low. Pay-per-use pricing means no upfront investment. Trial with 100 FOI requests costs under
+    £50. AI handles heavy lifting (95%+ detection rate) while FOI officers perform final review
+    before publishing responses. System integrates with existing FOI workflows and document management
+    systems. Typical pilot: 3-6 months with 50-100 FOI requests to validate accuracy and ROI."
+  </p>
+</div>
+
+{# Story 15.3: Completion next steps with proper links #}
+{% set scenarioId = "foi-redaction" %}
+{% set scenarioName = "FOI Redaction" %}
+{% set totalSteps = 5 %}
+{% include "components/completion-next-steps.njk" %}
+
+<div class="govuk-warning-text govuk-!-margin-top-8">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Important</span>
+    Remember to clean up your AWS resources
+  </strong>
+</div>
+
+<div class="ndx-cleanup-section">
+  <h2 class="govuk-heading-m">Clean up your resources</h2>
+
+  <p class="govuk-body">
+    Your FOI Redaction resources will automatically delete after 2 hours, but you can
+    delete them now to stop any further charges:
+  </p>
+
+  <ol class="govuk-list govuk-list--number">
+    <li>
+      Go to <a href="https://eu-west-2.console.aws.amazon.com/cloudformation/home?region=eu-west-2#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console</a>
+    </li>
+    <li>
+      Find your stack: <code>ndx-try-foi-redaction-[timestamp]</code>
+    </li>
+    <li>
+      Select the stack and click "Delete"
+    </li>
+    <li>
+      Confirm deletion - this takes 2-3 minutes
+    </li>
+    <li>
+      S3 bucket will be automatically emptied before deletion
+    </li>
+  </ol>
+
+  <p class="govuk-body">
+    <strong>Estimated cost so far:</strong> Less than £0.20 for a 10-minute evaluation
+    (Comprehend charges per text unit processed)
+  </p>
+
+  <details class="govuk-details govuk-!-margin-top-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        What if I want to test with more FOI documents?
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        If you want to continue testing PII detection:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Resources will auto-delete after 2 hours total (from deployment)</li>
+        <li>Cost: approximately £0.05-£0.10 per FOI document processed (depends on length)</li>
+        <li>Maximum cost: £10 (enforced by template configuration)</li>
+        <li>You can upload your own FOI response documents (max 10MB, PDF/DOCX/TXT)</li>
+        <li>Test with real council FOI responses (anonymize first if using production data)</li>
+      </ul>
+      <p class="govuk-body">
+        You can redeploy the scenario anytime to start fresh with new sample documents.
+      </p>
+    </div>
+  </details>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Production considerations</h2>
+
+  <p class="govuk-body">
+    If you're considering deploying this for real FOI request processing:
+  </p>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Integration with existing FOI systems
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        Production deployment would integrate via:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>API endpoints to send FOI response documents for PII detection</li>
+        <li>Webhooks to trigger redaction when FOI officers prepare responses</li>
+        <li>Direct integration with FOI case management systems (iCasework, Firmstep, etc.)</li>
+        <li>Queue-based processing for batch redaction of multiple documents</li>
+        <li>Export redacted documents back to FOI system or document management system</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Handling low confidence detections
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        Production systems would:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Set confidence threshold (e.g., 95%) for auto-redaction</li>
+        <li>Flag low-confidence detections for FOI officer review</li>
+        <li>Show original document context next to detected PII for easy verification</li>
+        <li>Allow officers to manually mark/unmark PII items</li>
+        <li>Track false positive/negative rates over time to tune confidence thresholds</li>
+        <li>Provide feedback loop to improve detection accuracy for your council's FOI patterns</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Data protection and security
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        Production deployment includes:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Encryption at rest for S3 buckets (customer-managed KMS keys)</li>
+        <li>Encryption in transit (TLS 1.2+) for all API calls</li>
+        <li>VPC endpoint for Comprehend (traffic never leaves AWS network)</li>
+        <li>IAM roles with least-privilege permissions</li>
+        <li>CloudTrail logging for audit compliance and ICO requests</li>
+        <li>Automatic document deletion after configurable retention period (e.g., 30 days)</li>
+        <li>GDPR-compliant data processing agreements with AWS</li>
+        <li>UK data residency (all processing in eu-west-2 London region)</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Cost at scale
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        Real-world cost examples (based on average 3-page FOI response):
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>500 FOI requests/year: ~£300/year (£0.60 per request)</li>
+        <li>1,000 FOI requests/year: ~£550/year (£0.55 per request due to volume discounts)</li>
+        <li>2,000 FOI requests/year: ~£1,000/year (£0.50 per request)</li>
+      </ul>
+      <p class="govuk-body">
+        Costs include Comprehend (per text unit), Lambda (per execution), S3 storage, and API Gateway.
+        No upfront licensing or infrastructure costs. Pay only for documents actually processed.
+      </p>
+      <p class="govuk-body">
+        ROI example: For 500 FOI requests/year, £300 cost vs £5,000 staff time savings = £4,700 net benefit.
+      </p>
+    </div>
+  </details>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Handling complex FOI scenarios
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        Advanced use cases:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>
+          <strong>Partial redaction:</strong> Redact PII while preserving organizational context
+          (e.g., redact employee names but keep job titles)
+        </li>
+        <li>
+          <strong>Third-party personal data:</strong> Detect and redact information about residents,
+          applicants, objectors - not just council employees
+        </li>
+        <li>
+          <strong>Multiple exemptions:</strong> Combine PII redaction (Section 40) with commercial
+          sensitivity or legal professional privilege redactions
+        </li>
+        <li>
+          <strong>Email chain processing:</strong> Handle email threads with multiple participants,
+          detecting PII in signatures, headers, and body text
+        </li>
+        <li>
+          <strong>Scanned documents:</strong> OCR integration for redacting handwritten or poor-quality
+          scanned FOI responses
+        </li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Questions or feedback?</h2>
+
+  <p class="govuk-body">
+    We'd love to hear about your experience with this walkthrough:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+    <li><a href="https://github.com/co-cddo/ndx-try-feedback/issues" target="_blank" rel="noopener noreferrer" class="govuk-link">Report an issue on GitHub</a></li>
+    <li><a href="/partner-tour/" class="govuk-link">Schedule a guided tour with AWS partners</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .ndx-takeaway-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-committee-language {
+    padding: 30px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+    margin: 30px 0;
+  }
+
+  .ndx-committee-language h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  .ndx-committee-language h3:first-child {
+    margin-top: 0;
+  }
+
+  .ndx-evidence-pack-section {
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-cleanup-section {
+    padding: 30px;
+    background-color: #fff7e6;
+    border-left: 4px solid #f47738;
+  }
+
+  .ndx-cleanup-section code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-related-scenario {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    min-height: 140px;
+  }
+
+  .ndx-related-scenario h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-takeaway-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-related-scenario {
+      min-height: auto;
+    }
+  }
+</style>

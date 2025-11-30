@@ -1,0 +1,403 @@
+---
+layout: page
+title: Get Your Evidence Pack
+description: Share your evaluation and generate a committee-ready Evidence Pack tailored to your role
+eleventyExcludeFromCollections: true
+---
+
+{#
+  Evidence Pack Generation Page - Story 4.2
+
+  This page collects evaluation insights via a reflection form,
+  then generates a personalized Evidence Pack based on the user's role.
+
+  Flow:
+  1. User completes reflection form (7 fields)
+  2. User selects their persona (CTO, Service Manager, etc.)
+  3. Evidence Pack preview is generated with persona-specific content
+#}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <span class="govuk-caption-xl">Evidence Pack Generator</span>
+    <h1 class="govuk-heading-xl">Get Your Evidence Pack</h1>
+
+    {# CTA Banner - AC 4.2.13 #}
+    <div class="ndx-safety-banner ndx-safety-banner--success govuk-!-margin-bottom-6">
+      <div class="govuk-!-padding-2">
+        <p class="govuk-heading-m govuk-!-margin-bottom-2 ndx-safety-banner__title">
+          <span class="ndx-safety-banner__icon" aria-hidden="true">📄</span>
+          Get Your Evidence Pack
+        </p>
+        <p class="govuk-body ndx-safety-banner__text">
+          Takes 2 min • Committee-ready PDF • Tailored to your role
+        </p>
+      </div>
+    </div>
+
+    <div class="govuk-inset-text">
+      <p class="govuk-body">
+        Share your evaluation insights and we'll generate a personalized Evidence Pack tailored to your role.
+        Your responses help create committee-ready documentation for your organization.
+      </p>
+    </div>
+
+    {# Reflection Form - Story 4.2 #}
+    <div class="ndx-reflection-form-section govuk-!-margin-bottom-9">
+      <h2 class="govuk-heading-l">What You Experienced</h2>
+
+      {# Progress Indicator - AC 4.2.12 #}
+      <div class="govuk-!-margin-bottom-4" aria-live="polite" aria-atomic="true">
+        <p class="govuk-body">
+          <strong>Progress:</strong>
+          <span class="ndx-form-progress-count">0</span> of 7 questions completed
+        </p>
+        <div style="background-color: #f3f2f1; height: 8px; border-radius: 4px; overflow: hidden;">
+          <div class="ndx-form-progress-bar" style="background-color: #00703c; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+        </div>
+      </div>
+
+      <form id="reflection-form" data-scenario-id="council-chatbot" novalidate>
+
+        {# Field 1: What Surprised You - AC 4.2.1 #}
+        <div class="govuk-form-group" id="what-surprised-group">
+          <label class="govuk-label govuk-label--s" for="what-surprised">
+            What surprised you about this scenario? <span class="ndx-required" aria-label="required">*</span>
+          </label>
+          <div id="what-surprised-hint" class="govuk-hint">
+            For example, the response speed, accuracy of answers, ease of deployment, or cost implications.
+          </div>
+          <textarea class="govuk-textarea" id="what-surprised" name="what_surprised" rows="4" aria-describedby="what-surprised-hint" required></textarea>
+        </div>
+
+        {# Field 2: Would Implement - AC 4.2.1 #}
+        <div class="govuk-form-group" id="would-implement-group">
+          <fieldset class="govuk-fieldset" aria-describedby="would-implement-hint">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+              Would you implement this in your organization? <span class="ndx-required" aria-label="required">*</span>
+            </legend>
+            <div id="would-implement-hint" class="govuk-hint">
+              Select the option that best reflects your organization's position.
+            </div>
+            <div class="govuk-radios" data-module="govuk-radios">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="would-implement-yes" name="would_implement" type="radio" value="yes" required>
+                <label class="govuk-label govuk-radios__label" for="would-implement-yes">
+                  Yes, we're ready to proceed
+                </label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="would-implement-maybe" name="would_implement" type="radio" value="maybe">
+                <label class="govuk-label govuk-radios__label" for="would-implement-maybe">
+                  Maybe, need more information
+                </label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="would-implement-no" name="would_implement" type="radio" value="no">
+                <label class="govuk-label govuk-radios__label" for="would-implement-no">
+                  No, not suitable for us
+                </label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        {# Field 3: Production Wants - AC 4.2.1 #}
+        <div class="govuk-form-group" id="production-wants-group">
+          <label class="govuk-label govuk-label--s" for="production-wants">
+            What would you want in a production version? (optional)
+          </label>
+          <div id="production-wants-hint" class="govuk-hint">
+            For example, integrations, features, customizations, or scalability requirements.
+          </div>
+          <textarea class="govuk-textarea" id="production-wants" name="production_wants" rows="4" aria-describedby="production-wants-hint"></textarea>
+        </div>
+
+        {# Field 4: Concerns - AC 4.2.1 #}
+        <div class="govuk-form-group" id="concerns-group">
+          <label class="govuk-label govuk-label--s" for="concerns">
+            What concerns do you have? (optional)
+          </label>
+          <div id="concerns-hint" class="govuk-hint">
+            For example, security, compliance, costs, vendor lock-in, or technical constraints.
+          </div>
+          <textarea class="govuk-textarea" id="concerns" name="concerns" rows="4" aria-describedby="concerns-hint"></textarea>
+        </div>
+
+        {# Field 5: Likelihood to Proceed - AC 4.2.1 #}
+        <div class="govuk-form-group" id="likelihood-proceed-group">
+          <fieldset class="govuk-fieldset" aria-describedby="likelihood-proceed-hint">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+              How likely are you to proceed with this? <span class="ndx-required" aria-label="required">*</span>
+            </legend>
+            <div id="likelihood-proceed-hint" class="govuk-hint">
+              1 = Very unlikely, 5 = Very likely
+            </div>
+            <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="likelihood-1" name="likelihood_proceed" type="radio" value="1" required>
+                <label class="govuk-label govuk-radios__label" for="likelihood-1">
+                  1
+                </label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="likelihood-2" name="likelihood_proceed" type="radio" value="2">
+                <label class="govuk-label govuk-radios__label" for="likelihood-2">
+                  2
+                </label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="likelihood-3" name="likelihood_proceed" type="radio" value="3">
+                <label class="govuk-label govuk-radios__label" for="likelihood-3">
+                  3
+                </label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="likelihood-4" name="likelihood_proceed" type="radio" value="4">
+                <label class="govuk-label govuk-radios__label" for="likelihood-4">
+                  4
+                </label>
+              </div>
+              <div class="govuk-radios__item">
+                <input class="govuk-radios__input" id="likelihood-5" name="likelihood_proceed" type="radio" value="5">
+                <label class="govuk-label govuk-radios__label" for="likelihood-5">
+                  5
+                </label>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        {# Field 6: Council Name - AC 4.2.1 #}
+        <div class="govuk-form-group" id="council-name-group">
+          <label class="govuk-label govuk-label--s" for="council-name">
+            Your council or organization name (optional)
+          </label>
+          <div id="council-name-hint" class="govuk-hint">
+            This will appear on your Evidence Pack.
+          </div>
+          <input class="govuk-input govuk-!-width-two-thirds" id="council-name" name="council_name" type="text" aria-describedby="council-name-hint">
+        </div>
+
+        {# Field 7: Email - AC 4.2.1, AC 4.2.3 #}
+        <div class="govuk-form-group" id="email-group">
+          <label class="govuk-label govuk-label--s" for="email">
+            Email address for Evidence Pack delivery (optional)
+          </label>
+          <div id="email-hint" class="govuk-hint">
+            We'll send you a PDF copy of your Evidence Pack. We will not use your email for any other purpose.
+          </div>
+          <input class="govuk-input govuk-!-width-two-thirds" id="email" name="email" type="email" spellcheck="false" autocomplete="email" aria-describedby="email-hint">
+        </div>
+
+        {# Privacy Notice - AC 4.2.10 #}
+        <div class="govuk-inset-text govuk-!-margin-top-6">
+          <p class="govuk-body-s">
+            Your responses are stored locally in your browser and are not sent to any server.
+            Read our <a href="/privacy/" class="govuk-link">privacy notice</a> to learn how we handle data.
+          </p>
+        </div>
+
+        {# Submit Button - AC 4.2.14 #}
+        <div class="ndx-form-submit">
+          <button type="submit" class="govuk-button" data-module="govuk-button" disabled>
+            Continue to Persona Selection
+          </button>
+          <p class="govuk-body-s govuk-hint">
+            Complete all required fields (*) to continue
+          </p>
+        </div>
+      </form>
+    </div>
+
+    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+    {# Persona Selection - Shown after form completion #}
+    <div class="ndx-persona-selection" hidden>
+      <h2 class="govuk-heading-l">Select Your Role</h2>
+
+      <p class="govuk-body">
+        Choose your role to generate an Evidence Pack with content tailored to your perspective and concerns.
+      </p>
+
+      <div class="govuk-form-group">
+        <fieldset class="govuk-fieldset">
+          <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+            Which role best describes you?
+          </legend>
+          <div class="govuk-radios" data-module="govuk-radios">
+            <div class="govuk-radios__item">
+              <input class="govuk-radios__input" id="persona-cto" name="persona" type="radio" value="cto" checked>
+              <label class="govuk-label govuk-radios__label" for="persona-cto">
+                CTO (Chief Technology Officer)
+              </label>
+              <div id="persona-cto-hint" class="govuk-hint govuk-radios__hint">
+                Technical architecture, security compliance, and integration details
+              </div>
+            </div>
+            <div class="govuk-radios__item">
+              <input class="govuk-radios__input" id="persona-service-manager" name="persona" type="radio" value="service-manager">
+              <label class="govuk-label govuk-radios__label" for="persona-service-manager">
+                Service Manager
+              </label>
+              <div id="persona-service-manager-hint" class="govuk-hint govuk-radios__hint">
+                Resident impact, service delivery improvements, and operational benefits
+              </div>
+            </div>
+            <div class="govuk-radios__item">
+              <input class="govuk-radios__input" id="persona-finance" name="persona" type="radio" value="finance">
+              <label class="govuk-label govuk-radios__label" for="persona-finance">
+                Finance Director
+              </label>
+              <div id="persona-finance-hint" class="govuk-hint govuk-radios__hint">
+                Cost analysis, ROI projections, and budget implications
+              </div>
+            </div>
+            <div class="govuk-radios__item">
+              <input class="govuk-radios__input" id="persona-developer" name="persona" type="radio" value="developer">
+              <label class="govuk-label govuk-radios__label" for="persona-developer">
+                Developer / Technical Lead
+              </label>
+              <div id="persona-developer-hint" class="govuk-hint govuk-radios__hint">
+                Implementation details, code patterns, and technical runbook
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <button
+        type="button"
+        class="govuk-button"
+        data-module="govuk-button"
+        data-pdf-generate
+        data-scenario-id="council-chatbot"
+        data-persona="cto">
+        Generate PDF
+      </button>
+
+      <p class="govuk-body-s">
+        Note: This demo shows sample CTO persona content. In production, each persona will have unique tailored content.
+      </p>
+    </div>
+
+    <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+    {# Success Banner - AC 4.3.9 #}
+    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="pdf-success-title" data-pdf-success hidden>
+      <div class="govuk-notification-banner__header">
+        <h2 class="govuk-notification-banner__title" id="pdf-success-title">
+          Success
+        </h2>
+      </div>
+      <div class="govuk-notification-banner__content">
+        <h3 class="govuk-notification-banner__heading">
+          Evidence Pack PDF generated successfully
+        </h3>
+        <p class="govuk-body">
+          Your PDF has been downloaded. Next steps:
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li>Review the PDF for completeness</li>
+          <li>Share with your procurement team</li>
+          <li>Schedule a technical review meeting</li>
+        </ul>
+      </div>
+    </div>
+
+    {# Loading State - AC 4.3.16 #}
+    <div class="govuk-inset-text" data-pdf-loading hidden>
+      <p class="govuk-body">
+        <strong>Generating PDF...</strong>
+      </p>
+      <p class="govuk-body">
+        This usually takes around 5 seconds. Please wait while we prepare your Evidence Pack.
+      </p>
+      <div style="background-color: #f3f2f1; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 15px;">
+        <div style="background-color: #1d70b8; height: 100%; width: 60%; animation: progress-bar 3s ease-in-out infinite;"></div>
+      </div>
+    </div>
+
+    {# Evidence Pack Preview - Gated by form completion #}
+    <div class="ndx-evidence-pack-preview">
+      <h2 class="govuk-heading-l">Evidence Pack Preview</h2>
+
+      <div class="govuk-inset-text">
+        <p class="govuk-body">
+          This is a demonstration of the Evidence Pack template system using sample data.
+          In production, evidence packs will be generated from your actual evaluation form responses.
+        </p>
+      </div>
+
+      {# Demo controls #}
+      <div class="govuk-!-margin-bottom-6 ndx-print-hide">
+        <h3 class="govuk-heading-m">Preview Controls</h3>
+
+        <button
+          type="button"
+          class="govuk-button"
+          data-module="govuk-button"
+          data-pdf-generate
+          data-scenario-id="council-chatbot"
+          data-persona="cto">
+          Generate PDF
+        </button>
+
+        <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button" onclick="window.print()">
+          Print / Save as PDF (Browser)
+        </button>
+
+        <p class="govuk-body-s govuk-!-margin-top-2">
+          Generate PDF: Uses html2pdf.js for optimized A4 output (~5 seconds)<br>
+          Browser Print: Fallback option using your browser's print dialog
+        </p>
+      </div>
+
+      <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+      {# Evidence Pack - CTO Persona by default #}
+      {% set persona = 'cto' %}
+      {% set scenarioId = 'council-chatbot' %}
+      {% set session = evidencePackSample.session %}
+      {% set cto_evaluation = evidencePackSample.cto_evaluation %}
+      {% set service_manager_evaluation = evidencePackSample.service_manager_evaluation %}
+      {% set finance_evaluation = evidencePackSample.finance_evaluation %}
+      {% set developer_evaluation = evidencePackSample.developer_evaluation %}
+      {% set evaluation_summary = evidencePackSample.evaluation_summary %}
+      {% set roi_projection = evidencePackSample.roi_projection %}
+      {% set next_steps = evidencePackSample.next_steps %}
+
+      {% include "evidence-pack/base.njk" %}
+
+    </div>
+  </div>
+</div>
+
+{# Load reflection form JavaScript #}
+<script src="/assets/js/reflection-form.js"></script>
+
+{# Load PDF generator - Story 4-3 #}
+<script src="/assets/js/evidence-pack-generator.js"></script>
+
+{# Simple JavaScript for persona switching (enhancement for demo) #}
+<script>
+  // This is demo-only code - production will generate server-side with actual form data
+  document.addEventListener('DOMContentLoaded', function() {
+    const radios = document.querySelectorAll('input[name="persona"]');
+
+    radios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        // In production, this would trigger a new page load with the selected persona
+        // For now, just show a message
+        if (this.value !== 'cto') {
+          alert('Persona switching requires page reload. In production, each persona will have a unique URL with their specific content. Currently showing CTO persona only.');
+        }
+      });
+    });
+  });
+</script>
+
+{# Print-specific header for all pages #}
+<div class="ndx-evidence-pack__header print-only" style="display: none;">
+  Evidence Pack: Council Chatbot | {{ session.council_name }} | {{ session.evaluation_date }}
+</div>

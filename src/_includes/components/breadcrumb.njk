@@ -1,0 +1,131 @@
+{#
+  Breadcrumb Navigation Component (Story 14.6)
+
+  Renders GOV.UK-compliant breadcrumbs with proper scenario names.
+
+  Supports multiple page types:
+  - scenario: Home > Scenarios > [Scenario Name]
+  - walkthrough: Home > Walkthroughs > [Scenario Name] > [Step]
+  - exploration: Home > Walkthroughs > [Scenario Name] > Explore > [Section]
+  - generic: Home > [Custom items]
+
+  Usage:
+    {% include "components/breadcrumb.njk" %}
+
+  Expects variables:
+    - breadcrumbType: string ('scenario'|'walkthrough'|'exploration'|'generic')
+    - scenarioId: string (for scenario/walkthrough/exploration types)
+    - currentStep: number (for walkthrough type)
+    - totalSteps: number (for walkthrough type)
+    - explorationSection: string (for exploration type)
+    - customBreadcrumbs: array (for generic type)
+    - scenarios: object (global data from scenarios.yaml)
+#}
+
+{# Get scenario name from scenarios data #}
+{% set scenarioName = "" %}
+{% if scenarioId %}
+  {% for scenario in scenarios.scenarios %}
+    {% if scenario.id == scenarioId %}
+      {% set scenarioName = scenario.name %}
+    {% endif %}
+  {% endfor %}
+  {# Fallback if not found #}
+  {% if not scenarioName %}
+    {% set scenarioName = scenarioId | replace("-", " ") | title %}
+  {% endif %}
+{% endif %}
+
+<nav class="govuk-breadcrumbs ndx-breadcrumb" aria-label="Breadcrumb">
+  <ol class="govuk-breadcrumbs__list">
+    {# Home - always present #}
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/">Home</a>
+    </li>
+
+    {% if breadcrumbType == 'scenario' %}
+      {# Scenario page: Home > Scenarios > [Scenario Name] #}
+      <li class="govuk-breadcrumbs__list-item">
+        <a class="govuk-breadcrumbs__link" href="/scenarios/">Scenarios</a>
+      </li>
+      <li class="govuk-breadcrumbs__list-item" aria-current="page">
+        {{ scenarioName }}
+      </li>
+
+    {% elif breadcrumbType == 'walkthrough' %}
+      {# Walkthrough pages: Home > Walkthroughs > [Scenario Name] > [Step] #}
+      <li class="govuk-breadcrumbs__list-item">
+        <a class="govuk-breadcrumbs__link" href="/walkthroughs/">Walkthroughs</a>
+      </li>
+      <li class="govuk-breadcrumbs__list-item">
+        <a class="govuk-breadcrumbs__link" href="/walkthroughs/{{ scenarioId }}/">{{ scenarioName }}</a>
+      </li>
+      {% if currentStep and currentStep > 0 %}
+        {% if currentStep <= totalSteps %}
+          <li class="govuk-breadcrumbs__list-item" aria-current="page">
+            Step {{ currentStep }} of {{ totalSteps }}
+          </li>
+        {% elif currentStep > totalSteps %}
+          <li class="govuk-breadcrumbs__list-item" aria-current="page">
+            Complete
+          </li>
+        {% endif %}
+      {% else %}
+        <li class="govuk-breadcrumbs__list-item" aria-current="page">
+          Introduction
+        </li>
+      {% endif %}
+
+    {% elif breadcrumbType == 'exploration' %}
+      {# Exploration pages: Home > Walkthroughs > [Scenario Name] > Explore > [Section] #}
+      <li class="govuk-breadcrumbs__list-item">
+        <a class="govuk-breadcrumbs__link" href="/walkthroughs/">Walkthroughs</a>
+      </li>
+      <li class="govuk-breadcrumbs__list-item">
+        <a class="govuk-breadcrumbs__link" href="/walkthroughs/{{ scenarioId }}/">{{ scenarioName }}</a>
+      </li>
+      <li class="govuk-breadcrumbs__list-item">
+        <a class="govuk-breadcrumbs__link" href="/walkthroughs/{{ scenarioId }}/explore/">Explore</a>
+      </li>
+      {% if explorationSection %}
+        <li class="govuk-breadcrumbs__list-item" aria-current="page">
+          {{ explorationSection }}
+        </li>
+      {% endif %}
+
+    {% elif breadcrumbType == 'walkthroughs-index' %}
+      {# Walkthroughs index: Home > Walkthroughs #}
+      <li class="govuk-breadcrumbs__list-item" aria-current="page">
+        Walkthroughs
+      </li>
+
+    {% elif breadcrumbType == 'scenarios-index' %}
+      {# Scenarios index: Home > Scenarios #}
+      <li class="govuk-breadcrumbs__list-item" aria-current="page">
+        Scenarios
+      </li>
+
+    {% elif breadcrumbType == 'generic' and customBreadcrumbs %}
+      {# Generic breadcrumbs with custom items #}
+      {% for item in customBreadcrumbs %}
+        {% if item.href %}
+          <li class="govuk-breadcrumbs__list-item">
+            <a class="govuk-breadcrumbs__link" href="{{ item.href }}">{{ item.text }}</a>
+          </li>
+        {% else %}
+          <li class="govuk-breadcrumbs__list-item" aria-current="page">
+            {{ item.text }}
+          </li>
+        {% endif %}
+      {% endfor %}
+
+    {% else %}
+      {# Fallback: just show current page title if available #}
+      {% if title %}
+        <li class="govuk-breadcrumbs__list-item" aria-current="page">
+          {{ title }}
+        </li>
+      {% endif %}
+    {% endif %}
+  </ol>
+</nav>

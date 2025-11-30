@@ -1,0 +1,288 @@
+{#
+  Phase Navigator Component (Story 12.1)
+
+  Horizontal progress indicator showing three-phase journey:
+  TRY → WALK THROUGH → EXPLORE
+
+  Usage:
+    {% include "components/phase-navigator.njk" %}
+
+  Expects:
+    - scenarioId: string (from page front matter or body data attribute)
+    - phaseConfig: object (from _data/phase-config.yaml)
+
+  Features:
+    - AC1: Displays all three phases with time estimates
+    - AC2: "You are here" indicator for current phase
+    - AC3: Checkmark for completed phases
+    - AC4: Cost reassurance text
+    - AC7: Branching visual for Explore fork
+    - AC11: Mobile sticky bottom bar
+    - AC12-15: Full ARIA accessibility
+    - AC16: Skeleton loading states
+#}
+
+{% set scenarioId = scenarioId if scenarioId is defined else "council-chatbot" %}
+{% set phases = phaseConfig.phases %}
+{% set costMessage = phaseConfig.costReassurance %}
+
+{# Skeleton loading state - prevents layout shift (AC-16) #}
+<div class="ndx-phase-navigator__skeleton" data-skeleton hidden aria-hidden="true">
+  <div class="ndx-phase-navigator__skeleton-bar"></div>
+  <div class="ndx-phase-navigator__skeleton-phases">
+    <div class="ndx-phase-navigator__skeleton-phase"></div>
+    <div class="ndx-phase-navigator__skeleton-phase"></div>
+    <div class="ndx-phase-navigator__skeleton-phase"></div>
+  </div>
+</div>
+
+{# Main navigator - AC12: nav role with aria-label #}
+<nav class="ndx-phase-navigator"
+     role="navigation"
+     aria-label="Journey progress"
+     data-phase-navigator
+     data-scenario-id="{{ scenarioId | escape }}">
+
+  {# Cost reassurance - AC4: First visible line #}
+  <p class="ndx-phase-navigator__cost-reassurance">
+    <svg class="ndx-phase-navigator__icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM9 15V13H11V15H9ZM11 11H9V5H11V11Z" fill="#00703c"/>
+    </svg>
+    {{ costMessage }}
+  </p>
+
+  {# Phase progression container #}
+  <div class="ndx-phase-navigator__container">
+    {# Connector line - desktop only #}
+    <div class="ndx-phase-navigator__connector" aria-hidden="true"></div>
+
+    {# Phase items - AC1: All three phases with time estimates #}
+    <ol class="ndx-phase-navigator__list">
+      {% for phase in phases %}
+        <li class="ndx-phase-navigator__phase"
+            data-phase-id="{{ phase.id }}"
+            {% if loop.index === 1 %}data-phase-initial{% endif %}>
+
+          {# Phase link - AC13: Keyboard navigable #}
+          <a href="#{{ phase.id }}"
+             class="ndx-phase-navigator__link"
+             tabindex="0"
+             aria-label="{{ phase.label }}: {{ phase.sublabel }} ({{ phase.time }})"
+             data-base-label="{{ phase.label }}: {{ phase.sublabel }} ({{ phase.time }})"
+             data-phase-link="{{ phase.id }}">
+
+            {# Phase indicator circle - AC14: Not color-only (icons + text) #}
+            <span class="ndx-phase-navigator__indicator" aria-hidden="true">
+              {# AC3: Checkmark for completed phases #}
+              <svg class="ndx-phase-navigator__checkmark" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.5 4.5L6 12L2.5 8.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {# Phase number for incomplete phases #}
+              <span class="ndx-phase-navigator__number">{{ loop.index }}</span>
+            </span>
+
+            {# Phase content #}
+            <span class="ndx-phase-navigator__content">
+              <span class="ndx-phase-navigator__label">{{ phase.label }}</span>
+              <span class="ndx-phase-navigator__sublabel">{{ phase.sublabel }}</span>
+              <span class="ndx-phase-navigator__time">{{ phase.time }}</span>
+
+              {# AC2: "You are here" indicator - added dynamically via JS with aria-current="step" #}
+              <span class="ndx-phase-navigator__current-marker" hidden>You are here</span>
+
+              {# AC7: Fork indicator for Explore phase #}
+              {% if phase.fork %}
+                <span class="ndx-phase-navigator__fork-badge">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M6 1V11M6 1L9 4M6 1L3 4M6 11L9 8M6 11L3 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  Optional
+                </span>
+              {% endif %}
+            </span>
+          </a>
+        </li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  {# Parallel entry prompt - AC9: Hidden by default, shown via JS #}
+  <div class="ndx-phase-navigator__prompt" data-parallel-entry-prompt hidden>
+    <div class="govuk-warning-text govuk-!-margin-bottom-0">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-visually-hidden">Warning</span>
+        To get the full experience, start by deploying the demo to your Innovation Sandbox.
+      </strong>
+    </div>
+    <p class="govuk-body-s">
+      <a href="/scenarios/{{ scenarioId }}/" class="govuk-link govuk-link--no-visited-state">
+        Start from the beginning
+      </a>
+      <span class="govuk-!-margin-left-2 govuk-!-margin-right-2">or</span>
+      <a href="#" class="govuk-link govuk-link--no-visited-state" data-dismiss-prompt>
+        Continue without deployment
+      </a>
+    </p>
+  </div>
+
+  {# Stack expired message - AC10: Hidden by default, shown via JS #}
+  <div class="ndx-phase-navigator__expired" data-stack-expired hidden>
+    <div class="govuk-notification-banner" role="region" aria-labelledby="stack-expired-title">
+      <div class="govuk-notification-banner__header">
+        <h2 class="govuk-notification-banner__title" id="stack-expired-title">
+          Your demo environment has expired
+        </h2>
+      </div>
+      <div class="govuk-notification-banner__content">
+        <p class="govuk-notification-banner__heading">
+          CloudFormation stacks auto-delete after 90 minutes. You can re-deploy or continue with screenshots.
+        </p>
+        <div class="govuk-button-group">
+          <a href="/scenarios/{{ scenarioId }}/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+            Re-deploy Demo
+          </a>
+          <a href="#demo-video" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+            Continue with Screenshots
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</nav>
+
+{# AC15: Noscript fallback #}
+<noscript>
+  <div class="govuk-inset-text">
+    <p><strong>Enable JavaScript for journey tracking</strong></p>
+    <p>The phase navigator requires JavaScript to track your progress. The navigation links will still work, but your progress won't be saved.</p>
+  </div>
+</noscript>
+
+{# Transition CTA - AC8: Shown at phase completion #}
+<div class="ndx-phase-navigator__transition" data-transition-cta hidden>
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h2 class="govuk-panel__title" data-transition-title>
+      Great! You've deployed the demo
+    </h2>
+    <div class="govuk-panel__body">
+      <p data-transition-body>Now let's walk through what you just deployed and see it in action.</p>
+      <a href="#"
+         role="button"
+         draggable="false"
+         class="govuk-button govuk-button--start govuk-!-margin-top-3"
+         data-module="govuk-button"
+         data-transition-action>
+        Start Walkthrough
+        <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</div>
+
+{# Branching decision - AC7: Shown after walkthrough #}
+<div class="ndx-phase-navigator__branching" data-branching-cta hidden>
+  <h3 class="govuk-heading-m">Choose your next step</h3>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-phase-navigator__branch ndx-phase-navigator__branch--primary">
+        <h4 class="govuk-heading-s">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M4 4H16V16H4V4Z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          Generate Evidence Pack
+        </h4>
+        <p class="govuk-body-s">Create your business case documentation with what you've learned.</p>
+        <a href="/evidence-pack/{{ scenarioId }}/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+          Generate Evidence Pack
+        </a>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-phase-navigator__branch ndx-phase-navigator__branch--optional">
+        <h4 class="govuk-heading-s">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2"/>
+            <circle cx="10" cy="10" r="2" fill="currentColor"/>
+          </svg>
+          Go Deeper <span class="govuk-tag govuk-tag--grey govuk-!-margin-left-1">Optional</span>
+        </h4>
+        <p class="govuk-body-s">Explore more activities and features at your own pace.</p>
+        <a href="/walkthroughs/{{ scenarioId }}/explore/" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+          Start Exploring
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /**
+   * Sanitize scenario ID to prevent XSS (AC-Security)
+   * Only allows alphanumeric, hyphens, and underscores
+   */
+  function sanitizeScenarioId(id) {
+    if (!id || typeof id !== 'string') return '';
+    return id.replace(/[^a-zA-Z0-9_-]/g, '');
+  }
+
+  // Initialize phase navigator on load
+  document.addEventListener('DOMContentLoaded', function() {
+    const navigator = document.querySelector('[data-phase-navigator]');
+    if (!navigator) return;
+
+    // Hide skeleton, show navigator
+    const skeleton = document.querySelector('[data-skeleton]');
+    if (skeleton) {
+      skeleton.hidden = true;
+    }
+
+    // Initialize from PhaseState if available
+    if (window.PhaseState) {
+      window.updatePhaseIndicators();
+    }
+
+    // Handle phase link clicks (AC-13: Keyboard activation)
+    navigator.querySelectorAll('[data-phase-link]').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const phaseId = this.dataset.phaseLink;
+        const scenarioId = sanitizeScenarioId(navigator.dataset.scenarioId);
+
+        if (window.PhaseState) {
+          window.PhaseState.setPhaseState({
+            currentPhase: phaseId,
+            scenario: scenarioId
+          });
+          window.updatePhaseIndicators();
+
+          // Update hash navigation for keyboard users (AC-7)
+          window.history.pushState(null, '', '#' + phaseId);
+        }
+      });
+
+      // Keyboard support (Enter/Space)
+      link.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.click();
+        }
+      });
+    });
+
+    // Handle dismiss prompt
+    const dismissBtn = navigator.querySelector('[data-dismiss-prompt]');
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const prompt = document.querySelector('[data-parallel-entry-prompt]');
+        if (prompt) {
+          prompt.hidden = true;
+        }
+      });
+    }
+  });
+</script>

@@ -1,0 +1,172 @@
+{#
+  Next Steps Section (Shared - AC-4.1.6)
+
+  Variables:
+  - next_steps: next steps data
+  - session: evaluation session data
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    Next Steps
+  </h2>
+
+  {% if next_steps %}
+
+  <h3 class="govuk-heading-m">Immediate Actions (Next 2-4 Weeks)</h3>
+  {% if next_steps.immediate %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Action</th>
+        <th scope="col" class="govuk-table__header">Owner</th>
+        <th scope="col" class="govuk-table__header">Deadline</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for step in next_steps.immediate %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">{{ step.action }}</td>
+        <td class="govuk-table__cell"><strong>{{ step.owner }}</strong></td>
+        <td class="govuk-table__cell">{{ step.deadline }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Short-Term Actions (1-2 Months)</h3>
+  {% if next_steps.short_term %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Action</th>
+        <th scope="col" class="govuk-table__header">Owner</th>
+        <th scope="col" class="govuk-table__header">Deadline</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for step in next_steps.short_term %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">{{ step.action }}</td>
+        <td class="govuk-table__cell"><strong>{{ step.owner }}</strong></td>
+        <td class="govuk-table__cell">{{ step.deadline }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Medium-Term Actions (3-6 Months)</h3>
+  {% if next_steps.medium_term %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Action</th>
+        <th scope="col" class="govuk-table__header">Owner</th>
+        <th scope="col" class="govuk-table__header">Deadline</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for step in next_steps.medium_term %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">{{ step.action }}</td>
+        <td class="govuk-table__cell"><strong>{{ step.owner }}</strong></td>
+        <td class="govuk-table__cell">{{ step.deadline }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Critical Success Factors</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>Leadership Support:</strong> Executive sponsorship and budget commitment</li>
+    <li><strong>Stakeholder Alignment:</strong> IT, Customer Services, Legal, Finance working together</li>
+    <li><strong>Change Management:</strong> Staff training and resident communication strategy</li>
+    <li><strong>Technical Capability:</strong> AWS skills development or partner support</li>
+    <li><strong>Phased Approach:</strong> Pilot before full rollout to manage risk</li>
+  </ul>
+
+  <h3 class="govuk-heading-m">Decision Gates</h3>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Gate</th>
+        <th scope="col" class="govuk-table__header">Criteria</th>
+        <th scope="col" class="govuk-table__header">Decision Maker</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Gate 1: Budget Approval</th>
+        <td class="govuk-table__cell">Business case approved, funding secured</td>
+        <td class="govuk-table__cell">Finance Director / Leadership Team</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Gate 2: Procurement</th>
+        <td class="govuk-table__cell">AWS account procured, contracts signed</td>
+        <td class="govuk-table__cell">Procurement Team</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Gate 3: DPIA & Security</th>
+        <td class="govuk-table__cell">Data protection and security approval</td>
+        <td class="govuk-table__cell">DPO / CISO</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Gate 4: Pilot Go-Live</th>
+        <td class="govuk-table__cell">Technical readiness, pilot group identified</td>
+        <td class="govuk-table__cell">Service Manager / CTO</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Gate 5: Full Rollout</th>
+        <td class="govuk-table__cell">Pilot success, stakeholder approval</td>
+        <td class="govuk-table__cell">Leadership Team</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="govuk-heading-m">Resources & Support</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>AWS Support:</strong> Consider AWS Enterprise Support for production workloads</li>
+    <li><strong>AWS Partners:</strong> Engage AWS consulting partners for implementation support</li>
+    <li><strong>NDX Programme:</strong> Leverage NDX Partnership resources and peer council network</li>
+    <li><strong>LGA AI Hub:</strong> Connect with other councils implementing AI solutions</li>
+    <li><strong>Training:</strong> AWS training and certification for technical staff</li>
+  </ul>
+
+  {% if session.stakeholders_involved %}
+  <h3 class="govuk-heading-m">Stakeholder Engagement</h3>
+  <p class="govuk-body">
+    Key stakeholders to involve in implementation planning:
+  </p>
+  <p class="govuk-body">
+    {{ session.stakeholders_involved }}
+  </p>
+  {% endif %}
+
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Contact NDX Partnership:</strong> For additional support, guidance, or questions about this evaluation, contact the NDX Programme team.
+    </p>
+    <p class="govuk-body">
+      <strong>Next Evaluation:</strong> Consider evaluating additional AWS scenarios to build broader cloud capability and identify more transformation opportunities.
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-m">Success Metrics</h3>
+  <p class="govuk-body">
+    Track these KPIs to measure implementation success:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>Adoption Rate:</strong> % of queries handled by chatbot vs. human agents</li>
+    <li><strong>First Contact Resolution:</strong> % of chatbot conversations resolved without escalation</li>
+    <li><strong>Resident Satisfaction:</strong> User feedback scores and survey results</li>
+    <li><strong>Cost Savings:</strong> Actual savings vs. projected savings</li>
+    <li><strong>Response Time:</strong> Average time to resolve resident queries</li>
+    <li><strong>Accuracy:</strong> % of chatbot responses that are correct and helpful</li>
+    <li><strong>Availability:</strong> System uptime and reliability metrics</li>
+  </ul>
+</div>

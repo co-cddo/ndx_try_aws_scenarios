@@ -1,0 +1,470 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Review Extracted Fields - Planning AI Walkthrough"
+description: Review the AI-extracted planning application fields and verify accuracy
+currentStep: 4
+totalSteps: 4
+timeEstimate: "3 minutes"
+scenarioId: planning-ai
+---
+
+{#
+  Step 4: Review Extracted Fields (AC-3.3.3, AC-3.3.4)
+  - Review extracted data
+  - Verify field accuracy
+  - Understand confidence scores
+#}
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Review Extracted Fields" %}
+{% set stepDescription = "Examine the AI-extracted fields and see how they match the original planning application document." %}
+{% set timeEstimate = "3 minutes" %}
+{# Load screenshots from YAML data - Story 13.4 #}
+{% set screenshotData = screenshots["planning-ai"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 4) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "All key fields extracted correctly (applicant, address, description)",
+  "Confidence scores show 95%+ accuracy",
+  "Extracted data matches original document content",
+  "You understand time savings vs manual entry"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">What you should see</h3>
+
+<p class="govuk-body">
+  After processing completes, you'll see a results section with extracted fields. The exact
+  fields depend on which sample document you uploaded:
+</p>
+
+{# Display expected results for each document type #}
+<div class="ndx-expected-results">
+  {% for doc in planningSampleDocuments %}
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+          Expected results for {{ doc.title }}
+        </span>
+      </summary>
+      <div class="govuk-details__text">
+        <table class="govuk-table">
+          <caption class="govuk-table__caption govuk-table__caption--s">
+            AI-extracted fields from {{ doc.title }}
+          </caption>
+          <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+              <th scope="col" class="govuk-table__header">Field Name</th>
+              <th scope="col" class="govuk-table__header">Extracted Value</th>
+              <th scope="col" class="govuk-table__header">Confidence</th>
+            </tr>
+          </thead>
+          <tbody class="govuk-table__body">
+            {% for field in doc.fields %}
+              <tr class="govuk-table__row">
+                <th scope="row" class="govuk-table__header">{{ field.name }}</th>
+                <td class="govuk-table__cell">{{ field.extracted }}</td>
+                <td class="govuk-table__cell">
+                  <span class="govuk-tag govuk-tag--green">{{ field.confidence }}</span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="govuk-inset-text govuk-!-margin-top-3">
+          <p class="govuk-body-s"><strong>Wow factors for this document:</strong></p>
+          <ul class="govuk-list govuk-list--bullet govuk-body-s">
+            {% for factor in doc.wowFactors %}
+              <li>{{ factor }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </details>
+  {% endfor %}
+</div>
+
+<h3 class="govuk-heading-m">Understanding the results</h3>
+
+<p class="govuk-body">
+  Each extracted field includes:
+</p>
+
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Field Name</dt>
+    <dd class="govuk-summary-list__value">
+      The type of information extracted (e.g., "Applicant Name", "Site Address"). These map
+      to standard planning system fields.
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Extracted Value</dt>
+    <dd class="govuk-summary-list__value">
+      The actual text extracted from the PDF. This is what would be automatically populated
+      in your planning database.
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Confidence Score</dt>
+    <dd class="govuk-summary-list__value">
+      AI's confidence level (0-100%). Scores above 95% are highly reliable. Lower scores
+      may need human review.
+    </dd>
+  </div>
+</dl>
+
+<h3 class="govuk-heading-m">Verify accuracy</h3>
+
+<p class="govuk-body">
+  Compare the extracted fields against the original PDF document:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the sample PDF you downloaded</strong>
+    <p class="govuk-body">
+      Find it in your downloads folder and open it in a PDF reader
+    </p>
+  </li>
+
+  <li>
+    <strong>Locate the applicant name in the PDF</strong>
+    <p class="govuk-body">
+      Usually on page 1, in a section like "Applicant Details" or "Personal Information"
+    </p>
+  </li>
+
+  <li>
+    <strong>Compare with extracted "Applicant Name" field</strong>
+    <p class="govuk-body">
+      Does it match exactly? Notice the AI found this even if it wasn't labeled clearly.
+    </p>
+  </li>
+
+  <li>
+    <strong>Check the address extraction</strong>
+    <p class="govuk-body">
+      Look for "Site Address" or "Application Site" in the PDF. The AI should have captured
+      the full address including postcode.
+    </p>
+  </li>
+
+  <li>
+    <strong>Review the development description</strong>
+    <p class="govuk-body">
+      Find the "Proposed Development" or "Description of Works" section. The AI extracts
+      the key summary, not just copying entire paragraphs.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>What's impressive:</strong> The AI understood document structure and planning
+    terminology. It didn't just scan text - it knew what information to look for and where
+    it typically appears in planning applications.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Key observations</h3>
+
+<p class="govuk-body">
+  Notice these important capabilities:
+</p>
+
+<div class="ndx-observations-grid">
+  <div class="ndx-observation-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-observation-icon" aria-hidden="true">✓</span>
+      Format independence
+    </h4>
+    <p class="govuk-body-s">
+      AI extracted fields regardless of where they appeared on the page. No template
+      matching required - it works with any planning application format.
+    </p>
+  </div>
+
+  <div class="ndx-observation-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-observation-icon" aria-hidden="true">✓</span>
+      Accuracy on typed text
+    </h4>
+    <p class="govuk-body-s">
+      97-99% confidence scores on typed PDF documents. Better than human transcription
+      accuracy, with no typos or misread characters.
+    </p>
+  </div>
+
+  <div class="ndx-observation-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-observation-icon" aria-hidden="true">✓</span>
+      UK-specific recognition
+    </h4>
+    <p class="govuk-body-s">
+      Correctly identified postcodes, understood "Land adjacent to..." addresses, and
+      recognized planning terminology like "Householder" and "Change of Use".
+    </p>
+  </div>
+
+  <div class="ndx-observation-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-observation-icon" aria-hidden="true">✓</span>
+      Speed vs accuracy tradeoff
+    </h4>
+    <p class="govuk-body-s">
+      8-20 seconds to extract 5-6 fields vs 45 minutes manual entry. That's 135-270×
+      faster with higher accuracy.
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Real-world integration</h3>
+
+<p class="govuk-body">
+  In a production system, these extracted fields would:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>
+    <strong>Auto-populate planning database:</strong> Extracted values flow directly into
+    your planning system's application record
+  </li>
+  <li>
+    <strong>Trigger validation rules:</strong> Check extracted postcode against planning zones,
+    verify applicant details against land registry
+  </li>
+  <li>
+    <strong>Enable officer review:</strong> Low confidence scores (<95%) flag for human verification
+    while high confidence fields auto-approve
+  </li>
+  <li>
+    <strong>Link to case management:</strong> Automatically create case files, assign to
+    planning officers, generate acknowledgment letters
+  </li>
+  <li>
+    <strong>Audit trail:</strong> Original PDF stored with extracted metadata for compliance
+    and appeals
+  </li>
+</ul>
+
+<h3 class="govuk-heading-m">Calculate your time savings</h3>
+
+<p class="govuk-body">
+  Based on what you just saw, estimate your council's savings:
+</p>
+
+<div class="ndx-roi-calculator">
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="applications-per-year">
+      Planning applications processed per year
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="applications-per-year" name="applications-per-year" type="number" value="200">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="minutes-per-app">
+      Minutes spent on data entry per application
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="minutes-per-app" name="minutes-per-app" type="number" value="45">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="hourly-rate">
+      Planning officer hourly rate (£)
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="hourly-rate" name="hourly-rate" type="number" value="25">
+  </div>
+
+  <button type="button" class="govuk-button" data-module="govuk-button" id="calculate-savings">
+    Calculate savings
+  </button>
+
+  <div class="govuk-inset-text" id="savings-result" style="display: none;">
+    <p class="govuk-body"><strong>Your estimated annual savings:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><span id="hours-saved"></span> hours of officer time freed</li>
+      <li><span id="cost-savings"></span> in staff cost savings</li>
+      <li><span id="capacity-gained"></span> additional applications processable with same staff</li>
+    </ul>
+  </div>
+</div>
+
+{# AC-3.3.7: Troubleshooting extraction accuracy #}
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Extracted fields don't match document
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If extracted values are incorrect or incomplete:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check the source document quality - blurry scans reduce accuracy</li>
+      <li>Ensure text is machine-readable, not handwritten</li>
+      <li>Verify document uses standard planning application format</li>
+      <li>Look at confidence scores - <95% indicates uncertainty</li>
+      <li>Try re-uploading with a higher quality scan</li>
+      <li>Check if PDF contains actual text or is just images</li>
+    </ul>
+    <p class="govuk-body">
+      Our sample documents should extract with 97-99% accuracy. If not, there may be a
+      service configuration issue.
+    </p>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Some fields missing entirely
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If expected fields aren't extracted at all:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>The field may not exist in this document type (e.g., outline applications lack detailed descriptions)</li>
+      <li>Check if field is labeled clearly in the PDF - ambiguous labels confuse AI</li>
+      <li>Some fields may need custom extraction rules beyond Textract's default capability</li>
+      <li>Verify the extraction Lambda function includes logic for all required fields</li>
+      <li>Check CloudWatch logs to see what Textract returned</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Confidence scores very low (<90%)
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If confidence scores are unexpectedly low:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Low-quality scans or poor image resolution</li>
+      <li>Unusual fonts or formatting in the PDF</li>
+      <li>Handwritten text (Textract OCR works best on typed text)</li>
+      <li>Document skewed or rotated (Textract auto-corrects but this reduces confidence)</li>
+      <li>Field values in unexpected document locations</li>
+    </ul>
+    <p class="govuk-body">
+      In production, you'd set a confidence threshold (e.g., 95%) and flag lower scores
+      for human review.
+    </p>
+  </div>
+</details>
+
+{# Screenshot placeholder notice #}
+<div class="govuk-warning-text govuk-!-margin-top-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Note</span>
+    Screenshot placeholder: In production, this page would include screenshots showing the
+    extracted fields display with confidence scores and a side-by-side comparison with the
+    original PDF.
+  </strong>
+</div>
+
+<style>
+  .ndx-expected-results {
+    margin: 30px 0;
+  }
+
+  .ndx-observations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-observation-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-observation-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .ndx-observation-icon {
+    font-size: 24px;
+    color: #0b0c0c;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .ndx-observation-card p {
+    margin-bottom: 0;
+  }
+
+  .ndx-roi-calculator {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    margin: 30px 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-observations-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Simple ROI calculator
+  (function() {
+    'use strict';
+
+    const calculateBtn = document.getElementById('calculate-savings');
+    const resultDiv = document.getElementById('savings-result');
+
+    if (!calculateBtn || !resultDiv) return;
+
+    calculateBtn.addEventListener('click', function() {
+      const appsPerYear = parseInt(document.getElementById('applications-per-year').value) || 0;
+      const minutesPerApp = parseInt(document.getElementById('minutes-per-app').value) || 0;
+      const hourlyRate = parseInt(document.getElementById('hourly-rate').value) || 0;
+
+      // Calculate
+      const totalHours = (appsPerYear * minutesPerApp) / 60;
+      const hoursSaved = totalHours * 0.75; // 75% time savings
+      const costSavings = hoursSaved * hourlyRate;
+      const capacityGained = Math.round(appsPerYear * 0.75);
+
+      // Update results
+      document.getElementById('hours-saved').textContent = hoursSaved.toFixed(1);
+      document.getElementById('cost-savings').textContent = '£' + costSavings.toFixed(2);
+      document.getElementById('capacity-gained').textContent = capacityGained;
+
+      // Show results
+      resultDiv.style.display = 'block';
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // Announce results to screen readers
+      var announcement = 'Calculation complete. ' + hoursSaved.toFixed(1) + ' hours saved annually, cost savings of £' + costSavings.toFixed(2) + '.';
+      var ariaAnnounce = document.getElementById('roi-aria-announce');
+      if (ariaAnnounce) {
+        ariaAnnounce.textContent = announcement;
+      }
+    });
+  })();
+</script>
+
+{# Hidden live region for screen reader announcements #}
+<div id="roi-aria-announce" class="govuk-visually-hidden" aria-live="polite" aria-atomic="true"></div>

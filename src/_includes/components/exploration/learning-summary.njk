@@ -1,0 +1,128 @@
+{#
+  Learning Summary Component (Story 6.1)
+
+  Displayed when user completes exploration or navigates away
+  Summarizes what was learned from completed activities
+
+  Usage:
+    {% include "components/exploration/learning-summary.njk" %}
+
+  Expects:
+    scenarioId: string
+    activities: array of activity objects
+#}
+
+<div class="ndx-learning-summary" id="learning-summary" hidden>
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h2 class="govuk-panel__title">
+      Exploration Complete
+    </h2>
+    <div class="govuk-panel__body">
+      You've explored the {{ explorationData.scenario_title | default('scenario') }}
+    </div>
+  </div>
+
+  <div class="ndx-learning-summary__content">
+    <h3 class="govuk-heading-m">What you learned</h3>
+
+    <ul class="govuk-list ndx-learning-summary__list" id="learnings-list">
+      {# Populated by JavaScript based on completed activities #}
+    </ul>
+
+    <div class="ndx-learning-summary__actions">
+      <a href="/evidence-pack/{{ scenarioId }}/" class="govuk-button" data-module="govuk-button">
+        Generate Evidence Pack
+      </a>
+      <a href="/walkthroughs/{{ scenarioId }}/explore/" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+        Continue exploring
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ndx-learning-summary {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 4px solid #1d70b8;
+  }
+
+  .ndx-learning-summary__content {
+    margin-top: 30px;
+  }
+
+  .ndx-learning-summary__list {
+    margin-bottom: 30px;
+  }
+
+  .ndx-learning-summary__list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #b1b4b6;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .ndx-learning-summary__list li::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: #00703c;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='10' viewBox='0 0 12 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 5L4 8L11 1' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 12px 10px;
+  }
+
+  .ndx-learning-summary__actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-learning-summary__actions {
+      flex-direction: column;
+    }
+
+    .ndx-learning-summary__actions .govuk-button {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  // Populate learning summary based on completed activities
+  document.addEventListener('DOMContentLoaded', function() {
+    const scenarioId = '{{ scenarioId }}';
+    if (!window.ExplorationState) return;
+
+    const activities = {{ activities | dump | safe if activities else '[]' }};
+    const completed = window.ExplorationState.getCompletedActivities(scenarioId);
+
+    if (completed.length === 0) return;
+
+    const list = document.getElementById('learnings-list');
+    if (!list) return;
+
+    const learnings = activities
+      .filter(a => completed.includes(a.id))
+      .map(a => a.learning);
+
+    learnings.forEach(learning => {
+      const li = document.createElement('li');
+      li.textContent = learning;
+      list.appendChild(li);
+    });
+
+    // Show summary if at least 3 activities completed
+    if (completed.length >= 3) {
+      const summary = document.getElementById('learning-summary');
+      if (summary) summary.hidden = false;
+    }
+  });
+</script>

@@ -1,0 +1,432 @@
+---
+layout: layouts/walkthrough.njk
+title: Text-to-Speech Walkthrough
+description: Step-by-step guide to converting council announcements to audio with Amazon Polly
+currentStep: 0
+totalSteps: 4
+scenarioId: text-to-speech
+---
+
+{#
+  Text-to-Speech Walkthrough Landing Page (Story 3.6)
+  AC-3.6.1, AC-3.6.5
+#}
+
+<h1 class="govuk-heading-xl">Try Text-to-Speech for Council Announcements</h1>
+
+{# AC-3.6.5: Value proposition - 8 minutes to understand text-to-speech accessibility #}
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    8 minutes to convert council announcements to natural-sounding audio
+  </h2>
+  <div class="govuk-panel__body">
+    No deployment needed. Use Amazon Polly to generate broadcast-quality audio from text and hear three different UK English voices.
+  </div>
+</div>
+
+{# Technical reassurance #}
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you through converting text to speech using Amazon Polly.
+    Perfect for communications officers, accessibility teams, and anyone evaluating
+    text-to-speech for making council information accessible to all residents.
+  </p>
+</div>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this 8-minute walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Access the Polly interface</strong> - Open the text-to-speech console (2 minutes)
+  </li>
+  <li>
+    <strong>Select a council announcement</strong> - Choose from 4 sample announcements (1 minute)
+  </li>
+  <li>
+    <strong>Generate audio with different voices</strong> - Convert text to speech with Amy, Brian, and Emma (3 minutes)
+  </li>
+  <li>
+    <strong>Compare voices and calculate ROI</strong> - Listen to voice quality and see cost savings (2 minutes)
+  </li>
+</ol>
+
+{# Prerequisites section with sample data check #}
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already deployed the Text-to-Speech scenario to your Innovation Sandbox account.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/text-to-speech/" class="govuk-link">Deploy the Text-to-Speech scenario</a> if you haven't already.
+    Deployment takes 3-5 minutes.
+  </p>
+
+  {# Sample Data Status Component #}
+  <div class="govuk-!-margin-top-4">
+    <h3 class="govuk-heading-s">Sample announcement check</h3>
+    {% include "components/sample-data-status.njk" %}
+  </div>
+
+  {# Sample Data Explanation Panel (Story 12.2) - AC1, AC2, AC3 #}
+  <div class="govuk-!-margin-top-4">
+    {% include "components/sample-data-panel.njk" %}
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For communications teams</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How text-to-speech works with council content</li>
+      <li>Natural-sounding UK English neural voices</li>
+      <li>Instant audio generation (30 seconds vs 1-2 weeks)</li>
+      <li>99% cost reduction vs studio recording</li>
+      <li>When to use different voice styles (conversational, authoritative, formal)</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For accessibility teams</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>WCAG 2.1 AA compliance for accessible content</li>
+      <li>PSBAR 2018 regulatory requirements</li>
+      <li>Serving visually impaired and reading-difficulty residents</li>
+      <li>Multi-channel delivery (web, phone, social media)</li>
+      <li>Avoiding non-compliance penalties (up to £20K per breach)</li>
+    </ul>
+  </div>
+</div>
+
+{# AC-3.6.1: Sample announcements overview #}
+<h2 class="govuk-heading-m">Sample council announcements</h2>
+
+<p class="govuk-body">
+  We've prepared 4 realistic council announcements for you to convert:
+</p>
+
+<div class="ndx-announcements-grid">
+  {% for announcement in sampleAnnouncements %}
+    <div class="ndx-announcement-card">
+      <h3 class="govuk-heading-s">{{ announcement.title }}</h3>
+      <dl class="govuk-summary-list govuk-summary-list--no-border">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Category</dt>
+          <dd class="govuk-summary-list__value">{{ announcement.category }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Length</dt>
+          <dd class="govuk-summary-list__value">{{ announcement.characterCount }} characters</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Cost</dt>
+          <dd class="govuk-summary-list__value">{{ announcement.estimatedCost }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Duration</dt>
+          <dd class="govuk-summary-list__value">{{ announcement.estimatedDuration }}</dd>
+        </div>
+      </dl>
+      <details class="govuk-details govuk-details--small govuk-!-margin-top-2">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text govuk-!-font-size-16">
+            Use case
+          </span>
+        </summary>
+        <div class="govuk-details__text">
+          <p class="govuk-body-s">{{ announcement.useCase }}</p>
+          <p class="govuk-body-s"><strong>Target audience:</strong> {{ announcement.targetAudience }}</p>
+        </div>
+      </details>
+    </div>
+  {% endfor %}
+</div>
+
+{# AC-3.6.4: Voice options overview #}
+<div class="ndx-voices-section govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">UK English neural voices</h2>
+  <p class="govuk-body">
+    Amazon Polly offers three neural voices for British English, each with a distinct style:
+  </p>
+
+  <div class="govuk-grid-row ndx-voices-grid">
+    {% for voice in pollyVoices %}
+      <div class="govuk-grid-column-one-third">
+        <div class="ndx-voice-card">
+          <h3 class="govuk-heading-s">{{ voice.id }}</h3>
+          <p class="govuk-body-s" style="color: #505a5f; margin-bottom: 10px;">
+            {{ voice.gender }} • {{ voice.style }}
+          </p>
+          <p class="govuk-body-s">
+            {{ voice.description }}
+          </p>
+          <div class="govuk-inset-text govuk-!-margin-top-3" style="padding: 10px; margin-top: 10px;">
+            <p class="govuk-body-s" style="margin-bottom: 5px;"><strong>Best for:</strong></p>
+            <p class="govuk-body-s" style="margin-bottom: 0;">{{ voice.bestFor }}</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{# Accessibility use cases #}
+<div class="ndx-accessibility-section govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">Who benefits from audio announcements?</h2>
+
+  <p class="govuk-body">
+    Text-to-speech makes council information accessible to residents who cannot or prefer not to read text:
+  </p>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+        <li><strong>Visually impaired residents</strong> - 2% of UK population (1.3M people) rely on audio content</li>
+        <li><strong>Reading difficulties</strong> - 16% of UK adults have literacy below Level 1</li>
+        <li><strong>Elderly residents</strong> - 19% of UK population aged 65+ may have vision decline</li>
+      </ul>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+        <li><strong>Busy commuters</strong> - Listen to council news while driving or traveling</li>
+        <li><strong>Non-native speakers</strong> - Audio helps with pronunciation and comprehension</li>
+        <li><strong>Phone callers</strong> - Integrate audio with IVR phone systems</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="govuk-inset-text govuk-!-margin-top-4">
+    <p class="govuk-body">
+      <strong>Regulatory requirement:</strong> PSBAR 2018 (Public Sector Bodies Accessibility Regulations)
+      requires councils to provide accessible alternatives to text-only content. Text-to-speech audio
+      versions ensure WCAG 2.1 AA compliance and avoid penalties up to £20,000 per accessibility breach.
+    </p>
+  </div>
+</div>
+
+{# Wow moment preview #}
+<div class="ndx-wow-moment-preview govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">The wow moment</h2>
+  <p class="govuk-body">
+    When you hear the neural voices, you'll notice:
+  </p>
+  <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+    <li><strong>Natural speech patterns</strong> - Not robotic "computer voices" from the past</li>
+    <li><strong>UK-specific pronunciation</strong> - Correctly pronounces British place names, postcodes, council terms</li>
+    <li><strong>Emotional inflection</strong> - Appropriate tone for urgent warnings vs routine updates</li>
+    <li><strong>Instant generation</strong> - 30 seconds from text to broadcast-quality audio</li>
+  </ul>
+  <p class="govuk-body">
+    These are the same neural voices used by the BBC, NHS, and major UK councils for accessible
+    content. Residents won't know it's AI-generated - the quality is indistinguishable from
+    professional voice recording.
+  </p>
+</div>
+
+{# ROI preview #}
+<div class="ndx-reflection-section govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Think about your council announcements</h2>
+
+  <div class="govuk-inset-text" style="border-left-color: #00703c;">
+    <p class="govuk-!-font-size-24" style="font-weight: 700;">
+      How many announcements does your council publish per year?
+    </p>
+  </div>
+
+  <p class="govuk-body">
+    Consider the impact for 50 announcements annually:
+  </p>
+
+  <div class="ndx-roi-preview">
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Current cost (studio recording)</dt>
+        <dd class="govuk-summary-list__value">
+          50 × £200 = <strong>£10,000/year</strong>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">With Polly text-to-speech</dt>
+        <dd class="govuk-summary-list__value">
+          50 × £0.008 = <strong>£0.40/year</strong>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Annual cost savings</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>£9,999.60 (99.996% reduction)</strong>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Time savings</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>99 hours/year</strong> freed from coordinating studio recordings
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Compliance value</dt>
+        <dd class="govuk-summary-list__value">
+          Avoid up to <strong>£20,000 penalty</strong> per accessibility breach
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Total annual benefit</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>£30,000</strong> (savings + compliance protection)
+        </dd>
+      </div>
+    </dl>
+
+    <div class="govuk-inset-text govuk-!-margin-top-4">
+      <p class="govuk-body">
+        <strong>Committee language:</strong> "Amazon Polly text-to-speech reduces audio production
+        costs by 99.99% - from £10,000 to £0.40 annually for 50 announcements. More importantly,
+        it enables 100% accessibility compliance (WCAG 2.1 AA, PSBAR 2018) by providing instant
+        audio versions of all council communications, avoiding potential penalties up to £20K per
+        breach. Total annual value: £30K in cost savings and compliance protection."
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/text-to-speech/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 8 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-announcements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-announcement-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-announcement-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-announcement-card .govuk-summary-list {
+    font-size: 16px;
+  }
+
+  .ndx-announcement-card .govuk-summary-list__key {
+    width: 40%;
+  }
+
+  .ndx-voices-section {
+    padding: 25px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-voices-section h2 {
+    margin-top: 0;
+  }
+
+  .ndx-voices-grid {
+    margin-top: 20px;
+  }
+
+  .ndx-voice-card {
+    padding: 20px;
+    background-color: #ffffff;
+    border: 2px solid #b1b4b6;
+    border-radius: 4px;
+    min-height: 320px;
+    margin-bottom: 20px;
+  }
+
+  .ndx-voice-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-accessibility-section {
+    padding: 25px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-accessibility-section h2 {
+    margin-top: 0;
+  }
+
+  .ndx-wow-moment-preview {
+    padding: 25px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-wow-moment-preview h2 {
+    margin-top: 0;
+  }
+
+  .ndx-reflection-section {
+    padding: 30px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-reflection-section h2 {
+    margin-top: 0;
+  }
+
+  .ndx-roi-preview {
+    background-color: #ffffff;
+    padding: 20px;
+    border: 2px solid #b1b4b6;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-announcements-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-voice-card {
+      min-height: auto;
+    }
+  }
+</style>

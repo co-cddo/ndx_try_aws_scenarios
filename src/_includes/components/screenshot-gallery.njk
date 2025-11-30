@@ -1,0 +1,336 @@
+{#
+  Screenshot Gallery Component (Stories 2.5, 16.5)
+
+  Interactive gallery with navigation for scenario screenshots.
+
+  Features (AC-2.5.2, AC-2.5.5, AC-2.5.7, Story 16.5):
+    - Main image display with annotation
+    - Responsive srcset with WebP and PNG fallback
+    - Thumbnail navigation strip with images
+    - Previous/next buttons with keyboard support
+    - Mobile swipe/touch support
+    - Lazy loading for performance
+    - No-JS fallback (static image list)
+    - WCAG 2.2 AA accessible (keyboard, screen reader)
+    - ARIA tabs pattern with full keyboard nav (arrows, Home, End, Enter, Space)
+
+  Expects scenarioData.screenshots.steps array from parent context:
+    [{stepNumber, image, thumbnail, alt, annotation}, ...]
+  Or galleryImages array:
+    [{url, thumbnailUrl, alt, caption}, ...]
+#}
+
+{# Support both data formats #}
+{% set steps = galleryImages or scenarioData.screenshots.steps %}
+
+{# Gallery with JavaScript enhancement #}
+<div class="ndx-screenshot-gallery"
+     data-module="screenshot-gallery"
+     role="region"
+     aria-label="Screenshot gallery for {{ scenarioData.name }}">
+
+  {# Main Image Display #}
+  <div class="ndx-screenshot-gallery__main">
+    <figure class="ndx-screenshot-gallery__figure">
+      {% for step in steps %}
+      {# Support both old format (stepNumber, image, annotation) and new format (url, caption) #}
+      {% set stepNum = step.stepNumber or loop.index %}
+      {% set imgUrl = step.url or step.image | default('/assets/screenshots/placeholder.svg') %}
+      {% set imgAlt = step.alt | default('Screenshot ' + stepNum) %}
+      {% set caption = step.caption or step.annotation %}
+      <div class="ndx-screenshot-gallery__slide{% if loop.first %} ndx-screenshot-gallery__slide--active{% endif %}"
+           data-step="{{ stepNum }}"
+           {% if not loop.first %}hidden{% endif %}
+           role="tabpanel"
+           id="screenshot-panel-{{ stepNum }}"
+           aria-labelledby="screenshot-tab-{{ stepNum }}">
+        {# Responsive picture element with WebP and PNG fallback (Story 16.5) #}
+        <picture>
+          {# WebP source with responsive srcset #}
+          {% if imgUrl and '.png' in imgUrl %}
+          <source srcset="{{ imgUrl | replace('.png', '-640w.webp') }} 640w,
+                          {{ imgUrl | replace('.png', '-1024w.webp') }} 1024w,
+                          {{ imgUrl | replace('.png', '.webp') }} 1920w"
+                  sizes="(max-width: 640px) 100vw,
+                         (max-width: 1024px) 90vw,
+                         800px"
+                  type="image/webp">
+          {# PNG fallback with responsive srcset #}
+          <source srcset="{{ imgUrl | replace('.png', '-640w.png') }} 640w,
+                          {{ imgUrl | replace('.png', '-1024w.png') }} 1024w,
+                          {{ imgUrl }} 1920w"
+                  sizes="(max-width: 640px) 100vw,
+                         (max-width: 1024px) 90vw,
+                         800px"
+                  type="image/png">
+          {% endif %}
+          <img
+            src="{{ imgUrl }}"
+            alt="{{ imgAlt }}"
+            class="ndx-screenshot-gallery__image"
+            width="1920"
+            height="1080"
+            loading="lazy"
+            decoding="async"
+          >
+        </picture>
+        <figcaption class="ndx-screenshot-gallery__caption">
+          {% if step.stepNumber %}
+          <span class="ndx-screenshot-gallery__step-number" aria-hidden="true">
+            Step {{ stepNum }}
+          </span>
+          {% endif %}
+          <span class="ndx-screenshot-gallery__annotation">
+            {{ caption }}
+          </span>
+        </figcaption>
+      </div>
+      {% endfor %}
+    </figure>
+  </div>
+
+  {# Navigation Controls #}
+  <nav class="ndx-screenshot-gallery__nav" aria-label="Screenshot navigation">
+    {# Previous/Next Buttons #}
+    <div class="ndx-screenshot-gallery__controls">
+      <button
+        type="button"
+        class="ndx-screenshot-gallery__btn ndx-screenshot-gallery__btn--prev govuk-button govuk-button--secondary"
+        aria-label="Previous screenshot"
+        data-action="prev"
+        disabled>
+        <span aria-hidden="true">&larr;</span> Previous
+      </button>
+
+      <span class="ndx-screenshot-gallery__counter" aria-live="polite">
+        <span class="ndx-screenshot-gallery__current">1</span> of <span class="ndx-screenshot-gallery__total">{{ steps | length }}</span>
+      </span>
+
+      <button
+        type="button"
+        class="ndx-screenshot-gallery__btn ndx-screenshot-gallery__btn--next govuk-button govuk-button--secondary"
+        aria-label="Next screenshot"
+        data-action="next"
+        {% if steps | length <= 1 %}disabled{% endif %}>
+        Next <span aria-hidden="true">&rarr;</span>
+      </button>
+    </div>
+
+    {# Thumbnail Strip (Story 16.5 - with optional thumbnail images) #}
+    <div class="ndx-screenshot-gallery__thumbnails" role="tablist" aria-label="Screenshot thumbnails">
+      {% for step in steps %}
+      {% set stepNum = step.stepNumber or loop.index %}
+      {% set thumbUrl = step.thumbnailUrl or step.thumbnail %}
+      {% set caption = step.caption or step.annotation %}
+      <button
+        type="button"
+        class="ndx-screenshot-gallery__thumb{% if loop.first %} ndx-screenshot-gallery__thumb--active{% endif %}{% if thumbUrl %} ndx-screenshot-gallery__thumb--has-image{% endif %}"
+        role="tab"
+        id="screenshot-tab-{{ stepNum }}"
+        aria-selected="{% if loop.first %}true{% else %}false{% endif %}"
+        aria-controls="screenshot-panel-{{ stepNum }}"
+        tabindex="{% if loop.first %}0{% else %}-1{% endif %}"
+        data-step="{{ stepNum }}"
+        title="{% if step.stepNumber %}Step {{ stepNum }}: {% endif %}{{ caption | truncate(50) }}">
+        <span class="govuk-visually-hidden">
+          {% if step.stepNumber %}Step {{ stepNum }}: {% endif %}{{ caption }}
+        </span>
+        {% if thumbUrl %}
+        <img src="{{ thumbUrl }}"
+             alt=""
+             class="ndx-screenshot-gallery__thumb-image"
+             aria-hidden="true"
+             loading="lazy">
+        {% else %}
+        <span class="ndx-screenshot-gallery__thumb-number" aria-hidden="true">{{ stepNum }}</span>
+        {% endif %}
+      </button>
+      {% endfor %}
+    </div>
+  </nav>
+</div>
+
+{# No-JavaScript Fallback - Static Image List #}
+<noscript>
+  <div class="ndx-screenshot-gallery--static">
+    <ol class="govuk-list govuk-list--number">
+      {% for step in steps %}
+      <li class="ndx-screenshot-gallery__static-item">
+        <figure>
+          <img
+            src="{{ step.image | default('/assets/screenshots/placeholder.svg') }}"
+            alt="{{ step.alt }}"
+            class="ndx-screenshot-gallery__static-image"
+          >
+          <figcaption class="govuk-body-s">
+            <strong>Step {{ step.stepNumber }}:</strong> {{ step.annotation }}
+          </figcaption>
+        </figure>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</noscript>
+
+{# Inline JavaScript for Gallery Navigation (Story 16.5 enhanced) #}
+<script>
+(function() {
+  'use strict';
+
+  // Initialize all screenshot galleries on page
+  document.querySelectorAll('[data-module="screenshot-gallery"]').forEach(function(gallery) {
+    var slides = gallery.querySelectorAll('.ndx-screenshot-gallery__slide');
+    var thumbs = gallery.querySelectorAll('.ndx-screenshot-gallery__thumb');
+    var prevBtn = gallery.querySelector('[data-action="prev"]');
+    var nextBtn = gallery.querySelector('[data-action="next"]');
+    var currentDisplay = gallery.querySelector('.ndx-screenshot-gallery__current');
+    var mainArea = gallery.querySelector('.ndx-screenshot-gallery__main');
+    var currentIndex = 0;
+    var totalSlides = slides.length;
+
+    // Swipe tracking variables
+    var touchStartX = 0;
+    var touchEndX = 0;
+    var swipeThreshold = 50; // minimum distance in pixels
+
+    function showSlide(index, shouldFocusThumb) {
+      // Clamp index
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+      currentIndex = index;
+
+      // Update slides
+      slides.forEach(function(slide, i) {
+        if (i === index) {
+          slide.classList.add('ndx-screenshot-gallery__slide--active');
+          slide.removeAttribute('hidden');
+        } else {
+          slide.classList.remove('ndx-screenshot-gallery__slide--active');
+          slide.setAttribute('hidden', '');
+        }
+      });
+
+      // Update thumbnails with roving tabindex (ARIA tabs pattern)
+      thumbs.forEach(function(thumb, i) {
+        if (i === index) {
+          thumb.classList.add('ndx-screenshot-gallery__thumb--active');
+          thumb.setAttribute('aria-selected', 'true');
+          thumb.setAttribute('tabindex', '0');
+        } else {
+          thumb.classList.remove('ndx-screenshot-gallery__thumb--active');
+          thumb.setAttribute('aria-selected', 'false');
+          thumb.setAttribute('tabindex', '-1');
+        }
+      });
+
+      // Update counter
+      if (currentDisplay) {
+        currentDisplay.textContent = (index + 1);
+      }
+
+      // Update button states
+      if (prevBtn) prevBtn.disabled = (index === 0);
+      if (nextBtn) nextBtn.disabled = (index === totalSlides - 1);
+
+      // Focus management for keyboard users
+      if (shouldFocusThumb && thumbs[index]) {
+        thumbs[index].focus();
+      }
+    }
+
+    // Previous button
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function() {
+        showSlide(currentIndex - 1);
+      });
+    }
+
+    // Next button
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function() {
+        showSlide(currentIndex + 1);
+      });
+    }
+
+    // Thumbnail clicks
+    thumbs.forEach(function(thumb, i) {
+      thumb.addEventListener('click', function() {
+        showSlide(i);
+      });
+    });
+
+    // Keyboard navigation for ARIA tabs pattern
+    var thumbnailContainer = gallery.querySelector('.ndx-screenshot-gallery__thumbnails');
+    if (thumbnailContainer) {
+      thumbnailContainer.addEventListener('keydown', function(e) {
+        var handled = false;
+
+        switch (e.key) {
+          case 'ArrowLeft':
+          case 'ArrowUp':
+            showSlide(currentIndex - 1, true);
+            handled = true;
+            break;
+          case 'ArrowRight':
+          case 'ArrowDown':
+            showSlide(currentIndex + 1, true);
+            handled = true;
+            break;
+          case 'Home':
+            showSlide(0, true);
+            handled = true;
+            break;
+          case 'End':
+            showSlide(totalSlides - 1, true);
+            handled = true;
+            break;
+          case 'Enter':
+          case ' ':
+            // ARIA tabs: Enter/Space should activate the focused tab
+            // Since we auto-activate on arrow keys, this mainly handles
+            // cases where focus moves to a tab without arrow keys
+            var focusedIndex = Array.prototype.indexOf.call(thumbs, document.activeElement);
+            if (focusedIndex >= 0) {
+              showSlide(focusedIndex);
+              handled = true;
+            }
+            break;
+        }
+
+        if (handled) {
+          e.preventDefault();
+        }
+      });
+    }
+
+    // Mobile swipe support (Story 16.5)
+    if (mainArea) {
+      mainArea.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      mainArea.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, { passive: true });
+
+      function handleSwipe() {
+        var swipeDistance = touchEndX - touchStartX;
+
+        if (Math.abs(swipeDistance) >= swipeThreshold) {
+          if (swipeDistance > 0) {
+            // Swipe right - previous
+            showSlide(currentIndex - 1);
+          } else {
+            // Swipe left - next
+            showSlide(currentIndex + 1);
+          }
+        }
+      }
+    }
+
+    // Initialize
+    showSlide(0);
+  });
+})();
+</script>

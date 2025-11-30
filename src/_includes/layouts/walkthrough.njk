@@ -1,0 +1,310 @@
+---
+layout: page
+---
+{#
+  Walkthrough Layout (Story 3.2 - AC-3.2.2, AC-3.2.8)
+
+  Base layout for walkthrough pages with:
+  - Step navigation (sidebar on desktop, accordion on mobile)
+  - Progress indicator showing current step and total steps
+  - Time estimate per step
+  - Next/Previous navigation buttons
+  - Mobile responsive at 320px viewport
+
+  Expects front matter:
+    title: string
+    description: string
+    currentStep: number (0 for landing, 1-4 for steps, 5 for complete)
+    totalSteps: number (default: 4)
+    timeEstimate: string (optional)
+    scenarioId: string (default: "council-chatbot")
+#}
+
+{% set currentStep = currentStep if currentStep is defined else 0 %}
+{% set totalSteps = totalSteps if totalSteps is defined else 4 %}
+{% set scenarioId = scenarioId if scenarioId is defined else "council-chatbot" %}
+{% set walkthroughData = walkthroughs.walkthroughs[scenarioId] %}
+{% set stepTitles = walkthroughData.steps if walkthroughData and walkthroughData.steps else [] %}
+
+{# Phase Navigator - Story 12.1 #}
+{% include "components/phase-navigator.njk" %}
+
+{# Breadcrumb navigation - Story 14.6 #}
+{% set breadcrumbType = 'walkthrough' %}
+{% include "components/breadcrumb.njk" %}
+
+{# Progress indicator #}
+{% if currentStep > 0 and currentStep <= totalSteps %}
+  <div class="ndx-walkthrough-progress" role="region" aria-labelledby="progress-heading">
+    <h2 class="govuk-visually-hidden" id="progress-heading">Walkthrough progress</h2>
+    <div class="ndx-walkthrough-progress__bar" aria-hidden="true">
+      <div class="ndx-walkthrough-progress__fill" style="width: {{ (currentStep / totalSteps * 100) | round }}%"></div>
+    </div>
+    <p class="govuk-body-s ndx-walkthrough-progress__text">
+      Step {{ currentStep }} of {{ totalSteps }}
+      {% if timeEstimate %}
+        <span class="ndx-walkthrough-progress__time">• {{ timeEstimate }}</span>
+      {% endif %}
+    </p>
+  </div>
+{% endif %}
+
+<div class="govuk-grid-row">
+  {# Main content area #}
+  <div class="govuk-grid-column-two-thirds">
+    {{ content | safe }}
+  </div>
+
+  {# Sidebar navigation - desktop only #}
+  <div class="govuk-grid-column-one-third ndx-walkthrough-sidebar">
+    <nav class="ndx-walkthrough-nav" aria-labelledby="walkthrough-nav-heading">
+      <h2 class="govuk-heading-s" id="walkthrough-nav-heading">Walkthrough steps</h2>
+      <ol class="ndx-walkthrough-nav__list">
+        <li class="ndx-walkthrough-nav__item{% if currentStep == 0 %} ndx-walkthrough-nav__item--current{% endif %}">
+          <a href="/walkthroughs/{{ scenarioId }}/" class="ndx-walkthrough-nav__link">
+            <span class="ndx-walkthrough-nav__number">Start</span>
+            <span class="ndx-walkthrough-nav__title">Introduction</span>
+          </a>
+        </li>
+        {% for stepNum in range(1, totalSteps + 1) %}
+        <li class="ndx-walkthrough-nav__item{% if currentStep == stepNum %} ndx-walkthrough-nav__item--current{% endif %}">
+          <a href="/walkthroughs/{{ scenarioId }}/step-{{ stepNum }}/" class="ndx-walkthrough-nav__link">
+            <span class="ndx-walkthrough-nav__number">{{ stepNum }}</span>
+            <span class="ndx-walkthrough-nav__title">{{ stepTitles[stepNum - 1].title if stepTitles[stepNum - 1] else "Step " ~ stepNum }}</span>
+          </a>
+        </li>
+        {% endfor %}
+        <li class="ndx-walkthrough-nav__item{% if currentStep == totalSteps + 1 %} ndx-walkthrough-nav__item--current{% endif %}">
+          <a href="/walkthroughs/{{ scenarioId }}/complete/" class="ndx-walkthrough-nav__link">
+            <span class="ndx-walkthrough-nav__number">✓</span>
+            <span class="ndx-walkthrough-nav__title">Complete</span>
+          </a>
+        </li>
+      </ol>
+    </nav>
+
+    {# Quick help #}
+    <div class="ndx-walkthrough-help govuk-!-margin-top-6">
+      <h3 class="govuk-heading-s">Need help?</h3>
+      <p class="govuk-body-s">
+        If you're stuck, check the <a href="/scenarios/{{ scenarioId }}/#troubleshooting" class="govuk-link">troubleshooting section</a> or <a href="/contact/" class="govuk-link">contact us</a>.
+      </p>
+    </div>
+  </div>
+</div>
+
+{# Bottom navigation - Previous/Next buttons #}
+{% if currentStep > 0 and currentStep <= totalSteps %}
+  <nav class="ndx-walkthrough-pagination" aria-label="Walkthrough pagination">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-half">
+        {% if currentStep > 1 %}
+          <a href="/walkthroughs/{{ scenarioId }}/step-{{ currentStep - 1 }}/" class="govuk-link ndx-walkthrough-pagination__prev" rel="prev">
+            <svg class="ndx-walkthrough-pagination__icon" xmlns="http://www.w3.org/2000/svg" height="13" width="17" viewBox="0 0 17 13">
+              <path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"></path>
+            </svg>
+            Previous step
+          </a>
+        {% elif currentStep == 1 %}
+          <a href="/walkthroughs/{{ scenarioId }}/" class="govuk-link ndx-walkthrough-pagination__prev" rel="prev">
+            <svg class="ndx-walkthrough-pagination__icon" xmlns="http://www.w3.org/2000/svg" height="13" width="17" viewBox="0 0 17 13">
+              <path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"></path>
+            </svg>
+            Back to introduction
+          </a>
+        {% endif %}
+      </div>
+      <div class="govuk-grid-column-one-half ndx-walkthrough-pagination__next-container">
+        {% if currentStep < totalSteps %}
+          <a href="/walkthroughs/{{ scenarioId }}/step-{{ currentStep + 1 }}/" class="govuk-link ndx-walkthrough-pagination__next" rel="next">
+            Next step
+            <svg class="ndx-walkthrough-pagination__icon" xmlns="http://www.w3.org/2000/svg" height="13" width="17" viewBox="0 0 17 13">
+              <path d="m10.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7266z"></path>
+            </svg>
+          </a>
+        {% elif currentStep == totalSteps %}
+          <a href="/walkthroughs/{{ scenarioId }}/complete/" class="govuk-button" data-module="govuk-button">
+            Complete walkthrough
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+{% endif %}
+
+<style>
+  .ndx-walkthrough-progress {
+    margin-bottom: 40px;
+  }
+
+  .ndx-walkthrough-progress__bar {
+    height: 8px;
+    background-color: #f3f2f1;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .ndx-walkthrough-progress__fill {
+    height: 100%;
+    background-color: #00703c;
+    transition: width 0.3s ease;
+  }
+
+  .ndx-walkthrough-progress__text {
+    margin: 0;
+    color: #505a5f;
+  }
+
+  .ndx-walkthrough-progress__time {
+    color: #505a5f;
+  }
+
+  .ndx-walkthrough-sidebar {
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
+  }
+
+  .ndx-walkthrough-nav__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 3px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-nav__item {
+    margin: 0;
+    position: relative;
+  }
+
+  .ndx-walkthrough-nav__item--current {
+    border-left: 3px solid #1d70b8;
+    margin-left: -3px;
+  }
+
+  .ndx-walkthrough-nav__link {
+    display: flex;
+    gap: 12px;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #0b0c0c;
+  }
+
+  .ndx-walkthrough-nav__link:hover {
+    background-color: #f3f2f1;
+  }
+
+  .ndx-walkthrough-nav__link:focus {
+    outline: 3px solid #ffdd00;
+    outline-offset: 0;
+  }
+
+  .ndx-walkthrough-nav__item--current .ndx-walkthrough-nav__link {
+    background-color: #f8f8f8;
+    font-weight: 700;
+  }
+
+  .ndx-walkthrough-nav__number {
+    display: inline-block;
+    min-width: 24px;
+    text-align: center;
+    font-weight: 700;
+    color: #505a5f;
+  }
+
+  .ndx-walkthrough-nav__item--current .ndx-walkthrough-nav__number {
+    color: #002055;
+  }
+
+  .ndx-walkthrough-nav__title {
+    flex: 1;
+  }
+
+  .ndx-walkthrough-help {
+    padding: 15px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-walkthrough-pagination {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-pagination__next-container {
+    text-align: right;
+  }
+
+  .ndx-walkthrough-pagination__prev,
+  .ndx-walkthrough-pagination__next {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 19px;
+    font-weight: 700;
+  }
+
+  .ndx-walkthrough-pagination__icon {
+    fill: currentColor;
+  }
+
+  .ndx-walkthrough-pagination__prev:hover,
+  .ndx-walkthrough-pagination__next:hover {
+    text-decoration: underline;
+    text-decoration-thickness: max(3px, .1875rem, .12em);
+    text-underline-offset: .1578em;
+  }
+
+  .ndx-walkthrough-pagination__prev:focus,
+  .ndx-walkthrough-pagination__next:focus {
+    outline: 3px solid #ffdd00;
+    outline-offset: 0;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .ndx-walkthrough-sidebar {
+      position: static;
+      margin-top: 40px;
+    }
+
+    .ndx-walkthrough-nav {
+      border: 1px solid #b1b4b6;
+      padding: 15px;
+    }
+
+    .ndx-walkthrough-pagination__next-container {
+      text-align: left;
+      margin-top: 15px;
+    }
+  }
+
+  @media (max-width: 320px) {
+    .ndx-walkthrough-nav__link {
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .ndx-walkthrough-nav__number {
+      min-width: 20px;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .ndx-walkthrough-progress,
+    .ndx-walkthrough-nav,
+    .ndx-walkthrough-pagination,
+    .ndx-walkthrough-help {
+      display: none;
+    }
+  }
+</style>
+
+<script src="/assets/js/phase-state.js" defer></script>
+<script src="/assets/js/walkthrough.js" defer></script>
+
+{# Lightbox component for screenshot zoom - Story 13.9 #}
+{% include "components/lightbox.njk" %}

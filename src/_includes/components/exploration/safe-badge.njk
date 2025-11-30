@@ -1,0 +1,84 @@
+{#
+  Safe Badge Component (Story 6.2)
+
+  Reassurance badge for experiments showing they're safe to try
+
+  Usage:
+    {% include "components/exploration/safe-badge.njk" %}
+
+  Expects:
+    showTooltip: boolean (optional, default true)
+#}
+
+{% set showTooltip = showTooltip if showTooltip is defined else true %}
+
+<span class="ndx-safe-badge">
+  <span class="govuk-tag govuk-tag--green ndx-safe-badge__tag">
+    <svg class="ndx-safe-badge__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M7 1L2 3V6.5C2 9.5 4.1 12.3 7 13C9.9 12.3 12 9.5 12 6.5V3L7 1Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5 7L6.5 8.5L9 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Safe to try
+  </span>
+  {% if showTooltip %}
+    <span class="ndx-safe-badge__tooltip" role="tooltip">
+      This experiment won't break anything. You can always reset.
+    </span>
+  {% endif %}
+</span>
+
+<style>
+  .ndx-safe-badge {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .ndx-safe-badge__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .ndx-safe-badge__icon {
+    flex-shrink: 0;
+  }
+
+  .ndx-safe-badge__tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0b0c0c;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 3px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    z-index: 10;
+  }
+
+  .ndx-safe-badge__tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #0b0c0c;
+  }
+
+  .ndx-safe-badge:hover .ndx-safe-badge__tooltip,
+  .ndx-safe-badge:focus-within .ndx-safe-badge__tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-safe-badge__tooltip {
+      display: none;
+    }
+  }
+</style>

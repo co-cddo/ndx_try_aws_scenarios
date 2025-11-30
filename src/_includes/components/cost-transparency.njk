@@ -1,0 +1,101 @@
+{#
+  Cost Transparency Component
+
+  Displays comprehensive cost information for a scenario including:
+  - Estimated cost range and maximum guarantee
+  - "How costs work" explanation
+  - Per-service cost breakdown
+  - Auto-cleanup timing
+
+  Required variables:
+    - scenarioData: The scenario object from scenarios.yaml
+#}
+
+{% if scenarioData and scenarioData.deployment and scenarioData.deployment.costBreakdown %}
+<div class="ndx-cost-transparency" id="cost-transparency">
+  <h3 class="govuk-heading-m">Cost transparency</h3>
+
+  {# Cost Summary Box #}
+  <div class="ndx-cost-transparency__summary">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-half">
+        <div class="ndx-cost-transparency__estimate">
+          <span class="ndx-cost-transparency__label">Estimated cost</span>
+          <span class="ndx-cost-transparency__value">{{ scenarioData.estimatedCost }}</span>
+        </div>
+      </div>
+      <div class="govuk-grid-column-one-half">
+        <div class="ndx-cost-transparency__maximum">
+          <span class="ndx-cost-transparency__label">Maximum expected</span>
+          <span class="ndx-cost-transparency__value ndx-cost-transparency__value--max">{{ scenarioData.maximumCost }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# How Costs Work Explanation #}
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">How costs work</span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">AWS charges are based on actual usage during your evaluation:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Pay-per-use</strong> - You only pay for what you use during the evaluation window</li>
+        <li><strong>Short evaluation period</strong> - Costs accrue only during your ~15-30 minute hands-on time</li>
+        <li><strong>Automatic cleanup</strong> - Resources are automatically deleted after 2 hours, stopping all charges</li>
+        <li><strong>No ongoing costs</strong> - Once resources are deleted, no further charges apply</li>
+      </ul>
+      <p class="govuk-body govuk-!-margin-bottom-0">
+        <strong>Maximum guarantee:</strong> Even with extended usage, costs should not exceed {{ scenarioData.maximumCost }}.
+        This estimate assumes you complete the full walkthrough and interact with all features.
+      </p>
+    </div>
+  </details>
+
+  {# Cost Breakdown Table #}
+  {% if scenarioData.deployment.costBreakdown.services %}
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">View cost breakdown by AWS service</span>
+    </summary>
+    <div class="govuk-details__text">
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-visually-hidden">
+          Cost breakdown by AWS service for {{ scenarioData.name }}
+        </caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Service</th>
+            <th scope="col" class="govuk-table__header">Estimated cost</th>
+            <th scope="col" class="govuk-table__header">Usage notes</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for item in scenarioData.deployment.costBreakdown.services %}
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">{{ item.name }}</td>
+            <td class="govuk-table__cell">{{ item.cost }}</td>
+            <td class="govuk-table__cell">{{ item.note | default("-") }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if scenarioData.deployment.costBreakdown.autoCleanup %}
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        <strong>Auto-cleanup:</strong> {{ scenarioData.deployment.costBreakdown.autoCleanup }}
+      </p>
+      {% endif %}
+    </div>
+  </details>
+  {% endif %}
+
+  {# Council Responsibility Statement #}
+  <div class="govuk-inset-text ndx-cost-transparency__responsibility">
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      <strong>Important:</strong> Your council is responsible for all AWS charges in your Innovation Sandbox account.
+      Costs shown are estimates based on typical usage. Actual charges may vary based on your interactions.
+    </p>
+  </div>
+</div>
+{% endif %}

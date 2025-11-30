@@ -1,0 +1,117 @@
+{#
+  Executive Summary Section
+
+  Variables:
+  - scenarioData: scenario object
+  - session: evaluation session data
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    Executive Summary
+  </h2>
+
+  <h3 class="govuk-heading-m">Scenario Overview</h3>
+  <p class="govuk-body">{{ scenarioData.description }}</p>
+
+  <h3 class="govuk-heading-m">Key Findings</h3>
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Deployment:</strong> Successful deployment in {{ session.deployment_time_actual | default("3-5 minutes") }}
+      <br>
+      <strong>Evaluation:</strong> {{ session.queries_tested | default("Multiple") }} scenarios tested
+      {% if session.chatbot_accuracy %}
+        with {{ session.chatbot_accuracy }} accuracy
+      {% endif %}
+      <br>
+      <strong>Recommendation:</strong>
+      {% if session.would_implement == 'yes' %}
+        Proceed to implementation planning
+      {% elif session.would_implement == 'maybe' %}
+        Further evaluation recommended
+      {% else %}
+        Not recommended at this time
+      {% endif %}
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-m">Quick Stats</h3>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Scenario
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ scenarioData.name }}
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Difficulty
+      </dt>
+      <dd class="govuk-summary-list__value">
+        <strong class="govuk-tag govuk-tag--{{ scenarioData.difficulty | difficultyColor }}">
+          {{ scenarioData.difficulty | capitalize }}
+        </strong>
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Deployment Time
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ session.deployment_time_actual | default(scenarioData.deployment.deploymentTime) }}
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Evaluation Cost
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ scenarioData.estimatedCost }}
+      </dd>
+    </div>
+    {% if session.likelihood_proceed %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Likelihood to Proceed
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ session.likelihood_proceed }} out of 5
+      </dd>
+    </div>
+    {% endif %}
+  </dl>
+
+  <h3 class="govuk-heading-m">AWS Services Evaluated</h3>
+  <p class="govuk-body">
+    {% for service in scenarioData.awsServices %}
+      <span class="govuk-tag govuk-tag--blue govuk-!-margin-right-1 govuk-!-margin-bottom-1">
+        {{ service }}
+      </span>
+    {% endfor %}
+  </p>
+
+  <h3 class="govuk-heading-m">Key Evaluation Insights</h3>
+
+  {% if session.what_surprised %}
+  <div class="govuk-!-margin-bottom-4">
+    <h4 class="govuk-heading-s">What surprised the team</h4>
+    <p class="govuk-body">{{ session.what_surprised }}</p>
+  </div>
+  {% endif %}
+
+  {% if session.production_wants %}
+  <div class="govuk-!-margin-bottom-4">
+    <h4 class="govuk-heading-s">Production requirements identified</h4>
+    <p class="govuk-body">{{ session.production_wants }}</p>
+  </div>
+  {% endif %}
+
+  {% if session.concerns %}
+  <div class="govuk-!-margin-bottom-4">
+    <h4 class="govuk-heading-s">Concerns raised</h4>
+    <p class="govuk-body">{{ session.concerns }}</p>
+  </div>
+  {% endif %}
+</div>

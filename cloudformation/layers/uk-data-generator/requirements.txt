@@ -1,0 +1,5 @@
+# UK Data Generator Lambda Layer Dependencies
+# Python 3.12 runtime
+
+# No external dependencies required - uses Python standard library only
+# This keeps the layer lightweight and reduces cold start times

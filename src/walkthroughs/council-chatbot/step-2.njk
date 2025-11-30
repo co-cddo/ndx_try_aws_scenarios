@@ -1,0 +1,283 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Try This First Question - Council Chatbot Walkthrough"
+description: Ask the chatbot about bin collections and experience the wow moment
+currentStep: 2
+totalSteps: 4
+timeEstimate: "3 minutes"
+scenarioId: council-chatbot
+---
+
+{#
+  Step 2: Try This First Question (AC-3.2.3, AC-3.2.5, AC-3.2.13)
+  - Copyable bin collection query
+  - Wow moment callout
+  - Expected response documentation
+#}
+
+{% set firstQuestion = chatbotSampleQuestions.categories[0].questions[0] %}
+
+<div class="ndx-walkthrough-step" id="step-2">
+  <div class="ndx-walkthrough-step__header">
+    <span class="ndx-walkthrough-step__number govuk-tag govuk-tag--blue">
+      Step 2
+    </span>
+    <span class="ndx-walkthrough-step__time govuk-body-s">
+      3 minutes
+    </span>
+  </div>
+
+  <h1 class="govuk-heading-xl ndx-walkthrough-step__title">
+    Try This First Question
+  </h1>
+
+  <p class="govuk-body-l ndx-walkthrough-step__description">
+    Let's start with a common resident question: asking about bin collection days.
+    This demonstrates how the chatbot handles location-specific queries.
+  </p>
+
+  {# Copy-to-clipboard section with sample question #}
+  <div class="ndx-walkthrough-step__copy-section">
+    <h2 class="govuk-heading-m">Copy this question</h2>
+
+    <p class="govuk-body">
+      Click the copy button below, then paste it into the chatbot's text input box and press Send.
+    </p>
+
+    <div class="ndx-walkthrough-step__copy-container">
+      <pre class="ndx-walkthrough-step__copy-text" id="copy-text-2">{{ firstQuestion.copyText }}</pre>
+      <button type="button"
+              class="govuk-button govuk-button--secondary ndx-walkthrough-step__copy-btn"
+              data-copy-target="copy-text-2"
+              data-step="2"
+              aria-label="Copy question to clipboard">
+        <span class="ndx-walkthrough-step__copy-icon">📋</span>
+        <span class="ndx-walkthrough-step__copy-label">Copy</span>
+      </button>
+    </div>
+
+    {# Copy confirmation message #}
+    <div class="ndx-walkthrough-step__copy-confirmation"
+         id="copy-confirmation-2"
+         role="status"
+         aria-live="polite"
+         aria-atomic="true"
+         hidden>
+      <span class="ndx-walkthrough-step__copy-success">✓ Copied to clipboard!</span>
+    </div>
+  </div>
+
+  {# Step-by-step instructions #}
+  <div class="govuk-!-margin-top-6">
+    <h2 class="govuk-heading-m">How to ask the question</h2>
+
+    <ol class="govuk-list govuk-list--number govuk-list--spaced">
+      <li>
+        <strong>Copy the question above</strong> by clicking the Copy button
+      </li>
+      <li>
+        <strong>Go to your chatbot tab</strong> (the one you opened in Step 1)
+      </li>
+      <li>
+        <strong>Click in the text input box</strong> at the bottom of the page
+      </li>
+      <li>
+        <strong>Paste the question</strong> (Ctrl+V or Cmd+V)
+      </li>
+      <li>
+        <strong>Click Send</strong> or press Enter
+      </li>
+      <li>
+        <strong>Wait 2-3 seconds</strong> for the chatbot to respond
+      </li>
+    </ol>
+  </div>
+
+  {# Expected outcome #}
+  <div class="ndx-walkthrough-step__outcomes">
+    <h2 class="govuk-heading-m">What you should see</h2>
+    <ul class="govuk-list ndx-walkthrough-step__outcome-list">
+      <li class="ndx-walkthrough-step__outcome-item">
+        <span class="ndx-walkthrough-step__checkmark" aria-hidden="true">✓</span>
+        Your question appears in the chat window
+      </li>
+      <li class="ndx-walkthrough-step__outcome-item">
+        <span class="ndx-walkthrough-step__checkmark" aria-hidden="true">✓</span>
+        Chatbot responds within 2-3 seconds
+      </li>
+      <li class="ndx-walkthrough-step__outcome-item">
+        <span class="ndx-walkthrough-step__checkmark" aria-hidden="true">✓</span>
+        Response mentions specific bin collection days for postcode B15 2NW
+      </li>
+      <li class="ndx-walkthrough-step__outcome-item">
+        <span class="ndx-walkthrough-step__checkmark" aria-hidden="true">✓</span>
+        Response includes different bin types (Black, Blue, Green)
+      </li>
+      <li class="ndx-walkthrough-step__outcome-item">
+        <span class="ndx-walkthrough-step__checkmark" aria-hidden="true">✓</span>
+        Response provides a link to check collection dates online
+      </li>
+    </ul>
+  </div>
+</div>
+
+{# Wow Moment 1 - Natural Language Understanding (AC-3.2.13) #}
+{% set wowMoment1 = chatbotSampleQuestions.wowMoments[0] %}
+{% set title = wowMoment1.title %}
+{% set explanation = wowMoment1.explanation %}
+{% set technicalDetail = wowMoment1.technicalDetail %}
+{% set icon = "🤖" %}
+{% include "components/wow-moment.njk" %}
+
+<h2 class="govuk-heading-m govuk-!-margin-top-6">Expected response</h2>
+
+<p class="govuk-body">
+  The chatbot should give a response similar to this:
+</p>
+
+<div class="ndx-expected-response">
+  <div class="ndx-expected-response__label">
+    <strong>Chatbot response:</strong>
+  </div>
+  <div class="ndx-expected-response__content">
+    {{ firstQuestion.expectedResponse }}
+  </div>
+</div>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>Note:</strong> The exact wording may vary slightly, but the chatbot should provide:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Specific collection days for the postcode mentioned</li>
+    <li>Different bin types (general waste, recycling, garden waste)</li>
+    <li>Frequency of collections (weekly, fortnightly, monthly)</li>
+    <li>A link or reference to check exact dates online</li>
+  </ul>
+</div>
+
+<h2 class="govuk-heading-m">What makes this impressive</h2>
+
+<p class="govuk-body-l">
+  Notice how the chatbot:
+</p>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h3 class="govuk-heading-s">📍 Understood location context</h3>
+      <p class="govuk-body-s">
+        It extracted "B15 2NW" from your question and used it to provide
+        postcode-specific information - just like a human would.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h3 class="govuk-heading-s">🗂️ Retrieved council data</h3>
+      <p class="govuk-body-s">
+        It accessed your council's knowledge base to find the correct bin
+        collection schedule - not just generic information.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h3 class="govuk-heading-s">💬 Natural language response</h3>
+      <p class="govuk-body-s">
+        The response reads naturally, not like a database query result.
+        It's written for residents, not technical users.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h3 class="govuk-heading-s">🔗 Actionable guidance</h3>
+      <p class="govuk-body-s">
+        It includes next steps (check online) and sets expectations
+        (which bins, when) - helping residents self-serve.
+      </p>
+    </div>
+  </div>
+</div>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Chatbot not responding
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If the chatbot doesn't respond or shows an error:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check your internet connection</li>
+      <li>Refresh the chatbot page and try again</li>
+      <li>Check the CloudFormation stack is still active (hasn't expired)</li>
+      <li>Try a simpler question first (e.g., "What are your opening hours?")</li>
+      <li>Check browser console for errors (F12 key, Console tab)</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Response doesn't match expected
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If the response is very different from expected:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check sample data was seeded correctly (see Step 1)</li>
+      <li>The AI may phrase things differently - that's normal</li>
+      <li>Key information (bin types, days, postcode) should still be there</li>
+      <li>If completely unrelated, the knowledge base may not be loaded</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  .ndx-expected-response {
+    border-left: 4px solid #00703c;
+    background-color: #f8f8f8;
+    padding: 20px;
+    margin: 20px 0;
+  }
+
+  .ndx-expected-response__label {
+    margin-bottom: 10px;
+    color: #00703c;
+  }
+
+  .ndx-expected-response__content {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .ndx-feature-highlight {
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    min-height: 140px;
+  }
+
+  .ndx-feature-highlight h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-feature-highlight p {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-feature-highlight {
+      min-height: auto;
+    }
+  }
+</style>

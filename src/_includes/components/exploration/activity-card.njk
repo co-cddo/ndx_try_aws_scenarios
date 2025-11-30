@@ -1,0 +1,200 @@
+{#
+  Activity Card Component (Story 6.1)
+
+  Displays an exploration activity with:
+  - Time estimate badge
+  - "What You'll Learn" summary
+  - Start button
+  - Safe badge for experiments
+  - Completion indicator
+
+  Usage:
+    {% include "components/exploration/activity-card.njk" %}
+
+  Expects:
+    activity: object with id, title, category, time_estimate, learning, safe_badge, etc.
+    scenarioId: string
+    index: number (for ordering)
+#}
+
+{% set isCompleted = false %}
+{# Note: Completion state is managed by JavaScript via ExplorationState #}
+
+<div class="ndx-activity-card{% if activity.is_first %} ndx-activity-card--first{% endif %}"
+     data-activity-id="{{ activity.id }}"
+     data-category="{{ activity.category }}"
+     data-persona="{{ activity.persona }}">
+
+  <div class="ndx-activity-card__header">
+    {# Order number #}
+    <span class="ndx-activity-card__number" aria-hidden="true">{{ index }}</span>
+
+    {# Title #}
+    <h3 class="govuk-heading-s ndx-activity-card__title">
+      {{ activity.title }}
+    </h3>
+
+    {# Completion check mark - managed by JS #}
+    <span class="ndx-activity-card__check" aria-label="Completed" hidden>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="10" cy="10" r="10" fill="#00703c"/>
+        <path d="M6 10L9 13L14 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+  </div>
+
+  <div class="ndx-activity-card__content">
+    {# Badges row #}
+    <div class="ndx-activity-card__badges">
+      {# Time estimate #}
+      {% include "components/exploration/time-estimate.njk" %}
+
+      {# Safe badge #}
+      {% if activity.safe_badge %}
+        <span class="govuk-tag govuk-tag--green">Safe to try</span>
+      {% endif %}
+
+      {# Category badge #}
+      {% if activity.category == 'experiments' %}
+        <span class="govuk-tag govuk-tag--blue">Experiment</span>
+      {% elif activity.category == 'architecture' %}
+        <span class="govuk-tag govuk-tag--purple">Architecture</span>
+      {% elif activity.category == 'limits' %}
+        <span class="govuk-tag govuk-tag--orange">Challenge</span>
+      {% endif %}
+    </div>
+
+    {# Learning summary #}
+    <p class="govuk-body ndx-activity-card__learning">
+      <strong>What you'll learn:</strong> {{ activity.learning }}
+    </p>
+
+    {# Technical details - hidden in simplified mode #}
+    {% if activity.input_text or activity.expected_output %}
+      <div class="ndx-activity-card__technical">
+        {% if activity.input_text %}
+          <p class="govuk-body-s">
+            <strong>Try this:</strong>
+            <code class="ndx-activity-card__code">{{ activity.input_text | truncate(100) }}</code>
+          </p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="ndx-activity-card__actions">
+    <a href="/walkthroughs/{{ scenarioId }}/explore/{{ activity.category }}/{{ activity.id }}/"
+       class="govuk-button govuk-button--secondary"
+       data-module="govuk-button"
+       aria-describedby="activity-{{ activity.id }}-description">
+      Start activity
+    </a>
+    <span id="activity-{{ activity.id }}-description" class="govuk-visually-hidden">
+      {{ activity.title }} - {{ activity.time_estimate }}
+    </span>
+  </div>
+</div>
+
+<style>
+  .ndx-activity-card {
+    border: 1px solid #b1b4b6;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #fff;
+    border-radius: 0;
+  }
+
+  .ndx-activity-card--first {
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-activity-card--completed {
+    border-left: 4px solid #00703c;
+    background: #f8fff8;
+  }
+
+  .ndx-activity-card--completed .ndx-activity-card__check {
+    display: inline-block !important;
+  }
+
+  .ndx-activity-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
+  .ndx-activity-card__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #f3f2f1;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 14px;
+    color: #505a5f;
+    flex-shrink: 0;
+  }
+
+  .ndx-activity-card__title {
+    flex: 1;
+    margin: 0;
+  }
+
+  .ndx-activity-card__check {
+    flex-shrink: 0;
+  }
+
+  .ndx-activity-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .ndx-activity-card__learning {
+    margin-bottom: 15px;
+  }
+
+  .ndx-activity-card__technical {
+    background: #f3f2f1;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-left: 3px solid #1d70b8;
+  }
+
+  .ndx-activity-card__code {
+    display: inline-block;
+    background: #fff;
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 14px;
+    word-break: break-word;
+  }
+
+  .ndx-activity-card__actions {
+    margin-top: 15px;
+  }
+
+  /* Persona filtering - handled via data attributes */
+  [data-persona-filter="visual"] [data-persona="technical"] {
+    display: none;
+  }
+
+  [data-persona-filter="technical"] [data-persona="visual"] {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-activity-card {
+      padding: 15px;
+    }
+
+    .ndx-activity-card__badges {
+      flex-direction: column;
+      gap: 5px;
+    }
+  }
+</style>

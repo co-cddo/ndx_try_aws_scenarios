@@ -1,0 +1,436 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  NDX:Try - Council Chatbot Scenario (Sandbox)
+  AI-powered resident Q&A assistant.
+  Sandbox uses keyword matching; production uses Bedrock.
+  Version: 1.0.1
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Scenario Configuration
+        Parameters:
+          - Environment
+          - KnowledgeBaseSource
+      - Label:
+          default: Auto-Cleanup
+        Parameters:
+          - AutoCleanupHours
+
+Parameters:
+  Environment:
+    Type: String
+    Default: sandbox
+    AllowedValues:
+      - sandbox
+      - development
+      - production
+    Description: Deployment environment
+
+  KnowledgeBaseSource:
+    Type: String
+    Default: council-sample-data
+    Description: Knowledge base source for chatbot
+
+  AutoCleanupHours:
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 24
+    Description: Hours until automatic resource cleanup
+
+Resources:
+  # S3 Bucket for Knowledge Base
+  KnowledgeBaseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-try-chatbot-kb-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoCleanup
+            Status: Enabled
+            ExpirationInDays: 1
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: council-chatbot
+        - Key: AutoCleanup
+          Value: 'true'
+
+  # IAM Role for Lambda
+  ChatbotRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'ndx-try-chatbot-role-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt KnowledgeBaseBucket.Arn
+                  - !Sub '${KnowledgeBaseBucket.Arn}/*'
+        - PolicyName: BedrockAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-pro-v1:0'
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: council-chatbot
+
+  # Lambda Function - Chatbot Handler (Amazon Nova Pro)
+  ChatbotFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-chatbot-handler-${AWS::Region}'
+      Description: Council chatbot using Amazon Nova Pro AI
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      Role: !GetAtt ChatbotRole.Arn
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          KNOWLEDGE_BUCKET: !Ref KnowledgeBaseBucket
+          ENVIRONMENT: !Ref Environment
+          BEDROCK_MODEL_ID: amazon.nova-pro-v1:0
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          from datetime import datetime
+
+          # Initialize Bedrock client
+          bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
+
+          # Council assistant system prompt
+          SYSTEM_PROMPT = """You are a helpful UK local council service assistant for a sample council.
+          You help residents with questions about council services including:
+          - Waste collection and recycling (black bin weekly on Monday, blue recycling fortnightly Thursday, green garden waste fortnightly)
+          - Council Tax payments, discounts (25% single person), and support schemes
+          - Planning applications and building permissions
+          - Housing services, repairs, and housing register
+          - Parking permits, car parks, and penalties
+          - Road repairs, potholes, and street lighting
+          - General contact information (phone: 01234-567-890, email: contact@samplecouncil.gov.uk)
+
+          Keep responses concise (under 200 words), friendly, and helpful.
+          Use bullet points and formatting for readability.
+          Include relevant contact details or next steps where appropriate.
+          If you don't know specific details, provide general guidance and suggest contacting the council directly.
+          This is a demo council - use sample data but make it realistic for UK councils."""
+
+          def get_bedrock_response(user_message):
+              """Call Amazon Nova Pro for AI response"""
+              try:
+                  response = bedrock.invoke_model(
+                      modelId='amazon.nova-pro-v1:0',
+                      body=json.dumps({
+                          "messages": [
+                              {"role": "user", "content": [{"text": user_message}]}
+                          ],
+                          "system": [{"text": SYSTEM_PROMPT}],
+                          "inferenceConfig": {
+                              "max_new_tokens": 1024,
+                              "temperature": 0.7
+                          }
+                      })
+                  )
+                  result = json.loads(response['body'].read())
+                  return {
+                      'success': True,
+                      'response': result['output']['message']['content'][0]['text'],
+                      'usage': result.get('usage', {})
+                  }
+              except Exception as e:
+                  print(f"Bedrock error: {str(e)}")
+                  return {
+                      'success': False,
+                      'error': str(e)
+                  }
+
+          def get_topic_from_message(message):
+              """Categorize the message topic for display"""
+              message_lower = message.lower()
+              if any(w in message_lower for w in ['bin', 'waste', 'rubbish', 'recycling', 'collection']):
+                  return 'Bin Collections'
+              elif any(w in message_lower for w in ['council tax', 'payment', 'bill', 'discount']):
+                  return 'Council Tax'
+              elif any(w in message_lower for w in ['planning', 'application', 'build', 'extension', 'permission']):
+                  return 'Planning'
+              elif any(w in message_lower for w in ['housing', 'rent', 'repair', 'home', 'accommodation']):
+                  return 'Housing'
+              elif any(w in message_lower for w in ['parking', 'car park', 'permit', 'ticket']):
+                  return 'Parking'
+              elif any(w in message_lower for w in ['pothole', 'road', 'highway', 'street', 'pavement', 'light']):
+                  return 'Roads & Highways'
+              elif any(w in message_lower for w in ['contact', 'phone', 'email', 'hours', 'open']):
+                  return 'Contact Us'
+              else:
+                  return 'General Enquiry'
+
+          def render_chat_html():
+              return '''<!DOCTYPE html>
+          <html lang="en">
+          <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>Council Chatbot Demo</title>
+          <style>
+          *{margin:0;padding:0;box-sizing:border-box}
+          body{font-family:Arial,sans-serif;font-size:16px;line-height:1.5;color:#0b0c0c;background:#fff}
+          .banner{background:#ffdd00;padding:12px 20px;text-align:center;font-weight:700;border-bottom:2px solid #0b0c0c}
+          .header{background:#0b0c0c;color:#fff;padding:15px 20px;font-size:24px;font-weight:700}
+          .container{max-width:1280px;margin:0 auto;padding:20px;display:flex;flex-direction:column;height:calc(100vh - 150px)}
+          .messages{flex:1;overflow-y:auto;padding:20px 0;margin-bottom:10px}
+          .message{margin-bottom:15px;display:flex;flex-direction:column;align-items:flex-start}
+          .message.bot{align-items:flex-start}
+          .message.user{align-items:flex-end}
+          .topic-badge{background:#f3f2f1;color:#0b0c0c;padding:4px 8px;border-radius:4px;font-size:14px;font-weight:700;margin-bottom:6px;display:inline-block;border:1px solid #b1b4b6}
+          .bubble{max-width:70%;padding:12px 16px;border-radius:8px;word-wrap:break-word;white-space:pre-wrap}
+          .bot .bubble{background:#f3f2f1;color:#0b0c0c}
+          .user .bubble{background:#1d70b8;color:#fff}
+          .error-message{border:2px solid #d4351c;background:#f9e6e5}
+          .error-message:before{content:"⚠️ ";margin-right:4px}
+          .loading{display:flex;gap:4px;align-items:center;padding:12px 16px;background:#f3f2f1;border-radius:8px;max-width:70px}
+          .loading span{width:8px;height:8px;background:#505a5f;border-radius:50%;animation:pulse 1.4s infinite ease-in-out both}
+          .loading span:nth-child(1){animation-delay:-0.32s}
+          .loading span:nth-child(2){animation-delay:-0.16s}
+          @keyframes pulse{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+          .clear-btn{display:block;text-align:right;margin-bottom:10px;font-size:14px}
+          .clear-btn button{background:transparent;border:none;color:#1d70b8;text-decoration:underline;cursor:pointer;font-size:14px;padding:4px 8px}
+          .clear-btn button:hover{color:#003078}
+          .clear-btn button:focus{outline:3px solid #ffdd00;outline-offset:0;background:#ffdd00;color:#0b0c0c}
+          .sample-questions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+          .sample-question{background:#fff;border:2px solid #0b0c0c;color:#0b0c0c;padding:8px 12px;border-radius:4px;font-size:14px;cursor:pointer;font-family:Arial,sans-serif;line-height:1.3}
+          .sample-question:hover{background:#f3f2f1}
+          .sample-question:focus{outline:3px solid #ffdd00;outline-offset:0}
+          .sample-question:disabled{background:#f3f2f1;color:#505a5f;cursor:not-allowed;border-color:#b1b4b6}
+          .input-group{display:flex;gap:10px}
+          .input-group label{position:absolute;left:-9999px}
+          #userInput{flex:1;padding:12px;border:2px solid #0b0c0c;border-radius:4px;font-size:16px}
+          #userInput:focus{outline:3px solid #ffdd00;outline-offset:0}
+          #userInput:disabled{background:#f3f2f1;color:#505a5f;cursor:not-allowed}
+          #sendBtn{background:#00703c;color:#fff;border:none;padding:12px 24px;border-radius:4px;font-size:16px;font-weight:700;cursor:pointer;min-width:100px}
+          #sendBtn:hover:not(:disabled){background:#005a30}
+          #sendBtn:focus{outline:3px solid #ffdd00;outline-offset:0}
+          #sendBtn:disabled{background:#b1b4b6;cursor:not-allowed}
+          .sr-only{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+          @media(max-width:768px){
+          .header{font-size:20px;padding:12px 15px}
+          .container{padding:15px}
+          .bubble{max-width:85%}
+          #sendBtn{padding:12px 16px;min-width:80px}
+          .sample-question{font-size:13px;padding:6px 10px}
+          }
+          @media(max-width:375px){
+          .header{font-size:18px}
+          .bubble{max-width:90%;font-size:14px}
+          .sample-question{font-size:12px;padding:5px 8px}
+          }
+          </style>
+          </head>
+          <body>
+          <div class="banner">Powered by Amazon Nova Pro - Real AI responses for council enquiries</div>
+          <div class="header"><span style="font-size:14px;opacity:0.8">NDX:Try</span> Council Chatbot Demo</div>
+          <div class="container">
+          <div class="messages" id="messages" role="log" aria-live="polite" aria-atomic="false"></div>
+          <div class="clear-btn"><button id="clearBtn" aria-label="Clear conversation history">Clear conversation</button></div>
+          <div class="sample-questions" id="sampleQuestions"></div>
+          <div class="input-group">
+          <label for="userInput">Your question</label>
+          <input type="text" id="userInput" placeholder="Type your question..." maxlength="500">
+          <button id="sendBtn" aria-label="Send message">Send</button>
+          </div>
+          <div id="statusMsg" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+          </div>
+          <script>
+          var isProcessing=false;
+          var loadingElement=null;
+          var conversationKey='ndx-chatbot-conversation';
+          var maxMessages=20;
+          var sampleQuestionsList=["What are my bin collection days?","How do I pay council tax?","I want to apply for planning permission","How do I report a pothole?","What are your opening hours?","How do I get a parking permit?"];
+          function escapeHtml(text){var div=document.createElement('div');div.textContent=text;return div.innerHTML}
+          function announceStatus(msg){var status=document.getElementById('statusMsg');status.textContent=msg}
+          function scrollToBottom(){var msgs=document.getElementById('messages');msgs.scrollTop=msgs.scrollHeight}
+          function setInputDisabled(disabled){document.getElementById('userInput').disabled=disabled;var btn=document.getElementById('sendBtn');btn.disabled=disabled;btn.textContent=disabled?'Sending...':'Send';var sampleBtns=document.querySelectorAll('.sample-question');for(var i=0;i<sampleBtns.length;i++){sampleBtns[i].disabled=disabled}}
+          function focusInput(){document.getElementById('userInput').focus()}
+          function showLoadingIndicator(){var msg=document.createElement('div');msg.className='message bot';msg.id='loadingMsg';var loading=document.createElement('div');loading.className='loading';loading.setAttribute('aria-label','Waiting for response');loading.innerHTML='<span></span><span></span><span></span>';msg.appendChild(loading);loadingElement=msg;document.getElementById('messages').appendChild(msg);scrollToBottom()}
+          function hideLoadingIndicator(){if(loadingElement&&loadingElement.parentNode){loadingElement.parentNode.removeChild(loadingElement);loadingElement=null}}
+          function saveConversation(){try{var messages=document.getElementById('messages').querySelectorAll('.message:not(#loadingMsg)');var conversation=[];for(var i=0;i<messages.length;i++){var msg=messages[i];var type=msg.classList.contains('user')?'user':'bot';var bubble=msg.querySelector('.bubble');if(!bubble)continue;var text=bubble.textContent;var topic=null;var badge=msg.querySelector('.topic-badge');if(badge){topic=badge.textContent}conversation.push({type:type,text:text,topic:topic})}if(conversation.length>maxMessages){conversation=conversation.slice(-maxMessages)}sessionStorage.setItem(conversationKey,JSON.stringify(conversation))}catch(e){console.error('Failed to save conversation:',e)}}
+          function loadConversation(){try{var saved=sessionStorage.getItem(conversationKey);if(!saved)return false;var conversation=JSON.parse(saved);var messagesDiv=document.getElementById('messages');for(var i=0;i<conversation.length;i++){var item=conversation[i];var msg=document.createElement('div');msg.className='message '+item.type;if(item.type==='bot'&&item.topic){var badge=document.createElement('div');badge.className='topic-badge';badge.textContent=item.topic;msg.appendChild(badge)}var bubble=document.createElement('div');bubble.className='bubble';if(item.text.indexOf('⚠️')===0||item.text.indexOf('Unable to connect')!==-1||item.text.indexOf('Request timed out')!==-1||item.text.indexOf('API error')!==-1){bubble.className='bubble error-message'}bubble.textContent=item.text;msg.appendChild(bubble);messagesDiv.appendChild(msg)}scrollToBottom();return true}catch(e){console.error('Failed to load conversation:',e);return false}}
+          function clearConversation(){try{sessionStorage.removeItem(conversationKey);var messagesDiv=document.getElementById('messages');messagesDiv.innerHTML='';var welcomeMsg=document.createElement('div');welcomeMsg.className='message bot';var bubble=document.createElement('div');bubble.className='bubble';bubble.textContent="🤖 Hello! I'm the council chatbot. I can help with bin collections, council tax, planning, housing, parking, roads, and general enquiries. What would you like to know?";welcomeMsg.appendChild(bubble);messagesDiv.appendChild(welcomeMsg);saveConversation();announceStatus('Conversation cleared');focusInput()}catch(e){console.error('Failed to clear conversation:',e)}}
+          function addUserMessage(text){var msg=document.createElement('div');msg.className='message user';var bubble=document.createElement('div');bubble.className='bubble';bubble.textContent=text;msg.appendChild(bubble);document.getElementById('messages').appendChild(msg);scrollToBottom();saveConversation()}
+          function displayBotResponse(data){var msg=document.createElement('div');msg.className='message bot';if(data.topic){var badge=document.createElement('div');badge.className='topic-badge';badge.textContent=data.topic;msg.appendChild(badge)}var bubble=document.createElement('div');bubble.className='bubble';bubble.textContent=data.response;msg.appendChild(bubble);document.getElementById('messages').appendChild(msg);scrollToBottom();announceStatus('Response received: '+data.topic);saveConversation()}
+          function displayError(errMsg){var msg=document.createElement('div');msg.className='message bot';var bubble=document.createElement('div');bubble.className='bubble error-message';bubble.textContent=errMsg;msg.appendChild(bubble);document.getElementById('messages').appendChild(msg);scrollToBottom();announceStatus('Error: '+errMsg);saveConversation()}
+          async function sendMessage(text){if(isProcessing||!text.trim())return;isProcessing=true;try{setInputDisabled(true);announceStatus('Sending message');addUserMessage(text);showLoadingIndicator();var controller=new AbortController();var timeoutId=setTimeout(function(){controller.abort()},10000);var response=await fetch(window.location.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text}),signal:controller.signal});clearTimeout(timeoutId);hideLoadingIndicator();if(!response.ok){var errorData;try{errorData=await response.json();displayError(errorData.error||'API error: '+response.status)}catch(e){displayError('API error: '+response.status)}return}var data=await response.json();if(data.error){displayError(data.error)}else{displayBotResponse(data)}}catch(error){hideLoadingIndicator();if(error.name==='AbortError'){displayError('Request timed out. Please try again.')}else{displayError('Unable to connect. Please try again.')}}finally{isProcessing=false;setInputDisabled(false);focusInput()}}
+          function handleSend(){var input=document.getElementById('userInput');var text=input.value.trim();if(text&&!isProcessing){input.value='';sendMessage(text)}}
+          function renderSampleQuestions(){var container=document.getElementById('sampleQuestions');for(var i=0;i<sampleQuestionsList.length;i++){var btn=document.createElement('button');btn.className='sample-question';btn.textContent=sampleQuestionsList[i];btn.setAttribute('aria-label','Send this question: '+sampleQuestionsList[i]);btn.onclick=(function(q){return function(){if(!isProcessing){sendMessage(q)}}})(sampleQuestionsList[i]);container.appendChild(btn)}}
+          window.onload=function(){var hasConversation=loadConversation();if(!hasConversation){var welcomeMsg=document.createElement('div');welcomeMsg.className='message bot';var bubble=document.createElement('div');bubble.className='bubble';bubble.textContent="🤖 Hello! I'm the council chatbot. I can help with bin collections, council tax, planning, housing, parking, roads, and general enquiries. What would you like to know?";welcomeMsg.appendChild(bubble);document.getElementById('messages').appendChild(welcomeMsg);saveConversation()}renderSampleQuestions();focusInput()};
+          document.getElementById('sendBtn').onclick=handleSend;
+          document.getElementById('clearBtn').onclick=clearConversation;
+          document.getElementById('userInput').onkeypress=function(e){if(e.key==='Enter'&&!isProcessing){handleSend()}};
+          </script>
+          </body>
+          </html>'''
+
+          def lambda_handler(event, context):
+              try:
+                  # Detect HTTP method
+                  method = event.get('requestContext', {}).get('http', {}).get('method', 'GET')
+
+                  # Serve HTML for GET requests
+                  if method == 'GET':
+                      return {
+                          'statusCode': 200,
+                          'headers': {'Content-Type': 'text/html'},
+                          'body': render_chat_html()
+                      }
+
+                  # Handle POST requests (JSON API)
+                  if isinstance(event.get('body'), str):
+                      body = json.loads(event['body'])
+                  else:
+                      body = event.get('body', event)
+
+                  user_message = body.get('message', body.get('query', '')).strip()
+
+                  if not user_message:
+                      return {
+                          'statusCode': 400,
+                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                          'body': json.dumps({'error': 'Message is required'})
+                      }
+
+                  # Call Amazon Nova Pro for AI response
+                  bedrock_result = get_bedrock_response(user_message)
+                  topic = get_topic_from_message(user_message)
+
+                  if not bedrock_result['success']:
+                      return {
+                          'statusCode': 500,
+                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                          'body': json.dumps({
+                              'error': f"AI service error: {bedrock_result.get('error', 'Unknown error')}"
+                          })
+                      }
+
+                  return {
+                      'statusCode': 200,
+                      'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                      'body': json.dumps({
+                          'success': True,
+                          'response': bedrock_result['response'],
+                          'topic': topic,
+                          'query': body.get('message', body.get('query', '')),
+                          'timestamp': datetime.utcnow().isoformat(),
+                          'model': 'Amazon Nova Pro',
+                          'usage': bedrock_result.get('usage', {})
+                      })
+                  }
+
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  return {
+                      'statusCode': 500,
+                      'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                      'body': json.dumps({'error': str(e)})
+                  }
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: council-chatbot
+
+  # Lambda Function URL
+  ChatbotFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !GetAtt ChatbotFunction.Arn
+      Cors:
+        AllowCredentials: false
+        AllowHeaders:
+          - content-type
+        AllowMethods:
+          - POST
+          - GET
+        AllowOrigins:
+          - '*'
+        MaxAge: 86400
+
+  ChatbotFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ChatbotFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+
+  # CloudWatch Log Group
+  ChatbotLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ChatbotFunction}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: council-chatbot
+
+Outputs:
+  ChatbotURL:
+    Description: Web interface URL to interact with the chatbot
+    Value: !GetAtt ChatbotFunctionUrl.FunctionUrl
+    Export:
+      Name: !Sub '${AWS::StackName}-ChatbotURL'
+
+  KnowledgeBaseBucket:
+    Description: S3 bucket for chatbot knowledge base
+    Value: !Ref KnowledgeBaseBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-KnowledgeBaseBucket'
+
+  ScenarioInfo:
+    Description: NDX:Try scenario information
+    Value: !Sub |
+      {
+        "scenario": "council-chatbot",
+        "environment": "${Environment}",
+        "autoCleanup": "${AutoCleanupHours} hours",
+        "mode": "Amazon Nova Pro",
+        "note": "Real AI-powered responses using Amazon Bedrock"
+      }

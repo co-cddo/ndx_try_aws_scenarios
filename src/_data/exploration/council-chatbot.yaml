@@ -1,0 +1,215 @@
+# Council Chatbot Exploration Data (Story 6.1)
+# Defines all exploration activities for the Council Chatbot scenario
+
+scenario_id: council-chatbot
+scenario_title: Council Chatbot
+total_time_estimate: "45 minutes"
+description: "Explore the Council Chatbot beyond the basic walkthrough"
+
+# Persona paths
+personas:
+  visual:
+    id: visual
+    title: "Service Manager / Non-Technical"
+    description: "Explore through screenshots, diagrams, and guided interactions"
+    icon: "eye"
+    time_estimate: "25 minutes"
+  technical:
+    id: technical
+    title: "Developer / Technical"
+    description: "Explore through AWS Console, code, and architecture details"
+    icon: "code"
+    time_estimate: "35 minutes"
+
+# All exploration activities
+activities:
+  # Visual-First Experiments (Story 6.2)
+  - id: exp1
+    title: "Ask Outside the Knowledge Base"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "The chatbot has boundaries - it only answers from its training data"
+    is_first: true
+    safe_badge: true
+    input_text: "What's the weather going to be tomorrow?"
+    expected_output: "Chatbot says it can only answer council-related questions"
+    screenshot: "experiments/exp1-out-of-scope-response.png"
+
+  - id: exp2
+    title: "Multi-Turn Conversation"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "Context retention reduces repetitive questions from residents"
+    safe_badge: true
+    input_text: |
+      First: "When are bins collected?"
+      Then: "What about recycling?"
+    expected_output: "Chatbot remembers context from first question"
+    screenshot: "experiments/exp2-context-retention.png"
+
+  - id: exp3
+    title: "Semantic Understanding"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "AI understands intent, not just keywords"
+    safe_badge: true
+    input_variations:
+      - "How do I pay my council tax?"
+      - "Where do I settle my council tax bill?"
+      - "Council tax payment options"
+    expected_output: "All three phrasings get the same helpful answer"
+    screenshot: "experiments/exp3-semantic-understanding.png"
+
+  - id: exp4
+    title: "Complex Multi-Part Question"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "Complex questions may need to be broken down"
+    safe_badge: true
+    input_text: "I need to report a pothole on my street, check when my bins are collected, and find out about planning permission for a shed"
+    expected_output: "Chatbot handles multi-part queries with structured response"
+    screenshot: "experiments/exp4-multipart-question.png"
+
+  - id: exp5
+    title: "Welsh Language Input"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "Welsh language support for councils in Wales"
+    safe_badge: true
+    input_text: "Pryd mae'r biniau'n cael eu casglu?"
+    expected_output: "Chatbot responds appropriately (may redirect to English or provide Welsh response)"
+    screenshot: "experiments/exp5-welsh-language.png"
+
+  # Visual Architecture Tour (Story 6.3)
+  - id: arch-visual
+    title: "Visual Architecture Tour"
+    category: architecture
+    persona: visual
+    time_estimate: "10 min"
+    learning: "How the chatbot uses AWS Bedrock to understand and respond"
+    steps:
+      - title: "Resident Asks Question"
+        description: "A resident types a question in the web interface"
+        screenshot: "architecture/step1-resident-question.png"
+      - title: "Question Reaches Lambda"
+        description: "AWS Lambda function receives and processes the request"
+        screenshot: "architecture/step2-lambda-receives.png"
+      - title: "Bedrock Understands Intent"
+        description: "AWS Bedrock AI model interprets what the resident wants"
+        screenshot: "architecture/step3-bedrock-processes.png"
+      - title: "Knowledge Base Searched"
+        description: "Council documents and FAQs are searched for the answer"
+        screenshot: "architecture/step4-knowledge-search.png"
+      - title: "Response Generated"
+        description: "AI generates a helpful, accurate response"
+        screenshot: "architecture/step5-response-generated.png"
+
+  # Console Architecture Tour (Story 6.3)
+  - id: arch-console
+    title: "Console Architecture Tour"
+    category: architecture
+    persona: technical
+    time_estimate: "15 min"
+    learning: "Navigate AWS Console to understand the chatbot infrastructure"
+    steps:
+      - title: "Lambda Function"
+        console_url: "https://console.aws.amazon.com/lambda/home"
+        what_to_look_for: "Function code, environment variables, CloudWatch logs"
+        screenshot: "architecture/console-lambda.png"
+      - title: "Bedrock Model"
+        console_url: "https://console.aws.amazon.com/bedrock/home"
+        what_to_look_for: "Model selection, inference parameters, token limits"
+        screenshot: "architecture/console-bedrock.png"
+      - title: "DynamoDB Conversation History"
+        console_url: "https://console.aws.amazon.com/dynamodbv2/home"
+        what_to_look_for: "Table schema, session data, TTL settings"
+        screenshot: "architecture/console-dynamodb.png"
+      - title: "CloudWatch Logs"
+        console_url: "https://console.aws.amazon.com/cloudwatch/home"
+        what_to_look_for: "Request/response logs, latency metrics, errors"
+        screenshot: "architecture/console-cloudwatch.png"
+      - title: "API Gateway"
+        console_url: "https://console.aws.amazon.com/apigateway/home"
+        what_to_look_for: "Endpoint configuration, CORS settings, throttling"
+        screenshot: "architecture/console-apigateway.png"
+
+  # Boundary Challenges (Story 6.4)
+  - id: limit1
+    title: "Token Overload"
+    category: limits
+    persona: both
+    time_estimate: "5 min"
+    learning: "AI models have context limits - very long inputs get truncated"
+    challenge_description: "Paste a 5000+ character text to see how the chatbot handles it"
+    sample_text: "[Very long council policy document text...]"
+    expected_behavior: "Chatbot may truncate input or ask for a shorter question"
+    business_implication: "Complex documents may need summarization before chatbot processing"
+    recovery: "Ask a shorter, focused question"
+    screenshot: "limits/limit1-token-overload.png"
+
+  - id: limit2
+    title: "Sensitive Topic Handling"
+    category: limits
+    persona: both
+    time_estimate: "5 min"
+    learning: "AI has guardrails for sensitive or harmful content"
+    challenge_description: "Ask about a potentially sensitive topic"
+    sample_text: "How do I report suspected fraud?"
+    expected_behavior: "Chatbot provides appropriate guidance without speculation"
+    business_implication: "Guardrails protect both residents and the council"
+    recovery: "Chatbot redirects to appropriate channels"
+    screenshot: "limits/limit2-sensitive-topic.png"
+
+  - id: limit3
+    title: "Rate Limiting"
+    category: limits
+    persona: both
+    time_estimate: "5 min"
+    learning: "Systems have rate limits to prevent abuse"
+    challenge_description: "Send 10 rapid-fire questions in quick succession"
+    expected_behavior: "May see brief delays or throttling after many requests"
+    business_implication: "Rate limits protect the system and control costs"
+    recovery: "Wait a few seconds between questions"
+    screenshot: "limits/limit3-rate-limiting.png"
+
+# Production guidance topics (Story 6.5)
+production_guidance:
+  - id: scale
+    title: "What Would Change at Scale"
+    topics:
+      - "User capacity: From 10s to 1000s of concurrent users"
+      - "Data volume: Larger knowledge base, more conversation history"
+      - "Availability: Multi-AZ deployment, failover strategies"
+      - "Security: WAF, API keys, audit logging"
+  - id: customization
+    title: "Customization Options"
+    topics:
+      - "Knowledge base: Add your council's specific documents"
+      - "Personality: Adjust tone and response style"
+      - "Integrations: Connect to CRM, ticketing systems"
+      - "Languages: Add additional language support"
+  - id: costs
+    title: "Cost Projection"
+    demo_costs:
+      bedrock: "~$0.50"
+      lambda: "~$0.10"
+      dynamodb: "~$0.05"
+      total: "~$0.65 per session"
+    production_costs:
+      bedrock: "$500-2000/month"
+      lambda: "$50-100/month"
+      dynamodb: "$25-50/month"
+      total: "$575-2150/month (10,000 conversations)"
+  - id: security
+    title: "Security Hardening Checklist"
+    items:
+      - "Enable AWS WAF for API protection"
+      - "Implement API key authentication"
+      - "Enable CloudTrail for audit logging"
+      - "Configure VPC endpoints for private connectivity"
+      - "Set up alerts for unusual activity"

@@ -1,0 +1,925 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  NDX:Try - QuickSight Dashboard Scenario
+  Real Amazon QuickSight analytics and reporting with council performance data.
+  Uses Amazon QuickSight for business intelligence dashboards.
+  Version: 2.4.0 (Story 25.5 - Dashboard Filters and Embedding)
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Scenario Configuration
+        Parameters:
+          - Environment
+          - SampleDataset
+      - Label:
+          default: Auto-Cleanup
+        Parameters:
+          - AutoCleanupHours
+
+Parameters:
+  Environment:
+    Type: String
+    Default: sandbox
+    AllowedValues:
+      - sandbox
+      - development
+      - production
+    Description: Deployment environment (controls lifecycle rules and retention)
+
+  SampleDataset:
+    Type: String
+    Default: council-metrics
+    Description: Sample dataset identifier for council performance metrics
+
+  AutoCleanupHours:
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 24
+    Description: Hours until automatic resource cleanup in sandbox environment
+
+  QuickSightUsername:
+    Type: String
+    Default: 'AWSReservedSSO_ndx_IsbAdminsPS_53e05916f706247a/ndx@dsit.gov.uk'
+    Description: QuickSight username for resource permissions (found via aws quicksight list-users)
+
+Resources:
+  # ============================================================================
+  # S3 BUCKET FOR QUICKSIGHT DATA
+  # ============================================================================
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-quicksight-data-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoCleanupSandbox
+            Status: Enabled
+            ExpirationInDays: 7
+            NoncurrentVersionExpirationInDays: 1
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+        - Key: AutoCleanup
+          Value: 'true'
+
+  # ============================================================================
+  # S3 BUCKET POLICY - ALLOW QUICKSIGHT ACCESS
+  # ============================================================================
+  DataBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DataBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowQuickSightServiceAccess
+            Effect: Allow
+            Principal:
+              Service: quicksight.amazonaws.com
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucket
+              - s3:GetBucketLocation
+            Resource:
+              - !GetAtt DataBucket.Arn
+              - !Sub '${DataBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+
+  # ============================================================================
+  # IAM ROLE FOR DATA GENERATOR LAMBDA
+  # ============================================================================
+  DataGeneratorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'ndx-quicksight-data-generator-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3DataAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                  - s3:GetBucketLocation
+                Resource:
+                  - !GetAtt DataBucket.Arn
+                  - !Sub '${DataBucket.Arn}/*'
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+  # ============================================================================
+  # DATA GENERATOR LAMBDA FUNCTION
+  # ============================================================================
+  DataGeneratorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ndx-quicksight-data-generator-${AWS::Region}'
+      Description: Generates sample council performance data for QuickSight
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt DataGeneratorRole.Arn
+      Timeout: 120
+      MemorySize: 256
+      Environment:
+        Variables:
+          DATA_BUCKET: !Ref DataBucket
+          ACCOUNT_ID: !Ref AWS::AccountId
+          REGION: !Ref AWS::Region
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import random
+          import csv
+          import urllib3
+          from datetime import datetime, timedelta
+          import os
+
+          s3 = boto3.client('s3')
+          http = urllib3.PoolManager()
+
+          SERVICE_AREAS = [
+              'Waste Collection', 'Planning Applications', 'Housing',
+              'Council Tax', 'Highways', 'Environmental Health',
+              'Benefits', 'Customer Services', 'Parking'
+          ]
+
+          REGIONS = [
+              'London', 'South East', 'South West', 'West Midlands',
+              'East Midlands', 'North West', 'North East', 'Yorkshire'
+          ]
+
+          def generate_council_data():
+              """Generate 12 months of council performance data"""
+              rows = []
+
+              # Generate data for the last 12 months
+              for month_offset in range(12):
+                  month_date = datetime.now() - timedelta(days=30 * month_offset)
+                  month_str = month_date.strftime('%Y-%m')
+
+                  for region in REGIONS:
+                      council_name = f'Demo {region} Council'
+
+                      for service in SERVICE_AREAS:
+                          # Generate realistic performance data
+                          cases_received = random.randint(100, 500)
+                          resolution_rate = random.uniform(0.75, 0.95)
+                          cases_resolved = int(cases_received * resolution_rate)
+                          avg_response_hours = round(random.uniform(12, 72), 1)
+                          satisfaction_score = round(random.uniform(3.5, 4.8), 2)
+
+                          rows.append({
+                              'council_name': council_name,
+                              'region': region,
+                              'service_area': service,
+                              'month': month_str,
+                              'cases_received': cases_received,
+                              'cases_resolved': cases_resolved,
+                              'avg_response_hours': avg_response_hours,
+                              'satisfaction_score': satisfaction_score
+                          })
+
+              return rows
+
+          def write_csv_to_s3(bucket, key, data):
+              """Write data as CSV to S3"""
+              if not data:
+                  raise ValueError("No data to write")
+
+              # Create CSV content
+              csv_buffer = []
+              fieldnames = data[0].keys()
+
+              # Add header
+              csv_buffer.append(','.join(fieldnames))
+
+              # Add rows
+              for row in data:
+                  csv_buffer.append(','.join(str(row[field]) for field in fieldnames))
+
+              csv_content = '\n'.join(csv_buffer)
+
+              # Upload to S3
+              s3.put_object(
+                  Bucket=bucket,
+                  Key=key,
+                  Body=csv_content.encode('utf-8'),
+                  ContentType='text/csv'
+              )
+
+              return len(data)
+
+          def create_manifest(bucket, region, data_key):
+              """Create QuickSight manifest file"""
+              manifest = {
+                  "fileLocations": [
+                      {
+                          "URIs": [
+                              f"https://{bucket}.s3.{region}.amazonaws.com/{data_key}"
+                          ]
+                      }
+                  ],
+                  "globalUploadSettings": {
+                      "format": "CSV",
+                      "delimiter": ",",
+                      "textqualifier": "\"",
+                      "containsHeader": True
+                  }
+              }
+
+              return manifest
+
+          def send_cfn_response(event, context, status, data=None, physical_id=None, reason=None):
+              """Send CloudFormation custom resource response"""
+              response_body = {
+                  'Status': status,
+                  'Reason': reason or f'See CloudWatch Log Stream: {context.log_stream_name}',
+                  'PhysicalResourceId': physical_id or context.log_stream_name,
+                  'StackId': event['StackId'],
+                  'RequestId': event['RequestId'],
+                  'LogicalResourceId': event['LogicalResourceId'],
+                  'Data': data or {}
+              }
+
+              json_response = json.dumps(response_body).encode('utf-8')
+
+              headers = {
+                  'Content-Type': 'application/json',
+                  'Content-Length': str(len(json_response))
+              }
+
+              try:
+                  http.request(
+                      'PUT',
+                      event['ResponseURL'],
+                      body=json_response,
+                      headers=headers
+                  )
+              except Exception as e:
+                  print(f"Failed to send response: {str(e)}")
+
+          def handler(event, context):
+              """Lambda handler for Custom Resource and data generation"""
+              print(f"Event: {json.dumps(event)}")
+
+              # Get environment variables
+              bucket = os.environ['DATA_BUCKET']
+              region = os.environ['REGION']
+              account_id = os.environ['ACCOUNT_ID']
+
+              data_key = 'data/council-metrics.csv'
+              manifest_key = 'manifests/council-data-manifest.json'
+
+              # Check if this is a CloudFormation Custom Resource event
+              request_type = event.get('RequestType')
+
+              if request_type:
+                  # This is a CloudFormation Custom Resource event
+                  try:
+                      if request_type in ['Create', 'Update']:
+                          print("Generating sample data for QuickSight...")
+
+                          # Generate data
+                          data = generate_council_data()
+                          row_count = write_csv_to_s3(bucket, data_key, data)
+
+                          # Create manifest
+                          manifest = create_manifest(bucket, region, data_key)
+                          s3.put_object(
+                              Bucket=bucket,
+                              Key=manifest_key,
+                              Body=json.dumps(manifest, indent=2).encode('utf-8'),
+                              ContentType='application/json'
+                          )
+
+                          response_data = {
+                              'RowCount': row_count,
+                              'DataKey': data_key,
+                              'ManifestKey': manifest_key,
+                              'BucketName': bucket
+                          }
+
+                          send_cfn_response(
+                              event, context, 'SUCCESS',
+                              data=response_data,
+                              physical_id=f'{bucket}-data-generator',
+                              reason=f'Generated {row_count} rows of sample data'
+                          )
+
+                      elif request_type == 'Delete':
+                          print("Cleaning up data files...")
+
+                          # Delete data files
+                          try:
+                              s3.delete_object(Bucket=bucket, Key=data_key)
+                              s3.delete_object(Bucket=bucket, Key=manifest_key)
+                          except Exception as e:
+                              print(f"Error deleting files: {str(e)}")
+
+                          send_cfn_response(
+                              event, context, 'SUCCESS',
+                              physical_id=f'{bucket}-data-generator',
+                              reason='Data files cleaned up'
+                          )
+
+                  except Exception as e:
+                      print(f"Error: {str(e)}")
+                      send_cfn_response(
+                          event, context, 'FAILED',
+                          reason=str(e)
+                      )
+
+              else:
+                  # Direct invocation (not CloudFormation)
+                  try:
+                      data = generate_council_data()
+                      row_count = write_csv_to_s3(bucket, data_key, data)
+
+                      manifest = create_manifest(bucket, region, data_key)
+                      s3.put_object(
+                          Bucket=bucket,
+                          Key=manifest_key,
+                          Body=json.dumps(manifest, indent=2).encode('utf-8'),
+                          ContentType='application/json'
+                      )
+
+                      return {
+                          'statusCode': 200,
+                          'body': json.dumps({
+                              'success': True,
+                              'rowCount': row_count,
+                              'dataKey': data_key,
+                              'manifestKey': manifest_key
+                          })
+                      }
+
+                  except Exception as e:
+                      print(f"Error: {str(e)}")
+                      return {
+                          'statusCode': 500,
+                          'body': json.dumps({
+                              'success': False,
+                              'error': str(e)
+                          })
+                      }
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+  # ============================================================================
+  # CLOUDWATCH LOG GROUP
+  # ============================================================================
+  DataGeneratorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${DataGeneratorFunction}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+  # ============================================================================
+  # CUSTOM RESOURCE - TRIGGER DATA GENERATION
+  # ============================================================================
+  DataGeneratorTrigger:
+    Type: AWS::CloudFormation::CustomResource
+    DependsOn:
+      - DataBucket
+      - DataBucketPolicy
+      - DataGeneratorLogGroup
+    Properties:
+      ServiceToken: !GetAtt DataGeneratorFunction.Arn
+      Timestamp: !Sub '${AWS::StackName}-${AWS::StackId}'
+
+  # ============================================================================
+  # IAM ROLE FOR QUICKSIGHT S3 ACCESS (Story 25.2)
+  # ============================================================================
+  QuickSightS3AccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'ndx-quicksight-s3-access-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: quicksight.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3ReadAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucket
+                  - s3:GetBucketLocation
+                Resource:
+                  - !GetAtt DataBucket.Arn
+                  - !Sub '${DataBucket.Arn}/*'
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+  # ============================================================================
+  # QUICKSIGHT DATASOURCE - S3 MANIFEST (Story 25.2)
+  # ============================================================================
+  CouncilDataSource:
+    Type: AWS::QuickSight::DataSource
+    DependsOn:
+      - DataGeneratorTrigger
+      - QuickSightS3AccessRole
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSourceId: !Sub 'ndx-council-data-source-${AWS::Region}'
+      Name: NDX Council Performance Data
+      Type: S3
+      DataSourceParameters:
+        S3Parameters:
+          ManifestFileLocation:
+            Bucket: !Ref DataBucket
+            Key: manifests/council-data-manifest.json
+          RoleArn: !GetAtt QuickSightS3AccessRole.Arn
+      Permissions:
+        - Principal: !Sub 'arn:aws:quicksight:${AWS::Region}:${AWS::AccountId}:user/default/${QuickSightUsername}'
+          Actions:
+            - quicksight:DescribeDataSource
+            - quicksight:DescribeDataSourcePermissions
+            - quicksight:PassDataSource
+            - quicksight:UpdateDataSource
+            - quicksight:DeleteDataSource
+            - quicksight:UpdateDataSourcePermissions
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+  # ============================================================================
+  # QUICKSIGHT DATASET - SPICE IMPORT (Story 25.3)
+  # SPICE auto-purchase enabled via UpdateSPICECapacityConfiguration API
+  # ============================================================================
+  CouncilDataSet:
+    Type: AWS::QuickSight::DataSet
+    DependsOn:
+      - CouncilDataSource
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub 'ndx-council-data-set-${AWS::Region}'
+      Name: NDX Council Performance DataSet
+      ImportMode: SPICE
+      PhysicalTableMap:
+        CouncilDataPhysical:
+          S3Source:
+            DataSourceArn: !GetAtt CouncilDataSource.Arn
+            InputColumns:
+              - Name: council_name
+                Type: STRING
+              - Name: region
+                Type: STRING
+              - Name: service_area
+                Type: STRING
+              - Name: month
+                Type: STRING
+              - Name: cases_received
+                Type: STRING
+              - Name: cases_resolved
+                Type: STRING
+              - Name: avg_response_hours
+                Type: STRING
+              - Name: satisfaction_score
+                Type: STRING
+            UploadSettings:
+              ContainsHeader: true
+              Delimiter: ','
+              Format: CSV
+              TextQualifier: DOUBLE_QUOTE
+      LogicalTableMap:
+        CouncilDataLogical:
+          Alias: Council Performance Data
+          Source:
+            PhysicalTableId: CouncilDataPhysical
+          DataTransforms:
+            # Cast numeric columns from STRING to proper types
+            - CastColumnTypeOperation:
+                ColumnName: cases_received
+                NewColumnType: INTEGER
+            - CastColumnTypeOperation:
+                ColumnName: cases_resolved
+                NewColumnType: INTEGER
+            - CastColumnTypeOperation:
+                ColumnName: avg_response_hours
+                NewColumnType: DECIMAL
+            - CastColumnTypeOperation:
+                ColumnName: satisfaction_score
+                NewColumnType: DECIMAL
+            # Add calculated column for resolution rate
+            - CreateColumnsOperation:
+                Columns:
+                  - ColumnId: resolution_rate
+                    ColumnName: resolution_rate
+                    Expression: '{cases_resolved} / {cases_received}'
+      Permissions:
+        - Principal: !Sub 'arn:aws:quicksight:${AWS::Region}:${AWS::AccountId}:user/default/${QuickSightUsername}'
+          Actions:
+            - quicksight:DescribeDataSet
+            - quicksight:DescribeDataSetPermissions
+            - quicksight:PassDataSet
+            - quicksight:DescribeIngestion
+            - quicksight:ListIngestions
+            - quicksight:UpdateDataSet
+            - quicksight:DeleteDataSet
+            - quicksight:CreateIngestion
+            - quicksight:CancelIngestion
+            - quicksight:UpdateDataSetPermissions
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+  # ============================================================================
+  # QUICKSIGHT DASHBOARD (Story 25.4)
+  # ============================================================================
+  CouncilDashboard:
+    Type: AWS::QuickSight::Dashboard
+    DependsOn:
+      - CouncilDataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DashboardId: !Sub 'ndx-council-dashboard-${AWS::Region}'
+      Name: NDX Council Performance Dashboard
+      VersionDescription: 'Version 2.0 - Dashboard with filters for Service Area and Region'
+      Definition:
+        DataSetIdentifierDeclarations:
+          - Identifier: CouncilData
+            DataSetArn: !GetAtt CouncilDataSet.Arn
+        # FilterGroups for dashboard interactivity (Story 25.5)
+        FilterGroups:
+          - FilterGroupId: service-area-filter-group
+            Filters:
+              - CategoryFilter:
+                  FilterId: service-area-filter
+                  Column:
+                    DataSetIdentifier: CouncilData
+                    ColumnName: service_area
+                  Configuration:
+                    FilterListConfiguration:
+                      MatchOperator: CONTAINS
+                      SelectAllOptions: FILTER_ALL_VALUES
+            ScopeConfiguration:
+              SelectedSheets:
+                SheetVisualScopingConfigurations:
+                  - SheetId: main-dashboard
+                    Scope: ALL_VISUALS
+            CrossDataset: ALL_DATASETS
+            Status: ENABLED
+          - FilterGroupId: region-filter-group
+            Filters:
+              - CategoryFilter:
+                  FilterId: region-filter
+                  Column:
+                    DataSetIdentifier: CouncilData
+                    ColumnName: region
+                  Configuration:
+                    FilterListConfiguration:
+                      MatchOperator: CONTAINS
+                      SelectAllOptions: FILTER_ALL_VALUES
+            ScopeConfiguration:
+              SelectedSheets:
+                SheetVisualScopingConfigurations:
+                  - SheetId: main-dashboard
+                    Scope: ALL_VISUALS
+            CrossDataset: ALL_DATASETS
+            Status: ENABLED
+        Sheets:
+          - SheetId: main-dashboard
+            Name: Council Performance Overview
+            ContentType: INTERACTIVE
+            # FilterControls for user interaction (Story 25.5)
+            FilterControls:
+              - Dropdown:
+                  FilterControlId: service-area-dropdown
+                  Title: Service Area
+                  SourceFilterId: service-area-filter
+                  Type: MULTI_SELECT
+              - Dropdown:
+                  FilterControlId: region-dropdown
+                  Title: Region
+                  SourceFilterId: region-filter
+                  Type: MULTI_SELECT
+            Visuals:
+              # KPI Visual - Total Cases
+              - KPIVisual:
+                  VisualId: kpi-total-cases
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Total Cases Received
+                  ChartConfiguration:
+                    FieldWells:
+                      Values:
+                        - NumericalMeasureField:
+                            FieldId: total-cases-field
+                            Column:
+                              DataSetIdentifier: CouncilData
+                              ColumnName: cases_received
+                            AggregationFunction:
+                              SimpleNumericalAggregation: SUM
+              # KPI Visual - Resolution Rate
+              - KPIVisual:
+                  VisualId: kpi-resolution-rate
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Average Resolution Rate
+                  ChartConfiguration:
+                    FieldWells:
+                      Values:
+                        - NumericalMeasureField:
+                            FieldId: resolution-rate-field
+                            Column:
+                              DataSetIdentifier: CouncilData
+                              ColumnName: resolution_rate
+                            AggregationFunction:
+                              SimpleNumericalAggregation: AVERAGE
+              # KPI Visual - Satisfaction Score
+              - KPIVisual:
+                  VisualId: kpi-satisfaction
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Average Satisfaction Score
+                  ChartConfiguration:
+                    FieldWells:
+                      Values:
+                        - NumericalMeasureField:
+                            FieldId: satisfaction-field
+                            Column:
+                              DataSetIdentifier: CouncilData
+                              ColumnName: satisfaction_score
+                            AggregationFunction:
+                              SimpleNumericalAggregation: AVERAGE
+              # Bar Chart - Cases by Service Area
+              - BarChartVisual:
+                  VisualId: bar-cases-by-service
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Cases by Service Area
+                  ChartConfiguration:
+                    FieldWells:
+                      BarChartAggregatedFieldWells:
+                        Category:
+                          - CategoricalDimensionField:
+                              FieldId: service-category-field
+                              Column:
+                                DataSetIdentifier: CouncilData
+                                ColumnName: service_area
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: cases-value-field
+                              Column:
+                                DataSetIdentifier: CouncilData
+                                ColumnName: cases_received
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    Orientation: HORIZONTAL
+                    BarsArrangement: CLUSTERED
+              # Bar Chart - Satisfaction by Service Area
+              - BarChartVisual:
+                  VisualId: bar-satisfaction-by-service
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Satisfaction by Service Area
+                  ChartConfiguration:
+                    FieldWells:
+                      BarChartAggregatedFieldWells:
+                        Category:
+                          - CategoricalDimensionField:
+                              FieldId: service-satisfaction-category
+                              Column:
+                                DataSetIdentifier: CouncilData
+                                ColumnName: service_area
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: satisfaction-value-field
+                              Column:
+                                DataSetIdentifier: CouncilData
+                                ColumnName: satisfaction_score
+                              AggregationFunction:
+                                SimpleNumericalAggregation: AVERAGE
+                    Orientation: HORIZONTAL
+                    BarsArrangement: CLUSTERED
+              # Table Visual - Service Breakdown
+              - TableVisual:
+                  VisualId: table-service-breakdown
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Service Performance Breakdown
+                  ChartConfiguration:
+                    FieldWells:
+                      TableAggregatedFieldWells:
+                        GroupBy:
+                          - CategoricalDimensionField:
+                              FieldId: table-service-field
+                              Column:
+                                DataSetIdentifier: CouncilData
+                                ColumnName: service_area
+                          - CategoricalDimensionField:
+                              FieldId: table-region-field
+                              Column:
+                                DataSetIdentifier: CouncilData
+                                ColumnName: region
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: table-cases-field
+                              Column:
+                                DataSetIdentifier: CouncilData
+                                ColumnName: cases_received
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                          - NumericalMeasureField:
+                              FieldId: table-resolved-field
+                              Column:
+                                DataSetIdentifier: CouncilData
+                                ColumnName: cases_resolved
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                          - NumericalMeasureField:
+                              FieldId: table-satisfaction-field
+                              Column:
+                                DataSetIdentifier: CouncilData
+                                ColumnName: satisfaction_score
+                              AggregationFunction:
+                                SimpleNumericalAggregation: AVERAGE
+      Permissions:
+        - Principal: !Sub 'arn:aws:quicksight:${AWS::Region}:${AWS::AccountId}:user/default/${QuickSightUsername}'
+          Actions:
+            - quicksight:DescribeDashboard
+            - quicksight:ListDashboardVersions
+            - quicksight:UpdateDashboardPermissions
+            - quicksight:QueryDashboard
+            - quicksight:UpdateDashboard
+            - quicksight:DeleteDashboard
+            - quicksight:UpdateDashboardPublishedVersion
+            - quicksight:DescribeDashboardPermissions
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+# ============================================================================
+# OUTPUTS
+# ============================================================================
+Outputs:
+  DataBucket:
+    Description: S3 bucket name for QuickSight data
+    Value: !Ref DataBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-DataBucket'
+
+  DataBucketArn:
+    Description: S3 bucket ARN for QuickSight data
+    Value: !GetAtt DataBucket.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-DataBucketArn'
+
+  DataGeneratorFunctionArn:
+    Description: Lambda function ARN for data generation
+    Value: !GetAtt DataGeneratorFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-DataGeneratorFunctionArn'
+
+  ManifestKey:
+    Description: S3 key for QuickSight manifest file
+    Value: manifests/council-data-manifest.json
+    Export:
+      Name: !Sub '${AWS::StackName}-ManifestKey'
+
+  DataKey:
+    Description: S3 key for council metrics CSV file
+    Value: data/council-metrics.csv
+    Export:
+      Name: !Sub '${AWS::StackName}-DataKey'
+
+  ManifestUri:
+    Description: Full S3 URI for QuickSight manifest (use for DataSource creation)
+    Value: !Sub 's3://${DataBucket}/manifests/council-data-manifest.json'
+    Export:
+      Name: !Sub '${AWS::StackName}-ManifestUri'
+
+  DataUri:
+    Description: Full S3 URI for council metrics data
+    Value: !Sub 's3://${DataBucket}/data/council-metrics.csv'
+    Export:
+      Name: !Sub '${AWS::StackName}-DataUri'
+
+  DataSourceArn:
+    Description: QuickSight DataSource ARN
+    Value: !GetAtt CouncilDataSource.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-DataSourceArn'
+
+  DataSourceId:
+    Description: QuickSight DataSource ID
+    Value: !Sub 'ndx-council-data-source-${AWS::Region}'
+    Export:
+      Name: !Sub '${AWS::StackName}-DataSourceId'
+
+  QuickSightS3RoleArn:
+    Description: IAM Role ARN for QuickSight S3 access
+    Value: !GetAtt QuickSightS3AccessRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-QuickSightS3RoleArn'
+
+  DataSetArn:
+    Description: QuickSight DataSet ARN
+    Value: !GetAtt CouncilDataSet.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-DataSetArn'
+
+  DataSetId:
+    Description: QuickSight DataSet ID
+    Value: !Sub 'ndx-council-data-set-${AWS::Region}'
+    Export:
+      Name: !Sub '${AWS::StackName}-DataSetId'
+
+  DashboardArn:
+    Description: QuickSight Dashboard ARN
+    Value: !GetAtt CouncilDashboard.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-DashboardArn'
+
+  DashboardId:
+    Description: QuickSight Dashboard ID
+    Value: !Sub 'ndx-council-dashboard-${AWS::Region}'
+    Export:
+      Name: !Sub '${AWS::StackName}-DashboardId'
+
+  DashboardUrl:
+    Description: QuickSight Dashboard Console URL
+    Value: !Sub 'https://${AWS::Region}.quicksight.aws.amazon.com/sn/dashboards/ndx-council-dashboard-${AWS::Region}'
+    Export:
+      Name: !Sub '${AWS::StackName}-DashboardUrl'
+
+  ScenarioInfo:
+    Description: NDX:Try scenario information
+    Value: !Sub |
+      {
+        "scenario": "quicksight-dashboard",
+        "version": "2.4.0",
+        "story": "25.5 - Dashboard Filters and Embedding",
+        "environment": "${Environment}",
+        "dataset": "${SampleDataset}",
+        "services": ["S3", "Lambda", "QuickSight", "CloudFormation"],
+        "features": ["KPI Visuals", "Bar Charts", "Data Table", "Filters"],
+        "nextStories": ["25.6 - Integration Testing"]
+      }

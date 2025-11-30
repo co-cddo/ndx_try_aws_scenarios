@@ -1,0 +1,385 @@
+---
+layout: layouts/walkthrough.njk
+title: FOI Redaction Walkthrough
+description: Step-by-step guide to experiencing AI-powered PII detection and redaction for FOI requests
+currentStep: 0
+totalSteps: 5
+scenarioId: foi-redaction
+---
+
+{#
+  FOI Redaction Walkthrough Landing Page (Story 3.4)
+  AC-3.4.1, AC-3.4.4, AC-3.4.5
+#}
+
+<h1 class="govuk-heading-xl">Try AI-Powered FOI Redaction</h1>
+
+{# AC-3.4.5: Value proposition - 10 minutes to understand automatic PII redaction #}
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    10 minutes to see AI automatically detect and redact personal information
+  </h2>
+  <div class="govuk-panel__body">
+    No deployment needed. Upload a sample FOI document and watch AI identify names, addresses, phone numbers, and emails instantly.
+  </div>
+</div>
+
+{# AC-3.4.5: Technical reassurance #}
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you step-by-step through uploading an FOI response document and reviewing
+    AI-detected personal information. Perfect for FOI officers, information governance teams, and anyone
+    evaluating AI for reducing manual redaction work.
+  </p>
+</div>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this 10-minute walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Access the redaction interface</strong> - Find your deployed AI redaction service (2 minutes)
+  </li>
+  <li>
+    <strong>Download a sample FOI document</strong> - Get a realistic FOI response to test with (1 minute)
+  </li>
+  <li>
+    <strong>Upload and process the document</strong> - Watch AI detect PII in real-time (2 minutes)
+  </li>
+  <li>
+    <strong>Review detected PII with confidence scores</strong> - See what the AI found and how confident it is (3 minutes)
+  </li>
+  <li>
+    <strong>View redacted output</strong> - See the document with PII replaced by redaction markers (2 minutes)
+  </li>
+</ol>
+
+{# Prerequisites section with sample data check #}
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already deployed the FOI Redaction scenario to your Innovation Sandbox account.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/foi-redaction/" class="govuk-link">Deploy the FOI Redaction scenario</a> if you haven't already.
+    Deployment takes 4-6 minutes.
+  </p>
+
+  {# Sample Data Status Component #}
+  <div class="govuk-!-margin-top-4">
+    <h3 class="govuk-heading-s">Sample documents check</h3>
+    {% include "components/sample-data-status.njk" %}
+  </div>
+
+  {# Sample Data Explanation Panel (Story 12.2) - AC1, AC2, AC3 #}
+  <div class="govuk-!-margin-top-4">
+    {% include "components/sample-data-panel.njk" %}
+  </div>
+
+  {# Manual seeding fallback #}
+  <details class="govuk-details govuk-!-margin-top-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Manual document upload (if automatic deployment failed)
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">If the automated sample document deployment failed, you can manually upload documents:</p>
+
+      <ol class="govuk-list govuk-list--number">
+        <li>
+          Go to the <a href="https://console.aws.amazon.com/s3/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS S3 console</a>
+        </li>
+        <li>
+          Find the bucket named <code>ndx-try-foi-redaction-[timestamp]-documents</code>
+        </li>
+        <li>
+          Download sample documents from <a href="/assets/documents/foi/" class="govuk-link">our sample document library</a>
+        </li>
+        <li>
+          Upload the PDF files to the S3 bucket under the <code>samples/</code> prefix
+        </li>
+        <li>
+          Refresh this page to verify documents are available
+        </li>
+      </ol>
+
+      <p class="govuk-body">
+        If you continue to have issues, <a href="/contact/" class="govuk-link">contact support</a>.
+      </p>
+    </div>
+  </details>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For FOI officers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How AI reads FOI response documents</li>
+      <li>Which types of PII can be automatically detected</li>
+      <li>Time saved vs manual line-by-line review</li>
+      <li>Accuracy and confidence scores for each detection</li>
+      <li>When human review is still needed</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For information governance managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Potential processing time reduction (80% time savings)</li>
+      <li>Volume of FOI requests that could benefit</li>
+      <li>Compliance risk reduction (fewer missed PII)</li>
+      <li>Return on investment calculation</li>
+      <li>Integration with existing FOI workflows</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">Sample documents you'll use</h2>
+
+<p class="govuk-body">
+  We've prepared 3 realistic FOI response documents representing common request types:
+</p>
+
+<div class="govuk-grid-row ndx-sample-documents-preview">
+  {% for doc in foiSampleDocuments %}
+    <div class="govuk-grid-column-one-third">
+      <div class="ndx-sample-document-card">
+        <h3 class="govuk-heading-s">{{ doc.title }}</h3>
+        <dl class="govuk-summary-list govuk-summary-list--no-border">
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">Type</dt>
+            <dd class="govuk-summary-list__value">{{ doc.type }}</dd>
+          </div>
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">File Size</dt>
+            <dd class="govuk-summary-list__value">{{ doc.fileSize }}</dd>
+          </div>
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">PII Types</dt>
+            <dd class="govuk-summary-list__value">{{ doc.piiLocations.length }} detected</dd>
+          </div>
+        </dl>
+        <p class="govuk-body-s" style="color: #505a5f; margin-top: 10px;">
+          <strong>Expected redactions:</strong> {{ doc.expectedRedactions }}
+        </p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{# AC-3.4.2, AC-3.4.3: PII types detected #}
+<div class="ndx-pii-types-section govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">Personal information we detect</h2>
+  <p class="govuk-body">
+    The AI automatically identifies these types of personal information (PII):
+  </p>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+        <li><strong>Person names</strong> - Full names, first names, surnames</li>
+        <li><strong>Addresses</strong> - UK postal addresses including postcodes</li>
+      </ul>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+        <li><strong>Phone numbers</strong> - Mobile, landline, including area codes</li>
+        <li><strong>Email addresses</strong> - Personal and work email addresses</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="govuk-body">
+    In addition, the system can detect UK-specific identifiers like National Insurance numbers.
+  </p>
+</div>
+
+{# AC-3.4.5: Wow moment preview #}
+<div class="ndx-wow-moment-preview govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">The wow moment</h2>
+  <p class="govuk-body">
+    After you upload an FOI response, you'll see AI automatically:
+  </p>
+  <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+    <li><strong>Find all PII locations</strong> - Even across multiple pages and sections</li>
+    <li><strong>Show confidence scores</strong> - 95-99% accuracy on typed documents</li>
+    <li><strong>Generate redacted output</strong> - PII replaced with markers like [REDACTED: NAME]</li>
+    <li><strong>Preserve document structure</strong> - Everything else remains readable</li>
+  </ul>
+  <p class="govuk-body">
+    All in under 30 seconds. No manual highlighting. No missed personal details. No transcription errors.
+  </p>
+</div>
+
+{# AC-3.4.5: Reflection prompt - ROI calculation #}
+<div class="ndx-reflection-section govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Think about your council</h2>
+
+  <div class="govuk-inset-text" style="border-left-color: #00703c;">
+    <p class="govuk-!-font-size-24" style="font-weight: 700;">
+      How many FOI requests does your council process annually?
+    </p>
+  </div>
+
+  <p class="govuk-body">
+    Consider the time savings. Our example calculation:
+  </p>
+
+  <div class="ndx-roi-calculation">
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Current state</dt>
+        <dd class="govuk-summary-list__value">
+          500 FOI requests/year × 30 minutes manual redaction = <strong>250 hours/year</strong>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">With AI redaction</dt>
+        <dd class="govuk-summary-list__value">
+          80% auto-redaction, 20% manual review = <strong>50 hours/year</strong>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Time freed</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>200 hours saved</strong> for complex exemptions and policy work
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Annual cost benefit</dt>
+        <dd class="govuk-summary-list__value">
+          200 hours × £25/hour = <strong>£5,000 saved per year</strong>
+        </dd>
+      </div>
+    </dl>
+
+    <div class="govuk-inset-text govuk-!-margin-top-4">
+      <p class="govuk-body">
+        <strong>Committee language:</strong> "Implementing AI redaction reduces FOI processing time by 80%,
+        freeing 200 hours annually while improving compliance by ensuring consistent PII detection."
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/foi-redaction/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 10 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-sample-documents-preview {
+    margin-top: 20px;
+  }
+
+  .ndx-sample-document-card {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+    min-height: 280px;
+  }
+
+  .ndx-sample-document-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-sample-document-card .govuk-summary-list {
+    font-size: 16px;
+  }
+
+  .ndx-sample-document-card .govuk-summary-list__key {
+    width: 40%;
+  }
+
+  .ndx-pii-types-section {
+    padding: 25px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-pii-types-section h2 {
+    margin-top: 0;
+  }
+
+  .ndx-wow-moment-preview {
+    padding: 25px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-wow-moment-preview h2 {
+    margin-top: 0;
+  }
+
+  .ndx-reflection-section {
+    padding: 30px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-reflection-section h2 {
+    margin-top: 0;
+  }
+
+  .ndx-roi-calculation {
+    background-color: #ffffff;
+    padding: 20px;
+    border: 2px solid #b1b4b6;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-sample-document-card {
+      min-height: auto;
+    }
+
+    .ndx-sample-documents-preview .govuk-grid-column-one-third {
+      width: 100%;
+    }
+  }
+</style>

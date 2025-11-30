@@ -1,0 +1,285 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 1: Access the QuickSight Dashboard - QuickSight Dashboard Walkthrough"
+description: Locate the dashboard URL in CloudFormation outputs and open QuickSight
+currentStep: 1
+totalSteps: 4
+timeEstimate: "2 minutes"
+scenarioId: quicksight-dashboard
+---
+
+{#
+  Step 1: Access the QuickSight Dashboard (AC-3.7.2)
+  - Find CloudFormation stack
+  - Locate dashboard URL in Outputs tab
+  - Open QuickSight dashboard in browser
+  - Verify dashboard loads correctly
+#}
+
+{% set stepNumber = 1 %}
+{% set stepTitle = "Access the QuickSight Dashboard" %}
+{% set stepDescription = "Find the dashboard URL in CloudFormation outputs and open it in your browser." %}
+{% set timeEstimate = "2 minutes" %}
+{# Load screenshots from YAML data - Story 13.8 #}
+{% set screenshotData = screenshots["quicksight-dashboard"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 1) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "You locate your CloudFormation stack",
+  "You find the QuickSightDashboardURL in outputs",
+  "You open the dashboard in your browser",
+  "You see the QuickSight dashboard loading screen"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Finding your CloudFormation stack</h3>
+
+<p class="govuk-body">
+  The QuickSight dashboard is deployed via CloudFormation. First, locate your stack:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+  <li>
+    Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console</a> (us-east-1 N. Virginia region)
+  </li>
+  <li>
+    Look for a stack named <code>ndx-try-quicksight-dashboard-[timestamp]</code>
+  </li>
+  <li>
+    Verify stack status shows <strong style="color: #00703c;">CREATE_COMPLETE</strong> (green)
+  </li>
+  <li>
+    If status shows <strong style="color: #d4351c;">CREATE_IN_PROGRESS</strong>, wait 2-3 minutes for completion
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Deployment time:</strong> QuickSight dashboards take 8-12 minutes to deploy because AWS must:
+    (1) Create QuickSight subscription for your account (one-time, 3-5 minutes), (2) Upload sample data
+    to S3, (3) Create Athena table and run queries, (4) Import data into SPICE cache (4-7 minutes).
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Locating the dashboard URL</h3>
+
+<p class="govuk-body">
+  Once your stack shows CREATE_COMPLETE:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+  <li>
+    Click on your stack name to open the stack details page
+  </li>
+  <li>
+    Click the <strong>Outputs</strong> tab (next to Stack info, Events, Resources)
+  </li>
+  <li>
+    Look for an output key named <code>QuickSightDashboardURL</code>
+  </li>
+  <li>
+    The value will be a URL like: <code>https://us-east-1.quicksight.aws.amazon.com/embed/.../dashboards/ndx-council-dashboard...</code>
+  </li>
+  <li>
+    Click the URL to open the dashboard in a new browser tab
+  </li>
+</ol>
+
+<div class="govuk-warning-text">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Important</span>
+    The dashboard URL includes embedded authentication - do not share this URL publicly as it grants access to your dashboard.
+  </strong>
+</div>
+
+<h3 class="govuk-heading-m">What you should see</h3>
+
+<p class="govuk-body">
+  When the QuickSight dashboard loads, you should see:
+</p>
+
+<ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+  <li><strong>Dashboard title:</strong> "NDX Council Performance Dashboard" at the top</li>
+  <li><strong>3 KPI cards</strong> showing Total Cases Received (267,334), Average Resolution Rate (0.85), and Average Satisfaction Score (4.15)</li>
+  <li><strong>Cases by Service Area</strong> horizontal bar chart showing request volumes across 9 service areas</li>
+  <li><strong>Satisfaction by Service Area</strong> horizontal bar chart comparing satisfaction scores</li>
+  <li><strong>Service Performance Breakdown</strong> table with columns for service_area, region, cases_received, cases_resolved, satisfaction_score</li>
+  <li><strong>Controls panel</strong> at the top with Service Area and Region filter dropdowns</li>
+</ul>
+
+<div class="ndx-interface-guide govuk-!-margin-top-4">
+  <h4 class="govuk-heading-s">QuickSight interface overview</h4>
+
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Top navigation bar</dt>
+      <dd class="govuk-summary-list__value">
+        Contains dashboard name, filter controls, share, export, and refresh buttons
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Controls panel</dt>
+      <dd class="govuk-summary-list__value">
+        Service Area and Region dropdown filters - apply to all widgets simultaneously
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Widget area</dt>
+      <dd class="govuk-summary-list__value">
+        Main dashboard body with KPI cards, charts, and tables - each widget is interactive
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Export button</dt>
+      <dd class="govuk-summary-list__value">
+        Top-right corner - download dashboard as PDF or export data to Excel/CSV
+      </dd>
+    </div>
+  </dl>
+</div>
+
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Stack shows CREATE_FAILED or ROLLBACK_COMPLETE
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body"><strong>Possible causes:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>QuickSight subscription not activated for your AWS account</li>
+      <li>IAM permissions missing for QuickSight API calls</li>
+      <li>S3 bucket name conflict (rare)</li>
+    </ul>
+    <p class="govuk-body"><strong>Solutions:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Click on stack, go to Events tab, look for error message with red FAILED status</li>
+      <li>Delete the failed stack and redeploy scenario from the portal</li>
+      <li>If QuickSight subscription error: Go to QuickSight console, sign up for free trial (one-time)</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Dashboard URL not appearing in Outputs tab
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body"><strong>Possible causes:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Stack still deploying (QuickSight takes 8-12 minutes)</li>
+      <li>Dashboard creation failed (check Events tab for errors)</li>
+    </ul>
+    <p class="govuk-body"><strong>Solutions:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Wait for stack status to show CREATE_COMPLETE (refresh page every 30 seconds)</li>
+      <li>If stack shows CREATE_COMPLETE but no output, go to Events tab and look for failures</li>
+      <li>Check Resources tab to verify QuickSight dashboard resource created successfully</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Dashboard URL shows "Access Denied" or "You don't have permission"
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body"><strong>Possible causes:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>QuickSight Reader access not configured for your user</li>
+      <li>Dashboard sharing permissions not set correctly</li>
+      <li>URL expired (embedded authentication timeout after 24 hours)</li>
+    </ul>
+    <p class="govuk-body"><strong>Solutions:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Go back to CloudFormation Outputs tab and click the URL again (generates fresh credentials)</li>
+      <li>If still access denied, go to QuickSight console, check Manage users section to verify your user exists</li>
+      <li>Contact AWS support if QuickSight subscription issues persist</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Dashboard loads but shows "No data" or blank charts
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body"><strong>Possible causes:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>SPICE dataset import still in progress (check Datasets section)</li>
+      <li>Sample data not uploaded to S3 successfully</li>
+      <li>Athena query failed to create table</li>
+    </ul>
+    <p class="govuk-body"><strong>Solutions:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>In QuickSight, click Datasets (left sidebar), find council-service-metrics dataset</li>
+      <li>Check dataset status - should show "Last refresh: [timestamp]" with green checkmark</li>
+      <li>If status shows "Failed", click Refresh now to retry SPICE import</li>
+      <li>Verify S3 bucket contains service-metrics.csv file (check CloudFormation Resources tab for bucket name)</li>
+    </ul>
+  </div>
+</details>
+
+{# Navigation #}
+<div class="ndx-walkthrough-nav govuk-!-margin-top-8">
+  <a href="/walkthroughs/quicksight-dashboard/" class="govuk-link ndx-walkthrough-nav__back">
+    ← Back to Overview
+  </a>
+  <a href="/walkthroughs/quicksight-dashboard/step-2/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    Continue to Step 2
+  </a>
+</div>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-interface-guide {
+    padding: 20px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-interface-guide h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-walkthrough-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-nav__back {
+    font-size: 19px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-walkthrough-nav {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ndx-walkthrough-nav__back {
+      margin-bottom: 15px;
+    }
+  }
+</style>

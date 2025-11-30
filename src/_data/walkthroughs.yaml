@@ -1,0 +1,84 @@
+# Walkthrough metadata for scenario cards
+# Maps scenario IDs to walkthrough information
+# Used by scenario-card.njk to show walkthrough badges (Story 15.4)
+# Step titles describe what users achieve at each step
+
+walkthroughs:
+  council-chatbot:
+    totalSteps: 4
+    url: "/walkthroughs/council-chatbot/"
+    title: "Council Chatbot Walkthrough"
+    duration: "10 minutes"
+    hasWalkthrough: true
+    category: "ai"
+    steps:
+      - title: "Chatbot accessed"
+      - title: "First question answered"
+      - title: "Custom question tested"
+      - title: "AI behaviour understood"
+
+  planning-ai:
+    totalSteps: 4
+    url: "/walkthroughs/planning-ai/"
+    title: "Planning Application AI Walkthrough"
+    duration: "8 minutes"
+    hasWalkthrough: true
+    category: "ai"
+    steps:
+      - title: "Upload interface accessed"
+      - title: "Document uploaded"
+      - title: "Data extracted"
+      - title: "AI accuracy evaluated"
+
+  foi-redaction:
+    totalSteps: 5
+    url: "/walkthroughs/foi-redaction/"
+    title: "FOI Redaction Walkthrough"
+    duration: "10 minutes"
+    hasWalkthrough: true
+    category: "ai"
+    steps:
+      - title: "Redaction tool accessed"
+      - title: "Sample text submitted"
+      - title: "PII detected"
+      - title: "Redactions reviewed"
+      - title: "Confidence levels understood"
+
+  smart-car-park:
+    totalSteps: 4
+    url: "/walkthroughs/smart-car-park/"
+    title: "Smart Car Park IoT Walkthrough"
+    duration: "12 minutes"
+    hasWalkthrough: true
+    category: "iot"
+    steps:
+      - title: "Dashboard accessed"
+      - title: "Live data explored"
+      - title: "Occupancy patterns analysed"
+      - title: "IoT architecture understood"
+
+  text-to-speech:
+    totalSteps: 4
+    url: "/walkthroughs/text-to-speech/"
+    title: "Text to Speech Walkthrough"
+    duration: "8 minutes"
+    hasWalkthrough: true
+    category: "accessibility"
+    steps:
+      - title: "Polly interface accessed"
+      - title: "Text converted to speech"
+      - title: "Voice options explored"
+      - title: "Accessibility benefits understood"
+
+  quicksight-dashboard:
+    totalSteps: 4
+    url: "/walkthroughs/quicksight-dashboard/"
+    title: "QuickSight Dashboard Walkthrough"
+    duration: "10 minutes"
+    hasWalkthrough: true
+    category: "analytics"
+    steps:
+      - title: "Dashboard accessed"
+      - title: "Metrics explored"
+      - title: "Filters applied"
+      - title: "Self-service value understood"

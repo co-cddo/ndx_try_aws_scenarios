@@ -1,0 +1,283 @@
+---
+layout: page
+---
+{#
+  Scenario Detail Page Layout
+
+  This layout displays a single scenario with:
+  - Full scenario metadata
+  - Deploy to Innovation Sandbox button with confirmation modal
+  - Pre-deployment checklist
+  - Cost transparency information
+  - Error message guidance
+
+  Expects front matter:
+    title: string
+    description: string
+    scenario: string (scenario ID from scenarios.yaml)
+#}
+
+{% set scenarioData = scenarios.scenarios | selectattr("id", "equalto", scenario) | first %}
+
+{% if not scenarioData %}
+  <div class="govuk-error-summary" data-module="govuk-error-summary">
+    <h2 class="govuk-error-summary__title">Scenario not found</h2>
+    <div class="govuk-error-summary__body">
+      <p>The scenario "{{ scenario }}" could not be found.</p>
+      <p><a href="/scenarios/" class="govuk-link">Browse all scenarios</a></p>
+    </div>
+  </div>
+{% else %}
+
+{# Phase Navigator - Story 12.1 #}
+{% set scenarioId = scenario %}
+{% include "components/phase-navigator.njk" %}
+
+{# Breadcrumb navigation - Story 14.6 #}
+{% set breadcrumbType = 'scenario' %}
+{% include "components/breadcrumb.njk" %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {# Badges #}
+    <p class="govuk-body-s govuk-!-margin-bottom-2">
+      {% if scenarioData.isMostPopular %}
+        <span class="govuk-tag govuk-tag--yellow">Most Popular</span>
+      {% endif %}
+      {% if scenarioData.featured %}
+        <span class="govuk-tag govuk-tag--purple{% if scenarioData.isMostPopular %} govuk-!-margin-left-1{% endif %}">Featured</span>
+      {% endif %}
+      <span class="govuk-tag govuk-tag--{{ scenarioData.difficulty | difficultyColor }}{% if scenarioData.isMostPopular or scenarioData.featured %} govuk-!-margin-left-1{% endif %}">
+        {{ scenarioData.difficulty | capitalize }}
+      </span>
+    </p>
+
+    {# Headline #}
+    <p class="govuk-body-l">{{ scenarioData.headline }}</p>
+
+    {# Description #}
+    <p class="govuk-body">{{ scenarioData.description }}</p>
+
+    {# What you'll learn #}
+    <h2 class="govuk-heading-m">What you'll learn</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      {% for skill in scenarioData.skillsLearned %}
+        <li>{{ skill }}</li>
+      {% endfor %}
+    </ul>
+
+    {# Business outcomes #}
+    {% if scenarioData.businessOutcomes %}
+      <h2 class="govuk-heading-m">Business outcomes</h2>
+      <ul class="govuk-list govuk-list--bullet">
+        {% for outcome in scenarioData.businessOutcomes %}
+          <li>{{ outcome }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {# AWS Services Used #}
+    <h2 class="govuk-heading-m">AWS services used</h2>
+    <p class="govuk-body">
+      {% for service in scenarioData.awsServices %}
+        <span class="govuk-tag govuk-tag--blue govuk-!-margin-right-1 govuk-!-margin-bottom-1">{{ service }}</span>
+      {% endfor %}
+    </p>
+  </div>
+
+  <div class="govuk-grid-column-one-third">
+    {# Scenario summary card #}
+    <div class="ndx-scenario-summary">
+      <h2 class="govuk-heading-s">At a glance</h2>
+      <dl class="govuk-summary-list govuk-summary-list--no-border">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Time</dt>
+          <dd class="govuk-summary-list__value">{{ scenarioData.timeEstimate }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Est. cost</dt>
+          <dd class="govuk-summary-list__value">{{ scenarioData.estimatedCost }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Max cost</dt>
+          <dd class="govuk-summary-list__value">{{ scenarioData.maximumCost }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Audience</dt>
+          <dd class="govuk-summary-list__value">
+            <strong class="govuk-tag govuk-tag--{{ scenarioData.primaryPersona | personaColor }}">
+              {{ scenarioData.primaryPersona | capitalize | replace("-", " ") }}
+            </strong>
+          </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Security</dt>
+          <dd class="govuk-summary-list__value">
+            <span class="govuk-tag govuk-tag--green">Sandbox isolated</span>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</div>
+
+{# Walkthrough CTA - Story 15.1 #}
+{# Positioned after description, before deployment section #}
+<div class="govuk-grid-row govuk-!-margin-top-4">
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-m">Try the walkthrough</h2>
+    <p class="govuk-body">Experience this scenario step-by-step with our guided walkthrough. No deployment required - see the actual screens and functionality.</p>
+    {% include "components/walkthrough-cta.njk" %}
+  </div>
+</div>
+
+{# Demo Video Section - Zero-Deployment Path (Story 2.4 - AC-2.4.5) #}
+{# Positioned before deployment section so non-deploying users see it first #}
+{% include "components/demo-video-section.njk" %}
+
+{# Screenshot Walkthrough Section - Zero-Deployment Path (Story 2.5 - AC-2.5.1) #}
+{# Positioned after video section, before deployment section #}
+{% include "components/screenshot-walkthrough.njk" %}
+
+{# Partner Tour Section - Alternative path for guided evaluation (Story 2.6 - AC-2.6.1) #}
+{# Positioned after screenshot walkthrough, before deployment section #}
+{% include "components/partner-tour-section.njk" %}
+
+{# Deploy Section #}
+<div class="govuk-!-margin-top-8">
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+  <h2 class="govuk-heading-l">Deploy to Innovation Sandbox</h2>
+
+  {% if scenarioData.deployment %}
+    {# Cost Transparency Component (Story 2.3) #}
+    {% include "components/cost-transparency.njk" %}
+
+    {# Cost Acknowledgment Warning #}
+    <div class="govuk-warning-text">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-visually-hidden">Warning</span>
+        Maximum expected cost: {{ scenarioData.maximumCost }}. Your council is responsible for all AWS charges in your Innovation Sandbox account.
+      </strong>
+    </div>
+
+    {# Pre-deployment Acknowledgment Checklist (AC-2.3.4, AC-2.3.5) #}
+    <div class="ndx-prereq-checklist govuk-!-margin-bottom-6">
+      <h3 class="govuk-heading-s">Before you deploy</h3>
+      <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input js-prereq-check" id="prereq-account" name="prereq-account" type="checkbox" value="account">
+          <label class="govuk-label govuk-checkboxes__label" for="prereq-account">
+            I have an AWS Innovation Sandbox account
+          </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input js-prereq-check" id="prereq-logged-in" name="prereq-logged-in" type="checkbox" value="logged-in">
+          <label class="govuk-label govuk-checkboxes__label" for="prereq-logged-in">
+            I am logged into AWS Console
+            <a href="https://console.aws.amazon.com/console/home" target="_blank" rel="noopener noreferrer" class="govuk-link govuk-!-margin-left-1">(Check now<span class="govuk-visually-hidden"> opens in new tab</span>)</a>
+          </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input js-prereq-check" id="prereq-cost" name="prereq-cost" type="checkbox" value="cost">
+          <label class="govuk-label govuk-checkboxes__label" for="prereq-cost">
+            I understand the maximum expected cost is {{ scenarioData.maximumCost }}
+          </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input js-prereq-check" id="prereq-cleanup" name="prereq-cleanup" type="checkbox" value="cleanup">
+          <label class="govuk-label govuk-checkboxes__label" for="prereq-cleanup">
+            I understand resources will auto-delete after 2 hours
+          </label>
+        </div>
+      </div>
+    </div>
+
+    {# Deploy Button - works as link without JS #}
+    {% set deployUrl = scenarioData | deployUrl %}
+    <div class="ndx-deploy-action">
+      <a href="{{ deployUrl }}"
+         id="deploy-button"
+         role="button"
+         draggable="false"
+         class="govuk-button govuk-button--start"
+         data-module="govuk-button"
+         data-scenario-id="{{ scenarioData.id }}"
+         data-deploy-url="{{ deployUrl }}">
+        Deploy to Innovation Sandbox
+        <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+        </svg>
+      </a>
+      <p class="govuk-body-s govuk-!-margin-top-2">
+        Opens AWS CloudFormation Console in a new tab
+      </p>
+    </div>
+
+  {% else %}
+    {# No deployment configured - show placeholder #}
+    <div class="govuk-inset-text">
+      <p>Deployment configuration is being prepared for this scenario.</p>
+      <p><a href="/contact/" class="govuk-link">Contact us</a> if you'd like to be notified when it's ready.</p>
+    </div>
+  {% endif %}
+</div>
+
+{# Confirmation Modal - hidden by default, shown via JS #}
+<dialog id="deploy-modal" class="ndx-modal" role="dialog" aria-labelledby="modal-title" aria-describedby="modal-description" aria-modal="true">
+  <div class="ndx-modal__content">
+    <h2 id="modal-title" class="govuk-heading-l">You're leaving NDX:Try</h2>
+    <p id="modal-description" class="govuk-body">You'll be redirected to the AWS CloudFormation Console to complete deployment in your Innovation Sandbox account.</p>
+    <p class="govuk-body">
+      <strong>What happens next:</strong>
+    </p>
+    <ol class="govuk-list govuk-list--number">
+      <li>Review the pre-filled parameters (no changes needed)</li>
+      <li>Acknowledge the IAM capabilities checkbox</li>
+      <li>Click "Create stack" to start deployment</li>
+      <li>Wait {% if scenarioData.deployment.deploymentTime %}{{ scenarioData.deployment.deploymentTime }}{% else %}2-5 minutes{% endif %} for resources to deploy</li>
+    </ol>
+    <div class="govuk-button-group">
+      <a href="#" id="modal-continue" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+        Continue to AWS Console
+      </a>
+      <button type="button" id="modal-cancel" class="govuk-button govuk-button--secondary">
+        Go back
+      </button>
+    </div>
+  </div>
+</dialog>
+
+{# Deployment Guide - What happens next (Story 2.2) #}
+{% include "components/deployment-guide.njk" %}
+
+{# Deployment Success - After deployment completes (Story 2.2) #}
+{% include "components/deployment-success.njk" %}
+
+{# Error Messages Reference #}
+<div class="govuk-!-margin-top-8">
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">Troubleshooting common deployment issues</span>
+    </summary>
+    <div class="govuk-details__text">
+      {% include "components/error-messages.njk" %}
+    </div>
+  </details>
+</div>
+
+{# Related Links #}
+<div class="govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">Related</h2>
+  <ul class="govuk-list">
+    <li><a href="/scenarios/" class="govuk-link">Browse all scenarios</a></li>
+    <li><a href="/quiz/" class="govuk-link">Find your scenario (quiz)</a></li>
+    <li><a href="/get-started/" class="govuk-link">Get started guide</a></li>
+  </ul>
+</div>
+
+{% endif %}
+
+<script src="/assets/js/phase-state.js" defer></script>
+<script src="/assets/js/deploy-url.js" defer></script>

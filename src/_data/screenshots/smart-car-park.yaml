@@ -1,0 +1,178 @@
+# Screenshot data for Smart Car Park scenario (Story 13.2)
+# Used by screenshot.njk component to display S3-hosted screenshots
+# S3 Base: https://ndx-try-screenshots.s3.eu-west-2.amazonaws.com/current/smart-car-park/
+
+scenario: smart-car-park
+scenarioTitle: "Smart Car Park IoT"
+awsService: "AWS IoT Core"
+totalSteps: 4
+
+# Step-specific screenshots
+steps:
+  - step: 1
+    title: "Access the Dashboard"
+    screenshots:
+      - id: cloudformation-outputs
+        filename: step-1-cloudformation-outputs.png
+        alt: "CloudFormation stack outputs showing the Smart Car Park dashboard URL"
+        caption: "Find your Smart Car Park dashboard URL in CloudFormation Outputs"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "10%"
+            y: "42%"
+            label: "DashboardURL output"
+            arrow: "right"
+
+      - id: dashboard-overview
+        filename: step-1-dashboard-overview.png
+        alt: "Smart Car Park dashboard showing real-time occupancy data for multiple car parks"
+        caption: "Live dashboard showing parking space availability across all sites"
+        width: 1920
+        height: 1080
+
+  - step: 2
+    title: "View Real-Time Data"
+    screenshots:
+      - id: live-occupancy
+        filename: step-2-live-occupancy.png
+        alt: "Real-time occupancy graph showing spaces available over time"
+        caption: "Watch occupancy levels update in real-time as sensors report"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "36%"
+            y: "30%"
+            label: "Live occupancy chart"
+            arrow: "down"
+
+      - id: sensor-status
+        filename: step-2-sensor-status.png
+        alt: "Individual sensor status showing connection state and last reading"
+        caption: "Monitor individual parking sensors and their current status"
+        width: 1920
+        height: 1080
+
+      - id: map-view
+        filename: step-2-map-view.png
+        alt: "Map showing car park locations with colour-coded availability"
+        caption: "Geographic view shows availability at each car park location"
+        width: 1920
+        height: 1080
+
+  - step: 3
+    title: "Simulate Sensor Events"
+    screenshots:
+      - id: simulator-interface
+        filename: step-3-simulator-interface.png
+        alt: "IoT device simulator interface for generating parking events"
+        caption: "Use the simulator to send parking space occupied/vacant events"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "14%"
+            y: "37%"
+            label: "Event simulator"
+            arrow: "right"
+
+      - id: event-publishing
+        filename: step-3-event-publishing.png
+        alt: "Publishing a simulated car parking event showing JSON payload"
+        caption: "Simulated sensor events follow the same format as real IoT devices"
+        width: 1920
+        height: 1080
+
+      - id: dashboard-update
+        filename: step-3-dashboard-update.png
+        alt: "Dashboard reflecting the simulated event with updated occupancy"
+        caption: "Watch the dashboard update immediately when events are received"
+        width: 1920
+        height: 1080
+
+  - step: 4
+    title: "Explore Analytics"
+    screenshots:
+      - id: historical-trends
+        filename: step-4-historical-trends.png
+        alt: "Analytics showing parking patterns over the past week"
+        caption: "Analyse historical occupancy patterns and peak times"
+        width: 1920
+        height: 1080
+
+      - id: predictive-insights
+        filename: step-4-predictive-insights.png
+        alt: "Predicted occupancy forecast for upcoming hours"
+        caption: "ML-powered predictions help plan for busy periods"
+        width: 1920
+        height: 1080
+
+      - id: iot-console
+        filename: step-4-iot-console.png
+        alt: "AWS IoT Core console showing device fleet and message routing"
+        caption: "AWS IoT Core manages device connections and message routing"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "17%"
+            y: "16%"
+            label: "Thing registry"
+            arrow: "down"
+
+# Explore section screenshots (Epic 9 content)
+explore:
+  architecture:
+    - id: architecture-overview
+      filename: explore-architecture-overview.png
+      alt: "Architecture diagram showing IoT Core, Lambda, DynamoDB, and dashboard"
+      caption: "How Smart Car Park processes sensor data in real-time"
+      width: 1920
+      height: 1080
+
+    - id: iot-rules
+      filename: explore-iot-rules.png
+      alt: "IoT Core rule configuration routing sensor data to Lambda and S3"
+      caption: "IoT Rules Engine routes messages for processing and storage"
+      width: 1920
+      height: 1080
+
+    - id: timestream-db
+      filename: explore-timestream-db.png
+      alt: "Amazon Timestream database showing parking sensor readings"
+      caption: "Timestream stores time-series data efficiently for analytics"
+      width: 1920
+      height: 1080
+
+  experiments:
+    - id: new-sensors
+      filename: explore-new-sensors.png
+      alt: "Adding a new simulated sensor to the IoT fleet"
+      caption: "Add new parking sensors to expand coverage"
+      width: 1920
+      height: 1080
+
+    - id: rule-modification
+      filename: explore-rule-modification.png
+      alt: "Editing an IoT rule to add an alerting action"
+      caption: "Modify routing rules to add alerts when car parks fill up"
+      width: 1920
+      height: 1080
+
+  limits:
+    - id: scale-testing
+      filename: explore-scale-testing.png
+      alt: "Load testing simulation with high-frequency sensor events"
+      caption: "Test how the system handles high message volumes"
+      width: 1920
+      height: 1080
+
+  production:
+    - id: production-security
+      filename: explore-production-security.png
+      alt: "IoT security best practices including device certificates"
+      caption: "Security considerations: certificates, policies, encryption"
+      width: 1920
+      height: 1080

@@ -1,0 +1,143 @@
+{#
+  Architecture & Security Assessment Section (CTO Persona - AC-4.1.2)
+
+  Variables:
+  - scenarioData: scenario object
+  - cto_evaluation: CTO-specific evaluation data
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    Architecture & Security Assessment
+  </h2>
+
+  {% include "evidence-pack/partials/persona-header.njk" %}
+
+  <h3 class="govuk-heading-m">Architecture Overview</h3>
+  <p class="govuk-body">
+    This scenario uses a serverless architecture leveraging the following AWS services:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    {% for service in scenarioData.awsServices %}
+      <li>{{ service }}</li>
+    {% endfor %}
+  </ul>
+
+  {% if cto_evaluation and cto_evaluation.architecture_assessment %}
+  <h3 class="govuk-heading-m">Architecture Assessment</h3>
+
+  {% if cto_evaluation.architecture_assessment.strengths %}
+  <h4 class="govuk-heading-s">Strengths</h4>
+  <ul class="govuk-list govuk-list--bullet">
+    {% for strength in cto_evaluation.architecture_assessment.strengths %}
+      <li>{{ strength }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if cto_evaluation.architecture_assessment.concerns %}
+  <h4 class="govuk-heading-s">Technical Considerations</h4>
+  <ul class="govuk-list govuk-list--bullet">
+    {% for concern in cto_evaluation.architecture_assessment.concerns %}
+      <li>{{ concern }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Deployment Architecture</h3>
+  <p class="govuk-body">
+    The deployment uses AWS CloudFormation infrastructure-as-code with the following characteristics:
+  </p>
+
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Deployment Method
+      </dt>
+      <dd class="govuk-summary-list__value">
+        CloudFormation Template (Infrastructure as Code)
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Region
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ scenarioData.deployment.region | upper }} (London)
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Deployment Time
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ scenarioData.deployment.deploymentTime }}
+      </dd>
+    </div>
+    {% if scenarioData.deployment.capabilities %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Required Capabilities
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {% for capability in scenarioData.deployment.capabilities %}
+          <span class="govuk-tag govuk-tag--grey">{{ capability }}</span>
+        {% endfor %}
+      </dd>
+    </div>
+    {% endif %}
+  </dl>
+
+  {% if scenarioData.deployment.deploymentPhases %}
+  <h3 class="govuk-heading-m">Deployment Phases</h3>
+  <ol class="govuk-list govuk-list--number">
+    {% for phase in scenarioData.deployment.deploymentPhases %}
+      <li>{{ phase }}</li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Scalability & Performance</h3>
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Serverless Architecture:</strong> The solution automatically scales based on demand. Lambda functions scale horizontally, and managed services (Bedrock, Lex) handle scaling transparently.
+    </p>
+    <p class="govuk-body">
+      <strong>Cost Model:</strong> Pay-per-use pricing means costs scale with actual usage, not peak capacity provisioning.
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-m">Security Summary</h3>
+  <p class="govuk-body">
+    {{ scenarioData.securitySummary }}
+  </p>
+
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Network Isolation
+      </dt>
+      <dd class="govuk-summary-list__value">
+        Innovation Sandbox - isolated from production
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        IAM Permissions
+      </dt>
+      <dd class="govuk-summary-list__value">
+        Least privilege principle applied to all roles
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Auto-Cleanup
+      </dt>
+      <dd class="govuk-summary-list__value">
+        Resources automatically deleted after evaluation period
+      </dd>
+    </div>
+  </dl>
+</div>

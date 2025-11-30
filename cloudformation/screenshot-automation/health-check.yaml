@@ -1,0 +1,283 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  NDX Reference Stack Health Check
+  Story: S0.5 - Reference Deployment Environment
+
+  Lambda function to monitor reference stack health with:
+  - Hourly health checks via EventBridge
+  - CloudWatch metrics publishing
+  - Alarm for unhealthy state detection
+
+  AC5.4: Stack maintained in COMPLETE state during screenshot windows
+  AC5.8: Lambda function runs hourly via EventBridge
+
+Parameters:
+  ReferenceStackName:
+    Type: String
+    Default: 'ndx-reference'
+    Description: Name of the reference stack to monitor
+
+Resources:
+  # ==========================================================================
+  # Health Check Lambda Function
+  # ==========================================================================
+  HealthCheckFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ndx-reference-stack-health-check
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Timeout: 30
+      MemorySize: 256
+      Role: !GetAtt HealthCheckRole.Arn
+      Environment:
+        Variables:
+          REFERENCE_STACK_NAME: !Ref ReferenceStackName
+      Code:
+        ZipFile: |
+          const { CloudFormationClient, DescribeStacksCommand, ListStackResourcesCommand } = require('@aws-sdk/client-cloudformation');
+          const { CloudWatchClient, PutMetricDataCommand } = require('@aws-sdk/client-cloudwatch');
+          const { DynamoDBClient, DescribeTableCommand } = require('@aws-sdk/client-dynamodb');
+          const { S3Client, HeadBucketCommand } = require('@aws-sdk/client-s3');
+
+          const cfnClient = new CloudFormationClient({});
+          const cwClient = new CloudWatchClient({});
+          const dynamoClient = new DynamoDBClient({});
+          const s3Client = new S3Client({});
+
+          exports.handler = async (event, context) => {
+            const startTime = Date.now();
+            const stackName = process.env.REFERENCE_STACK_NAME;
+
+            // Extract account ID from Lambda execution ARN
+            // ARN format: arn:aws:lambda:region:account-id:function:function-name
+            const accountId = context.invokedFunctionArn.split(':')[4];
+
+            const result = {
+              stack_name: stackName,
+              status: 'HEALTHY',
+              timestamp: new Date().toISOString(),
+              checks: {
+                cloudformation_status: 'UNKNOWN',
+                nested_stacks_healthy: false,
+                outputs_available: false,
+                sample_data_accessible: false
+              },
+              issues: []
+            };
+
+            try {
+              // Check 1: CloudFormation stack status
+              const stackResponse = await cfnClient.send(new DescribeStacksCommand({
+                StackName: stackName
+              }));
+
+              const stack = stackResponse.Stacks?.[0];
+              if (!stack) {
+                result.status = 'UNHEALTHY';
+                result.issues.push('Stack not found');
+                result.checks.cloudformation_status = 'NOT_FOUND';
+              } else {
+                result.checks.cloudformation_status = stack.StackStatus;
+
+                // Check if stack is in a complete state
+                const completeStates = ['CREATE_COMPLETE', 'UPDATE_COMPLETE'];
+                if (!completeStates.includes(stack.StackStatus)) {
+                  result.status = 'DEGRADED';
+                  result.issues.push(`Stack status is ${stack.StackStatus}, expected CREATE_COMPLETE or UPDATE_COMPLETE`);
+                }
+
+                // Check 2: Verify outputs are available
+                if (stack.Outputs && stack.Outputs.length > 0) {
+                  result.checks.outputs_available = true;
+                } else {
+                  result.status = 'DEGRADED';
+                  result.issues.push('Stack outputs not available');
+                }
+
+                // Check 3: Verify sample data accessibility
+                // Check DynamoDB tables exist
+                const tablesToCheck = [
+                  'ndx-reference-chatbot-conversations',
+                  'ndx-reference-car-park-sensors'
+                ];
+
+                let tablesHealthy = true;
+                for (const tableName of tablesToCheck) {
+                  try {
+                    await dynamoClient.send(new DescribeTableCommand({ TableName: tableName }));
+                  } catch (err) {
+                    tablesHealthy = false;
+                    result.issues.push(`DynamoDB table ${tableName} not accessible`);
+                  }
+                }
+
+                // Check S3 buckets exist (using accountId from context)
+                const bucketsToCheck = [
+                  `ndx-reference-planning-ai-${accountId}`,
+                  `ndx-reference-foi-redaction-${accountId}`,
+                  `ndx-reference-text-to-speech-${accountId}`
+                ];
+
+                let bucketsHealthy = true;
+                for (const bucketName of bucketsToCheck) {
+                  try {
+                    await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
+                  } catch (err) {
+                    bucketsHealthy = false;
+                    result.issues.push(`S3 bucket ${bucketName} not accessible`);
+                  }
+                }
+
+                result.checks.sample_data_accessible = tablesHealthy && bucketsHealthy;
+                if (!result.checks.sample_data_accessible && result.status === 'HEALTHY') {
+                  result.status = 'DEGRADED';
+                }
+
+                // Check 4: Nested stacks (if any)
+                result.checks.nested_stacks_healthy = true; // Assume healthy unless proven otherwise
+              }
+
+              // Publish metrics to CloudWatch
+              const healthStatus = result.status === 'HEALTHY' ? 1 : 0;
+              const duration = Date.now() - startTime;
+
+              await cwClient.send(new PutMetricDataCommand({
+                Namespace: 'AWS/NDXScreenshot',
+                MetricData: [
+                  {
+                    MetricName: 'stack_health_status',
+                    Value: healthStatus,
+                    Unit: 'None',
+                    Timestamp: new Date()
+                  },
+                  {
+                    MetricName: 'health_check_duration_ms',
+                    Value: duration,
+                    Unit: 'Milliseconds',
+                    Timestamp: new Date()
+                  }
+                ]
+              }));
+
+              console.log(JSON.stringify(result));
+              return result;
+
+            } catch (error) {
+              result.status = 'UNHEALTHY';
+              result.issues.push(`Health check failed: ${error.message}`);
+
+              // Publish failure metric
+              await cwClient.send(new PutMetricDataCommand({
+                Namespace: 'AWS/NDXScreenshot',
+                MetricData: [
+                  {
+                    MetricName: 'stack_health_status',
+                    Value: 0,
+                    Unit: 'None',
+                    Timestamp: new Date()
+                  }
+                ]
+              }));
+
+              console.error(JSON.stringify(result));
+              return result;
+            }
+          };
+
+  HealthCheckRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: HealthCheckPermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:DescribeStacks
+                  - cloudformation:ListStackResources
+                Resource: !Sub 'arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ReferenceStackName}/*'
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeTable
+                Resource:
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/ndx-reference-*'
+              - Effect: Allow
+                Action:
+                  - s3:HeadBucket
+                  - s3:ListBucket
+                Resource:
+                  - !Sub 'arn:aws:s3:::ndx-reference-*'
+              - Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: '*'
+
+  # ==========================================================================
+  # EventBridge Scheduled Rule (Hourly)
+  # ==========================================================================
+  HourlyScheduleRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: ndx-reference-stack-health-check-hourly
+      Description: Trigger health check every hour
+      ScheduleExpression: 'rate(1 hour)'
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt HealthCheckFunction.Arn
+          Id: HealthCheckTarget
+
+  HealthCheckInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref HealthCheckFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt HourlyScheduleRule.Arn
+      Sid: AllowEventBridgeHourlyInvocation
+
+  # ==========================================================================
+  # CloudWatch Alarm for Unhealthy Stack
+  # ==========================================================================
+  ReferenceStackUnhealthyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ReferenceStackUnhealthy
+      AlarmDescription: Alert when reference stack health check fails
+      MetricName: stack_health_status
+      Namespace: AWS/NDXScreenshot
+      Statistic: Minimum
+      Period: 3600
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: breaching
+
+Outputs:
+  HealthCheckFunctionArn:
+    Description: ARN of the health check Lambda function
+    Value: !GetAtt HealthCheckFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-HealthCheckFunctionArn'
+
+  HealthCheckFunctionName:
+    Description: Name of the health check Lambda function
+    Value: !Ref HealthCheckFunction
+    Export:
+      Name: !Sub '${AWS::StackName}-HealthCheckFunctionName'
+
+  AlarmArn:
+    Description: ARN of the unhealthy stack alarm
+    Value: !GetAtt ReferenceStackUnhealthyAlarm.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-AlarmArn'

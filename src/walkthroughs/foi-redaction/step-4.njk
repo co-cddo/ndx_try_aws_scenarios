@@ -1,0 +1,566 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Review Detected PII with Confidence Scores - FOI Redaction Walkthrough"
+description: Examine AI-detected PII and understand confidence scores for each detection
+currentStep: 4
+totalSteps: 5
+timeEstimate: "3 minutes"
+scenarioId: foi-redaction
+---
+
+{#
+  Step 4: Review Detected PII with Confidence Scores (AC-3.4.2, AC-3.4.4)
+  - Explain confidence scores (high/medium/low)
+  - Visual guide to confidence thresholds
+  - Guidance on when human review is needed
+  - Interactive ROI calculator
+  - Reflection prompt about FOI volume
+#}
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Review Detected PII with Confidence Scores" %}
+{% set stepDescription = "Examine the PII the AI found and understand confidence scores to know when human review is needed." %}
+{% set timeEstimate = "3 minutes" %}
+{# Load screenshots from YAML data - Story 13.5 #}
+{% set screenshotData = screenshots["foi-redaction"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 4) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "All PII in the document has been detected",
+  "Each detection shows a confidence score",
+  "You understand high/medium/low confidence thresholds",
+  "You can identify which detections need human review"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">What you should see</h3>
+
+<p class="govuk-body">
+  After processing completes, you'll see a results section with detected PII. The exact
+  results depend on which sample document you uploaded:
+</p>
+
+{# Display expected results for each document type #}
+<div class="ndx-expected-results">
+  {% for doc in foiSampleDocuments %}
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+          Expected results for {{ doc.title }}
+        </span>
+      </summary>
+      <div class="govuk-details__text">
+        <table class="govuk-table">
+          <caption class="govuk-table__caption govuk-table__caption--s">
+            AI-detected PII from {{ doc.title }}
+          </caption>
+          <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+              <th scope="col" class="govuk-table__header">PII Type</th>
+              <th scope="col" class="govuk-table__header">Detected Text</th>
+              <th scope="col" class="govuk-table__header">Location</th>
+              <th scope="col" class="govuk-table__header">Confidence</th>
+            </tr>
+          </thead>
+          <tbody class="govuk-table__body">
+            {% for pii in doc.piiLocations %}
+              {% set confidenceData = doc.expectedConfidence | selectattr("type", "equalto", pii.type) | first %}
+              <tr class="govuk-table__row">
+                <th scope="row" class="govuk-table__header">{{ pii.type | upper }}</th>
+                <td class="govuk-table__cell"><code>{{ pii.text }}</code></td>
+                <td class="govuk-table__cell">{{ pii.location }}</td>
+                <td class="govuk-table__cell">
+                  {% if confidenceData.threshold == "high" %}
+                    <span class="govuk-tag govuk-tag--green">{{ (confidenceData.confidence * 100) | round }}%</span>
+                  {% elif confidenceData.threshold == "medium" %}
+                    <span class="govuk-tag govuk-tag--yellow">{{ (confidenceData.confidence * 100) | round }}%</span>
+                  {% else %}
+                    <span class="govuk-tag govuk-tag--red">{{ (confidenceData.confidence * 100) | round }}%</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="govuk-inset-text govuk-!-margin-top-3">
+          <p class="govuk-body-s"><strong>Wow factors for this document:</strong></p>
+          <ul class="govuk-list govuk-list--bullet govuk-body-s">
+            {% for factor in doc.wowFactors %}
+              <li>{{ factor }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </details>
+  {% endfor %}
+</div>
+
+{# AC-3.4.4: Confidence score explanation #}
+<h3 class="govuk-heading-m">Understanding confidence scores</h3>
+
+<p class="govuk-body">
+  Each PII detection includes a confidence score representing how certain the AI is that it found real personal information.
+  This helps you decide which detections to trust and which need human review.
+</p>
+
+<div class="ndx-confidence-guide">
+  <div class="ndx-confidence-level ndx-confidence-high">
+    <div class="ndx-confidence-header">
+      <span class="govuk-tag govuk-tag--green">High Confidence</span>
+      <span class="govuk-body-s" style="color: #505a5f; font-weight: 700;">95-100%</span>
+    </div>
+    <dl class="govuk-summary-list govuk-summary-list--no-border">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Meaning</dt>
+        <dd class="govuk-summary-list__value">
+          Very high confidence - PII detected with near certainty. AI is 95%+ sure this is personal information.
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Recommended action</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>Auto-redact</strong> - Safe for production redaction without human review
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Examples</dt>
+        <dd class="govuk-summary-list__value">
+          Email addresses (99%), phone numbers with standard formats (98%), full names in clear context (97%)
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="ndx-confidence-level ndx-confidence-medium">
+    <div class="ndx-confidence-header">
+      <span class="govuk-tag govuk-tag--yellow">Medium Confidence</span>
+      <span class="govuk-body-s" style="color: #505a5f; font-weight: 700;">80-94%</span>
+    </div>
+    <dl class="govuk-summary-list govuk-summary-list--no-border">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Meaning</dt>
+        <dd class="govuk-summary-list__value">
+          Likely PII but some uncertainty. AI is 80-94% confident - usually correct but not certain.
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Recommended action</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>Flag for review</strong> - Quick human check before redaction (5-10 seconds per item)
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Examples</dt>
+        <dd class="govuk-summary-list__value">
+          Partial addresses (no postcode), unusual name formats, ambiguous phone numbers
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="ndx-confidence-level ndx-confidence-low">
+    <div class="ndx-confidence-header">
+      <span class="govuk-tag govuk-tag--red">Low Confidence</span>
+      <span class="govuk-body-s" style="color: #505a5f; font-weight: 700;">Below 80%</span>
+    </div>
+    <dl class="govuk-summary-list govuk-summary-list--no-border">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Meaning</dt>
+        <dd class="govuk-summary-list__value">
+          Possible false positive. AI is less than 80% confident - may or may not be actual PII.
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Recommended action</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>Manual review required</strong> - Human judgment needed to confirm or reject
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Examples</dt>
+        <dd class="govuk-summary-list__value">
+          Organization names flagged as person names, street names without numbers, generic email addresses
+        </dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>Production tip:</strong> In a real FOI system, you'd set a confidence threshold (e.g., 95%)
+    to automatically redact high-confidence detections and flag lower scores for review. This balances
+    automation with accuracy.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Verify accuracy</h3>
+
+<p class="govuk-body">
+  Compare the AI detections against the original PDF document:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the sample PDF you downloaded earlier</strong>
+    <p class="govuk-body">
+      Find it in your downloads folder and open it alongside the redaction interface
+    </p>
+  </li>
+
+  <li>
+    <strong>Check each detected PII item</strong>
+    <p class="govuk-body">
+      For each detection in the results, locate it in the PDF. Does the text match exactly?
+      Is it actually PII that should be redacted?
+    </p>
+  </li>
+
+  <li>
+    <strong>Look for missed PII (false negatives)</strong>
+    <p class="govuk-body">
+      Scan the PDF for any personal information the AI didn't detect. This is rare with our
+      sample documents (97-99% recall rate) but can happen with unusual formats.
+    </p>
+  </li>
+
+  <li>
+    <strong>Check for false positives</strong>
+    <p class="govuk-body">
+      Are any detections NOT actually PII? For example, organization names flagged as person names.
+      Low confidence scores often indicate these edge cases.
+    </p>
+  </li>
+</ol>
+
+<div class="ndx-accuracy-observations">
+  <h3 class="govuk-heading-s">Key observations</h3>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-observation-card">
+        <h4 class="govuk-heading-xs">
+          <span class="ndx-observation-icon" aria-hidden="true">✓</span>
+          Context-aware detection
+        </h4>
+        <p class="govuk-body-s">
+          AI understands context. "Manchester" in an address is flagged as PII, but "Manchester City Council"
+          is correctly identified as an organization, not personal information.
+        </p>
+      </div>
+    </div>
+
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-observation-card">
+        <h4 class="govuk-heading-xs">
+          <span class="ndx-observation-icon" aria-hidden="true">✓</span>
+          Multi-page coverage
+        </h4>
+        <p class="govuk-body-s">
+          AI processes the entire document, finding PII regardless of where it appears - headers, footers,
+          tables, or body text across all pages.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="govuk-grid-row govuk-!-margin-top-3">
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-observation-card">
+        <h4 class="govuk-heading-xs">
+          <span class="ndx-observation-icon" aria-hidden="true">✓</span>
+          Format independence
+        </h4>
+        <p class="govuk-body-s">
+          Phone numbers work with any format: 07712 345678, 0121-456-7890, +44 20 7946 0958. No need
+          to standardize formats before processing.
+        </p>
+      </div>
+    </div>
+
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-observation-card">
+        <h4 class="govuk-heading-xs">
+          <span class="ndx-observation-icon" aria-hidden="true">✓</span>
+          UK-specific patterns
+        </h4>
+        <p class="govuk-body-s">
+          Correctly identifies UK postcodes (M1 4BT, LS1 5AB), National Insurance numbers (AB 12 34 56 C),
+          and UK address formats including flats and building names.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Calculate your time savings</h3>
+
+<p class="govuk-body">
+  Based on what you just saw, estimate your council's FOI redaction savings:
+</p>
+
+<div class="ndx-roi-calculator">
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="foi-requests-per-year">
+      FOI requests processed per year
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="foi-requests-per-year" name="foi-requests-per-year" type="number" value="500">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="minutes-per-request">
+      Minutes spent on manual redaction per request
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="minutes-per-request" name="minutes-per-request" type="number" value="30">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label govuk-label--s" for="hourly-rate">
+      FOI officer hourly rate (£)
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="hourly-rate" name="hourly-rate" type="number" value="25">
+  </div>
+
+  <button type="button" class="govuk-button" data-module="govuk-button" id="calculate-savings">
+    Calculate savings
+  </button>
+
+  <div class="govuk-inset-text" id="savings-result" style="display: none;">
+    <p class="govuk-body"><strong>Your estimated annual savings:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><span id="hours-saved"></span> hours of FOI officer time freed (80% reduction)</li>
+      <li><span id="cost-savings"></span> in staff cost savings</li>
+      <li><span id="capacity-gained"></span> additional FOI requests processable with same staff</li>
+    </ul>
+    <p class="govuk-body-s" style="color: #505a5f; margin-top: 15px;">
+      <strong>Committee language:</strong> "AI redaction reduces FOI processing time by 80%, freeing
+      <span id="hours-saved-copy"></span> hours annually for complex exemptions and policy work,
+      with an estimated cost benefit of <span id="cost-savings-copy"></span> per year."
+    </p>
+  </div>
+</div>
+
+{# Troubleshooting section #}
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Some PII not detected (false negatives)
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the AI missed some personal information:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check if PII is in an unusual format (all caps, no spaces, abbreviations)</li>
+      <li>Verify text is machine-readable (scanned documents may need better OCR)</li>
+      <li>Look for handwritten text (Comprehend works best on typed text)</li>
+      <li>Check if PII is in tables or complex layouts (may reduce detection accuracy)</li>
+      <li>Unusual UK formats may not be recognized (very old postcode styles, etc.)</li>
+    </ul>
+    <p class="govuk-body">
+      Our sample documents should detect 97-99% of PII. In production, always perform final human review
+      before publishing FOI responses to catch edge cases.
+    </p>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Non-PII flagged as personal information (false positives)
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the AI flagged text that isn't actually PII:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check confidence score - false positives often have lower scores (<90%)</li>
+      <li>Common false positives: organization names, building names, generic email addresses (info@council.gov.uk)</li>
+      <li>Review the context - is this actually personal or organizational information?</li>
+      <li>In production, you'd manually un-mark false positives during review step</li>
+      <li>Consider adding common false positives to an allowlist (e.g., council building names)</li>
+    </ul>
+    <p class="govuk-body">
+      Setting a higher confidence threshold (95%+) reduces false positives but may increase manual review workload.
+    </p>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Confidence scores seem inaccurate
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If confidence scores don't match your expectations:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Remember: scores reflect AI's certainty, not ground truth accuracy</li>
+      <li>Low-quality scans or unusual fonts reduce confidence even if detection is correct</li>
+      <li>Uncommon name spellings or address formats may have lower scores despite being accurate</li>
+      <li>Confidence is based on statistical patterns from millions of training documents</li>
+      <li>In production, track actual accuracy vs confidence scores to calibrate your threshold</li>
+    </ul>
+  </div>
+</details>
+
+{# Screenshot placeholder notice #}
+<div class="govuk-warning-text govuk-!-margin-top-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Note</span>
+    Screenshot placeholder: In production, this page would include screenshots showing the
+    PII detection results table with highlighted confidence scores and a side-by-side comparison
+    with the original PDF.
+  </strong>
+</div>
+
+<style>
+  .ndx-expected-results {
+    margin: 30px 0;
+  }
+
+  .ndx-confidence-guide {
+    margin: 30px 0;
+  }
+
+  .ndx-confidence-level {
+    margin-bottom: 30px;
+    padding: 20px;
+    border-left: 4px solid;
+  }
+
+  .ndx-confidence-high {
+    background-color: #f8fbf8;
+    border-left-color: #00703c;
+  }
+
+  .ndx-confidence-medium {
+    background-color: #fffbf0;
+    border-left-color: #f47738;
+  }
+
+  .ndx-confidence-low {
+    background-color: #fff5f5;
+    border-left-color: #d4351c;
+  }
+
+  .ndx-confidence-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .ndx-confidence-level .govuk-summary-list {
+    font-size: 16px;
+    margin-bottom: 0;
+  }
+
+  .ndx-confidence-level .govuk-summary-list__key {
+    width: 35%;
+  }
+
+  .ndx-accuracy-observations {
+    margin: 30px 0;
+  }
+
+  .ndx-observation-card {
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+    min-height: 140px;
+  }
+
+  .ndx-observation-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ndx-observation-icon {
+    font-size: 20px;
+    color: #0b0c0c;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .ndx-observation-card p {
+    margin-bottom: 0;
+  }
+
+  .ndx-roi-calculator {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    margin: 30px 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-observation-card {
+      min-height: auto;
+    }
+
+    .ndx-confidence-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+</style>
+
+<script>
+  // ROI calculator for FOI redaction
+  (function() {
+    'use strict';
+
+    const calculateBtn = document.getElementById('calculate-savings');
+    const resultDiv = document.getElementById('savings-result');
+
+    if (!calculateBtn || !resultDiv) return;
+
+    calculateBtn.addEventListener('click', function() {
+      const requestsPerYear = parseInt(document.getElementById('foi-requests-per-year').value) || 0;
+      const minutesPerRequest = parseInt(document.getElementById('minutes-per-request').value) || 0;
+      const hourlyRate = parseInt(document.getElementById('hourly-rate').value) || 0;
+
+      // Calculate
+      const totalHours = (requestsPerYear * minutesPerRequest) / 60;
+      const hoursSaved = totalHours * 0.80; // 80% time savings
+      const costSavings = hoursSaved * hourlyRate;
+      const capacityGained = Math.round(requestsPerYear * 0.80);
+
+      // Update results
+      document.getElementById('hours-saved').textContent = hoursSaved.toFixed(1);
+      document.getElementById('cost-savings').textContent = '£' + costSavings.toFixed(2);
+      document.getElementById('capacity-gained').textContent = capacityGained;
+
+      // Update committee language copies
+      document.getElementById('hours-saved-copy').textContent = hoursSaved.toFixed(1);
+      document.getElementById('cost-savings-copy').textContent = '£' + costSavings.toFixed(2);
+
+      // Show results
+      resultDiv.style.display = 'block';
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // Announce results to screen readers
+      var announcement = 'Calculation complete. ' + hoursSaved.toFixed(1) + ' hours saved annually, cost savings of £' + costSavings.toFixed(2) + '.';
+      var ariaAnnounce = document.getElementById('roi-aria-announce');
+      if (ariaAnnounce) {
+        ariaAnnounce.textContent = announcement;
+      }
+    });
+  })();
+</script>
+
+{# Hidden live region for screen reader announcements #}
+<div id="roi-aria-announce" class="govuk-visually-hidden" aria-live="polite" aria-atomic="true"></div>

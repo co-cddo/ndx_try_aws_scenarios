@@ -1,0 +1,205 @@
+---
+layout: layouts/exploration
+title: "Take It Further - Production Guidance"
+description: "Understand what changes for production car park IoT deployments"
+scenarioId: smart-car-park
+eleventyNavigation:
+  key: smart-car-park-production
+  parent: smart-car-park-explore
+  title: Production Guidance
+---
+
+{# Story 9.5: Smart Car Park Production Guidance Page #}
+
+{% set scenarioId = "smart-car-park" %}
+{% set explorationData = exploration[scenarioId] %}
+{% set guidance = explorationData.production_guidance %}
+
+<section class="ndx-production-intro" aria-labelledby="intro-heading">
+  <h2 class="govuk-heading-l" id="intro-heading">Ready for Production?</h2>
+  <p class="govuk-body-l">
+    You've explored the IoT dashboard. Now understand what changes when moving
+    to a production deployment managing real car parks.
+  </p>
+  <div class="govuk-inset-text">
+    <strong>This is guidance, not implementation.</strong> Use this information to inform
+    your smart parking strategy and technical planning.
+  </div>
+</section>
+
+{% for section in guidance %}
+  {% if section.id == "scale" %}
+    <section class="ndx-production-section" aria-labelledby="scale-heading">
+      <h2 class="govuk-heading-l" id="scale-heading">{{ section.title }}</h2>
+      <p class="govuk-body">
+        The demo handles one car park. Production systems need to manage
+        multiple locations with thousands of sensors and historical analytics.
+      </p>
+      <dl class="govuk-summary-list">
+        {% for topic in section.topics %}
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+              {% if "Multi" in topic %}Multi-Location{% elif "Thousands" in topic %}Sensor Scale{% elif "Peak" in topic %}Peak Handling{% elif "Historical" in topic %}Data Retention{% else %}Consideration{% endif %}
+            </dt>
+            <dd class="govuk-summary-list__value">{{ topic }}</dd>
+          </div>
+        {% endfor %}
+      </dl>
+    </section>
+  {% endif %}
+{% endfor %}
+
+{% for section in guidance %}
+  {% if section.id == "customization" %}
+    <section class="ndx-production-section" aria-labelledby="customization-heading">
+      <h2 class="govuk-heading-l" id="customization-heading">{{ section.title }}</h2>
+      <p class="govuk-body">
+        The demo uses default settings. Production deployments are customized to your
+        council's specific car park layouts, alert thresholds, and branding.
+      </p>
+      <table class="govuk-table">
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Customization</th>
+            <th scope="col" class="govuk-table__header">Description</th>
+            <th scope="col" class="govuk-table__header">Effort Estimate</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for topic in section.topics %}
+            <tr class="govuk-table__row">
+              <th scope="row" class="govuk-table__header">
+                {% if "Zone" in topic %}Zone Config{% elif "Alert" in topic %}Thresholds{% elif "Dashboard" in topic %}Branding{% elif "Integration" in topic %}PGS Integration{% else %}Custom{% endif %}
+              </th>
+              <td class="govuk-table__cell">{{ topic }}</td>
+              <td class="govuk-table__cell">
+                {% if "Zone" in topic %}1-2 days{% elif "Alert" in topic %}2-3 days{% elif "Dashboard" in topic %}1-2 weeks{% elif "Integration" in topic %}2-4 weeks{% else %}Varies{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  {% endif %}
+{% endfor %}
+
+{% for section in guidance %}
+  {% if section.id == "costs" %}
+    <section class="ndx-production-section" aria-labelledby="costs-heading">
+      <h2 class="govuk-heading-l" id="costs-heading">{{ section.title }}</h2>
+      <p class="govuk-body">
+        Costs scale with sensor count and dashboard users. Here's a comparison between
+        this demo and a typical production deployment (1000 sensors, 5 dashboard users).
+      </p>
+      <table class="govuk-table">
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Service</th>
+            <th scope="col" class="govuk-table__header">Demo Costs</th>
+            <th scope="col" class="govuk-table__header">Production Costs (1000 sensors)</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header">AWS IoT Core</th>
+            <td class="govuk-table__cell">{{ section.demo_costs.iot_core }}</td>
+            <td class="govuk-table__cell">{{ section.production_costs.iot_core }}</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header">Amazon Timestream</th>
+            <td class="govuk-table__cell">{{ section.demo_costs.timestream }}</td>
+            <td class="govuk-table__cell">{{ section.production_costs.timestream }}</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header">AWS Lambda</th>
+            <td class="govuk-table__cell">{{ section.demo_costs.lambda }}</td>
+            <td class="govuk-table__cell">{{ section.production_costs.lambda }}</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <th scope="row" class="govuk-table__header">Amazon QuickSight</th>
+            <td class="govuk-table__cell">{{ section.demo_costs.quicksight }}</td>
+            <td class="govuk-table__cell">{{ section.production_costs.quicksight }}</td>
+          </tr>
+          <tr class="govuk-table__row ndx-cost-total">
+            <th scope="row" class="govuk-table__header"><strong>Total</strong></th>
+            <td class="govuk-table__cell"><strong>{{ section.demo_costs.total }}</strong></td>
+            <td class="govuk-table__cell"><strong>{{ section.production_costs.total }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="govuk-inset-text">
+        <strong>Note:</strong> Production costs vary based on sensor update frequency and dashboard usage patterns.
+      </div>
+    </section>
+  {% endif %}
+{% endfor %}
+
+{% for section in guidance %}
+  {% if section.id == "security" %}
+    <section class="ndx-production-section" aria-labelledby="security-heading">
+      <h2 class="govuk-heading-l" id="security-heading">{{ section.title }}</h2>
+      <p class="govuk-body">
+        The demo prioritizes ease of exploration. Production deployments need additional
+        security measures for IoT device management and data protection.
+      </p>
+      <div class="ndx-checklist">
+        {% for item in section.items %}
+          <div class="ndx-checklist__item">
+            <span class="ndx-checklist__icon" aria-hidden="true">&#9744;</span>
+            <span class="ndx-checklist__text">{{ item }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endfor %}
+
+<section class="ndx-production-section" aria-labelledby="next-steps-heading">
+  <h2 class="govuk-heading-l" id="next-steps-heading">What's Your Next Step?</h2>
+  <div class="ndx-decision-tree">
+    <div class="ndx-decision-tree__question">
+      <h3 class="govuk-heading-m">Are you ready to proceed with this scenario?</h3>
+    </div>
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-half">
+        <div class="ndx-decision-tree__path ndx-decision-tree__path--yes">
+          <h4 class="govuk-heading-s">Yes, we want to move forward</h4>
+          <ol class="govuk-list govuk-list--number">
+            <li><a href="/evidence-pack/{{ scenarioId }}/" class="govuk-link">Generate your Evidence Pack</a></li>
+            <li><a href="/next-steps/{{ scenarioId }}/" class="govuk-link">View pathways and partners</a></li>
+            <li><a href="/partner-tour/" class="govuk-link">Book a partner-led tour</a></li>
+          </ol>
+        </div>
+      </div>
+      <div class="govuk-grid-column-one-half">
+        <div class="ndx-decision-tree__path ndx-decision-tree__path--explore">
+          <h4 class="govuk-heading-s">Need to explore more options</h4>
+          <ol class="govuk-list govuk-list--number">
+            <li><a href="/scenarios/" class="govuk-link">View other scenarios</a></li>
+            <li><a href="/quiz/" class="govuk-link">Retake the scenario quiz</a></li>
+            <li><a href="/contact/" class="govuk-link">Contact us for guidance</a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ndx-production-intro { margin-bottom: 40px; }
+  .ndx-production-section { margin-bottom: 50px; padding-bottom: 30px; border-bottom: 1px solid #b1b4b6; }
+  .ndx-production-section:last-of-type { border-bottom: none; }
+  .ndx-cost-total { background: #f8f8f8; }
+  .ndx-checklist { margin-top: 20px; }
+  .ndx-checklist__item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: #f8f8f8; margin-bottom: 10px; border-left: 4px solid #00703c; }
+  .ndx-checklist__icon { font-size: 18px; color: #505a5f; flex-shrink: 0; }
+  .ndx-checklist__text { flex: 1; }
+  .ndx-decision-tree { margin-top: 30px; }
+  .ndx-decision-tree__question { text-align: center; margin-bottom: 30px; padding: 20px; background: #f0f4f5; }
+  .ndx-decision-tree__question h3 { margin-bottom: 0; }
+  .ndx-decision-tree__path { padding: 25px; height: 100%; }
+  .ndx-decision-tree__path--yes { background: #e8f4e8; border-left: 4px solid #00703c; }
+  .ndx-decision-tree__path--explore { background: #f0f4f5; border-left: 4px solid #1d70b8; }
+  .ndx-decision-tree__path h4 { margin-bottom: 15px; }
+  @media (max-width: 768px) { .ndx-decision-tree__path { margin-bottom: 20px; } }
+</style>

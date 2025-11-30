@@ -1,0 +1,98 @@
+# Success Stories Configuration
+# Controls the success stories page content and case study display
+
+# Feature flag - set to false when real stories are published
+coming_soon: true
+
+# Placeholder message
+placeholder_message: "We're collecting success stories from councils who have deployed NDX:Try scenarios. Check back soon for real-world case studies and lessons learned."
+
+# Placeholder case studies (will be replaced with real stories)
+stories:
+  - id: story-1
+    council: "Riverside Borough Council"
+    council_type: "District Council"
+    region: "South East"
+    population: "120,000"
+    scenario: "council-chatbot"
+    scenario_name: "Council Chatbot"
+    headline: "Reduced call centre volume by 35%"
+    challenge: "High volume of routine enquiries overwhelming contact centre staff during peak hours, leading to long wait times and frustrated residents."
+    solution: "Deployed AI chatbot for 24/7 citizen support, handling routine queries about bins, council tax, and local services. Integrated with existing CRM system."
+    results:
+      - "35% reduction in call centre volume"
+      - "24/7 availability for residents"
+      - "Staff freed to handle complex cases"
+      - "Average response time reduced from 8 minutes to instant"
+    quote: "The chatbot handles routine queries brilliantly, letting our team focus on residents who need personal support."
+    quote_attribution: "Service Manager, Customer Services"
+    quote_attribution_role: "Service Manager, Customer Services"
+    deployment_date: "2024-06"
+    status: "placeholder"
+    tags:
+      - "Citizen Engagement"
+      - "Service Efficiency"
+      - "AI"
+
+  - id: story-2
+    council: "Greenfield County Council"
+    council_type: "County Council"
+    region: "East Midlands"
+    population: "450,000"
+    scenario: "planning-ai"
+    scenario_name: "Planning Application AI"
+    headline: "Cut planning document processing time by 60%"
+    challenge: "Manual review of planning documents causing 6-week backlogs and frustrated applicants. Planning officers spending 70% of time on data entry instead of decision-making."
+    solution: "AI document processing for automatic extraction of key planning application data, with human verification for sensitive decisions."
+    results:
+      - "60% faster document processing"
+      - "Improved accuracy in data extraction"
+      - "Reduced backlog from 6 weeks to 2 weeks"
+      - "Planning officers refocused on decision-making"
+    quote: "What used to take hours now takes minutes. Our planners can focus on decisions, not data entry."
+    quote_attribution: "Head of Planning Services"
+    quote_attribution_role: "Head of Planning Services"
+    deployment_date: "2024-09"
+    status: "placeholder"
+    tags:
+      - "Planning"
+      - "Service Efficiency"
+      - "AI"
+
+  - id: story-3
+    council: "Northgate District Council"
+    council_type: "District Council"
+    region: "North West"
+    population: "85,000"
+    scenario: "foi-redaction"
+    scenario_name: "FOI Redaction"
+    headline: "Achieved consistent redaction across all FOI requests"
+    challenge: "Inconsistent redaction standards across different officers causing compliance concerns and ICO warnings. High workload during peak FOI periods."
+    solution: "AI-assisted redaction tool ensuring consistent application of exemptions across all FOI responses, with mandatory human review before release."
+    results:
+      - "100% consistent redaction standards"
+      - "50% time saving on complex requests"
+      - "Zero data breach incidents since implementation"
+      - "ICO compliance rating improved from 'Needs Improvement' to 'Good'"
+    quote: "The AI catches things we might miss when processing high volumes. It's like having an extra pair of expert eyes."
+    quote_attribution: "Information Governance Officer"
+    quote_attribution_role: "Information Governance Officer"
+    deployment_date: "2024-07"
+    status: "placeholder"
+    tags:
+      - "Transparency"
+      - "Compliance"
+      - "AI"
+
+# Call to action configuration
+cta:
+  enabled: true
+  title: "Share Your Success Story"
+  description: "Have you deployed an NDX:Try scenario and seen positive results? We'd love to feature your experience to help other councils."
+  button_text: "Submit Your Story"
+  button_link: "/contact/"
+  requirements:
+    - "Deployed and tested for at least 3 months"
+    - "Willing to share anonymized metrics"
+    - "Available for brief interview (30 minutes)"
+    - "Approval from council leadership to publish"

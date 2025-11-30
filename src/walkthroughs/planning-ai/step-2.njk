@@ -1,0 +1,279 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Download Sample Application - Planning AI Walkthrough"
+description: Download a realistic planning application document to test AI extraction
+currentStep: 2
+totalSteps: 4
+timeEstimate: "1 minute"
+scenarioId: planning-ai
+---
+
+{#
+  Step 2: Download Sample Application (AC-3.3.2, AC-3.3.3)
+  - Sample document selection
+  - Download instructions
+  - Preview of what will be extracted
+#}
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Download Sample Application" %}
+{% set stepDescription = "Choose one of our realistic planning application documents to test the AI extraction." %}
+{% set timeEstimate = "1 minute" %}
+{# Load screenshots from YAML data - Story 13.4 #}
+{% set screenshotData = screenshots["planning-ai"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 2) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "Sample document downloaded to your computer",
+  "You understand what fields should be extracted",
+  "Document is ready for upload in next step"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Choose a sample application</h3>
+
+<p class="govuk-body">
+  We've prepared 3 realistic planning applications. Choose any one to test with:
+</p>
+
+<div class="ndx-sample-documents-grid">
+  {% for doc in planningSampleDocuments %}
+    <div class="ndx-sample-document-card">
+      <h4 class="govuk-heading-s">{{ doc.title }}</h4>
+
+      <dl class="govuk-summary-list govuk-summary-list--no-border">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Type</dt>
+          <dd class="govuk-summary-list__value">{{ doc.type }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Applicant</dt>
+          <dd class="govuk-summary-list__value">{{ doc.applicant }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Address</dt>
+          <dd class="govuk-summary-list__value">{{ doc.address }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Description</dt>
+          <dd class="govuk-summary-list__value">{{ doc.description }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">File size</dt>
+          <dd class="govuk-summary-list__value">{{ doc.fileSize }}</dd>
+        </div>
+      </dl>
+
+      <div class="ndx-document-download govuk-!-margin-top-3">
+        <a href="{{ doc.documentUrl }}" download class="govuk-button govuk-button--secondary" data-module="govuk-button">
+          Download PDF
+        </a>
+        <p class="govuk-body-s govuk-!-margin-top-2" style="color: #505a5f;">
+          Processing time: {{ doc.timeToProcess }}
+        </p>
+      </div>
+
+      {# Preview what will be extracted #}
+      <details class="govuk-details govuk-!-margin-top-3">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">
+            What AI will extract from this document
+          </span>
+        </summary>
+        <div class="govuk-details__text">
+          <p class="govuk-body-s">The AI extraction will identify these {{ doc.fields.length }} fields:</p>
+          <ul class="govuk-list govuk-list--bullet govuk-body-s">
+            {% for field in doc.fields %}
+              <li><strong>{{ field.name }}:</strong> {{ field.extracted }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </details>
+    </div>
+  {% endfor %}
+</div>
+
+<h3 class="govuk-heading-m">Download instructions</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Pick one sample document</strong>
+    <p class="govuk-body">
+      We recommend starting with "House Extension Application" - it's the quickest to process.
+    </p>
+  </li>
+
+  <li>
+    <strong>Click "Download PDF"</strong>
+    <p class="govuk-body">
+      The PDF will download to your default downloads folder
+    </p>
+  </li>
+
+  <li>
+    <strong>Note the file location</strong>
+    <p class="govuk-body">
+      You'll need to find this file in the next step to upload it. Most browsers show
+      downloads in the bottom-left corner or in a downloads bar.
+    </p>
+  </li>
+
+  <li>
+    <strong>Optional: Preview the PDF</strong>
+    <p class="govuk-body">
+      Open the PDF to see what a realistic planning application looks like. Notice where
+      the applicant name, address, and description appear in the document.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Tip:</strong> If you want to test multiple documents, you can come back to this step
+    later and try a different application type.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Understanding the sample documents</h3>
+
+<p class="govuk-body">
+  Each sample document represents a common planning application type:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>
+    <strong>House Extension Application (Householder):</strong> Most common type - small extensions
+    to existing dwellings. Typically 2-4 page applications.
+  </li>
+  <li>
+    <strong>Change of Use Application (Full):</strong> More complex - changing building purpose.
+    Includes multiple use classes and floor area calculations.
+  </li>
+  <li>
+    <strong>New Dwelling Application (Outline):</strong> Most detailed - new building proposals.
+    Includes site area, dwelling counts, and detailed descriptions.
+  </li>
+</ul>
+
+<div class="govuk-warning-text govuk-!-margin-top-4">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Note</span>
+    These are realistic sample documents with fictional applicant details. They follow
+    standard UK planning application formats but contain no real personal information.
+  </strong>
+</div>
+
+{# AC-3.3.7: Troubleshooting #}
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Download link not working
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If clicking "Download PDF" doesn't work:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Right-click the button and choose "Save link as..."</li>
+      <li>Check your browser's download settings aren't blocking PDFs</li>
+      <li>Try a different browser (Chrome, Firefox, Safari, Edge all supported)</li>
+      <li>Check you have enough disk space for the file (1-4 MB)</li>
+      <li>Disable browser extensions that might block downloads</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Can't find downloaded file
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you can't locate the downloaded PDF:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check your browser's Downloads page (usually Ctrl+J or Cmd+Shift+J)</li>
+      <li>Look in your default Downloads folder</li>
+      <li>Search your computer for "sample-house-extension.pdf" (or the document name)</li>
+      <li>Check if your browser asks where to save files - you may have saved it elsewhere</li>
+      <li>Try downloading again and watch where your browser saves it</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      PDF won't open or looks corrupted
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the PDF won't open or displays incorrectly:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Try opening with Adobe Reader or another PDF viewer</li>
+      <li>Re-download the file - the download may have been interrupted</li>
+      <li>Check the file size matches what's shown (1.2 MB, 2.8 MB, or 3.5 MB)</li>
+      <li>Ensure you have a PDF reader installed on your computer</li>
+      <li>Try a different sample document</li>
+    </ul>
+  </div>
+</details>
+
+{# Screenshot placeholder notice #}
+<div class="govuk-warning-text govuk-!-margin-top-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Note</span>
+    Screenshot placeholder: In production, this page would include screenshots showing the sample
+    documents interface and a preview of what a planning application PDF looks like.
+  </strong>
+</div>
+
+<style>
+  .ndx-sample-documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin: 30px 0;
+  }
+
+  .ndx-sample-document-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-sample-document-card h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-sample-document-card .govuk-summary-list {
+    font-size: 16px;
+    margin-bottom: 0;
+  }
+
+  .ndx-sample-document-card .govuk-summary-list__key {
+    width: 35%;
+  }
+
+  .ndx-document-download {
+    border-top: 1px solid #b1b4b6;
+    padding-top: 15px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-sample-documents-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

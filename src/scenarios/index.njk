@@ -1,0 +1,101 @@
+---
+layout: page
+title: All Scenarios
+description: Browse all 6 AWS evaluation scenarios designed for UK local government councils. Filter by audience, difficulty, or time to find the right scenario for you.
+---
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <p class="govuk-body-l">
+      Browse all AWS scenarios designed for UK councils. Each scenario can be deployed in your own isolated sandbox environment with no commitment required.
+    </p>
+    <p class="govuk-body">
+      Not sure which scenario is right for you? <a href="/quiz/" class="govuk-link">Take our 2-minute quiz</a> to get personalised recommendations.
+    </p>
+  </div>
+</div>
+
+{# Filter controls - hidden without JS via .js-gallery-filters class #}
+<div class="ndx-gallery-filters js-gallery-filters" hidden>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-third">
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="filter-persona">
+          Filter by audience
+        </label>
+        <select class="govuk-select" id="filter-persona" name="filter-persona">
+          <option value="">All audiences</option>
+          <option value="technical">Technical / Developer</option>
+          <option value="service-manager">Service Manager</option>
+          <option value="leadership">Leadership / CTO</option>
+          <option value="finance">Finance</option>
+        </select>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="filter-difficulty">
+          Filter by difficulty
+        </label>
+        <select class="govuk-select" id="filter-difficulty" name="filter-difficulty">
+          <option value="">All difficulties</option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="filter-time">
+          Filter by time
+        </label>
+        <select class="govuk-select" id="filter-time" name="filter-time">
+          <option value="">Any time</option>
+          <option value="quick">Under 15 minutes</option>
+          <option value="medium">15-30 minutes</option>
+          <option value="longer">Over 30 minutes</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="govuk-grid-row govuk-!-margin-bottom-4">
+    <div class="govuk-grid-column-full">
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        <span class="js-filter-count">Showing 6 scenarios</span>
+        <button type="button" class="govuk-link js-clear-filters govuk-!-margin-left-3" hidden>Clear filters</button>
+      </p>
+    </div>
+  </div>
+</div>
+
+{# No results message - hidden by default #}
+<div class="ndx-gallery-no-results govuk-!-padding-6 govuk-!-margin-bottom-6" hidden>
+  <h2 class="govuk-heading-m">No scenarios match your filters</h2>
+  <p class="govuk-body">
+    Try adjusting your filters or <button type="button" class="govuk-link js-clear-filters">clear all filters</button> to see all scenarios.
+  </p>
+  <p class="govuk-body">
+    Or <a href="/quiz/" class="govuk-link">take our quiz</a> to get personalised recommendations based on your needs.
+  </p>
+</div>
+
+{# Scenario grid #}
+<div class="ndx-scenario-grid js-scenario-grid">
+  {% for scenario in scenarios.scenarios %}
+    {% set scenario = scenario %}
+    {% include "components/scenario-card.njk" %}
+  {% endfor %}
+</div>
+
+<div class="govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">Need help choosing?</h2>
+  <p class="govuk-body">
+    Take our short quiz to get personalised scenario recommendations based on your council's specific challenges and constraints.
+  </p>
+  <a href="/quiz/" role="button" draggable="false" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+    Find your scenario
+  </a>
+</div>
+
+<script src="/assets/js/gallery-filter.js" defer></script>

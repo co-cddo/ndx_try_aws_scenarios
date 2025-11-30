@@ -1,0 +1,309 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 1: Access the Polly Interface - Text-to-Speech Walkthrough"
+description: Open the Amazon Polly text-to-speech console
+currentStep: 1
+totalSteps: 4
+timeEstimate: "2 minutes"
+scenarioId: text-to-speech
+---
+
+{#
+  Step 1: Access the Polly Interface (AC-3.6.2)
+  - Find CloudFormation stack
+  - Access Polly console URL
+  - Verify access to text-to-speech interface
+#}
+
+{% set stepNumber = 1 %}
+{% set stepTitle = "Access the Polly Interface" %}
+{% set stepDescription = "Find your deployed Text-to-Speech resources and open the Amazon Polly console." %}
+{% set timeEstimate = "2 minutes" %}
+{# Load screenshots from YAML data - Story 13.7 #}
+{% set screenshotData = screenshots["text-to-speech"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 1) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "CloudFormation stack 'ndx-try-text-to-speech-[timestamp]' shows CREATE_COMPLETE status",
+  "Polly console URL opens successfully",
+  "Text input area and voice selection visible",
+  "You're ready to convert text to speech"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Find your deployment</h3>
+
+<p class="govuk-body">
+  The Text-to-Speech scenario deployed via CloudFormation. Let's find your stack and access the Polly console:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the CloudFormation console</strong>
+    <p class="govuk-body">
+      Go to <a href="https://eu-west-2.console.aws.amazon.com/cloudformation/home?region=eu-west-2#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console (eu-west-2 London)</a>
+    </p>
+  </li>
+
+  <li>
+    <strong>Find your stack</strong>
+    <p class="govuk-body">
+      Look for a stack named <code>ndx-try-text-to-speech-[timestamp]</code> with status <strong>CREATE_COMPLETE</strong>
+    </p>
+  </li>
+
+  <li>
+    <strong>Click the Outputs tab</strong>
+    <p class="govuk-body">
+      Select your stack, then click the "Outputs" tab. You'll see a list of resources created by the deployment.
+    </p>
+  </li>
+
+  <li>
+    <strong>Open the Polly console URL</strong>
+    <p class="govuk-body">
+      Find the output key <code>PollyConsoleURL</code> and click the URL value. This opens the Amazon Polly
+      text-to-speech interface with pre-configured permissions.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>What's happening:</strong> The CloudFormation stack created an S3 bucket for audio storage
+    and configured IAM permissions for Polly access. The console URL includes embedded credentials so
+    you don't need to manage AWS permissions manually.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">What you should see</h3>
+
+<p class="govuk-body">
+  The Amazon Polly console interface includes:
+</p>
+
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Text input area</dt>
+    <dd class="govuk-summary-list__value">
+      Large text box where you paste or type council announcements (up to 3000 characters)
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Engine selection</dt>
+    <dd class="govuk-summary-list__value">
+      Dropdown to choose "Neural" (recommended) or "Standard" engine
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Language selection</dt>
+    <dd class="govuk-summary-list__value">
+      Dropdown showing "British English (en-GB)" pre-selected
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Voice selection</dt>
+    <dd class="govuk-summary-list__value">
+      Dropdown listing Amy, Brian, Emma (UK English neural voices)
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Listen button</dt>
+    <dd class="govuk-summary-list__value">
+      Orange "Listen" button to generate and play audio preview
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Download to S3</dt>
+    <dd class="govuk-summary-list__value">
+      Blue "Synthesize to S3" button to save audio file permanently
+    </dd>
+  </div>
+</dl>
+
+<h3 class="govuk-heading-m">Verify your access</h3>
+
+<p class="govuk-body">
+  Quick test to ensure Polly is working:
+</p>
+
+<ol class="govuk-list govuk-list--number">
+  <li>
+    In the text input area, type: <code>Testing Amazon Polly text to speech</code>
+  </li>
+  <li>
+    Verify "Engine" is set to <strong>Neural</strong> (not Standard)
+  </li>
+  <li>
+    Verify "Language" is set to <strong>British English</strong>
+  </li>
+  <li>
+    Select voice <strong>Amy</strong> from the dropdown
+  </li>
+  <li>
+    Click the orange <strong>"Listen"</strong> button
+  </li>
+  <li>
+    You should hear Amy's voice say the test sentence in ~2 seconds
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Did you hear the audio?</strong> If yes, Polly is working correctly. If not, check the
+    troubleshooting section below.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Understanding the interface</h3>
+
+<div class="ndx-interface-guide">
+  <h4 class="govuk-heading-s">Neural vs Standard engine</h4>
+  <p class="govuk-body-s">
+    <strong>Neural:</strong> Uses deep learning to generate natural-sounding speech with emotion and inflection.
+    Sounds like a real person. Costs £0.016 per 1000 characters.
+  </p>
+  <p class="govuk-body-s">
+    <strong>Standard:</strong> Older text-to-speech technology. Sounds robotic. Costs £0.004 per 1000 characters
+    (4× cheaper but noticeably lower quality).
+  </p>
+  <p class="govuk-body-s">
+    <strong>Recommendation:</strong> Always use Neural for public-facing council communications. The quality
+    difference is worth the small additional cost (£0.008 per typical announcement).
+  </p>
+</div>
+
+<div class="ndx-interface-guide govuk-!-margin-top-4">
+  <h4 class="govuk-heading-s">Listen vs Synthesize to S3</h4>
+  <p class="govuk-body-s">
+    <strong>"Listen" button:</strong> Generates audio on-demand for preview. Audio is not saved - use this
+    for testing different voices or making text edits.
+  </p>
+  <p class="govuk-body-s">
+    <strong>"Synthesize to S3" button:</strong> Generates audio and saves MP3 file to your S3 bucket with
+    a permanent URL. Use this when you're ready to publish the audio on your website or phone system.
+  </p>
+  <p class="govuk-body-s">
+    <strong>Recommendation:</strong> Use "Listen" to compare voices and finalize text, then "Synthesize to S3"
+    once to save the final version. Avoid repeatedly saving to S3 during testing.
+  </p>
+</div>
+
+{# AC-3.6.5: Troubleshooting #}
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      CloudFormation stack not found or status is not CREATE_COMPLETE
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you don't see the Text-to-Speech stack:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check you're in the correct AWS region (eu-west-2 London)</li>
+      <li>Verify you deployed the scenario (go to <a href="/scenarios/text-to-speech/" class="govuk-link">Text-to-Speech scenario page</a>)</li>
+      <li>If stack shows CREATE_IN_PROGRESS, wait 2-3 more minutes for completion</li>
+      <li>If stack shows CREATE_FAILED, delete and redeploy (check CloudWatch logs for error details)</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Polly console URL shows "Access Denied" error
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you can't access the Polly console:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Verify you're logged into the same AWS account where you deployed the stack</li>
+      <li>Check the URL is complete (should be very long with embedded credentials)</li>
+      <li>Try copying the URL again from CloudFormation Outputs (may have been truncated)</li>
+      <li>Ensure IAM permissions were created correctly (check CloudFormation Events tab for errors)</li>
+    </ul>
+    <p class="govuk-body">
+      If still blocked, go directly to the <a href="https://eu-west-2.console.aws.amazon.com/polly/home/SynthesizeSpeech" target="_blank" rel="noopener noreferrer" class="govuk-link">Polly console (direct link)</a> and manually configure.
+    </p>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      "Listen" button does nothing or shows error
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If audio doesn't play when you click Listen:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check your browser allows audio playback (may need to enable in browser settings)</li>
+      <li>Verify text input is not empty (Polly can't generate audio from blank text)</li>
+      <li>Try selecting a different voice (some voices may fail if misconfigured)</li>
+      <li>Check browser console (F12) for JavaScript errors</li>
+      <li>Try a different browser (Chrome, Firefox, Safari all support Polly)</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Only seeing "Standard" voices, not "Neural" voices
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If Amy, Brian, Emma don't appear in the voice dropdown:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Ensure "Engine" dropdown is set to <strong>Neural</strong> (not Standard)</li>
+      <li>Ensure "Language" is set to <strong>British English (en-GB)</strong> not US English</li>
+      <li>Neural voices may not be available in all AWS regions - confirm you're in eu-west-2 (London)</li>
+      <li>If using Polly API directly, verify you have neural engine permissions in IAM</li>
+    </ul>
+  </div>
+</details>
+
+<div class="govuk-!-margin-top-6">
+  <p class="govuk-body">
+    Once you can hear Amy's voice in the test, you're ready to convert real council announcements.
+  </p>
+</div>
+
+<style>
+  .ndx-interface-guide {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-interface-guide h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-interface-guide p {
+    margin-bottom: 10px;
+  }
+
+  .ndx-interface-guide p:last-child {
+    margin-bottom: 0;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+</style>

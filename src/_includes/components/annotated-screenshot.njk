@@ -1,0 +1,186 @@
+{#
+  Annotated Screenshot Component (Story 16.2)
+
+  Extends screenshot.njk with CSS-based overlay annotations including:
+  - Numbered callout circles (1, 2, 3...)
+  - Optional pointing arrows to UI elements
+  - Brief labels in a legend below the image
+  - Percentage-based positioning for responsive design
+
+  Usage:
+    {% set screenshotData = {
+      scenario: "council-chatbot",
+      filename: "step-1-cloudformation-outputs.png",
+      alt: "CloudFormation outputs page",
+      caption: "Find your chatbot URL in the Outputs tab",
+      annotations: [
+        { number: 1, x: "15%", y: "25%", label: "Outputs tab", arrow: "down" },
+        { number: 2, x: "60%", y: "40%", label: "ChatbotURL value" }
+      ]
+    } %}
+    {% include "components/annotated-screenshot.njk" %}
+
+  Parameters:
+    - scenario (required): Scenario ID matching S3 folder structure
+    - filename (required): Image filename in S3
+    - alt (required): Descriptive alt text
+    - caption (optional): Description displayed below image
+    - annotations (optional): Array of annotation objects:
+      - number: Display number (1, 2, 3...)
+      - x: Percentage from left (e.g., "15%" or pixel value)
+      - y: Percentage from top (e.g., "25%" or pixel value)
+      - label: Text description for legend
+      - arrow (optional): Arrow direction ("up", "down", "left", "right")
+    - width (optional): Image width (default: 1920)
+    - height (optional): Image height (default: 1080)
+
+  Accessibility:
+    - Annotations overlay is aria-hidden (decorative)
+    - Legend provides text descriptions for screen readers
+    - Focus management preserved from base component
+    - WCAG 2.2 AA compliant colour contrast on callouts
+
+  FR Coverage: FR141-FR143
+#}
+
+{% set baseUrl = "https://ndx-try-screenshots.s3.eu-west-2.amazonaws.com/current" %}
+{% set fallbackPath = "/assets/images/fallbacks/" + scenario + ".svg" %}
+
+{# Build image URL #}
+{% set imgUrl = baseUrl + "/" + scenario + "/" + filename %}
+
+{# Defaults #}
+{% set imgWidth = width if width else 1920 %}
+{% set imgHeight = height if height else 1080 %}
+{% set imgLoading = loading if loading else "lazy" %}
+{% set enableZoom = zoomable if zoomable is defined else true %}
+
+{# Check for annotations #}
+{% set hasAnnotations = annotations and annotations | length > 0 %}
+
+{# Generate unique ID #}
+{% set screenshotId = "annotated-" + (scenario + "-" + filename) | slug %}
+
+<figure class="ndx-screenshot{% if hasAnnotations %} ndx-annotated-screenshot{% endif %}"
+        id="{{ screenshotId }}"
+        data-screenshot
+        data-annotated="{{ 'true' if hasAnnotations else 'false' }}"
+        data-scenario="{{ scenario | escape }}"
+        data-filename="{{ filename | escape }}">
+
+  {# Image container with annotations overlay #}
+  <div class="ndx-screenshot__container ndx-annotated-screenshot__container">
+
+    {# Zoom trigger wrapping the image #}
+    {% if enableZoom %}
+    <button type="button"
+            class="ndx-screenshot__trigger"
+            data-lightbox-trigger
+            data-src="{{ imgUrl }}"
+            data-alt="{{ alt | escape }}"
+            data-caption="{{ caption | escape if caption else '' }}"
+            aria-label="View larger image: {{ alt | escape }}">
+    {% endif %}
+
+      {# Picture element with responsive srcset and WebP + PNG fallback (Story 16.3) #}
+      <picture>
+        {# WebP source with responsive srcset for modern browsers #}
+        <source srcset="{{ imgUrl | replace('.png', '-640w.webp') }} 640w,
+                        {{ imgUrl | replace('.png', '-1024w.webp') }} 1024w,
+                        {{ imgUrl | replace('.png', '.webp') }} 1920w"
+                sizes="(max-width: 640px) 100vw,
+                       (max-width: 1024px) 90vw,
+                       640px"
+                type="image/webp">
+
+        {# PNG fallback with responsive srcset #}
+        <source srcset="{{ imgUrl | replace('.png', '-640w.png') }} 640w,
+                        {{ imgUrl | replace('.png', '-1024w.png') }} 1024w,
+                        {{ imgUrl }} 1920w"
+                sizes="(max-width: 640px) 100vw,
+                       (max-width: 1024px) 90vw,
+                       640px"
+                type="image/png">
+
+        {# Fallback img for browsers that don't support picture #}
+        <img src="{{ imgUrl }}"
+             alt="{{ alt | escape }}"
+             width="{{ imgWidth }}"
+             height="{{ imgHeight }}"
+             loading="{{ imgLoading }}"
+             decoding="async"
+             class="ndx-screenshot__image"
+             data-fallback="{{ fallbackPath }}"
+             onerror="this.onerror=null; this.classList.add('ndx-screenshot__image--error'); this.src=this.dataset.fallback;">
+      </picture>
+
+      {# Annotations overlay - CSS positioned markers #}
+      {% if hasAnnotations %}
+      <div class="ndx-annotations" aria-hidden="true">
+        {% for annotation in annotations %}
+          {% set posX = annotation.x if annotation.x is string and '%' in annotation.x else (annotation.x / imgWidth * 100) ~ '%' %}
+          {% set posY = annotation.y if annotation.y is string and '%' in annotation.y else (annotation.y / imgHeight * 100) ~ '%' %}
+
+          <div class="ndx-annotation"
+               style="left: {{ posX }}; top: {{ posY }};"
+               data-annotation-number="{{ annotation.number if annotation.number else loop.index }}">
+
+            {# Numbered callout circle #}
+            <span class="ndx-annotation__number">
+              {{ annotation.number if annotation.number else loop.index }}
+            </span>
+
+            {# Optional arrow indicator #}
+            {% if annotation.arrow %}
+            <span class="ndx-annotation__arrow ndx-annotation__arrow--{{ annotation.arrow }}" aria-hidden="true"></span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {# Zoom hint - only shown when not viewing annotations closely #}
+      {% if enableZoom %}
+      <span class="ndx-screenshot__zoom-hint" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2"/>
+          <path d="M12.5 12.5L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M8 5v6M5 8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Click to enlarge</span>
+      </span>
+    </button>
+    {% endif %}
+
+  </div>
+
+  {# Caption and annotation legend #}
+  <figcaption class="ndx-screenshot__caption">
+    {% if caption %}
+    <p class="ndx-screenshot__caption-text">{{ caption }}</p>
+    {% endif %}
+
+    {# Annotation legend - accessible text descriptions #}
+    {% if hasAnnotations %}
+    <ol class="ndx-annotation__legend">
+      {% for annotation in annotations %}
+      <li class="ndx-annotation__legend-item">
+        <span class="ndx-annotation__legend-number">{{ annotation.number if annotation.number else loop.index }}</span>
+        <span class="ndx-annotation__legend-label">{{ annotation.label | escape }}</span>
+      </li>
+      {% endfor %}
+    </ol>
+    {% endif %}
+  </figcaption>
+
+  {# Fallback message #}
+  <div class="ndx-screenshot__fallback" aria-live="polite" hidden>
+    <p class="govuk-body-s">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2"/>
+        <path d="M8 4v5M8 11v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Screenshot updating - please check back soon
+    </p>
+  </div>
+</figure>

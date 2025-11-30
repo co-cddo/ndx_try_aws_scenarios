@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="quicksight-fallback-title quicksight-fallback-desc">
+  <title id="quicksight-fallback-title">QuickSight Dashboard Screenshot</title>
+  <desc id="quicksight-fallback-desc">Screenshot temporarily unavailable - showing placeholder for QuickSight Dashboard scenario</desc>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="#f3f2f1"/>
+
+  <!-- GOV.UK Blue header bar -->
+  <rect width="1920" height="100" fill="#1d70b8"/>
+
+  <!-- Central content area -->
+  <rect x="360" y="200" width="1200" height="680" rx="4" fill="#ffffff" stroke="#b1b4b6" stroke-width="2"/>
+
+  <!-- Dashboard/Chart icon -->
+  <g transform="translate(860, 400)">
+    <rect width="200" height="160" rx="20" fill="#1d70b8" opacity="0.1"/>
+    <!-- Chart bars -->
+    <rect x="35" y="100" width="25" height="40" rx="2" fill="#1d70b8"/>
+    <rect x="70" y="70" width="25" height="70" rx="2" fill="#00703c"/>
+    <rect x="105" y="50" width="25" height="90" rx="2" fill="#1d70b8"/>
+    <rect x="140" y="80" width="25" height="60" rx="2" fill="#00703c"/>
+    <!-- Line chart overlay -->
+    <path d="M47 95 L82 65 L117 45 L152 75" stroke="#d4351c" stroke-width="3" fill="none"/>
+    <circle cx="47" cy="95" r="4" fill="#d4351c"/>
+    <circle cx="82" cy="65" r="4" fill="#d4351c"/>
+    <circle cx="117" cy="45" r="4" fill="#d4351c"/>
+    <circle cx="152" cy="75" r="4" fill="#d4351c"/>
+    <!-- Dashboard frame -->
+    <rect x="20" y="20" width="160" height="125" rx="4" stroke="#1d70b8" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- "Screenshot updating" text -->
+  <text x="960" y="620" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#505a5f">
+    Screenshot updating - please check back soon
+  </text>
+
+  <!-- Scenario label -->
+  <text x="960" y="680" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#0b0c0c" font-weight="600">
+    QuickSight Dashboard
+  </text>
+
+  <!-- AWS QuickSight badge -->
+  <rect x="815" y="720" width="290" height="36" rx="4" fill="#232f3e"/>
+  <text x="960" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">
+    Powered by Amazon QuickSight
+  </text>
+</svg>

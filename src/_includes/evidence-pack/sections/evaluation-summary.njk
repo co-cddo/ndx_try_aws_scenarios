@@ -1,0 +1,105 @@
+{#
+  Evaluation Summary Section (Shared - AC-4.1.6)
+
+  Variables:
+  - evaluation_summary: shared evaluation data
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    Evaluation Summary
+  </h2>
+
+  <p class="govuk-body">
+    This section summarizes the key findings from the AWS Innovation Sandbox evaluation.
+  </p>
+
+  {% if evaluation_summary %}
+
+  <h3 class="govuk-heading-m">Strengths</h3>
+  {% if evaluation_summary.strengths %}
+  <ul class="govuk-list govuk-list--bullet">
+    {% for strength in evaluation_summary.strengths %}
+      <li>{{ strength }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Areas for Consideration</h3>
+  {% if evaluation_summary.weaknesses %}
+  <ul class="govuk-list govuk-list--bullet">
+    {% for weakness in evaluation_summary.weaknesses %}
+      <li>{{ weakness }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Opportunities</h3>
+  {% if evaluation_summary.opportunities %}
+  <ul class="govuk-list govuk-list--bullet">
+    {% for opportunity in evaluation_summary.opportunities %}
+      <li>{{ opportunity }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Risks & Mitigation</h3>
+  {% if evaluation_summary.risks %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Risk</th>
+        <th scope="col" class="govuk-table__header">Mitigation Strategy</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for risk in evaluation_summary.risks %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">{{ risk }}</th>
+        <td class="govuk-table__cell">
+          {% if risk.includes("acceptance") %}
+            Change management, user training, phased rollout with pilot group
+          {% elif risk.includes("privacy") or risk.includes("security") %}
+            DPIA, security audit, compliance review with DPO
+          {% elif risk.includes("cost") %}
+            CloudWatch cost alerts, usage monitoring, budget controls
+          {% elif risk.includes("availability") %}
+            Multi-region deployment, disaster recovery planning, AWS Support contract
+          {% else %}
+            Risk assessment and mitigation plan to be developed
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Key Learnings from Evaluation</h3>
+  <div class="govuk-inset-text">
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Innovation Sandbox:</strong> Safe, isolated environment enabled risk-free experimentation</li>
+      <li><strong>Rapid Deployment:</strong> CloudFormation templates enabled quick setup without deep AWS expertise</li>
+      <li><strong>Cost Transparency:</strong> Actual evaluation costs aligned with estimates</li>
+      <li><strong>Service Quality:</strong> AWS managed services performed as expected with minimal configuration</li>
+    </ul>
+  </div>
+
+  <h3 class="govuk-heading-m">Recommendation</h3>
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h4 class="govuk-panel__title">
+      Evaluation Outcome
+    </h4>
+    <div class="govuk-panel__body">
+      <strong>Recommend proceeding to implementation planning</strong>
+      <br>
+      Subject to budget approval and stakeholder alignment
+    </div>
+  </div>
+
+  {% else %}
+  <p class="govuk-body">
+    Evaluation summary will be completed after the technical evaluation.
+  </p>
+  {% endif %}
+</div>

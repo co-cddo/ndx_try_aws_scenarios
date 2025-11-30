@@ -1,0 +1,262 @@
+# QuickSight Dashboard Exploration Data
+# Epic 11: Hands-On Exploration for QuickSight Dashboard Scenario
+
+scenario_id: quicksight-dashboard
+scenario_title: QuickSight Dashboard
+total_time_estimate: "40 minutes"
+
+# Persona paths for different user types
+personas:
+  data_analyst:
+    id: analyst
+    title: "Data Analyst"
+    description: "Focus on data exploration and visualization creation"
+    time_estimate: "30 minutes"
+    recommended_path:
+      - exp1
+      - exp2
+      - exp4
+      - arch-visual
+      - limit1
+      - limit3
+  service_manager:
+    id: manager
+    title: "Service Manager"
+    description: "Focus on reports, sharing, and scheduled updates"
+    time_estimate: "25 minutes"
+    recommended_path:
+      - exp1
+      - exp3
+      - exp5
+      - arch-visual
+      - limit2
+
+# All exploration activities
+activities:
+  # ========================================
+  # EXPERIMENTS (5 guided experiments)
+  # ========================================
+  - id: exp1
+    title: "Dashboard Filtering"
+    category: experiments
+    time_estimate: "5 minutes"
+    learning: "Filters let users explore data without modifying the underlying dashboard"
+    steps:
+      - title: "Open the Dashboard"
+        action: "Navigate to the sample council dashboard"
+      - title: "Apply a Date Filter"
+        action: "Use the date picker to select last 30 days"
+      - title: "Apply a Category Filter"
+        action: "Filter by department or service area"
+      - title: "Combine Filters"
+        action: "Apply both filters and observe how visuals update"
+    expected_outcome: "All charts and KPIs update to reflect the filtered data; filter selections are visible"
+    what_to_observe:
+      - "Visual update speed"
+      - "Filter persistence across tabs"
+      - "Clear filter option"
+
+  - id: exp2
+    title: "Drill-Down Navigation"
+    category: experiments
+    time_estimate: "5 minutes"
+    learning: "Drill-down reveals progressively detailed data from summary to individual records"
+    steps:
+      - title: "Start with Summary View"
+        action: "View the top-level KPI or chart"
+      - title: "Click a Category"
+        action: "Click on a bar, slice, or row to drill down"
+      - title: "Drill Deeper"
+        action: "Continue drilling to see individual records"
+      - title: "Drill Up"
+        action: "Use the breadcrumb or back button to return to summary"
+    expected_outcome: "Seamless navigation from summary to detail and back"
+    what_to_observe:
+      - "Drill-down indicators"
+      - "Data hierarchy"
+      - "Breadcrumb navigation"
+
+  - id: exp3
+    title: "Export and Sharing"
+    category: experiments
+    time_estimate: "4 minutes"
+    learning: "Dashboards can be exported to PDF, shared via email, or embedded in other applications"
+    steps:
+      - title: "Export to PDF"
+        action: "Use the export menu to generate a PDF report"
+      - title: "Email Dashboard"
+        action: "Click share and enter an email address"
+      - title: "Copy Embed URL"
+        action: "Generate an embed URL for intranet embedding"
+      - title: "Review Export Options"
+        action: "Note available formats and scheduling options"
+    expected_outcome: "Dashboard content can be shared in multiple formats for different audiences"
+    what_to_observe:
+      - "Export quality"
+      - "Filter state preservation in exports"
+      - "Embed URL structure"
+
+  - id: exp4
+    title: "Calculated Fields"
+    category: experiments
+    time_estimate: "6 minutes"
+    learning: "Calculated fields enable custom metrics without modifying source data"
+    steps:
+      - title: "View Existing Calculations"
+        action: "Open the analysis view to see field list"
+      - title: "Create a Simple Calculation"
+        action: "Add a percentage calculation (e.g., completion rate)"
+      - title: "Use Date Functions"
+        action: "Create a fiscal quarter field from dates"
+      - title: "Apply to Visual"
+        action: "Add your calculated field to a chart"
+    expected_outcome: "Custom metrics enable tailored analysis without IT involvement"
+    what_to_observe:
+      - "Calculation syntax"
+      - "Field validation"
+      - "Performance impact"
+
+  - id: exp5
+    title: "Scheduled Refresh"
+    category: experiments
+    time_estimate: "4 minutes"
+    learning: "SPICE datasets can be scheduled to refresh automatically from source data"
+    steps:
+      - title: "View Dataset Settings"
+        action: "Open the dataset configuration page"
+      - title: "Check Current Schedule"
+        action: "View the existing refresh schedule (if any)"
+      - title: "Modify Refresh Time"
+        action: "Change the refresh to a different time"
+      - title: "Review Refresh History"
+        action: "Check when the last refresh completed"
+    expected_outcome: "Dashboards can be kept current without manual intervention"
+    what_to_observe:
+      - "Refresh frequency options"
+      - "Timezone handling"
+      - "Failure notifications"
+
+  # ========================================
+  # ARCHITECTURE TOURS (Visual + Console)
+  # ========================================
+  - id: arch-visual
+    title: "Visual Architecture Tour"
+    category: architecture
+    time_estimate: "6 minutes"
+    learning: "Understand how data flows from source files through SPICE to interactive dashboards"
+    steps:
+      - title: "Data Sources"
+        description: "Council data is stored in S3 as CSV or Parquet files. AWS Glue Catalog maintains schema information for data discovery."
+      - title: "QuickSight Dataset"
+        description: "SPICE (Super-fast, Parallel, In-memory Calculation Engine) imports data for fast querying. Datasets define relationships and calculated fields."
+      - title: "Analysis Layer"
+        description: "Authors create visualizations, add filters, and define parameters. Analyses can contain multiple sheets with different views."
+      - title: "Dashboard Publication"
+        description: "Analyses are published as read-only dashboards for viewers. Dashboards can be shared, embedded, or scheduled for email."
+      - title: "User Interaction"
+        description: "Viewers apply filters and drill down without modifying the dashboard. Actions can link between dashboards or external URLs."
+      - title: "Embedding Options"
+        description: "Dashboards can be embedded in council intranet or portals via secure URLs with row-level security."
+
+  - id: arch-console
+    title: "Console Architecture Tour"
+    category: architecture
+    time_estimate: "10 minutes"
+    learning: "Explore the actual AWS resources powering this analytics solution"
+    requires_deployment: true
+    steps:
+      - title: "S3 Data Bucket"
+        console_url: "https://console.aws.amazon.com/s3/home"
+        what_to_look_for: "CSV/Parquet files, folder structure, data partitioning"
+      - title: "Glue Catalog"
+        console_url: "https://console.aws.amazon.com/glue/home#/v2/data-catalog/databases"
+        what_to_look_for: "Database and table definitions, schema columns, data types"
+      - title: "QuickSight Console"
+        console_url: "https://quicksight.aws.amazon.com/"
+        what_to_look_for: "Datasets, analyses, dashboards, user management"
+      - title: "CloudWatch Logs"
+        console_url: "https://console.aws.amazon.com/cloudwatch/home#/logs"
+        what_to_look_for: "SPICE refresh logs, error messages, usage metrics"
+
+  # ========================================
+  # BOUNDARY CHALLENGES (3 limit tests)
+  # ========================================
+  - id: limit1
+    title: "Empty Dataset"
+    category: limits
+    time_estimate: "3 minutes"
+    learning: "Dashboards handle empty or missing data gracefully"
+    challenge_description: "Apply filters that result in zero matching records"
+    sample_text: "Filter to a date range with no data (e.g., future dates)"
+    expected_behavior: "Charts show 'No data' message; KPIs display zero or dash"
+    business_implication: "Users understand when no data exists vs. when there's an error"
+    recovery: "Clear filters to restore data. Check filter combinations."
+
+  - id: limit2
+    title: "Large Date Range"
+    category: limits
+    time_estimate: "4 minutes"
+    learning: "Performance with very large datasets depends on SPICE capacity"
+    challenge_description: "Select the maximum available date range (e.g., 5 years)"
+    sample_text: "Set date filter to 'All Time' or the earliest available date"
+    expected_behavior: "Charts may take longer to render; consider aggregation"
+    business_implication: "Large queries may require scheduled reports instead of interactive exploration"
+    recovery: "Reduce date range or apply additional filters to limit data volume."
+
+  - id: limit3
+    title: "Complex Calculations"
+    category: limits
+    time_estimate: "5 minutes"
+    learning: "Some calculations are expensive and may slow dashboard performance"
+    challenge_description: "Create a calculation with multiple nested functions"
+    sample_text: "Try: ifelse(datediff(today(), {Date},'DAY') < 30, 'Recent', 'Old')"
+    expected_behavior: "Complex calculations work but may increase render time"
+    business_implication: "Pre-calculate complex fields in ETL rather than in dashboard"
+    recovery: "Simplify calculation or move to a calculated field in the dataset."
+
+# ========================================
+# PRODUCTION GUIDANCE
+# ========================================
+production_guidance:
+  - id: scale
+    title: "Scale Considerations"
+    topics:
+      - "SPICE capacity: plan for 10GB per author, 1GB per reader"
+      - "Dataset refresh: large datasets may need off-peak scheduling"
+      - "Concurrent users: Enterprise edition supports more concurrent viewers"
+      - "Cross-region: consider regions for data residency compliance"
+
+  - id: customization
+    title: "Customization Options"
+    topics:
+      - "Branding: add council logo, color palette, custom fonts"
+      - "Row-level security: different departments see their own data"
+      - "Custom domain: embed dashboards on council.gov.uk subdomain"
+      - "API integration: programmatic dashboard creation and updates"
+
+  - id: costs
+    title: "Cost Comparison"
+    demo_costs:
+      quicksight_author: "~$24/month (1 author)"
+      quicksight_reader: "~$0 (first 5 readers free)"
+      spice: "~$0.25/GB"
+      s3: "~$0.02"
+      glue: "~$0.01"
+      total: "~$24-25/month (demo)"
+    production_costs:
+      quicksight_author: "$216-480/month (3-20 authors)"
+      quicksight_reader: "$50-200/month (50-200 readers)"
+      spice: "$25-100/month (100-400GB)"
+      s3: "$5-20/month"
+      glue: "$10-30/month"
+      total: "$300-830/month"
+
+  - id: security
+    title: "Security Checklist"
+    items:
+      - "Row-level security policies per department"
+      - "Column-level restrictions for sensitive data"
+      - "Active Directory integration for SSO"
+      - "VPC connectivity for private data sources"
+      - "Embedding with user session tokens"
+      - "Audit logging for dashboard access"

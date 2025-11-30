@@ -1,0 +1,217 @@
+{#
+  Technical Runbook Summary Section (Developer Deep - AC-4.1.13)
+
+  Variables:
+  - cto_evaluation: CTO evaluation data (for deployment/monitoring)
+  - developer_evaluation: Developer evaluation data
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    Technical Runbook Summary
+  </h2>
+
+  {% include "evidence-pack/partials/persona-header.njk" %}
+
+  {% if cto_evaluation and cto_evaluation.technical_runbook %}
+  {% set runbook = cto_evaluation.technical_runbook %}
+
+  <h3 class="govuk-heading-m">Deployment Procedure</h3>
+  {% if runbook.deployment_steps %}
+  <ol class="govuk-list govuk-list--number">
+    {% for step in runbook.deployment_steps %}
+    <li>
+      <strong>{{ step.step }}</strong>
+      <br>
+      <span class="govuk-body-s">Estimated time: {{ step.time }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Total Deployment Time:</strong> 5-8 minutes
+      <br>
+      <strong>Prerequisites:</strong> AWS account with CloudFormation permissions, logged into AWS Console
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-m">Monitoring & Observability</h3>
+
+  <h4 class="govuk-heading-s">CloudWatch Metrics</h4>
+  {% if runbook.monitoring.cloudwatch_metrics %}
+  <ul class="govuk-list govuk-list--bullet">
+    {% for metric in runbook.monitoring.cloudwatch_metrics %}
+      <li>{{ metric }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <h4 class="govuk-heading-s">Recommended CloudWatch Alarms</h4>
+  {% if runbook.monitoring.cloudwatch_alarms %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Alarm</th>
+        <th scope="col" class="govuk-table__header">Threshold</th>
+        <th scope="col" class="govuk-table__header">Action</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for alarm in runbook.monitoring.cloudwatch_alarms %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">{{ alarm }}</th>
+        <td class="govuk-table__cell">As configured</td>
+        <td class="govuk-table__cell">SNS notification to operations team</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <h4 class="govuk-heading-s">Monitoring Dashboard</h4>
+  <p class="govuk-body">
+    Create a CloudWatch dashboard with the following widgets:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>Request Rate:</strong> API Gateway and Lambda invocations per minute</li>
+    <li><strong>Error Rate:</strong> Lambda errors and API Gateway 4xx/5xx responses</li>
+    <li><strong>Latency:</strong> P50, P95, P99 response times</li>
+    <li><strong>Costs:</strong> Daily AWS service costs by service</li>
+    <li><strong>Usage:</strong> Bedrock API calls and Lex message counts</li>
+  </ul>
+
+  <h3 class="govuk-heading-m">Troubleshooting Guide</h3>
+
+  {% if runbook.troubleshooting.common_issues %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Issue</th>
+        <th scope="col" class="govuk-table__header">Resolution Steps</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for issue in runbook.troubleshooting.common_issues %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">{{ issue.issue }}</th>
+        <td class="govuk-table__cell">{{ issue.resolution }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Log Analysis</h3>
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>CloudWatch Logs Insights:</strong> Use CloudWatch Logs Insights to query logs:
+    </p>
+    <pre><code>fields @timestamp, @message
+| filter @message like /ERROR/
+| sort @timestamp desc
+| limit 20</code></pre>
+  </div>
+
+  <h3 class="govuk-heading-m">Operational Maintenance</h3>
+
+  {% if runbook.maintenance %}
+  <h4 class="govuk-heading-s">Regular Maintenance Tasks</h4>
+  <ul class="govuk-list govuk-list--bullet">
+    {% for task in runbook.maintenance %}
+      <li>{{ task }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <h4 class="govuk-heading-s">Monthly Maintenance Checklist</h4>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Review CloudWatch metrics and identify performance trends</li>
+    <li>Check AWS costs and compare to budget forecasts</li>
+    <li>Update knowledge base content in S3 with new council information</li>
+    <li>Review conversation logs for accuracy and identify gaps</li>
+    <li>Update Lambda function dependencies if security patches available</li>
+    <li>Test disaster recovery procedures</li>
+    <li>Review IAM permissions and remove unused access</li>
+  </ul>
+
+  <h4 class="govuk-heading-s">Quarterly Review</h4>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Analyze chatbot accuracy and conversation success rates</li>
+    <li>Review and optimize Lambda function memory allocation</li>
+    <li>Evaluate Reserved Instance or Savings Plan opportunities</li>
+    <li>Conduct security audit and penetration testing</li>
+    <li>Update documentation based on operational learnings</li>
+  </ul>
+
+  <h3 class="govuk-heading-m">Backup & Disaster Recovery</h3>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Component</th>
+        <th scope="col" class="govuk-table__header">Backup Strategy</th>
+        <th scope="col" class="govuk-table__header">Recovery Time</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">S3 Knowledge Base</th>
+        <td class="govuk-table__cell">Cross-region replication + versioning</td>
+        <td class="govuk-table__cell">&lt; 1 hour</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">DynamoDB Tables</th>
+        <td class="govuk-table__cell">Point-in-time recovery enabled</td>
+        <td class="govuk-table__cell">&lt; 30 minutes</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">CloudFormation Stack</th>
+        <td class="govuk-table__cell">Template stored in version control (Git)</td>
+        <td class="govuk-table__cell">&lt; 10 minutes</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Lambda Functions</th>
+        <td class="govuk-table__cell">Code in version control, automatic versioning</td>
+        <td class="govuk-table__cell">&lt; 5 minutes</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="govuk-heading-m">Incident Response</h3>
+  <ol class="govuk-list govuk-list--number">
+    <li><strong>Detect:</strong> CloudWatch alarm triggers, user reports issue</li>
+    <li><strong>Assess:</strong> Check CloudWatch dashboard, review logs</li>
+    <li><strong>Communicate:</strong> Notify stakeholders, post status update</li>
+    <li><strong>Mitigate:</strong> Apply fix (rollback, scale, configuration change)</li>
+    <li><strong>Resolve:</strong> Verify service restored, monitor closely</li>
+    <li><strong>Review:</strong> Post-incident review, update runbook</li>
+  </ol>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      Escalation: For critical incidents affecting service availability, contact AWS Support (Enterprise Support recommended for production).
+    </strong>
+  </div>
+
+  <h3 class="govuk-heading-m">On-Call Runbook Access</h3>
+  <p class="govuk-body">
+    Ensure the operations team has access to:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>AWS Console with appropriate IAM permissions</li>
+    <li>CloudWatch dashboards and log groups</li>
+    <li>CloudFormation stack details and template</li>
+    <li>S3 bucket with knowledge base content</li>
+    <li>Runbook documentation (this document + detailed procedures)</li>
+    <li>Contact list for escalation (AWS Support, development team, stakeholders)</li>
+  </ul>
+
+  {% else %}
+  <p class="govuk-body">
+    Detailed technical runbook will be developed during production implementation.
+  </p>
+  {% endif %}
+</div>

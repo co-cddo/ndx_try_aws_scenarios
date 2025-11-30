@@ -1,0 +1,207 @@
+# FOI Redaction Exploration Data (Story 8.1)
+# Defines all exploration activities for the FOI Redaction scenario
+
+scenario_id: foi-redaction
+scenario_title: FOI Redaction
+total_time_estimate: "40 minutes"
+description: "Explore PII detection and redaction beyond the basic walkthrough"
+
+# Persona paths
+personas:
+  visual:
+    id: visual
+    title: "FOI Officer / Non-Technical"
+    description: "Explore through screenshots, diagrams, and guided interactions"
+    icon: "eye"
+    time_estimate: "25 minutes"
+  technical:
+    id: technical
+    title: "Developer / Technical"
+    description: "Explore through AWS Console, code, and architecture details"
+    icon: "code"
+    time_estimate: "35 minutes"
+
+# All exploration activities
+activities:
+  # PII Detection Experiments (Story 8.2)
+  - id: exp1
+    title: "Obvious PII Detection"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "AI reliably detects standard PII: names, addresses, phone numbers"
+    is_first: true
+    safe_badge: true
+    input_text: "Test a document with clear personal information"
+    expected_output: "All names, addresses, phone numbers and emails are redacted"
+    screenshot: "experiments/exp1-obvious-pii.png"
+
+  - id: exp2
+    title: "Subtle PII Detection"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "AI can detect less obvious PII: staff IDs, case references"
+    safe_badge: true
+    input_text: "Test a document with staff IDs and case numbers"
+    expected_output: "Staff IDs and case references identified with lower confidence"
+    screenshot: "experiments/exp2-subtle-pii.png"
+
+  - id: exp3
+    title: "False Positive Management"
+    category: experiments
+    persona: both
+    time_estimate: "10 min"
+    learning: "Some place names may match person names - review is essential"
+    safe_badge: true
+    input_text: "Test a document mentioning places like Reading, Hamilton, or Chester"
+    expected_output: "Some false positives flagged (e.g., 'Reading' detected as a name)"
+    screenshot: "experiments/exp3-false-positives.png"
+
+  - id: exp4
+    title: "Confidence Threshold Adjustment"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "Lower threshold catches more PII but increases false positives"
+    safe_badge: true
+    input_text: "Compare results at 80% vs 60% confidence thresholds"
+    expected_output: "Lower threshold redacts more items but includes false matches"
+    screenshot: "experiments/exp4-threshold.png"
+
+  - id: exp5
+    title: "Before/After Comparison"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "Visual comparison helps understand what was redacted"
+    safe_badge: true
+    input_text: "View original and redacted documents side by side"
+    expected_output: "Clear visual comparison showing redacted sections"
+    screenshot: "experiments/exp5-comparison.png"
+
+  # Visual Architecture Tour (Story 8.3)
+  - id: arch-visual
+    title: "Visual Architecture Tour"
+    category: architecture
+    persona: visual
+    time_estimate: "10 min"
+    learning: "How documents flow through PII detection and redaction"
+    steps:
+      - title: "Document Upload"
+        description: "Your FOI document is uploaded securely to AWS"
+        screenshot: "architecture/step1-upload.png"
+      - title: "Comprehend PII Detection"
+        description: "Amazon Comprehend identifies personal information"
+        screenshot: "architecture/step2-comprehend.png"
+      - title: "Confidence Scoring"
+        description: "Each detected entity receives a confidence score"
+        screenshot: "architecture/step3-confidence.png"
+      - title: "Redaction Applied"
+        description: "PII above threshold is redacted from the document"
+        screenshot: "architecture/step4-redaction.png"
+      - title: "Audit Report Generated"
+        description: "A report documents what was redacted and why"
+        screenshot: "architecture/step5-audit.png"
+
+  # Console Architecture Tour (Story 8.3)
+  - id: arch-console
+    title: "Console Architecture Tour"
+    category: architecture
+    persona: technical
+    time_estimate: "15 min"
+    learning: "Navigate AWS Console to understand PII detection infrastructure"
+    steps:
+      - title: "Comprehend PII Detection"
+        console_url: "https://console.aws.amazon.com/comprehend/home"
+        what_to_look_for: "PII entity types, confidence scores, detection results"
+        screenshot: "architecture/console-comprehend.png"
+      - title: "Lambda Redaction Function"
+        console_url: "https://console.aws.amazon.com/lambda/home"
+        what_to_look_for: "Redaction logic, threshold configuration, audit logging"
+        screenshot: "architecture/console-lambda.png"
+      - title: "S3 Document Storage"
+        console_url: "https://console.aws.amazon.com/s3/home"
+        what_to_look_for: "Original and redacted document buckets, encryption settings"
+        screenshot: "architecture/console-s3.png"
+      - title: "CloudWatch Audit Logs"
+        console_url: "https://console.aws.amazon.com/cloudwatch/home"
+        what_to_look_for: "PII detection events, redaction audit trail"
+        screenshot: "architecture/console-cloudwatch.png"
+
+  # Boundary Challenges (Story 8.4)
+  - id: limit1
+    title: "Zero PII Document"
+    category: limits
+    persona: both
+    time_estimate: "5 min"
+    learning: "System handles clean documents gracefully"
+    challenge_description: "Upload a document with no personal information"
+    sample_text: "Try uploading a policy document or public information"
+    expected_behavior: "System reports no PII found, document passes through unchanged"
+    business_implication: "Not all documents need redaction - the system correctly identifies these"
+    recovery: "Document is returned unmodified with a report confirming no PII"
+    screenshot: "limits/limit1-zero-pii.png"
+
+  - id: limit2
+    title: "High PII Document"
+    category: limits
+    persona: both
+    time_estimate: "5 min"
+    learning: "Dense PII documents require careful review"
+    challenge_description: "Upload a document with many personal details"
+    sample_text: "Try uploading a document with a contact list or personnel records"
+    expected_behavior: "Many redactions applied, review report is extensive"
+    business_implication: "High-PII documents need more review time"
+    recovery: "Review the audit report carefully before release"
+    screenshot: "limits/limit2-high-pii.png"
+
+  - id: limit3
+    title: "Unusual Encodings"
+    category: limits
+    persona: both
+    time_estimate: "5 min"
+    learning: "Character encoding affects detection accuracy"
+    challenge_description: "Upload a document with special characters or non-Latin text"
+    sample_text: "Try uploading a document with Welsh place names or accented characters"
+    expected_behavior: "Some characters may affect detection accuracy"
+    business_implication: "Review documents with special characters more carefully"
+    recovery: "Use UTF-8 encoded documents for best results"
+    screenshot: "limits/limit3-encoding.png"
+
+# Production guidance topics (Story 8.5)
+production_guidance:
+  - id: scale
+    title: "What Would Change at Scale"
+    topics:
+      - "Document volume: From 10s to 100s of FOI requests per month"
+      - "Batch processing: Queue management for multiple documents"
+      - "Review workflow: Integration with FOI case management"
+      - "Audit requirements: Long-term retention of redaction logs"
+  - id: customization
+    title: "Customization Options"
+    topics:
+      - "PII types: Enable/disable specific entity types"
+      - "Confidence threshold: Adjust sensitivity per document type"
+      - "Custom entities: Add council-specific patterns (case refs, etc.)"
+      - "Review interface: Integrate with existing FOI workflow"
+  - id: costs
+    title: "Cost Projection"
+    demo_costs:
+      comprehend: "~$0.50"
+      lambda: "~$0.10"
+      s3: "~$0.02"
+      total: "~$0.62 per document"
+    production_costs:
+      comprehend: "$250-500/month"
+      lambda: "$25-50/month"
+      s3: "$10-25/month"
+      total: "$285-575/month (500 documents)"
+  - id: security
+    title: "Security Hardening Checklist"
+    items:
+      - "Enable S3 encryption for document storage"
+      - "Implement IAM role for least-privilege access"
+      - "Configure VPC endpoints for private processing"
+      - "Enable CloudTrail for complete audit trail"
+      - "Set retention policies for GDPR compliance"

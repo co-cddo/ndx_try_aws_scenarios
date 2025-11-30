@@ -1,0 +1,699 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  NDX:Try - Smart Car Park Scenario with DynamoDB
+  Real-time parking availability with persistent storage.
+  Uses Lambda + DynamoDB for demo (full version uses IoT Core + Timestream).
+  Version: 2.0.0
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Scenario Configuration
+        Parameters:
+          - Environment
+          - SimulatedSensors
+      - Label:
+          default: Auto-Cleanup
+        Parameters:
+          - AutoCleanupHours
+
+Parameters:
+  Environment:
+    Type: String
+    Default: sandbox
+    AllowedValues:
+      - sandbox
+      - development
+      - production
+    Description: Deployment environment
+
+  SimulatedSensors:
+    Type: Number
+    Default: 20
+    MinValue: 5
+    MaxValue: 100
+    Description: Number of simulated parking sensors
+
+  AutoCleanupHours:
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 24
+    Description: Hours until automatic resource cleanup
+
+Resources:
+  # DynamoDB Table for parking data (persistent storage)
+  ParkingDataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'ndx-try-parking-data-${AWS::Region}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: carParkId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: carParkId
+          KeyType: HASH
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: smart-car-park
+        - Key: AutoCleanup
+          Value: 'true'
+
+  # S3 Bucket for historical data (optional backup)
+  ParkingDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-try-parking-data-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoCleanup
+            Status: Enabled
+            ExpirationInDays: 1
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: smart-car-park
+        - Key: AutoCleanup
+          Value: 'true'
+
+  # IAM Role for Lambda
+  SmartParkingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'ndx-try-smart-parking-role-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt ParkingDataBucket.Arn
+                  - !Sub '${ParkingDataBucket.Arn}/*'
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:BatchGetItem
+                Resource:
+                  - !GetAtt ParkingDataTable.Arn
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: smart-car-park
+
+  # Lambda Function - Parking Data Simulator with DynamoDB
+  ParkingSimulatorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-parking-simulator-${AWS::Region}'
+      Description: Simulates IoT parking sensor data with DynamoDB persistence
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      Role: !GetAtt SmartParkingRole.Arn
+      Timeout: 60
+      MemorySize: 256
+      Environment:
+        Variables:
+          DATA_BUCKET: !Ref ParkingDataBucket
+          DATA_TABLE: !Ref ParkingDataTable
+          SENSOR_COUNT: !Ref SimulatedSensors
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+          import random
+          from datetime import datetime
+          from decimal import Decimal
+
+          s3 = boto3.client('s3')
+          dynamodb = boto3.resource('dynamodb')
+
+          # Car park configuration
+          CAR_PARKS = [
+              {'id': 'CP001', 'name': 'Town Centre Multi-Storey', 'capacity': 450, 'hourlyRate': 1.50},
+              {'id': 'CP002', 'name': 'Market Square', 'capacity': 120, 'hourlyRate': 1.20},
+              {'id': 'CP003', 'name': 'Railway Station', 'capacity': 280, 'hourlyRate': 2.00},
+              {'id': 'CP004', 'name': 'Leisure Centre', 'capacity': 200, 'hourlyRate': 1.00}
+          ]
+
+          def render_dashboard_html():
+              return '''<!DOCTYPE html>
+          <html lang="en" class="govuk-template">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Smart Car Park Dashboard - NDX:Try</title>
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f3f2f1; color: #0b0c0c; line-height: 1.5; }
+              a { color: #1d70b8; }
+              a:focus { outline: 3px solid #ffdd00; background: #ffdd00; }
+              .skip-link { position: absolute; top: -40px; left: 0; background: #ffdd00; color: #0b0c0c; padding: 8px; z-index: 100; }
+              .skip-link:focus { top: 0; }
+              .phase-banner { background: #f3f2f1; border-bottom: 1px solid #b1b4b6; padding: 10px 0; }
+              .phase-banner-inner { max-width: 960px; margin: 0 auto; padding: 0 15px; }
+              .phase-tag { display: inline-block; background: #1d70b8; color: white; padding: 2px 8px; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+              .header { background: #0b0c0c; padding: 15px 0; }
+              .header-inner { max-width: 960px; margin: 0 auto; padding: 0 15px; }
+              .header-title { color: white; font-size: 24px; font-weight: bold; text-decoration: none; }
+              .header-title:hover { text-decoration: underline; }
+              .main { max-width: 960px; margin: 0 auto; padding: 30px 15px; }
+              h1 { font-size: 36px; font-weight: 700; margin-bottom: 20px; }
+              .banner { background: #1d70b8; color: white; padding: 10px 20px; text-align: center; font-weight: bold; }
+              .summary-panel { background: white; border-left: 5px solid #1d70b8; padding: 20px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+              .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
+              .summary-item { text-align: center; }
+              .summary-value { font-size: 36px; font-weight: bold; color: #1d70b8; }
+              .summary-label { font-size: 14px; color: #505a5f; }
+              .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+              .car-park-card { background: white; border-radius: 4px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 5px solid #b1b4b6; }
+              .car-park-card.status-green { border-top-color: #00703c; }
+              .car-park-card.status-amber { border-top-color: #f47738; }
+              .car-park-card.status-red { border-top-color: #d4351c; }
+              .car-park-name { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+              .car-park-status { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 14px; font-weight: bold; color: white; margin-bottom: 15px; }
+              .status-green .car-park-status { background: #00703c; }
+              .status-amber .car-park-status { background: #f47738; color: #0b0c0c; }
+              .status-red .car-park-status { background: #d4351c; }
+              .progress-bar { background: #f3f2f1; border-radius: 4px; height: 20px; overflow: hidden; margin-bottom: 15px; }
+              .progress-fill { height: 100%; transition: width 0.5s ease; }
+              .status-green .progress-fill { background: #00703c; }
+              .status-amber .progress-fill { background: #f47738; }
+              .status-red .progress-fill { background: #d4351c; }
+              .car-park-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; }
+              .stat-label { color: #505a5f; }
+              .stat-value { font-weight: bold; }
+              .car-park-price { margin-top: 15px; padding-top: 15px; border-top: 1px solid #f3f2f1; font-size: 14px; }
+              .controls { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 30px; }
+              .btn { display: inline-block; padding: 10px 20px; font-size: 16px; font-weight: bold; text-decoration: none; border: none; border-radius: 4px; cursor: pointer; }
+              .btn:focus { outline: 3px solid #ffdd00; outline-offset: 2px; }
+              .btn-primary { background: #00703c; color: white; }
+              .btn-primary:hover { background: #005a30; }
+              .btn-secondary { background: #f3f2f1; color: #0b0c0c; border: 2px solid #0b0c0c; }
+              .btn-secondary:hover { background: #e8e6e4; }
+              .btn:disabled { background: #b1b4b6; cursor: not-allowed; }
+              .last-updated { font-size: 14px; color: #505a5f; }
+              .auto-refresh { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+              .auto-refresh input { width: 18px; height: 18px; }
+              .loading { display: none; align-items: center; gap: 10px; padding: 20px; background: #f3f2f1; border-radius: 4px; margin-bottom: 20px; }
+              .loading.visible { display: flex; }
+              .spinner { width: 24px; height: 24px; border: 3px solid #f3f2f1; border-top-color: #1d70b8; border-radius: 50%; animation: spin 1s linear infinite; }
+              @keyframes spin { to { transform: rotate(360deg); } }
+              .sample-note { background: #f3f2f1; border-left: 5px solid #1d70b8; padding: 15px 20px; margin-top: 30px; font-size: 14px; }
+              .sensor-status { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 20px; }
+              .sensor-dot { width: 12px; height: 12px; border-radius: 50%; background: #00703c; animation: pulse 2s infinite; }
+              @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+              .db-badge { display: inline-block; background: #f47738; color: #0b0c0c; padding: 2px 8px; font-size: 12px; font-weight: bold; border-radius: 4px; margin-left: 10px; }
+              @media (max-width: 640px) {
+                h1 { font-size: 28px; }
+                .summary-value { font-size: 28px; }
+                .controls { flex-direction: column; align-items: stretch; }
+              }
+            </style>
+          </head>
+          <body>
+            <a href="#main-content" class="skip-link">Skip to main content</a>
+
+            <div class="banner">Powered by Amazon DynamoDB - Real-Time IoT Simulation</div>
+
+            <div class="phase-banner">
+              <div class="phase-banner-inner">
+                <span class="phase-tag">Sandbox</span>
+                <span>Data persists in DynamoDB - in production uses IoT Core + Timestream</span>
+              </div>
+            </div>
+
+            <header class="header">
+              <div class="header-inner">
+                <a href="/" class="header-title">NDX:Try - Smart Car Park Dashboard</a>
+              </div>
+            </header>
+
+            <main class="main" id="main-content">
+              <h1>Live Parking Availability <span class="db-badge">DynamoDB</span></h1>
+
+              <div class="sensor-status">
+                <div class="sensor-dot"></div>
+                <span>IoT Sensors Online - Data stored in Amazon DynamoDB</span>
+              </div>
+
+              <div class="summary-panel" role="region" aria-label="Parking summary">
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <div class="summary-value" id="totalCapacity">-</div>
+                    <div class="summary-label">Total Spaces</div>
+                  </div>
+                  <div class="summary-item">
+                    <div class="summary-value" id="totalAvailable" style="color: #00703c;">-</div>
+                    <div class="summary-label">Available Now</div>
+                  </div>
+                  <div class="summary-item">
+                    <div class="summary-value" id="totalOccupied" style="color: #d4351c;">-</div>
+                    <div class="summary-label">Occupied</div>
+                  </div>
+                  <div class="summary-item">
+                    <div class="summary-value" id="avgOccupancy">-</div>
+                    <div class="summary-label">Avg Occupancy</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="controls">
+                <button class="btn btn-primary" id="refreshBtn" onclick="fetchParkingData()">
+                  Refresh Data
+                </button>
+                <button class="btn btn-secondary" id="simulateBtn" onclick="simulateData()">
+                  Simulate Sensor Update
+                </button>
+                <div class="auto-refresh">
+                  <input type="checkbox" id="autoRefresh" checked>
+                  <label for="autoRefresh">Auto-refresh every 30s</label>
+                </div>
+                <div class="last-updated">
+                  Last updated: <span id="lastUpdated">-</span>
+                </div>
+              </div>
+
+              <div class="loading" id="loading" role="status" aria-live="polite">
+                <div class="spinner"></div>
+                <span>Fetching parking data from DynamoDB...</span>
+              </div>
+
+              <div class="dashboard-grid" id="dashboardGrid" role="region" aria-label="Car park status cards">
+                <!-- Car park cards will be inserted here -->
+              </div>
+
+              <div class="sample-note">
+                <strong>About this demo:</strong> This dashboard uses <strong>Amazon DynamoDB</strong> for persistent
+                data storage. Each "Simulate Sensor Update" writes to DynamoDB, and data is retrieved on refresh.
+                In a production environment, this would connect to AWS IoT Core for live sensor telemetry
+                and Amazon Timestream for time-series historical data.
+              </div>
+            </main>
+
+            <script>
+              let autoRefreshInterval = null;
+
+              function formatTime(isoString) {
+                const date = new Date(isoString);
+                return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              }
+
+              function getStatusLabel(status) {
+                switch(status) {
+                  case 'green': return 'Available';
+                  case 'amber': return 'Limited';
+                  case 'red': return 'Full';
+                  default: return 'Unknown';
+                }
+              }
+
+              function renderCarParkCard(carPark) {
+                return `
+                  <div class="car-park-card status-${carPark.status}" role="article" aria-label="${carPark.name}">
+                    <div class="car-park-name">${carPark.name}</div>
+                    <div class="car-park-status">${getStatusLabel(carPark.status)}</div>
+                    <div class="progress-bar" role="progressbar" aria-valuenow="${carPark.percentFull}" aria-valuemin="0" aria-valuemax="100" aria-label="${carPark.name} occupancy ${carPark.percentFull} percent">
+                      <div class="progress-fill" style="width: ${carPark.percentFull}%"></div>
+                    </div>
+                    <div class="car-park-stats">
+                      <div>
+                        <div class="stat-label">Available</div>
+                        <div class="stat-value" style="color: #00703c;">${carPark.available}</div>
+                      </div>
+                      <div>
+                        <div class="stat-label">Occupied</div>
+                        <div class="stat-value" style="color: #d4351c;">${carPark.occupied}</div>
+                      </div>
+                      <div>
+                        <div class="stat-label">Capacity</div>
+                        <div class="stat-value">${carPark.capacity}</div>
+                      </div>
+                      <div>
+                        <div class="stat-label">Occupancy</div>
+                        <div class="stat-value">${carPark.percentFull}%</div>
+                      </div>
+                    </div>
+                    <div class="car-park-price">
+                      <span class="stat-label">Hourly rate:</span> <strong>${carPark.hourlyRate}</strong>
+                    </div>
+                  </div>
+                `;
+              }
+
+              async function fetchParkingData() {
+                const loading = document.getElementById('loading');
+                const grid = document.getElementById('dashboardGrid');
+                const refreshBtn = document.getElementById('refreshBtn');
+
+                loading.classList.add('visible');
+                refreshBtn.disabled = true;
+
+                try {
+                  const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'status' })
+                  });
+
+                  const data = await response.json();
+
+                  if (data.success) {
+                    // Update summary
+                    document.getElementById('totalCapacity').textContent = data.totalCapacity;
+                    document.getElementById('totalAvailable').textContent = data.totalAvailable;
+                    document.getElementById('totalOccupied').textContent = data.totalCapacity - data.totalAvailable;
+
+                    const avgOccupancy = Math.round(((data.totalCapacity - data.totalAvailable) / data.totalCapacity) * 100);
+                    document.getElementById('avgOccupancy').textContent = avgOccupancy + '%';
+
+                    // Update cards
+                    grid.innerHTML = data.carParks.map(renderCarParkCard).join('');
+
+                    // Update timestamp
+                    document.getElementById('lastUpdated').textContent = formatTime(data.timestamp);
+                  }
+                } catch (error) {
+                  console.error('Error fetching data:', error);
+                  grid.innerHTML = '<div style="color: #d4351c; padding: 20px;">Error loading parking data. Please try again.</div>';
+                } finally {
+                  loading.classList.remove('visible');
+                  refreshBtn.disabled = false;
+                }
+              }
+
+              async function simulateData() {
+                const simulateBtn = document.getElementById('simulateBtn');
+                simulateBtn.disabled = true;
+                simulateBtn.textContent = 'Writing to DynamoDB...';
+
+                try {
+                  await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'simulate' })
+                  });
+
+                  // Fetch updated data
+                  await fetchParkingData();
+                } finally {
+                  simulateBtn.disabled = false;
+                  simulateBtn.textContent = 'Simulate Sensor Update';
+                }
+              }
+
+              function setupAutoRefresh() {
+                const checkbox = document.getElementById('autoRefresh');
+
+                if (checkbox.checked && !autoRefreshInterval) {
+                  autoRefreshInterval = setInterval(fetchParkingData, 30000);
+                } else if (!checkbox.checked && autoRefreshInterval) {
+                  clearInterval(autoRefreshInterval);
+                  autoRefreshInterval = null;
+                }
+
+                checkbox.addEventListener('change', function() {
+                  if (this.checked) {
+                    autoRefreshInterval = setInterval(fetchParkingData, 30000);
+                  } else {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                  }
+                });
+              }
+
+              // Initialize on page load
+              document.addEventListener('DOMContentLoaded', function() {
+                fetchParkingData();
+                setupAutoRefresh();
+              });
+            </script>
+          </body>
+          </html>'''
+
+          def initialize_car_parks(table):
+              """Initialize car park data in DynamoDB if not exists"""
+              for car_park in CAR_PARKS:
+                  try:
+                      response = table.get_item(Key={'carParkId': car_park['id']})
+                      if 'Item' not in response:
+                          # Initialize with random occupancy
+                          occupancy_pct = random.uniform(0.4, 0.85)
+                          occupied = int(car_park['capacity'] * occupancy_pct)
+                          available = car_park['capacity'] - occupied
+                          status = 'green' if available > 50 else 'amber' if available > 10 else 'red'
+
+                          table.put_item(Item={
+                              'carParkId': car_park['id'],
+                              'name': car_park['name'],
+                              'capacity': car_park['capacity'],
+                              'occupied': occupied,
+                              'available': available,
+                              'percentFull': Decimal(str(round(occupancy_pct * 100, 1))),
+                              'status': status,
+                              'hourlyRate': Decimal(str(car_park['hourlyRate'])),
+                              'lastUpdated': datetime.utcnow().isoformat()
+                          })
+                  except Exception as e:
+                      print(f"Error initializing {car_park['id']}: {e}")
+
+          def get_parking_data_from_dynamodb(table):
+              """Get all car park data from DynamoDB"""
+              response = table.scan()
+              items = response.get('Items', [])
+
+              # Convert Decimal to float for JSON serialization
+              parking_data = []
+              for item in items:
+                  parking_data.append({
+                      'id': item['carParkId'],
+                      'name': item['name'],
+                      'capacity': int(item['capacity']),
+                      'occupied': int(item['occupied']),
+                      'available': int(item['available']),
+                      'percentFull': float(item['percentFull']),
+                      'status': item['status'],
+                      'hourlyRate': f"£{float(item['hourlyRate']):.2f}",
+                      'lastUpdated': item.get('lastUpdated', '')
+                  })
+
+              # Sort by ID for consistent ordering
+              return sorted(parking_data, key=lambda x: x['id'])
+
+          def simulate_sensor_update(table):
+              """Simulate IoT sensor updates and write to DynamoDB"""
+              timestamp = datetime.utcnow().isoformat()
+
+              for car_park in CAR_PARKS:
+                  # Simulate realistic occupancy changes
+                  hour = datetime.utcnow().hour
+                  if 9 <= hour <= 17:  # Business hours - higher occupancy
+                      occupancy_pct = random.uniform(0.6, 0.95)
+                  else:
+                      occupancy_pct = random.uniform(0.2, 0.6)
+
+                  occupied = int(car_park['capacity'] * occupancy_pct)
+                  available = car_park['capacity'] - occupied
+                  status = 'green' if available > 50 else 'amber' if available > 10 else 'red'
+
+                  table.put_item(Item={
+                      'carParkId': car_park['id'],
+                      'name': car_park['name'],
+                      'capacity': car_park['capacity'],
+                      'occupied': occupied,
+                      'available': available,
+                      'percentFull': Decimal(str(round(occupancy_pct * 100, 1))),
+                      'status': status,
+                      'hourlyRate': Decimal(str(car_park['hourlyRate'])),
+                      'lastUpdated': timestamp
+                  })
+
+              return timestamp
+
+          def lambda_handler(event, context):
+              try:
+                  table_name = os.environ['DATA_TABLE']
+                  table = dynamodb.Table(table_name)
+
+                  # Check HTTP method - return HTML for GET, JSON for POST
+                  http_method = event.get('requestContext', {}).get('http', {}).get('method', 'GET')
+
+                  if http_method == 'GET':
+                      return {
+                          'statusCode': 200,
+                          'headers': {'Content-Type': 'text/html; charset=utf-8'},
+                          'body': render_dashboard_html()
+                      }
+
+                  # POST request - handle JSON API
+                  if isinstance(event.get('body'), str):
+                      body = json.loads(event['body'])
+                  else:
+                      body = event.get('body', event)
+
+                  action = body.get('action', 'status')
+
+                  if action == 'simulate':
+                      # Simulate IoT sensor updates and write to DynamoDB
+                      timestamp = simulate_sensor_update(table)
+
+                      return {
+                          'statusCode': 200,
+                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                          'body': json.dumps({
+                              'success': True,
+                              'message': f'Simulated sensor data written to DynamoDB for {len(CAR_PARKS)} car parks',
+                              'timestamp': timestamp,
+                              'storage': 'Amazon DynamoDB'
+                          })
+                      }
+
+                  elif action == 'status':
+                      # Initialize data if table is empty
+                      initialize_car_parks(table)
+
+                      # Get current parking status from DynamoDB
+                      parking_data = get_parking_data_from_dynamodb(table)
+                      timestamp = datetime.utcnow().isoformat()
+
+                      return {
+                          'statusCode': 200,
+                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                          'body': json.dumps({
+                              'success': True,
+                              'timestamp': timestamp,
+                              'carParks': parking_data,
+                              'totalCapacity': sum(cp['capacity'] for cp in parking_data),
+                              'totalAvailable': sum(cp['available'] for cp in parking_data),
+                              'storage': 'Amazon DynamoDB',
+                              'note': 'Data persists in DynamoDB - in production uses IoT Core + Timestream'
+                          })
+                      }
+
+                  else:
+                      return {
+                          'statusCode': 400,
+                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                          'body': json.dumps({'error': f"Unknown action: {action}"})
+                      }
+
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  return {
+                      'statusCode': 500,
+                      'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                      'body': json.dumps({'error': str(e)})
+                  }
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: smart-car-park
+
+  # Lambda Function URL
+  ParkingSimulatorFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !GetAtt ParkingSimulatorFunction.Arn
+      Cors:
+        AllowCredentials: false
+        AllowHeaders:
+          - content-type
+        AllowMethods:
+          - POST
+          - GET
+        AllowOrigins:
+          - '*'
+        MaxAge: 86400
+
+  ParkingSimulatorFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ParkingSimulatorFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+
+  # CloudWatch Log Group
+  ParkingSimulatorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ParkingSimulatorFunction}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: smart-car-park
+
+Outputs:
+  AvailabilityAPI:
+    Description: Real-time parking availability API endpoint
+    Value: !GetAtt ParkingSimulatorFunctionUrl.FunctionUrl
+    Export:
+      Name: !Sub '${AWS::StackName}-AvailabilityAPI'
+
+  DataBucket:
+    Description: S3 bucket for parking data
+    Value: !Ref ParkingDataBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-DataBucket'
+
+  DataTable:
+    Description: DynamoDB table for parking data
+    Value: !Ref ParkingDataTable
+    Export:
+      Name: !Sub '${AWS::StackName}-DataTable'
+
+  ScenarioInfo:
+    Description: NDX:Try scenario information
+    Value: !Sub |
+      {
+        "scenario": "smart-car-park",
+        "environment": "${Environment}",
+        "autoCleanup": "${AutoCleanupHours} hours",
+        "sensors": "${SimulatedSensors}",
+        "storage": "Amazon DynamoDB",
+        "note": "Sandbox uses Lambda+DynamoDB; production uses IoT Core+Timestream"
+      }

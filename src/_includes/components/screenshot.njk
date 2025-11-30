@@ -1,0 +1,129 @@
+{#
+  Screenshot Component (Story 13.1, Updated Story 17.1)
+
+  Displays screenshots from git-based local storage with metadata, loading states, and click-to-zoom functionality.
+
+  Usage:
+    {% set screenshot = {
+      scenario: "council-chatbot",
+      filename: "bedrock-overview.png",
+      alt: "Bedrock agent configuration panel",
+      caption: "The Bedrock agent that powers natural language understanding"
+    } %}
+    {% include "components/screenshot.njk" %}
+
+  Or with explicit parameters:
+    {% include "components/screenshot.njk" with {
+      scenario: "council-chatbot",
+      filename: "bedrock-overview.png",
+      alt: "Bedrock agent configuration",
+      caption: "The Bedrock agent powers natural language understanding",
+      width: 1920,
+      height: 1080
+    } %}
+
+  Parameters:
+    - scenario (required): Scenario ID matching screenshot folder structure
+    - filename (required): Image filename (PNG)
+    - alt (required): Descriptive alt text (max 125 chars recommended)
+    - caption (optional): Longer description displayed below image
+    - width (optional): Image width for layout stability (default: 1920)
+    - height (optional): Image height for layout stability (default: 1080)
+    - loading (optional): "lazy" or "eager" (default: "lazy")
+    - zoomable (optional): Enable click-to-zoom (default: true)
+
+  Accessibility:
+    - AC-16.1: All screenshots have descriptive alt text
+    - AC-16.6: Keyboard accessible zoom trigger
+    - AC-13.9: Focus management for lightbox
+
+  FR Coverage: FR124, FR125, FR127
+  Story 17.1: Migrated from S3 to git-based local storage
+#}
+
+{# Story 17.1: Changed from S3 URL to local git-based storage #}
+{% set baseUrl = "/assets/images/screenshots" %}
+{% set fallbackPath = "/assets/images/fallbacks/" + scenario + ".svg" %}
+
+{# Build image URL #}
+{% set imgUrl = baseUrl + "/" + scenario + "/" + filename %}
+
+{# Defaults #}
+{% set imgWidth = width if width else 1920 %}
+{% set imgHeight = height if height else 1080 %}
+{% set imgLoading = loading if loading else "lazy" %}
+{% set enableZoom = zoomable if zoomable is defined else true %}
+
+{# Generate unique ID for accessibility #}
+{% set screenshotId = "screenshot-" + (scenario + "-" + filename) | slug %}
+
+<figure class="ndx-screenshot"
+        id="{{ screenshotId }}"
+        data-screenshot
+        data-scenario="{{ scenario | escape }}"
+        data-filename="{{ filename | escape }}">
+
+  {# Image container with optional zoom trigger #}
+  {% if enableZoom %}
+  <button type="button"
+          class="ndx-screenshot__trigger"
+          data-lightbox-trigger
+          data-src="{{ imgUrl }}"
+          data-alt="{{ alt | escape }}"
+          data-caption="{{ caption | escape if caption else '' }}"
+          aria-label="View larger image: {{ alt | escape }}">
+  {% else %}
+  <div class="ndx-screenshot__container">
+  {% endif %}
+
+    {#
+      Story 17.1: Simplified to single PNG image
+      Removed WebP variants and responsive srcset for simpler git-based storage
+      Can be re-enabled with image optimization pipeline in future
+    #}
+    <img src="{{ imgUrl }}"
+         alt="{{ alt | escape }}"
+         width="{{ imgWidth }}"
+         height="{{ imgHeight }}"
+         loading="{{ imgLoading }}"
+         decoding="async"
+         class="ndx-screenshot__image"
+         data-fallback="{{ fallbackPath }}"
+         onerror="this.onerror=null; this.classList.add('ndx-screenshot__image--error'); this.src=this.dataset.fallback;">
+
+    {# Zoom hint overlay - shown on hover/focus #}
+    {% if enableZoom %}
+    <span class="ndx-screenshot__zoom-hint" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2"/>
+        <path d="M12.5 12.5L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M8 5v6M5 8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Click to enlarge</span>
+    </span>
+    {% endif %}
+
+  {% if enableZoom %}
+  </button>
+  {% else %}
+  </div>
+  {% endif %}
+
+  {# Caption with semantic figcaption #}
+  {% if caption %}
+  <figcaption class="ndx-screenshot__caption">
+    {{ caption }}
+  </figcaption>
+  {% endif %}
+
+  {# Fallback message - shown when image fails to load #}
+  <div class="ndx-screenshot__fallback" aria-live="polite" hidden>
+    <p class="govuk-body-s">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2"/>
+        <path d="M8 4v5M8 11v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Screenshot updating - please check back soon
+    </p>
+  </div>
+</figure>

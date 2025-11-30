@@ -1,0 +1,127 @@
+---
+layout: layouts/exploration
+title: "Explore - FOI Redaction"
+description: "Go beyond the walkthrough - understand how PII detection and redaction works"
+scenarioId: foi-redaction
+eleventyNavigation:
+  key: foi-redaction-explore
+  parent: foi-redaction-walkthrough
+  title: Explore Further
+---
+
+{# Story 8.1: FOI Redaction Exploration Landing Page #}
+
+{% set scenarioId = "foi-redaction" %}
+{% set explorationData = exploration[scenarioId] %}
+{% set activities = explorationData.activities %}
+{% set personas = explorationData.personas %}
+
+{# Introduction Section #}
+<section class="ndx-explore-intro" aria-labelledby="explore-intro-heading">
+  <h2 class="govuk-heading-l" id="explore-intro-heading">Ready to Explore Deeper?</h2>
+
+  <p class="govuk-body-l">
+    You've seen the basics. Now discover how PII detection really works,
+    test its accuracy, and understand confidence thresholds for production use.
+  </p>
+
+  <div class="govuk-inset-text">
+    <strong>Safe exploration:</strong> Everything here is designed for experimentation.
+    You can't break anything, and you'll learn something at every step.
+  </div>
+</section>
+
+{# Persona Selection #}
+<section class="ndx-persona-selection" aria-labelledby="persona-heading">
+  <h2 class="govuk-heading-m" id="persona-heading">Choose Your Path</h2>
+
+  <div class="govuk-grid-row">
+    {% for key, persona in personas %}
+      <div class="govuk-grid-column-one-half">
+        <div class="ndx-persona-card" data-persona="{{ persona.id }}">
+          <h3 class="govuk-heading-s">{{ persona.title }}</h3>
+          <p class="govuk-body-s">{{ persona.description }}</p>
+          <p class="govuk-body-s"><strong>Time:</strong> {{ persona.time_estimate }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{# Exploration Categories #}
+<section class="ndx-explore-categories" aria-labelledby="categories-heading">
+  <h2 class="govuk-heading-l" id="categories-heading">What Would You Like to Explore?</h2>
+
+  <div class="ndx-category-section">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-category-icon" aria-hidden="true">🔬</span>
+      What Can I Change?
+    </h3>
+    <p class="govuk-body">5 guided experiments to test PII detection capabilities.</p>
+    <a href="/walkthroughs/{{ scenarioId }}/explore/experiments/" class="govuk-button">
+      Start Experiments
+    </a>
+  </div>
+
+  <div class="ndx-category-section">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-category-icon" aria-hidden="true">🏗️</span>
+      How Does It Work?
+    </h3>
+    <p class="govuk-body">Visual and console tours of the redaction architecture.</p>
+    <a href="/walkthroughs/{{ scenarioId }}/explore/architecture/" class="govuk-button govuk-button--secondary">
+      Take the Tour
+    </a>
+  </div>
+
+  <div class="ndx-category-section">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-category-icon" aria-hidden="true">⚠️</span>
+      Test the Limits
+    </h3>
+    <p class="govuk-body">3 boundary challenges to understand edge cases.</p>
+    <a href="/walkthroughs/{{ scenarioId }}/explore/limits/" class="govuk-button govuk-button--secondary">
+      Try Challenges
+    </a>
+  </div>
+
+  <div class="ndx-category-section">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-category-icon" aria-hidden="true">🚀</span>
+      Take It Further
+    </h3>
+    <p class="govuk-body">Production guidance for FOI compliance integration.</p>
+    <a href="/walkthroughs/{{ scenarioId }}/explore/production/" class="govuk-button govuk-button--secondary">
+      View Guidance
+    </a>
+  </div>
+</section>
+
+{# Progress Indicator #}
+<section class="ndx-explore-progress" aria-labelledby="progress-heading">
+  <h2 class="govuk-heading-m" id="progress-heading">Your Progress</h2>
+  {% include "components/exploration/completion-indicator.njk" %}
+</section>
+
+<style>
+  .ndx-explore-intro { margin-bottom: 40px; }
+  .ndx-persona-selection { margin-bottom: 40px; }
+  .ndx-persona-card {
+    padding: 20px;
+    background: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .ndx-persona-card:hover { border-left-color: #003078; }
+  .ndx-persona-card.selected { border-left-color: #00703c; background: #e8f4e8; }
+  .ndx-category-section {
+    padding: 25px;
+    background: #f8f8f8;
+    margin-bottom: 20px;
+    border-left: 4px solid #1d70b8;
+  }
+  .ndx-category-icon { margin-right: 10px; }
+  .ndx-explore-progress { margin-top: 40px; padding-top: 30px; border-top: 2px solid #b1b4b6; }
+</style>

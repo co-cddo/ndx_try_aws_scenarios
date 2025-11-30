@@ -1,0 +1,266 @@
+# Smart Car Park IoT Exploration Data
+# Epic 9: Hands-On Exploration for Smart Car Park Scenario
+
+scenario_id: smart-car-park
+scenario_title: Smart Car Park IoT
+total_time_estimate: "40 minutes"
+
+# Persona paths for different user types
+personas:
+  operations_manager:
+    id: operations
+    title: "Operations Manager"
+    description: "Focus on dashboard insights and real-time monitoring"
+    time_estimate: "25 minutes"
+    recommended_path:
+      - exp1
+      - exp2
+      - arch-visual
+      - limit1
+  it_lead:
+    id: technical
+    title: "IT Lead"
+    description: "Deep dive into IoT architecture and data flows"
+    time_estimate: "35 minutes"
+    recommended_path:
+      - exp1
+      - exp2
+      - exp3
+      - exp4
+      - exp5
+      - arch-visual
+      - arch-console
+      - limit1
+      - limit2
+      - limit3
+
+# All exploration activities
+activities:
+  # ========================================
+  # EXPERIMENTS (5 guided experiments)
+  # ========================================
+  - id: exp1
+    title: "Toggle Sensor States"
+    category: experiments
+    time_estimate: "4 minutes"
+    learning: "See how individual sensor changes propagate through the system in real-time"
+    steps:
+      - title: "Open the IoT Dashboard"
+        action: "Navigate to the QuickSight dashboard showing bay occupancy"
+      - title: "Identify a Vacant Bay"
+        action: "Find a bay currently showing as VACANT (green indicator)"
+      - title: "Toggle the Sensor"
+        action: "Use the simulator to change the bay to OCCUPIED"
+      - title: "Watch the Update"
+        action: "Observe the dashboard update within 5-10 seconds"
+    expected_outcome: "Dashboard reflects the change within seconds, demonstrating real-time IoT data flow"
+    what_to_observe:
+      - "Update latency from sensor to dashboard"
+      - "Visual indicator change (green to red)"
+      - "Occupancy percentage recalculation"
+
+  - id: exp2
+    title: "Dashboard Real-Time Updates"
+    category: experiments
+    time_estimate: "5 minutes"
+    learning: "Understand how QuickSight refreshes data from Timestream"
+    steps:
+      - title: "Open Two Browser Windows"
+        action: "Dashboard in one, simulator controls in another"
+      - title: "Make Rapid Changes"
+        action: "Toggle 3-4 sensors in quick succession"
+      - title: "Observe Update Pattern"
+        action: "Watch how the dashboard batches or streams updates"
+      - title: "Check Historical View"
+        action: "Switch to the historical trends view to see the changes logged"
+    expected_outcome: "Dashboard updates reflect changes with consistent latency; historical data captures all state changes"
+    what_to_observe:
+      - "Update frequency pattern"
+      - "Whether changes are batched"
+      - "Historical data accuracy"
+
+  - id: exp3
+    title: "Traffic Pattern Simulation"
+    category: experiments
+    time_estimate: "6 minutes"
+    learning: "See how the system handles typical morning rush or evening departure patterns"
+    steps:
+      - title: "Set Morning Rush Scenario"
+        action: "Use the simulator to gradually fill bays over 2 minutes"
+      - title: "Watch Occupancy Rise"
+        action: "Observe the percentage climbing and zone breakdown changing"
+      - title: "Check Alert Thresholds"
+        action: "See if high-occupancy alerts trigger at 80% or 90%"
+      - title: "Simulate Departure"
+        action: "Gradually empty bays and watch metrics recover"
+    expected_outcome: "System accurately tracks occupancy trends; alerts fire at configured thresholds"
+    what_to_observe:
+      - "Trend line accuracy"
+      - "Alert trigger points"
+      - "Zone-level vs aggregate metrics"
+
+  - id: exp4
+    title: "Alert Threshold Testing"
+    category: experiments
+    time_estimate: "5 minutes"
+    learning: "Understand when and how capacity alerts are triggered"
+    steps:
+      - title: "Check Current Occupancy"
+        action: "Note the current percentage and bay count"
+      - title: "Fill to 80% Capacity"
+        action: "Add occupied sensors until you hit the 80% threshold"
+      - title: "Watch for Alert"
+        action: "Observe if a warning indicator appears"
+      - title: "Push to 95%"
+        action: "Continue filling to see critical alert behavior"
+    expected_outcome: "Warning at 80%, critical alert at 95%; different visual indicators for each level"
+    what_to_observe:
+      - "Alert styling differences"
+      - "Notification triggers (if configured)"
+      - "Recovery when occupancy drops"
+
+  - id: exp5
+    title: "Zone Filtering"
+    category: experiments
+    time_estimate: "4 minutes"
+    learning: "See how zone-level filtering helps manage multi-area car parks"
+    steps:
+      - title: "View All Zones"
+        action: "Start with the aggregate view showing all zones"
+      - title: "Filter to Zone A"
+        action: "Use the zone selector to isolate Zone A"
+      - title: "Compare Zone Metrics"
+        action: "Switch between zones to compare occupancy patterns"
+      - title: "Check Zone Trends"
+        action: "View historical data filtered by zone"
+    expected_outcome: "Filtering provides accurate zone-level metrics; helpful for managing multi-story or multi-section car parks"
+    what_to_observe:
+      - "Filter responsiveness"
+      - "Zone-specific calculations"
+      - "Cross-zone comparison capability"
+
+  # ========================================
+  # ARCHITECTURE TOURS (Visual + Console)
+  # ========================================
+  - id: arch-visual
+    title: "Visual Architecture Tour"
+    category: architecture
+    time_estimate: "6 minutes"
+    learning: "Understand the IoT data flow from sensors through to dashboards"
+    steps:
+      - title: "Sensor Layer"
+        description: "Physical or simulated sensors report bay status (OCCUPIED/VACANT) via MQTT protocol. Each sensor has a unique ID and reports state changes immediately."
+      - title: "IoT Core Ingestion"
+        description: "AWS IoT Core receives MQTT messages, routes them to appropriate services based on topic patterns. Device shadows maintain last-known state for offline scenarios."
+      - title: "Time Series Storage"
+        description: "Amazon Timestream stores every state change with microsecond precision. Data is automatically tiered from memory to magnetic storage based on age."
+      - title: "Processing Layer"
+        description: "Lambda functions calculate aggregate metrics: total occupancy, zone breakdowns, trend analysis. Runs on every batch of changes or on schedule."
+      - title: "Dashboard Presentation"
+        description: "QuickSight queries Timestream and renders real-time visualizations. Auto-refresh keeps dashboards current without manual intervention."
+      - title: "Alert Pipeline"
+        description: "SNS notifications triggered when occupancy exceeds thresholds. Configurable recipients and escalation paths."
+
+  - id: arch-console
+    title: "Console Architecture Tour"
+    category: architecture
+    time_estimate: "10 minutes"
+    learning: "Explore the actual AWS resources powering this scenario"
+    requires_deployment: true
+    steps:
+      - title: "IoT Core"
+        console_url: "https://console.aws.amazon.com/iot/home#/thinghub"
+        what_to_look_for: "Thing registry, message broker, topic rules routing data to Timestream and Lambda"
+      - title: "Timestream Database"
+        console_url: "https://console.aws.amazon.com/timestream/home#/databases"
+        what_to_look_for: "Database and table structure, sample queries, data retention settings"
+      - title: "Lambda Functions"
+        console_url: "https://console.aws.amazon.com/lambda/home#/functions"
+        what_to_look_for: "Aggregation function code, CloudWatch logs showing processing events"
+      - title: "QuickSight"
+        console_url: "https://quicksight.aws.amazon.com/"
+        what_to_look_for: "Dashboard layout, data source configuration, refresh settings"
+      - title: "CloudWatch Alarms"
+        console_url: "https://console.aws.amazon.com/cloudwatch/home#/alarms"
+        what_to_look_for: "Occupancy threshold alarms, SNS action configuration"
+
+  # ========================================
+  # BOUNDARY CHALLENGES (3 limit tests)
+  # ========================================
+  - id: limit1
+    title: "All Sensors Offline"
+    category: limits
+    time_estimate: "4 minutes"
+    learning: "System maintains last-known state when sensors stop reporting"
+    challenge_description: "Simulate a network outage where all sensors stop sending data"
+    sample_text: "Pause the simulator or disconnect the MQTT client"
+    expected_behavior: "Dashboard shows stale data with timestamp warning; device shadows preserve last state"
+    business_implication: "Staff know when data is unreliable; can switch to manual counting as backup"
+    recovery: "Resume the simulator. Fresh data should flow within 10-15 seconds, and the stale warning should clear."
+
+  - id: limit2
+    title: "Rapid State Changes"
+    category: limits
+    time_estimate: "5 minutes"
+    learning: "System handles high-frequency updates without losing data"
+    challenge_description: "Toggle the same sensor on/off rapidly (10+ times in 30 seconds)"
+    sample_text: "Use the simulator's rapid-fire mode or script quick toggles"
+    expected_behavior: "All state changes captured in Timestream; dashboard may batch updates for performance"
+    business_implication: "Busy car parks with constant turnover won't overwhelm the system"
+    recovery: "Stop rapid changes. System catches up within seconds. Check Timestream for complete history."
+
+  - id: limit3
+    title: "Invalid Sensor Data"
+    category: limits
+    time_estimate: "4 minutes"
+    learning: "System validates and rejects malformed sensor messages"
+    challenge_description: "Send a message with invalid bay status (e.g., 'BROKEN' instead of OCCUPIED/VACANT)"
+    sample_text: "Modify simulator to send: {\"bayId\": \"A1\", \"status\": \"BROKEN\"}"
+    expected_behavior: "IoT Rule rejects invalid message; CloudWatch logs the validation failure; dashboard unaffected"
+    business_implication: "Bad data from malfunctioning sensors doesn't corrupt reports"
+    recovery: "Check CloudWatch Logs for the rejection. Send a valid message to confirm the bay updates correctly."
+
+# ========================================
+# PRODUCTION GUIDANCE
+# ========================================
+production_guidance:
+  - id: scale
+    title: "Scale Considerations"
+    topics:
+      - "Multi-car park support: routing by topic prefix (carpark/london/bay/A1)"
+      - "Thousands of bays: partition Timestream tables by location"
+      - "Peak hour handling: Lambda concurrency and QuickSight capacity"
+      - "Historical data: 90-day memory tier, 2-year magnetic retention"
+
+  - id: customization
+    title: "Customization Options"
+    topics:
+      - "Zone configuration: Define zones, levels, and bay numbering schemes"
+      - "Alert thresholds: Customize warning (80%) and critical (95%) levels"
+      - "Dashboard branding: Add council logo, color schemes, custom layouts"
+      - "Integration: Connect to existing parking guidance systems (PGS)"
+
+  - id: costs
+    title: "Cost Comparison"
+    demo_costs:
+      iot_core: "~$0.10"
+      timestream: "~$0.50"
+      lambda: "~$0.02"
+      quicksight: "~$0 (included in demo)"
+      total: "~$0.62 per day"
+    production_costs:
+      iot_core: "$50-150/month (1000 sensors)"
+      timestream: "$200-500/month"
+      lambda: "$20-50/month"
+      quicksight: "$250-500/month (5 users)"
+      total: "$520-1,200/month"
+
+  - id: security
+    title: "Security Checklist"
+    items:
+      - "Certificate-based device authentication"
+      - "IoT policies restricting topic access per device"
+      - "VPC endpoints for Timestream access"
+      - "QuickSight row-level security for multi-tenant"
+      - "CloudTrail logging for all API calls"
+      - "Encryption in transit and at rest"

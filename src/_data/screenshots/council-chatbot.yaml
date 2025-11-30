@@ -1,0 +1,158 @@
+# Screenshot data for Council Chatbot scenario (Story 13.2)
+# Used by screenshot.njk component to display S3-hosted screenshots
+# S3 Base: https://ndx-try-screenshots.s3.eu-west-2.amazonaws.com/current/council-chatbot/
+
+scenario: council-chatbot
+scenarioTitle: "Council Chatbot"
+awsService: "Amazon Bedrock"
+totalSteps: 4
+
+# Step-specific screenshots
+steps:
+  - step: 1
+    title: "Access the Chatbot"
+    screenshots:
+      - id: cloudformation-outputs
+        filename: step-1-cloudformation-outputs.png
+        alt: "CloudFormation stack outputs page showing the ChatbotURL output value"
+        caption: "Find your chatbot URL in the CloudFormation Outputs tab"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "10%"
+            y: "42%"
+            label: "ChatbotURL output"
+            arrow: "right"
+
+      - id: chatbot-interface
+        filename: step-1-chatbot-interface.png
+        alt: "Council Chatbot web interface with welcome message and text input"
+        caption: "The chatbot interface ready to receive questions"
+        width: 1920
+        height: 1080
+
+  - step: 2
+    title: "Ask a Question"
+    screenshots:
+      - id: question-input
+        filename: step-2-question-input.png
+        alt: "User typing a question about bin collection into the chatbot input field"
+        caption: "Type your question in the input field and click Send"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "20%"
+            y: "56%"
+            label: "Question input field"
+            arrow: "down"
+
+      - id: response-display
+        filename: step-2-response-display.png
+        alt: "Chatbot displaying a helpful response about bin collection schedules"
+        caption: "The chatbot provides a relevant, informative response"
+        width: 1920
+        height: 1080
+
+  - step: 3
+    title: "Try Different Topics"
+    screenshots:
+      - id: council-tax-question
+        filename: step-3-council-tax.png
+        alt: "Conversation showing a council tax question and the chatbot's detailed response"
+        caption: "Ask about council tax, payments, and account management"
+        width: 1920
+        height: 1080
+
+      - id: planning-question
+        filename: step-3-planning.png
+        alt: "Chatbot answering questions about planning applications and permits"
+        caption: "The chatbot can also help with planning-related queries"
+        width: 1920
+        height: 1080
+
+      - id: multi-turn-conversation
+        filename: step-3-multi-turn.png
+        alt: "Full conversation history showing multiple questions and responses"
+        caption: "The chatbot maintains context across multiple questions"
+        width: 1920
+        height: 1080
+
+  - step: 4
+    title: "Review & Reflect"
+    screenshots:
+      - id: conversation-summary
+        filename: step-4-conversation-summary.png
+        alt: "Complete conversation showing various questions answered by the chatbot"
+        caption: "Review your conversation to see what the chatbot can do"
+        width: 1920
+        height: 1080
+
+      - id: bedrock-console
+        filename: step-4-bedrock-console.png
+        alt: "AWS Bedrock console showing the agent configuration and model selection"
+        caption: "Behind the scenes: Amazon Bedrock powers the natural language understanding"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "16%"
+            y: "19%"
+            label: "Claude model selection"
+            arrow: "down"
+
+# Explore section screenshots (Epic 6 content)
+explore:
+  architecture:
+    - id: architecture-overview
+      filename: explore-architecture-overview.png
+      alt: "System architecture diagram showing API Gateway, Lambda, Bedrock Agent, and knowledge base"
+      caption: "How the Council Chatbot components work together"
+      width: 1920
+      height: 1080
+
+    - id: bedrock-agent-detail
+      filename: explore-bedrock-agent.png
+      alt: "Amazon Bedrock agent configuration page showing instructions and action groups"
+      caption: "The Bedrock Agent handles natural language understanding and response generation"
+      width: 1920
+      height: 1080
+
+    - id: knowledge-base
+      filename: explore-knowledge-base.png
+      alt: "Bedrock Knowledge Base showing S3 data source and OpenSearch Serverless"
+      caption: "Council knowledge is stored in S3 and indexed for semantic search"
+      width: 1920
+      height: 1080
+
+  experiments:
+    - id: prompt-modification
+      filename: explore-prompt-modification.png
+      alt: "Bedrock agent instructions editor showing the system prompt"
+      caption: "Experiment: Modify the agent instructions to change personality or scope"
+      width: 1920
+      height: 1080
+
+    - id: knowledge-update
+      filename: explore-knowledge-update.png
+      alt: "S3 bucket containing knowledge base documents"
+      caption: "Add your own council documents to expand the chatbot's knowledge"
+      width: 1920
+      height: 1080
+
+  limits:
+    - id: boundary-testing
+      filename: explore-boundary-testing.png
+      alt: "Chatbot response showing how it handles off-topic questions appropriately"
+      caption: "The chatbot stays on-topic and handles inappropriate requests safely"
+      width: 1920
+      height: 1080
+
+  production:
+    - id: production-checklist
+      filename: explore-production-checklist.png
+      alt: "Production readiness checklist for deploying Council Chatbot at scale"
+      caption: "Key considerations before production deployment"
+      width: 1920
+      height: 1080

@@ -1,0 +1,201 @@
+{#
+  Next Steps Guidance Component (Story 5-1 - AC 5.1.2, 5.1.3, 5.1.4)
+
+  Displays contextual "What's Next" guidance based on user's evaluation outcome.
+  Reads would_implement from localStorage (ndx_reflection_form).
+
+  Three pathways:
+  - proceed: would_implement = 'yes'
+  - maybe: would_implement = 'maybe' OR no data (default)
+  - not_now: would_implement = 'no'
+
+  Requires:
+  - scenarioData: Scenario object from scenarios.yaml
+  - pathways: Global data from pathways.yaml
+#}
+
+{# PROCEED Pathway - would_implement = 'yes' #}
+<div class="ndx-pathway-section" data-pathway="proceed" hidden>
+  <div class="govuk-notification-banner govuk-notification-banner--success" role="region" aria-labelledby="proceed-title">
+    <div class="govuk-notification-banner__header">
+      <h2 class="govuk-notification-banner__title" id="proceed-title">
+        Success
+      </h2>
+    </div>
+    <div class="govuk-notification-banner__content">
+      <h3 class="govuk-notification-banner__heading">
+        {{ pathways.proceed.heading }}
+      </h3>
+      <p class="govuk-body">{{ pathways.proceed.description }}</p>
+    </div>
+  </div>
+
+  <ol class="govuk-list govuk-list--number govuk-list--spaced">
+    {% for step in pathways.proceed.steps %}
+      <li>
+        <strong class="govuk-body">{{ step.title }}</strong>
+        <p class="govuk-body">{{ step.description }}</p>
+
+        {# G-Cloud link for "Find approved suppliers" step (AC 5.1.6) #}
+        {% if loop.index === 2 and scenarioData.gcloud_search_term %}
+          <p class="govuk-body">
+            <a href="https://www.digitalmarketplace.service.gov.uk/g-cloud/search?q={{ scenarioData.gcloud_search_term | urlencode }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="govuk-link"
+               onclick="if(window.NDXAnalytics) NDXAnalytics.trackGCloudClicked('{{ scenarioData.id }}', '{{ scenarioData.gcloud_search_term }}')">
+              Search G-Cloud for {{ scenarioData.name }} suppliers
+              <span class="govuk-visually-hidden">(opens in new tab)</span>
+            </a>
+          </p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+
+  {# Download Evidence Pack CTA #}
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Your Evidence Pack is ready</strong>
+    </p>
+    <p class="govuk-body">
+      Download your personalized business case with ROI calculations, security compliance details, and implementation guidance.
+    </p>
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      <a href="/evidence-pack/?scenario={{ scenarioData.id }}" class="govuk-link govuk-!-font-weight-bold">
+        Download Evidence Pack
+      </a>
+    </p>
+  </div>
+
+  {# Partner recommendations preview #}
+  <div class="govuk-!-margin-top-6">
+    <h3 class="govuk-heading-m">Implementation partners</h3>
+    <p class="govuk-body">
+      Browse G-Cloud approved suppliers who can help implement this solution:
+    </p>
+    <a href="https://www.digitalmarketplace.service.gov.uk/g-cloud/search?q={{ scenarioData.gcloud_search_term | urlencode }}"
+       target="_blank"
+       rel="noopener noreferrer"
+       role="button"
+       draggable="false"
+       class="govuk-button govuk-button--secondary"
+       data-module="govuk-button"
+       onclick="if(window.NDXAnalytics) NDXAnalytics.trackGCloudClicked('{{ scenarioData.id }}', '{{ scenarioData.gcloud_search_term }}')">
+      Find suppliers on G-Cloud
+      <span class="govuk-visually-hidden">(opens in new tab)</span>
+    </a>
+  </div>
+</div>
+
+{# MAYBE Pathway - would_implement = 'maybe' OR no data (default) #}
+<div class="ndx-pathway-section" data-pathway="maybe" hidden>
+  <h2 class="govuk-heading-m">{{ pathways.maybe.heading }}</h2>
+  <p class="govuk-body">{{ pathways.maybe.description }}</p>
+
+  <div class="govuk-grid-row govuk-!-margin-top-6">
+    {% for option in pathways.maybe.options %}
+      <div class="govuk-grid-column-one-half">
+        <div class="govuk-card govuk-card--contained">
+          <div class="govuk-card__content">
+            <h3 class="govuk-heading-s">{{ option.title }}</h3>
+            <p class="govuk-body">{{ option.description }}</p>
+            <p class="govuk-body govuk-!-margin-bottom-0">
+              <a href="{{ option.link }}" class="govuk-link">
+                {% if 'scenarios' in option.link %}
+                  Browse scenarios
+                {% else %}
+                  Contact us
+                {% endif %}
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {# Additional exploration options #}
+  <div class="govuk-!-margin-top-6">
+    <h3 class="govuk-heading-m">Other ways to explore</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>
+        <a href="/quiz/" class="govuk-link">Take the scenario quiz</a> to find scenarios matching your priorities
+      </li>
+      <li>
+        <a href="/evidence-pack/?scenario={{ scenarioData.id }}" class="govuk-link">Review your Evidence Pack</a> to see the detailed analysis
+      </li>
+      <li>
+        <a href="/partner-tour/" class="govuk-link">Request a partner-led guided tour</a> of this scenario
+      </li>
+    </ul>
+  </div>
+</div>
+
+{# NOT NOW Pathway - would_implement = 'no' #}
+<div class="ndx-pathway-section" data-pathway="not_now" hidden>
+  <h2 class="govuk-heading-m">{{ pathways.not_now.heading }}</h2>
+  <p class="govuk-body">{{ pathways.not_now.description }}</p>
+
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>We'd love your feedback</strong>
+    </p>
+    <p class="govuk-body">
+      Help us improve this scenario by sharing why it wasn't the right fit for your council.
+    </p>
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      <a href="{{ pathways.not_now.feedback_link }}" class="govuk-link">Share feedback</a>
+    </p>
+  </div>
+
+  {# Explore related scenarios #}
+  <div class="govuk-!-margin-top-6">
+    <h3 class="govuk-heading-m">Explore related scenarios</h3>
+    <p class="govuk-body">
+      These scenarios might be a better match for your council's needs:
+    </p>
+
+    {# Show 2 related scenarios based on tags #}
+    <div class="govuk-grid-row">
+      {% set relatedCount = 0 %}
+      {% for otherScenario in scenarios.scenarios %}
+        {% if otherScenario.id !== scenarioData.id and relatedCount < 2 %}
+          {# Check for matching tags #}
+          {% set hasMatchingTag = false %}
+          {% for tag in scenarioData.tags %}
+            {% if tag in otherScenario.tags %}
+              {% set hasMatchingTag = true %}
+            {% endif %}
+          {% endfor %}
+
+          {% if hasMatchingTag %}
+            {% set relatedCount = relatedCount + 1 %}
+            <div class="govuk-grid-column-one-half">
+              <div class="govuk-card govuk-card--contained">
+                <div class="govuk-card__content">
+                  <h4 class="govuk-heading-s">
+                    <a href="{{ otherScenario.url }}" class="govuk-link">
+                      {{ otherScenario.name }}
+                    </a>
+                  </h4>
+                  <p class="govuk-body-s">{{ otherScenario.headline }}</p>
+                  <p class="govuk-body-s govuk-!-margin-bottom-0">
+                    <strong class="govuk-tag govuk-tag--{{ otherScenario.difficulty | difficultyColor }}">
+                      {{ otherScenario.difficulty | capitalize }}
+                    </strong>
+                    <span class="govuk-!-margin-left-2">{{ otherScenario.timeEstimate }}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <p class="govuk-body govuk-!-margin-top-4">
+      <a href="/scenarios/" class="govuk-link">Browse all scenarios</a>
+    </p>
+  </div>
+</div>

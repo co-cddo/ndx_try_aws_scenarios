@@ -1,0 +1,319 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Notice the Details - Council Chatbot Walkthrough"
+description: Understand what makes this chatbot intelligent and production-ready
+currentStep: 4
+totalSteps: 4
+timeEstimate: "1 minute"
+scenarioId: council-chatbot
+---
+
+{#
+  Step 4: Notice the Details (AC-3.2.13)
+  - Technical explanation in plain English
+  - Wow moment callout
+  - What makes this production-ready
+#}
+
+<h1 class="govuk-heading-xl">Notice the Details</h1>
+
+<p class="govuk-body-l">
+  You've just experienced an AI chatbot that could handle real resident queries.
+  Let's look at what makes this impressive from a technical and service delivery perspective.
+</p>
+
+{# Wow Moment 3 - Multi-Modal Responses (AC-3.2.13) #}
+{% set wowMoment3 = chatbotSampleQuestions.wowMoments[2] %}
+{% set title = wowMoment3.title %}
+{% set explanation = wowMoment3.explanation %}
+{% set technicalDetail = wowMoment3.technicalDetail %}
+{% set icon = "📝" %}
+{% include "components/wow-moment.njk" %}
+
+<h2 class="govuk-heading-l govuk-!-margin-top-6">What makes this intelligent</h2>
+
+<div class="ndx-detail-grid">
+  <div class="ndx-detail-card">
+    <h3 class="govuk-heading-m ndx-detail-card__title">
+      <span class="ndx-detail-card__icon">🎯</span>
+      UK-specific knowledge
+    </h3>
+    <p class="govuk-body">
+      The chatbot understands UK council services, local government structure,
+      and British terminology (bins not trash, council tax not property tax).
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> Generic AI chatbots trained on US data would
+      give wrong answers. This is configured for UK councils specifically.
+    </p>
+  </div>
+
+  <div class="ndx-detail-card">
+    <h3 class="govuk-heading-m ndx-detail-card__title">
+      <span class="ndx-detail-card__icon">📚</span>
+      Council knowledge base
+    </h3>
+    <p class="govuk-body">
+      Responses come from your council's actual knowledge - not just the AI's
+      general training. It retrieves documents, schedules, and policies specific
+      to your authority.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> Every council is different. This approach
+      means accurate, authority-specific answers without retraining the AI.
+    </p>
+  </div>
+
+  <div class="ndx-detail-card">
+    <h3 class="govuk-heading-m ndx-detail-card__title">
+      <span class="ndx-detail-card__icon">🔒</span>
+      Privacy-first architecture
+    </h3>
+    <p class="govuk-body">
+      Questions and responses stay in your AWS account. The AI model (Amazon Bedrock)
+      doesn't train on your data or share it with other customers.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> GDPR compliance and data sovereignty are
+      built-in. Resident data never leaves your control.
+    </p>
+  </div>
+
+  <div class="ndx-detail-card">
+    <h3 class="govuk-heading-m ndx-detail-card__title">
+      <span class="ndx-detail-card__icon">⚡</span>
+      Real-time responses
+    </h3>
+    <p class="govuk-body">
+      Sub-3-second responses for most queries. Fast enough for a natural conversation,
+      unlike traditional knowledge bases that require multiple clicks and searches.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> Residents expect instant answers online.
+      Slow responses mean they'll call instead, defeating the purpose.
+    </p>
+  </div>
+
+  <div class="ndx-detail-card">
+    <h3 class="govuk-heading-m ndx-detail-card__title">
+      <span class="ndx-detail-card__icon">💷</span>
+      Cost-effective scaling
+    </h3>
+    <p class="govuk-body">
+      Pay per conversation, not per resident or per month. Serverless architecture
+      means zero cost when no one's using it, automatic scaling during busy periods.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> No upfront investment in servers. Costs scale
+      with actual usage, not predicted capacity.
+    </p>
+  </div>
+
+  <div class="ndx-detail-card">
+    <h3 class="govuk-heading-m ndx-detail-card__title">
+      <span class="ndx-detail-card__icon">🔄</span>
+      Easy knowledge updates
+    </h3>
+    <p class="govuk-body">
+      Update the knowledge base by uploading new documents - no retraining required.
+      New policies, changed schedules, or updated procedures are available immediately.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> Council information changes frequently.
+      Traditional chatbots require expensive retraining. This just needs a file upload.
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l govuk-!-margin-top-8">What you didn't see (but is important)</h2>
+
+<p class="govuk-body">
+  Behind the scenes, this chatbot also handles:
+</p>
+
+<details class="govuk-details govuk-!-margin-top-4">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Conversation memory and context
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      The chatbot maintains conversation history for up to 15 minutes. This means:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Follow-up questions work ("What about garden waste?")</li>
+      <li>References to previous topics are understood ("Tell me more about that")</li>
+      <li>No need to repeat context ("I asked about B15 earlier...")</li>
+    </ul>
+    <p class="govuk-body">
+      <strong>Technical detail:</strong> Amazon Lex manages session state. Bedrock receives
+      conversation history with each request for context-aware responses.
+    </p>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Fallback and error handling
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      When the chatbot doesn't know the answer:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>It admits uncertainty rather than making up information</li>
+      <li>It suggests contacting the council or checking the website</li>
+      <li>It can escalate to human operators if configured</li>
+    </ul>
+    <p class="govuk-body">
+      <strong>Technical detail:</strong> Confidence scoring on knowledge base retrieval.
+      Responses below threshold trigger fallback responses instead of hallucinated answers.
+    </p>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Multilingual support (potential)
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      While this demo is English-only, the underlying technology supports:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Automatic language detection</li>
+      <li>Translation of questions and responses</li>
+      <li>100+ languages supported by Claude 3</li>
+    </ul>
+    <p class="govuk-body">
+      <strong>Business value:</strong> Serve diverse communities without hiring
+      multilingual staff or maintaining multiple knowledge bases.
+    </p>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Analytics and improvement
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      In production, you'd capture:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Most common questions (to improve service design)</li>
+      <li>Questions the chatbot couldn't answer (knowledge gaps)</li>
+      <li>Resident satisfaction ratings</li>
+      <li>Time saved vs. traditional channels</li>
+    </ul>
+    <p class="govuk-body">
+      <strong>Technical detail:</strong> CloudWatch Logs capture all interactions.
+      Lambda functions can analyze patterns and trigger knowledge base updates.
+    </p>
+  </div>
+</details>
+
+<h2 class="govuk-heading-l govuk-!-margin-top-6">Production readiness checklist</h2>
+
+<p class="govuk-body">
+  This demo is fully functional, but for production you'd want to add:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Feature</th>
+      <th scope="col" class="govuk-table__header">Demo status</th>
+      <th scope="col" class="govuk-table__header">Production requirement</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Custom domain</th>
+      <td class="govuk-table__cell">AWS API endpoint</td>
+      <td class="govuk-table__cell">chat.yourcouncil.gov.uk</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Brand styling</th>
+      <td class="govuk-table__cell">Basic interface</td>
+      <td class="govuk-table__cell">Council branding, GOV.UK styling</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Knowledge base</th>
+      <td class="govuk-table__cell">Sample data</td>
+      <td class="govuk-table__cell">Real council policies and schedules</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Human handoff</th>
+      <td class="govuk-table__cell">Not configured</td>
+      <td class="govuk-table__cell">Escalate to call centre or webchat</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Analytics</th>
+      <td class="govuk-table__cell">Basic CloudWatch logs</td>
+      <td class="govuk-table__cell">Dashboard with KPIs and trends</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Security</th>
+      <td class="govuk-table__cell">Public access</td>
+      <td class="govuk-table__cell">Rate limiting, DDoS protection, audit logs</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>Good news:</strong> All of these are configuration, not development.
+    The core technology you've just tested is production-ready. The checklist
+    items are about integrating it into your council's existing infrastructure.
+  </p>
+</div>
+
+<style>
+  .ndx-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .ndx-detail-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-detail-card__title {
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ndx-detail-card__icon {
+    font-size: 32px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-detail-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-detail-card__title {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .ndx-detail-card__icon {
+      font-size: 24px;
+    }
+  }
+</style>

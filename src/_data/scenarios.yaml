@@ -1,0 +1,945 @@
+# Scenarios Configuration for NDX:Try AWS Scenarios Portal
+# This file is validated against schemas/scenario.schema.json during build
+
+scenarios:
+  - id: "council-chatbot"
+    name: "Council Chatbot"
+    headline: "AI-powered resident Q&A assistant that answers queries 24/7"
+    bestFor: "Reducing call centre volume with 24/7 AI support"
+    description: "Deploy an intelligent chatbot that can answer common resident questions about council services, bin collections, planning applications, and more. Uses Amazon Bedrock for natural language understanding with pre-configured council knowledge."
+    difficulty: "beginner"
+    timeEstimate: "15 minutes"
+    primaryPersona: "service-manager"
+    gcloud_search_term: "chatbot AI local government"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    estimatedCost: "Under £5 for evaluation"
+    maximumCost: "£10 maximum"
+    securitySummary: "Innovation Sandbox isolated - safe to experiment with full data protection"
+    skillsLearned:
+      - "Amazon Bedrock"
+      - "Conversational AI"
+      - "CloudFormation basics"
+      - "Lambda functions"
+    isMostPopular: true
+    awsServices:
+      - "Amazon Bedrock"
+      - "Amazon Lex"
+      - "AWS Lambda"
+      - "Amazon S3"
+    tags:
+      - "AI"
+      - "Chatbot"
+      - "Customer Service"
+      - "24/7 Support"
+    businessOutcomes:
+      - "Reduce call centre volume by handling routine queries"
+      - "Provide 24/7 resident support without additional staffing"
+      - "Improve resident satisfaction with instant responses"
+    prerequisites:
+      - "AWS account (sandbox provided)"
+      - "No technical expertise required"
+    url: "/scenarios/council-chatbot/"
+    order: 1
+    featured: true
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/council-chatbot/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/council-chatbot/template.yaml"
+      region: "eu-west-2"
+      stackNamePrefix: "ndx-try-council-chatbot"
+      parameters:
+        - name: "Environment"
+          value: "sandbox"
+          description: "Deployment environment (sandbox for Innovation Sandbox)"
+        - name: "AutoCleanupHours"
+          value: "2"
+          description: "Hours until automatic resource cleanup"
+        - name: "KnowledgeBaseSource"
+          value: "council-sample-data"
+          description: "Sample council knowledge base for the chatbot"
+      costBreakdown:
+        services:
+          - name: "Amazon Bedrock"
+            cost: "~£3.00"
+            note: "Claude 3 Haiku model inference"
+          - name: "Amazon Lex"
+            cost: "~£0.50"
+            note: "Conversation handling"
+          - name: "AWS Lambda"
+            cost: "~£0.10"
+            note: "Processing functions"
+          - name: "Amazon S3"
+            cost: "~£0.05"
+            note: "Knowledge base storage"
+        autoCleanup: "Resources automatically deleted after 2 hours"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "council-chatbot"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+      deploymentTime: "3-5 minutes"
+      deploymentPhases:
+        - "Creating IAM roles (~30 seconds)"
+        - "Creating S3 bucket for knowledge base (~10 seconds)"
+        - "Creating Lambda functions (~60 seconds)"
+        - "Configuring Amazon Lex bot (~120 seconds)"
+        - "Setting up Bedrock integration (~30 seconds)"
+      outputs:
+        - name: "ChatbotURL"
+          description: "Web interface URL to interact with the chatbot"
+        - name: "LexBotId"
+          description: "Amazon Lex bot identifier for API integration"
+    # Demo Video (Story 2.4 - Zero-Deployment Path)
+    video:
+      title: "Council Chatbot Demo Walkthrough"
+      duration: "7:30"
+      recordedDate: "2025-01-15"
+      # youtubeId will be added when video is recorded
+      # Placeholder shows "Coming Soon" message
+    # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
+    screenshots:
+      # steps array will be populated when screenshots are captured
+      # Empty steps shows "Coming Soon" placeholder
+      steps: []
+
+    # Success Metrics (Story 4-4)
+    success_metrics:
+      service_area: "Contact Center"
+      primary_metric: "Call volume reduction"
+      baseline:
+        description: "5,000 calls/month, 30% routine inquiries (1,500 calls/month)"
+        value: 1500
+        unit: "routine calls handled per month"
+        source: "LGA Contact Center Survey 2023"
+      projection:
+        description: "AI chatbot handles 80% of routine inquiries"
+        value: 1200
+        reduction_percent: 80
+      roi:
+        annual_savings: 72000
+        calculation: "1,200 calls × £5/call × 12 months = £72,000 annual savings"
+        payback_months: 1
+        disclaimer: "Illustrative projection based on typical UK council contact center operations. Actual savings depend on call volume, handling costs, and adoption rates."
+      committee_language: "AI chatbot reduces inquiry handling costs by £72,000 annually while improving 24/7 citizen access and freeing staff for complex casework"
+
+    # Security Posture (Story 4-4 - CTO Evidence Pack)
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "UK (eu-west-2 London region)"
+      encryption: "AES-256 at rest, TLS 1.3 in transit"
+      data_handling: "No data leaves UK; AWS shared responsibility model applies"
+
+    # TCO Projection (Story 4-4 - Finance Evidence Pack)
+    tco_projection:
+      year_1:
+        aws_services: 2400
+        integration: 5000
+        training: 2000
+        support: 1000
+        total: 10400
+      year_2:
+        aws_services: 2600
+        integration: 0
+        training: 500
+        support: 1000
+        total: 4100
+      year_3:
+        aws_services: 2800
+        integration: 0
+        training: 500
+        support: 1000
+        total: 4300
+
+  - id: "planning-ai"
+    name: "Planning Application AI"
+    headline: "Intelligent document analysis for faster planning decisions"
+    bestFor: "Speeding up planning application processing by 40%"
+    description: "Use AI to extract key information from planning applications, identify potential issues, and suggest relevant policies. Reduces manual review time and improves consistency in planning decisions."
+    difficulty: "intermediate"
+    timeEstimate: "30 minutes"
+    primaryPersona: "technical"
+    gcloud_search_term: "planning application AI document processing"
+    secondaryPersonas:
+      - "service-manager"
+    estimatedCost: "Under £10 for evaluation"
+    maximumCost: "£20 maximum"
+    securitySummary: "Innovation Sandbox isolated - sample data only, no live documents"
+    skillsLearned:
+      - "Amazon Textract"
+      - "Amazon Comprehend"
+      - "Document AI"
+      - "CloudFormation"
+    isMostPopular: false
+    awsServices:
+      - "Amazon Textract"
+      - "Amazon Comprehend"
+      - "Amazon Bedrock"
+      - "AWS Lambda"
+      - "Amazon S3"
+    tags:
+      - "AI"
+      - "Document Processing"
+      - "Planning"
+      - "Automation"
+    businessOutcomes:
+      - "Reduce planning application processing time by 40%"
+      - "Improve consistency in policy application"
+      - "Free up planning officers for complex cases"
+    prerequisites:
+      - "AWS account (sandbox provided)"
+      - "Sample planning documents provided"
+    url: "/scenarios/planning-ai/"
+    order: 2
+    featured: true
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/planning-ai/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/planning-ai/template.yaml"
+      region: "eu-west-2"
+      stackNamePrefix: "ndx-try-planning-ai"
+      parameters:
+        - name: "Environment"
+          value: "sandbox"
+          description: "Deployment environment (sandbox for Innovation Sandbox)"
+        - name: "AutoCleanupHours"
+          value: "2"
+          description: "Hours until automatic resource cleanup"
+        - name: "SampleDataBucket"
+          value: "ndx-try-sample-planning-docs"
+          description: "S3 bucket with sample planning documents"
+      costBreakdown:
+        services:
+          - name: "Amazon Textract"
+            cost: "~£4.00"
+            note: "Document text extraction"
+          - name: "Amazon Comprehend"
+            cost: "~£2.00"
+            note: "Entity and policy recognition"
+          - name: "Amazon Bedrock"
+            cost: "~£3.00"
+            note: "AI analysis and recommendations"
+          - name: "AWS Lambda"
+            cost: "~£0.20"
+            note: "Processing orchestration"
+          - name: "Amazon S3"
+            cost: "~£0.10"
+            note: "Document storage"
+        autoCleanup: "Resources automatically deleted after 2 hours"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "planning-ai"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+      deploymentTime: "5-8 minutes"
+      deploymentPhases:
+        - "Creating IAM roles (~30 seconds)"
+        - "Creating S3 buckets for input/output (~20 seconds)"
+        - "Creating Lambda functions (~90 seconds)"
+        - "Configuring Amazon Textract (~60 seconds)"
+        - "Setting up Amazon Comprehend (~60 seconds)"
+        - "Configuring Bedrock integration (~60 seconds)"
+      outputs:
+        - name: "UploadURL"
+          description: "S3 presigned URL endpoint for document upload"
+        - name: "ResultsURL"
+          description: "API endpoint to retrieve analysis results"
+    # Demo Video (Story 2.4 - Zero-Deployment Path)
+    video:
+      title: "Planning Application AI Demo Walkthrough"
+      duration: "9:45"
+      recordedDate: "2025-01-15"
+      # youtubeId will be added when video is recorded
+    # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
+    screenshots:
+      steps: []
+
+    # Success Metrics (Story 4-4)
+    success_metrics:
+      service_area: "Planning Department"
+      primary_metric: "Application processing time reduction"
+      baseline:
+        description: "Average 10 days per planning application, 300 applications/year"
+        value: 10
+        unit: "days per application"
+        source: "Planning Portal Annual Report 2023"
+      projection:
+        description: "AI reduces processing time by 50% through automated extraction"
+        value: 5
+        reduction_percent: 50
+      roi:
+        annual_savings: 45000
+        calculation: "150 staff days saved × £300/day = £45,000 annual savings"
+        payback_months: 3
+        disclaimer: "Illustrative projection based on typical UK planning department operations. Actual savings depend on application volume, complexity, and staff costs."
+      committee_language: "AI-powered document analysis saves £45,000 annually while reducing planning application processing time by 50%, improving service delivery to residents and developers"
+
+    # Security Posture (Story 4-4 - CTO Evidence Pack)
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "UK (eu-west-2 London region)"
+      encryption: "AES-256 at rest, TLS 1.3 in transit"
+      data_handling: "No data leaves UK; sample data only in sandbox; AWS shared responsibility model"
+
+    # TCO Projection (Story 4-4 - Finance Evidence Pack)
+    tco_projection:
+      year_1:
+        aws_services: 4800
+        integration: 8000
+        training: 3000
+        support: 1500
+        total: 17300
+      year_2:
+        aws_services: 5200
+        integration: 0
+        training: 1000
+        support: 1500
+        total: 7700
+      year_3:
+        aws_services: 5600
+        integration: 0
+        training: 1000
+        support: 1500
+        total: 8100
+
+  - id: "foi-redaction"
+    name: "FOI Redaction"
+    headline: "Automated sensitive data redaction for FOI requests"
+    bestFor: "Reducing FOI response time by 60%"
+    description: "Automatically identify and redact personal information, sensitive data, and exempt content from documents before FOI release. Uses AI-powered entity recognition to ensure compliance while reducing manual effort."
+    difficulty: "intermediate"
+    timeEstimate: "25 minutes"
+    primaryPersona: "service-manager"
+    gcloud_search_term: "FOI redaction document processing"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    estimatedCost: "Under £5 for evaluation"
+    maximumCost: "£15 maximum"
+    securitySummary: "Innovation Sandbox isolated - uses synthetic sample data only"
+    skillsLearned:
+      - "Amazon Comprehend"
+      - "Entity Recognition"
+      - "Data Protection"
+      - "Lambda automation"
+    isMostPopular: false
+    awsServices:
+      - "Amazon Comprehend"
+      - "Amazon Textract"
+      - "AWS Lambda"
+      - "Amazon S3"
+    tags:
+      - "AI"
+      - "Data Protection"
+      - "FOI"
+      - "Compliance"
+    businessOutcomes:
+      - "Reduce FOI response time by 60%"
+      - "Ensure consistent redaction standards"
+      - "Reduce risk of accidental data disclosure"
+    prerequisites:
+      - "AWS account (sandbox provided)"
+      - "Sample documents provided"
+    url: "/scenarios/foi-redaction/"
+    order: 3
+    featured: false
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/foi-redaction/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/foi-redaction/template.yaml"
+      region: "eu-west-2"
+      stackNamePrefix: "ndx-try-foi-redaction"
+      parameters:
+        - name: "Environment"
+          value: "sandbox"
+          description: "Deployment environment (sandbox for Innovation Sandbox)"
+        - name: "AutoCleanupHours"
+          value: "2"
+          description: "Hours until automatic resource cleanup"
+        - name: "RedactionConfidenceThreshold"
+          value: "0.85"
+          description: "Minimum confidence score for automatic redaction"
+      costBreakdown:
+        services:
+          - name: "Amazon Comprehend"
+            cost: "~£2.50"
+            note: "PII and entity detection"
+          - name: "Amazon Textract"
+            cost: "~£1.50"
+            note: "Document text extraction"
+          - name: "AWS Lambda"
+            cost: "~£0.15"
+            note: "Redaction processing"
+          - name: "Amazon S3"
+            cost: "~£0.10"
+            note: "Document storage"
+        autoCleanup: "Resources automatically deleted after 2 hours"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "foi-redaction"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+      deploymentTime: "4-6 minutes"
+      deploymentPhases:
+        - "Creating IAM roles (~30 seconds)"
+        - "Creating S3 buckets for input/output (~15 seconds)"
+        - "Creating Lambda functions (~60 seconds)"
+        - "Configuring Amazon Comprehend PII detection (~90 seconds)"
+        - "Setting up Amazon Textract (~45 seconds)"
+      outputs:
+        - name: "UploadURL"
+          description: "Document upload endpoint"
+        - name: "RedactedURL"
+          description: "Redacted document download location"
+    # Demo Video (Story 2.4 - Zero-Deployment Path)
+    video:
+      title: "FOI Redaction Demo Walkthrough"
+      duration: "8:15"
+      recordedDate: "2025-01-15"
+      # youtubeId will be added when video is recorded
+    # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
+    screenshots:
+      steps: []
+
+    # Success Metrics (Story 4-4)
+    success_metrics:
+      service_area: "Legal & Compliance"
+      primary_metric: "FOI processing time reduction"
+      baseline:
+        description: "Average 3 hours per FOI request for redaction, 200 requests/year"
+        value: 3
+        unit: "hours per FOI request"
+        source: "ICO FOI Processing Report 2023"
+      projection:
+        description: "AI reduces redaction time by 70% through automated entity detection"
+        value: 0.9
+        reduction_percent: 70
+      roi:
+        annual_savings: 30000
+        calculation: "420 staff hours saved × £70/hour = £30,000 annual savings"
+        payback_months: 2
+        disclaimer: "Illustrative projection based on typical UK council FOI volumes. Actual savings depend on request complexity, redaction requirements, and staff costs."
+      committee_language: "AI-powered redaction saves £30,000 annually while reducing FOI processing time by 70%, ensuring compliance and reducing disclosure risk"
+
+    # Security Posture (Story 4-4 - CTO Evidence Pack)
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "UK (eu-west-2 London region)"
+      encryption: "AES-256 at rest, TLS 1.3 in transit"
+      data_handling: "Synthetic data only in sandbox; production data never leaves UK; AWS shared responsibility model"
+
+    # TCO Projection (Story 4-4 - Finance Evidence Pack)
+    tco_projection:
+      year_1:
+        aws_services: 2000
+        integration: 4000
+        training: 2500
+        support: 1000
+        total: 9500
+      year_2:
+        aws_services: 2200
+        integration: 0
+        training: 500
+        support: 1000
+        total: 3700
+      year_3:
+        aws_services: 2400
+        integration: 0
+        training: 500
+        support: 1000
+        total: 3900
+
+  - id: "smart-car-park"
+    name: "Smart Car Park"
+    headline: "Real-time parking availability with IoT sensors"
+    bestFor: "Real-time parking data and smart city infrastructure"
+    description: "Monitor car park occupancy in real-time using IoT sensors, provide live availability data to residents, and generate insights on parking patterns. Includes dashboard and public-facing availability display."
+    difficulty: "advanced"
+    timeEstimate: "45 minutes"
+    primaryPersona: "technical"
+    gcloud_search_term: "IoT smart parking local government"
+    secondaryPersonas:
+      - "service-manager"
+    estimatedCost: "Under £15 for evaluation"
+    maximumCost: "£25 maximum"
+    securitySummary: "Innovation Sandbox isolated - simulated IoT data, no real sensors"
+    skillsLearned:
+      - "AWS IoT Core"
+      - "Amazon Timestream"
+      - "Real-time dashboards"
+      - "API Gateway"
+    isMostPopular: false
+    awsServices:
+      - "AWS IoT Core"
+      - "Amazon Timestream"
+      - "Amazon QuickSight"
+      - "AWS Lambda"
+      - "Amazon API Gateway"
+    tags:
+      - "IoT"
+      - "Real-time"
+      - "Parking"
+      - "Smart City"
+    businessOutcomes:
+      - "Reduce traffic from drivers searching for parking"
+      - "Optimise parking revenue with usage insights"
+      - "Improve resident satisfaction with availability data"
+    prerequisites:
+      - "AWS account (sandbox provided)"
+      - "Simulated sensor data provided"
+    url: "/scenarios/smart-car-park/"
+    order: 4
+    featured: false
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/smart-car-park/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/smart-car-park/template.yaml"
+      region: "eu-west-2"
+      stackNamePrefix: "ndx-try-smart-car-park"
+      parameters:
+        - name: "Environment"
+          value: "sandbox"
+          description: "Deployment environment (sandbox for Innovation Sandbox)"
+        - name: "AutoCleanupHours"
+          value: "2"
+          description: "Hours until automatic resource cleanup"
+        - name: "SimulatedSensors"
+          value: "20"
+          description: "Number of simulated parking sensors"
+        - name: "DataGenerationInterval"
+          value: "30"
+          description: "Seconds between simulated data points"
+      costBreakdown:
+        services:
+          - name: "AWS IoT Core"
+            cost: "~£5.00"
+            note: "Device messaging and rules"
+          - name: "Amazon Timestream"
+            cost: "~£4.00"
+            note: "Time-series data storage"
+          - name: "Amazon QuickSight"
+            cost: "~£3.00"
+            note: "Dashboard visualisation"
+          - name: "AWS Lambda"
+            cost: "~£0.50"
+            note: "Data processing"
+          - name: "Amazon API Gateway"
+            cost: "~£0.20"
+            note: "Public availability API"
+        autoCleanup: "Resources automatically deleted after 2 hours"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "smart-car-park"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_AUTO_EXPAND"
+      deploymentTime: "8-12 minutes"
+      deploymentPhases:
+        - "Creating IAM roles (~30 seconds)"
+        - "Creating VPC and networking (~120 seconds)"
+        - "Setting up AWS IoT Core (~90 seconds)"
+        - "Creating Amazon Timestream database (~60 seconds)"
+        - "Creating Lambda functions (~90 seconds)"
+        - "Configuring API Gateway (~45 seconds)"
+        - "Setting up QuickSight dashboard (~120 seconds)"
+      outputs:
+        - name: "DashboardURL"
+          description: "QuickSight dashboard URL for parking visualisation"
+        - name: "AvailabilityAPI"
+          description: "Public API for real-time parking availability"
+    # Demo Video (Story 2.4 - Zero-Deployment Path)
+    video:
+      title: "Smart Car Park IoT Demo Walkthrough"
+      duration: "10:30"
+      recordedDate: "2025-01-15"
+      # youtubeId will be added when video is recorded
+    # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
+    screenshots:
+      steps: []
+
+    # Success Metrics (Story 4-4)
+    success_metrics:
+      service_area: "Parking Services"
+      primary_metric: "Revenue optimization & traffic reduction"
+      baseline:
+        description: "£330,000 annual parking revenue, 15% lost to inefficient space utilization"
+        value: 330000
+        unit: "annual parking revenue (£)"
+        source: "Local Government Parking Revenue Report 2023"
+      projection:
+        description: "Real-time data increases utilization by 15%, generating additional revenue"
+        value: 380000
+        reduction_percent: 15
+      roi:
+        annual_savings: 50000
+        calculation: "£330,000 × 15% utilization improvement = £50,000 additional revenue"
+        payback_months: 6
+        disclaimer: "Illustrative projection based on typical UK council car park operations. Actual revenue depends on parking capacity, pricing, demand patterns, and resident adoption."
+      committee_language: "IoT-powered parking management generates £50,000 additional annual revenue through optimized space utilization while reducing traffic congestion and improving resident experience"
+
+    # Security Posture (Story 4-4 - CTO Evidence Pack)
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "UK (eu-west-2 London region)"
+      encryption: "AES-256 at rest, TLS 1.3 in transit, IoT device certificates"
+      data_handling: "Simulated sensor data in sandbox; production IoT data encrypted in transit; AWS shared responsibility model"
+
+    # TCO Projection (Story 4-4 - Finance Evidence Pack)
+    tco_projection:
+      year_1:
+        aws_services: 6000
+        integration: 12000
+        training: 3500
+        support: 2000
+        total: 23500
+      year_2:
+        aws_services: 6500
+        integration: 0
+        training: 1000
+        support: 2000
+        total: 9500
+      year_3:
+        aws_services: 7000
+        integration: 0
+        training: 1000
+        support: 2000
+        total: 10000
+
+  - id: "text-to-speech"
+    name: "Text to Speech"
+    headline: "Accessibility audio generation for council content"
+    bestFor: "Improving accessibility compliance and reaching more residents"
+    description: "Convert council documents, web content, and communications to natural-sounding speech. Improve accessibility for visually impaired residents and those who prefer audio content."
+    difficulty: "beginner"
+    timeEstimate: "15 minutes"
+    primaryPersona: "service-manager"
+    gcloud_search_term: "text to speech accessibility local government"
+    secondaryPersonas:
+      - "technical"
+    estimatedCost: "Under £3 for evaluation"
+    maximumCost: "£8 maximum"
+    securitySummary: "Innovation Sandbox isolated - sample content only, no live data"
+    skillsLearned:
+      - "Amazon Polly"
+      - "Text-to-speech AI"
+      - "S3 storage"
+      - "Accessibility best practices"
+    isMostPopular: false
+    awsServices:
+      - "Amazon Polly"
+      - "AWS Lambda"
+      - "Amazon S3"
+    tags:
+      - "Accessibility"
+      - "Audio"
+      - "Content"
+      - "Inclusion"
+    businessOutcomes:
+      - "Improve accessibility compliance"
+      - "Reach residents who prefer audio content"
+      - "Reduce accessibility accommodation requests"
+    prerequisites:
+      - "AWS account (sandbox provided)"
+      - "Sample text content provided"
+    url: "/scenarios/text-to-speech/"
+    order: 5
+    featured: true
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/text-to-speech/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/text-to-speech/template.yaml"
+      region: "eu-west-2"
+      stackNamePrefix: "ndx-try-text-to-speech"
+      parameters:
+        - name: "Environment"
+          value: "sandbox"
+          description: "Deployment environment (sandbox for Innovation Sandbox)"
+        - name: "AutoCleanupHours"
+          value: "2"
+          description: "Hours until automatic resource cleanup"
+        - name: "VoiceId"
+          value: "Amy"
+          description: "Amazon Polly voice (British English)"
+        - name: "OutputFormat"
+          value: "mp3"
+          description: "Audio output format"
+      costBreakdown:
+        services:
+          - name: "Amazon Polly"
+            cost: "~£2.00"
+            note: "Neural text-to-speech conversion"
+          - name: "AWS Lambda"
+            cost: "~£0.10"
+            note: "Processing functions"
+          - name: "Amazon S3"
+            cost: "~£0.05"
+            note: "Audio file storage"
+        autoCleanup: "Resources automatically deleted after 2 hours"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "text-to-speech"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+      deploymentTime: "2-4 minutes"
+      deploymentPhases:
+        - "Creating IAM roles (~20 seconds)"
+        - "Creating S3 bucket for audio files (~10 seconds)"
+        - "Creating Lambda functions (~45 seconds)"
+        - "Configuring Amazon Polly (~30 seconds)"
+        - "Setting up API Gateway (~30 seconds)"
+      outputs:
+        - name: "ConvertURL"
+          description: "Text-to-speech conversion API endpoint"
+        - name: "AudioBucket"
+          description: "S3 bucket URL for generated audio files"
+    # Demo Video (Story 2.4 - Zero-Deployment Path)
+    video:
+      title: "Text to Speech Accessibility Demo Walkthrough"
+      duration: "5:45"
+      recordedDate: "2025-01-15"
+      # youtubeId will be added when video is recorded
+    # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
+    screenshots:
+      steps: []
+
+    # Success Metrics (Story 4-4)
+    success_metrics:
+      service_area: "Accessibility & Communications"
+      primary_metric: "Content accessibility coverage"
+      baseline:
+        description: "60% of web content accessible, 400 accessibility requests/year"
+        value: 60
+        unit: "percent of content accessible"
+        source: "GDS Accessibility Monitoring 2023"
+      projection:
+        description: "AI text-to-speech achieves 100% audio accessibility coverage"
+        value: 100
+        reduction_percent: 100
+      roi:
+        annual_savings: 20000
+        calculation: "320 manual accommodation requests × £60/request = £20,000 annual savings"
+        payback_months: 3
+        disclaimer: "Illustrative projection based on typical UK council accessibility requirements. Actual savings depend on content volume, request types, and compliance obligations."
+      committee_language: "AI-powered text-to-speech saves £20,000 annually while achieving 100% audio accessibility coverage, improving compliance and resident inclusivity"
+
+    # Security Posture (Story 4-4 - CTO Evidence Pack)
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "UK (eu-west-2 London region)"
+      encryption: "AES-256 at rest for audio files, TLS 1.3 in transit"
+      data_handling: "Sample content only in sandbox; no personal data processed; AWS shared responsibility model"
+
+    # TCO Projection (Story 4-4 - Finance Evidence Pack)
+    tco_projection:
+      year_1:
+        aws_services: 1500
+        integration: 3000
+        training: 1500
+        support: 800
+        total: 6800
+      year_2:
+        aws_services: 1600
+        integration: 0
+        training: 500
+        support: 800
+        total: 2900
+      year_3:
+        aws_services: 1700
+        integration: 0
+        training: 500
+        support: 800
+        total: 3000
+
+  - id: "quicksight-dashboard"
+    name: "QuickSight Dashboard"
+    headline: "Service performance analytics and reporting"
+    bestFor: "Data-driven decision making without technical expertise"
+    description: "Create interactive dashboards to visualise council service performance, resident feedback, and operational metrics. Enables data-driven decision making without requiring data science expertise."
+    difficulty: "intermediate"
+    timeEstimate: "30 minutes"
+    primaryPersona: "leadership"
+    gcloud_search_term: "data analytics dashboard local government"
+    secondaryPersonas:
+      - "service-manager"
+      - "finance"
+    estimatedCost: "Under £10 for evaluation"
+    maximumCost: "£20 maximum"
+    securitySummary: "Innovation Sandbox isolated - sample council metrics only"
+    skillsLearned:
+      - "Amazon QuickSight"
+      - "Data visualization"
+      - "AWS Glue ETL"
+      - "Business intelligence"
+    isMostPopular: false
+    awsServices:
+      - "Amazon QuickSight"
+      - "Amazon S3"
+      - "AWS Glue"
+    tags:
+      - "Analytics"
+      - "Dashboard"
+      - "Reporting"
+      - "Data"
+    businessOutcomes:
+      - "Enable data-driven service improvements"
+      - "Reduce time to generate performance reports"
+      - "Provide leadership with real-time insights"
+    prerequisites:
+      - "AWS account (sandbox provided)"
+      - "Sample council data provided"
+    url: "/scenarios/quicksight-dashboard/"
+    order: 6
+    featured: false
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/quicksight-dashboard/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/quicksight-dashboard/template.yaml"
+      region: "eu-west-2"
+      stackNamePrefix: "ndx-try-quicksight-dashboard"
+      parameters:
+        - name: "Environment"
+          value: "sandbox"
+          description: "Deployment environment (sandbox for Innovation Sandbox)"
+        - name: "AutoCleanupHours"
+          value: "2"
+          description: "Hours until automatic resource cleanup"
+        - name: "SampleDataset"
+          value: "council-metrics"
+          description: "Sample council performance metrics dataset"
+      costBreakdown:
+        services:
+          - name: "Amazon QuickSight"
+            cost: "~£6.00"
+            note: "Business intelligence dashboards"
+          - name: "AWS Glue"
+            cost: "~£2.00"
+            note: "Data catalogue and ETL"
+          - name: "Amazon S3"
+            cost: "~£0.20"
+            note: "Data storage"
+        autoCleanup: "Resources automatically deleted after 2 hours"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "quicksight-dashboard"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+      deploymentTime: "5-8 minutes"
+      deploymentPhases:
+        - "Creating IAM roles (~30 seconds)"
+        - "Creating S3 bucket for data (~15 seconds)"
+        - "Setting up AWS Glue catalogue (~60 seconds)"
+        - "Creating Glue ETL job (~90 seconds)"
+        - "Configuring QuickSight namespace (~45 seconds)"
+        - "Creating QuickSight dashboard (~120 seconds)"
+      outputs:
+        - name: "DashboardURL"
+          description: "QuickSight dashboard URL for council metrics"
+        - name: "DatasetId"
+          description: "QuickSight dataset identifier"
+    # Demo Video (Story 2.4 - Zero-Deployment Path)
+    video:
+      title: "QuickSight Dashboard Analytics Demo Walkthrough"
+      duration: "8:00"
+      recordedDate: "2025-01-15"
+      # youtubeId will be added when video is recorded
+    # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
+    screenshots:
+      steps: []
+
+    # Success Metrics (Story 4-4)
+    success_metrics:
+      service_area: "Business Intelligence & Performance"
+      primary_metric: "Report generation time reduction"
+      baseline:
+        description: "Manual reports take 16 hours/month, data from 5 disparate systems"
+        value: 16
+        unit: "hours per month for manual reporting"
+        source: "LGA Performance Management Survey 2023"
+      projection:
+        description: "Automated dashboards reduce reporting time by 80%"
+        value: 3.2
+        reduction_percent: 80
+      roi:
+        annual_savings: 35000
+        calculation: "154 staff hours saved × £230/hour (analyst rate) = £35,000 annual savings"
+        payback_months: 4
+        disclaimer: "Illustrative projection based on typical UK council performance reporting. Actual savings depend on data complexity, dashboard requirements, and staff costs."
+      committee_language: "AI-powered dashboards save £35,000 annually while reducing report generation time by 80%, enabling real-time data-driven decision making across all council services"
+
+    # Security Posture (Story 4-4 - CTO Evidence Pack)
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "UK (eu-west-2 London region)"
+      encryption: "AES-256 at rest, TLS 1.3 in transit, QuickSight row-level security"
+      data_handling: "Sample council metrics in sandbox; production data access controls via IAM; AWS shared responsibility model"
+
+    # TCO Projection (Story 4-4 - Finance Evidence Pack)
+    tco_projection:
+      year_1:
+        aws_services: 4200
+        integration: 7000
+        training: 2500
+        support: 1500
+        total: 15200
+      year_2:
+        aws_services: 4500
+        integration: 0
+        training: 1000
+        support: 1500
+        total: 7000
+      year_3:
+        aws_services: 4800
+        integration: 0
+        training: 1000
+        support: 1500
+        total: 7300

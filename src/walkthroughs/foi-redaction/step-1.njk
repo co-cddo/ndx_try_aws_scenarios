@@ -1,0 +1,218 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 1: Access Redaction Interface - FOI Redaction Walkthrough"
+description: Find and open your deployed AI redaction interface
+currentStep: 1
+totalSteps: 5
+timeEstimate: "2 minutes"
+scenarioId: foi-redaction
+---
+
+{#
+  Step 1: Access the Redaction Interface (AC-3.4.1)
+  - Screenshot with CloudFormation outputs
+  - Expected outcome with checkmarks
+  - Clear instructions for finding the redaction URL
+#}
+
+{% set stepNumber = 1 %}
+{% set stepTitle = "Access the Redaction Interface" %}
+{% set stepDescription = "Find your AI redaction service URL from the CloudFormation stack outputs." %}
+{% set timeEstimate = "2 minutes" %}
+{# Load screenshots from YAML data - Story 13.5 #}
+{% set screenshotData = screenshots["foi-redaction"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 1) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "CloudFormation stack shows CREATE_COMPLETE status",
+  "RedactionInterfaceURL output is visible in the Outputs tab",
+  "FOI redaction interface opens in a new browser tab"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">How to find your redaction interface URL</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the CloudFormation console</strong>
+    <p class="govuk-body">
+      Go to <a href="https://eu-west-2.console.aws.amazon.com/cloudformation/home?region=eu-west-2#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console in eu-west-2 (London)<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+    </p>
+  </li>
+
+  <li>
+    <strong>Find your stack</strong>
+    <p class="govuk-body">
+      Look for a stack named <code>ndx-try-foi-redaction-[timestamp]</code>
+    </p>
+    <p class="govuk-body">
+      The status should be <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span>
+    </p>
+  </li>
+
+  <li>
+    <strong>Click on the stack name</strong>
+    <p class="govuk-body">
+      This opens the stack details page
+    </p>
+  </li>
+
+  <li>
+    <strong>Go to the "Outputs" tab</strong>
+    <p class="govuk-body">
+      You'll see a list of outputs from the deployment
+    </p>
+  </li>
+
+  <li>
+    <strong>Find the RedactionInterfaceURL output</strong>
+    <p class="govuk-body">
+      Look for the row with Key: <code>RedactionInterfaceURL</code>
+    </p>
+    <p class="govuk-body">
+      The Value will be a URL like: <code>https://[random-id].execute-api.eu-west-2.amazonaws.com/prod/redact</code>
+    </p>
+  </li>
+
+  <li>
+    <strong>Click the RedactionInterfaceURL value</strong>
+    <p class="govuk-body">
+      This opens the redaction interface in a new tab
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Tip:</strong> Bookmark this URL or keep the tab open - you'll need it for the rest of the walkthrough.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">What you should see</h3>
+
+<p class="govuk-body">
+  When you open the redaction interface URL, you should see:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>A clean web interface with "FOI Redaction - AI PII Detection" heading</li>
+  <li>Upload area with drag-and-drop zone or file browser button</li>
+  <li>Supported formats notice: "PDF, DOCX, TXT (max 10MB)"</li>
+  <li>Sample documents section with 3 downloadable FOI responses</li>
+  <li>Empty results area ready to show detected PII</li>
+  <li>Confidence threshold selector (High: 95%+, Medium: 80-94%, Low: <80%)</li>
+</ul>
+
+{# Troubleshooting section #}
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details govuk-!-margin-top-4">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Stack not showing CREATE_COMPLETE
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If your stack shows <span class="govuk-tag govuk-tag--blue">CREATE_IN_PROGRESS</span>:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Wait 4-6 minutes for deployment to complete</li>
+      <li>Refresh the CloudFormation console page</li>
+      <li>Check the "Events" tab to see deployment progress</li>
+      <li>Comprehend and S3 setup typically takes 3-4 minutes</li>
+    </ul>
+
+    <p class="govuk-body">
+      If your stack shows <span class="govuk-tag govuk-tag--red">CREATE_FAILED</span> or <span class="govuk-tag govuk-tag--red">ROLLBACK_COMPLETE</span>:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check the "Events" tab to see which resource failed</li>
+      <li>Common issues: IAM permissions for Comprehend, S3 bucket name conflicts</li>
+      <li>Verify Comprehend is available in eu-west-2 region</li>
+      <li>Try deleting the stack and redeploying</li>
+      <li><a href="/contact/" class="govuk-link">Contact support</a> if the issue persists</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      RedactionInterfaceURL not in Outputs
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you don't see RedactionInterfaceURL in the Outputs tab:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check the stack is fully deployed (CREATE_COMPLETE status)</li>
+      <li>Refresh the page - outputs may take a moment to appear</li>
+      <li>Check you're looking at the correct stack (ndx-try-foi-redaction-...)</li>
+      <li>Try the "Resources" tab and find the API Gateway - the invoke URL is your redaction URL</li>
+      <li>Ensure API Gateway Lambda integration completed successfully</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Redaction interface shows error
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the redaction interface page shows an error or won't load:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check you're using the correct region (eu-west-2)</li>
+      <li>Check your browser isn't blocking the page (HTTPS should work)</li>
+      <li>Try opening in an incognito/private window</li>
+      <li>Check the stack Events tab for any errors during API Gateway or Lambda setup</li>
+      <li>Wait a few minutes - API Gateway endpoints can take 1-2 minutes to activate after deployment</li>
+      <li>Verify Comprehend service is available in eu-west-2 region</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Sample documents not showing
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the sample documents section is empty:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Wait 1-2 minutes - sample documents are uploaded during stack creation</li>
+      <li>Refresh the redaction interface page</li>
+      <li>Check the S3 bucket named <code>ndx-try-foi-redaction-[timestamp]-documents</code> contains files</li>
+      <li>Check CloudFormation Events tab for sample data seeding Lambda execution</li>
+      <li>Use the manual upload option in the walkthrough introduction if automatic seeding failed</li>
+    </ul>
+  </div>
+</details>
+
+{# Screenshot placeholder notice #}
+<div class="govuk-warning-text govuk-!-margin-top-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Note</span>
+    Screenshot placeholder: In production, this page would include annotated screenshots showing the CloudFormation Outputs tab and the FOI redaction interface.
+  </strong>
+</div>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+</style>

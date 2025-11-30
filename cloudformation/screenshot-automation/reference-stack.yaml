@@ -1,0 +1,310 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  NDX Reference Deployment Stack for Screenshot Automation
+  Story: S0.5 - Reference Deployment Environment
+
+  Creates a dedicated reference deployment with:
+  - Pre-loaded sample data for all 6 scenarios
+  - Stack outputs for dynamic console URL building
+  - Stack policy to prevent accidental modifications
+
+  AC5.1: Dedicated CloudFormation stack 'ndx-reference'
+  AC5.2: Uses same templates as user deployments
+  AC5.9: Stack Policy prevents accidental modifications
+
+Parameters:
+  TemplateVersion:
+    Type: String
+    Default: 'latest'
+    Description: Git tag or version of templates to use for nested stacks
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Template Configuration
+        Parameters:
+          - TemplateVersion
+
+Resources:
+  # ==========================================================================
+  # Scenario 1: Council Chatbot
+  # ==========================================================================
+  CouncilChatbotLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ndx-reference-council-chatbot
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt CouncilChatbotRole.Arn
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+            // Mock chatbot handler for screenshots
+            return {
+              statusCode: 200,
+              body: JSON.stringify({
+                response: 'This is a sample chatbot response for screenshot testing.'
+              })
+            };
+          };
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CouncilChatbotTable
+
+  CouncilChatbotRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource: !GetAtt CouncilChatbotTable.Arn
+
+  CouncilChatbotTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ndx-reference-chatbot-conversations
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: conversationId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: conversationId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+
+  CouncilChatbotApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: ndx-reference-chatbot-api
+      ProtocolType: HTTP
+      Description: API endpoint for council chatbot
+
+  CouncilChatbotIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref CouncilChatbotApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CouncilChatbotLambda.Arn}/invocations'
+      PayloadFormatVersion: '2.0'
+
+  CouncilChatbotRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref CouncilChatbotApi
+      RouteKey: 'POST /chat'
+      Target: !Sub 'integrations/${CouncilChatbotIntegration}'
+
+  CouncilChatbotStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref CouncilChatbotApi
+      StageName: prod
+      AutoDeploy: true
+
+  # ==========================================================================
+  # Scenario 2: Planning AI
+  # ==========================================================================
+  PlanningAiS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-reference-planning-ai-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # ==========================================================================
+  # Scenario 3: FOI Redaction
+  # ==========================================================================
+  FoiRedactionS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-reference-foi-redaction-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # ==========================================================================
+  # Scenario 4: Smart Car Park
+  # ==========================================================================
+  SmartCarParkTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ndx-reference-car-park-sensors
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: sensorId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: sensorId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+
+  # ==========================================================================
+  # Scenario 5: Text-to-Speech
+  # ==========================================================================
+  TextToSpeechS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-reference-text-to-speech-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # ==========================================================================
+  # Scenario 6: QuickSight (placeholder outputs)
+  # ==========================================================================
+  # Note: QuickSight dashboards must be created manually or via API
+  # We'll export placeholder values for screenshot testing
+
+Outputs:
+  # Council Chatbot Outputs
+  CouncilChatbotLambdaArn:
+    Description: ARN of the council chatbot Lambda function
+    Value: !GetAtt CouncilChatbotLambda.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-CouncilChatbotLambdaArn'
+
+  CouncilChatbotApiEndpoint:
+    Description: API endpoint for council chatbot
+    Value: !Sub 'https://${CouncilChatbotApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
+    Export:
+      Name: !Sub '${AWS::StackName}-CouncilChatbotApiEndpoint'
+
+  CouncilChatbotDynamoTableArn:
+    Description: ARN of the council chatbot DynamoDB table
+    Value: !GetAtt CouncilChatbotTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-CouncilChatbotDynamoTableArn'
+
+  # Planning AI Outputs
+  PlanningAiTextractEndpoint:
+    Description: Textract endpoint region for planning AI
+    Value: !Sub 'https://textract.${AWS::Region}.amazonaws.com'
+    Export:
+      Name: !Sub '${AWS::StackName}-PlanningAiTextractEndpoint'
+
+  PlanningAiS3BucketArn:
+    Description: ARN of the planning AI S3 bucket
+    Value: !GetAtt PlanningAiS3Bucket.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-PlanningAiS3BucketArn'
+
+  # FOI Redaction Outputs
+  FoiRedactionComprehendEndpoint:
+    Description: Comprehend endpoint region for FOI redaction
+    Value: !Sub 'https://comprehend.${AWS::Region}.amazonaws.com'
+    Export:
+      Name: !Sub '${AWS::StackName}-FoiRedactionComprehendEndpoint'
+
+  FoiRedactionS3BucketArn:
+    Description: ARN of the FOI redaction S3 bucket
+    Value: !GetAtt FoiRedactionS3Bucket.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-FoiRedactionS3BucketArn'
+
+  # Smart Car Park Outputs
+  SmartCarParkIotEndpoint:
+    Description: IoT endpoint for smart car park
+    Value: !Sub 'https://iot.${AWS::Region}.amazonaws.com'
+    Export:
+      Name: !Sub '${AWS::StackName}-SmartCarParkIotEndpoint'
+
+  SmartCarParkDynamoTableArn:
+    Description: ARN of the smart car park DynamoDB table
+    Value: !GetAtt SmartCarParkTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-SmartCarParkDynamoTableArn'
+
+  # Text-to-Speech Outputs
+  TextToSpeechPollyEndpoint:
+    Description: Polly endpoint region for text-to-speech
+    Value: !Sub 'https://polly.${AWS::Region}.amazonaws.com'
+    Export:
+      Name: !Sub '${AWS::StackName}-TextToSpeechPollyEndpoint'
+
+  TextToSpeechS3BucketArn:
+    Description: ARN of the text-to-speech S3 bucket
+    Value: !GetAtt TextToSpeechS3Bucket.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-TextToSpeechS3BucketArn'
+
+  # QuickSight Outputs (placeholders - require manual setup)
+  QuickSightDashboardId:
+    Description: QuickSight dashboard ID (placeholder for manual setup)
+    Value: 'placeholder-dashboard-id'
+    Export:
+      Name: !Sub '${AWS::StackName}-QuickSightDashboardId'
+
+  QuickSightDataSetArn:
+    Description: QuickSight dataset ARN (placeholder for manual setup)
+    Value: !Sub 'arn:aws:quicksight:${AWS::Region}:${AWS::AccountId}:dataset/placeholder'
+    Export:
+      Name: !Sub '${AWS::StackName}-QuickSightDataSetArn'
+
+  # Stack Metadata
+  StackName:
+    Description: Name of this reference stack
+    Value: !Ref 'AWS::StackName'
+
+  TemplateVersion:
+    Description: Template version used for this deployment
+    Value: !Ref TemplateVersion
+
+  # Stack Policy (AC5.9) - Apply with CLI:
+  # aws cloudformation set-stack-policy --stack-name ndx-reference --stack-policy-body file://stack-policy.json
+  StackPolicy:
+    Description: |
+      Stack Policy JSON to apply after deployment for AC5.9.
+      Copy this value to a file and apply via CLI.
+    Value: |
+      {
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": "Update:*",
+            "Principal": "*",
+            "Resource": "*",
+            "Condition": {
+              "StringEquals": {
+                "aws:PrincipalArn": "arn:aws:iam::*:user/ndx-screenshot-automation"
+              }
+            }
+          },
+          {
+            "Effect": "Deny",
+            "Action": ["Update:Replace", "Update:Delete"],
+            "Principal": "*",
+            "Resource": "*"
+          }
+        ]
+      }

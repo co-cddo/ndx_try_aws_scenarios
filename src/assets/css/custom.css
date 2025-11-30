@@ -1,0 +1,3656 @@
+/**
+ * NDX:Try AWS Scenarios Portal - Custom Styles
+ *
+ * These styles extend GOV.UK Frontend for NDX:Try specific components.
+ * All styles follow GOV.UK Design System principles.
+ */
+
+/* ==========================================================================
+   Font Style Safeguards
+   Ensures headings never appear italic even if font fails to load
+   Uses !important to override any browser font synthesis
+   ========================================================================== */
+
+.govuk-heading-xl,
+.govuk-heading-l,
+.govuk-heading-m,
+.govuk-heading-s,
+h1, h2, h3, h4, h5, h6,
+.govuk-panel__title,
+.ndx-hero__title,
+.ndx-walkthrough-hero__title {
+  font-style: normal !important;
+  font-synthesis: none;
+}
+
+/* Ensure all body text also never appears italic unless explicitly set */
+body {
+  font-synthesis: none;
+}
+
+/* ==========================================================================
+   Experimental Prototype Banner
+   Yellow banner matching NDX main site style
+   ========================================================================== */
+
+.ndx-experimental-banner {
+  background: yellow;
+  padding: 5px 15px;
+  margin-bottom: 0;
+}
+
+.ndx-experimental-banner p {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 10px 0;
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.ndx-experimental-banner a {
+  color: #0b0c0c;
+  text-decoration: underline;
+}
+
+.ndx-experimental-banner a:hover {
+  text-decoration-thickness: max(3px, .1875rem, .12em);
+}
+
+.ndx-experimental-banner a:focus {
+  outline: 3px solid transparent;
+  color: #0b0c0c;
+  background-color: #fd0;
+  box-shadow: 0 -2px #fd0, 0 4px #0b0c0c;
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   Trust Indicators Section
+   ========================================================================== */
+
+.ndx-trust-indicators {
+  background-color: #f3f2f1;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.ndx-trust-indicators__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.ndx-trust-indicators__item {
+  flex: 1 1 200px;
+  text-align: center;
+}
+
+.ndx-trust-indicators__value {
+  display: block;
+  font-size: 36px;
+  font-weight: 700;
+  color: #1d70b8;
+  line-height: 1.2;
+}
+
+.ndx-trust-indicators__label {
+  display: block;
+  font-size: 16px;
+  color: #505a5f;
+}
+
+/* ==========================================================================
+   Scenario Cards
+   ========================================================================== */
+
+.ndx-scenario-card {
+  border: 1px solid #b1b4b6;
+  padding: 20px;
+  background-color: #ffffff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ndx-scenario-card--featured {
+  border-left: 4px solid #1d70b8;
+}
+
+.ndx-scenario-card__content {
+  flex: 1;
+}
+
+.ndx-scenario-card__action {
+  border-top: 1px solid #b1b4b6;
+  padding-top: 15px;
+}
+
+/* Story 15.4: Walkthrough badge on scenario cards */
+.ndx-scenario-card__walkthrough-badge {
+  margin-bottom: 15px;
+}
+
+.ndx-walkthrough-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.ndx-walkthrough-badge:hover {
+  background-color: #006853;
+  color: #ffffff;
+}
+
+.ndx-walkthrough-badge:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+}
+
+.ndx-walkthrough-badge__icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.ndx-walkthrough-badge__text {
+  font-weight: 700;
+}
+
+.ndx-walkthrough-badge__duration {
+  font-weight: 400;
+}
+
+/* ==========================================================================
+   Scenario Card Grid
+   ========================================================================== */
+
+.ndx-scenario-grid {
+  display: grid;
+  gap: 30px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 641px) {
+  .ndx-scenario-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1020px) {
+  .ndx-scenario-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ==========================================================================
+   Hero Section
+   ========================================================================== */
+
+.ndx-hero {
+  background-color: #1d70b8;
+  color: #ffffff;
+  padding: 40px 0;
+  margin: -30px -15px 30px -15px;
+}
+
+@media (min-width: 641px) {
+  .ndx-hero {
+    padding: 60px 0;
+    margin: -30px -30px 30px -30px;
+  }
+}
+
+.ndx-hero__title {
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.ndx-hero__description {
+  color: #ffffff;
+  font-size: 19px;
+  margin-bottom: 30px;
+}
+
+.ndx-hero__cta .govuk-button {
+  background-color: #ffffff;
+  color: #1d70b8;
+  box-shadow: 0 2px 0 #003078;
+}
+
+.ndx-hero__cta .govuk-button:hover {
+  background-color: #f3f2f1;
+}
+
+/* ==========================================================================
+   Safety Message Banner
+   ========================================================================== */
+
+.ndx-safety-banner {
+  background-color: #d4351c;
+  color: #ffffff;
+  padding: 15px;
+  margin-bottom: 30px;
+}
+
+.ndx-safety-banner--info {
+  background-color: #1d70b8;
+}
+
+.ndx-safety-banner--success {
+  background-color: #00703c;
+}
+
+.ndx-safety-banner__icon {
+  display: inline-block;
+  margin-right: 10px;
+  font-weight: 700;
+}
+
+.ndx-safety-banner__title {
+  color: #ffffff;
+  margin-top: 0;
+}
+
+.ndx-safety-banner__text {
+  color: #ffffff;
+  margin: 0;
+}
+
+/* ==========================================================================
+   What is NDX Section
+   ========================================================================== */
+
+.ndx-explainer {
+  background-color: #f3f2f1;
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.ndx-explainer__title {
+  margin-top: 0;
+}
+
+/* ==========================================================================
+   Call to Action Sections
+   ========================================================================== */
+
+.ndx-cta-section {
+  background-color: #f3f2f1;
+  padding: 30px;
+  margin-top: 40px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.ndx-cta-section__title {
+  margin-top: 0;
+}
+
+/* ==========================================================================
+   404 Error Page
+   ========================================================================== */
+
+.ndx-error-page {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.ndx-error-page__code {
+  font-size: 80px;
+  font-weight: 700;
+  color: #b1b4b6;
+  margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   Skip Link Enhancement
+   ========================================================================== */
+
+/* Skip link is already provided by GOV.UK Frontend, this ensures visibility */
+.govuk-skip-link:focus {
+  z-index: 9999;
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+.ndx-text-center {
+  text-align: center;
+}
+
+.ndx-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+  .ndx-hero {
+    background-color: #ffffff;
+    color: #0b0c0c;
+  }
+
+  .ndx-hero__title,
+  .ndx-hero__description {
+    color: #0b0c0c;
+  }
+
+  .ndx-scenario-card {
+    break-inside: avoid;
+  }
+}
+
+/* ==========================================================================
+   Scenario Selector Quiz
+   ========================================================================== */
+
+.ndx-quiz {
+  max-width: 640px;
+}
+
+.ndx-quiz__intro {
+  margin-bottom: 30px;
+}
+
+.ndx-quiz__question {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ndx-quiz__question[hidden] {
+  display: none;
+}
+
+.ndx-quiz__results {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.ndx-quiz__results[hidden] {
+  display: none;
+}
+
+/* Quiz recommendation cards - highlighted style */
+.ndx-scenario-card--recommended {
+  border-left: 4px solid #00703c;
+  position: relative;
+}
+
+.ndx-scenario-card--recommended::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, #00703c, transparent);
+}
+
+/* Quiz progress indicator styling */
+.ndx-quiz .govuk-caption-l {
+  color: #505a5f;
+  margin-bottom: 10px;
+}
+
+/* Ensure quiz results grid shows full width */
+.ndx-quiz__results .ndx-scenario-grid {
+  max-width: none;
+}
+
+/* Quiz results on larger screens - 2 column max for readability */
+@media (min-width: 641px) {
+  .ndx-quiz__results .ndx-scenario-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1020px) {
+  .ndx-quiz__results .ndx-scenario-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Quiz restart link button styling */
+.ndx-quiz .js-quiz-restart {
+  font-family: inherit;
+  font-size: inherit;
+  color: #1d70b8;
+  padding: 0;
+}
+
+.ndx-quiz .js-quiz-restart:hover {
+  color: #003078;
+}
+
+.ndx-quiz .js-quiz-restart:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+}
+
+/* Print styles for quiz */
+@media print {
+  .ndx-quiz__question,
+  .ndx-quiz .govuk-button-group {
+    display: none;
+  }
+
+  .ndx-quiz__results {
+    display: block !important;
+  }
+
+  .ndx-quiz__results[hidden] {
+    display: block !important;
+  }
+}
+
+/* ==========================================================================
+   Scenario Gallery Filters
+   ========================================================================== */
+
+.ndx-gallery-filters {
+  background-color: #f3f2f1;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.ndx-gallery-filters .govuk-form-group {
+  margin-bottom: 0;
+}
+
+.ndx-gallery-filters .govuk-select {
+  width: 100%;
+}
+
+/* Clear filters link button */
+.ndx-gallery-filters .js-clear-filters {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #1d70b8;
+  text-decoration: underline;
+}
+
+.ndx-gallery-filters .js-clear-filters:hover {
+  color: #003078;
+}
+
+.ndx-gallery-filters .js-clear-filters:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+  text-decoration: none;
+}
+
+/* No results message */
+.ndx-gallery-no-results {
+  background-color: #f3f2f1;
+  text-align: center;
+}
+
+.ndx-gallery-no-results[hidden] {
+  display: none;
+}
+
+.ndx-gallery-no-results .js-clear-filters {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #1d70b8;
+  text-decoration: underline;
+}
+
+.ndx-gallery-no-results .js-clear-filters:hover {
+  color: #003078;
+}
+
+.ndx-gallery-no-results .js-clear-filters:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   Scenario Card Enhancements
+   ========================================================================== */
+
+/* Most Popular badge styling */
+.ndx-scenario-card--popular {
+  border-left: 4px solid #ffdd00;
+  position: relative;
+}
+
+.ndx-scenario-card--popular::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, #ffdd00, transparent);
+}
+
+/* Hidden card (when filtered out) */
+.ndx-scenario-card[hidden] {
+  display: none;
+}
+
+/* Card action button styling */
+.ndx-scenario-card__action .govuk-button {
+  margin-bottom: 0;
+}
+
+/* Print styles for gallery */
+@media print {
+  .ndx-gallery-filters {
+    display: none;
+  }
+
+  .ndx-scenario-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .ndx-scenario-card[hidden] {
+    display: block !important;
+  }
+}
+
+/* ==========================================================================
+   Get Started Journey Steps
+   ========================================================================== */
+
+.ndx-journey {
+  margin-bottom: 40px;
+}
+
+.ndx-journey__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+/* Mobile: Stacked layout with left border */
+.ndx-journey__step {
+  position: relative;
+  padding-left: 60px;
+  padding-bottom: 30px;
+  border-left: 3px solid #b1b4b6;
+  margin-left: 20px;
+}
+
+.ndx-journey__step:last-child {
+  border-left-color: transparent;
+  padding-bottom: 0;
+}
+
+.ndx-journey__step--final {
+  border-left-color: transparent;
+}
+
+.ndx-journey__step-marker {
+  position: absolute;
+  left: -22px;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 5px 0;
+}
+
+.ndx-journey__step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1d70b8;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.ndx-journey__step--final .ndx-journey__step-number {
+  background-color: #00703c;
+}
+
+.ndx-journey__step-icon {
+  width: 24px;
+  height: 24px;
+  color: #505a5f;
+}
+
+.ndx-journey__step-content {
+  padding-top: 5px;
+}
+
+.ndx-journey__step-title {
+  margin-bottom: 5px;
+}
+
+.ndx-journey__step-time {
+  color: #505a5f;
+  margin-bottom: 15px;
+}
+
+.ndx-journey__step-time strong {
+  color: #1d70b8;
+}
+
+.ndx-journey__total-time {
+  background-color: #f3f2f1;
+  padding: 20px;
+  margin-top: 30px;
+  text-align: center;
+  border-left: 4px solid #1d70b8;
+}
+
+/* Tablet: Wider content area */
+@media (min-width: 641px) {
+  .ndx-journey__step {
+    padding-left: 80px;
+    margin-left: 30px;
+  }
+
+  .ndx-journey__step-marker {
+    left: -32px;
+  }
+
+  .ndx-journey__step-number {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .ndx-journey__step-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Desktop: Full timeline with larger markers */
+@media (min-width: 1020px) {
+  .ndx-journey__step {
+    padding-left: 100px;
+    margin-left: 40px;
+    padding-bottom: 40px;
+  }
+
+  .ndx-journey__step-marker {
+    left: -42px;
+  }
+
+  .ndx-journey__step-number {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+
+  .ndx-journey__step-icon {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Print styles for journey */
+@media print {
+  .ndx-journey__step {
+    border-left-color: #0b0c0c;
+    page-break-inside: avoid;
+  }
+
+  .ndx-journey__step-number {
+    background-color: #ffffff;
+    color: #0b0c0c;
+    border: 2px solid #0b0c0c;
+  }
+
+  .ndx-journey__step--final .ndx-journey__step-number {
+    background-color: #ffffff;
+  }
+
+  .ndx-journey__total-time {
+    border-left-color: #0b0c0c;
+  }
+}
+
+/* ==========================================================================
+   Scenario Detail Page - Deploy Section (Story 2.1)
+   ========================================================================== */
+
+/* Scenario Summary Card (sidebar) */
+.ndx-scenario-summary {
+  background-color: #f3f2f1;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.ndx-scenario-summary .govuk-summary-list__key {
+  width: 40%;
+}
+
+/* Pre-requisites Checklist */
+.ndx-prereq-checklist {
+  background-color: #f3f2f1;
+  padding: 20px;
+  border-left: 4px solid #1d70b8;
+}
+
+.ndx-prereq-checklist .govuk-checkboxes__label {
+  font-weight: 400;
+}
+
+/* Deploy Action Area */
+.ndx-deploy-action {
+  margin-top: 30px;
+}
+
+.ndx-deploy-action--incomplete .govuk-button--start {
+  opacity: 0.8;
+}
+
+/* Confirmation Modal */
+.ndx-modal {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.ndx-modal::backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.ndx-modal__content {
+  padding: 30px;
+}
+
+.ndx-modal__content .govuk-heading-l {
+  margin-top: 0;
+}
+
+.ndx-modal__content .govuk-button-group {
+  margin-bottom: 0;
+}
+
+/* Focus trap for modal accessibility */
+.ndx-modal:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+}
+
+/* Fallback for browsers without dialog support */
+.ndx-modal[open] {
+  display: block;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  background-color: #ffffff;
+}
+
+.ndx-modal:not([open]) {
+  display: none;
+}
+
+/* Cost breakdown table styling */
+.ndx-deploy-action + .govuk-details {
+  margin-top: 20px;
+}
+
+/* Error messages accordion in deploy section */
+.ndx-deploy-action ~ .govuk-details .govuk-accordion__section-header {
+  padding: 10px 0;
+}
+
+/* Print styles for deploy section */
+@media print {
+  .ndx-deploy-action .govuk-button--start,
+  .ndx-prereq-checklist,
+  .ndx-modal {
+    display: none;
+  }
+
+  .ndx-scenario-summary {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+  }
+}
+
+/* ==========================================================================
+   Deployment Guide Component (Story 2.2)
+   ========================================================================== */
+
+.ndx-deployment-guide {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid #b1b4b6;
+}
+
+.ndx-deployment-guide__time {
+  background-color: #f3f2f1;
+  padding: 15px 20px;
+  margin-bottom: 30px;
+  border-left: 4px solid #1d70b8;
+}
+
+.ndx-deployment-guide__steps {
+  margin-bottom: 30px;
+}
+
+/* Deployment Timeline */
+.ndx-deployment-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.ndx-deployment-timeline__item {
+  position: relative;
+  padding-left: 45px;
+  padding-bottom: 20px;
+  border-left: 2px solid #b1b4b6;
+  margin-left: 12px;
+}
+
+.ndx-deployment-timeline__item:last-child {
+  border-left-color: transparent;
+  padding-bottom: 0;
+}
+
+.ndx-deployment-timeline__marker {
+  position: absolute;
+  left: -13px;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #1d70b8;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ndx-deployment-timeline__content {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Success/Failure Indicators */
+.ndx-deployment-guide__indicator {
+  display: flex;
+  align-items: flex-start;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f3f2f1;
+}
+
+.ndx-deployment-guide__indicator--success {
+  border-left: 4px solid #00703c;
+}
+
+.ndx-deployment-guide__indicator--failure {
+  border-left: 4px solid #d4351c;
+}
+
+.ndx-deployment-guide__indicator-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 15px;
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.ndx-deployment-guide__indicator--success .ndx-deployment-guide__indicator-icon {
+  background-color: #00703c;
+  color: #ffffff;
+}
+
+.ndx-deployment-guide__indicator--failure .ndx-deployment-guide__indicator-icon {
+  background-color: #d4351c;
+  color: #ffffff;
+}
+
+.ndx-deployment-guide__indicator-content {
+  flex: 1;
+}
+
+.ndx-deployment-guide__indicator-content code {
+  background-color: #ffffff;
+  padding: 2px 6px;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+/* ==========================================================================
+   Deployment Success Component (Story 2.2)
+   ========================================================================== */
+
+.ndx-deployment-success {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid #b1b4b6;
+}
+
+.ndx-deployment-success .govuk-notification-banner--success {
+  margin-bottom: 30px;
+}
+
+.ndx-deployment-success .govuk-summary-list {
+  margin-bottom: 0;
+}
+
+.ndx-deployment-success__cleanup {
+  background-color: #f3f2f1;
+  padding: 20px;
+  margin-top: 30px;
+  border-left: 4px solid #505a5f;
+}
+
+.ndx-deployment-success__cleanup-icon {
+  margin-right: 8px;
+}
+
+/* Print styles for deployment guide and success */
+@media print {
+  .ndx-deployment-guide,
+  .ndx-deployment-success {
+    page-break-inside: avoid;
+  }
+
+  .ndx-deployment-guide__time,
+  .ndx-deployment-success__cleanup {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    border-left-width: 4px;
+  }
+
+  .ndx-deployment-timeline__marker {
+    background-color: #ffffff;
+    color: #0b0c0c;
+    border: 2px solid #0b0c0c;
+  }
+
+  .ndx-deployment-guide__indicator {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    border-left-width: 4px;
+  }
+}
+
+/* ==========================================================================
+   Cost Transparency Component (Story 2.3)
+   ========================================================================== */
+
+.ndx-cost-transparency {
+  margin-bottom: 30px;
+}
+
+.ndx-cost-transparency__summary {
+  background-color: #f3f2f1;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-left: 4px solid #1d70b8;
+}
+
+.ndx-cost-transparency__estimate,
+.ndx-cost-transparency__maximum {
+  text-align: center;
+}
+
+.ndx-cost-transparency__label {
+  display: block;
+  font-size: 14px;
+  color: #505a5f;
+  margin-bottom: 5px;
+}
+
+.ndx-cost-transparency__value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0b0c0c;
+}
+
+.ndx-cost-transparency__value--max {
+  color: #d4351c;
+}
+
+.ndx-cost-transparency__responsibility {
+  background-color: #fff7e6;
+  border-left-color: #ffdd00;
+}
+
+/* Cost Comparison Guidance in Deployment Success */
+.ndx-deployment-success__cost-comparison {
+  background-color: #f3f2f1;
+  padding: 20px;
+  margin-top: 30px;
+  border-left: 4px solid #1d70b8;
+}
+
+.ndx-deployment-success__cost-comparison .govuk-heading-s {
+  margin-top: 0;
+}
+
+/* ==========================================================================
+   Deploy Button Disabled State (Story 2.3 - AC-2.3.4)
+   ========================================================================== */
+
+/* Visually disabled button until acknowledgments complete */
+.ndx-deploy-button--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.ndx-deploy-button--disabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: transparent;
+}
+
+/* Note: Button remains functional as a link for progressive enhancement */
+/* This visual state is a cue, not a block - users can still click */
+
+/* Acknowledgment progress indicator */
+.ndx-deploy-action .govuk-body-s {
+  transition: color 0.2s ease;
+}
+
+.ndx-deploy-action[data-ready="false"] .govuk-body-s {
+  color: #d4351c;
+}
+
+/* Print styles for cost transparency */
+@media print {
+  .ndx-cost-transparency__summary {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    border-left-width: 4px;
+  }
+
+  .ndx-cost-transparency__value--max {
+    color: #0b0c0c;
+  }
+
+  .ndx-cost-transparency__responsibility {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    border-left-width: 4px;
+  }
+
+  .ndx-deployment-success__cost-comparison {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    border-left-width: 4px;
+  }
+}
+
+/* ==========================================================================
+   Demo Video Section (Story 2.4)
+   ========================================================================== */
+
+.ndx-demo-video-section {
+  margin-bottom: 30px;
+}
+
+/* Video Player Container - 16:9 Aspect Ratio (AC-2.4.2) */
+.ndx-video-player {
+  margin-bottom: 20px;
+}
+
+.ndx-video-player__container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  background-color: #0b0c0c;
+  border-radius: 4px;
+}
+
+.ndx-video-player__iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Video metadata display */
+.ndx-demo-video-section__meta {
+  color: #505a5f;
+}
+
+.ndx-demo-video-section__duration,
+.ndx-demo-video-section__recorded {
+  display: inline-block;
+}
+
+/* Transcript styling */
+.ndx-demo-video-section__transcript {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.ndx-demo-video-section__transcript p {
+  margin-bottom: 15px;
+}
+
+/* Video contents list */
+.ndx-demo-video-section__contents {
+  background-color: #f3f2f1;
+  padding: 20px;
+  border-left: 4px solid #1d70b8;
+}
+
+.ndx-demo-video-section__contents .govuk-heading-s {
+  margin-top: 0;
+}
+
+.ndx-demo-video-section__contents .govuk-list {
+  margin-bottom: 0;
+}
+
+/* Coming soon state */
+.ndx-demo-video-section--coming-soon .govuk-inset-text {
+  border-left-color: #ffdd00;
+  background-color: #fff7e6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .ndx-demo-video-section__duration,
+  .ndx-demo-video-section__recorded {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .ndx-demo-video-section__recorded {
+    margin-left: 0 !important;
+  }
+}
+
+/* Print styles for video section (AC-2.4 Quality Criteria) */
+@media print {
+  /* Hide video player in print */
+  .ndx-video-player {
+    display: none;
+  }
+
+  .ndx-demo-video-section {
+    page-break-inside: avoid;
+  }
+
+  .ndx-demo-video-section__contents {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    border-left-width: 4px;
+  }
+
+  /* Show transcript link for print */
+  .ndx-demo-video-section::after {
+    content: "Watch the video at: youtube.com";
+    display: block;
+    font-style: italic;
+    margin-top: 10px;
+  }
+}
+
+/* ==========================================================================
+   Screenshot Walkthrough Component Styles (Story 2.5)
+   ========================================================================== */
+
+/* Screenshot Walkthrough Section */
+.ndx-screenshot-walkthrough {
+  margin-top: 30px;
+}
+
+/* Coming soon state */
+.ndx-screenshot-walkthrough--coming-soon .govuk-inset-text {
+  border-left-color: #ffdd00;
+  background-color: #fff7e6;
+}
+
+/* Screenshot Gallery Container */
+.ndx-screenshot-gallery {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Main Image Display */
+.ndx-screenshot-gallery__main {
+  margin-bottom: 20px;
+}
+
+.ndx-screenshot-gallery__figure {
+  margin: 0;
+}
+
+.ndx-screenshot-gallery__slide {
+  display: none;
+}
+
+.ndx-screenshot-gallery__slide--active {
+  display: block;
+}
+
+.ndx-screenshot-gallery__image {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  background-color: #f3f2f1;
+  border: 1px solid #b1b4b6;
+  border-radius: 4px;
+}
+
+/* Caption and Annotation */
+.ndx-screenshot-gallery__caption {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f3f2f1;
+  border-left: 4px solid #1d70b8;
+}
+
+.ndx-screenshot-gallery__step-number {
+  display: inline-block;
+  padding: 4px 10px;
+  margin-right: 10px;
+  background-color: #1d70b8;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 2px;
+}
+
+.ndx-screenshot-gallery__annotation {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #0b0c0c;
+}
+
+/* Navigation Controls */
+.ndx-screenshot-gallery__nav {
+  margin-top: 20px;
+}
+
+.ndx-screenshot-gallery__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.ndx-screenshot-gallery__btn {
+  min-width: 100px;
+}
+
+.ndx-screenshot-gallery__counter {
+  font-weight: 700;
+  color: #505a5f;
+}
+
+/* Thumbnail Strip */
+.ndx-screenshot-gallery__thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 15px;
+  background-color: #f3f2f1;
+  border-radius: 4px;
+}
+
+.ndx-screenshot-gallery__thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background-color: #ffffff;
+  border: 2px solid #b1b4b6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.ndx-screenshot-gallery__thumb:hover {
+  border-color: #1d70b8;
+  background-color: #f0f4f9;
+}
+
+.ndx-screenshot-gallery__thumb:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+}
+
+.ndx-screenshot-gallery__thumb--active {
+  border-color: #1d70b8;
+  background-color: #1d70b8;
+}
+
+.ndx-screenshot-gallery__thumb--active .ndx-screenshot-gallery__thumb-number {
+  color: #ffffff;
+}
+
+.ndx-screenshot-gallery__thumb-number {
+  font-weight: 700;
+  font-size: 16px;
+  color: #0b0c0c;
+}
+
+/* Thumbnail images (Story 16.5) */
+.ndx-screenshot-gallery__thumb--has-image {
+  width: 80px;
+  height: 60px;
+  padding: 2px;
+  overflow: hidden;
+}
+
+.ndx-screenshot-gallery__thumb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.ndx-screenshot-gallery__thumb--active.ndx-screenshot-gallery__thumb--has-image {
+  padding: 2px;
+  border-width: 3px;
+}
+
+/* Touch feedback for swipe (Story 16.5) */
+.ndx-screenshot-gallery__main {
+  touch-action: pan-y;
+  user-select: none;
+}
+
+/* Swipe indicator on mobile */
+@media (pointer: coarse) {
+  .ndx-screenshot-gallery__main::after {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  .ndx-screenshot-gallery__main {
+    position: relative;
+  }
+}
+
+/* Static fallback for no-JS */
+.ndx-screenshot-gallery--static {
+  margin-top: 20px;
+}
+
+.ndx-screenshot-gallery__static-item {
+  margin-bottom: 30px;
+}
+
+.ndx-screenshot-gallery__static-item figure {
+  margin: 0;
+}
+
+.ndx-screenshot-gallery__static-image {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border: 1px solid #b1b4b6;
+  border-radius: 4px;
+}
+
+/* Responsive adjustments for screenshots (AC-2.5.4) */
+@media (max-width: 640px) {
+  .ndx-screenshot-gallery__controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ndx-screenshot-gallery__btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .ndx-screenshot-gallery__counter {
+    text-align: center;
+    order: -1;
+    margin-bottom: 10px;
+  }
+
+  .ndx-screenshot-gallery__thumb {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ndx-screenshot-gallery__thumb--has-image {
+    width: 60px;
+    height: 45px;
+  }
+
+  .ndx-screenshot-gallery__image {
+    max-height: 300px;
+  }
+
+  .ndx-screenshot-gallery__caption {
+    padding: 10px;
+  }
+
+  .ndx-screenshot-gallery__step-number {
+    display: block;
+    margin-bottom: 8px;
+    margin-right: 0;
+  }
+}
+
+/* Print styles for screenshot gallery (AC-2.5 Quality Criteria) */
+@media print {
+  .ndx-screenshot-gallery__nav {
+    display: none;
+  }
+
+  /* Show all screenshots in print */
+  .ndx-screenshot-gallery__slide {
+    display: block !important;
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+
+  .ndx-screenshot-gallery__slide[hidden] {
+    display: block !important;
+  }
+
+  .ndx-screenshot-gallery__image {
+    max-height: none;
+    max-width: 100%;
+  }
+
+  .ndx-screenshot-gallery__caption {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    border-left-width: 4px;
+  }
+
+  .ndx-screenshot-gallery__step-number {
+    background-color: #0b0c0c;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ==========================================================================
+   Partner Tour Section Styles (Story 2.6)
+   ========================================================================== */
+
+/* Partner Tour Section on Scenario Pages (AC-2.6.1) */
+.ndx-partner-tour-section {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.ndx-partner-tour-section__cta {
+  background-color: #f3f2f1;
+  padding: 20px;
+  border-radius: 0;
+  text-align: center;
+}
+
+.ndx-partner-tour-section__button {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+/* Partner Tour Form Page Styles */
+.ndx-partner-tour-form {
+  margin-bottom: 30px;
+}
+
+/* Required field indicator */
+.ndx-required {
+  color: #d4351c;
+  font-weight: 700;
+  padding-left: 4px;
+}
+
+/* Form error summary positioning */
+.ndx-partner-tour-form__error-summary {
+  margin-bottom: 30px;
+}
+
+/* Confirmation panel */
+.ndx-partner-tour-form__confirmation {
+  margin-bottom: 30px;
+}
+
+/* Sidebar on form page */
+.ndx-partner-tour-sidebar {
+  background-color: #f3f2f1;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+@media (min-width: 40.0625em) {
+  .ndx-partner-tour-sidebar {
+    margin-top: 0;
+    position: sticky;
+    top: 20px;
+  }
+}
+
+/* Print styles for partner tour section */
+@media print {
+  .ndx-partner-tour-section__button {
+    display: none;
+  }
+
+  .ndx-partner-tour-section__cta {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    padding: 15px;
+  }
+
+  .ndx-partner-tour-form {
+    display: none;
+  }
+
+  .ndx-partner-tour-sidebar {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Reflection Form Styles (Story 4.2)
+   ========================================================================== */
+
+/* Progress bar container */
+.ndx-form-progress-bar {
+  background-color: #00703c;
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* Submit button disabled state - AC 4.2.14 */
+.ndx-form-submit button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #b1b4b6;
+  box-shadow: 0 2px 0 #6f777b;
+  pointer-events: none;
+}
+
+.ndx-form-submit button[disabled]:hover {
+  background-color: #b1b4b6;
+}
+
+/* Submit button ready state */
+.ndx-form-submit--ready button {
+  opacity: 1;
+  cursor: pointer;
+  background-color: #00703c;
+  box-shadow: 0 2px 0 #00421e;
+  pointer-events: auto;
+}
+
+.ndx-form-submit--ready button:hover {
+  background-color: #005a30;
+}
+
+/* Persona selection section (hidden until form complete) */
+.ndx-persona-selection[hidden] {
+  display: none;
+}
+
+/* Evidence pack preview section */
+.ndx-evidence-pack-preview {
+  margin-top: 30px;
+}
+
+/* Print styles for reflection form */
+@media print {
+  .ndx-reflection-form-section,
+  .ndx-persona-selection {
+    display: none;
+  }
+
+  .ndx-evidence-pack-preview {
+    margin-top: 0;
+  }
+
+  .ndx-form-progress-bar {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ==========================================================================
+   Phase Navigator Component (Story 12.1)
+   ========================================================================== */
+
+/* Skeleton loading state - AC-16: Prevents layout shift */
+.ndx-phase-navigator__skeleton {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f3f2f1;
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.ndx-phase-navigator__skeleton-bar {
+  height: 8px;
+  background-color: #d4d4d4;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.ndx-phase-navigator__skeleton-phases {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.ndx-phase-navigator__skeleton-phase {
+  flex: 1;
+  height: 80px;
+  background-color: #d4d4d4;
+  border-radius: 4px;
+}
+
+/* Main navigator - AC1-4, AC7, AC14, AC16 */
+.ndx-phase-navigator {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f8f8f8;
+  border-left: 4px solid #1d70b8;
+  border-radius: 0;
+}
+
+/* Cost reassurance - AC4: First visible line */
+.ndx-phase-navigator__cost-reassurance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px 0;
+  padding: 10px;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 16px;
+  color: #00703c;
+}
+
+.ndx-phase-navigator__icon {
+  flex-shrink: 0;
+}
+
+/* Phase progression container */
+.ndx-phase-navigator__container {
+  position: relative;
+}
+
+/* Connector line - desktop horizontal layout */
+.ndx-phase-navigator__connector {
+  position: absolute;
+  top: 32px;
+  left: 40px;
+  right: 40px;
+  height: 3px;
+  background-color: #b1b4b6;
+  z-index: 1;
+}
+
+/* Phase list */
+.ndx-phase-navigator__list {
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Individual phase item */
+.ndx-phase-navigator__phase {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 200px;
+}
+
+/* Phase link - AC13: Keyboard navigable with 44x44px touch target */
+.ndx-phase-navigator__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #0b0c0c;
+  padding: 10px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.ndx-phase-navigator__link:hover {
+  background-color: rgba(29, 112, 184, 0.1);
+}
+
+.ndx-phase-navigator__link:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+}
+
+/* Phase indicator circle - AC14: Not color-only */
+.ndx-phase-navigator__indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 3px solid #b1b4b6;
+  margin-bottom: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* AC3: Checkmark hidden by default, shown for completed */
+.ndx-phase-navigator__checkmark {
+  display: none;
+}
+
+.ndx-phase-navigator__phase--completed .ndx-phase-navigator__checkmark {
+  display: block;
+}
+
+.ndx-phase-navigator__phase--completed .ndx-phase-navigator__number {
+  display: none;
+}
+
+.ndx-phase-navigator__phase--completed .ndx-phase-navigator__indicator {
+  background-color: #00703c;
+  border-color: #00703c;
+}
+
+/* AC2: Current phase styling with "You are here" */
+.ndx-phase-navigator__phase--current .ndx-phase-navigator__indicator {
+  background-color: #1d70b8;
+  border-color: #1d70b8;
+  box-shadow: 0 0 0 4px rgba(29, 112, 184, 0.2);
+}
+
+.ndx-phase-navigator__phase--current .ndx-phase-navigator__number {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.ndx-phase-navigator__phase--current .ndx-phase-navigator__current-marker {
+  display: block !important;
+}
+
+/* Phase number */
+.ndx-phase-navigator__number {
+  font-size: 18px;
+  font-weight: 700;
+  color: #505a5f;
+}
+
+/* Phase content */
+.ndx-phase-navigator__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ndx-phase-navigator__label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0b0c0c;
+}
+
+.ndx-phase-navigator__sublabel {
+  font-size: 14px;
+  color: #505a5f;
+}
+
+.ndx-phase-navigator__time {
+  font-size: 13px;
+  color: #505a5f;
+  font-weight: 600;
+}
+
+/* AC2: "You are here" marker */
+.ndx-phase-navigator__current-marker {
+  display: none;
+  margin-top: 8px;
+  padding: 4px 12px;
+  background-color: #1d70b8;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* AC7: Fork badge for optional Explore phase */
+.ndx-phase-navigator__fork-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  background-color: #f3f2f1;
+  border: 1px solid #b1b4b6;
+  border-radius: 2px;
+  font-size: 11px;
+  color: #505a5f;
+  font-weight: 600;
+}
+
+/* Parallel entry prompt - AC9 */
+.ndx-phase-navigator__prompt {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #fff7e6;
+  border-left: 4px solid #ffdd00;
+}
+
+.ndx-phase-navigator__prompt[hidden] {
+  display: none;
+}
+
+/* Stack expired message - AC10 */
+.ndx-phase-navigator__expired {
+  margin-top: 20px;
+}
+
+.ndx-phase-navigator__expired[hidden] {
+  display: none;
+}
+
+/* Transition CTA - AC8 */
+.ndx-phase-navigator__transition {
+  margin-top: 30px;
+}
+
+.ndx-phase-navigator__transition[hidden] {
+  display: none;
+}
+
+/* Branching decision - AC7 */
+.ndx-phase-navigator__branching {
+  margin-top: 30px;
+  padding: 30px 0;
+  border-top: 2px solid #b1b4b6;
+}
+
+.ndx-phase-navigator__branching[hidden] {
+  display: none;
+}
+
+.ndx-phase-navigator__branch {
+  padding: 20px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.ndx-phase-navigator__branch--primary {
+  background-color: #e8f5e9;
+  border-left: 4px solid #00703c;
+}
+
+.ndx-phase-navigator__branch--optional {
+  background-color: #f3f2f1;
+  border-left: 4px solid #505a5f;
+}
+
+.ndx-phase-navigator__branch h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0;
+}
+
+.ndx-phase-navigator__branch h4 svg {
+  flex-shrink: 0;
+}
+
+/* Mobile sticky bottom bar - AC11 */
+@media (max-width: 767px) {
+  .ndx-phase-navigator {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    background-color: #ffffff;
+    border-top: 3px solid #1d70b8;
+    border-left: none;
+    border-radius: 0;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  /* Compact cost reassurance */
+  .ndx-phase-navigator__cost-reassurance {
+    font-size: 13px;
+    padding: 6px 10px;
+    margin-bottom: 12px;
+  }
+
+  .ndx-phase-navigator__icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Horizontal connector for mobile */
+  .ndx-phase-navigator__connector {
+    top: 24px;
+    left: 30px;
+    right: 30px;
+    height: 2px;
+  }
+
+  /* Compact phase items */
+  .ndx-phase-navigator__list {
+    gap: 10px;
+  }
+
+  .ndx-phase-navigator__phase {
+    max-width: none;
+  }
+
+  /* Smaller indicators - ensure 44x44px touch target */
+  .ndx-phase-navigator__link {
+    padding: 6px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .ndx-phase-navigator__indicator {
+    width: 36px;
+    height: 36px;
+    border-width: 2px;
+    margin-bottom: 6px;
+  }
+
+  .ndx-phase-navigator__number {
+    font-size: 14px;
+  }
+
+  .ndx-phase-navigator__checkmark {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Compact labels */
+  .ndx-phase-navigator__label {
+    font-size: 12px;
+  }
+
+  .ndx-phase-navigator__sublabel {
+    font-size: 11px;
+  }
+
+  .ndx-phase-navigator__time {
+    font-size: 10px;
+  }
+
+  .ndx-phase-navigator__current-marker {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+
+  .ndx-phase-navigator__fork-badge {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+
+  /* Hide prompts and messages on mobile sticky bar */
+  .ndx-phase-navigator__prompt,
+  .ndx-phase-navigator__expired,
+  .ndx-phase-navigator__transition,
+  .ndx-phase-navigator__branching {
+    position: static;
+    margin-top: 15px;
+  }
+
+  /* Add bottom padding to main content to prevent overlap */
+  body {
+    padding-bottom: 140px;
+  }
+
+  /* Safe area insets for notched devices */
+  @supports (padding: max(0px)) {
+    .ndx-phase-navigator {
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    body {
+      padding-bottom: max(140px, calc(140px + env(safe-area-inset-bottom)));
+    }
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 768px) and (max-width: 1019px) {
+  .ndx-phase-navigator__phase {
+    max-width: 160px;
+  }
+
+  .ndx-phase-navigator__label {
+    font-size: 14px;
+  }
+
+  .ndx-phase-navigator__sublabel {
+    font-size: 13px;
+  }
+}
+
+/* Print styles - AC15: Show static version */
+@media print {
+  .ndx-phase-navigator {
+    position: static;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    border-left-width: 4px;
+    box-shadow: none;
+  }
+
+  .ndx-phase-navigator__skeleton {
+    display: none;
+  }
+
+  .ndx-phase-navigator__cost-reassurance {
+    background-color: transparent;
+    border: 1px solid #00703c;
+  }
+
+  .ndx-phase-navigator__connector {
+    background-color: #0b0c0c;
+  }
+
+  .ndx-phase-navigator__indicator {
+    border-color: #0b0c0c;
+  }
+
+  .ndx-phase-navigator__phase--current .ndx-phase-navigator__indicator,
+  .ndx-phase-navigator__phase--completed .ndx-phase-navigator__indicator {
+    background-color: #0b0c0c;
+    border-color: #0b0c0c;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .ndx-phase-navigator__phase--current .ndx-phase-navigator__number {
+    color: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .ndx-phase-navigator__current-marker {
+    background-color: #0b0c0c;
+    color: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .ndx-phase-navigator__prompt,
+  .ndx-phase-navigator__expired,
+  .ndx-phase-navigator__transition,
+  .ndx-phase-navigator__branching {
+    display: none;
+  }
+
+  body {
+    padding-bottom: 0 !important;
+  }
+}
+
+/* ==========================================================================
+   Screenshot Component (Story 13.1, 13.9)
+   ========================================================================== */
+
+/* Screenshot figure container */
+.ndx-screenshot {
+  margin: 0 0 20px 0;
+  position: relative;
+}
+
+/* Trigger button for zoom - wraps image */
+.ndx-screenshot__trigger {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.ndx-screenshot__trigger:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+}
+
+.ndx-screenshot__trigger:hover .ndx-screenshot__zoom-hint,
+.ndx-screenshot__trigger:focus .ndx-screenshot__zoom-hint {
+  opacity: 1;
+}
+
+/* Non-zoomable container */
+.ndx-screenshot__container {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+/* Screenshot image */
+.ndx-screenshot__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  background-color: #f3f2f1;
+  border: 1px solid #b1b4b6;
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+}
+
+.ndx-screenshot__trigger:hover .ndx-screenshot__image {
+  transform: scale(1.02);
+}
+
+/* Error state - fallback image loaded */
+.ndx-screenshot__image--error {
+  padding: 40px;
+  min-height: 200px;
+}
+
+/* Zoom hint overlay */
+.ndx-screenshot__zoom-hint {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: rgba(11, 12, 12, 0.8);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.ndx-screenshot__zoom-hint svg {
+  flex-shrink: 0;
+}
+
+/* Caption below image */
+.ndx-screenshot__caption {
+  margin-top: 10px;
+  padding: 12px 15px;
+  background-color: #f3f2f1;
+  border-left: 3px solid #1d70b8;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #505a5f;
+}
+
+/* Fallback message */
+.ndx-screenshot__fallback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 20px;
+  background-color: #fff7e6;
+  border: 1px solid #ffdd00;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.ndx-screenshot__fallback[hidden] {
+  display: none;
+}
+
+.ndx-screenshot__fallback p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #594d00;
+}
+
+/* ==========================================================================
+   Responsive Screenshot Sizing (Story 16.3)
+   Ensures breakpoint-appropriate dimensions with aspect ratio preservation
+   ========================================================================== */
+
+/* Prevent Cumulative Layout Shift (CLS) with aspect-ratio */
+.ndx-screenshot__container,
+.ndx-screenshot__trigger {
+  aspect-ratio: 16 / 9;
+  contain: layout;
+}
+
+.ndx-screenshot__image {
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Tablet breakpoint (1024px and below) */
+@media (max-width: 1024px) {
+  .ndx-screenshot {
+    max-width: 100%;
+  }
+
+  .ndx-screenshot__image {
+    max-height: 450px;
+  }
+}
+
+/* Mobile breakpoint (640px and below) */
+@media (max-width: 640px) {
+  .ndx-screenshot__image {
+    max-height: 300px;
+  }
+
+  .ndx-screenshot__zoom-hint {
+    font-size: 12px;
+    padding: 6px 10px;
+    bottom: 8px;
+    right: 8px;
+  }
+
+  .ndx-screenshot__caption {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+/* Print styles for screenshots */
+@media print {
+  .ndx-screenshot {
+    page-break-inside: avoid;
+  }
+
+  .ndx-screenshot__trigger {
+    cursor: default;
+  }
+
+  .ndx-screenshot__zoom-hint {
+    display: none;
+  }
+
+  .ndx-screenshot__image {
+    max-height: none;
+    border-color: #0b0c0c;
+  }
+
+  .ndx-screenshot__caption {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    border-left-width: 3px;
+  }
+}
+
+/* ==========================================================================
+   Lightbox Component (Story 13.9)
+   ========================================================================== */
+
+/* Dialog element styling */
+.ndx-lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: hidden;
+}
+
+.ndx-lightbox::backdrop {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+/* Backdrop click area */
+.ndx-lightbox__backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Content container */
+.ndx-lightbox__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 60px 20px 40px;
+  z-index: 2;
+}
+
+/* Close button */
+.ndx-lightbox__close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  z-index: 10;
+}
+
+.ndx-lightbox__close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.ndx-lightbox__close:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+}
+
+/* Figure container */
+.ndx-lightbox__figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 95%;
+  max-height: calc(100% - 100px);
+  margin: 0;
+}
+
+/* Lightbox image */
+.ndx-lightbox__image {
+  max-width: 100%;
+  max-height: calc(100vh - 160px);
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Caption below image */
+.ndx-lightbox__caption {
+  margin-top: 15px;
+  padding: 10px 20px;
+  max-width: 800px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+}
+
+.ndx-lightbox__caption[hidden] {
+  display: none;
+}
+
+/* Keyboard hint */
+.ndx-lightbox__hint {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+}
+
+.ndx-lightbox__hint kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .ndx-lightbox__content {
+    padding: 50px 10px 30px;
+  }
+
+  .ndx-lightbox__close {
+    top: 10px;
+    right: 10px;
+  }
+
+  .ndx-lightbox__image {
+    max-height: calc(100vh - 120px);
+  }
+
+  .ndx-lightbox__caption {
+    font-size: 14px;
+    padding: 8px 15px;
+  }
+
+  .ndx-lightbox__hint {
+    display: none;
+  }
+}
+
+/* Print: hide lightbox */
+@media print {
+  .ndx-lightbox {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   Header Navigation Dropdowns (Story 14.4)
+   ========================================================================== */
+
+/* Header navigation wrapper - sits below main header */
+.ndx-header-nav {
+  background-color: #f3f2f1;
+  border-bottom: 1px solid #b1b4b6;
+}
+
+.ndx-header-nav .govuk-width-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Hide desktop nav on mobile, show mobile nav */
+@media (max-width: 767px) {
+  .ndx-nav {
+    display: none;
+  }
+
+  .ndx-mobile-nav-toggle {
+    display: flex;
+  }
+}
+
+/* Show desktop nav on larger screens, hide mobile toggle */
+@media (min-width: 768px) {
+  .ndx-nav {
+    display: block;
+  }
+
+  .ndx-mobile-nav-toggle {
+    display: none;
+  }
+}
+
+/* Navigation container extends govuk-eleventy-plugin header */
+.ndx-nav {
+  position: relative;
+}
+
+.ndx-nav__list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+
+.ndx-nav__item {
+  position: relative;
+}
+
+/* Dropdown trigger button */
+.ndx-nav__trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 15px 20px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 400;
+  color: #1d70b8;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+}
+
+.ndx-nav__trigger:hover {
+  background-color: #f3f2f1;
+  color: #003078;
+}
+
+.ndx-nav__trigger:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+}
+
+/* Dropdown icon animation */
+.ndx-nav__icon {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ndx-nav__trigger[aria-expanded="true"] .ndx-nav__icon {
+  transform: rotate(180deg);
+}
+
+/* Dropdown menu panel */
+.ndx-nav__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 280px;
+  max-width: 380px;
+  background-color: #ffffff;
+  border: 1px solid #b1b4b6;
+  border-top: 3px solid #1d70b8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.ndx-nav__dropdown--open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Dropdown list */
+.ndx-nav__dropdown-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Dropdown item link */
+.ndx-nav__dropdown-link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 15px 20px;
+  text-decoration: none;
+  color: #0b0c0c;
+  border-bottom: 1px solid #f3f2f1;
+  transition: background-color 0.15s ease;
+}
+
+.ndx-nav__dropdown-link:last-child {
+  border-bottom: none;
+}
+
+.ndx-nav__dropdown-link:hover {
+  background-color: #f3f2f1;
+}
+
+.ndx-nav__dropdown-link:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: -3px;
+  background-color: #ffdd00;
+}
+
+/* Link title */
+.ndx-nav__dropdown-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #1d70b8;
+}
+
+.ndx-nav__dropdown-link:hover .ndx-nav__dropdown-title {
+  text-decoration: underline;
+}
+
+/* Link description */
+.ndx-nav__dropdown-desc {
+  font-size: 14px;
+  color: #505a5f;
+  line-height: 1.4;
+}
+
+/* Category tag in dropdown */
+.ndx-nav__dropdown-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.ndx-nav__dropdown-tag--ai {
+  background-color: #1d70b8;
+  color: #ffffff;
+}
+
+.ndx-nav__dropdown-tag--iot {
+  background-color: #00703c;
+  color: #ffffff;
+}
+
+.ndx-nav__dropdown-tag--analytics {
+  background-color: #4c2c92;
+  color: #ffffff;
+}
+
+/* Category group in Walkthroughs dropdown */
+.ndx-nav__dropdown-group {
+  border-bottom: 1px solid #b1b4b6;
+}
+
+.ndx-nav__dropdown-group:last-child {
+  border-bottom: none;
+}
+
+.ndx-nav__dropdown-group-label {
+  display: block;
+  padding: 10px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #505a5f;
+  background-color: #f3f2f1;
+}
+
+/* View all link at bottom of dropdown */
+.ndx-nav__dropdown-footer {
+  border-top: 1px solid #b1b4b6;
+  padding: 12px 20px;
+  background-color: #f3f2f1;
+}
+
+.ndx-nav__dropdown-footer a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #1d70b8;
+  text-decoration: none;
+}
+
+.ndx-nav__dropdown-footer a:hover {
+  text-decoration: underline;
+}
+
+.ndx-nav__dropdown-footer a:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+}
+
+/* Popular badge */
+.ndx-nav__dropdown-popular {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+  border-radius: 2px;
+}
+
+/* Ensure dropdowns don't extend beyond viewport */
+.ndx-nav__item:last-child .ndx-nav__dropdown {
+  left: auto;
+  right: 0;
+}
+
+/* Hide navigation on mobile - handled by mobile-nav.js */
+@media (max-width: 767px) {
+  .ndx-nav {
+    display: none;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 768px) and (max-width: 1019px) {
+  .ndx-nav__trigger {
+    padding: 12px 15px;
+    font-size: 15px;
+  }
+
+  .ndx-nav__dropdown {
+    min-width: 250px;
+    max-width: 320px;
+  }
+
+  .ndx-nav__dropdown-link {
+    padding: 12px 15px;
+  }
+
+  .ndx-nav__dropdown-title {
+    font-size: 15px;
+  }
+
+  .ndx-nav__dropdown-desc {
+    font-size: 13px;
+  }
+}
+
+/* Print styles - show all links without dropdowns */
+@media print {
+  .ndx-nav__trigger {
+    color: #0b0c0c;
+  }
+
+  .ndx-nav__icon {
+    display: none;
+  }
+
+  .ndx-nav__dropdown {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   Mobile Navigation (Story 14.5)
+   ========================================================================== */
+
+/* Hamburger menu button */
+.ndx-mobile-nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1d70b8;
+}
+
+.ndx-mobile-nav-toggle:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+}
+
+@media (max-width: 767px) {
+  .ndx-mobile-nav-toggle {
+    display: flex;
+  }
+}
+
+/* Mobile nav overlay */
+.ndx-mobile-nav {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 320px;
+  background-color: #ffffff;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 2000;
+  overflow-y: auto;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
+}
+
+.ndx-mobile-nav--open {
+  transform: translateX(0);
+}
+
+.ndx-mobile-nav__backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 1999;
+}
+
+.ndx-mobile-nav__backdrop--visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ndx-mobile-nav__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 3px solid #1d70b8;
+  background-color: #f3f2f1;
+}
+
+.ndx-mobile-nav__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0b0c0c;
+  margin: 0;
+}
+
+.ndx-mobile-nav__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #0b0c0c;
+}
+
+.ndx-mobile-nav__close:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+}
+
+.ndx-mobile-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ndx-mobile-nav__item {
+  border-bottom: 1px solid #b1b4b6;
+}
+
+/* Accordion trigger for mobile dropdowns */
+.ndx-mobile-nav__accordion-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 15px 20px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d70b8;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ndx-mobile-nav__accordion-trigger:hover {
+  background-color: #f3f2f1;
+}
+
+.ndx-mobile-nav__accordion-trigger:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: -3px;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+}
+
+.ndx-mobile-nav__accordion-trigger svg {
+  transition: transform 0.2s ease;
+}
+
+.ndx-mobile-nav__accordion-trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+/* Accordion content */
+.ndx-mobile-nav__accordion-content {
+  display: none;
+  background-color: #f3f2f1;
+}
+
+.ndx-mobile-nav__accordion-content--open {
+  display: block;
+}
+
+.ndx-mobile-nav__sublist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ndx-mobile-nav__subitem {
+  border-top: 1px solid #d4d4d4;
+}
+
+.ndx-mobile-nav__link {
+  display: block;
+  padding: 15px 20px;
+  color: #1d70b8;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 700;
+  min-height: 44px;
+}
+
+.ndx-mobile-nav__link:hover {
+  background-color: #f3f2f1;
+}
+
+.ndx-mobile-nav__link:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: -3px;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+}
+
+.ndx-mobile-nav__sublink {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 20px 12px 30px;
+  color: #0b0c0c;
+  text-decoration: none;
+  min-height: 44px;
+}
+
+.ndx-mobile-nav__sublink:hover {
+  background-color: #e8e8e8;
+}
+
+.ndx-mobile-nav__sublink:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: -3px;
+  background-color: #ffdd00;
+}
+
+.ndx-mobile-nav__sublink-title {
+  font-weight: 700;
+  color: #1d70b8;
+}
+
+.ndx-mobile-nav__sublink-desc {
+  font-size: 14px;
+  color: #505a5f;
+}
+
+/* Prevent body scroll when mobile nav is open */
+body.ndx-mobile-nav-open {
+  overflow: hidden;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ndx-nav__dropdown,
+  .ndx-mobile-nav,
+  .ndx-mobile-nav__backdrop,
+  .ndx-nav__icon,
+  .ndx-mobile-nav__accordion-trigger svg {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   Navigation Active States (Story 14.7)
+   ========================================================================== */
+
+/* Desktop navigation active trigger */
+.ndx-nav__trigger--active,
+.ndx-nav__trigger--active:hover {
+  color: #0b0c0c;
+  font-weight: 700;
+  border-bottom: 3px solid #1d70b8;
+  padding-bottom: 12px;
+}
+
+/* Desktop navigation active link */
+.ndx-nav__link--active,
+.ndx-nav__link--active:hover {
+  color: #0b0c0c;
+  font-weight: 700;
+}
+
+/* Dropdown item active state */
+.ndx-nav__dropdown-link--active {
+  background-color: #f3f2f1;
+  border-left: 3px solid #1d70b8;
+  padding-left: 12px;
+}
+
+/* Mobile navigation active link */
+.ndx-mobile-nav__link--active {
+  color: #0b0c0c;
+  font-weight: 700;
+  border-left: 3px solid #1d70b8;
+  padding-left: 17px;
+  margin-left: -3px;
+}
+
+/* Mobile navigation active accordion trigger */
+.ndx-mobile-nav__accordion-trigger--active {
+  color: #0b0c0c;
+  font-weight: 700;
+  border-left: 3px solid #1d70b8;
+  padding-left: 17px;
+  margin-left: -3px;
+}
+
+/* Mobile navigation active sublink */
+.ndx-mobile-nav__sublink--active {
+  background-color: #f8f8f8;
+  border-left: 3px solid #1d70b8;
+  padding-left: 12px;
+  margin-left: -3px;
+}
+
+.ndx-mobile-nav__sublink--active .ndx-mobile-nav__sublink-title {
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Breadcrumb Navigation Component (Story 14.6)
+   ========================================================================== */
+
+/* Custom breadcrumb wrapper */
+.ndx-breadcrumb {
+  margin-bottom: 20px;
+}
+
+/* Ensure proper spacing below breadcrumbs */
+.ndx-breadcrumb + h1,
+.ndx-breadcrumb + .govuk-heading-xl {
+  margin-top: 10px;
+}
+
+/* Truncation for long breadcrumb items on mobile */
+@media (max-width: 640px) {
+  .ndx-breadcrumb .govuk-breadcrumbs__list-item {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Print: ensure breadcrumbs are visible */
+@media print {
+  .ndx-breadcrumb {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .ndx-breadcrumb .govuk-breadcrumbs__link {
+    color: #0b0c0c;
+  }
+}
+
+/* ==========================================================================
+   Walkthrough CTA Component (Story 15.1)
+   ========================================================================== */
+
+.ndx-walkthrough-cta {
+  margin: 30px 0;
+  padding: 20px 25px;
+  background-color: #f8f8f8;
+  border-left: 4px solid #00703c;
+}
+
+.ndx-walkthrough-cta__progress {
+  margin-bottom: 15px;
+}
+
+.ndx-walkthrough-cta__completed {
+  margin-bottom: 15px;
+}
+
+.ndx-walkthrough-cta__time {
+  color: #505a5f;
+}
+
+/* Progress bar */
+.ndx-progress-bar {
+  height: 8px;
+  background-color: #dee0e2;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ndx-progress-bar__fill {
+  height: 100%;
+  background-color: #1d70b8;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+/* Ensure button group alignment */
+.ndx-walkthrough-cta .govuk-button-group {
+  margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ndx-walkthrough-cta {
+    padding: 15px 20px;
+  }
+
+  .ndx-walkthrough-cta .govuk-button-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ndx-walkthrough-cta .govuk-button {
+    margin: 0;
+  }
+}
+
+/* Print: hide CTA */
+@media print {
+  .ndx-walkthrough-cta {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Sample Data Panel Component (Story 12.2)
+   ========================================================================== */
+
+/* Main panel container - AC1, AC3: positioned near sample data */
+.ndx-sample-data-panel {
+  border-left: 4px solid #1d70b8;
+  background-color: #f3f2f1;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+}
+
+/* Key info section - AC2: visible without expanding */
+.ndx-sample-data-panel__key-info {
+  margin-bottom: 10px;
+}
+
+.ndx-sample-data-panel__purpose {
+  margin-bottom: 5px;
+  color: #0b0c0c;
+}
+
+.ndx-sample-data-panel__cost {
+  margin-bottom: 0;
+}
+
+/* Cost badge - AC2: key info visible inline */
+.ndx-sample-data-panel__cost-badge {
+  display: inline-block;
+  background-color: #00703c;
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* GOV.UK Details component integration - AC6, AC7 */
+.ndx-sample-data-panel .govuk-details {
+  margin-bottom: 0;
+}
+
+.ndx-sample-data-panel .govuk-details__summary {
+  font-size: 16px;
+}
+
+.ndx-sample-data-panel .govuk-details__text {
+  padding-top: 10px;
+}
+
+/* Ensure good contrast - AC6: WCAG 2.1 AA compliance */
+.ndx-sample-data-panel .govuk-details__text p {
+  margin-bottom: 10px;
+  color: #0b0c0c;
+}
+
+.ndx-sample-data-panel .govuk-details__text p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .ndx-sample-data-panel {
+    padding: 12px 15px;
+  }
+
+  .ndx-sample-data-panel__cost-badge {
+    font-size: 13px;
+    padding: 2px 6px;
+  }
+}
+
+/* Print styles - show expanded content */
+@media print {
+  .ndx-sample-data-panel {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    border-left-width: 4px;
+  }
+
+  .ndx-sample-data-panel__cost-badge {
+    background-color: #00703c;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Show details content in print */
+  .ndx-sample-data-panel .govuk-details__text {
+    display: block !important;
+  }
+
+  .ndx-sample-data-panel .govuk-details[open] .govuk-details__text,
+  .ndx-sample-data-panel .govuk-details:not([open]) .govuk-details__text {
+    display: block !important;
+  }
+}
+
+/* ==========================================================================
+   Story 15.5: Cross-Scenario Recommendation Cards
+   ========================================================================== */
+
+.ndx-recommendation-card {
+  padding: 20px;
+  background-color: #f3f2f1;
+  border-left: 4px solid #1d70b8;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ndx-recommendation-card h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.ndx-recommendation-card h4 a {
+  color: #1d70b8;
+}
+
+.ndx-recommendation-card h4 a:hover {
+  color: #003078;
+}
+
+.ndx-recommendation-reason {
+  color: #505a5f;
+  font-style: italic;
+  flex-grow: 1;
+  margin-bottom: 15px;
+}
+
+/* Responsive adjustments for recommendation cards */
+@media (max-width: 768px) {
+  .ndx-recommendations .govuk-grid-column-one-third {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .ndx-recommendation-card {
+    height: auto;
+  }
+}
+
+/* Print styles - hide recommendations */
+@media print {
+  .ndx-recommendations,
+  .ndx-all-complete {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Screenshot Annotation Component (Story 16.2)
+   ========================================================================== */
+
+/* Annotated screenshot container */
+.ndx-annotated-screenshot {
+  position: relative;
+}
+
+.ndx-annotated-screenshot__container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+/* Annotations overlay container */
+.ndx-annotations {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Individual annotation marker */
+.ndx-annotation {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+/* Numbered callout circle - WCAG AA compliant contrast */
+.ndx-annotation__number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #d4351c;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  line-height: 1;
+  z-index: 1;
+}
+
+/* Arrow indicators */
+.ndx-annotation__arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: 0;
+}
+
+.ndx-annotation__arrow--down {
+  top: 100%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: 4px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 12px solid #d4351c;
+}
+
+.ndx-annotation__arrow--up {
+  bottom: 100%;
+  left: 50%;
+  margin-left: -8px;
+  margin-bottom: 4px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 12px solid #d4351c;
+}
+
+.ndx-annotation__arrow--left {
+  right: 100%;
+  top: 50%;
+  margin-top: -8px;
+  margin-right: 4px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 12px solid #d4351c;
+}
+
+.ndx-annotation__arrow--right {
+  left: 100%;
+  top: 50%;
+  margin-top: -8px;
+  margin-left: 4px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 12px solid #d4351c;
+}
+
+/* Annotation legend below the image */
+.ndx-annotation__legend {
+  margin: 15px 0 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: annotation-counter;
+  background-color: #f3f2f1;
+  padding: 15px 20px;
+  border-radius: 4px;
+}
+
+.ndx-annotation__legend-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dee0e2;
+}
+
+.ndx-annotation__legend-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* Legend number badge - matches annotation callout */
+.ndx-annotation__legend-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  background-color: #d4351c;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ndx-annotation__legend-label {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #0b0c0c;
+  padding-top: 2px;
+}
+
+/* Caption text styling when annotations present */
+.ndx-annotated-screenshot .ndx-screenshot__caption-text {
+  margin-bottom: 10px;
+}
+
+/* Hover state on annotation markers */
+.ndx-annotation:hover .ndx-annotation__number {
+  background-color: #aa2a17;
+  transform: scale(1.1);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+/* Tablet responsive adjustments (Story 16.3) */
+@media (max-width: 1024px) {
+  .ndx-annotation__number {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .ndx-annotated-screenshot__container {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .ndx-annotation__number {
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
+    border-width: 2px;
+  }
+
+  .ndx-annotation__arrow--down,
+  .ndx-annotation__arrow--up {
+    border-left-width: 6px;
+    border-right-width: 6px;
+  }
+
+  .ndx-annotation__arrow--down { border-top-width: 10px; }
+  .ndx-annotation__arrow--up { border-bottom-width: 10px; }
+
+  .ndx-annotation__arrow--left,
+  .ndx-annotation__arrow--right {
+    border-top-width: 6px;
+    border-bottom-width: 6px;
+  }
+
+  .ndx-annotation__arrow--left { border-right-width: 10px; }
+  .ndx-annotation__arrow--right { border-left-width: 10px; }
+
+  .ndx-annotation__legend {
+    padding: 12px 15px;
+  }
+
+  .ndx-annotation__legend-number {
+    min-width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+
+  .ndx-annotation__legend-label {
+    font-size: 14px;
+  }
+}
+
+/* Print styles for annotations */
+@media print {
+  .ndx-annotations {
+    display: none;
+  }
+
+  .ndx-annotation__legend {
+    background-color: transparent;
+    border: 1px solid #0b0c0c;
+    padding: 10px 15px;
+  }
+
+  .ndx-annotation__legend-number {
+    background-color: #0b0c0c;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .ndx-annotation:hover .ndx-annotation__number {
+    transition: none;
+  }
+}

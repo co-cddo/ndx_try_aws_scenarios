@@ -1,0 +1,157 @@
+{#
+  Scenario Card Component
+
+  Usage:
+    {% include "components/scenario-card.njk" %}
+
+  Expects a `scenario` object with:
+    - id: string
+    - name: string
+    - headline: string
+    - description: string
+    - bestFor: string
+    - difficulty: 'beginner' | 'intermediate' | 'advanced'
+    - timeEstimate: string
+    - primaryPersona: string
+    - secondaryPersonas: string[] (optional)
+    - estimatedCost: string
+    - maximumCost: string
+    - securitySummary: string
+    - skillsLearned: string[]
+    - isMostPopular: boolean (optional)
+    - tags: string[]
+    - url: string
+    - featured: boolean (optional)
+
+  Also reads from walkthroughs data for walkthrough badge (Story 15.4)
+#}
+
+{# Get walkthrough data for this scenario #}
+{% set walkthroughData = walkthroughs.walkthroughs[scenario.id] %}
+
+<div class="ndx-scenario-card{% if scenario.featured %} ndx-scenario-card--featured{% endif %}{% if scenario.isMostPopular %} ndx-scenario-card--popular{% endif %}"
+     data-scenario-id="{{ scenario.id }}"
+     data-difficulty="{{ scenario.difficulty }}"
+     data-persona="{{ scenario.primaryPersona }}"
+     data-personas="{{ scenario.primaryPersona }}{% if scenario.secondaryPersonas %}{% for p in scenario.secondaryPersonas %},{{ p }}{% endfor %}{% endif %}"
+     data-time="{{ scenario.timeEstimate }}">
+  <div class="ndx-scenario-card__content">
+    {# Badge row - Most Popular, Featured, and Journey Preview (Story 12.1 AC-5) #}
+    <p class="govuk-body-s govuk-!-margin-bottom-2">
+      {% if scenario.isMostPopular %}
+        <span class="govuk-tag govuk-tag--yellow">Most Popular</span>
+      {% endif %}
+      {% if scenario.featured %}
+        <span class="govuk-tag govuk-tag--purple{% if scenario.isMostPopular %} govuk-!-margin-left-1{% endif %}">Featured</span>
+      {% endif %}
+      {# AC-5: 3 phases badge #}
+      <span class="govuk-tag govuk-tag--blue{% if scenario.isMostPopular or scenario.featured %} govuk-!-margin-left-1{% endif %}">3 phases</span>
+    </p>
+
+    {# Title #}
+    <h3 class="govuk-heading-m govuk-!-margin-bottom-2">
+      <a href="{{ scenario.url }}" class="govuk-link govuk-link--no-visited-state">
+        {{ scenario.name }}
+      </a>
+    </h3>
+
+    {# Headline #}
+    <p class="govuk-body govuk-!-margin-bottom-2">
+      {{ scenario.headline }}
+    </p>
+
+    {# Best For label #}
+    <p class="govuk-body-s govuk-!-margin-bottom-3">
+      <strong>Best for:</strong> {{ scenario.bestFor }}
+    </p>
+
+    {# Security and CloudFormation badges #}
+    <p class="govuk-body-s govuk-!-margin-bottom-3">
+      <span class="govuk-tag govuk-tag--green govuk-!-margin-right-1">
+        Sandbox Isolated
+      </span>
+      <span class="govuk-tag govuk-tag--blue">
+        CloudFormation Template
+      </span>
+    </p>
+
+    {# Story 15.4: Walkthrough badge #}
+    {% if walkthroughData and walkthroughData.hasWalkthrough %}
+    <div class="ndx-scenario-card__walkthrough-badge govuk-!-margin-bottom-3">
+      <a href="{{ walkthroughData.url }}"
+         class="govuk-tag govuk-tag--turquoise ndx-walkthrough-badge"
+         aria-label="Walkthrough available for {{ scenario.name }}: {{ walkthroughData.totalSteps }} steps, {{ walkthroughData.duration }}">
+        <svg class="ndx-walkthrough-badge__icon" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+          <path d="M4 2l8 5-8 5V2z" fill="currentColor"/>
+        </svg>
+        <span class="ndx-walkthrough-badge__text">{{ walkthroughData.totalSteps }}-step guide</span>
+        <span class="ndx-walkthrough-badge__duration">&middot; {{ walkthroughData.duration }}</span>
+      </a>
+    </div>
+    {% endif %}
+
+    {# Metadata summary list #}
+    <dl class="govuk-summary-list govuk-summary-list--no-border govuk-!-margin-bottom-3">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key govuk-!-width-one-third">
+          Difficulty
+        </dt>
+        <dd class="govuk-summary-list__value">
+          <strong class="govuk-tag govuk-tag--{{ scenario.difficulty | difficultyColor }}">
+            {{ scenario.difficulty | capitalize }}
+          </strong>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key govuk-!-width-one-third">
+          Time
+        </dt>
+        <dd class="govuk-summary-list__value">
+          {{ scenario.timeEstimate }}
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key govuk-!-width-one-third">
+          Est. Cost
+        </dt>
+        <dd class="govuk-summary-list__value">
+          {{ scenario.estimatedCost }}
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key govuk-!-width-one-third">
+          Max Cost
+        </dt>
+        <dd class="govuk-summary-list__value">
+          {{ scenario.maximumCost }}
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key govuk-!-width-one-third">
+          Audience
+        </dt>
+        <dd class="govuk-summary-list__value">
+          <strong class="govuk-tag govuk-tag--{{ scenario.primaryPersona | personaColor }}">
+            {{ scenario.primaryPersona | capitalize | replace("-", " ") }}
+          </strong>
+        </dd>
+      </div>
+    </dl>
+
+    {# Tags #}
+    {% if scenario.tags and scenario.tags.length > 0 %}
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        {% for tag in scenario.tags %}
+          <span class="govuk-tag govuk-tag--grey govuk-!-margin-right-1 govuk-!-margin-bottom-1">{{ tag }}</span>
+        {% endfor %}
+      </p>
+    {% endif %}
+  </div>
+
+  {# Card action - AC-5: Updated CTA text #}
+  <div class="ndx-scenario-card__action govuk-!-margin-top-3">
+    <a href="{{ scenario.url }}" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+      Start Free Journey &middot; 15 min
+    </a>
+  </div>
+</div>

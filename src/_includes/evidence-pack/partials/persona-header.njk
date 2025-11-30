@@ -1,0 +1,54 @@
+{#
+  Persona Badge Header
+
+  Displays persona-specific badge with icon and description
+
+  Variables:
+  - persona: 'cto', 'service-manager', 'finance', 'developer'
+#}
+
+{% set personaConfig = {
+  'cto': {
+    label: 'Chief Technology Officer',
+    tag: 'CTO',
+    color: 'blue',
+    icon: '🔧',
+    description: 'Architecture, security, and technical decision-making perspective'
+  },
+  'service-manager': {
+    label: 'Service Manager',
+    tag: 'Service Manager',
+    color: 'purple',
+    icon: '👥',
+    description: 'Resident impact and service improvement perspective'
+  },
+  'finance': {
+    label: 'Finance Director',
+    tag: 'Finance',
+    color: 'turquoise',
+    icon: '💰',
+    description: 'Cost analysis, ROI, and budget impact perspective'
+  },
+  'developer': {
+    label: 'Developer',
+    tag: 'Technical Lead',
+    color: 'orange',
+    icon: '💻',
+    description: 'Implementation details and technical runbook perspective'
+  }
+} %}
+
+{% set config = personaConfig[persona] %}
+
+{% if config %}
+<div class="ndx-persona-header govuk-!-margin-bottom-6 print-avoid-break">
+  <p class="govuk-body-s govuk-!-margin-bottom-2">
+    <span class="govuk-tag govuk-tag--{{ config.color }}">
+      {{ config.tag }}
+    </span>
+  </p>
+  <p class="govuk-body-s">
+    {{ config.description }}
+  </p>
+</div>
+{% endif %}

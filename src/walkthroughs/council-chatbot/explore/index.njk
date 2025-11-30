@@ -1,0 +1,478 @@
+---
+layout: layouts/exploration
+title: Explore the Council Chatbot
+description: Go beyond the basics - experiment, understand the architecture, and test the limits
+scenarioId: council-chatbot
+eleventyNavigation:
+  key: council-chatbot-explore
+  parent: council-chatbot-walkthrough
+  title: Explore
+---
+
+{# Story 6.1: Council Chatbot Exploration Landing Page #}
+
+{% set scenarioId = "council-chatbot" %}
+{% set explorationData = exploration[scenarioId] %}
+{% set activities = explorationData.activities %}
+
+{# Completion indicator #}
+{% set totalActivities = activities | length %}
+{% include "components/exploration/completion-indicator.njk" %}
+
+{# Persona selector #}
+<div class="ndx-persona-selector" role="group" aria-labelledby="persona-heading">
+  <h2 class="govuk-heading-m" id="persona-heading">Choose your exploration path</h2>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-persona-card" data-persona-type="visual">
+        <h3 class="govuk-heading-s">
+          <button class="ndx-persona-card__button" type="button" aria-pressed="true" data-persona-select="visual">
+            Service Manager / Non-Technical
+          </button>
+        </h3>
+        <p class="govuk-body-s">
+          Explore through screenshots, diagrams, and guided interactions.
+          No coding required.
+        </p>
+        <p class="govuk-body-s govuk-!-margin-bottom-0">
+          <strong>Time:</strong> {{ explorationData.personas.visual.time_estimate }}
+        </p>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-persona-card" data-persona-type="technical">
+        <h3 class="govuk-heading-s">
+          <button class="ndx-persona-card__button" type="button" aria-pressed="false" data-persona-select="technical">
+            Developer / Technical
+          </button>
+        </h3>
+        <p class="govuk-body-s">
+          Explore through AWS Console, architecture diagrams, and code inspection.
+        </p>
+        <p class="govuk-body-s govuk-!-margin-bottom-0">
+          <strong>Time:</strong> {{ explorationData.personas.technical.time_estimate }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Activity sections #}
+<div class="ndx-activities-container" data-persona-filter="visual">
+
+  {# Experiments Section (Story 6.2) #}
+  <section class="ndx-activities-section" id="experiments" aria-labelledby="experiments-heading">
+    <h2 class="govuk-heading-l" id="experiments-heading">
+      What Can I Change?
+      <span class="govuk-caption-l">5 guided experiments</span>
+    </h2>
+
+    <p class="govuk-body-l">
+      Test the chatbot's capabilities with these safe experiments. Each one teaches you something
+      about how AI-powered chatbots work.
+    </p>
+
+    <div class="ndx-activity-list">
+      {% set experimentIndex = 1 %}
+      {% for activity in activities %}
+        {% if activity.category == "experiments" %}
+          {% set index = experimentIndex %}
+          {% include "components/exploration/activity-card.njk" %}
+          {% set experimentIndex = experimentIndex + 1 %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+
+  {# Architecture Section (Story 6.3) #}
+  <section class="ndx-activities-section" id="architecture" aria-labelledby="architecture-heading">
+    <h2 class="govuk-heading-l" id="architecture-heading">
+      How Does It Work?
+      <span class="govuk-caption-l">Architecture tour</span>
+    </h2>
+
+    <p class="govuk-body-l">
+      Understand the technology behind the chatbot. Choose your path:
+    </p>
+
+    <div class="govuk-tabs" data-module="govuk-tabs">
+      <h3 class="govuk-tabs__title">
+        Tour options
+      </h3>
+      <ul class="govuk-tabs__list">
+        <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+          <a class="govuk-tabs__tab" href="#visual-tour">
+            Visual Tour
+          </a>
+        </li>
+        <li class="govuk-tabs__list-item">
+          <a class="govuk-tabs__tab" href="#console-tour">
+            Console Tour
+          </a>
+        </li>
+      </ul>
+
+      <div class="govuk-tabs__panel" id="visual-tour">
+        <h4 class="govuk-heading-m">Visual Architecture Tour</h4>
+        <p class="govuk-body">Follow the journey of a question from resident to response.</p>
+
+        {% for activity in activities %}
+          {% if activity.id == "arch-visual" %}
+            <ol class="ndx-visual-tour">
+              {% for step in activity.steps %}
+                <li class="ndx-visual-tour__step">
+                  <div class="ndx-visual-tour__content">
+                    <h5 class="govuk-heading-s">{{ step.title }}</h5>
+                    <p class="govuk-body">{{ step.description }}</p>
+                  </div>
+                  <div class="ndx-visual-tour__image">
+                    <img src="/assets/images/exploration/{{ scenarioId }}/{{ step.screenshot }}"
+                         alt="{{ step.title }}"
+                         loading="lazy"
+                         width="400"
+                         height="250">
+                  </div>
+                </li>
+              {% endfor %}
+            </ol>
+            <button type="button"
+                    class="govuk-button govuk-button--secondary"
+                    onclick="completeActivity('{{ scenarioId }}', '{{ activity.id }}')">
+              Mark as complete
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="console-tour">
+        <h4 class="govuk-heading-m">Console Architecture Tour</h4>
+        <p class="govuk-body">Navigate the AWS Console to see the real infrastructure.</p>
+
+        {% set stackExpired = false %}
+        {% include "components/exploration/fallback-banner.njk" %}
+
+        {% for activity in activities %}
+          {% if activity.id == "arch-console" %}
+            <ol class="ndx-console-tour ndx-console-content">
+              {% for step in activity.steps %}
+                <li class="ndx-console-tour__step">
+                  <h5 class="govuk-heading-s">{{ step.title }}</h5>
+                  <p class="govuk-body">{{ step.what_to_look_for }}</p>
+                  <p class="govuk-body">
+                    <a href="{{ step.console_url }}" class="govuk-link" target="_blank" rel="noopener noreferrer">
+                      Open in AWS Console
+                      <span class="govuk-visually-hidden">(opens in new tab)</span>
+                    </a>
+                  </p>
+                  <img src="/assets/images/exploration/{{ scenarioId }}/{{ step.screenshot }}"
+                       alt="AWS Console showing {{ step.title }}"
+                       loading="lazy"
+                       class="ndx-console-tour__screenshot"
+                       width="600"
+                       height="400">
+                </li>
+              {% endfor %}
+            </ol>
+            <button type="button"
+                    class="govuk-button govuk-button--secondary"
+                    onclick="completeActivity('{{ scenarioId }}', '{{ activity.id }}')">
+              Mark as complete
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {# Limits Section (Story 6.4) #}
+  <section class="ndx-activities-section" id="limits" aria-labelledby="limits-heading">
+    <h2 class="govuk-heading-l" id="limits-heading">
+      Test the Limits
+      <span class="govuk-caption-l">3 boundary challenges</span>
+    </h2>
+
+    <p class="govuk-body-l">
+      Every system has limits. Understanding them helps you plan for real-world usage.
+    </p>
+
+    <div class="govuk-inset-text">
+      <strong>Safe to explore:</strong> These challenges won't break anything. The system is designed
+      to handle edge cases gracefully.
+    </div>
+
+    <div class="ndx-activity-list">
+      {% set limitIndex = 1 %}
+      {% for activity in activities %}
+        {% if activity.category == "limits" %}
+          <div class="ndx-limit-card" data-activity-id="{{ activity.id }}">
+            <div class="ndx-limit-card__header">
+              <span class="ndx-limit-card__number">{{ limitIndex }}</span>
+              <h3 class="govuk-heading-s ndx-limit-card__title">{{ activity.title }}</h3>
+              {% include "components/exploration/safe-badge.njk" %}
+            </div>
+
+            <div class="ndx-limit-card__content">
+              <p class="govuk-body"><strong>Challenge:</strong> {{ activity.challenge_description }}</p>
+              <p class="govuk-body"><strong>Expected behavior:</strong> {{ activity.expected_behavior }}</p>
+              <p class="govuk-body"><strong>Business implication:</strong> {{ activity.business_implication }}</p>
+
+              <details class="govuk-details" data-module="govuk-details">
+                <summary class="govuk-details__summary">
+                  <span class="govuk-details__summary-text">
+                    How to recover
+                  </span>
+                </summary>
+                <div class="govuk-details__text">
+                  {{ activity.recovery }}
+                </div>
+              </details>
+
+              <button type="button"
+                      class="govuk-button govuk-button--secondary"
+                      onclick="completeActivity('{{ scenarioId }}', '{{ activity.id }}')">
+                Mark as complete
+              </button>
+            </div>
+          </div>
+          {% set limitIndex = limitIndex + 1 %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+
+{# What's Next #}
+<section class="ndx-exploration-next" aria-labelledby="next-heading">
+  <h2 class="govuk-heading-l" id="next-heading">What's Next?</h2>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-m">Take It Further</h3>
+        <p class="govuk-body">
+          Ready for production? See cost projections, security guidance, and customization options.
+        </p>
+        <a href="/walkthroughs/{{ scenarioId }}/explore/production/" class="govuk-link">
+          View production guidance
+        </a>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-m">Generate Evidence Pack</h3>
+        <p class="govuk-body">
+          Create a committee-ready PDF documenting what you learned and experienced.
+        </p>
+        <a href="/evidence-pack/{{ scenarioId }}/" class="govuk-link">
+          Create Evidence Pack
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Persona selector styles */
+  .ndx-persona-selector {
+    margin-bottom: 40px;
+    padding: 30px;
+    background: #f8f8f8;
+  }
+
+  .ndx-persona-card {
+    border: 2px solid #b1b4b6;
+    padding: 20px;
+    background: #fff;
+    height: 100%;
+  }
+
+  .ndx-persona-card[data-selected="true"] {
+    border-color: #1d70b8;
+    box-shadow: inset 0 0 0 2px #1d70b8;
+  }
+
+  .ndx-persona-card__button {
+    all: unset;
+    cursor: pointer;
+    color: #1d70b8;
+    text-decoration: underline;
+  }
+
+  .ndx-persona-card__button:hover {
+    color: #003078;
+  }
+
+  .ndx-persona-card__button:focus {
+    outline: 3px solid #ffdd00;
+    outline-offset: 0;
+    background: #ffdd00;
+    box-shadow: 0 -2px #ffdd00, 0 4px #0b0c0c;
+    text-decoration: none;
+  }
+
+  /* Activity sections */
+  .ndx-activities-section {
+    margin-bottom: 60px;
+    padding-top: 30px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  .ndx-activity-list {
+    margin-top: 30px;
+  }
+
+  /* Visual tour styles */
+  .ndx-visual-tour {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ndx-visual-tour__step {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    padding: 30px 0;
+    border-bottom: 1px solid #b1b4b6;
+    align-items: center;
+  }
+
+  .ndx-visual-tour__step:nth-child(even) {
+    direction: rtl;
+  }
+
+  .ndx-visual-tour__step:nth-child(even) > * {
+    direction: ltr;
+  }
+
+  .ndx-visual-tour__image img {
+    width: 100%;
+    height: auto;
+    border: 1px solid #b1b4b6;
+  }
+
+  /* Console tour styles */
+  .ndx-console-tour {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ndx-console-tour__step {
+    padding: 30px 0;
+    border-bottom: 1px solid #b1b4b6;
+  }
+
+  .ndx-console-tour__screenshot {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #b1b4b6;
+    margin-top: 15px;
+  }
+
+  /* Limit card styles */
+  .ndx-limit-card {
+    border: 1px solid #b1b4b6;
+    margin-bottom: 20px;
+    background: #fff;
+  }
+
+  .ndx-limit-card__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: #f8f8f8;
+    border-bottom: 1px solid #b1b4b6;
+  }
+
+  .ndx-limit-card__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #f47738;
+    color: #fff;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .ndx-limit-card__title {
+    flex: 1;
+    margin: 0;
+  }
+
+  .ndx-limit-card__content {
+    padding: 20px;
+  }
+
+  /* Next section styles */
+  .ndx-exploration-next {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 4px solid #1d70b8;
+  }
+
+  .ndx-next-card {
+    padding: 25px;
+    background: #f8f8f8;
+    height: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .ndx-visual-tour__step {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-visual-tour__step:nth-child(even) {
+      direction: ltr;
+    }
+
+    .ndx-persona-card {
+      margin-bottom: 20px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Persona selection
+    const personaButtons = document.querySelectorAll('[data-persona-select]');
+    const activitiesContainer = document.querySelector('[data-persona-filter]');
+    const personaCards = document.querySelectorAll('[data-persona-type]');
+
+    personaButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const persona = this.dataset.personaSelect;
+
+        // Update button states
+        personaButtons.forEach(btn => {
+          btn.setAttribute('aria-pressed', btn === this ? 'true' : 'false');
+        });
+
+        // Update card selection
+        personaCards.forEach(card => {
+          card.dataset.selected = card.dataset.personaType === persona ? 'true' : 'false';
+        });
+
+        // Update activity filter
+        if (activitiesContainer) {
+          activitiesContainer.dataset.personaFilter = persona;
+        }
+
+        // Track analytics
+        if (window.NDXAnalytics) {
+          window.NDXAnalytics.trackExplorationPersonaSelected('{{ scenarioId }}', persona);
+        }
+      });
+    });
+
+    // Initialize selected state
+    personaCards[0].dataset.selected = 'true';
+  });
+</script>

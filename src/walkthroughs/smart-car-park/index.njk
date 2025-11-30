@@ -1,0 +1,538 @@
+---
+layout: layouts/walkthrough.njk
+title: Smart Car Park IoT Walkthrough
+description: Step-by-step guide to experiencing real-time car park occupancy monitoring with IoT sensors
+currentStep: 0
+totalSteps: 4
+scenarioId: smart-car-park
+---
+
+{#
+  Smart Car Park IoT Walkthrough Landing Page (Story 3.5)
+  AC-3.5.3, AC-3.5.5
+#}
+
+<h1 class="govuk-heading-xl">Try IoT-Powered Car Park Management</h1>
+
+{# AC-3.5.3: Value proposition - 10 minutes to understand real-time IoT monitoring #}
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    10 minutes to see real-time car park occupancy data from IoT sensors
+  </h2>
+  <div class="govuk-panel__body">
+    No deployment needed. View a CloudWatch dashboard showing live occupancy across 50 parking spaces with automated insights.
+  </div>
+</div>
+
+{# Technical reassurance #}
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you through viewing a real-time dashboard powered by IoT sensors.
+    Perfect for facilities managers, smart city teams, and anyone evaluating IoT for
+    car park management or broader smart city initiatives.
+  </p>
+</div>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this 10-minute walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Access the CloudWatch dashboard</strong> - Find your deployed IoT monitoring dashboard (2 minutes)
+  </li>
+  <li>
+    <strong>View real-time occupancy data</strong> - See live metrics across 3 car park zones (2 minutes)
+  </li>
+  <li>
+    <strong>Understand the IoT data flow</strong> - Learn how sensor readings become dashboard insights (3 minutes)
+  </li>
+  <li>
+    <strong>Explore occupancy trends & ROI</strong> - Analyze patterns and calculate business value (3 minutes)
+  </li>
+</ol>
+
+{# Prerequisites section with sample data check #}
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already deployed the Smart Car Park scenario to your Innovation Sandbox account.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/smart-car-park/" class="govuk-link">Deploy the Smart Car Park scenario</a> if you haven't already.
+    Deployment takes 5-7 minutes.
+  </p>
+
+  {# Sample Data Status Component #}
+  <div class="govuk-!-margin-top-4">
+    <h3 class="govuk-heading-s">IoT sensor data check</h3>
+    {% include "components/sample-data-status.njk" %}
+  </div>
+
+  {# Sample Data Explanation Panel (Story 12.2) - AC1, AC2, AC3 #}
+  <div class="govuk-!-margin-top-4">
+    {% include "components/sample-data-panel.njk" %}
+  </div>
+
+  {# Manual seeding fallback #}
+  <details class="govuk-details govuk-!-margin-top-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Manual data seeding (if automatic deployment failed)
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">If the automated sensor data seeding failed, you can manually trigger it:</p>
+
+      <ol class="govuk-list govuk-list--number">
+        <li>
+          Go to the <a href="https://console.aws.amazon.com/lambda/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS Lambda console</a>
+        </li>
+        <li>
+          Find the function named <code>SmartCarPark-DataSeeder-[timestamp]</code>
+        </li>
+        <li>
+          Click "Test" and create a new test event with default settings
+        </li>
+        <li>
+          Click "Test" to invoke the function - it will populate 1000 sensor readings
+        </li>
+        <li>
+          Refresh this page to verify sensor data is available
+        </li>
+      </ol>
+
+      <p class="govuk-body">
+        If you continue to have issues, <a href="/contact/" class="govuk-link">contact support</a>.
+      </p>
+    </div>
+  </details>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For facilities managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How IoT sensors detect vehicle presence</li>
+      <li>Real-time visibility across all car park zones</li>
+      <li>Automated alerts for high occupancy or sensor failures</li>
+      <li>Historical patterns showing peak vs off-peak usage</li>
+      <li>Elimination of manual space counting</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For smart city teams</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Revenue increase from improved occupancy (60% to 85%)</li>
+      <li>Operational cost savings (£9.75K/year eliminated)</li>
+      <li>ROI calculation and payback period</li>
+      <li>Scalability to other IoT use cases</li>
+      <li>Foundation for smart city strategy</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">The car park you'll monitor</h2>
+
+<p class="govuk-body">
+  We've simulated a typical council multi-storey car park with IoT sensors:
+</p>
+
+<div class="ndx-car-park-overview">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-quarter">
+      <div class="ndx-stat-box">
+        <span class="ndx-stat-number">50</span>
+        <span class="ndx-stat-label">Total Spaces</span>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-quarter">
+      <div class="ndx-stat-box">
+        <span class="ndx-stat-number">3</span>
+        <span class="ndx-stat-label">Zones/Floors</span>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-quarter">
+      <div class="ndx-stat-box">
+        <span class="ndx-stat-number">50</span>
+        <span class="ndx-stat-label">IoT Sensors</span>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-quarter">
+      <div class="ndx-stat-box">
+        <span class="ndx-stat-number">1000</span>
+        <span class="ndx-stat-label">Data Points</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-grid-row ndx-zones-preview govuk-!-margin-top-4">
+  {% for zone in carParkConfig.zones %}
+    <div class="govuk-grid-column-one-third">
+      <div class="ndx-zone-card">
+        <h3 class="govuk-heading-s">{{ zone.name }}</h3>
+        <dl class="govuk-summary-list govuk-summary-list--no-border">
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">Spaces</dt>
+            <dd class="govuk-summary-list__value">{{ zone.spaces }}</dd>
+          </div>
+          <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">Sensors</dt>
+            <dd class="govuk-summary-list__value">{{ zone.sensors }}</dd>
+          </div>
+        </dl>
+        <p class="govuk-body-s" style="color: #505a5f; margin-top: 10px;">
+          {{ zone.description }}
+        </p>
+        <details class="govuk-details govuk-details--small govuk-!-margin-top-2">
+          <summary class="govuk-details__summary">
+            <span class="govuk-details__summary-text govuk-!-font-size-16">
+              Features
+            </span>
+          </summary>
+          <div class="govuk-details__text">
+            <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+              {% for feature in zone.features %}
+                <li>{{ feature }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{# AC-3.5.3, AC-3.5.5: IoT data flow overview #}
+<div class="ndx-iot-flow-section govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">How IoT sensors work</h2>
+  <p class="govuk-body">
+    Each parking space has an ultrasonic sensor that detects vehicle presence:
+  </p>
+
+  <div class="ndx-iot-flow-diagram">
+    <div class="ndx-flow-step">
+      <div class="ndx-flow-number">1</div>
+      <div class="ndx-flow-content">
+        <h3 class="govuk-heading-s">Sensor detects vehicle</h3>
+        <p class="govuk-body-s">Ultrasonic distance measurement determines if space is occupied</p>
+      </div>
+    </div>
+    <div class="ndx-flow-arrow">→</div>
+    <div class="ndx-flow-step">
+      <div class="ndx-flow-number">2</div>
+      <div class="ndx-flow-content">
+        <h3 class="govuk-heading-s">Data sent to AWS IoT Core</h3>
+        <p class="govuk-body-s">Sensor publishes MQTT message with occupancy state</p>
+      </div>
+    </div>
+    <div class="ndx-flow-arrow">→</div>
+    <div class="ndx-flow-step">
+      <div class="ndx-flow-number">3</div>
+      <div class="ndx-flow-content">
+        <h3 class="govuk-heading-s">Lambda processes reading</h3>
+        <p class="govuk-body-s">Validates data, stores history, publishes metrics</p>
+      </div>
+    </div>
+    <div class="ndx-flow-arrow">→</div>
+    <div class="ndx-flow-step">
+      <div class="ndx-flow-number">4</div>
+      <div class="ndx-flow-content">
+        <h3 class="govuk-heading-s">CloudWatch displays dashboard</h3>
+        <p class="govuk-body-s">Real-time metrics visible in your browser</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="govuk-inset-text govuk-!-margin-top-4">
+    <p class="govuk-body">
+      <strong>AWS services used:</strong> IoT Core (message broker), Lambda (processing),
+      DynamoDB (history storage), CloudWatch (visualization + alerts)
+    </p>
+  </div>
+</div>
+
+{# Wow moment preview #}
+<div class="ndx-wow-moment-preview govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">The wow moment</h2>
+  <p class="govuk-body">
+    When you open the CloudWatch dashboard, you'll see:
+  </p>
+  <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+    <li><strong>Live occupancy updates</strong> - Dashboard refreshes every 10 seconds automatically</li>
+    <li><strong>Multi-zone visibility</strong> - See all 3 floors at once (impossible with manual counting)</li>
+    <li><strong>24-hour historical trends</strong> - Identify peak hours and quiet periods instantly</li>
+    <li><strong>Automated alerts</strong> - Get notified when occupancy reaches thresholds</li>
+  </ul>
+  <p class="govuk-body">
+    All powered by 50 IoT sensors collecting data every 2 minutes. Zero manual effort.
+    No clipboards. No spreadsheets. No outdated information.
+  </p>
+</div>
+
+{# ROI preview #}
+<div class="ndx-reflection-section govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Think about your council car parks</h2>
+
+  <div class="govuk-inset-text" style="border-left-color: #00703c;">
+    <p class="govuk-!-font-size-24" style="font-weight: 700;">
+      How many car parks does your council manage?
+    </p>
+  </div>
+
+  <p class="govuk-body">
+    Consider the impact per 50-space car park:
+  </p>
+
+  <div class="ndx-roi-preview">
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Manual counting eliminated</dt>
+        <dd class="govuk-summary-list__value">
+          Save <strong>£9,750/year</strong> in labor costs
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Occupancy improvement</dt>
+        <dd class="govuk-summary-list__value">
+          From 60% to 85% = <strong>£16,250 additional revenue/year</strong>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Total annual benefit</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>£26,000 per car park</strong>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">AWS annual cost</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>£145/year</strong> (IoT Core, Lambda, DynamoDB, CloudWatch)
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Net ROI</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>178:1 return</strong> - payback in 2 days
+        </dd>
+      </div>
+    </dl>
+
+    <div class="govuk-inset-text govuk-!-margin-top-4">
+      <p class="govuk-body">
+        <strong>Committee language:</strong> "IoT sensors transform car park management from reactive
+        to proactive. Real-time occupancy data increases revenue by £16K annually while eliminating
+        manual counting costs of £9.75K. Total annual benefit of £26K against AWS costs of £145
+        delivers a 178:1 return on investment, with payback achieved in just 2 days."
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/smart-car-park/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 10 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-car-park-overview {
+    margin: 30px 0;
+  }
+
+  .ndx-stat-box {
+    text-align: center;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-stat-number {
+    display: block;
+    font-size: 48px;
+    font-weight: 700;
+    color: #0b0c0c;
+    line-height: 1;
+  }
+
+  .ndx-stat-label {
+    display: block;
+    font-size: 16px;
+    color: #505a5f;
+    margin-top: 8px;
+  }
+
+  .ndx-zones-preview {
+    margin-top: 20px;
+  }
+
+  .ndx-zone-card {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+    min-height: 320px;
+  }
+
+  .ndx-zone-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-zone-card .govuk-summary-list {
+    font-size: 16px;
+  }
+
+  .ndx-zone-card .govuk-summary-list__key {
+    width: 40%;
+  }
+
+  .ndx-iot-flow-section {
+    padding: 25px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-iot-flow-section h2 {
+    margin-top: 0;
+  }
+
+  .ndx-iot-flow-diagram {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    overflow-x: auto;
+  }
+
+  .ndx-flow-step {
+    flex: 1;
+    min-width: 200px;
+    padding: 15px;
+    background-color: #ffffff;
+    border: 2px solid #b1b4b6;
+    border-radius: 4px;
+    position: relative;
+  }
+
+  .ndx-flow-number {
+    position: absolute;
+    top: -12px;
+    left: 10px;
+    width: 24px;
+    height: 24px;
+    background-color: #1d70b8;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .ndx-flow-content h3 {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 16px;
+  }
+
+  .ndx-flow-arrow {
+    flex: 0 0 40px;
+    text-align: center;
+    font-size: 32px;
+    color: #1d70b8;
+    font-weight: 700;
+  }
+
+  .ndx-wow-moment-preview {
+    padding: 25px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-wow-moment-preview h2 {
+    margin-top: 0;
+  }
+
+  .ndx-reflection-section {
+    padding: 30px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-reflection-section h2 {
+    margin-top: 0;
+  }
+
+  .ndx-roi-preview {
+    background-color: #ffffff;
+    padding: 20px;
+    border: 2px solid #b1b4b6;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-zone-card {
+      min-height: auto;
+    }
+
+    .ndx-zones-preview .govuk-grid-column-one-third {
+      width: 100%;
+    }
+
+    .ndx-iot-flow-diagram {
+      flex-direction: column;
+    }
+
+    .ndx-flow-arrow {
+      transform: rotate(90deg);
+      margin: 10px 0;
+    }
+
+    .ndx-stat-box {
+      margin-bottom: 15px;
+    }
+  }
+</style>

@@ -1,0 +1,68 @@
+# Site Configuration for NDX:Try AWS Scenarios Portal
+# This file provides global configuration used across all pages
+
+name: "NDX:Try AWS"
+description: "Try AWS Before You Buy - Zero-cost evaluation platform for UK local government"
+tagline: "AWS Scenarios for UK Councils"
+url: "https://aws.try.ndx.digital.cabinet-office.gov.uk"
+
+# Organisation details
+organisation:
+  name: "NDX Partnership"
+  fullName: "National Digital Exchange Partnership"
+  type: "UK Government"
+
+# Trust indicators
+trustIndicators:
+  councilCount: "50+"
+  timeToInsight: "15 minutes"
+  commitment: "Zero commitment"
+  cost: "Zero cost to try"
+
+# Key messages
+messaging:
+  headline: "Try AWS Before You Buy for UK Councils"
+  subheadline: "Evaluate AWS AI and cloud services with real local government scenarios"
+  valueProposition:
+    - "No cloud expertise required"
+    - "Deploy in 15 minutes"
+    - "Zero cost to try"
+    - "Automatic cleanup when you're done"
+  safetyMessage: "Isolated Innovation Sandbox - Your evaluation is completely separate from production systems"
+
+# External links
+links:
+  github: "https://github.com/co-cddo/ndx-try-aws-scenarios"
+  lga: "https://www.local.gov.uk/"
+  lgaAiHub: "https://www.local.gov.uk/our-support/efficiency-and-productivity/artificial-intelligence"
+  govukFrontend: "https://design-system.service.gov.uk/"
+
+# License
+license:
+  type: "MIT"
+  text: "Open Source (MIT License)"
+  url: "https://opensource.org/licenses/MIT"
+
+# Accessibility
+accessibility:
+  standard: "WCAG 2.2 AA"
+  statement: "/accessibility/"
+
+# Analytics
+analytics:
+  enabled: true
+  ga_measurement_id: "G-PLACEHOLDER" # Replace with actual ID before production
+
+# Feature flags
+features:
+  quizEnabled: true
+  evidencePackEnabled: false
+  analyticsEnabled: false
+
+# Content tone reminders (for content authors)
+contentGuidance:
+  - "Grant permission to try - 'You're not the first, you won't be the last'"
+  - "Reduce imposter syndrome - 'No AWS expertise required'"
+  - "Promise safety - 'Isolated sandbox, automatic cleanup, capped cost'"
+  - "Respect time - '15 minutes to decide, not 15 hours'"
+  - "Enable sharing - 'Easy to forward to your team/leadership'"

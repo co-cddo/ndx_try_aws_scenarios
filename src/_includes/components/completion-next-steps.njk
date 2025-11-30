@@ -1,0 +1,150 @@
+{#
+  Completion Next Steps Component (Story 15.3)
+
+  Displays standardized next steps on walkthrough completion pages:
+  - Primary CTA: Generate Evidence Pack
+  - Secondary: Return to scenario page
+  - Tertiary: Browse all scenarios
+  - Placeholder for cross-scenario recommendations (Story 15.5)
+
+  Expects:
+    scenarioId: string - The scenario ID (e.g., "council-chatbot")
+    scenarioName: string - Display name (e.g., "Council Chatbot")
+    totalSteps: number - Total steps in walkthrough
+#}
+
+{% set sid = scenarioId | default("council-chatbot") %}
+{% set sname = scenarioName | default("Council Chatbot") %}
+{% set steps = totalSteps | default(4) %}
+
+{# Data attribute for progress tracker #}
+<div class="ndx-completion-next-steps" data-total-steps="{{ steps }}" data-scenario="{{ sid }}">
+
+  <h2 class="govuk-heading-l">Next steps</h2>
+
+  <div class="govuk-grid-row">
+    {# Primary CTA: Generate Evidence Pack #}
+    <div class="govuk-grid-column-one-third">
+      <div class="ndx-next-step-card ndx-next-step-card--primary">
+        <h3 class="govuk-heading-s">Generate Evidence Pack</h3>
+        <p class="govuk-body-s">
+          Create your business case with what you've learned. Perfect for committee papers.
+        </p>
+        <a href="/evidence-pack/?scenario={{ sid }}"
+           class="govuk-button"
+           data-module="govuk-button"
+           data-analytics-event="evidence_pack_start"
+           data-analytics-scenario="{{ sid }}">
+          Generate Evidence Pack
+        </a>
+      </div>
+    </div>
+
+    {# Secondary: Return to Scenario #}
+    <div class="govuk-grid-column-one-third">
+      <div class="ndx-next-step-card">
+        <h3 class="govuk-heading-s">Return to {{ sname }}</h3>
+        <p class="govuk-body-s">
+          Review deployment options, costs, and technical details.
+        </p>
+        <a href="/scenarios/{{ sid }}/"
+           class="govuk-button govuk-button--secondary"
+           data-module="govuk-button">
+          Back to scenario
+        </a>
+      </div>
+    </div>
+
+    {# Tertiary: Browse Scenarios #}
+    <div class="govuk-grid-column-one-third">
+      <div class="ndx-next-step-card">
+        <h3 class="govuk-heading-s">Try Another</h3>
+        <p class="govuk-body-s">
+          Explore more AI scenarios for local government.
+        </p>
+        <a href="/scenarios/"
+           class="govuk-button govuk-button--secondary"
+           data-module="govuk-button">
+          Browse scenarios
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {# Cross-scenario recommendations placeholder (Story 15.5) #}
+  <div class="ndx-recommendations govuk-!-margin-top-6" data-recommendations hidden>
+    <h3 class="govuk-heading-m">Recommended for you</h3>
+    <p class="govuk-body-s govuk-!-margin-bottom-4">Based on your interests, you might also like:</p>
+    <div class="govuk-grid-row" data-recommendation-cards>
+      {# Cards populated by JavaScript in Story 15.5 #}
+    </div>
+  </div>
+
+  {# All complete celebration state (Story 15.5) #}
+  <div class="ndx-all-complete govuk-!-margin-top-6" data-all-complete hidden>
+    <div class="govuk-inset-text">
+      <p><strong>Congratulations!</strong> You've completed all available walkthroughs.</p>
+      <p>Ready to build your business case? Generate an evidence pack to share with your stakeholders.</p>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .ndx-completion-next-steps {
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+
+  .ndx-next-step-card {
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #b1b4b6;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ndx-next-step-card--primary {
+    background-color: #f3f2f1;
+    border-left-color: #00703c;
+  }
+
+  .ndx-next-step-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-next-step-card p {
+    flex-grow: 1;
+    margin-bottom: 15px;
+  }
+
+  .ndx-next-step-card .govuk-button {
+    margin-bottom: 0;
+  }
+
+  .ndx-recommendations,
+  .ndx-all-complete {
+    border-top: 1px solid #b1b4b6;
+    padding-top: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .ndx-next-step-card {
+      min-height: auto;
+      margin-bottom: 20px;
+    }
+  }
+
+  @media print {
+    .ndx-completion-next-steps .govuk-button {
+      display: none;
+    }
+
+    .ndx-recommendations,
+    .ndx-all-complete {
+      display: none;
+    }
+  }
+</style>

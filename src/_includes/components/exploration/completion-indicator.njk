@@ -1,0 +1,136 @@
+{#
+  Completion Indicator Component (Story 6.1)
+
+  Shows progress through exploration activities:
+  - Count of completed activities
+  - Progress bar
+  - "Essential complete" message after 3 activities
+
+  Usage:
+    {% include "components/exploration/completion-indicator.njk" %}
+
+  Expects:
+    totalActivities: number
+    scenarioId: string
+#}
+
+{% set totalActivities = totalActivities if totalActivities is defined else 10 %}
+
+<div class="ndx-completion-indicator" role="region" aria-labelledby="completion-heading">
+  <h2 class="govuk-visually-hidden" id="completion-heading">Exploration progress</h2>
+
+  <div class="ndx-completion-indicator__content">
+    <div class="ndx-completion-indicator__count">
+      <span class="ndx-completion-indicator__number" data-completion-count>0</span>
+      <span class="ndx-completion-indicator__label">of {{ totalActivities }} activities completed</span>
+    </div>
+
+    <div class="ndx-completion-indicator__bar" aria-hidden="true">
+      <div class="ndx-completion-indicator__fill" data-completion-fill style="width: 0%"></div>
+    </div>
+
+    <p class="govuk-body-s ndx-completion-indicator__hint">
+      Complete 3 or more activities for essential exploration
+    </p>
+  </div>
+</div>
+
+<style>
+  .ndx-completion-indicator {
+    background: #f8f8f8;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-completion-indicator__count {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .ndx-completion-indicator__number {
+    font-size: 36px;
+    font-weight: 700;
+    color: #1d70b8;
+    line-height: 1;
+  }
+
+  .ndx-completion-indicator__label {
+    font-size: 16px;
+    color: #505a5f;
+  }
+
+  .ndx-completion-indicator__bar {
+    height: 8px;
+    background: #dee0e2;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .ndx-completion-indicator__fill {
+    height: 100%;
+    background: #1d70b8;
+    transition: width 0.3s ease;
+  }
+
+  /* Essential complete state */
+  .ndx-completion-indicator--essential {
+    border-left-color: #00703c;
+  }
+
+  .ndx-completion-indicator--essential .ndx-completion-indicator__number {
+    color: #00703c;
+  }
+
+  .ndx-completion-indicator--essential .ndx-completion-indicator__fill {
+    background: #00703c;
+  }
+
+  .ndx-completion-indicator__hint {
+    margin: 0;
+    color: #505a5f;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-completion-indicator__number {
+      font-size: 28px;
+    }
+  }
+</style>
+
+<script>
+  // Update completion indicator based on state
+  document.addEventListener('DOMContentLoaded', function() {
+    const scenarioId = document.body.dataset.scenarioId;
+    if (!scenarioId || !window.ExplorationState) return;
+
+    function updateIndicator() {
+      const count = window.ExplorationState.getCompletedCount(scenarioId);
+      const total = {{ totalActivities }};
+      const isEssential = count >= 3;
+
+      // Update count
+      document.querySelectorAll('[data-completion-count]').forEach(el => {
+        el.textContent = count;
+      });
+
+      // Update progress bar
+      document.querySelectorAll('[data-completion-fill]').forEach(el => {
+        el.style.width = ((count / total) * 100) + '%';
+      });
+
+      // Update essential state
+      document.querySelectorAll('.ndx-completion-indicator').forEach(el => {
+        el.classList.toggle('ndx-completion-indicator--essential', isEssential);
+      });
+    }
+
+    updateIndicator();
+
+    // Listen for completion events
+    window.addEventListener('activityCompleted', updateIndicator);
+  });
+</script>

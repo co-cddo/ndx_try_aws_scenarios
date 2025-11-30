@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  GitHub Actions Upload Permissions for NDX Screenshot Automation
+  Creates dedicated IAM user for GitHub Actions to upload screenshots and manifests to S3.
+  Separate from the read-only federation user for security isolation.
+  Sprint: Sprint 0 - Story S0.3
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Screenshot Bucket Configuration
+        Parameters:
+          - ScreenshotBucketName
+          - NotificationTopicArn
+    ParameterLabels:
+      ScreenshotBucketName:
+        default: S3 bucket name for screenshots
+      NotificationTopicArn:
+        default: SNS topic ARN for notifications
+
+Parameters:
+  ScreenshotBucketName:
+    Type: String
+    Description: Name of the S3 bucket where screenshots are stored (from s3-bucket stack)
+
+  NotificationTopicArn:
+    Type: String
+    Description: ARN of the SNS topic for notifications (from s3-bucket stack)
+
+Resources:
+  # IAM User for GitHub Actions uploads
+  GitHubUploadUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: ndx-github-screenshot-uploader
+      Tags:
+        - Key: Purpose
+          Value: GitHubActionsUpload
+        - Key: Project
+          Value: NDXTryAWSScenarios
+        - Key: Sprint
+          Value: Sprint0
+        - Key: Story
+          Value: S0.3
+
+  # IAM Policy for S3 uploads and SNS notifications
+  GitHubUploadPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ndx-github-upload-permissions
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # Allow S3 uploads to screenshots bucket
+          - Sid: AllowScreenshotUpload
+            Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:PutObjectAcl
+            Resource:
+              - !Sub 'arn:aws:s3:::${ScreenshotBucketName}/current/*'
+              - !Sub 'arn:aws:s3:::${ScreenshotBucketName}/manifests/*'
+
+          # Allow listing bucket for verification
+          - Sid: AllowBucketList
+            Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !Sub 'arn:aws:s3:::${ScreenshotBucketName}'
+            Condition:
+              StringLike:
+                s3:prefix:
+                  - 'current/*'
+                  - 'manifests/*'
+
+          # Allow SNS notifications
+          - Sid: AllowSNSNotifications
+            Effect: Allow
+            Action:
+              - sns:Publish
+            Resource: !Ref NotificationTopicArn
+
+      Users:
+        - !Ref GitHubUploadUser
+
+  # Access key for GitHub Actions
+  GitHubUploadAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref GitHubUploadUser
+      Status: Active
+
+Outputs:
+  GitHubUploadUserArn:
+    Description: ARN of the IAM user for GitHub Actions uploads
+    Value: !GetAtt GitHubUploadUser.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-UserArn'
+
+  GitHubUploadAccessKeyId:
+    Description: Access Key ID for GitHub Actions (store in GitHub Secrets as AWS_UPLOAD_ACCESS_KEY_ID)
+    Value: !Ref GitHubUploadAccessKey
+
+  GitHubUploadSecretAccessKey:
+    Description: Secret Access Key for GitHub Actions (store in GitHub Secrets as AWS_UPLOAD_SECRET_ACCESS_KEY)
+    Value: !GetAtt GitHubUploadAccessKey.SecretAccessKey
+    NoEcho: true
+
+  GitHubUploadUserName:
+    Description: IAM user name
+    Value: !Ref GitHubUploadUser
+    Export:
+      Name: !Sub '${AWS::StackName}-UserName'
+
+  DeploymentInstructions:
+    Description: Next steps after stack creation
+    Value: |
+      1. Retrieve GitHubUploadSecretAccessKey from stack outputs (it won't be shown again)
+      2. Add AWS_UPLOAD_ACCESS_KEY_ID to GitHub Secrets
+      3. Add AWS_UPLOAD_SECRET_ACCESS_KEY to GitHub Secrets
+      4. Update GitHub workflow to use these credentials for S3 uploads
+      5. Test upload: aws s3 cp test.txt s3://<bucket-name>/current/test/test.txt

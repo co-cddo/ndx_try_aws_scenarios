@@ -1,0 +1,224 @@
+{
+  "deploymentProgressGuidance": {
+    "takingLonger": {
+      "threshold": "10 minutes",
+      "userMessage": "Deployment is taking longer than expected",
+      "guidance": [
+        "This can happen with complex scenarios or during peak times",
+        "Check the Events tab in CloudFormation for progress details",
+        "Look for resources currently showing CREATE_IN_PROGRESS",
+        "Most deployments complete within 15 minutes"
+      ]
+    },
+    "stillInProgress": {
+      "statusPattern": "CREATE_IN_PROGRESS",
+      "userMessage": "Deployment is still in progress",
+      "guidance": [
+        "The Events tab shows which resources are being created",
+        "Wait for all resources to show CREATE_COMPLETE",
+        "The page auto-refreshes - no need to manually reload"
+      ]
+    },
+    "rollbackInProgress": {
+      "statusPattern": "ROLLBACK_IN_PROGRESS",
+      "userMessage": "Deployment failed and is being rolled back",
+      "guidance": [
+        "CloudFormation automatically cleans up failed resources",
+        "Wait for rollback to complete before trying again",
+        "Check the Events tab for the specific error message",
+        "Look for the first resource that shows CREATE_FAILED"
+      ]
+    }
+  },
+  "errorDetectionPatterns": {
+    "lookFor": [
+      "Any resource showing CREATE_FAILED in the Status column",
+      "Red text in the Status column indicating an error",
+      "ROLLBACK_IN_PROGRESS or ROLLBACK_COMPLETE stack status",
+      "Error messages in the Status Reason column"
+    ],
+    "successIndicators": [
+      "Stack status shows CREATE_COMPLETE in green",
+      "All resources show CREATE_COMPLETE",
+      "Outputs tab becomes available with access URLs",
+      "No red error messages in the Events tab"
+    ]
+  },
+  "errorMappings": [
+    {
+      "cloudFormationCode": "AccessDenied",
+      "pattern": "User:.* is not authorized",
+      "userMessage": "Your AWS account doesn't have permission to create these resources.",
+      "troubleshootingSteps": [
+        "Check you're logged into the correct AWS account",
+        "Verify your Innovation Sandbox has CloudFormation permissions",
+        "Contact your AWS administrator if permissions are restricted"
+      ],
+      "supportLink": "/help/permissions-error"
+    },
+    {
+      "cloudFormationCode": "BucketAlreadyOwnedByYou",
+      "pattern": "S3.*bucket.*already.*exists",
+      "userMessage": "An S3 bucket with this name already exists. Please try again with a different stack name.",
+      "troubleshootingSteps": [
+        "Go back and modify the stack name",
+        "Or delete the existing stack first"
+      ],
+      "supportLink": "/help/bucket-exists"
+    },
+    {
+      "cloudFormationCode": "LimitExceeded",
+      "pattern": "limit.*exceeded|quota.*reached",
+      "userMessage": "Your AWS account has reached a service limit.",
+      "troubleshootingSteps": [
+        "Check AWS Service Quotas in your account",
+        "Request a limit increase if needed",
+        "Or try deploying in a different region"
+      ],
+      "supportLink": "/help/service-limits"
+    },
+    {
+      "cloudFormationCode": "NotLoggedIn",
+      "pattern": "not.*logged.*in|sign.*in.*required|session.*expired",
+      "userMessage": "You're not logged into AWS Console.",
+      "troubleshootingSteps": [
+        "Click the 'Check AWS Login' link on the deploy page",
+        "Sign into your Innovation Sandbox account",
+        "Return to NDX:Try and try deploying again"
+      ],
+      "supportLink": "/help/aws-login"
+    },
+    {
+      "cloudFormationCode": "WrongRegion",
+      "pattern": "template.*not.*found|bucket.*does.*not.*exist.*in.*region",
+      "userMessage": "The deployment is configured for a different AWS region.",
+      "troubleshootingSteps": [
+        "Check you're in the eu-west-2 (London) region",
+        "Click the region selector in the top-right of AWS Console",
+        "Select 'Europe (London) eu-west-2'"
+      ],
+      "supportLink": "/help/region-mismatch"
+    },
+    {
+      "cloudFormationCode": "ResourceConflict",
+      "pattern": "already.*exists|resource.*conflict|duplicate",
+      "userMessage": "A resource with this name already exists in your account.",
+      "troubleshootingSteps": [
+        "You may have deployed this scenario before",
+        "Delete the existing stack from CloudFormation console",
+        "Or wait for auto-cleanup (resources delete after 2 hours)"
+      ],
+      "supportLink": "/help/resource-conflict"
+    },
+    {
+      "cloudFormationCode": "QuotaExceeded",
+      "pattern": "quota.*exceeded|service.*limit|maximum.*number",
+      "userMessage": "Your AWS account has reached a service limit.",
+      "troubleshootingSteps": [
+        "Open AWS Service Quotas console",
+        "Check limits for the failing service",
+        "Request a limit increase if needed"
+      ],
+      "supportLink": "/help/quota-exceeded"
+    },
+    {
+      "cloudFormationCode": "NetworkBlocked",
+      "pattern": "connection.*timed.*out|network.*unreachable|could.*not.*connect",
+      "userMessage": "Your network may be blocking access to AWS services.",
+      "troubleshootingSteps": [
+        "Check if your council firewall allows *.amazonaws.com",
+        "Contact your IT team to whitelist AWS endpoints",
+        "Try from a different network if possible"
+      ],
+      "supportLink": "/help/network-requirements"
+    },
+    {
+      "cloudFormationCode": "InvalidTemplate",
+      "pattern": "invalid.*template|template.*validation.*failed",
+      "userMessage": "There's an issue with the CloudFormation template.",
+      "troubleshootingSteps": [
+        "This is likely a template issue on our side",
+        "Please report this using the contact form",
+        "Include the scenario name and error message"
+      ],
+      "supportLink": "/contact/"
+    },
+    {
+      "cloudFormationCode": "CircularDependency",
+      "pattern": "circular.*dependency|cyclic.*reference",
+      "userMessage": "There's a configuration issue with the template.",
+      "troubleshootingSteps": [
+        "This is a template issue on our side",
+        "Please report this using the contact form",
+        "Include the scenario name in your report"
+      ],
+      "supportLink": "/contact/"
+    },
+    {
+      "cloudFormationCode": "BedrockAccessDenied",
+      "pattern": "bedrock.*access.*denied|model.*not.*enabled",
+      "userMessage": "Amazon Bedrock access hasn't been enabled in your account.",
+      "troubleshootingSteps": [
+        "Go to the Amazon Bedrock console",
+        "Click 'Model access' in the left menu",
+        "Request access to the required models",
+        "Wait for access to be granted (usually instant)"
+      ],
+      "supportLink": "/help/bedrock-access"
+    },
+    {
+      "cloudFormationCode": "VPCConfigError",
+      "pattern": "vpc.*configuration|subnet.*not.*found|security.*group",
+      "userMessage": "There's an issue with the VPC or network configuration.",
+      "troubleshootingSteps": [
+        "Check if your account has a default VPC",
+        "Verify the target subnets exist in your account",
+        "Contact your AWS administrator for network setup"
+      ],
+      "supportLink": "/help/vpc-config"
+    },
+    {
+      "cloudFormationCode": "LambdaCodeMissing",
+      "pattern": "lambda.*code.*not.*found|function.*code.*missing",
+      "userMessage": "Lambda function code could not be found.",
+      "troubleshootingSteps": [
+        "This is a deployment configuration issue",
+        "Please report this using the contact form",
+        "We'll investigate and fix the template"
+      ],
+      "supportLink": "/contact/"
+    },
+    {
+      "cloudFormationCode": "SessionExpired",
+      "pattern": "session.*expired|token.*expired|credentials.*expired",
+      "userMessage": "Your AWS session has expired.",
+      "troubleshootingSteps": [
+        "Sign out of AWS Console",
+        "Sign back in with your Innovation Sandbox credentials",
+        "Return to NDX:Try and try deploying again"
+      ],
+      "supportLink": "/help/aws-login"
+    },
+    {
+      "cloudFormationCode": "InsufficientCapabilities",
+      "pattern": "insufficient.*capabilities|requires.*capability",
+      "userMessage": "Additional permissions are required for this deployment.",
+      "troubleshootingSteps": [
+        "On the CloudFormation review page, check the 'Capabilities' checkboxes",
+        "These allow CloudFormation to create IAM roles for the scenario",
+        "This is standard for most AWS deployments"
+      ],
+      "supportLink": "/help/iam-capabilities"
+    }
+  ],
+  "fallbackMessage": {
+    "userMessage": "Deployment encountered an unexpected error.",
+    "troubleshootingSteps": [
+      "Check the CloudFormation Events tab for details",
+      "Try deleting the failed stack and deploying again",
+      "Contact support if the issue persists"
+    ],
+    "supportLink": "/contact/",
+    "reportErrorLink": "/contact/"
+  }
+}

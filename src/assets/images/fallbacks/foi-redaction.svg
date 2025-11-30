@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="foi-redaction-fallback-title foi-redaction-fallback-desc">
+  <title id="foi-redaction-fallback-title">FOI Redaction Screenshot</title>
+  <desc id="foi-redaction-fallback-desc">Screenshot temporarily unavailable - showing placeholder for FOI Redaction scenario</desc>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="#f3f2f1"/>
+
+  <!-- GOV.UK Blue header bar -->
+  <rect width="1920" height="100" fill="#1d70b8"/>
+
+  <!-- Central content area -->
+  <rect x="360" y="200" width="1200" height="680" rx="4" fill="#ffffff" stroke="#b1b4b6" stroke-width="2"/>
+
+  <!-- Redaction icon -->
+  <g transform="translate(860, 400)">
+    <rect width="200" height="160" rx="20" fill="#1d70b8" opacity="0.1"/>
+    <rect x="40" y="20" width="120" height="120" rx="4" fill="#ffffff" stroke="#1d70b8" stroke-width="3"/>
+    <!-- Document lines with redaction -->
+    <rect x="55" y="45" width="90" height="8" rx="2" fill="#1d70b8" opacity="0.5"/>
+    <rect x="55" y="65" width="70" height="8" rx="2" fill="#0b0c0c"/> <!-- Redacted -->
+    <rect x="55" y="85" width="80" height="8" rx="2" fill="#1d70b8" opacity="0.5"/>
+    <rect x="55" y="105" width="60" height="8" rx="2" fill="#0b0c0c"/> <!-- Redacted -->
+    <!-- Shield icon -->
+    <path d="M150 10l25 10v30c0 20-25 35-25 35s-25-15-25-35v-30l25-10z" fill="#00703c"/>
+    <path d="M145 35l5 5 15-15" stroke="#ffffff" stroke-width="3" fill="none"/>
+  </g>
+
+  <!-- "Screenshot updating" text -->
+  <text x="960" y="620" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#505a5f">
+    Screenshot updating - please check back soon
+  </text>
+
+  <!-- Scenario label -->
+  <text x="960" y="680" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#0b0c0c" font-weight="600">
+    FOI Redaction
+  </text>
+
+  <!-- AWS Comprehend badge -->
+  <rect x="820" y="720" width="280" height="36" rx="4" fill="#232f3e"/>
+  <text x="960" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">
+    Powered by Amazon Comprehend
+  </text>
+</svg>

@@ -1,0 +1,215 @@
+{#
+  ROI Projection Section (Shared - AC-4.1.6)
+  Updated for Story 4-4 to use scenarioData.success_metrics
+
+  Variables:
+  - scenarioData: Scenario data from scenarios.yaml (includes success_metrics)
+  - roi_projection: Legacy ROI data (fallback)
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    ROI Projection
+  </h2>
+
+  {# AC 4.4.7: Illustrative Disclaimer at TOP #}
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      <strong>Illustrative Projection:</strong> These ROI projections are estimates based on typical UK council operations. Actual results will depend on your specific adoption rates, integration complexity, operational efficiency, and local factors. Always conduct your own business case analysis with your Finance team.
+    </strong>
+  </div>
+
+  {% if scenarioData and scenarioData.success_metrics %}
+  {# Story 4-4: Use success_metrics from scenarios.yaml #}
+  {% set metrics = scenarioData.success_metrics %}
+
+  <h3 class="govuk-heading-m">Service Area & Primary Metric</h3>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Service Area
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ metrics.service_area }}
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Primary Metric
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ metrics.primary_metric }}
+      </dd>
+    </div>
+  </dl>
+
+  <h3 class="govuk-heading-m">Baseline & Projection</h3>
+  <div class="govuk-grid-row govuk-!-margin-bottom-6">
+    <div class="govuk-grid-column-one-half">
+      <div class="govuk-panel" style="border: 2px solid #0b0c0c; background-color: #f3f2f1;">
+        <h4 class="govuk-panel__title" style="color: #0b0c0c;">
+          Current Baseline
+        </h4>
+        <div class="govuk-panel__body" style="color: #0b0c0c;">
+          <p class="govuk-body">{{ metrics.baseline.description }}</p>
+          <p class="govuk-body"><strong>{{ metrics.baseline.value }} {{ metrics.baseline.unit }}</strong></p>
+          <p class="govuk-body-s"><em>Source: {{ metrics.baseline.source }}</em></p>
+        </div>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="govuk-panel govuk-panel--confirmation">
+        <h4 class="govuk-panel__title">
+          With AI Solution
+        </h4>
+        <div class="govuk-panel__body">
+          <p class="govuk-body" style="color: white;">{{ metrics.projection.description }}</p>
+          <p class="govuk-body" style="color: white;">
+            <strong style="font-size: 48px;">{{ metrics.projection.reduction_percent }}%</strong>
+          </p>
+          <p class="govuk-body" style="color: white;">improvement achieved</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="govuk-heading-m">ROI Summary</h3>
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h4 class="govuk-panel__title">
+      Annual Savings Projection
+    </h4>
+    <div class="govuk-panel__body">
+      <strong style="font-size: 48px;">£{{ metrics.roi.annual_savings }}</strong>
+      <br>
+      <p class="govuk-body govuk-!-margin-top-3" style="color: white;">Payback in {{ metrics.roi.payback_months }} month{% if metrics.roi.payback_months != 1 %}s{% endif %}</p>
+    </div>
+  </div>
+
+  <h3 class="govuk-heading-m">ROI Calculation</h3>
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Calculation:</strong> {{ metrics.roi.calculation }}
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-m">Committee-Ready Summary</h3>
+  <div class="govuk-panel" style="border: 2px solid #1d70b8; background-color: #f3f2f1;">
+    <div class="govuk-panel__body" style="color: #0b0c0c;">
+      <p class="govuk-body-l">
+        "{{ metrics.committee_language }}"
+      </p>
+    </div>
+  </div>
+
+  <h3 class="govuk-heading-m">Key Assumptions</h3>
+  <div class="govuk-inset-text">
+    <p class="govuk-body"><strong>This projection assumes:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Baseline data from {{ metrics.baseline.source }}</li>
+      <li>Current operational costs remain stable</li>
+      <li>AI solution adoption matches projected usage patterns</li>
+      <li>Integration completed within estimated timeframes</li>
+      <li>Staff redeployed to higher-value activities (no redundancies)</li>
+    </ul>
+    <p class="govuk-body govuk-!-margin-top-4">
+      <strong>Important:</strong> {{ metrics.roi.disclaimer }}
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-m">Benefits Beyond Direct Cost Savings</h3>
+  <p class="govuk-body">
+    The ROI calculation focuses on direct cost savings, but additional benefits include:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>Resident Satisfaction:</strong> Faster service delivery improves user experience</li>
+    <li><strong>Staff Morale:</strong> Reduction in repetitive work allows focus on meaningful tasks</li>
+    <li><strong>Service Expansion:</strong> Platform enables additional AI-powered services</li>
+    <li><strong>Digital Transformation:</strong> Builds organizational cloud capability and modern practices</li>
+    <li><strong>Data Insights:</strong> Analytics reveal service patterns and improvement opportunities</li>
+    <li><strong>Scalability:</strong> Can handle demand spikes without proportional cost increases</li>
+  </ul>
+
+  <h3 class="govuk-heading-m">Next Steps for Business Case</h3>
+  <ol class="govuk-list govuk-list--number">
+    <li>Validate baseline assumptions with your Finance team</li>
+    <li>Adjust projections based on your council's specific volumes and costs</li>
+    <li>Conduct sensitivity analysis for different adoption scenarios</li>
+    <li>Include implementation risks and mitigation strategies</li>
+    <li>Obtain sign-off from Service Manager, Finance Director, and IT</li>
+  </ol>
+
+  {% elif roi_projection %}
+  {# Fallback to legacy roi_projection data structure #}
+
+  <h3 class="govuk-heading-m">3-Year ROI Summary</h3>
+
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h4 class="govuk-panel__title">
+      Total 3-Year ROI
+    </h4>
+    <div class="govuk-panel__body">
+      <strong style="font-size: 48px;">{{ roi_projection.three_year_summary.average_roi }}</strong>
+      <br>
+      Net Benefit: {{ roi_projection.three_year_summary.total_net_benefit }}
+    </div>
+  </div>
+
+  <h3 class="govuk-heading-m">Year-by-Year Breakdown</h3>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Year</th>
+        <th scope="col" class="govuk-table__header">Investment</th>
+        <th scope="col" class="govuk-table__header">Savings</th>
+        <th scope="col" class="govuk-table__header">Net Benefit</th>
+        <th scope="col" class="govuk-table__header">ROI</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Year 1</th>
+        <td class="govuk-table__cell">{{ roi_projection.year_1.investment }}</td>
+        <td class="govuk-table__cell">{{ roi_projection.year_1.savings }}</td>
+        <td class="govuk-table__cell"><strong>{{ roi_projection.year_1.net_benefit }}</strong></td>
+        <td class="govuk-table__cell">
+          <strong class="govuk-tag govuk-tag--green">{{ roi_projection.year_1.roi_percentage }}</strong>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Year 2</th>
+        <td class="govuk-table__cell">{{ roi_projection.year_2.investment }}</td>
+        <td class="govuk-table__cell">{{ roi_projection.year_2.savings }}</td>
+        <td class="govuk-table__cell"><strong>{{ roi_projection.year_2.net_benefit }}</strong></td>
+        <td class="govuk-table__cell">
+          <strong class="govuk-tag govuk-tag--green">{{ roi_projection.year_2.roi_percentage }}</strong>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Year 3</th>
+        <td class="govuk-table__cell">{{ roi_projection.year_3.investment }}</td>
+        <td class="govuk-table__cell">{{ roi_projection.year_3.savings }}</td>
+        <td class="govuk-table__cell"><strong>{{ roi_projection.year_3.net_benefit }}</strong></td>
+        <td class="govuk-table__cell">
+          <strong class="govuk-tag govuk-tag--green">{{ roi_projection.year_3.roi_percentage }}</strong>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header"><strong>Total (3 Years)</strong></th>
+        <td class="govuk-table__cell"><strong>{{ roi_projection.three_year_summary.total_investment }}</strong></td>
+        <td class="govuk-table__cell"><strong>{{ roi_projection.three_year_summary.total_savings }}</strong></td>
+        <td class="govuk-table__cell"><strong>{{ roi_projection.three_year_summary.total_net_benefit }}</strong></td>
+        <td class="govuk-table__cell">
+          <strong class="govuk-tag govuk-tag--green">{{ roi_projection.three_year_summary.average_roi }}</strong>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  {% else %}
+  <p class="govuk-body">
+    ROI projection will be developed in collaboration with Finance during business case approval.
+  </p>
+  {% endif %}
+</div>

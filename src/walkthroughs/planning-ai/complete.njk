@@ -1,0 +1,396 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - Planning Application AI"
+description: You've completed the Planning Application AI walkthrough
+currentStep: 5
+totalSteps: 4
+scenarioId: planning-ai
+---
+
+{#
+  Completion Page (Story 3.3)
+  - Key takeaways summary
+  - Generate Evidence Pack link (placeholder for Epic 4)
+  - Try Another Scenario link
+  - Cleanup reminder
+#}
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">
+    Walkthrough complete
+  </h1>
+  <div class="govuk-panel__body">
+    You've experienced AI-powered document extraction for planning applications
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  Congratulations! In just 8 minutes, you've seen how AI can eliminate hours of manual
+  data entry from planning application processing. What would have taken a traditional
+  proof-of-concept weeks to demonstrate, you've experienced hands-on right now.
+</p>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">🤖</span>
+      Automatic field extraction
+    </h3>
+    <p class="govuk-body">
+      AI read your planning PDF and automatically extracted applicant name, site address,
+      and development description. No templates, no configuration - it just worked.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: 45 minutes of manual typing reduced to 15 seconds
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">📊</span>
+      97-99% accuracy
+    </h3>
+    <p class="govuk-body">
+      Confidence scores showed 97-99% accuracy on typed documents. Better than human
+      transcription, with zero typos or misread postcodes.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Eliminated transcription errors and costly corrections
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">🏗️</span>
+      Format independence
+    </h3>
+    <p class="govuk-body">
+      AI worked with any planning application format - householder, full, outline. No
+      template matching or custom configuration needed.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Works with applications from any planning portal or agent
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">⚡</span>
+      Instant processing
+    </h3>
+    <p class="govuk-body">
+      8-20 seconds to extract 5-6 fields from multi-page PDFs. Scales to hundreds of
+      applications with no slowdown.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Officers focus on decision-making, not data entry
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">Committee-ready talking points</h2>
+
+<p class="govuk-body">
+  Use these points when presenting to decision-makers:
+</p>
+
+<div class="ndx-committee-language">
+  <h3 class="govuk-heading-s">The problem</h3>
+  <p class="govuk-body">
+    "Planning officers currently spend 45 minutes per application manually entering applicant
+    details, addresses, and descriptions into our planning system. With 200 applications per
+    year, that's 150 hours of valuable officer time spent on data entry."
+  </p>
+
+  <h3 class="govuk-heading-s">The solution</h3>
+  <p class="govuk-body">
+    "AI document extraction automatically reads planning PDFs and populates our system in
+    under 15 seconds, with 97-99% accuracy. This frees up 112 hours annually - equivalent to
+    nearly 3 weeks of officer time - to focus on actual planning decisions."
+  </p>
+
+  <h3 class="govuk-heading-s">The value</h3>
+  <p class="govuk-body">
+    "Annual cost savings of £2,812 in staff time, plus faster application processing for
+    residents. Officers report higher job satisfaction working on complex planning issues
+    rather than repetitive data entry."
+  </p>
+
+  <h3 class="govuk-heading-s">The risk</h3>
+  <p class="govuk-body">
+    "Low. Pay-per-use pricing means no upfront investment. Trial with 50 applications costs
+    under £20. Fields with confidence below 95% automatically flag for human review, ensuring
+    accuracy."
+  </p>
+</div>
+
+{# Story 15.3: Completion next steps with proper links #}
+{% set scenarioId = "planning-ai" %}
+{% set scenarioName = "Planning Application AI" %}
+{% set totalSteps = 4 %}
+{% include "components/completion-next-steps.njk" %}
+
+<div class="govuk-warning-text govuk-!-margin-top-8">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Important</span>
+    Remember to clean up your AWS resources
+  </strong>
+</div>
+
+<div class="ndx-cleanup-section">
+  <h2 class="govuk-heading-m">Clean up your resources</h2>
+
+  <p class="govuk-body">
+    Your Planning AI resources will automatically delete after 2 hours, but you can
+    delete them now to stop any further charges:
+  </p>
+
+  <ol class="govuk-list govuk-list--number">
+    <li>
+      Go to <a href="https://eu-west-2.console.aws.amazon.com/cloudformation/home?region=eu-west-2#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console</a>
+    </li>
+    <li>
+      Find your stack: <code>ndx-try-planning-ai-[timestamp]</code>
+    </li>
+    <li>
+      Select the stack and click "Delete"
+    </li>
+    <li>
+      Confirm deletion - this takes 2-3 minutes
+    </li>
+    <li>
+      S3 bucket will be automatically emptied before deletion
+    </li>
+  </ol>
+
+  <p class="govuk-body">
+    <strong>Estimated cost so far:</strong> Less than £0.30 for an 8-minute evaluation
+    (Textract charges per page processed)
+  </p>
+
+  <details class="govuk-details govuk-!-margin-top-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        What if I want to test with more documents?
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        If you want to continue testing document extraction:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Resources will auto-delete after 2 hours total (from deployment)</li>
+        <li>Cost: approximately £0.10 per planning application processed</li>
+        <li>Maximum cost: £10 (enforced by template configuration)</li>
+        <li>You can upload your own planning PDFs (max 10MB)</li>
+      </ul>
+      <p class="govuk-body">
+        You can redeploy the scenario anytime to start fresh with new sample documents.
+      </p>
+    </div>
+  </details>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Production considerations</h2>
+
+  <p class="govuk-body">
+    If you're considering deploying this for real planning applications:
+  </p>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Integration with existing planning systems
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        Production deployment would integrate via:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>API endpoints to send extracted data to your planning database</li>
+        <li>Webhooks to trigger processing when applications submitted via planning portal</li>
+        <li>Direct integration with Idox, Ocella, or other planning systems</li>
+        <li>Queue-based processing for batch imports of existing applications</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Handling low confidence extractions
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        Production systems would:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Set confidence threshold (e.g., 95%) for auto-approval</li>
+        <li>Flag low-confidence fields for officer review</li>
+        <li>Show original PDF section next to extracted value for easy verification</li>
+        <li>Track accuracy over time and retrain on edge cases</li>
+        <li>Allow officers to correct and provide feedback</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Data protection and security
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        Production deployment includes:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Encryption at rest for S3 buckets (customer-managed KMS keys)</li>
+        <li>Encryption in transit (TLS 1.2+)</li>
+        <li>VPC endpoint for Textract (traffic never leaves AWS network)</li>
+        <li>IAM roles with least-privilege permissions</li>
+        <li>CloudTrail logging for audit compliance</li>
+        <li>Automatic PDF deletion after configurable retention period</li>
+        <li>GDPR-compliant data processing agreements with AWS</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Cost at scale
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        Real-world cost examples:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>200 applications/year: ~£200/year (£1 per application)</li>
+        <li>500 applications/year: ~£450/year (£0.90 per application due to bulk discounts)</li>
+        <li>1000 applications/year: ~£800/year (£0.80 per application)</li>
+      </ul>
+      <p class="govuk-body">
+        Costs include Textract (per page), Lambda (per execution), S3 storage, and API Gateway.
+        No upfront licensing or infrastructure costs.
+      </p>
+    </div>
+  </details>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Questions or feedback?</h2>
+
+  <p class="govuk-body">
+    We'd love to hear about your experience with this walkthrough:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+    <li><a href="https://github.com/co-cddo/ndx-try-feedback/issues" target="_blank" rel="noopener noreferrer" class="govuk-link">Report an issue on GitHub</a></li>
+    <li><a href="/partner-tour/" class="govuk-link">Schedule a guided tour with AWS partners</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .ndx-takeaway-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ndx-takeaway-card__icon {
+    font-size: 32px;
+  }
+
+  .ndx-committee-language {
+    padding: 30px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+    margin: 30px 0;
+  }
+
+  .ndx-committee-language h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  .ndx-committee-language h3:first-child {
+    margin-top: 0;
+  }
+
+  .ndx-evidence-pack-section {
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-cleanup-section {
+    padding: 30px;
+    background-color: #fff7e6;
+    border-left: 4px solid #f47738;
+  }
+
+  .ndx-cleanup-section code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-related-scenario {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    min-height: 140px;
+  }
+
+  .ndx-related-scenario h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-takeaway-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-takeaway-card h3 {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .ndx-related-scenario {
+      min-height: auto;
+    }
+  }
+</style>

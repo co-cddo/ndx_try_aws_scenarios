@@ -1,0 +1,542 @@
+---
+layout: page
+title: Scenario Walkthroughs
+description: Step-by-step guides for exploring AWS scenarios in your Innovation Sandbox
+---
+
+{#
+  Walkthrough Index Page (Story 14.1)
+
+  Central hub listing all 6 scenarios with preview cards
+  - Responsive grid layout (3 columns desktop, 2 tablet, 1 mobile)
+  - Category filter buttons (All, AI, IoT, Analytics)
+  - Search functionality
+  - Time estimates per scenario
+
+  AC-14.1.1: 6 scenario cards displayed
+  AC-14.1.2: Responsive grid layout
+  AC-14.1.3: Category badges
+  AC-14.1.4: Time estimates shown
+#}
+
+{# Define category filter configuration #}
+{% set categories = [
+  { id: 'all', label: 'All', count: 6 },
+  { id: 'ai', label: 'AI', count: 4 },
+  { id: 'iot', label: 'IoT', count: 1 },
+  { id: 'analytics', label: 'Analytics', count: 1 }
+] %}
+
+{# Breadcrumbs - Story 14.6 #}
+{% set breadcrumbType = 'walkthroughs-index' %}
+{% include "components/breadcrumb.njk" %}
+
+{# Page Header #}
+<h1 class="govuk-heading-xl">Scenario Walkthroughs</h1>
+
+<p class="govuk-body-l">
+  Step-by-step guides to help you explore AWS services in your Innovation Sandbox.
+  Each walkthrough takes 15-45 minutes and gives you hands-on experience with real cloud services.
+</p>
+
+{# Key benefits panel #}
+<div class="govuk-inset-text govuk-!-margin-bottom-6">
+  <p class="govuk-body">
+    <strong>No technical expertise required.</strong> Our walkthroughs guide you through each step with clear instructions and screenshots. All scenarios use sample data and automatically clean up after 2 hours.
+  </p>
+</div>
+
+{# Filter and Search Bar #}
+<div class="ndx-walkthrough-index">
+  <div class="ndx-walkthrough-index__filters">
+    <div class="ndx-walkthrough-index__filter-buttons" role="group" aria-label="Filter walkthroughs by category">
+      {% for cat in categories %}
+        <button type="button"
+                class="govuk-button govuk-button--secondary ndx-walkthrough-index__filter-btn{% if cat.id == 'all' %} ndx-walkthrough-index__filter-btn--active{% endif %}"
+                data-filter="{{ cat.id }}"
+                aria-pressed="{% if cat.id == 'all' %}true{% else %}false{% endif %}">
+          {{ cat.label }}
+          <span class="ndx-walkthrough-index__filter-count">({{ cat.count }})</span>
+        </button>
+      {% endfor %}
+    </div>
+
+    <div class="govuk-form-group ndx-walkthrough-index__search">
+      <label class="govuk-label govuk-visually-hidden" for="walkthrough-search">
+        Search walkthroughs
+      </label>
+      <input type="search"
+             id="walkthrough-search"
+             class="govuk-input ndx-walkthrough-index__search-input"
+             placeholder="Search walkthroughs..."
+             data-search-input
+             aria-describedby="search-hint">
+      <span id="search-hint" class="govuk-visually-hidden">
+        Search by scenario name, description, or AWS service
+      </span>
+    </div>
+  </div>
+
+  {# Results count #}
+  <div class="ndx-walkthrough-index__results-count" aria-live="polite" aria-atomic="true">
+    <p class="govuk-body-s" id="results-count">
+      Showing <span class="ndx-walkthrough-index__count">6</span> walkthroughs
+    </p>
+  </div>
+
+  {# Cards Grid #}
+  <div class="ndx-walkthrough-index__grid" aria-live="polite">
+    {% for scenario in scenarios.scenarios %}
+      {% include "components/walkthrough-card.njk" %}
+    {% endfor %}
+  </div>
+
+  {# Empty State - shown when no results match #}
+  <div class="ndx-walkthrough-index__empty" hidden aria-live="polite">
+    <div class="govuk-panel govuk-panel--grey">
+      <h2 class="govuk-heading-m">No walkthroughs match your search</h2>
+      <p class="govuk-body">Try adjusting your search terms or clear the filter.</p>
+      <button type="button" class="govuk-button govuk-button--secondary" data-clear-search>
+        Clear search and filters
+      </button>
+      <p class="govuk-body-s govuk-!-margin-top-4">
+        <strong>Suggestions:</strong> Try searching for 'chatbot', 'AI', 'planning', or 'dashboard'
+      </p>
+    </div>
+  </div>
+</div>
+
+{# Help section #}
+<div class="govuk-!-margin-top-9">
+  <h2 class="govuk-heading-m">Need help choosing?</h2>
+  <p class="govuk-body">
+    Not sure which scenario is right for you? Our quiz can help you find the best match based on your role and what you want to achieve.
+  </p>
+  <a href="/quiz/" class="govuk-button govuk-button--secondary">
+    Take the scenario quiz
+  </a>
+</div>
+
+{# CSS for walkthrough index - Story 14.1 #}
+<style>
+  /* Filter and search bar */
+  .ndx-walkthrough-index__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-radius: 0;
+  }
+
+  .ndx-walkthrough-index__filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .ndx-walkthrough-index__filter-btn {
+    margin-bottom: 0;
+  }
+
+  .ndx-walkthrough-index__filter-btn--active {
+    background-color: #1d70b8;
+    color: #ffffff;
+    box-shadow: 0 2px 0 #003078;
+  }
+
+  .ndx-walkthrough-index__filter-btn--active:hover {
+    background-color: #003078;
+  }
+
+  .ndx-walkthrough-index__filter-count {
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  .ndx-walkthrough-index__search {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0;
+  }
+
+  .ndx-walkthrough-index__search-input {
+    width: 100%;
+  }
+
+  .ndx-walkthrough-index__results-count {
+    margin-bottom: 20px;
+    color: #505a5f;
+  }
+
+  .ndx-walkthrough-index__results-count p {
+    margin: 0;
+  }
+
+  /* Cards grid - responsive */
+  .ndx-walkthrough-index__grid {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 641px) {
+    .ndx-walkthrough-index__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1020px) {
+    .ndx-walkthrough-index__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Walkthrough card styling */
+  .ndx-walkthrough-card {
+    border: 1px solid #b1b4b6;
+    border-radius: 0;
+    background-color: #ffffff;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  .ndx-walkthrough-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #1d70b8;
+  }
+
+  .ndx-walkthrough-card:focus-within {
+    outline: 3px solid #ffdd00;
+    outline-offset: 0;
+  }
+
+  .ndx-walkthrough-card[hidden] {
+    display: none;
+  }
+
+  .ndx-walkthrough-card__link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .ndx-walkthrough-card__link:focus {
+    outline: none;
+  }
+
+  .ndx-walkthrough-card__header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .ndx-walkthrough-card__category {
+    font-size: 14px;
+  }
+
+  .ndx-walkthrough-card__popular {
+    font-size: 14px;
+  }
+
+  .ndx-walkthrough-card__content {
+    flex: 1;
+  }
+
+  .ndx-walkthrough-card__title {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #1d70b8;
+  }
+
+  .ndx-walkthrough-card:hover .ndx-walkthrough-card__title {
+    text-decoration: underline;
+  }
+
+  .ndx-walkthrough-card__description {
+    color: #505a5f;
+    margin-bottom: 15px;
+  }
+
+  .ndx-walkthrough-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #505a5f;
+  }
+
+  .ndx-walkthrough-card__steps,
+  .ndx-walkthrough-card__time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ndx-walkthrough-card__steps svg,
+  .ndx-walkthrough-card__time svg {
+    color: #1d70b8;
+  }
+
+  .ndx-walkthrough-card__services {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 15px;
+  }
+
+  .ndx-walkthrough-card__service {
+    display: inline-block;
+    padding: 2px 8px;
+    background-color: #f3f2f1;
+    border-radius: 2px;
+    font-size: 12px;
+    color: #505a5f;
+  }
+
+  .ndx-walkthrough-card__service--more {
+    font-style: italic;
+  }
+
+  .ndx-walkthrough-card__cta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #f3f2f1;
+    font-weight: 700;
+    color: #1d70b8;
+  }
+
+  .ndx-walkthrough-card:hover .ndx-walkthrough-card__cta {
+    text-decoration: underline;
+  }
+
+  .ndx-walkthrough-card__cta svg {
+    transition: transform 0.15s ease;
+  }
+
+  .ndx-walkthrough-card:hover .ndx-walkthrough-card__cta svg {
+    transform: translateX(4px);
+  }
+
+  /* Empty state */
+  .ndx-walkthrough-index__empty {
+    margin-top: 30px;
+  }
+
+  .ndx-walkthrough-index__empty .govuk-panel--grey {
+    background-color: #f3f2f1;
+    padding: 30px;
+    text-align: center;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 640px) {
+    .ndx-walkthrough-index__filters {
+      flex-direction: column;
+      gap: 15px;
+      padding: 15px;
+    }
+
+    .ndx-walkthrough-index__filter-buttons {
+      width: 100%;
+    }
+
+    .ndx-walkthrough-index__filter-btn {
+      flex: 1;
+      min-width: calc(50% - 5px);
+      text-align: center;
+    }
+
+    .ndx-walkthrough-index__search {
+      width: 100%;
+    }
+
+    .ndx-walkthrough-card__link {
+      padding: 15px;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .ndx-walkthrough-index__filters {
+      display: none;
+    }
+
+    .ndx-walkthrough-index__grid {
+      display: block;
+    }
+
+    .ndx-walkthrough-card {
+      page-break-inside: avoid;
+      margin-bottom: 20px;
+      border: 1px solid #0b0c0c;
+    }
+
+    .ndx-walkthrough-card[hidden] {
+      display: block !important;
+    }
+
+    .ndx-walkthrough-card__cta svg {
+      display: none;
+    }
+  }
+</style>
+
+{# JavaScript for filtering and search - Story 14.2, 14.3 #}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('[data-filter]');
+    const searchInput = document.querySelector('[data-search-input]');
+    const cards = document.querySelectorAll('.ndx-walkthrough-card');
+    const grid = document.querySelector('.ndx-walkthrough-index__grid');
+    const emptyState = document.querySelector('.ndx-walkthrough-index__empty');
+    const countDisplay = document.querySelector('.ndx-walkthrough-index__count');
+
+    let activeFilter = 'all';
+    let searchTerm = '';
+
+    // Filter cards
+    function filterCards() {
+      let visibleCount = 0;
+
+      cards.forEach(function(card) {
+        const category = card.dataset.category;
+        const name = card.dataset.name || '';
+        const description = card.dataset.description || '';
+        const headline = card.dataset.headline || '';
+        const services = card.dataset.services || '';
+
+        const matchesFilter = activeFilter === 'all' || category === activeFilter;
+        const searchText = (name + ' ' + description + ' ' + headline + ' ' + services).toLowerCase();
+        const matchesSearch = searchTerm.length < 2 || searchText.includes(searchTerm.toLowerCase());
+
+        if (matchesFilter && matchesSearch) {
+          card.hidden = false;
+          visibleCount++;
+        } else {
+          card.hidden = true;
+        }
+      });
+
+      // Update count
+      if (countDisplay) {
+        countDisplay.textContent = visibleCount;
+      }
+
+      // Show/hide empty state
+      if (emptyState) {
+        emptyState.hidden = visibleCount > 0;
+      }
+      if (grid) {
+        grid.hidden = visibleCount === 0;
+      }
+
+      // Update URL with filter state
+      updateUrl();
+    }
+
+    // Update URL with current filter/search state
+    function updateUrl() {
+      const url = new URL(window.location);
+      if (activeFilter !== 'all') {
+        url.searchParams.set('category', activeFilter);
+      } else {
+        url.searchParams.delete('category');
+      }
+      if (searchTerm.length >= 2) {
+        url.searchParams.set('q', searchTerm);
+      } else {
+        url.searchParams.delete('q');
+      }
+      history.replaceState(null, '', url);
+    }
+
+    // Initialize from URL params
+    function initFromUrl() {
+      const url = new URL(window.location);
+      const categoryParam = url.searchParams.get('category');
+      const searchParam = url.searchParams.get('q');
+
+      if (categoryParam && ['all', 'ai', 'iot', 'analytics'].includes(categoryParam)) {
+        activeFilter = categoryParam;
+        filterButtons.forEach(function(btn) {
+          const isActive = btn.dataset.filter === activeFilter;
+          btn.classList.toggle('ndx-walkthrough-index__filter-btn--active', isActive);
+          btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+      }
+
+      if (searchParam) {
+        searchTerm = searchParam;
+        if (searchInput) {
+          searchInput.value = searchParam;
+        }
+      }
+
+      filterCards();
+    }
+
+    // Filter button click handlers
+    filterButtons.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        // Update active state
+        filterButtons.forEach(function(b) {
+          b.classList.remove('ndx-walkthrough-index__filter-btn--active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        this.classList.add('ndx-walkthrough-index__filter-btn--active');
+        this.setAttribute('aria-pressed', 'true');
+
+        activeFilter = this.dataset.filter;
+        filterCards();
+      });
+    });
+
+    // Search input handler
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        searchTerm = this.value.trim();
+        filterCards();
+      });
+
+      // Handle Enter key
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          this.value = '';
+          searchTerm = '';
+          filterCards();
+        }
+      });
+    }
+
+    // Clear search button
+    const clearBtn = document.querySelector('[data-clear-search]');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function() {
+        searchTerm = '';
+        activeFilter = 'all';
+        if (searchInput) {
+          searchInput.value = '';
+        }
+        filterButtons.forEach(function(btn) {
+          const isAll = btn.dataset.filter === 'all';
+          btn.classList.toggle('ndx-walkthrough-index__filter-btn--active', isAll);
+          btn.setAttribute('aria-pressed', isAll ? 'true' : 'false');
+        });
+        filterCards();
+      });
+    }
+
+    // Initialize
+    initFromUrl();
+  });
+</script>

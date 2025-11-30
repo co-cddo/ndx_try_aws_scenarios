@@ -1,0 +1,117 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ndx.digital.cabinet-office.gov.uk/schemas/quiz-config.schema.json",
+  "title": "NDX:Try Quiz Configuration Schema",
+  "description": "JSON Schema for validating quiz-config.yaml in NDX:Try AWS Scenarios Portal",
+  "type": "object",
+  "required": ["questions", "recommendation_algorithm"],
+  "additionalProperties": false,
+  "properties": {
+    "questions": {
+      "type": "array",
+      "description": "Array of quiz questions",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "options"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": ["challenge", "time", "role"],
+            "description": "Unique identifier for the question"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 200,
+            "description": "The question text displayed to users"
+          },
+          "hint": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Optional hint text to help users understand the question"
+          },
+          "options": {
+            "type": "array",
+            "description": "Available answer options for this question",
+            "minItems": 3,
+            "items": {
+              "type": "object",
+              "required": ["id", "label"],
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]*$",
+                  "description": "Unique identifier for this option (lowercase with hyphens)"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 100,
+                  "description": "Display label for this option"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "description": "Optional description providing more context"
+                },
+                "weights": {
+                  "type": "object",
+                  "description": "Scoring weights for each scenario (scenario-id: weight)",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 5
+                  }
+                },
+                "action": {
+                  "type": "string",
+                  "enum": ["gallery"],
+                  "description": "Special action for escape options (e.g., 'gallery' redirects to scenario gallery)"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "recommendation_algorithm": {
+      "type": "object",
+      "description": "Configuration for the recommendation scoring algorithm",
+      "required": ["method", "threshold", "max_results"],
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["weighted_sum"],
+          "description": "Scoring method to use"
+        },
+        "threshold": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15,
+          "description": "Minimum score required to recommend a scenario"
+        },
+        "max_results": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "description": "Maximum number of scenarios to recommend"
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "description": "Human-readable labels for generating reasoning text",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

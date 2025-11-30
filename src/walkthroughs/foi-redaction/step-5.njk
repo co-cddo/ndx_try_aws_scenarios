@@ -1,0 +1,487 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 5: View Redacted Output - FOI Redaction Walkthrough"
+description: See the document with PII replaced by redaction markers
+currentStep: 5
+totalSteps: 5
+timeEstimate: "2 minutes"
+scenarioId: foi-redaction
+---
+
+{#
+  Step 5: View Redacted Output (AC-3.4.3)
+  - Before/after comparison
+  - Redaction marker format explanation
+  - Export options
+  - Compliance benefits
+#}
+
+{% set stepNumber = 5 %}
+{% set stepTitle = "View Redacted Output" %}
+{% set stepDescription = "See how the AI has replaced personal information with redaction markers while preserving the document structure." %}
+{% set timeEstimate = "2 minutes" %}
+{# Load screenshots from YAML data - Story 13.5 #}
+{% set screenshotData = screenshots["foi-redaction"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 5) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "Redacted version of the document is displayed",
+  "All detected PII is replaced with appropriate markers",
+  "Document structure and non-PII content remains intact",
+  "You understand the redaction marker format"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">What you should see</h3>
+
+<p class="govuk-body">
+  After reviewing the detected PII, you'll see the redacted output - your original FOI response
+  document with all personal information replaced by redaction markers.
+</p>
+
+{# AC-3.4.3: Before/After examples #}
+<div class="ndx-before-after-section">
+  <h3 class="govuk-heading-s">Before and after redaction</h3>
+  <p class="govuk-body">
+    Here's how the AI transforms your document:
+  </p>
+
+  {% for example in redactedOutputExamples.beforeAfter %}
+    <div class="ndx-before-after-card">
+      <div class="ndx-before-section">
+        <h4 class="govuk-heading-xs">Original text</h4>
+        <div class="ndx-document-text ndx-original-text">
+          {{ example.original }}
+        </div>
+      </div>
+
+      <div class="ndx-arrow">→</div>
+
+      <div class="ndx-after-section">
+        <h4 class="govuk-heading-xs">Redacted text</h4>
+        <div class="ndx-document-text ndx-redacted-text">
+          {{ example.redacted }}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<h3 class="govuk-heading-m">Understanding redaction markers</h3>
+
+<p class="govuk-body">
+  The AI uses standardized redaction markers to show what type of information was removed:
+</p>
+
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--s">
+    Redaction marker formats (AC-3.4.3)
+  </caption>
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">PII Type</th>
+      <th scope="col" class="govuk-table__header">Original Example</th>
+      <th scope="col" class="govuk-table__header">Redaction Marker</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Person Name</th>
+      <td class="govuk-table__cell">John David Smith</td>
+      <td class="govuk-table__cell"><code>[REDACTED: NAME]</code></td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Address</th>
+      <td class="govuk-table__cell">15 Elm Street, Manchester, M1 4BT</td>
+      <td class="govuk-table__cell"><code>[REDACTED: ADDRESS]</code></td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Phone Number</th>
+      <td class="govuk-table__cell">07712 345678</td>
+      <td class="govuk-table__cell"><code>[REDACTED: PHONE]</code></td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Email Address</th>
+      <td class="govuk-table__cell">john.smith@example.com</td>
+      <td class="govuk-table__cell"><code>[REDACTED: EMAIL]</code></td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">National Insurance Number</th>
+      <td class="govuk-table__cell">AB 12 34 56 C</td>
+      <td class="govuk-table__cell"><code>[REDACTED: NINO]</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>Why use markers instead of black bars?</strong> Redaction markers maintain readability
+    while showing what information was removed. This helps requesters understand what was redacted
+    and supports transparency about FOI exemptions applied.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">What's preserved in the redacted document</h3>
+
+<p class="govuk-body">
+  The AI redaction preserves everything except personal information:
+</p>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-preserved-card">
+      <h4 class="govuk-heading-s">
+        <span class="ndx-preserved-icon" aria-hidden="true">✓</span>
+        Document structure
+      </h4>
+      <p class="govuk-body-s">
+        Paragraphs, headings, tables, and formatting remain intact. Only PII text is replaced.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-preserved-card">
+      <h4 class="govuk-heading-s">
+        <span class="ndx-preserved-icon" aria-hidden="true">✓</span>
+        Non-personal information
+      </h4>
+      <p class="govuk-body-s">
+        Policy details, decisions, dates, locations (when not part of addresses) - all readable.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-grid-row govuk-!-margin-top-3">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-preserved-card">
+      <h4 class="govuk-heading-s">
+        <span class="ndx-preserved-icon" aria-hidden="true">✓</span>
+        Context and meaning
+      </h4>
+      <p class="govuk-body-s">
+        The FOI response remains understandable. Markers like [REDACTED: NAME] show what type of
+        information was removed.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-preserved-card">
+      <h4 class="govuk-heading-s">
+        <span class="ndx-preserved-icon" aria-hidden="true">✓</span>
+        Compliance evidence
+      </h4>
+      <p class="govuk-body-s">
+        Audit trail shows what PII was detected, confidence scores, and redaction decisions made.
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Export options</h3>
+
+<p class="govuk-body">
+  In a production system, the redacted document would be available in multiple formats:
+</p>
+
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">PDF with redaction markers</dt>
+    <dd class="govuk-summary-list__value">
+      The primary output - ready to send to FOI requesters. PII replaced with [REDACTED: TYPE] markers.
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">PDF with black boxes (optional)</dt>
+    <dd class="govuk-summary-list__value">
+      Traditional redaction style with black bars covering PII. Some councils prefer this format
+      for visual consistency with manual redactions.
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Redaction report (CSV/JSON)</dt>
+    <dd class="govuk-summary-list__value">
+      Detailed log of all PII detected, including original text, location, confidence scores, and
+      redaction decisions. For compliance audits and ICO requests.
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Review interface (HTML)</dt>
+    <dd class="govuk-summary-list__value">
+      Interactive interface for FOI officers to review detections, manually approve/reject redactions,
+      and add manual redactions for items AI missed.
+    </dd>
+  </div>
+</dl>
+
+<h3 class="govuk-heading-m">Compliance and transparency benefits</h3>
+
+<div class="ndx-compliance-section">
+  <h4 class="govuk-heading-s">GDPR and Data Protection</h4>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>
+      <strong>Reduced risk of accidental disclosure:</strong> AI consistently detects PII that human
+      reviewers might miss due to fatigue or time pressure
+    </li>
+    <li>
+      <strong>Audit trail for ICO compliance:</strong> Complete log of what PII was detected, when,
+      and what redaction decisions were made
+    </li>
+    <li>
+      <strong>Demonstrable due diligence:</strong> Shows council applied thorough, systematic PII
+      detection process before releasing FOI responses
+    </li>
+  </ul>
+
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">FOI Act Compliance</h4>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>
+      <strong>Faster response times:</strong> 80% reduction in redaction time helps councils meet
+      20-day FOI response deadline
+    </li>
+    <li>
+      <strong>Consistent application of Section 40 (personal information exemption):</strong> AI
+      applies same PII detection standards across all FOI requests
+    </li>
+    <li>
+      <strong>Better resource allocation:</strong> FOI officers spend time on complex exemption
+      judgments (Section 42, 43, etc.) rather than line-by-line redaction
+    </li>
+  </ul>
+
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">Transparency and Public Trust</h4>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>
+      <strong>Clear redaction markers:</strong> Requesters understand what type of information was
+      removed and why (personal data)
+    </li>
+    <li>
+      <strong>Reduced over-redaction:</strong> AI only flags actual PII, not entire paragraphs
+      "to be safe"
+    </li>
+    <li>
+      <strong>Improved FOI service quality:</strong> Faster responses with thorough PII protection
+      increases public confidence
+    </li>
+  </ul>
+</div>
+
+<div class="govuk-inset-text govuk-!-margin-top-6">
+  <p class="govuk-body">
+    <strong>Production consideration:</strong> Final human review is always recommended before
+    publishing FOI responses. Use AI to do the heavy lifting (finding 95%+ of PII automatically),
+    then FOI officers perform a quick 2-3 minute review to catch edge cases and apply judgment
+    on borderline redactions.
+  </p>
+</div>
+
+<div class="ndx-next-steps-callout">
+  <h3 class="govuk-heading-m">You've completed the walkthrough!</h3>
+  <p class="govuk-body">
+    You've seen how AI detects and redacts personal information in FOI responses. In just a few
+    minutes, you've experienced technology that could save your council 200+ hours per year while
+    improving compliance.
+  </p>
+  <p class="govuk-body">
+    <a href="/walkthroughs/foi-redaction/complete/" class="govuk-button">
+      View summary and key takeaways
+    </a>
+  </p>
+</div>
+
+{# Troubleshooting section #}
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details govuk-!-margin-top-4">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Redacted output not showing
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the redacted document doesn't appear:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check PII detection completed successfully (processing status shows "Complete")</li>
+      <li>Refresh the interface page</li>
+      <li>Check browser console for JavaScript errors</li>
+      <li>Verify Lambda function has permissions to write to S3</li>
+      <li>Check CloudWatch logs for redaction processing errors</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Redacted text appears garbled or incorrectly formatted
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the redacted output has formatting issues:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check original document was a properly formatted PDF (not corrupted)</li>
+      <li>Verify text extraction worked correctly (check Textract output)</li>
+      <li>Complex layouts (multi-column, tables) may have layout preservation issues</li>
+      <li>Try exporting as plain text if formatting is critical</li>
+      <li>Review redaction logic to ensure marker placement is correct</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Can't download or export redacted document
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If export/download doesn't work:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check S3 bucket has public read permissions for redacted documents (or use pre-signed URLs)</li>
+      <li>Verify API Gateway has correct CORS headers for downloads</li>
+      <li>Check browser's download settings aren't blocking files</li>
+      <li>Try right-clicking the download link and selecting "Save Link As..."</li>
+      <li>Check CloudWatch logs for S3 access errors</li>
+    </ul>
+  </div>
+</details>
+
+{# Screenshot placeholder notice #}
+<div class="govuk-warning-text govuk-!-margin-top-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Note</span>
+    Screenshot placeholder: In production, this page would include side-by-side screenshots of
+    the original and redacted documents, with zoom callouts showing before/after examples of
+    redaction markers in context.
+  </strong>
+</div>
+
+<style>
+  .ndx-before-after-section {
+    margin: 30px 0;
+  }
+
+  .ndx-before-after-card {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-before-section h4,
+  .ndx-after-section h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-document-text {
+    padding: 15px;
+    border-radius: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .ndx-original-text {
+    background-color: #ffffff;
+    border: 2px solid #b1b4b6;
+  }
+
+  .ndx-redacted-text {
+    background-color: #f8fbf8;
+    border: 2px solid #00703c;
+  }
+
+  .ndx-arrow {
+    font-size: 32px;
+    color: #1d70b8;
+    font-weight: 700;
+  }
+
+  .ndx-preserved-card {
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+    min-height: 140px;
+  }
+
+  .ndx-preserved-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ndx-preserved-icon {
+    font-size: 20px;
+    color: #0b0c0c;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .ndx-preserved-card p {
+    margin-bottom: 0;
+  }
+
+  .ndx-compliance-section {
+    padding: 25px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+    margin: 30px 0;
+  }
+
+  .ndx-compliance-section h4 {
+    margin-top: 0;
+  }
+
+  .ndx-next-steps-callout {
+    padding: 30px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+    margin: 40px 0;
+    text-align: center;
+  }
+
+  .ndx-next-steps-callout h3 {
+    margin-top: 0;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-before-after-card {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+    }
+
+    .ndx-arrow {
+      justify-self: center;
+      transform: rotate(90deg);
+    }
+
+    .ndx-preserved-card {
+      min-height: auto;
+    }
+  }
+</style>

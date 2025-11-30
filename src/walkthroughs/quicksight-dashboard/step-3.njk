@@ -1,0 +1,330 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Use Interactive Filters - QuickSight Dashboard Walkthrough"
+description: Apply Service Area and Region filters to explore multi-dimensional analysis
+currentStep: 3
+totalSteps: 4
+timeEstimate: "3 minutes"
+scenarioId: quicksight-dashboard
+---
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Use Interactive Filters" %}
+{% set stepDescription = "Experience the power of self-service analytics by filtering data by Service Area and Region." %}
+{% set timeEstimate = "3 minutes" %}
+{# Load screenshots from YAML data - Story 13.8 #}
+{% set screenshotData = screenshots["quicksight-dashboard"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 3) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "You apply the Service Area filter and see all widgets update instantly",
+  "You filter by Region to compare geographic performance",
+  "You understand how filters work together",
+  "You can reset filters to see all data again"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Opening the Controls panel</h3>
+
+<p class="govuk-body">
+  At the top of the dashboard, locate the <strong>Controls</strong> panel. If it's collapsed, click on it to expand:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+  <li>
+    Click the <strong>Controls</strong> bar at the top of the dashboard
+  </li>
+  <li>
+    You'll see two dropdown filters:
+    <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+      <li><strong>Service Area</strong> - currently showing "All"</li>
+      <li><strong>Region</strong> - currently showing "All"</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Filtering by Service Area</h3>
+
+<p class="govuk-body">
+  Let's filter to see just one service area:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+  <li>
+    Click the <strong>Service Area</strong> dropdown (currently set to "All")
+  </li>
+  <li>
+    You'll see a list of 9 service areas with checkboxes:
+    <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+      <li>Benefits</li>
+      <li>Council Tax</li>
+      <li>Customer Services</li>
+      <li>Environmental Health</li>
+      <li>Highways</li>
+      <li>Housing</li>
+      <li>Parking</li>
+      <li>Planning Applications</li>
+      <li>Waste Collection</li>
+    </ul>
+  </li>
+  <li>
+    Click "Select all" to uncheck all options
+  </li>
+  <li>
+    Select only <strong>"Housing"</strong>
+  </li>
+  <li>
+    Click outside the dropdown or press Escape to close it
+  </li>
+  <li>
+    Watch all widgets update instantly to show only Housing data
+  </li>
+</ol>
+
+<div class="ndx-wow-moment">
+  <h4 class="govuk-heading-s">The wow moment: Real-time filtering</h4>
+  <p class="govuk-body">
+    When you selected Housing, QuickSight instantly filtered the data:
+  </p>
+  <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+    <li><strong>Total Cases:</strong> Changed from 267,334 → 29,760 (Housing only)</li>
+    <li><strong>Bar charts:</strong> Now show only Housing as a single bar</li>
+    <li><strong>Table:</strong> Now shows Housing broken down by 8 regions</li>
+  </ul>
+  <p class="govuk-body">
+    <strong>Technical detail:</strong> SPICE (Super-fast, Parallel, In-memory Calculation Engine) stores data
+    in compressed columnar format. The filter was applied and all visuals updated in milliseconds - faster than
+    refreshing an Excel spreadsheet.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Understanding Housing performance by region</h3>
+
+<p class="govuk-body">
+  With Housing selected, look at the Service Performance Breakdown table:
+</p>
+
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--s">Housing performance by region</caption>
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Region</th>
+      <th scope="col" class="govuk-table__header">Cases</th>
+      <th scope="col" class="govuk-table__header">Resolved</th>
+      <th scope="col" class="govuk-table__header">Satisfaction</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">West Midlands</th>
+      <td class="govuk-table__cell">4,253</td>
+      <td class="govuk-table__cell">3,583</td>
+      <td class="govuk-table__cell"><strong>4.15</strong></td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">North East</th>
+      <td class="govuk-table__cell">4,244</td>
+      <td class="govuk-table__cell">3,665</td>
+      <td class="govuk-table__cell"><strong>4.22</strong></td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">London</th>
+      <td class="govuk-table__cell">3,798</td>
+      <td class="govuk-table__cell">3,222</td>
+      <td class="govuk-table__cell"><strong style="color: #00703c;">4.38</strong> (highest)</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">North West</th>
+      <td class="govuk-table__cell">3,601</td>
+      <td class="govuk-table__cell">3,150</td>
+      <td class="govuk-table__cell"><strong style="color: #d4351c;">3.88</strong> (lowest)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Insight:</strong> Housing satisfaction varies significantly by region. London (4.38) has the highest
+    satisfaction while North West (3.88) has the lowest. This 0.5 point difference is significant - it could indicate
+    different service delivery approaches, resource allocation, or housing stock conditions.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Resetting filters</h3>
+
+<p class="govuk-body">
+  To see all data again:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+  <li>
+    Click the <strong>Reset</strong> button in the top-left corner (circular arrow icon)
+  </li>
+  <li>
+    All filters return to "All" and dashboard shows full dataset (267,334 cases)
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">Filtering by Region</h3>
+
+<p class="govuk-body">
+  Now try filtering by geographic region:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+  <li>
+    Click the <strong>Region</strong> dropdown
+  </li>
+  <li>
+    You'll see 8 regions:
+    <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+      <li>East Midlands</li>
+      <li>London</li>
+      <li>North East</li>
+      <li>North West</li>
+      <li>South East</li>
+      <li>South West</li>
+      <li>West Midlands</li>
+      <li>Yorkshire</li>
+    </ul>
+  </li>
+  <li>
+    Select only <strong>"London"</strong>
+  </li>
+  <li>
+    Dashboard now shows all 9 service areas, but only for London region
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Use case:</strong> Regional managers can view their region's performance across all services.
+    London Housing Manager sees London data. Yorkshire Highways Manager sees Yorkshire highways data.
+    Same dashboard, personalized view.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Combining filters</h3>
+
+<p class="govuk-body">
+  You can apply both filters together:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+  <li>
+    Set <strong>Service Area</strong> to "Housing"
+  </li>
+  <li>
+    Set <strong>Region</strong> to "London"
+  </li>
+  <li>
+    Dashboard now shows only Housing cases in London (3,798 cases, 4.38 satisfaction)
+  </li>
+</ol>
+
+<div class="ndx-comparison govuk-!-margin-top-4">
+  <h4 class="govuk-heading-s">Before/After comparison: Service analysis</h4>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <h5 class="govuk-heading-s">Before QuickSight (Manual Excel)</h5>
+      <ol class="govuk-list govuk-list--number govuk-!-font-size-16">
+        <li>Manager emails analyst: "How is Housing performing in London?"</li>
+        <li>Analyst opens Excel, applies filters to raw data (10 min)</li>
+        <li>Analyst creates pivot table and charts (20 min)</li>
+        <li>Analyst formats and emails back (10 min)</li>
+        <li>Manager asks follow-up: "Compare to North West?" (repeat process)</li>
+      </ol>
+      <p class="govuk-body-s"><strong>Total time:</strong> 40+ minutes per question</p>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <h5 class="govuk-heading-s">After QuickSight (Self-Service)</h5>
+      <ol class="govuk-list govuk-list--number govuk-!-font-size-16">
+        <li>Manager opens QuickSight dashboard (5 seconds)</li>
+        <li>Selects "Housing" from Service Area dropdown (2 seconds)</li>
+        <li>Selects "London" from Region dropdown (2 seconds)</li>
+        <li>Sees answer instantly - 3,798 cases, 4.38 satisfaction</li>
+        <li>Changes Region to "North West" for comparison (2 seconds)</li>
+      </ol>
+      <p class="govuk-body-s"><strong>Total time:</strong> 15 seconds per question</p>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Reflection: Questions you answered</h3>
+
+<p class="govuk-body">
+  In this 3-minute step, you answered these questions through interactive exploration:
+</p>
+
+<ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+  <li>"How many Housing cases are we handling?" → 29,760 (filtered from 267K total)</li>
+  <li>"Which region has highest Housing satisfaction?" → London (4.38)</li>
+  <li>"Which region has lowest Housing satisfaction?" → North West (3.88)</li>
+  <li>"How many Housing cases in London specifically?" → 3,798</li>
+  <li>"How does London Housing compare to North West Housing?" → 0.5 point satisfaction difference</li>
+</ul>
+
+<p class="govuk-body">
+  <strong>Without QuickSight:</strong> Each question = separate analyst request, multi-day turnaround.<br>
+  <strong>With QuickSight:</strong> All 5 questions answered in under 2 minutes through self-service filtering.
+</p>
+
+<div class="ndx-walkthrough-nav govuk-!-margin-top-8">
+  <a href="/walkthroughs/quicksight-dashboard/step-2/" class="govuk-link ndx-walkthrough-nav__back">
+    ← Back to Step 2
+  </a>
+  <a href="/walkthroughs/quicksight-dashboard/step-4/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    Continue to Step 4
+  </a>
+</div>
+
+<style>
+  .ndx-wow-moment {
+    padding: 25px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+    margin: 30px 0;
+  }
+
+  .ndx-wow-moment h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-comparison {
+    padding: 25px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-comparison h4,
+  .ndx-comparison h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-walkthrough-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-nav__back {
+    font-size: 19px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-walkthrough-nav {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ndx-walkthrough-nav__back {
+      margin-bottom: 15px;
+    }
+  }
+</style>

@@ -1,0 +1,81 @@
+{#
+  Sample Data Explanation Panel Component (Story 12.2)
+
+  Provides contextual explanations of sample data using GOV.UK Details component.
+  Key information (purpose, cost) visible inline without expanding.
+
+  Props:
+    - scenarioId: ID of the scenario (council-chatbot, planning-ai, etc.)
+    - showCostIndicator: Whether to show cost indicator (default: true)
+
+  Accessibility:
+    - WCAG 2.1 AA compliant via GOV.UK Details component
+    - Keyboard navigable with Enter/Space keys
+    - Screen reader announces expand/collapse state
+
+  Acceptance Criteria:
+    - AC1: GOV.UK Details component positioned near sample data
+    - AC2: Key info visible without expanding
+    - AC3: Each data type has its own panel
+    - AC4: Expanded content explains data purpose and methodology
+    - AC5: Consistent terminology across scenarios
+    - AC6: WCAG 2.1 AA compliance
+    - AC7: Full keyboard operability
+#}
+
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+{% set scenario = sampleDataConfig.sampleDataExplanation[scenarioId] %}
+
+{# Issue #2: Error handling for invalid/incomplete data #}
+{% if not scenario %}
+  <!-- Development note: Unknown scenarioId "{{ scenarioId | escape }}" for sample-data-panel -->
+{% elseif not scenario.expandedContent or not scenario.keyInfo %}
+  <!-- Development note: Incomplete data for scenarioId "{{ scenarioId | escape }}" -->
+{% else %}
+<div class="ndx-sample-data-panel" data-scenario-id="{{ scenarioId | escape }}" role="complementary" aria-label="Sample data information">
+  {# Key info visible inline - AC2 #}
+  <div class="ndx-sample-data-panel__key-info">
+    <p class="govuk-body-s ndx-sample-data-panel__purpose">
+      <strong>{{ scenario.keyInfo.purpose }}</strong>
+    </p>
+    {# Issue #3: Explicit cost indicator default with clear logic #}
+    {# showCostIndicator defaults to true if not specified #}
+    {% set shouldShowCost = (showCostIndicator !== false) %}
+    {% if shouldShowCost %}
+    <p class="govuk-body-s ndx-sample-data-panel__cost">
+      <span class="ndx-sample-data-panel__cost-badge" aria-label="Free to use, no AWS charges">{{ scenario.keyInfo.costIndicator }}</span>
+    </p>
+    {% endif %}
+  </div>
+
+  {# Issue #1: Use Nunjucks set block instead of string concatenation #}
+  {% set expandedContentHtml %}
+    <p class="govuk-body-s">
+      <strong>What is this data?</strong><br>
+      {{ scenario.expandedContent.description }}
+    </p>
+    <p class="govuk-body-s">
+      <strong>What does it represent?</strong><br>
+      {{ scenario.expandedContent.represents }}
+    </p>
+    <p class="govuk-body-s">
+      <strong>Important:</strong><br>
+      {{ scenario.expandedContent.disclaimer }}
+    </p>
+    <p class="govuk-body-s">
+      <strong>How was it generated?</strong><br>
+      {{ scenario.expandedContent.methodology }}
+    </p>
+  {% endset %}
+
+  {# GOV.UK Details component - AC1, AC4, AC6, AC7 #}
+  {{ govukDetails({
+    summaryText: scenario.summary,
+    html: expandedContentHtml,
+    attributes: {
+      'data-module': 'govuk-details'
+    }
+  }) }}
+</div>
+{% endif %}

@@ -1,0 +1,819 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  NDX:Try - FOI Redaction Scenario
+  Automated sensitive data redaction for Freedom of Information requests.
+  Uses Amazon Comprehend for PII detection.
+  Version: 1.0.0
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Scenario Configuration
+        Parameters:
+          - Environment
+          - RedactionConfidenceThreshold
+      - Label:
+          default: Auto-Cleanup
+        Parameters:
+          - AutoCleanupHours
+
+Parameters:
+  Environment:
+    Type: String
+    Default: sandbox
+    AllowedValues:
+      - sandbox
+      - development
+      - production
+    Description: Deployment environment
+
+  RedactionConfidenceThreshold:
+    Type: Number
+    Default: 0.85
+    MinValue: 0.5
+    MaxValue: 0.99
+    Description: Minimum confidence score for automatic redaction
+
+  AutoCleanupHours:
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 24
+    Description: Hours until automatic resource cleanup
+
+Resources:
+  # S3 Bucket for Documents
+  DocumentsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-try-foi-docs-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoCleanup
+            Status: Enabled
+            ExpirationInDays: 1
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+            AllowedOrigins:
+              - '*'
+            MaxAge: 3000
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: foi-redaction
+        - Key: AutoCleanup
+          Value: 'true'
+
+  # IAM Role for Lambda
+  RedactionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'ndx-try-foi-role-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ComprehendAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - comprehend:DetectPiiEntities
+                  - comprehend:ContainsPiiEntities
+                  - comprehend:DetectEntities
+                Resource: '*'
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: !Sub '${DocumentsBucket.Arn}/*'
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: foi-redaction
+
+  # Lambda Function - FOI Redaction
+  RedactionFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-foi-redactor-${AWS::Region}'
+      Description: Redacts PII from FOI documents using Amazon Comprehend
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      Role: !GetAtt RedactionRole.Arn
+      Timeout: 120
+      MemorySize: 512
+      Environment:
+        Variables:
+          DOCUMENTS_BUCKET: !Ref DocumentsBucket
+          CONFIDENCE_THRESHOLD: !Ref RedactionConfidenceThreshold
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+          import re
+          import uuid
+          from datetime import datetime
+
+          comprehend = boto3.client('comprehend')
+          s3 = boto3.client('s3')
+
+          # PII types to redact
+          PII_TYPES = [
+              'NAME', 'ADDRESS', 'PHONE', 'EMAIL', 'SSN_UK',
+              'BANK_ACCOUNT_NUMBER', 'BANK_ROUTING', 'CREDIT_DEBIT_NUMBER',
+              'DATE_TIME', 'DRIVER_ID', 'IP_ADDRESS', 'MAC_ADDRESS',
+              'PASSPORT_NUMBER', 'UK_NATIONAL_INSURANCE_NUMBER'
+          ]
+
+          def render_redaction_html():
+              """Render the FOI Redaction web interface"""
+              return '''<!DOCTYPE html>
+          <html lang="en-GB">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>FOI Redaction | NDX:Try</title>
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body {
+                font-family: "GDS Transport", Arial, sans-serif;
+                font-size: 19px;
+                line-height: 1.5;
+                color: #0b0c0c;
+                background: #f3f2f1;
+                min-height: 100vh;
+              }
+              .skip-link {
+                position: absolute;
+                left: -9999px;
+                z-index: 1000;
+              }
+              .skip-link:focus {
+                left: 10px;
+                top: 10px;
+                background: #ffdd00;
+                padding: 8px 12px;
+                outline: 3px solid #0b0c0c;
+              }
+              .header {
+                background: #0b0c0c;
+                padding: 10px 20px;
+                color: white;
+              }
+              .header-content {
+                max-width: 960px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+              }
+              .header h1 {
+                font-size: 24px;
+                font-weight: bold;
+                margin: 0;
+              }
+              .header h1 span { color: #00703c; }
+              .phase-banner {
+                background: #f3f2f1;
+                padding: 10px 20px;
+                border-bottom: 1px solid #b1b4b6;
+              }
+              .phase-banner-content {
+                max-width: 960px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+              }
+              .phase-tag {
+                background: #1d70b8;
+                color: white;
+                padding: 2px 8px;
+                font-size: 14px;
+                font-weight: bold;
+                text-transform: uppercase;
+              }
+              .main {
+                max-width: 960px;
+                margin: 0 auto;
+                padding: 40px 20px;
+              }
+              h2 {
+                font-size: 36px;
+                font-weight: bold;
+                margin-bottom: 20px;
+              }
+              .lead {
+                font-size: 24px;
+                color: #505a5f;
+                margin-bottom: 30px;
+              }
+              .form-group {
+                margin-bottom: 20px;
+              }
+              label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 10px;
+              }
+              .hint {
+                color: #505a5f;
+                font-size: 16px;
+                margin-bottom: 10px;
+              }
+              textarea {
+                width: 100%;
+                min-height: 300px;
+                padding: 15px;
+                font-size: 19px;
+                font-family: inherit;
+                border: 2px solid #0b0c0c;
+                border-radius: 0;
+              }
+              textarea:focus {
+                outline: 3px solid #ffdd00;
+                outline-offset: 0;
+                box-shadow: inset 0 0 0 2px;
+              }
+              .char-count {
+                text-align: right;
+                font-size: 14px;
+                color: #505a5f;
+                margin-top: 5px;
+              }
+              .govuk-button {
+                background: #00703c;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                font-size: 19px;
+                font-weight: bold;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                box-shadow: 0 2px 0 #002d18;
+              }
+              .govuk-button:hover { background: #005a30; }
+              .govuk-button:focus {
+                outline: 3px solid #ffdd00;
+                outline-offset: 0;
+                background: #ffdd00;
+                color: #0b0c0c;
+                box-shadow: none;
+              }
+              .govuk-button--secondary {
+                background: #f3f2f1;
+                color: #0b0c0c;
+                box-shadow: 0 2px 0 #929191;
+              }
+              .govuk-button--secondary:hover { background: #dbdad9; }
+              .govuk-button--secondary:focus {
+                background: #ffdd00;
+                box-shadow: none;
+              }
+              .govuk-button:disabled {
+                background: #b1b4b6;
+                color: #505a5f;
+                cursor: not-allowed;
+                box-shadow: none;
+              }
+              .button-group {
+                display: flex;
+                gap: 15px;
+                margin-top: 20px;
+                flex-wrap: wrap;
+              }
+              .loading {
+                display: none;
+                text-align: center;
+                padding: 40px;
+                background: white;
+                margin-top: 20px;
+              }
+              .loading.visible { display: block; }
+              .loading-spinner {
+                width: 50px;
+                height: 50px;
+                border: 4px solid #f3f2f1;
+                border-top-color: #1d70b8;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+              }
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+              .results {
+                display: none;
+                background: white;
+                padding: 30px;
+                margin-top: 20px;
+              }
+              .results.visible { display: block; }
+              .results h3 {
+                font-size: 24px;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 4px solid #1d70b8;
+              }
+              .summary-cards {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+              }
+              .summary-card {
+                background: #f3f2f1;
+                padding: 20px;
+                text-align: center;
+              }
+              .summary-card .value {
+                font-size: 48px;
+                font-weight: bold;
+                color: #1d70b8;
+              }
+              .summary-card .label {
+                color: #505a5f;
+                font-size: 16px;
+              }
+              .redacted-output {
+                background: #f8f8f8;
+                padding: 20px;
+                font-family: monospace;
+                font-size: 16px;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                max-height: 400px;
+                overflow-y: auto;
+                border: 1px solid #b1b4b6;
+              }
+              .redaction-marker {
+                background: #d4351c;
+                color: white;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-weight: bold;
+                font-size: 12px;
+              }
+              .redaction-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+              }
+              .redaction-table th,
+              .redaction-table td {
+                border: 1px solid #b1b4b6;
+                padding: 10px;
+                text-align: left;
+              }
+              .redaction-table th {
+                background: #f3f2f1;
+                font-weight: bold;
+              }
+              .confidence-bar {
+                height: 20px;
+                background: #e5e5e5;
+                border-radius: 4px;
+                overflow: hidden;
+              }
+              .confidence-fill {
+                height: 100%;
+                background: #00703c;
+                transition: width 0.3s;
+              }
+              .sample-note {
+                background: #fff7e6;
+                border-left: 4px solid #f47738;
+                padding: 15px;
+                margin-top: 20px;
+                font-size: 16px;
+              }
+              .footer {
+                background: #f3f2f1;
+                padding: 20px;
+                margin-top: 40px;
+                border-top: 1px solid #b1b4b6;
+                text-align: center;
+                color: #505a5f;
+                font-size: 14px;
+              }
+              @media (max-width: 768px) {
+                h2 { font-size: 27px; }
+                .lead { font-size: 19px; }
+                textarea { min-height: 200px; }
+                .button-group { flex-direction: column; }
+                .summary-cards { grid-template-columns: 1fr; }
+              }
+            </style>
+          </head>
+          <body>
+            <a href="#main-content" class="skip-link">Skip to main content</a>
+
+            <header class="header">
+              <div class="header-content">
+                <h1><span>NDX</span>:Try</h1>
+                <span>FOI Redaction</span>
+              </div>
+            </header>
+
+            <div class="phase-banner">
+              <div class="phase-banner-content">
+                <span class="phase-tag">Sandbox</span>
+                <span>This is a demonstration environment using Amazon Comprehend</span>
+              </div>
+            </div>
+
+            <main class="main" id="main-content">
+              <h2>FOI Document Redaction</h2>
+              <p class="lead">Enter or paste text from a Freedom of Information request to automatically detect and redact personal information.</p>
+
+              <div class="form-group">
+                <label for="textInput">Document text</label>
+                <p class="hint">Maximum 5,000 characters. Personal information will be automatically detected and redacted.</p>
+                <textarea id="textInput" maxlength="5000" placeholder="Enter or paste your FOI document text here..." aria-describedby="charCount"></textarea>
+                <p class="char-count" id="charCount"><span id="charCountNum">0</span> / 5,000 characters</p>
+              </div>
+
+              <div class="button-group">
+                <button type="button" id="sampleBtn" class="govuk-button govuk-button--secondary">
+                  Use Sample Document
+                </button>
+                <button type="button" id="redactBtn" class="govuk-button" disabled aria-disabled="true">
+                  Redact Document
+                </button>
+              </div>
+
+              <div class="loading" id="loading" aria-live="polite">
+                <div class="loading-spinner" aria-hidden="true"></div>
+                <p><strong>Analyzing document...</strong></p>
+                <p>Detecting personal information using Amazon Comprehend</p>
+              </div>
+
+              <div class="results" id="results" aria-live="polite">
+                <h3>Redaction Results</h3>
+
+                <div class="summary-cards" id="summaryCards">
+                  <div class="summary-card">
+                    <div class="value" id="totalRedactions">0</div>
+                    <div class="label">Items Redacted</div>
+                  </div>
+                  <div class="summary-card">
+                    <div class="value" id="piiTypes">0</div>
+                    <div class="label">PII Types Found</div>
+                  </div>
+                  <div class="summary-card">
+                    <div class="value" id="confidenceAvg">0%</div>
+                    <div class="label">Avg Confidence</div>
+                  </div>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">Redacted Document</h4>
+                <div class="redacted-output" id="redactedOutput" role="region" aria-label="Redacted document text" tabindex="0"></div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">Redaction Details</h4>
+                <table class="redaction-table" id="redactionTable">
+                  <thead>
+                    <tr>
+                      <th>Type</th>
+                      <th>Count</th>
+                      <th>Confidence</th>
+                    </tr>
+                  </thead>
+                  <tbody id="redactionTableBody"></tbody>
+                </table>
+
+                <div class="sample-note">
+                  <strong>Note:</strong> This sandbox uses Amazon Comprehend for PII detection.
+                  Confidence threshold: 85%. In production, you may want to configure lower thresholds and add manual review steps.
+                </div>
+
+                <div class="button-group" style="margin-top: 30px;">
+                  <button type="button" id="newDocBtn" class="govuk-button govuk-button--secondary">
+                    Redact Another Document
+                  </button>
+                </div>
+              </div>
+            </main>
+
+            <footer class="footer">
+              <p>NDX:Try Sandbox Environment | FOI Redaction Scenario</p>
+            </footer>
+
+            <script>
+              var textInput = document.getElementById("textInput");
+              var charCountNum = document.getElementById("charCountNum");
+              var sampleBtn = document.getElementById("sampleBtn");
+              var redactBtn = document.getElementById("redactBtn");
+              var loading = document.getElementById("loading");
+              var results = document.getElementById("results");
+              var newDocBtn = document.getElementById("newDocBtn");
+
+              var sampleText = "Dear Council,\\n\\nThis is a Freedom of Information request.\\n\\nI am requesting the following information:\\n1. Council expenditure records for John Smith (john.smith@email.com)\\n2. Communications sent to 45 Oak Street, London, SW1A 1AA\\n3. Phone records for contact number 07700 900123\\n\\nMy name is Sarah Jones and I can be contacted at:\\nEmail: sarah.jones@requestor.com\\nPhone: 07800 123456\\nAddress: 12 High Street, Manchester, M1 1AA\\n\\nPlease respond within 20 working days as required by the Freedom of Information Act 2000.\\n\\nYours faithfully,\\nSarah Jones\\nDate: 15 January 2024";
+
+              // Character count
+              textInput.addEventListener("input", function() {
+                var count = textInput.value.length;
+                charCountNum.textContent = count;
+                redactBtn.disabled = count === 0;
+                redactBtn.setAttribute("aria-disabled", count === 0 ? "true" : "false");
+              });
+
+              // Sample document button
+              sampleBtn.addEventListener("click", function() {
+                textInput.value = sampleText;
+                var count = textInput.value.length;
+                charCountNum.textContent = count;
+                redactBtn.disabled = false;
+                redactBtn.setAttribute("aria-disabled", "false");
+                textInput.focus();
+              });
+
+              // Redact button
+              redactBtn.addEventListener("click", function() {
+                var text = textInput.value.trim();
+                if (!text) return;
+
+                loading.classList.add("visible");
+                results.classList.remove("visible");
+                document.querySelector(".form-group").style.display = "none";
+                document.querySelector(".button-group").style.display = "none";
+
+                fetch(window.location.href, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ text: text })
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                  loading.classList.remove("visible");
+                  displayResults(data);
+                })
+                .catch(function(error) {
+                  loading.classList.remove("visible");
+                  alert("Error analyzing document: " + error.message);
+                  document.querySelector(".form-group").style.display = "block";
+                  document.querySelector(".button-group").style.display = "flex";
+                });
+              });
+
+              // New document button
+              newDocBtn.addEventListener("click", function() {
+                results.classList.remove("visible");
+                document.querySelector(".form-group").style.display = "block";
+                document.querySelector(".button-group").style.display = "flex";
+                textInput.value = "";
+                charCountNum.textContent = "0";
+                redactBtn.disabled = true;
+                textInput.focus();
+              });
+
+              function displayResults(data) {
+                results.classList.add("visible");
+
+                // Summary cards
+                document.getElementById("totalRedactions").textContent = data.redactionCount;
+
+                // Count unique PII types
+                var typeCount = {};
+                data.redactions.forEach(function(r) {
+                  typeCount[r.type] = (typeCount[r.type] || 0) + 1;
+                });
+                document.getElementById("piiTypes").textContent = Object.keys(typeCount).length;
+
+                // Average confidence
+                if (data.redactions.length > 0) {
+                  var avgConf = data.redactions.reduce(function(sum, r) { return sum + r.confidence; }, 0) / data.redactions.length;
+                  document.getElementById("confidenceAvg").textContent = Math.round(avgConf * 100) + "%";
+                } else {
+                  document.getElementById("confidenceAvg").textContent = "N/A";
+                }
+
+                // Redacted output - style the markers
+                var styledOutput = data.redactedText.replace(/\\[REDACTED:([A-Z_]+)\\]/g, function(match, type) {
+                  return '<span class="redaction-marker">[' + type + ']</span>';
+                });
+                document.getElementById("redactedOutput").innerHTML = styledOutput;
+
+                // Redaction table
+                var tableBody = document.getElementById("redactionTableBody");
+                tableBody.innerHTML = "";
+
+                Object.keys(typeCount).forEach(function(type) {
+                  var typeRedactions = data.redactions.filter(function(r) { return r.type === type; });
+                  var avgTypeConf = typeRedactions.reduce(function(sum, r) { return sum + r.confidence; }, 0) / typeRedactions.length;
+
+                  var row = document.createElement("tr");
+                  row.innerHTML =
+                    '<td>' + type.replace(/_/g, ' ') + '</td>' +
+                    '<td>' + typeCount[type] + '</td>' +
+                    '<td><div class="confidence-bar"><div class="confidence-fill" style="width: ' + (avgTypeConf * 100) + '%"></div></div> ' + Math.round(avgTypeConf * 100) + '%</td>';
+                  tableBody.appendChild(row);
+                });
+
+                if (Object.keys(typeCount).length === 0) {
+                  var row = document.createElement("tr");
+                  row.innerHTML = '<td colspan="3" style="text-align: center; color: #505a5f;">No PII detected in document</td>';
+                  tableBody.appendChild(row);
+                }
+              }
+            </script>
+          </body>
+          </html>'''
+
+          def lambda_handler(event, context):
+              # Check HTTP method - GET returns HTML, POST returns JSON redaction
+              method = event.get('requestContext', {}).get('http', {}).get('method', 'GET')
+
+              if method == 'GET':
+                  return {
+                      'statusCode': 200,
+                      'headers': {'Content-Type': 'text/html'},
+                      'body': render_redaction_html()
+                  }
+
+              # POST handling for redaction
+              try:
+                  if isinstance(event.get('body'), str):
+                      body = json.loads(event['body'])
+                  else:
+                      body = event.get('body', event)
+
+                  text = body.get('text', '')
+
+                  if not text:
+                      return {
+                          'statusCode': 400,
+                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                          'body': json.dumps({'error': 'Text is required'})
+                      }
+
+                  # Limit text for sandbox
+                  if len(text) > 5000:
+                      text = text[:5000]
+
+                  threshold = float(os.environ.get('CONFIDENCE_THRESHOLD', 0.85))
+
+                  # Detect PII entities
+                  response = comprehend.detect_pii_entities(
+                      Text=text,
+                      LanguageCode='en'
+                  )
+
+                  entities = response.get('Entities', [])
+                  redacted_text = text
+                  redactions = []
+
+                  # Sort entities by offset (reverse order for replacement)
+                  sorted_entities = sorted(entities, key=lambda x: x['BeginOffset'], reverse=True)
+
+                  for entity in sorted_entities:
+                      if entity['Score'] >= threshold and entity['Type'] in PII_TYPES:
+                          begin = entity['BeginOffset']
+                          end = entity['EndOffset']
+                          original = text[begin:end]
+                          redaction_marker = f"[REDACTED:{entity['Type']}]"
+
+                          redacted_text = redacted_text[:begin] + redaction_marker + redacted_text[end:]
+
+                          redactions.append({
+                              'type': entity['Type'],
+                              'confidence': round(entity['Score'], 3),
+                              'original_length': len(original)
+                          })
+
+                  # Save to S3
+                  bucket = os.environ['DOCUMENTS_BUCKET']
+                  doc_id = str(uuid.uuid4())
+                  timestamp = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
+
+                  s3.put_object(
+                      Bucket=bucket,
+                      Key=f"redacted/{timestamp}-{doc_id}.txt",
+                      Body=redacted_text.encode('utf-8'),
+                      ContentType='text/plain'
+                  )
+
+                  return {
+                      'statusCode': 200,
+                      'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                      'body': json.dumps({
+                          'success': True,
+                          'redactedText': redacted_text,
+                          'redactionCount': len(redactions),
+                          'redactions': redactions,
+                          'originalLength': len(text),
+                          'confidenceThreshold': threshold
+                      })
+                  }
+
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  return {
+                      'statusCode': 500,
+                      'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                      'body': json.dumps({'error': str(e)})
+                  }
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: foi-redaction
+
+  # Lambda Function URL
+  RedactionFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !GetAtt RedactionFunction.Arn
+      Cors:
+        AllowCredentials: false
+        AllowHeaders:
+          - content-type
+        AllowMethods:
+          - GET
+          - POST
+        AllowOrigins:
+          - '*'
+        MaxAge: 86400
+
+  RedactionFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref RedactionFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+
+  # CloudWatch Log Group
+  RedactionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${RedactionFunction}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: foi-redaction
+
+Outputs:
+  RedactionURL:
+    Description: FOI document redaction API endpoint
+    Value: !GetAtt RedactionFunctionUrl.FunctionUrl
+    Export:
+      Name: !Sub '${AWS::StackName}-RedactionURL'
+
+  DocumentsBucket:
+    Description: S3 bucket for FOI documents
+    Value: !Ref DocumentsBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-DocumentsBucket'
+
+  ConfidenceThreshold:
+    Description: Redaction confidence threshold
+    Value: !Ref RedactionConfidenceThreshold
+    Export:
+      Name: !Sub '${AWS::StackName}-ConfidenceThreshold'
+
+  ScenarioInfo:
+    Description: NDX:Try scenario information
+    Value: !Sub |
+      {
+        "scenario": "foi-redaction",
+        "environment": "${Environment}",
+        "autoCleanup": "${AutoCleanupHours} hours",
+        "confidenceThreshold": "${RedactionConfidenceThreshold}"
+      }

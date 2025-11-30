@@ -1,0 +1,85 @@
+{#
+  Walkthrough Card Component (Story 14.1)
+
+  Displays a scenario as a card for the walkthrough index page with:
+  - Scenario title and headline description
+  - Category badge (AI, IoT, Analytics)
+  - Step count and time estimate
+  - Link to walkthrough
+
+  Expects: scenario object from scenarios.yaml iteration
+
+  Usage:
+    {% for scenario in scenarios.scenarios %}
+      {% include "components/walkthrough-card.njk" %}
+    {% endfor %}
+
+  Accessibility:
+    - Full card is clickable
+    - Semantic article element
+    - Category badges use GOV.UK tag component
+#}
+
+{% set category = scenario | scenarioCategory %}
+{% set categoryLabel = category | upper %}
+
+<article class="ndx-walkthrough-card"
+         data-category="{{ category }}"
+         data-name="{{ scenario.name | lower }}"
+         data-description="{{ scenario.description | lower }}"
+         data-headline="{{ scenario.headline | lower }}"
+         data-services="{{ scenario.awsServices | join(' ') | lower }}">
+  <a href="/walkthroughs/{{ scenario.id }}/" class="ndx-walkthrough-card__link">
+    <div class="ndx-walkthrough-card__header">
+      <span class="govuk-tag govuk-tag--{{ category | categoryColor }} ndx-walkthrough-card__category">
+        {{ categoryLabel }}
+      </span>
+      {% if scenario.isMostPopular %}
+        <span class="govuk-tag govuk-tag--yellow ndx-walkthrough-card__popular">Most popular</span>
+      {% endif %}
+    </div>
+
+    <div class="ndx-walkthrough-card__content">
+      <h3 class="govuk-heading-s ndx-walkthrough-card__title">
+        {{ scenario.name }}
+      </h3>
+      <p class="govuk-body-s ndx-walkthrough-card__description">
+        {{ scenario.headline }}
+      </p>
+    </div>
+
+    <div class="ndx-walkthrough-card__meta">
+      <span class="ndx-walkthrough-card__steps">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22,4 12,14.01 9,11.01"/>
+        </svg>
+        4 steps
+      </span>
+      <span class="ndx-walkthrough-card__time">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12,6 12,12 16,14"/>
+        </svg>
+        {{ scenario.timeEstimate }}
+      </span>
+    </div>
+
+    <div class="ndx-walkthrough-card__services">
+      {% for service in scenario.awsServices | slice(0, 2) %}
+        <span class="ndx-walkthrough-card__service">{{ service }}</span>
+      {% endfor %}
+      {% if scenario.awsServices.length > 2 %}
+        <span class="ndx-walkthrough-card__service ndx-walkthrough-card__service--more">+{{ scenario.awsServices.length - 2 }} more</span>
+      {% endif %}
+    </div>
+
+    <span class="ndx-walkthrough-card__cta">
+      Start walkthrough
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </span>
+  </a>
+</article>

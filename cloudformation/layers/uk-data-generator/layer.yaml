@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  UK Data Generator Lambda Layer
+  Provides realistic UK council sample data generation for AWS scenarios.
+  Version: 1.0.0
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Layer Configuration
+        Parameters:
+          - LayerName
+          - Description
+      - Label:
+          default: Code Deployment
+        Parameters:
+          - LayerCodeBucket
+          - LayerCodeKey
+
+Parameters:
+  LayerName:
+    Type: String
+    Default: uk-data-generator
+    Description: Name of the Lambda layer
+    AllowedPattern: '[a-zA-Z0-9-_]+'
+    ConstraintDescription: Must contain only alphanumeric characters, hyphens, and underscores
+
+  Description:
+    Type: String
+    Default: UK council sample data generator - realistic names, addresses, and service requests
+    Description: Layer description
+
+  LayerCodeBucket:
+    Type: String
+    Description: S3 bucket containing layer code package
+
+  LayerCodeKey:
+    Type: String
+    Default: uk-data-generator.zip
+    Description: S3 key for layer code package
+
+Resources:
+  UKDataGeneratorLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: !Ref LayerName
+      Description: !Ref Description
+      Content:
+        S3Bucket: !Ref LayerCodeBucket
+        S3Key: !Ref LayerCodeKey
+      CompatibleRuntimes:
+        - python3.12
+        - python3.11
+      CompatibleArchitectures:
+        - x86_64
+        - arm64
+      LicenseInfo: MIT
+
+Outputs:
+  LayerArn:
+    Description: ARN of the UK Data Generator Lambda Layer
+    Value: !Ref UKDataGeneratorLayer
+    Export:
+      Name: !Sub '${AWS::StackName}-LayerArn'
+
+  LayerVersion:
+    Description: Version number of the deployed layer
+    Value: !GetAtt UKDataGeneratorLayer.Version
+    Export:
+      Name: !Sub '${AWS::StackName}-LayerVersion'
+
+  LayerName:
+    Description: Name of the Lambda layer
+    Value: !Ref LayerName
+    Export:
+      Name: !Sub '${AWS::StackName}-LayerName'

@@ -1,0 +1,181 @@
+# Forms Configuration
+# Single source of truth for all form references across the portal
+#
+# During development: Use dev_url (placeholder URLs)
+# During production: Update live_url with actual GOV.UK Forms URLs
+#
+# Portal pages reference forms via Eleventy data: {{ forms.scenario_selector_quiz.live_url }}
+
+forms:
+  scenario_selector_quiz:
+    name: "Scenario Selector Quiz"
+    description: "3-question guided discovery to match councils with relevant scenarios"
+    short_description: "Find your scenario"
+
+    # URLs
+    dev_url: "https://placeholder.example.com/forms/scenario-selector"
+    live_url: "https://forms.service.gov.uk/ndx-try/scenario-selector"
+
+    # Form metadata
+    time_estimate: "Less than 1 minute"
+    required_fields: 3
+
+    # Questions (for documentation)
+    questions:
+      - question: "What's your main challenge?"
+        description: "Which service area are you trying to improve?"
+        type: "radio"
+        options:
+          - "Service management (citizen-facing services)"
+          - "Finance and procurement"
+          - "IT operations and infrastructure"
+          - "Citizen communication and support"
+          - "Other"
+
+      - question: "How much time do you have?"
+        description: "How long can you dedicate to evaluation?"
+        type: "radio"
+        options:
+          - "Quick tour (under 15 minutes)"
+          - "Hands-on evaluation (15-45 minutes)"
+          - "Deep dive (1+ hour)"
+          - "Unsure - show me options"
+
+      - question: "Who's evaluating?"
+        description: "What's your role in this decision?"
+        type: "radio"
+        options:
+          - "Technical lead (CTO/developer)"
+          - "Service manager (department lead)"
+          - "Finance/procurement"
+          - "Team evaluation (mixed group)"
+          - "Other"
+
+    # Output
+    output: "1-3 recommended scenarios ranked by relevance with explanation"
+    where_used:
+      - "Homepage call-to-action"
+      - "Get Started guide"
+      - "Scenario gallery page"
+
+  evidence_pack_generator:
+    name: "Evidence Pack Generator"
+    description: "Capture your evaluation insights and generate committee-ready PDF"
+    short_description: "Generate Evidence Pack"
+
+    # URLs
+    dev_url: "https://placeholder.example.com/forms/evidence-pack"
+    live_url: "https://forms.service.gov.uk/ndx-try/evidence-pack"
+
+    # Form metadata
+    time_estimate: "3-5 minutes"
+    required_fields: 6
+
+    # Form fields (for documentation)
+    fields:
+      - field: "Scenario evaluated"
+        description: "Which scenario did you try?"
+        type: "text"
+        required: true
+        helper_text: "e.g., 'Council Chatbot', 'Planning Application AI', etc."
+
+      - field: "What surprised you?"
+        description: "What was unexpected or impressive about this service?"
+        type: "textarea"
+        required: true
+        helper_text: "This helps us understand what resonated with councils"
+
+      - field: "Would this help your council?"
+        description: "Based on your evaluation, would you use this in production?"
+        type: "radio"
+        required: true
+        options:
+          - "Yes - we'd definitely use this"
+          - "Maybe - with some modifications"
+          - "No - not a priority for us"
+          - "Unsure - need more information"
+
+      - field: "What would you want in production?"
+        description: "If you were to implement this, what changes would you make?"
+        type: "textarea"
+        required: false
+        helper_text: "Think about features, integration, data, performance, etc."
+
+      - field: "Any concerns?"
+        description: "What barriers or risks would you need to address?"
+        type: "textarea"
+        required: false
+        helper_text: "Examples: cost, technical complexity, data security, skills, etc."
+
+      - field: "How likely are you to proceed?"
+        description: "Overall likelihood of procurement or further evaluation"
+        type: "rating"
+        required: true
+        scale: "1-5"
+        scale_labels:
+          "1": "Very unlikely"
+          "5": "Very likely"
+
+      - field: "Email address"
+        description: "Where should we send your Evidence Pack PDF?"
+        type: "email"
+        required: true
+        helper_text: "We'll send your personalized Evidence Pack here"
+
+      - field: "May we follow up?"
+        description: "Can we contact you about your evaluation or implementation?"
+        type: "radio"
+        required: false
+        options:
+          - "Yes, contact me with updates"
+          - "No, thanks"
+
+    # Output
+    output: "PDF Evidence Pack sent to email with:"
+    output_contents:
+      - "Scenario summary"
+      - "Council's evaluation insights"
+      - "ROI projection based on their responses"
+      - "Risk assessment"
+      - "Peer council comparisons"
+      - "Procurement next steps"
+      - "Implementation partner recommendations"
+
+    where_used:
+      - "Bottom of each scenario page"
+      - "Post-deployment walkthrough"
+      - "Case studies page"
+      - "What's Next guidance"
+
+# Form usage guide for developers
+usage_guide:
+  eleventy_syntax: |
+    In any Eleventy template (Nunjucks/Liquid):
+
+    {{ forms.scenario_selector_quiz.live_url }}
+    {{ forms.evidence_pack_generator.live_url }}
+
+  markdown_syntax: |
+    In Markdown files:
+
+    [Take the Quiz]({{ forms.scenario_selector_quiz.live_url }})
+    [Generate Evidence Pack]({{ forms.evidence_pack_generator.live_url }})
+
+  javascript_syntax: |
+    In JavaScript (if needed):
+
+    const quizUrl = eleventyConfig.getFilter('json')(forms).scenario_selector_quiz.live_url
+
+  development_workflow: |
+    1. During development: URLs point to placeholder.example.com
+    2. Create forms in GOV.UK Forms service
+    3. Get live URLs from GOV.UK Forms
+    4. Update live_url values in this file
+    5. Dev/prod URLs automatically switch based on environment
+
+  transition_to_production: |
+    Step 1: Create forms in GOV.UK Forms service
+    Step 2: Obtain form URLs from GOV.UK Forms dashboard
+    Step 3: Update live_url values in this file
+    Step 4: No code changes needed - Eleventy will use live URLs automatically
+    Step 5: All portal pages will reference correct URLs

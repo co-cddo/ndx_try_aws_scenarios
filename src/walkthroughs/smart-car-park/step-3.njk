@@ -1,0 +1,423 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Understand IoT Data Flow - Smart Car Park Walkthrough"
+description: Learn how sensor readings become real-time dashboard insights
+currentStep: 3
+totalSteps: 4
+timeEstimate: "3 minutes"
+scenarioId: smart-car-park
+---
+
+{#
+  Step 3: Understand IoT Data Flow (AC-3.5.3, AC-3.5.4, AC-3.5.5)
+  - Explain IoT Core → Lambda → DynamoDB → CloudWatch flow
+  - Wow moment: Real-time dashboard updates
+  - AWS service callouts
+#}
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Understand the IoT Data Flow" %}
+{% set stepDescription = "See how sensor readings travel from parking spaces to your dashboard in real-time." %}
+{% set timeEstimate = "3 minutes" %}
+{# Load screenshots from YAML data - Story 13.6 #}
+{% set screenshotData = screenshots["smart-car-park"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 3) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "You understand how IoT sensors detect vehicles",
+  "You see how AWS IoT Core receives sensor messages",
+  "You know how Lambda processes and stores data",
+  "You recognize CloudWatch's role in visualization"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">From sensor to dashboard: The complete journey</h3>
+
+<p class="govuk-body">
+  Every parking space in the car park has an ultrasonic sensor that continuously monitors vehicle
+  presence. Let's trace the path of a single sensor reading from detection to dashboard:
+</p>
+
+<div class="ndx-data-flow-steps govuk-!-margin-top-4">
+  {% for flowStep in iotDataFlow.steps %}
+    <div class="ndx-flow-card">
+      <div class="ndx-flow-step-number">
+        <span class="ndx-step-circle">{{ flowStep.step }}</span>
+      </div>
+      <div class="ndx-flow-step-content">
+        <h4 class="govuk-heading-s">{{ flowStep.component }}</h4>
+        <p class="govuk-body"><strong>Action:</strong> {{ flowStep.action }}</p>
+        <p class="govuk-body-s" style="color: #505a5f;">
+          <strong>Technology:</strong> {{ flowStep.technology }}
+        </p>
+        <p class="govuk-body-s" style="color: #505a5f;">
+          <strong>Output:</strong> {{ flowStep.output }}
+        </p>
+      </div>
+    </div>
+    {% if not loop.last %}
+      <div class="ndx-flow-connector">↓</div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+{# AC-3.5.5: AWS Service Callouts #}
+<h3 class="govuk-heading-m govuk-!-margin-top-6">AWS services explained</h3>
+
+<p class="govuk-body">
+  This walkthrough uses several AWS services working together. Here's what each one does:
+</p>
+
+<div class="ndx-aws-services-guide govuk-!-margin-top-4">
+  <div class="ndx-service-card">
+    <h4 class="govuk-heading-s">AWS IoT Core</h4>
+    <p class="govuk-body"><strong>Role:</strong> Message broker for IoT devices</p>
+    <p class="govuk-body">
+      <strong>What it does:</strong> Receives MQTT messages from 50 sensors, each publishing occupancy
+      state every 2 minutes when state changes. IoT Core can handle millions of messages per second,
+      so 50 sensors is trivial.
+    </p>
+    <p class="govuk-body">
+      <strong>Why it's useful:</strong> IoT Core manages device authentication, message routing,
+      and topic subscriptions. You don't build a message broker yourself - AWS provides enterprise-grade
+      infrastructure.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Cost:</strong> £1.00 per million messages. With 2.16M messages/month (50 sensors ×
+        30 msg/hour × 24h × 30 days), that's just £2.16/month.
+      </p>
+    </div>
+  </div>
+
+  <div class="ndx-service-card govuk-!-margin-top-3">
+    <h4 class="govuk-heading-s">AWS Lambda</h4>
+    <p class="govuk-body"><strong>Role:</strong> Process sensor readings</p>
+    <p class="govuk-body">
+      <strong>What it does:</strong> Every time IoT Core receives a sensor message, it triggers
+      the <code>ProcessSensorData</code> Lambda function. Lambda validates the reading, stores it
+      in DynamoDB, calculates zone metrics, and publishes to CloudWatch.
+    </p>
+    <p class="govuk-body">
+      <strong>Why it's useful:</strong> Lambda runs your code without servers. You only pay for
+      compute time used (milliseconds per execution). No idle servers, no capacity planning.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Cost:</strong> £0.20 per million invocations. Processing 2.16M sensor messages/month
+        costs £0.43/month.
+      </p>
+    </div>
+  </div>
+
+  <div class="ndx-service-card govuk-!-margin-top-3">
+    <h4 class="govuk-heading-s">Amazon DynamoDB</h4>
+    <p class="govuk-body"><strong>Role:</strong> Store historical sensor readings</p>
+    <p class="govuk-body">
+      <strong>What it does:</strong> Stores every sensor reading as a time-series record. Each record
+      includes sensor ID, timestamp, occupancy state, and confidence level. DynamoDB keeps 7 days
+      of history (then auto-deletes via TTL) for trend analysis.
+    </p>
+    <p class="govuk-body">
+      <strong>Why it's useful:</strong> DynamoDB scales automatically from zero to millions of
+      requests per second. No database servers to manage, no downtime for schema changes.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Cost:</strong> With 5 read/write capacity units and 2GB storage, ~£3.50/month.
+        Predictable pricing regardless of traffic spikes.
+      </p>
+    </div>
+  </div>
+
+  <div class="ndx-service-card govuk-!-margin-top-3">
+    <h4 class="govuk-heading-s">Amazon CloudWatch</h4>
+    <p class="govuk-body"><strong>Role:</strong> Dashboard visualization and alarms</p>
+    <p class="govuk-body">
+      <strong>What it does:</strong> Lambda publishes custom metrics (total occupancy, zone occupancy,
+      average duration) to CloudWatch. The dashboard you're viewing queries these metrics and renders
+      charts. Alarms trigger SNS notifications when occupancy thresholds are exceeded or sensors go offline.
+    </p>
+    <p class="govuk-body">
+      <strong>Why it's useful:</strong> CloudWatch handles all the complexity of time-series metric
+      storage, aggregation, and visualization. You define widgets, CloudWatch does the heavy lifting.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Cost:</strong> 10 custom metrics + 1 dashboard + 3 alarms = ~£5/month. Includes
+        15-month metric retention.
+      </p>
+    </div>
+  </div>
+</div>
+
+{# AC-3.5.4: Wow moment - Real-time updates #}
+{% set wowMoment = {
+  title: "Watch the Dashboard Update in Real-Time",
+  explanation: "As the IoT simulator publishes sensor readings, you'll see the CloudWatch dashboard metrics change every 5-10 seconds. Notice how all widgets update automatically - no manual refresh needed. This is what \"real-time monitoring\" means: the dashboard always shows current state, not data from 30 minutes ago.",
+  technicalDetail: "Behind the scenes: Sensors publish MQTT messages → IoT Core routes to Lambda → Lambda processes and publishes CloudWatch metrics → Dashboard auto-refreshes every 10 seconds to fetch latest metrics. Total latency from sensor reading to dashboard update: 15 seconds maximum.",
+  icon: "refresh"
+} %}
+
+{% include "components/wow-moment.njk" %}
+
+<div class="ndx-observations-section govuk-!-margin-top-6">
+  <h3 class="govuk-heading-m">What makes this \"wow\"?</h3>
+
+  <p class="govuk-body">
+    Compare this to manual car park management:
+  </p>
+
+  <div class="ndx-comparison-grid govuk-!-margin-top-3">
+    <div class="ndx-comparison-card ndx-comparison-before">
+      <h4 class="govuk-heading-s">
+        <span class="ndx-comparison-label ndx-label-before">Before: Manual</span>
+      </h4>
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+        <li>2 staff walk all 3 floors every 2 hours</li>
+        <li>Count occupied spaces with clickers</li>
+        <li>Write counts on clipboard</li>
+        <li>Back in office, enter into Excel</li>
+        <li>Create charts manually</li>
+        <li>Data is 30-120 minutes old by the time it's visible</li>
+        <li>No after-hours monitoring (staff work 9-5)</li>
+        <li>Cost: 1.5 hours/day × 260 days × £25/hour = £9,750/year</li>
+      </ul>
+    </div>
+
+    <div class="ndx-comparison-card ndx-comparison-after">
+      <h4 class="govuk-heading-s">
+        <span class="ndx-comparison-label ndx-label-after">After: IoT + AWS</span>
+      </h4>
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+        <li>50 sensors monitor continuously (24/7)</li>
+        <li>Occupancy detected automatically via ultrasonic distance</li>
+        <li>Data published to AWS IoT Core instantly</li>
+        <li>Lambda processes and stores in 2-5 seconds</li>
+        <li>Dashboard auto-generates charts in real-time</li>
+        <li>Data is never more than 15 seconds old</li>
+        <li>Works overnight, weekends, holidays without human intervention</li>
+        <li>Cost: £145/year for AWS services</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="govuk-inset-text govuk-!-margin-top-4">
+    <p class="govuk-body">
+      <strong>Impact:</strong> What took 1.5 hours of manual work daily now happens automatically
+      in real-time. Staff freed to focus on customer service and complex problems. Data quality
+      improves (no human counting errors). Operational cost drops by £9,750/year.
+    </p>
+  </div>
+</div>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text govuk-!-font-size-19">
+      <strong>Something went wrong?</strong> Troubleshooting help
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <h4 class="govuk-heading-s">I don't see the dashboard updating</h4>
+    <p class="govuk-body">Possible solutions:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>
+        <strong>Check auto-refresh is enabled</strong> - Look for "Auto refresh" toggle (top-right),
+        ensure ON and set to 10 seconds
+      </li>
+      <li>
+        <strong>Verify IoT simulator is running</strong> - Lambda console → <code>IoTSimulator</code>
+        function → Recent invocations should show activity
+      </li>
+      <li>
+        <strong>Check CloudWatch Logs</strong> - Lambda console → <code>ProcessSensorData</code> →
+        Logs tab → Look for "Published metric to CloudWatch" messages
+      </li>
+    </ul>
+
+    <h4 class="govuk-heading-s govuk-!-margin-top-4">How can I verify data is flowing?</h4>
+    <p class="govuk-body">Three checkpoints:</p>
+    <ol class="govuk-list govuk-list--number">
+      <li>
+        <strong>DynamoDB table:</strong> <a href="https://console.aws.amazon.com/dynamodb/" target="_blank" rel="noopener noreferrer" class="govuk-link">Open DynamoDB console</a>,
+        find <code>SmartCarPark-SensorReadings</code> table, click "Explore table items" - should
+        see ~1000 records
+      </li>
+      <li>
+        <strong>Lambda invocations:</strong> <a href="https://console.aws.amazon.com/lambda/" target="_blank" rel="noopener noreferrer" class="govuk-link">Open Lambda console</a>,
+        click <code>ProcessSensorData</code>, Monitor tab shows recent invocations graph
+      </li>
+      <li>
+        <strong>CloudWatch metrics:</strong> On your dashboard, click any widget's 3-dot menu →
+        "View in metrics" → See raw metric data and timestamps
+      </li>
+    </ol>
+  </div>
+</details>
+
+{# Navigation #}
+<div class="ndx-walkthrough-nav govuk-!-margin-top-8">
+  <a href="/walkthroughs/smart-car-park/step-2/" class="govuk-link ndx-walkthrough-nav__back">
+    ← Back to Step 2
+  </a>
+  <a href="/walkthroughs/smart-car-park/step-4/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    Continue to Step 4: Explore Trends & ROI
+  </a>
+</div>
+
+<style>
+  .ndx-data-flow-steps {
+    margin-top: 30px;
+  }
+
+  .ndx-flow-card {
+    display: flex;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    margin-bottom: 10px;
+  }
+
+  .ndx-flow-step-number {
+    flex: 0 0 50px;
+    margin-right: 20px;
+  }
+
+  .ndx-step-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #1d70b8;
+    color: #ffffff;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  .ndx-flow-step-content {
+    flex: 1;
+  }
+
+  .ndx-flow-step-content h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-flow-step-content p {
+    margin-bottom: 5px;
+  }
+
+  .ndx-flow-step-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .ndx-flow-connector {
+    text-align: center;
+    font-size: 36px;
+    color: #1d70b8;
+    font-weight: 700;
+    margin: 5px 0;
+  }
+
+  .ndx-aws-services-guide {
+    margin-top: 30px;
+  }
+
+  .ndx-service-card {
+    padding: 20px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-service-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-service-card p {
+    margin-bottom: 10px;
+  }
+
+  .ndx-observations-section {
+    padding: 25px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-observations-section h3 {
+    margin-top: 0;
+  }
+
+  .ndx-comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .ndx-comparison-card {
+    padding: 20px;
+    background-color: #ffffff;
+    border: 2px solid #b1b4b6;
+  }
+
+  .ndx-comparison-card h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-comparison-label {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  .ndx-label-before {
+    background-color: #d4351c;
+  }
+
+  .ndx-label-after {
+    background-color: #00703c;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-walkthrough-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-nav__back {
+    font-size: 19px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-comparison-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-walkthrough-nav {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ndx-walkthrough-nav__back {
+      margin-bottom: 15px;
+    }
+  }
+</style>

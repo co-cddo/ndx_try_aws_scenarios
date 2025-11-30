@@ -1,0 +1,86 @@
+# Navigation Configuration for NDX:Try AWS Scenarios Portal
+# Defines the navigation structure for header and footer
+
+# Primary navigation (header)
+primary:
+  - text: "Home"
+    href: "/"
+  - text: "Find Your Scenario"
+    href: "/quiz/"
+  - text: "All Scenarios"
+    href: "/scenarios/"
+  - text: "Walkthroughs"
+    href: "/walkthroughs/"
+  - text: "Get Started"
+    href: "/get-started/"
+
+# Secondary navigation (footer or additional links)
+secondary:
+  - text: "Accessibility"
+    href: "/accessibility/"
+  - text: "Contact"
+    href: "/contact/"
+  - text: "About NDX:Try"
+    href: "/about/"
+  - text: "Success Stories"
+    href: "/success-stories/"
+  - text: "Analytics"
+    href: "/analytics/"
+  - text: "Cost Analysis"
+    href: "/cost-analysis/"
+
+# Footer links
+footer:
+  meta:
+    - text: "Accessibility statement"
+      href: "/accessibility/"
+    - text: "Contact"
+      href: "/contact/"
+    - text: "Open Government Licence"
+      href: "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+  resources:
+    - text: "GitHub"
+      href: "https://github.com/co-cddo/ndx-try-aws-scenarios"
+      external: true
+    - text: "LGA AI Hub"
+      href: "https://www.local.gov.uk/our-support/efficiency-and-productivity/artificial-intelligence"
+      external: true
+
+# Quick links (for homepage or sidebars)
+quickLinks:
+  - text: "Take the Quiz"
+    href: "/quiz/"
+    description: "Find the best scenario for your council in under 2 minutes"
+  - text: "Browse All Scenarios"
+    href: "/scenarios/"
+    description: "Explore all 6 AWS scenarios with filtering options"
+  - text: "Get Started Guide"
+    href: "/get-started/"
+    description: "Your 15-minute journey from curiosity to evaluation"
+
+# Exploration links (Story 6.1 - added for hands-on exploration)
+exploration:
+  - scenario: "council-chatbot"
+    text: "Explore Council Chatbot"
+    href: "/walkthroughs/council-chatbot/explore/"
+    description: "Go beyond the basics - experiment, understand architecture, test limits"
+  - scenario: "planning-ai"
+    text: "Explore Planning AI"
+    href: "/walkthroughs/planning-ai/explore/"
+    description: "Hands-on exploration of document processing AI"
+  - scenario: "foi-redaction"
+    text: "Explore FOI Redaction"
+    href: "/walkthroughs/foi-redaction/explore/"
+    description: "Test PII detection capabilities and confidence thresholds"
+  - scenario: "smart-car-park"
+    text: "Explore Smart Car Park"
+    href: "/walkthroughs/smart-car-park/explore/"
+    description: "Explore real-time IoT data flows and dashboards"
+  - scenario: "text-to-speech"
+    text: "Explore Text-to-Speech"
+    href: "/walkthroughs/text-to-speech/explore/"
+    description: "Experiment with voice options and accessibility features"
+  - scenario: "quicksight-dashboard"
+    text: "Explore QuickSight Dashboard"
+    href: "/walkthroughs/quicksight-dashboard/explore/"
+    description: "Discover data visualization and reporting capabilities"

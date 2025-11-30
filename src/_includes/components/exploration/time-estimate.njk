@@ -1,0 +1,43 @@
+{#
+  Time Estimate Component (Story 6.1)
+
+  Displays time estimate badge for an activity
+
+  Usage:
+    {% include "components/exploration/time-estimate.njk" %}
+
+  Expects:
+    activity.time_estimate: string (e.g., "5 min", "10 min")
+#}
+
+{% if activity and activity.time_estimate %}
+  <span class="ndx-time-estimate" aria-label="Estimated time: {{ activity.time_estimate }}">
+    <svg class="ndx-time-estimate__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2"/>
+      <path d="M8 4V8L11 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="ndx-time-estimate__text">{{ activity.time_estimate }}</span>
+  </span>
+{% endif %}
+
+<style>
+  .ndx-time-estimate {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: #f3f2f1;
+    border-radius: 3px;
+    font-size: 14px;
+    color: #505a5f;
+  }
+
+  .ndx-time-estimate__icon {
+    flex-shrink: 0;
+    color: #505a5f;
+  }
+
+  .ndx-time-estimate__text {
+    font-weight: 400;
+  }
+</style>

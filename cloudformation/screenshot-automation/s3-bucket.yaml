@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 bucket and SNS for screenshot automation
+
+Parameters:
+  GitHubUploadUserArn:
+    Type: String
+    Default: ''
+    Description: Optional ARN of GitHub upload IAM user (from github-upload-permissions stack). Leave empty to skip bucket policy.
+
+Conditions:
+  HasGitHubUploadUser: !Not [!Equals [!Ref GitHubUploadUserArn, '']]
+
+Resources:
+  # S3 bucket with versioning and lifecycle
+  ScreenshotBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-screenshots-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldVersions
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NewerNoncurrentVersions: 10
+              NoncurrentDays: 90
+            NoncurrentVersionTransitions:
+              - StorageClass: GLACIER
+                TransitionInDays: 90
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # Bucket policy for GitHub Actions uploads
+  ScreenshotBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: HasGitHubUploadUser
+    Properties:
+      Bucket: !Ref ScreenshotBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowGitHubUploadUser
+            Effect: Allow
+            Principal:
+              AWS: !Ref GitHubUploadUserArn
+            Action:
+              - s3:PutObject
+              - s3:PutObjectAcl
+              - s3:GetObject
+              - s3:CopyObject
+            Resource:
+              - !Sub '${ScreenshotBucket.Arn}/current/*'
+              - !Sub '${ScreenshotBucket.Arn}/manifests/*'
+              - !Sub '${ScreenshotBucket.Arn}/baselines/*'
+              - !Sub '${ScreenshotBucket.Arn}/diffs/*'
+              - !Sub '${ScreenshotBucket.Arn}/fallback/*'
+
+          - Sid: AllowGitHubListBucket
+            Effect: Allow
+            Principal:
+              AWS: !Ref GitHubUploadUserArn
+            Action:
+              - s3:ListBucket
+            Resource: !GetAtt ScreenshotBucket.Arn
+            Condition:
+              StringLike:
+                s3:prefix:
+                  - 'current/*'
+                  - 'manifests/*'
+                  - 'baselines/*'
+                  - 'diffs/*'
+                  - 'fallback/*'
+
+  # SNS topic for notifications
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: ndx-screenshot-notifications
+
+Outputs:
+  BucketName:
+    Value: !Ref ScreenshotBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketName'
+  BucketArn:
+    Value: !GetAtt ScreenshotBucket.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketArn'
+  TopicArn:
+    Value: !Ref NotificationTopic
+    Export:
+      Name: !Sub '${AWS::StackName}-TopicArn'

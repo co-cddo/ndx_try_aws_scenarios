@@ -1,0 +1,157 @@
+# Screenshot data for Planning Application AI scenario (Story 13.2)
+# Used by screenshot.njk component to display S3-hosted screenshots
+# S3 Base: https://ndx-try-screenshots.s3.eu-west-2.amazonaws.com/current/planning-ai/
+
+scenario: planning-ai
+scenarioTitle: "Planning Application AI"
+awsService: "Amazon Textract"
+totalSteps: 4
+
+# Step-specific screenshots
+steps:
+  - step: 1
+    title: "Access the Application"
+    screenshots:
+      - id: cloudformation-outputs
+        filename: step-1-cloudformation-outputs.png
+        alt: "CloudFormation stack outputs showing the Planning AI application URL"
+        caption: "Find your Planning AI application URL in CloudFormation Outputs"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "10%"
+            y: "42%"
+            label: "ApplicationURL output"
+            arrow: "right"
+
+      - id: application-interface
+        filename: step-1-application-interface.png
+        alt: "Planning Application AI web interface with document upload area"
+        caption: "The application is ready to process planning documents"
+        width: 1920
+        height: 1080
+
+  - step: 2
+    title: "Upload a Planning Document"
+    screenshots:
+      - id: upload-interface
+        filename: step-2-upload-interface.png
+        alt: "Document upload area showing drag-and-drop zone and file browser button"
+        caption: "Drag and drop a planning document or click to browse files"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "31%"
+            y: "37%"
+            label: "Upload zone"
+            arrow: "down"
+
+      - id: processing-status
+        filename: step-2-processing-status.png
+        alt: "Processing indicator showing document being analyzed by Textract"
+        caption: "Amazon Textract extracts text and analyzes the document structure"
+        width: 1920
+        height: 1080
+
+  - step: 3
+    title: "Review Extracted Information"
+    screenshots:
+      - id: extraction-results
+        filename: step-3-extraction-results.png
+        alt: "Extracted planning application data showing property address, applicant, and proposal details"
+        caption: "AI-extracted fields from the planning document"
+        width: 1920
+        height: 1080
+
+      - id: confidence-scores
+        filename: step-3-confidence-scores.png
+        alt: "Confidence indicators showing extraction accuracy for each field"
+        caption: "Confidence scores help identify fields that may need manual review"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "39%"
+            y: "29%"
+            label: "Confidence score"
+            arrow: "left"
+
+      - id: document-preview
+        filename: step-3-document-preview.png
+        alt: "Original document with extracted regions highlighted"
+        caption: "See exactly where each piece of information was found"
+        width: 1920
+        height: 1080
+
+  - step: 4
+    title: "Export & Next Steps"
+    screenshots:
+      - id: export-options
+        filename: step-4-export-options.png
+        alt: "Export options showing JSON, CSV, and PDF formats"
+        caption: "Export extracted data in your preferred format"
+        width: 1920
+        height: 1080
+
+      - id: textract-console
+        filename: step-4-textract-console.png
+        alt: "AWS Textract console showing document analysis configuration"
+        caption: "Amazon Textract uses machine learning to understand document structure"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "21%"
+            y: "20%"
+            label: "Analysis type"
+            arrow: "down"
+
+# Explore section screenshots (Epic 7 content)
+explore:
+  architecture:
+    - id: architecture-overview
+      filename: explore-architecture-overview.png
+      alt: "Architecture diagram showing S3, Textract, Lambda, and API Gateway"
+      caption: "How Planning Application AI processes documents"
+      width: 1920
+      height: 1080
+
+    - id: textract-detail
+      filename: explore-textract-detail.png
+      alt: "Textract analysis output showing detected text, forms, and tables"
+      caption: "Textract extracts text, forms, tables, and key-value pairs"
+      width: 1920
+      height: 1080
+
+  experiments:
+    - id: custom-queries
+      filename: explore-custom-queries.png
+      alt: "Textract Queries feature for extracting specific fields"
+      caption: "Use Queries to extract specific planning application fields"
+      width: 1920
+      height: 1080
+
+    - id: different-documents
+      filename: explore-different-documents.png
+      alt: "Processing results for different types of planning documents"
+      caption: "Try different document types: applications, drawings, decisions"
+      width: 1920
+      height: 1080
+
+  limits:
+    - id: accuracy-testing
+      filename: explore-accuracy-testing.png
+      alt: "Comparison of extracted data vs ground truth for accuracy assessment"
+      caption: "Test extraction accuracy with your own documents"
+      width: 1920
+      height: 1080
+
+  production:
+    - id: production-considerations
+      filename: explore-production-considerations.png
+      alt: "Production deployment checklist for Planning AI at scale"
+      caption: "Considerations for production: volume, security, integration"
+      width: 1920
+      height: 1080

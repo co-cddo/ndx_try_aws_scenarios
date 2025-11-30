@@ -1,0 +1,317 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Download Sample FOI Document - FOI Redaction Walkthrough"
+description: Choose and download a sample FOI response document to test PII detection
+currentStep: 2
+totalSteps: 5
+timeEstimate: "1 minute"
+scenarioId: foi-redaction
+---
+
+{#
+  Step 2: Download Sample FOI Document (AC-3.4.1)
+  - List available sample documents
+  - Explain PII types in each document
+  - Download instructions
+#}
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Download Sample FOI Document" %}
+{% set stepDescription = "Choose one of our sample FOI response documents to see how AI detects different types of personal information." %}
+{% set timeEstimate = "1 minute" %}
+{# Load screenshots from YAML data - Story 13.5 #}
+{% set screenshotData = screenshots["foi-redaction"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 2) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "Sample document downloaded to your computer",
+  "You understand what PII types are in the document",
+  "Document opens successfully in your PDF reader"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Choose a sample document</h3>
+
+<p class="govuk-body">
+  We've created 3 realistic sample FOI response documents. Each contains different types of personal
+  information that AI will detect. Choose any one to start:
+</p>
+
+<div class="ndx-sample-documents-detail">
+  {% for doc in foiSampleDocuments %}
+    <div class="ndx-sample-document-detail-card">
+      <div class="ndx-sample-document-header">
+        <h4 class="govuk-heading-s">{{ doc.title }}</h4>
+        <span class="govuk-tag">{{ doc.type }}</span>
+      </div>
+
+      <p class="govuk-body-s">
+        {{ doc.description }}
+      </p>
+
+      <div class="govuk-!-margin-top-3">
+        <h5 class="govuk-heading-xs">Personal information in this document:</h5>
+        <ul class="govuk-list govuk-list--bullet govuk-body-s">
+          {% for pii in doc.piiLocations %}
+            <li>
+              <strong>{{ pii.type | upper }}:</strong> {{ pii.description }}
+              <br>
+              <span style="color: #505a5f; font-style: italic;">Location: {{ pii.location }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <dl class="govuk-summary-list govuk-summary-list--no-border govuk-!-margin-top-3">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">File size</dt>
+          <dd class="govuk-summary-list__value">{{ doc.fileSize }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Processing time</dt>
+          <dd class="govuk-summary-list__value">{{ doc.timeToProcess }}</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Expected redactions</dt>
+          <dd class="govuk-summary-list__value">{{ doc.expectedRedactions }} PII items</dd>
+        </div>
+      </dl>
+
+      <div class="govuk-!-margin-top-4">
+        <a href="{{ doc.documentUrl }}" class="govuk-button govuk-button--secondary" download>
+          Download {{ doc.title }}
+        </a>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="govuk-inset-text govuk-!-margin-top-6">
+  <p class="govuk-body">
+    <strong>All sample data is clearly marked with [SAMPLE] prefix.</strong> These are fictional FOI
+    responses created for demonstration purposes. No real personal information is used.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">What to look for in the document</h3>
+
+<p class="govuk-body">
+  After downloading, open the PDF and notice:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Names appear in different contexts</strong>
+    <p class="govuk-body">
+      Full names, first names only, or names in signatures. The AI should detect all variations.
+    </p>
+  </li>
+
+  <li>
+    <strong>Addresses have various formats</strong>
+    <p class="govuk-body">
+      Some are full postal addresses with postcodes, others are property descriptions like "Flat 7, Tower House".
+      All should be detected.
+    </p>
+  </li>
+
+  <li>
+    <strong>Phone numbers use different formats</strong>
+    <p class="govuk-body">
+      Mobile (07xxx), landline with area code (0121 xxx), or with spaces/dashes. The AI handles all formats.
+    </p>
+  </li>
+
+  <li>
+    <strong>Email addresses in correspondence</strong>
+    <p class="govuk-body">
+      Personal email addresses that should be redacted to protect privacy.
+    </p>
+  </li>
+
+  <li>
+    <strong>Sensitive identifiers (where applicable)</strong>
+    <p class="govuk-body">
+      Some documents contain National Insurance numbers or other sensitive data requiring redaction.
+    </p>
+  </li>
+</ol>
+
+<div class="ndx-pii-examples">
+  <h3 class="govuk-heading-m">Real-world PII detection examples</h3>
+
+  <p class="govuk-body">
+    Here's how AI detects PII in context:
+  </p>
+
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Original Text</th>
+        <th scope="col" class="govuk-table__header">PII Detected</th>
+        <th scope="col" class="govuk-table__header">Type</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">
+          "The applicant, John David Smith, resides at..."
+        </td>
+        <td class="govuk-table__cell">
+          <span class="govuk-tag govuk-tag--blue">John David Smith</span>
+        </td>
+        <td class="govuk-table__cell">NAME</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">
+          "...15 Elm Street, Manchester, M1 4BT"
+        </td>
+        <td class="govuk-table__cell">
+          <span class="govuk-tag govuk-tag--blue">15 Elm Street, Manchester, M1 4BT</span>
+        </td>
+        <td class="govuk-table__cell">ADDRESS</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">
+          "Contact on 07712 345678 or john.smith@example.com"
+        </td>
+        <td class="govuk-table__cell">
+          <span class="govuk-tag govuk-tag--blue">07712 345678</span>
+          <span class="govuk-tag govuk-tag--blue">john.smith@example.com</span>
+        </td>
+        <td class="govuk-table__cell">PHONE, EMAIL</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+{# Troubleshooting section #}
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details govuk-!-margin-top-4">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Download link not working
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the download button doesn't work:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Try right-clicking the button and selecting "Save Link As..."</li>
+      <li>Check your browser's download settings aren't blocking PDFs</li>
+      <li>Try a different browser (Chrome, Firefox, Edge all support PDF downloads)</li>
+      <li>Check your browser's pop-up blocker isn't preventing the download</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      PDF won't open
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the downloaded PDF won't open:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check file downloaded completely (file size matches the stated size)</li>
+      <li>Install a PDF reader (Adobe Acrobat Reader, Preview on Mac, built-in on Windows)</li>
+      <li>Try opening with your browser (drag PDF file onto browser window)</li>
+      <li>Check file isn't corrupted - try downloading again</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Can't find downloaded file
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you can't find the downloaded document:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check your browser's Downloads folder (usually in "My Documents" or "Downloads")</li>
+      <li>Click the download icon in your browser to see recent downloads</li>
+      <li>Use Windows Search or macOS Spotlight to search for "sample-council-tax-response.pdf"</li>
+      <li>Check your browser's download settings to see default download location</li>
+    </ul>
+  </div>
+</details>
+
+{# Screenshot placeholder notice #}
+<div class="govuk-warning-text govuk-!-margin-top-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Note</span>
+    Screenshot placeholder: In production, this page would include screenshots of each sample document's
+    first page and visual highlighting of where PII appears in the documents.
+  </strong>
+</div>
+
+<style>
+  .ndx-sample-documents-detail {
+    margin: 30px 0;
+  }
+
+  .ndx-sample-document-detail-card {
+    margin-bottom: 40px;
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-sample-document-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  .ndx-sample-document-header h4 {
+    margin: 0;
+    flex: 1;
+  }
+
+  .ndx-sample-document-detail-card .govuk-summary-list {
+    font-size: 16px;
+  }
+
+  .ndx-sample-document-detail-card .govuk-summary-list__key {
+    width: 45%;
+  }
+
+  .ndx-pii-examples {
+    margin: 40px 0;
+    padding: 25px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-pii-examples h3 {
+    margin-top: 0;
+  }
+
+  .ndx-pii-examples .govuk-table {
+    margin-top: 20px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-sample-document-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .ndx-pii-examples .govuk-table {
+      font-size: 14px;
+    }
+  }
+</style>

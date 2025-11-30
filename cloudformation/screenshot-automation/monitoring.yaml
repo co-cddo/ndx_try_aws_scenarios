@@ -1,0 +1,186 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudWatch monitoring resources for screenshot automation
+
+Parameters:
+  NotificationTopicArn:
+    Type: String
+    Description: ARN of SNS topic for alarm notifications (from s3-bucket stack)
+
+Resources:
+  # CloudWatch Dashboard
+  ScreenshotDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: ndx-screenshot-dashboard
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [ "AWS/NDXScreenshot", "screenshot_success_count", { "stat": "Sum", "label": "Success" } ],
+                  [ ".", "screenshot_failure_count", { "stat": "Sum", "label": "Failures" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Screenshot Capture Results",
+                "period": 3600,
+                "yAxis": {
+                  "left": {
+                    "label": "Count"
+                  }
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [ "AWS/NDXScreenshot", "screenshot_drift_detected", { "stat": "Average" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Visual Drift Detection",
+                "period": 3600,
+                "yAxis": {
+                  "left": {
+                    "label": "Drift Detected (0 or 1)",
+                    "min": 0,
+                    "max": 1
+                  }
+                }
+              }
+            },
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 6,
+              "width": 24,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [ { "expression": "m1/(m1+m2)*100", "label": "Success Rate (%)", "id": "e1" } ],
+                  [ "AWS/NDXScreenshot", "screenshot_success_count", { "id": "m1", "visible": false, "stat": "Sum" } ],
+                  [ ".", "screenshot_failure_count", { "id": "m2", "visible": false, "stat": "Sum" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Screenshot Success Rate",
+                "period": 3600,
+                "yAxis": {
+                  "left": {
+                    "label": "Percentage",
+                    "min": 0,
+                    "max": 100
+                  }
+                },
+                "annotations": {
+                  "horizontal": [
+                    {
+                      "label": "Target 90%",
+                      "value": 90,
+                      "fill": "above",
+                      "color": "#2ca02c"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+
+  # Alarm: Success rate below 90%
+  # Uses metric math to calculate success rate from success and failure counts
+  ScreenshotSuccessRateLowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ndx-screenshot-success-rate-low
+      AlarmDescription: Triggers when screenshot capture success rate falls below 90%
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref NotificationTopicArn
+      EvaluationPeriods: 1
+      Threshold: 0.9
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: notBreaching
+      # Calculate success rate using metric math (e1 = m1/(m1+m2))
+      Metrics:
+        - Id: m1
+          MetricStat:
+            Metric:
+              Namespace: AWS/NDXScreenshot
+              MetricName: screenshot_success_count
+              Dimensions:
+                - Name: scenario
+                  Value: all
+            Period: 3600
+            Stat: Sum
+        - Id: m2
+          MetricStat:
+            Metric:
+              Namespace: AWS/NDXScreenshot
+              MetricName: screenshot_failure_count
+              Dimensions:
+                - Name: scenario
+                  Value: all
+            Period: 3600
+            Stat: Sum
+        - Id: e1
+          Expression: m1/(m1+m2)
+          Label: Success Rate
+
+  # Alarm: Drift detection exceeds 20%
+  ScreenshotDriftHighAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ndx-screenshot-drift-high
+      AlarmDescription: Triggers when visual drift is detected in more than 20% of screenshots
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref NotificationTopicArn
+      MetricName: screenshot_drift_detected
+      Namespace: AWS/NDXScreenshot
+      Statistic: Average
+      Dimensions:
+        - Name: scenario
+          Value: all
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: 0.2
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+Outputs:
+  DashboardName:
+    Value: !Ref ScreenshotDashboard
+    Description: CloudWatch Dashboard name
+    Export:
+      Name: !Sub '${AWS::StackName}-DashboardName'
+
+  DashboardURL:
+    Value: !Sub 'https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=${ScreenshotDashboard}'
+    Description: CloudWatch Dashboard URL
+
+  SuccessRateAlarmName:
+    Value: !Ref ScreenshotSuccessRateLowAlarm
+    Description: Success rate alarm name
+    Export:
+      Name: !Sub '${AWS::StackName}-SuccessRateAlarmName'
+
+  DriftAlarmName:
+    Value: !Ref ScreenshotDriftHighAlarm
+    Description: Drift detection alarm name
+    Export:
+      Name: !Sub '${AWS::StackName}-DriftAlarmName'

@@ -1,0 +1,353 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Upload & Process Document - FOI Redaction Walkthrough"
+description: Upload your sample document and watch AI detect PII in real-time
+currentStep: 3
+totalSteps: 5
+timeEstimate: "2 minutes"
+scenarioId: foi-redaction
+---
+
+{#
+  Step 3: Upload & Process Document (AC-3.4.2, AC-3.4.3)
+  - Upload instructions
+  - Processing status explanation
+  - Wow moment for AI PII detection
+#}
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Upload & Process Document" %}
+{% set stepDescription = "Upload your downloaded FOI document and watch AI automatically detect personal information in real-time." %}
+{% set timeEstimate = "2 minutes" %}
+{# Load screenshots from YAML data - Story 13.5 #}
+{% set screenshotData = screenshots["foi-redaction"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 3) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "Document uploads successfully to the interface",
+  "Processing completes within 15-30 seconds",
+  "PII detection results appear automatically",
+  "You see the wow moment of instant PII identification"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Upload your document</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Locate the upload area in the redaction interface</strong>
+    <p class="govuk-body">
+      You should see a drag-and-drop zone or a "Choose file" button
+    </p>
+  </li>
+
+  <li>
+    <strong>Upload the sample document you downloaded</strong>
+    <p class="govuk-body">
+      Either drag the PDF file onto the drop zone, or click "Choose file" and select it from your downloads folder
+    </p>
+  </li>
+
+  <li>
+    <strong>Wait for upload confirmation</strong>
+    <p class="govuk-body">
+      You'll see a progress indicator showing the file is uploading. For our sample documents (under 2MB),
+      this takes 1-3 seconds.
+    </p>
+  </li>
+
+  <li>
+    <strong>Watch the processing indicator</strong>
+    <p class="govuk-body">
+      After upload, the AI processing begins automatically. You'll see a status message like
+      "Analyzing document for PII..."
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Processing time:</strong> Sample documents process in 15-30 seconds. The AI is reading the entire
+    document, extracting text, identifying PII entities, calculating confidence scores, and preparing the
+    redacted output.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">What's happening during processing</h3>
+
+<p class="govuk-body">
+  Behind the scenes, the AI performs these steps:
+</p>
+
+<div class="ndx-processing-steps">
+  <div class="ndx-processing-step">
+    <div class="ndx-processing-step-number">1</div>
+    <div class="ndx-processing-step-content">
+      <h4 class="govuk-heading-s">Document upload to S3</h4>
+      <p class="govuk-body-s">
+        Your sample document is securely uploaded to an encrypted S3 bucket for processing.
+        (1-3 seconds)
+      </p>
+    </div>
+  </div>
+
+  <div class="ndx-processing-step">
+    <div class="ndx-processing-step-number">2</div>
+    <div class="ndx-processing-step-content">
+      <h4 class="govuk-heading-s">Text extraction (if needed)</h4>
+      <p class="govuk-body-s">
+        If your document is a scanned PDF, Amazon Textract extracts text using OCR. Typed PDFs skip
+        this step. (5-10 seconds for scanned documents)
+      </p>
+    </div>
+  </div>
+
+  <div class="ndx-processing-step">
+    <div class="ndx-processing-step-number">3</div>
+    <div class="ndx-processing-step-content">
+      <h4 class="govuk-heading-s">PII entity detection</h4>
+      <p class="govuk-body-s">
+        Amazon Comprehend analyzes the text and identifies PII entities (names, addresses, phone, email, etc.).
+        Each detection gets a confidence score. (8-15 seconds)
+      </p>
+    </div>
+  </div>
+
+  <div class="ndx-processing-step">
+    <div class="ndx-processing-step-number">4</div>
+    <div class="ndx-processing-step-content">
+      <h4 class="govuk-heading-s">Results preparation</h4>
+      <p class="govuk-body-s">
+        The system prepares both the detection results (with locations and confidence scores) and the
+        redacted output document. (2-5 seconds)
+      </p>
+    </div>
+  </div>
+</div>
+
+{# AC-3.4.2, AC-3.4.3: Wow moment for PII detection #}
+{% set title = "The wow moment: AI reads and understands your FOI document" %}
+{% set explanation = "In under 30 seconds, AI has read your entire FOI response, identified every instance of personal information across all pages, calculated confidence scores for each detection, and prepared a redacted version. This is work that would take an FOI officer 20-30 minutes of careful line-by-line review." %}
+{% set technicalDetail = "Amazon Comprehend uses machine learning models trained on millions of documents to recognize PII patterns. It doesn't just search for keywords - it understands context. For example, it knows 'Manchester' in '15 Elm Street, Manchester' is part of an address, but 'Manchester' in 'Manchester City Council' is not PII." %}
+{% set icon = "🤖" %}
+
+<div class="govuk-!-margin-top-6">
+  {% include "components/wow-moment.njk" %}
+</div>
+
+<h3 class="govuk-heading-m">Processing status messages</h3>
+
+<p class="govuk-body">
+  During processing, you'll see status updates:
+</p>
+
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+      <span class="govuk-tag govuk-tag--blue">Uploading...</span>
+    </dt>
+    <dd class="govuk-summary-list__value">
+      Document is being uploaded to secure storage (1-3 seconds)
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+      <span class="govuk-tag govuk-tag--blue">Analyzing document...</span>
+    </dt>
+    <dd class="govuk-summary-list__value">
+      AI is reading the document and detecting PII entities (15-25 seconds)
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+      <span class="govuk-tag govuk-tag--green">Processing complete</span>
+    </dt>
+    <dd class="govuk-summary-list__value">
+      PII detection finished successfully. Results are ready to review.
+    </dd>
+  </div>
+</dl>
+
+<div class="ndx-processing-tips govuk-!-margin-top-6">
+  <h3 class="govuk-heading-s">While you wait...</h3>
+  <p class="govuk-body">
+    Processing takes 15-30 seconds. Consider:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>
+      <strong>In production:</strong> This would run automatically when FOI responses are prepared
+    </li>
+    <li>
+      <strong>Volume processing:</strong> The system can handle multiple documents simultaneously
+    </li>
+    <li>
+      <strong>Time savings:</strong> 30 seconds vs 20-30 minutes manual review = 40-60× faster
+    </li>
+    <li>
+      <strong>Accuracy:</strong> AI doesn't get tired or miss PII due to document fatigue
+    </li>
+  </ul>
+</div>
+
+{# Troubleshooting section #}
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details govuk-!-margin-top-4">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Upload fails immediately
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If upload fails before processing starts:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check file size is under 10MB (our samples are all under 2MB)</li>
+      <li>Verify file format is PDF, DOCX, or TXT</li>
+      <li>Check file isn't corrupted (try opening it locally first)</li>
+      <li>Check browser console for CORS or network errors</li>
+      <li>Try refreshing the redaction interface and uploading again</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Processing never completes (timeout)
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If processing spinner continues beyond 60 seconds:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Refresh the page - processing may have completed but UI didn't update</li>
+      <li>Check the S3 bucket for uploaded files (confirms upload succeeded)</li>
+      <li>Check CloudWatch logs for Lambda function errors</li>
+      <li>Verify Comprehend API is responding (check AWS service health dashboard)</li>
+      <li>Try with a different sample document to isolate the issue</li>
+      <li>Check Lambda function timeout is set to 60 seconds minimum</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Processing fails with error message
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you see an error message after processing starts:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check error message for specifics (API quota, permission denied, etc.)</li>
+      <li>Verify Lambda has IAM permissions for Comprehend DetectPiiEntities API</li>
+      <li>Check Comprehend API quotas not exceeded (1,000 requests per second default)</li>
+      <li>Review CloudWatch logs for detailed error stack traces</li>
+      <li>Wait 1-2 minutes and retry (temporary AWS service issues)</li>
+      <li>Check document content isn't triggering Comprehend content filters</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Something went wrong? Get help
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you're stuck or encounter unexpected behavior:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><a href="/contact/" class="govuk-link">Contact the NDX:Try support team</a></li>
+      <li>Check <a href="https://status.aws.amazon.com/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS Service Health Dashboard</a> for Comprehend outages</li>
+      <li>Review the <a href="/scenarios/foi-redaction/#troubleshooting" class="govuk-link">FOI Redaction scenario troubleshooting guide</a></li>
+      <li>Try deleting and redeploying the CloudFormation stack</li>
+    </ul>
+  </div>
+</details>
+
+{# Screenshot placeholder notice #}
+<div class="govuk-warning-text govuk-!-margin-top-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Note</span>
+    Screenshot placeholder: In production, this page would include animated GIFs or screenshots showing
+    the upload process, processing status messages, and the completion notification.
+  </strong>
+</div>
+
+<style>
+  .ndx-processing-steps {
+    margin: 30px 0;
+  }
+
+  .ndx-processing-step {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-processing-step:last-child {
+    margin-bottom: 0;
+  }
+
+  .ndx-processing-step-number {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1d70b8;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 20px;
+    border-radius: 50%;
+  }
+
+  .ndx-processing-step-content {
+    flex: 1;
+  }
+
+  .ndx-processing-step-content h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+
+  .ndx-processing-step-content p {
+    margin-bottom: 0;
+    color: #505a5f;
+  }
+
+  .ndx-processing-tips {
+    padding: 20px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-processing-tips h3 {
+    margin-top: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-processing-step {
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .ndx-processing-step-number {
+      align-self: flex-start;
+    }
+  }
+</style>

@@ -1,0 +1,385 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - QuickSight Dashboard"
+description: You've completed the QuickSight Dashboard walkthrough
+currentStep: 5
+totalSteps: 4
+scenarioId: quicksight-dashboard
+---
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">
+    Walkthrough complete
+  </h1>
+  <div class="govuk-panel__body">
+    You've experienced self-service analytics with Amazon QuickSight
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  Congratulations! In just 10 minutes, you've seen how self-service analytics empowers officers to answer
+  operational questions without IT dependency. What would have taken weeks to pilot, you've experienced
+  hands-on right now.
+</p>
+
+{# Story 24.6: Sandbox vs Production clarification #}
+<div class="govuk-inset-text govuk-!-margin-top-6" style="border-left-color: #1d70b8;">
+  <h3 class="govuk-heading-s" style="margin-top: 0;">Sandbox vs Production Architecture</h3>
+  <p class="govuk-body">
+    <strong>This sandbox demo</strong> uses Chart.js with Lambda-generated sample data (£0.00/month) to demonstrate self-service analytics concepts without licensing costs.
+  </p>
+  <p class="govuk-body">
+    <strong>Production deployment</strong> would use Amazon QuickSight with:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>QuickSight Reader users</strong> - £18/user/month for dashboard viewing, filtering, and export</li>
+    <li><strong>QuickSight Author users</strong> - £24/user/month for creating/editing dashboards (1-2 per council)</li>
+    <li><strong>SPICE in-memory caching</strong> - 10 GB free tier, enables sub-second queries over millions of rows</li>
+    <li><strong>Athena serverless SQL</strong> - £5/TB scanned (typically £2-5/month for council data)</li>
+    <li><strong>Glue Data Catalog</strong> - Auto-discovers CSV schema, free tier covers council usage</li>
+    <li><strong>Embedded dashboards</strong> - Integrate into council intranet via iframe</li>
+    <li><strong>ML Insights</strong> - Automatic anomaly detection and forecasting</li>
+  </ul>
+  <p class="govuk-body govuk-!-font-weight-bold">
+    Typical production cost: £200-400/month for 10-20 users with real-time analytics
+  </p>
+</div>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Real-time data exploration
+    </h3>
+    <p class="govuk-body">
+      You filtered 5 months of service data by date range, service type, and ward with instant results. No
+      waiting for IT to create Excel reports - answers in seconds, not days.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: 3-7 day lag eliminated → same-day decision-making
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Interactive drill-down
+    </h3>
+    <p class="govuk-body">
+      You clicked charts to drill into underlying data, sorted tables by any column, and explored multi-dimensional
+      patterns. Officers can follow their curiosity without submitting IT tickets.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Unlimited exploration vs static Excel reports
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      30-second committee reporting
+    </h3>
+    <p class="govuk-body">
+      You exported the dashboard to PDF in 30 seconds. This replaces 4.5 hours of analyst time creating
+      PowerPoint slides from multiple Excel files. 90x faster committee paper preparation.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: 4.5 hours → 3 minutes per committee report
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      80% IT dependency reduction
+    </h3>
+    <p class="govuk-body">
+      Self-service analytics reduces ad-hoc IT report requests by 80%, freeing 384 hours annually for strategic
+      projects. IT shifts from repetitive reporting to digital transformation.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: £13,440/year IT time savings + strategic focus
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">Committee-ready talking points</h2>
+
+<p class="govuk-body">
+  Use these points when presenting to decision-makers:
+</p>
+
+<div class="ndx-committee-language">
+  <h3 class="govuk-heading-s">The problem</h3>
+  <p class="govuk-body">
+    "Officers currently submit tickets to IT for ad-hoc reports, waiting 3-7 days for Excel spreadsheets.
+    With 20 ad-hoc requests per month, IT spends 480 hours annually on repetitive reporting instead of
+    strategic transformation projects. Data analysts spend 4 hours per week creating weekly service manager
+    reports. This creates decision lag - service managers make decisions on week-old data, not real-time insights."
+  </p>
+
+  <h3 class="govuk-heading-s">The solution</h3>
+  <p class="govuk-body">
+    "Amazon QuickSight provides self-service business intelligence dashboards accessible 24/7 via web browser.
+    Officers apply filters, drill down into data, and export reports without IT involvement. Dashboard reflects
+    latest service metrics (updated daily or hourly via automated S3 uploads). 80% of routine questions answered
+    through self-service, leaving IT to handle only complex analysis requiring custom queries."
+  </p>
+
+  <h3 class="govuk-heading-s">The value</h3>
+  <p class="govuk-body">
+    "For 10 users, annual savings of £17,340 (analyst time + IT time) against £2,218 cost delivers 6.8:1 ROI
+    with 1.5 month payback. Beyond financial savings: faster decision-making (same-day data vs week-old reports),
+    data-driven culture (officers ask more questions when answers are instant), democratic transparency
+    (councillors access same dashboard as officers), and IT strategic focus (384 hours freed for automation
+    and digital services)."
+  </p>
+
+  <h3 class="govuk-heading-s">The risk</h3>
+  <p class="govuk-body">
+    "Low. Predictable £18/user/month pricing (Reader users). 2-month pilot with 5 users costs £450 to validate
+    ROI and user adoption. Pre-built dashboards require no SQL skills - point-and-click filtering. CloudWatch
+    billing alarms prevent unexpected costs. QuickSight connects to existing council data (CSV exports to S3)
+    - no database migration required."
+  </p>
+</div>
+
+{# Story 15.3: Completion next steps with proper links #}
+{% set scenarioId = "quicksight-dashboard" %}
+{% set scenarioName = "QuickSight Dashboard" %}
+{% set totalSteps = 4 %}
+{% include "components/completion-next-steps.njk" %}
+
+<div class="govuk-warning-text govuk-!-margin-top-8">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Important</span>
+    Remember to clean up your AWS resources
+  </strong>
+</div>
+
+<div class="ndx-cleanup-section">
+  <h2 class="govuk-heading-m">Clean up your resources</h2>
+
+  <p class="govuk-body">
+    Your QuickSight Dashboard resources will automatically delete after 2 hours, but you can delete them
+    now to stop any further charges:
+  </p>
+
+  <ol class="govuk-list govuk-list--number">
+    <li>
+      Go to <a href="https://eu-west-2.console.aws.amazon.com/cloudformation/home?region=eu-west-2#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console</a>
+    </li>
+    <li>
+      Find your stack: <code>ndx-try-quicksight-dashboard-[timestamp]</code>
+    </li>
+    <li>
+      Select the stack and click "Delete"
+    </li>
+    <li>
+      Confirm deletion - this takes 3-5 minutes
+    </li>
+    <li>
+      S3 bucket and QuickSight dashboard will be automatically removed
+    </li>
+  </ol>
+
+  <p class="govuk-body">
+    <strong>Estimated cost so far:</strong> £1.50 for a 10-minute evaluation (QuickSight Reader user + SPICE cache + Athena queries)
+  </p>
+
+  <details class="govuk-details govuk-!-margin-top-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        What if I want to test with more council data?
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        If you want to continue testing QuickSight:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Upload your own CSV files to the S3 bucket (check CloudFormation Resources tab for bucket name)</li>
+        <li>Run Glue crawler to create table schema from your CSV structure</li>
+        <li>Refresh QuickSight dataset to pull latest data from Athena</li>
+        <li>Cost: £18/user/month (Reader) + minimal Athena/S3 costs (~£5/month)</li>
+        <li>Test with real council service data (anonymize if using production data)</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Production considerations</h2>
+
+  <p class="govuk-body">
+    If you're considering deploying QuickSight for real council analytics:
+  </p>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Integrating with council systems
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body"><strong>Data integration options:</strong></p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>CSV upload:</strong> Export from council systems, upload to S3 (manual or automated via script)</li>
+        <li><strong>API integration:</strong> Lambda function calls council API, writes to S3 hourly/daily</li>
+        <li><strong>Direct database connection:</strong> QuickSight connects to council database via VPC (real-time queries)</li>
+        <li><strong>Data warehouse:</strong> QuickSight connects to existing Redshift/Snowflake data warehouse</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Row-level security for ward managers
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        Row-level security (RLS) ensures each ward manager sees only their ward's data in shared dashboard:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Define RLS rules in dataset: map user email to ward field</li>
+        <li>Ward Manager A sees only "Central Ward" rows, Ward Manager B sees only "North Ward" rows</li>
+        <li>Councillors see ward-specific data for democratic oversight</li>
+        <li>Service managers see all wards for council-wide analysis</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Cost optimization strategies
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body"><strong>Keep QuickSight costs predictable:</strong></p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Use Reader users (£18/month):</strong> 90% of users only need viewing/filtering (not creating dashboards)</li>
+        <li><strong>Partition S3 data by date:</strong> Athena scans only relevant partitions (90% cost reduction)</li>
+        <li><strong>Enable SPICE caching:</strong> 10x faster queries, no per-query Athena cost, 10 GB free tier</li>
+        <li><strong>Set CloudWatch billing alarms:</strong> Email notification at £100/month threshold</li>
+        <li><strong>Schedule dataset refreshes:</strong> Daily refresh at 6am (not real-time) reduces query costs</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Governance and audit
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body"><strong>Data governance controls:</strong></p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>CloudTrail logging:</strong> Track who accessed which dashboards when (GDPR audit trail)</li>
+        <li><strong>Column-level security:</strong> Hide sensitive fields from certain user groups</li>
+        <li><strong>VPC deployment:</strong> QuickSight accesses databases via private VPC (not public internet)</li>
+        <li><strong>Data residency:</strong> All data stays in UK (eu-west-2 London region)</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Questions or feedback?</h2>
+
+  <p class="govuk-body">
+    We'd love to hear about your experience with this walkthrough:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+    <li><a href="https://github.com/co-cddo/ndx-try-feedback/issues" target="_blank" rel="noopener noreferrer" class="govuk-link">Report an issue on GitHub</a></li>
+    <li><a href="/partner-tour/" class="govuk-link">Schedule a guided tour with AWS partners</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .ndx-takeaway-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-committee-language {
+    padding: 30px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+    margin: 30px 0;
+  }
+
+  .ndx-committee-language h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  .ndx-committee-language h3:first-child {
+    margin-top: 0;
+  }
+
+  .ndx-evidence-pack-section {
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-cleanup-section {
+    padding: 30px;
+    background-color: #fff7e6;
+    border-left: 4px solid #f47738;
+  }
+
+  .ndx-cleanup-section code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-related-scenario {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    min-height: 140px;
+  }
+
+  .ndx-related-scenario h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-takeaway-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-related-scenario {
+      min-height: auto;
+    }
+  }
+</style>

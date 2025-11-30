@@ -1,0 +1,350 @@
+# Sample Evidence Pack Data for Testing
+# This file provides placeholder data for developing and testing the evidence pack template
+
+session:
+  council_name: "Example District Council"
+  evaluation_date: "2025-01-28"
+  evaluator_name: "Jane Smith"
+  evaluator_role: "Chief Technology Officer"
+  scenario_id: "council-chatbot"
+
+  # User responses from evaluation form
+  what_surprised: "The speed at which the chatbot understood complex planning queries and provided accurate responses based on our council's specific policies. The natural language processing was impressive."
+  would_implement: "yes"
+  production_wants: "Integration with our existing CRM system, ability to escalate complex queries to human agents, and multi-language support for our diverse resident base."
+  concerns: "Data security and ensuring responses are accurate and compliant with council policies. Need to understand the ongoing costs and maintenance requirements."
+  likelihood_proceed: 4
+  timeframe: "3-6 months"
+  budget_available: "yes"
+  stakeholders_involved: "IT Team, Customer Services, Legal, Data Protection Officer"
+
+  # Technical evaluation notes
+  deployment_time_actual: "4 minutes"
+  deployment_issues: "None - deployment was smooth"
+  chatbot_accuracy: "85%"
+  response_time_avg: "2.3 seconds"
+  queries_tested: 25
+  queries_successful: 21
+
+  # Business impact observations
+  estimated_call_reduction: "30-40%"
+  staff_time_saved_hours: "15 hours per week"
+  resident_satisfaction_impact: "Positive - instant responses 24/7"
+
+# CTO-specific technical evaluation
+cto_evaluation:
+  architecture_assessment:
+    strengths:
+      - "Serverless architecture reduces operational overhead"
+      - "Well-architected pattern using AWS best practices"
+      - "Clear separation of concerns with Lambda functions"
+      - "Scalable design that can handle traffic spikes"
+    concerns:
+      - "Vendor lock-in with AWS-specific services"
+      - "Need to understand disaster recovery procedures"
+      - "Integration complexity with existing on-premises systems"
+
+  security_compliance:
+    data_residency: "EU West 2 (London) - meets UK data sovereignty requirements"
+    encryption: "Data encrypted at rest (S3) and in transit (TLS 1.3)"
+    access_control: "IAM roles with least privilege principle applied"
+    compliance_frameworks:
+      - "GDPR compliant data handling"
+      - "Cyber Essentials alignment"
+      - "ISO 27001 compatible controls"
+    shared_responsibility:
+      aws_manages: "Infrastructure security, physical data centers, network security"
+      council_manages: "Data classification, application security, user access management, content accuracy"
+
+  technical_runbook:
+    deployment_steps:
+      - step: "Login to AWS Console with Innovation Sandbox credentials"
+        time: "1 minute"
+      - step: "Click 'Deploy to Innovation Sandbox' button from NDX:Try portal"
+        time: "30 seconds"
+      - step: "Review CloudFormation parameters (pre-configured)"
+        time: "1 minute"
+      - step: "Acknowledge IAM capabilities and create stack"
+        time: "30 seconds"
+      - step: "Wait for stack creation (automatic resource provisioning)"
+        time: "3-5 minutes"
+
+    monitoring:
+      cloudwatch_metrics:
+        - "Lambda invocation count and duration"
+        - "Bedrock API call count and latency"
+        - "Error rates and types"
+      cloudwatch_alarms:
+        - "High error rate (>5%)"
+        - "Response time threshold (>5s)"
+        - "Cost threshold breach"
+
+    troubleshooting:
+      common_issues:
+        - issue: "Chatbot not responding"
+          resolution: "Check Lambda function logs in CloudWatch, verify Bedrock model access"
+        - issue: "Incorrect answers"
+          resolution: "Review knowledge base content in S3, update FAQ documents"
+        - issue: "High latency"
+          resolution: "Check CloudWatch metrics, consider Lambda memory increase"
+
+# Service Manager-specific evaluation
+service_manager_evaluation:
+  resident_impact:
+    current_state:
+      - "Residents wait 15-20 minutes on phone for simple queries"
+      - "Call center only available 9am-5pm weekdays"
+      - "Repeat questions account for 40% of call volume"
+      - "No self-service option for common queries"
+
+    future_state:
+      - "Instant responses 24/7 via chatbot"
+      - "Phone lines freed up for complex cases"
+      - "Residents can get answers anytime, anywhere"
+      - "Consistent, accurate information every time"
+
+    citizen_journey:
+      before:
+        - step: "Resident has question about bin collection"
+        - step: "Waits in phone queue for 15 minutes"
+        - step: "Asks simple question to agent"
+        - step: "Agent looks up information in system"
+        - step: "Total time: 20 minutes"
+
+      after:
+        - step: "Resident visits council website"
+        - step: "Clicks chatbot widget"
+        - step: "Types question in plain English"
+        - step: "Receives instant, accurate answer with links"
+        - step: "Total time: 2 minutes"
+
+  service_improvement:
+    kpis:
+      - metric: "First contact resolution"
+        current: "65%"
+        target: "85%"
+      - metric: "Average handling time"
+        current: "8 minutes"
+        target: "5 minutes"
+      - metric: "Out of hours contact attempts"
+        current: "0 (service unavailable)"
+        target: "100% handled by chatbot"
+
+    resident_feedback_themes:
+      - "Appreciate 24/7 availability"
+      - "Find chatbot responses helpful for simple queries"
+      - "Like being able to escalate to human when needed"
+
+# Finance-specific evaluation
+finance_evaluation:
+  cost_analysis:
+    current_costs:
+      call_center_annual: "£180,000"
+      staff_fte: "6 FTE"
+      avg_cost_per_query: "£4.50"
+      annual_query_volume: "40,000"
+
+    aws_costs:
+      year_1:
+        setup: "£5,000"
+        aws_monthly: "£250"
+        aws_annual: "£3,000"
+        integration: "£8,000"
+        training: "£2,000"
+        total: "£18,000"
+
+      year_2:
+        aws_monthly: "£300"
+        aws_annual: "£3,600"
+        support: "£4,000"
+        enhancements: "£3,000"
+        total: "£10,600"
+
+      year_3:
+        aws_monthly: "£350"
+        aws_annual: "£4,200"
+        support: "£4,200"
+        enhancements: "£2,000"
+        total: "£10,400"
+
+  tco_projection:
+    three_year_total: "£39,000"
+    cost_per_query_with_chatbot: "£2.10"
+    savings_per_query: "£2.40"
+    annual_savings: "£96,000"
+    three_year_roi: "647%"
+    payback_period: "4.5 months"
+
+    cost_breakdown:
+      aws_services:
+        - service: "Amazon Bedrock"
+          percentage: 60
+          annual_cost: "£1,800"
+        - service: "Amazon Lex"
+          percentage: 25
+          annual_cost: "£750"
+        - service: "AWS Lambda"
+          percentage: 10
+          annual_cost: "£300"
+        - service: "Amazon S3"
+          percentage: 5
+          annual_cost: "£150"
+
+      non_aws_costs:
+        - item: "Integration development"
+          year_1: "£8,000"
+          year_2: "£0"
+          year_3: "£0"
+        - item: "Staff training"
+          year_1: "£2,000"
+          year_2: "£500"
+          year_3: "£500"
+        - item: "Content updates"
+          year_1: "£2,000"
+          year_2: "£3,000"
+          year_3: "£2,000"
+
+# Developer-specific evaluation
+developer_evaluation:
+  technical_implementation:
+    architecture_components:
+      - component: "Amazon Lex Bot"
+        purpose: "Natural language understanding and conversation flow"
+        complexity: "Medium"
+      - component: "Amazon Bedrock (Claude 3 Haiku)"
+        purpose: "Advanced AI reasoning for complex queries"
+        complexity: "Low (managed service)"
+      - component: "AWS Lambda Functions"
+        purpose: "Business logic and integrations"
+        complexity: "Medium"
+      - component: "Amazon S3"
+        purpose: "Knowledge base storage (FAQs, policies)"
+        complexity: "Low"
+      - component: "Amazon DynamoDB"
+        purpose: "Conversation history and session management"
+        complexity: "Medium"
+
+    integration_points:
+      - system: "Council CRM"
+        method: "REST API"
+        effort: "High - 3-4 weeks"
+      - system: "Council website"
+        method: "JavaScript widget embed"
+        effort: "Low - 2-3 days"
+      - system: "Microsoft Teams"
+        method: "Bot Framework connector"
+        effort: "Medium - 1-2 weeks"
+
+    technical_runbook_summary:
+      deployment:
+        - "One-click CloudFormation deployment"
+        - "Pre-configured parameters for Innovation Sandbox"
+        - "Automatic IAM role creation with least privilege"
+        - "3-5 minute deployment time"
+
+      monitoring:
+        - "CloudWatch Logs for all Lambda functions"
+        - "CloudWatch Metrics for invocation counts and latency"
+        - "Custom dashboards for business metrics"
+        - "CloudWatch Alarms for error rates and cost thresholds"
+
+      troubleshooting:
+        - "Check Lambda function logs in CloudWatch"
+        - "Verify Bedrock model access and quotas"
+        - "Review Lex conversation logs for intent recognition"
+        - "Test S3 knowledge base content accessibility"
+
+      maintenance:
+        - "Update S3 knowledge base content monthly"
+        - "Review and optimize Lambda function performance quarterly"
+        - "Update Lex intents based on conversation analytics"
+        - "Apply AWS service updates and patches automatically"
+
+# Shared evaluation data (all personas)
+evaluation_summary:
+  strengths:
+    - "Quick and easy deployment with CloudFormation"
+    - "Impressive natural language understanding"
+    - "Cost-effective compared to current call center operations"
+    - "Scalable architecture that can grow with demand"
+    - "Innovation Sandbox made evaluation safe and low-risk"
+
+  weaknesses:
+    - "Initial setup requires AWS account and basic understanding"
+    - "Knowledge base requires ongoing curation and updates"
+    - "Some complex queries still need human escalation"
+    - "Integration with existing systems requires development effort"
+
+  opportunities:
+    - "Expand to other council services (planning, benefits, council tax)"
+    - "Multi-language support for diverse communities"
+    - "Voice integration for accessibility"
+    - "Proactive notifications and reminders"
+
+  risks:
+    - "Resident acceptance of chatbot vs. human interaction"
+    - "Data privacy and security concerns"
+    - "Ongoing costs if usage exceeds estimates"
+    - "Dependency on AWS service availability"
+
+roi_projection:
+  year_1:
+    investment: "£18,000"
+    savings: "£96,000"
+    net_benefit: "£78,000"
+    roi_percentage: "433%"
+
+  year_2:
+    investment: "£10,600"
+    savings: "£96,000"
+    net_benefit: "£85,400"
+    roi_percentage: "806%"
+
+  year_3:
+    investment: "£10,400"
+    savings: "£96,000"
+    net_benefit: "£85,600"
+    roi_percentage: "823%"
+
+  three_year_summary:
+    total_investment: "£39,000"
+    total_savings: "£288,000"
+    total_net_benefit: "£249,000"
+    average_roi: "638%"
+
+next_steps:
+  immediate:
+    - action: "Present findings to senior leadership team"
+      owner: "CTO"
+      deadline: "2 weeks"
+    - action: "Schedule demo for customer services team"
+      owner: "Service Manager"
+      deadline: "1 week"
+    - action: "Obtain formal budget approval"
+      owner: "Finance Director"
+      deadline: "4 weeks"
+
+  short_term:
+    - action: "Develop detailed implementation plan"
+      owner: "IT Team"
+      deadline: "6 weeks"
+    - action: "Conduct data protection impact assessment"
+      owner: "DPO"
+      deadline: "6 weeks"
+    - action: "Identify integration requirements with CRM"
+      owner: "Developer Team"
+      deadline: "8 weeks"
+
+  medium_term:
+    - action: "Procure AWS production account"
+      owner: "Procurement"
+      deadline: "3 months"
+    - action: "Build and test integrations"
+      owner: "Developer Team"
+      deadline: "4 months"
+    - action: "Develop knowledge base content"
+      owner: "Customer Services"
+      deadline: "4 months"
+    - action: "Pilot with limited user group"
+      owner: "Service Manager"
+      deadline: "5 months"

@@ -1,0 +1,151 @@
+{#
+  Wow Moment Component (Story 3.2 - AC-3.2.13)
+
+  Distinctive callout component for highlighting technical achievements in plain English.
+  Uses GOV.UK notification/panel pattern with enhanced styling for emphasis.
+
+  Props:
+    - title: string (required) - Heading for the wow moment
+    - explanation: string (required) - Plain English explanation of what's impressive
+    - technicalDetail: string (optional) - Optional technical depth for interested users
+    - icon: string (optional) - Emoji or icon to display (default: "💡")
+
+  Usage:
+    {% include "components/wow-moment.njk" %}
+
+  Accessibility:
+    - ARIA label for assistive technology
+    - Semantic heading hierarchy
+    - High contrast colors
+    - Keyboard accessible details expansion
+#}
+
+{% if title and explanation %}
+<div class="ndx-wow-moment" role="region" aria-labelledby="wow-moment-title-{{ title | slug }}">
+  <div class="ndx-wow-moment__icon" aria-hidden="true">
+    {{ icon if icon else "💡" }}
+  </div>
+
+  <div class="ndx-wow-moment__content">
+    <h3 class="ndx-wow-moment__title govuk-heading-s" id="wow-moment-title-{{ title | slug }}">
+      {{ title }}
+    </h3>
+
+    <p class="govuk-body ndx-wow-moment__explanation">
+      {{ explanation }}
+    </p>
+
+    {% if technicalDetail %}
+      <details class="govuk-details ndx-wow-moment__technical">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">
+            Technical detail
+          </span>
+        </summary>
+        <div class="govuk-details__text">
+          {{ technicalDetail }}
+        </div>
+      </details>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<style>
+  .ndx-wow-moment {
+    display: flex;
+    gap: 20px;
+    padding: 25px;
+    margin: 30px 0;
+    background-color: #ffffff;
+    border-left: 5px solid #1d70b8;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .ndx-wow-moment__icon {
+    font-size: 48px;
+    line-height: 1;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+
+  .ndx-wow-moment__content {
+    flex: 1;
+  }
+
+  .ndx-wow-moment__title {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #0b0c0c;
+  }
+
+  .ndx-wow-moment__explanation {
+    margin-bottom: 15px;
+    font-size: 19px;
+    line-height: 1.6;
+  }
+
+  .ndx-wow-moment__technical {
+    margin-top: 15px;
+    margin-bottom: 0;
+  }
+
+  .ndx-wow-moment__technical .govuk-details__text {
+    background-color: #f8f8f8;
+    padding: 15px;
+    border-left: 3px solid #b1b4b6;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .ndx-wow-moment {
+      border-left-width: 8px;
+      border-left-color: #000000;
+    }
+
+    .ndx-wow-moment__title {
+      color: #000000;
+    }
+  }
+
+  /* Reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .ndx-wow-moment {
+      background: #f3f2f1;
+    }
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 640px) {
+    .ndx-wow-moment {
+      flex-direction: column;
+      gap: 15px;
+      padding: 20px 15px;
+    }
+
+    .ndx-wow-moment__icon {
+      font-size: 36px;
+      align-self: center;
+    }
+
+    .ndx-wow-moment__explanation {
+      font-size: 16px;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .ndx-wow-moment {
+      border: 2px solid #000000;
+      box-shadow: none;
+      page-break-inside: avoid;
+    }
+
+    .ndx-wow-moment__technical .govuk-details__text {
+      display: block !important;
+    }
+  }
+</style>

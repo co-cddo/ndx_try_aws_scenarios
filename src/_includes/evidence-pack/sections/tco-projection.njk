@@ -1,0 +1,310 @@
+{#
+  3-Year TCO Projection Section (Finance Deep - AC-4.1.12)
+  Updated for Story 4-4 to use scenarioData.tco_projection
+
+  Variables:
+  - scenarioData: Scenario data from scenarios.yaml (includes tco_projection, success_metrics)
+  - finance_evaluation: Legacy Finance evaluation data (fallback)
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    3-Year Total Cost of Ownership (TCO) Projection
+  </h2>
+
+  {% include "evidence-pack/partials/persona-header.njk" %}
+
+  {% if scenarioData and scenarioData.tco_projection %}
+  {# Story 4-4: Use tco_projection from scenarios.yaml #}
+  {% set tco = scenarioData.tco_projection %}
+  {% set metrics = scenarioData.success_metrics %}
+
+  {# Calculate totals #}
+  {% set three_year_total = tco.year_1.total + tco.year_2.total + tco.year_3.total %}
+  {% set three_year_savings = metrics.roi.annual_savings * 3 %}
+  {% set three_year_roi = ((three_year_savings - three_year_total) / three_year_total * 100) | round %}
+
+  <h3 class="govuk-heading-m">TCO Summary</h3>
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h4 class="govuk-panel__title">
+      3-Year Total Cost of Ownership
+    </h4>
+    <div class="govuk-panel__body">
+      £{{ three_year_total }}
+    </div>
+  </div>
+
+  <div class="govuk-grid-row govuk-!-margin-top-6">
+    <div class="govuk-grid-column-one-third">
+      <dl class="govuk-summary-list govuk-summary-list--no-border">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            Annual Savings
+          </dt>
+          <dd class="govuk-summary-list__value">
+            <strong>£{{ metrics.roi.annual_savings }}</strong>
+          </dd>
+        </div>
+      </dl>
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <dl class="govuk-summary-list govuk-summary-list--no-border">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            3-Year ROI
+          </dt>
+          <dd class="govuk-summary-list__value">
+            <strong class="govuk-tag govuk-tag--green">{{ three_year_roi }}%</strong>
+          </dd>
+        </div>
+      </dl>
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <dl class="govuk-summary-list govuk-summary-list--no-border">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            Payback Period
+          </dt>
+          <dd class="govuk-summary-list__value">
+            <strong>{{ metrics.roi.payback_months }} month{% if metrics.roi.payback_months != 1 %}s{% endif %}</strong>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <h3 class="govuk-heading-m">Year-by-Year Cost Breakdown</h3>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Cost Category</th>
+        <th scope="col" class="govuk-table__header">Year 1</th>
+        <th scope="col" class="govuk-table__header">Year 2</th>
+        <th scope="col" class="govuk-table__header">Year 3</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">AWS Services</th>
+        <td class="govuk-table__cell">£{{ tco.year_1.aws_services }}</td>
+        <td class="govuk-table__cell">£{{ tco.year_2.aws_services}}</td>
+        <td class="govuk-table__cell">£{{ tco.year_3.aws_services}}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Integration & Development</th>
+        <td class="govuk-table__cell">£{{ tco.year_1.integration}}</td>
+        <td class="govuk-table__cell">£{{ tco.year_2.integration}}</td>
+        <td class="govuk-table__cell">£{{ tco.year_3.integration}}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Training</th>
+        <td class="govuk-table__cell">£{{ tco.year_1.training}}</td>
+        <td class="govuk-table__cell">£{{ tco.year_2.training}}</td>
+        <td class="govuk-table__cell">£{{ tco.year_3.training}}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Support & Maintenance</th>
+        <td class="govuk-table__cell">£{{ tco.year_1.support}}</td>
+        <td class="govuk-table__cell">£{{ tco.year_2.support}}</td>
+        <td class="govuk-table__cell">£{{ tco.year_3.support}}</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header"><strong>Total</strong></th>
+        <td class="govuk-table__cell"><strong>£{{ tco.year_1.total}}</strong></td>
+        <td class="govuk-table__cell"><strong>£{{ tco.year_2.total}}</strong></td>
+        <td class="govuk-table__cell"><strong>£{{ tco.year_3.total}}</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="govuk-heading-m">Cost Breakdown Analysis</h3>
+  <div class="govuk-grid-row govuk-!-margin-bottom-6">
+    <div class="govuk-grid-column-one-half">
+      <h4 class="govuk-heading-s">Year 1 Costs (£{{ tco.year_1.total}})</h4>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>AWS Services: {{ (tco.year_1.aws_services / tco.year_1.total * 100) | round }}% (£{{ tco.year_1.aws_services }})</li>
+        <li>Integration: {{ (tco.year_1.integration / tco.year_1.total * 100) | round }}% (£{{ tco.year_1.integration}})</li>
+        <li>Training: {{ (tco.year_1.training / tco.year_1.total * 100) | round }}% (£{{ tco.year_1.training}})</li>
+        <li>Support: {{ (tco.year_1.support / tco.year_1.total * 100) | round }}% (£{{ tco.year_1.support}})</li>
+      </ul>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <h4 class="govuk-heading-s">Ongoing Costs (Years 2-3)</h4>
+      <p class="govuk-body">
+        After initial integration investment, annual costs stabilize to approximately £{{ (tco.year_2.total + tco.year_3.total) // 2}} per year:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>AWS usage grows modestly with adoption</li>
+        <li>No additional integration costs</li>
+        <li>Minimal training (new staff only)</li>
+        <li>Ongoing support remains stable</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="govuk-heading-m">Cost Efficiency Analysis</h3>
+  {% set current_cost_per_unit = (metrics.baseline.value * 12 * 60 if metrics.service_area == "Contact Center" else 300) %}
+  {% set new_cost_per_unit = three_year_total / (metrics.baseline.value * 12 * 3) %}
+
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        3-Year Investment
+      </dt>
+      <dd class="govuk-summary-list__value">
+        £{{ three_year_total }}
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        3-Year Savings
+      </dt>
+      <dd class="govuk-summary-list__value">
+        £{{ three_year_savings}}
+        <strong class="govuk-tag govuk-tag--green govuk-!-margin-left-2">
+          £{{ three_year_savings - three_year_total}} net benefit
+        </strong>
+      </dd>
+    </div>
+  </dl>
+
+  <h3 class="govuk-heading-m">Key Assumptions & Variables</h3>
+  <div class="govuk-inset-text">
+    <p class="govuk-body"><strong>This TCO projection assumes:</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>AWS costs based on current London (eu-west-2) pricing</li>
+      <li>Integration costs based on typical council IT rates</li>
+      <li>10% annual growth in AWS usage due to increased adoption</li>
+      <li>Staff FTE costs remain at current levels (no redundancies)</li>
+      <li>Exchange rates and cloud pricing remain stable</li>
+    </ul>
+  </div>
+
+  <h3 class="govuk-heading-m">Cost Optimization Opportunities</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>AWS Reserved Instances:</strong> Commit to 1-3 year terms for 30-50% discount on compute</li>
+    <li><strong>Savings Plans:</strong> Flexible pricing model for consistent usage patterns</li>
+    <li><strong>Right-sizing:</strong> Optimize Lambda memory and compute based on actual usage</li>
+    <li><strong>Data lifecycle:</strong> Archive older data to lower-cost S3 storage tiers</li>
+    <li><strong>Monitoring:</strong> Set up cost alerts and budgets to prevent overruns</li>
+    <li><strong>Tagging strategy:</strong> Track costs by department or project for chargeback</li>
+  </ul>
+
+  <h3 class="govuk-heading-m">Risk Factors & Mitigation</h3>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Risk</th>
+        <th scope="col" class="govuk-table__header">Impact</th>
+        <th scope="col" class="govuk-table__header">Mitigation</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Higher than expected usage</th>
+        <td class="govuk-table__cell">AWS costs exceed projections</td>
+        <td class="govuk-table__cell">Set CloudWatch alarms, implement usage quotas</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">AWS price increases</th>
+        <td class="govuk-table__cell">Annual costs rise</td>
+        <td class="govuk-table__cell">Lock in Reserved Instance pricing, monitor announcements</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Integration complexity</th>
+        <td class="govuk-table__cell">Development costs exceed estimates</td>
+        <td class="govuk-table__cell">Phased rollout, agile methodology, buffer in budget</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Low adoption rate</th>
+        <td class="govuk-table__cell">ROI not achieved</td>
+        <td class="govuk-table__cell">Change management, resident communications, training</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="govuk-heading-m">Budget Recommendation</h3>
+  <div class="govuk-panel" style="border: 2px solid #0b0c0c; background-color: #f3f2f1;">
+    <div class="govuk-panel__body" style="color: #0b0c0c;">
+      <p class="govuk-body">
+        <strong>Year 1 Budget Request:</strong> £{{ tco.year_1.total}}
+      </p>
+      <p class="govuk-body">
+        This includes AWS services, integration development, training, and ongoing support.
+      </p>
+      <p class="govuk-body">
+        <strong>Expected Payback:</strong> {{ metrics.roi.payback_months }} month{% if metrics.roi.payback_months != 1 %}s{% endif %} from go-live
+      </p>
+      <p class="govuk-body">
+        <strong>3-Year Net Benefit:</strong> £{{ three_year_savings - three_year_total}}
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-warning-text govuk-!-margin-top-6">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      TCO projections are estimates based on typical implementations. Conduct detailed cost analysis with your Finance team using your council's specific volume, staff costs, and integration requirements.
+    </strong>
+  </div>
+
+  {% elif finance_evaluation and finance_evaluation.tco_projection %}
+  {# Fallback to legacy finance_evaluation.tco_projection structure #}
+  {% set tco = finance_evaluation.tco_projection %}
+
+  <h3 class="govuk-heading-m">TCO Summary</h3>
+  <div class="govuk-panel govuk-panel--confirmation">
+    <h4 class="govuk-panel__title">
+      3-Year Total Cost of Ownership
+    </h4>
+    <div class="govuk-panel__body">
+      {{ tco.three_year_total }}
+    </div>
+  </div>
+
+  <div class="govuk-grid-row govuk-!-margin-top-6">
+    <div class="govuk-grid-column-one-third">
+      <dl class="govuk-summary-list govuk-summary-list--no-border">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            Annual Savings
+          </dt>
+          <dd class="govuk-summary-list__value">
+            <strong>{{ tco.annual_savings }}</strong>
+          </dd>
+        </div>
+      </dl>
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <dl class="govuk-summary-list govuk-summary-list--no-border">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            3-Year ROI
+          </dt>
+          <dd class="govuk-summary-list__value">
+            <strong class="govuk-tag govuk-tag--green">{{ tco.three_year_roi }}</strong>
+          </dd>
+        </div>
+      </dl>
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <dl class="govuk-summary-list govuk-summary-list--no-border">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">
+            Payback Period
+          </dt>
+          <dd class="govuk-summary-list__value">
+            <strong>{{ tco.payback_period }}</strong>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  {% else %}
+  <p class="govuk-body">
+    Detailed TCO projection will be developed during procurement and business case approval.
+  </p>
+  {% endif %}
+</div>

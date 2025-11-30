@@ -1,0 +1,181 @@
+# Screenshot data for FOI Redaction scenario (Story 13.2)
+# Used by screenshot.njk component to display S3-hosted screenshots
+# S3 Base: https://ndx-try-screenshots.s3.eu-west-2.amazonaws.com/current/foi-redaction/
+
+scenario: foi-redaction
+scenarioTitle: "FOI Redaction"
+awsService: "Amazon Comprehend"
+totalSteps: 5
+
+# Step-specific screenshots
+steps:
+  - step: 1
+    title: "Access the Redaction Tool"
+    screenshots:
+      - id: cloudformation-outputs
+        filename: step-1-cloudformation-outputs.png
+        alt: "CloudFormation stack outputs showing the FOI Redaction tool URL"
+        caption: "Find your FOI Redaction tool URL in CloudFormation Outputs"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "10%"
+            y: "42%"
+            label: "RedactionToolURL output"
+            arrow: "right"
+
+      - id: redaction-interface
+        filename: step-1-redaction-interface.png
+        alt: "FOI Redaction web interface with document upload and PII detection options"
+        caption: "The FOI Redaction tool ready to process sensitive documents"
+        width: 1920
+        height: 1080
+
+  - step: 2
+    title: "Upload a Document"
+    screenshots:
+      - id: upload-interface
+        filename: step-2-upload-interface.png
+        alt: "Document upload area with sample FOI response document selected"
+        caption: "Upload an FOI response document containing personal information"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "31%"
+            y: "37%"
+            label: "Upload zone"
+            arrow: "down"
+
+      - id: pii-options
+        filename: step-2-pii-options.png
+        alt: "PII detection options showing categories like names, addresses, phone numbers"
+        caption: "Select which types of personal information to detect and redact"
+        width: 1920
+        height: 1080
+
+  - step: 3
+    title: "Review Detected PII"
+    screenshots:
+      - id: pii-detection-results
+        filename: step-3-pii-detection-results.png
+        alt: "Document showing highlighted personal information detected by Comprehend"
+        caption: "Amazon Comprehend identifies personal information in the document"
+        width: 1920
+        height: 1080
+
+      - id: pii-categories
+        filename: step-3-pii-categories.png
+        alt: "List of detected PII organized by category with confidence scores"
+        caption: "Review detected items by category: names, addresses, dates, etc."
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "40%"
+            y: "21%"
+            label: "Confidence level"
+            arrow: "left"
+
+      - id: document-preview-pii
+        filename: step-3-document-preview.png
+        alt: "Document preview with PII highlighted in different colors by category"
+        caption: "Colour-coded highlighting shows different types of personal information"
+        width: 1920
+        height: 1080
+
+  - step: 4
+    title: "Apply Redactions"
+    screenshots:
+      - id: redaction-preview
+        filename: step-4-redaction-preview.png
+        alt: "Document showing redacted content with black bars over personal information"
+        caption: "Preview the document with selected redactions applied"
+        width: 1920
+        height: 1080
+
+      - id: selective-redaction
+        filename: step-4-selective-redaction.png
+        alt: "Interface showing checkboxes to select which detected items to redact"
+        caption: "Choose which items to redact - keep relevant information visible"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "12%"
+            y: "46%"
+            label: "Redaction selection"
+            arrow: "right"
+
+  - step: 5
+    title: "Download & Audit"
+    screenshots:
+      - id: download-options
+        filename: step-5-download-options.png
+        alt: "Download options showing redacted PDF and audit log export"
+        caption: "Download the redacted document and audit trail"
+        width: 1920
+        height: 1080
+
+      - id: audit-log
+        filename: step-5-audit-log.png
+        alt: "Audit log showing all redactions made with timestamps and categories"
+        caption: "The audit log records every redaction for compliance purposes"
+        width: 1920
+        height: 1080
+
+      - id: comprehend-console
+        filename: step-5-comprehend-console.png
+        alt: "AWS Comprehend console showing PII detection job configuration"
+        caption: "Amazon Comprehend uses ML to identify personally identifiable information"
+        width: 1920
+        height: 1080
+
+# Explore section screenshots (Epic 8 content)
+explore:
+  architecture:
+    - id: architecture-overview
+      filename: explore-architecture-overview.png
+      alt: "Architecture diagram showing S3, Comprehend, Lambda, and redaction pipeline"
+      caption: "How FOI Redaction processes documents securely"
+      width: 1920
+      height: 1080
+
+    - id: comprehend-detail
+      filename: explore-comprehend-detail.png
+      alt: "Comprehend PII detection analysis showing entity types and confidence"
+      caption: "Comprehend's ML models detect multiple types of PII"
+      width: 1920
+      height: 1080
+
+  experiments:
+    - id: custom-entities
+      filename: explore-custom-entities.png
+      alt: "Custom entity recognizer training for council-specific terms"
+      caption: "Train custom entity types specific to your organisation"
+      width: 1920
+      height: 1080
+
+    - id: threshold-tuning
+      filename: explore-threshold-tuning.png
+      alt: "Confidence threshold slider showing impact on detection sensitivity"
+      caption: "Adjust detection sensitivity to balance recall and precision"
+      width: 1920
+      height: 1080
+
+  limits:
+    - id: edge-cases
+      filename: explore-edge-cases.png
+      alt: "Examples of challenging content for PII detection"
+      caption: "Test with complex documents to understand detection limitations"
+      width: 1920
+      height: 1080
+
+  production:
+    - id: production-compliance
+      filename: explore-production-compliance.png
+      alt: "Compliance checklist for FOI redaction in production"
+      caption: "GDPR and FOI Act considerations for production deployment"
+      width: 1920
+      height: 1080

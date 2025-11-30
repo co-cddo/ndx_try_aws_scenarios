@@ -1,0 +1,288 @@
+{#
+  Experiment Card Component (Story 6.2)
+
+  Displays a guided experiment with:
+  - Copy-to-clipboard button
+  - Expected vs actual response
+  - "What You Learned" summary
+  - Reset conversation button
+
+  Usage:
+    {% set experiment = activity %}
+    {% set index = loop.index %}
+    {% include "components/exploration/experiment-card.njk" %}
+
+  Expects:
+    experiment: object with id, title, learning, input_text, expected_output, screenshot
+    index: number (1-5)
+    scenarioId: string
+#}
+
+<article class="ndx-experiment-card"
+         data-experiment-id="{{ experiment.id }}"
+         data-experiment-index="{{ index }}"
+         aria-labelledby="exp-title-{{ experiment.id }}">
+
+  <header class="ndx-experiment-card__header">
+    <span class="ndx-experiment-card__number" aria-hidden="true">{{ index }}</span>
+    <h3 class="govuk-heading-m ndx-experiment-card__title" id="exp-title-{{ experiment.id }}">
+      {{ experiment.title }}
+    </h3>
+    {% if experiment.safe_badge %}
+      {% include "components/exploration/safe-badge.njk" %}
+    {% endif %}
+  </header>
+
+  <div class="ndx-experiment-card__body">
+    {# Time estimate #}
+    <p class="ndx-experiment-card__meta">
+      <span class="govuk-tag govuk-tag--grey">{{ experiment.time_estimate }}</span>
+    </p>
+
+    {# What You'll Learn #}
+    <div class="ndx-experiment-card__learning">
+      <strong>What you'll learn:</strong>
+      <p class="govuk-body">{{ experiment.learning }}</p>
+    </div>
+
+    {# Try It Section #}
+    <div class="ndx-experiment-card__try-it">
+      <h4 class="govuk-heading-s">Try it yourself</h4>
+
+      {# Handle multi-variation experiments (like exp3) #}
+      {% if experiment.input_variations %}
+        <p class="govuk-body">Try these three different ways of asking the same question:</p>
+        <ol class="govuk-list govuk-list--number">
+          {% for variation in experiment.input_variations %}
+            <li class="ndx-experiment-card__input-item">
+              <code class="ndx-experiment-card__input-text">"{{ variation }}"</code>
+              <button type="button"
+                      class="govuk-button govuk-button--secondary ndx-copy-button"
+                      data-copy-text="{{ variation }}"
+                      aria-label="Copy '{{ variation }}' to clipboard">
+                <span class="ndx-copy-button__text">Copy</span>
+                <span class="ndx-copy-button__success" hidden>Copied!</span>
+              </button>
+            </li>
+          {% endfor %}
+        </ol>
+      {% else %}
+        {# Single input experiment #}
+        <div class="ndx-experiment-card__input-section">
+          <p class="govuk-body">Copy this text and paste it into the chatbot:</p>
+          <div class="ndx-experiment-card__input-box">
+            <code class="ndx-experiment-card__input-text">{{ experiment.input_text | safe }}</code>
+            <button type="button"
+                    class="govuk-button govuk-button--secondary ndx-copy-button"
+                    data-copy-text="{{ experiment.input_text }}"
+                    aria-label="Copy text to clipboard">
+              <span class="ndx-copy-button__text">Copy</span>
+              <span class="ndx-copy-button__success" hidden>Copied!</span>
+            </button>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    {# Expected Response #}
+    <div class="ndx-experiment-card__expected">
+      <h4 class="govuk-heading-s">Expected response</h4>
+      <p class="govuk-body">{{ experiment.expected_output }}</p>
+    </div>
+
+    {# Screenshot showing expected result #}
+    {% if experiment.screenshot %}
+      <div class="ndx-experiment-card__screenshot">
+        <img src="/assets/images/exploration/{{ scenarioId }}/{{ experiment.screenshot }}"
+             alt="Screenshot showing the expected chatbot response for {{ experiment.title }}"
+             loading="lazy"
+             width="600"
+             height="400">
+      </div>
+    {% endif %}
+
+    {# Actions #}
+    <div class="ndx-experiment-card__actions">
+      <button type="button"
+              class="govuk-button"
+              onclick="startExperiment('{{ scenarioId }}', '{{ experiment.id }}')"
+              aria-describedby="exp-title-{{ experiment.id }}">
+        Start experiment
+      </button>
+      <button type="button"
+              class="govuk-button govuk-button--secondary"
+              onclick="resetConversation('{{ scenarioId }}')"
+              aria-label="Reset chatbot conversation">
+        Reset conversation
+      </button>
+      <button type="button"
+              class="govuk-button govuk-button--secondary"
+              onclick="completeActivity('{{ scenarioId }}', '{{ experiment.id }}')"
+              aria-label="Mark {{ experiment.title }} as complete">
+        Mark as complete
+      </button>
+    </div>
+  </div>
+</article>
+
+<style>
+  .ndx-experiment-card {
+    border: 1px solid #b1b4b6;
+    margin-bottom: 30px;
+    background: #fff;
+  }
+
+  .ndx-experiment-card__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: #f8f8f8;
+    border-bottom: 1px solid #b1b4b6;
+    flex-wrap: wrap;
+  }
+
+  .ndx-experiment-card__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #1d70b8;
+    color: #fff;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .ndx-experiment-card__title {
+    flex: 1;
+    margin: 0;
+    min-width: 200px;
+  }
+
+  .ndx-experiment-card__body {
+    padding: 20px;
+  }
+
+  .ndx-experiment-card__meta {
+    margin-bottom: 15px;
+  }
+
+  .ndx-experiment-card__learning {
+    background: #f0f4f5;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-experiment-card__learning strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #0b0c0c;
+  }
+
+  .ndx-experiment-card__learning p {
+    margin-bottom: 0;
+  }
+
+  .ndx-experiment-card__try-it {
+    margin-bottom: 25px;
+  }
+
+  .ndx-experiment-card__input-section {
+    margin-top: 15px;
+  }
+
+  .ndx-experiment-card__input-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #f3f2f1;
+    padding: 15px;
+    border: 1px solid #b1b4b6;
+    flex-wrap: wrap;
+  }
+
+  .ndx-experiment-card__input-text {
+    flex: 1;
+    font-family: monospace;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-width: 200px;
+  }
+
+  .ndx-experiment-card__input-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #f3f2f1;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .ndx-experiment-card__input-item code {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .ndx-experiment-card__expected {
+    background: #e8f4e8;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-experiment-card__expected h4 {
+    margin-bottom: 10px;
+  }
+
+  .ndx-experiment-card__expected p {
+    margin-bottom: 0;
+  }
+
+  .ndx-experiment-card__screenshot {
+    margin-bottom: 20px;
+  }
+
+  .ndx-experiment-card__screenshot img {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    border: 1px solid #b1b4b6;
+  }
+
+  .ndx-experiment-card__actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .ndx-copy-button {
+    min-width: auto;
+    padding: 5px 10px;
+    font-size: 14px;
+  }
+
+  .ndx-copy-button__success {
+    color: #00703c;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-experiment-card__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .ndx-experiment-card__actions {
+      flex-direction: column;
+    }
+
+    .ndx-experiment-card__actions button {
+      width: 100%;
+    }
+  }
+</style>

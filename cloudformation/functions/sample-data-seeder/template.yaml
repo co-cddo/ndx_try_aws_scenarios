@@ -1,0 +1,216 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  Sample Data Seeder CloudFormation Custom Resource
+  Provides automated sample data seeding for UK council scenarios.
+  Version: 1.0.0
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Council Configuration
+        Parameters:
+          - CouncilName
+          - Region
+          - DataVolume
+          - Seed
+      - Label:
+          default: Lambda Configuration
+        Parameters:
+          - UKDataGeneratorLayerArn
+          - Timeout
+          - MemorySize
+      - Label:
+          default: Code Deployment
+        Parameters:
+          - FunctionCodeBucket
+          - FunctionCodeKey
+
+Parameters:
+  CouncilName:
+    Type: String
+    Default: Sample Council
+    Description: Name of the council for sample data context
+    MinLength: 3
+    MaxLength: 100
+
+  Region:
+    Type: String
+    Default: Sample Region
+    Description: Geographic region for sample data context
+    MinLength: 3
+    MaxLength: 50
+
+  DataVolume:
+    Type: Number
+    Default: 100
+    Description: Number of resident records to generate
+    MinValue: 10
+    MaxValue: 1000
+
+  Seed:
+    Type: Number
+    Default: 42
+    Description: Random seed for deterministic data generation
+    MinValue: 1
+
+  UKDataGeneratorLayerArn:
+    Type: String
+    Description: ARN of the UK Data Generator Lambda Layer
+    AllowedPattern: 'arn:aws:lambda:.*:.*:layer:.*'
+
+  Timeout:
+    Type: Number
+    Default: 60
+    Description: Lambda function timeout in seconds
+    MinValue: 30
+    MaxValue: 900
+
+  MemorySize:
+    Type: Number
+    Default: 512
+    Description: Lambda function memory in MB
+    AllowedValues: [128, 256, 512, 1024, 2048]
+
+  FunctionCodeBucket:
+    Type: String
+    Description: S3 bucket containing Lambda function code
+
+  FunctionCodeKey:
+    Type: String
+    Default: sample-data-seeder.zip
+    Description: S3 key for Lambda function code package
+
+Resources:
+  # IAM Role for Lambda Function
+  SampleDataSeederRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CloudWatchMetrics
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: '*'
+
+  # Lambda Function
+  SampleDataSeederFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-sample-data-seeder'
+      Description: CloudFormation custom resource for UK council sample data seeding
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      Role: !GetAtt SampleDataSeederRole.Arn
+      Timeout: !Ref Timeout
+      MemorySize: !Ref MemorySize
+      Layers:
+        - !Ref UKDataGeneratorLayerArn
+      Code:
+        S3Bucket: !Ref FunctionCodeBucket
+        S3Key: !Ref FunctionCodeKey
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO
+
+  # CloudWatch Log Group
+  SampleDataSeederLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${SampleDataSeederFunction}'
+      RetentionInDays: 30
+
+  # CloudWatch Alarm - Execution Time Warning
+  SeederExecutionTimeAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-seeder-execution-time-warning'
+      AlarmDescription: Alert if sample data seeding exceeds 45 seconds
+      MetricName: Duration
+      Namespace: AWS/Lambda
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 45000  # 45 seconds in milliseconds
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref SampleDataSeederFunction
+      TreatMissingData: notBreaching
+
+  # CloudWatch Alarm - Function Errors
+  SeederErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-seeder-errors'
+      AlarmDescription: Alert if sample data seeding fails
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref SampleDataSeederFunction
+      TreatMissingData: notBreaching
+
+  # Custom Resource for Sample Data Seeding
+  SampleDataResource:
+    Type: Custom::SampleDataSeeder
+    Properties:
+      ServiceToken: !GetAtt SampleDataSeederFunction.Arn
+      CouncilName: !Ref CouncilName
+      Region: !Ref Region
+      DataVolume: !Ref DataVolume
+      Seed: !Ref Seed
+
+Outputs:
+  SeedingStatus:
+    Description: Sample data seeding status
+    Value: !GetAtt SampleDataResource.Status
+    Export:
+      Name: !Sub '${AWS::StackName}-SeedingStatus'
+
+  RecordCounts:
+    Description: Number of records generated (JSON format)
+    Value: !GetAtt SampleDataResource.RecordCounts
+    Export:
+      Name: !Sub '${AWS::StackName}-RecordCounts'
+
+  GenerationTime:
+    Description: Time taken to generate sample data (seconds)
+    Value: !GetAtt SampleDataResource.GenerationTime
+    Export:
+      Name: !Sub '${AWS::StackName}-GenerationTime'
+
+  SeederFunctionArn:
+    Description: ARN of the Sample Data Seeder Lambda function
+    Value: !GetAtt SampleDataSeederFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-SeederFunctionArn'
+
+  SeederLogGroup:
+    Description: CloudWatch Log Group for debugging
+    Value: !Ref SampleDataSeederLogGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-SeederLogGroup'
+
+  ExecutionTimeAlarm:
+    Description: CloudWatch alarm for execution time warnings
+    Value: !GetAtt SeederExecutionTimeAlarm.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ExecutionTimeAlarm'

@@ -1,0 +1,74 @@
+{#
+  Screenshot Walkthrough Section Component (Story 2.5)
+
+  Wrapper component for scenario screenshot galleries with annotations.
+
+  Features (AC-2.5.1, AC-2.5.2):
+    - "Screenshot Walkthrough" heading
+    - Gallery component with annotated screenshots
+    - "Coming Soon" placeholder state for scenarios without screenshots
+    - Positioned after video section, before deployment section
+
+  Requires scenarioData with screenshots metadata:
+    screenshots.steps: array of {stepNumber, image, alt, annotation}
+#}
+
+{% if scenarioData and scenarioData.screenshots and scenarioData.screenshots.steps and scenarioData.screenshots.steps.length > 0 %}
+<div class="ndx-screenshot-walkthrough" id="screenshot-walkthrough">
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+  {# Section heading (AC-2.5.1) #}
+  <h2 class="govuk-heading-l">Screenshot walkthrough</h2>
+
+  <p class="govuk-body-l">
+    See key screens from {{ scenarioData.name }} without deploying. Each screenshot shows exactly what you'll experience.
+  </p>
+
+  {# Screenshot Gallery Component #}
+  {% include "components/screenshot-gallery.njk" %}
+
+  {# What screenshots show #}
+  <div class="ndx-screenshot-walkthrough__contents govuk-!-margin-top-6">
+    <details class="govuk-details" data-module="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+          What these screenshots show
+        </span>
+      </summary>
+      <div class="govuk-details__text">
+        <p>These screenshots capture the complete evaluation journey:</p>
+        <ol class="govuk-list govuk-list--number">
+          <li><strong>Deployment Start</strong> - CloudFormation stack creation in AWS Console</li>
+          <li><strong>Resources Creating</strong> - Progress as AWS builds your scenario</li>
+          <li><strong>Deployment Complete</strong> - Success notification and access details</li>
+          <li><strong>Key Interaction</strong> - The "wow moment" demonstrating the scenario's value</li>
+          <li><strong>Results</strong> - Outputs and what you achieved</li>
+          <li><strong>Cleanup</strong> - How resources auto-delete after 2 hours</li>
+        </ol>
+      </div>
+    </details>
+  </div>
+</div>
+
+{% elif scenarioData and scenarioData.screenshots %}
+{# Coming soon placeholder - screenshots metadata exists but no steps yet #}
+<div class="ndx-screenshot-walkthrough ndx-screenshot-walkthrough--coming-soon" id="screenshot-walkthrough">
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+  <h2 class="govuk-heading-l">Screenshot walkthrough</h2>
+
+  <div class="govuk-inset-text">
+    <p><strong>Screenshots coming soon</strong></p>
+    <p>We're preparing annotated screenshots for this scenario. In the meantime, you can:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      {% if scenarioData.video and scenarioData.video.youtubeId %}
+        <li><a href="#demo-video" class="govuk-link">Watch the demo video</a> above</li>
+      {% else %}
+        <li><a href="#demo-video" class="govuk-link">Check if a demo video is available</a> above</li>
+      {% endif %}
+      <li><a href="/contact/" class="govuk-link">Request a guided tour</a> with one of our partners</li>
+      <li>Deploy the scenario and follow the step-by-step guide below</li>
+    </ul>
+  </div>
+</div>
+{% endif %}

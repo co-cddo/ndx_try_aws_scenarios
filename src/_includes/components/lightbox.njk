@@ -1,0 +1,199 @@
+{#
+  Lightbox Component (Story 13.9)
+
+  Full-screen modal for viewing enlarged screenshots.
+  Uses native <dialog> element for accessibility.
+
+  Usage:
+    Include once at the bottom of layouts that have screenshots:
+    {% include "components/lightbox.njk" %}
+
+  Features:
+    - AC-13.9.1: Click/tap opens full-size image
+    - AC-13.9.2: Dark overlay behind modal
+    - AC-13.9.3: Close button (X) in top-right
+    - AC-13.9.4: Keyboard navigation (Escape to close)
+    - AC-13.9.5: Focus trap inside modal
+    - AC-13.9.6: Focus returns to trigger on close
+    - AC-13.9.7: Mobile pinch-to-zoom support
+
+  Accessibility:
+    - Native <dialog> provides focus trapping
+    - aria-modal="true" for screen readers
+    - Close button has aria-label
+    - Focus returns to triggering element
+
+  FR Coverage: FR127
+#}
+
+<dialog id="ndx-lightbox"
+        class="ndx-lightbox"
+        aria-labelledby="lightbox-title"
+        aria-modal="true"
+        data-lightbox>
+
+  {# Backdrop click handler - closes lightbox #}
+  <div class="ndx-lightbox__backdrop" data-lightbox-backdrop></div>
+
+  <div class="ndx-lightbox__content">
+    {# Close button - AC-13.9.3 #}
+    <button type="button"
+            class="ndx-lightbox__close"
+            data-lightbox-close
+            aria-label="Close enlarged image">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    {# Image container #}
+    <figure class="ndx-lightbox__figure">
+      {# Screen reader title - hidden visually #}
+      <h2 id="lightbox-title" class="govuk-visually-hidden" data-lightbox-title>
+        Enlarged screenshot
+      </h2>
+
+      {# Main image - populated by JavaScript #}
+      <img src=""
+           alt=""
+           class="ndx-lightbox__image"
+           id="lightbox-image"
+           data-lightbox-image>
+
+      {# Caption - populated by JavaScript #}
+      <figcaption class="ndx-lightbox__caption"
+                  id="lightbox-caption"
+                  data-lightbox-caption>
+      </figcaption>
+    </figure>
+
+    {# Keyboard hint #}
+    <p class="ndx-lightbox__hint govuk-body-s" aria-hidden="true">
+      Press <kbd>Escape</kbd> to close
+    </p>
+  </div>
+</dialog>
+
+<script>
+/**
+ * Lightbox JavaScript (Story 13.9)
+ *
+ * Manages lightbox opening/closing with proper focus management
+ */
+(function() {
+  'use strict';
+
+  const lightbox = document.querySelector('[data-lightbox]');
+  if (!lightbox) return;
+
+  const lightboxImage = lightbox.querySelector('[data-lightbox-image]');
+  const lightboxCaption = lightbox.querySelector('[data-lightbox-caption]');
+  const lightboxTitle = lightbox.querySelector('[data-lightbox-title]');
+  const closeButton = lightbox.querySelector('[data-lightbox-close]');
+  const backdrop = lightbox.querySelector('[data-lightbox-backdrop]');
+
+  let triggerElement = null;
+
+  /**
+   * Open lightbox with image data
+   * @param {string} src - Image source URL
+   * @param {string} alt - Alt text for image
+   * @param {string} caption - Optional caption text
+   */
+  function openLightbox(src, alt, caption) {
+    if (!src) return;
+
+    // Set image source and alt
+    lightboxImage.src = src;
+    lightboxImage.alt = alt || '';
+
+    // Set caption if provided
+    if (caption) {
+      lightboxCaption.textContent = caption;
+      lightboxCaption.hidden = false;
+    } else {
+      lightboxCaption.textContent = '';
+      lightboxCaption.hidden = true;
+    }
+
+    // Update screen reader title
+    lightboxTitle.textContent = 'Enlarged screenshot: ' + (alt || 'Image');
+
+    // Show modal using native dialog
+    lightbox.showModal();
+
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+
+    // Focus close button for keyboard users
+    setTimeout(function() {
+      closeButton.focus();
+    }, 100);
+  }
+
+  /**
+   * Close lightbox and return focus
+   */
+  function closeLightbox() {
+    // Clear image to stop any loading
+    lightboxImage.src = '';
+
+    // Close modal
+    lightbox.close();
+
+    // Restore body scroll
+    document.body.style.overflow = '';
+
+    // Return focus to trigger element - AC-13.9.6
+    if (triggerElement) {
+      triggerElement.focus();
+      triggerElement = null;
+    }
+  }
+
+  // Handle trigger clicks
+  document.addEventListener('click', function(event) {
+    const trigger = event.target.closest('[data-lightbox-trigger]');
+    if (!trigger) return;
+
+    event.preventDefault();
+    triggerElement = trigger;
+
+    const src = trigger.dataset.src;
+    const alt = trigger.dataset.alt;
+    const caption = trigger.dataset.caption;
+
+    openLightbox(src, alt, caption);
+  });
+
+  // Handle close button click
+  closeButton.addEventListener('click', closeLightbox);
+
+  // Handle backdrop click - AC-13.9.2
+  backdrop.addEventListener('click', closeLightbox);
+
+  // Handle Escape key - AC-13.9.4
+  lightbox.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeLightbox();
+    }
+  });
+
+  // Handle dialog cancel event (native Escape handling)
+  lightbox.addEventListener('cancel', function(event) {
+    event.preventDefault();
+    closeLightbox();
+  });
+
+  // Prevent clicks inside content from closing
+  lightbox.querySelector('.ndx-lightbox__content').addEventListener('click', function(event) {
+    event.stopPropagation();
+  });
+
+  // Mobile: Support pinch-to-zoom - AC-13.9.7
+  // Browser's native pinch-to-zoom works within dialog
+  // No additional JS needed
+
+})();
+</script>

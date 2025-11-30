@@ -1,0 +1,29 @@
+# Next Steps Pathway Definitions (Story 5-1)
+# These pathways guide users based on their evaluation outcome (would_implement)
+
+proceed:
+  heading: "You're Ready to Proceed"
+  description: "Based on your evaluation, here's your pathway to implementation:"
+  steps:
+    - title: "Review with stakeholders"
+      description: "Share your Evidence Pack with your committee"
+    - title: "Find approved suppliers"
+      description: "Browse G-Cloud for implementation partners"
+    - title: "Start procurement"
+      description: "Use your Evidence Pack as the business case foundation"
+
+maybe:
+  heading: "Need More Time to Decide?"
+  description: "That's perfectly fine. Here are some options:"
+  options:
+    - title: "Explore More Scenarios"
+      description: "Try another scenario to compare approaches"
+      link: "/scenarios/"
+    - title: "Speak to an Expert"
+      description: "Get answers to your specific questions"
+      link: "/contact/"
+
+not_now:
+  heading: "Not the Right Fit?"
+  description: "Thank you for exploring this scenario. Your feedback helps us improve."
+  feedback_link: "/contact/"

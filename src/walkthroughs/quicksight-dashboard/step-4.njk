@@ -1,0 +1,379 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Understand Self-Service Analytics - QuickSight Dashboard Walkthrough"
+description: Calculate ROI and understand how self-service empowers officers
+currentStep: 4
+totalSteps: 4
+timeEstimate: "2 minutes"
+scenarioId: quicksight-dashboard
+---
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Understand Self-Service Analytics" %}
+{% set stepDescription = "Calculate return on investment and see how QuickSight reduces IT dependency while empowering officers." %}
+{% set timeEstimate = "2 minutes" %}
+{# Load screenshots from YAML data - Story 13.8 #}
+{% set screenshotData = screenshots["quicksight-dashboard"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 4) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "You calculate ROI for your council",
+  "You understand 80% IT dependency reduction",
+  "You have committee language for business case",
+  "You see how self-service empowers officers"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Calculate your ROI</h3>
+
+<p class="govuk-body">
+  Use this interactive calculator to estimate the return on investment for QuickSight self-service analytics
+  in your council:
+</p>
+
+<div class="ndx-roi-calculator govuk-!-margin-top-4">
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="analyst-hours">
+      Analyst hours per week creating Excel reports
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="analyst-hours" name="analyst-hours" type="number" value="4">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="analyst-rate">
+      Analyst hourly rate (£)
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="analyst-rate" name="analyst-rate" type="number" value="25">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="it-reports">
+      IT ad-hoc reports per month
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="it-reports" name="it-reports" type="number" value="20">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="it-hours-per-report">
+      IT hours per ad-hoc report
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="it-hours-per-report" name="it-hours-per-report" type="number" step="0.5" value="2">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="it-rate">
+      IT hourly rate (£)
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="it-rate" name="it-rate" type="number" value="35">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="quicksight-users">
+      Number of QuickSight Reader users
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="quicksight-users" name="quicksight-users" type="number" value="10">
+  </div>
+
+  <button class="govuk-button" data-module="govuk-button" id="calculate-roi">
+    Calculate ROI
+  </button>
+
+  <div id="roi-results" class="ndx-roi-results" style="display: none;">
+    <h4 class="govuk-heading-s">Your ROI Calculation</h4>
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Current analyst cost</dt>
+        <dd class="govuk-summary-list__value" id="current-analyst">£5,200/year</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">With QuickSight analyst cost</dt>
+        <dd class="govuk-summary-list__value" id="quicksight-analyst">£1,300/year</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Analyst time savings</dt>
+        <dd class="govuk-summary-list__value" id="analyst-savings">£3,900/year</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Current IT ad-hoc cost</dt>
+        <dd class="govuk-summary-list__value" id="current-it">£16,800/year</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">With QuickSight IT ad-hoc cost (80% reduction)</dt>
+        <dd class="govuk-summary-list__value" id="quicksight-it">£3,360/year</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">IT time savings</dt>
+        <dd class="govuk-summary-list__value" id="it-savings">£13,440/year</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Total annual savings</dt>
+        <dd class="govuk-summary-list__value" id="total-savings" style="font-weight: 700;">£17,340/year</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">QuickSight annual cost</dt>
+        <dd class="govuk-summary-list__value" id="quicksight-cost">£2,218/year</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Net annual benefit</dt>
+        <dd class="govuk-summary-list__value" id="net-benefit" style="font-weight: 700; color: #00703c;">£15,122/year</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Return on investment</dt>
+        <dd class="govuk-summary-list__value" id="roi-ratio" style="font-weight: 700; color: #00703c;">6.8:1</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Payback period</dt>
+        <dd class="govuk-summary-list__value" id="payback" style="font-weight: 700;">1.5 months</dd>
+      </div>
+    </dl>
+
+    <div class="govuk-inset-text govuk-!-margin-top-3">
+      <p class="govuk-body" id="committee-language">
+        <strong>Committee language:</strong> "Amazon QuickSight self-service analytics reduces IT dependency
+        by 80%, freeing 384 hours annually for strategic projects. Officers answer operational questions
+        in real-time instead of waiting 7 days for reports. For 10 users, annual savings of £17,340 against
+        £2,218 cost delivers 6.8:1 return on investment with payback in 1.5 months."
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const calculateBtn = document.getElementById('calculate-roi');
+    const resultsDiv = document.getElementById('roi-results');
+
+    if (calculateBtn) {
+      calculateBtn.addEventListener('click', function() {
+        const analystHours = parseFloat(document.getElementById('analyst-hours').value) || 4;
+        const analystRate = parseFloat(document.getElementById('analyst-rate').value) || 25;
+        const itReports = parseFloat(document.getElementById('it-reports').value) || 20;
+        const itHoursPerReport = parseFloat(document.getElementById('it-hours-per-report').value) || 2;
+        const itRate = parseFloat(document.getElementById('it-rate').value) || 35;
+        const quicksightUsers = parseFloat(document.getElementById('quicksight-users').value) || 10;
+
+        const weeksPerYear = 52;
+        const currentAnalystHours = analystHours * weeksPerYear;
+        const currentAnalystCost = currentAnalystHours * analystRate;
+
+        const quicksightAnalystHours = 1 * weeksPerYear;
+        const quicksightAnalystCost = quicksightAnalystHours * analystRate;
+        const analystSavings = currentAnalystCost - quicksightAnalystCost;
+
+        const currentItHours = itReports * 12 * itHoursPerReport;
+        const currentItCost = currentItHours * itRate;
+
+        const quicksightItReports = itReports * 0.2;
+        const quicksightItHours = quicksightItReports * 12 * itHoursPerReport;
+        const quicksightItCost = quicksightItHours * itRate;
+        const itSavings = currentItCost - quicksightItCost;
+
+        const totalSavings = analystSavings + itSavings;
+
+        const quicksightCostPerUser = 18;
+        const athenaCostAnnual = 30;
+        const s3CostAnnual = 28;
+        const quicksightCost = (quicksightUsers * quicksightCostPerUser * 12) + athenaCostAnnual + s3CostAnnual;
+
+        const netBenefit = totalSavings - quicksightCost;
+        const roiRatio = (netBenefit / quicksightCost).toFixed(1);
+        const paybackMonths = (quicksightCost / (totalSavings / 12)).toFixed(1);
+
+        document.getElementById('current-analyst').textContent = '£' + currentAnalystCost.toLocaleString() + '/year';
+        document.getElementById('quicksight-analyst').textContent = '£' + quicksightAnalystCost.toLocaleString() + '/year';
+        document.getElementById('analyst-savings').textContent = '£' + analystSavings.toLocaleString() + '/year';
+        document.getElementById('current-it').textContent = '£' + currentItCost.toLocaleString() + '/year';
+        document.getElementById('quicksight-it').textContent = '£' + quicksightItCost.toLocaleString() + '/year';
+        document.getElementById('it-savings').textContent = '£' + itSavings.toLocaleString() + '/year';
+        document.getElementById('total-savings').textContent = '£' + totalSavings.toLocaleString() + '/year';
+        document.getElementById('quicksight-cost').textContent = '£' + quicksightCost.toLocaleString() + '/year';
+        document.getElementById('net-benefit').textContent = '£' + netBenefit.toLocaleString() + '/year';
+        document.getElementById('roi-ratio').textContent = roiRatio + ':1';
+        document.getElementById('payback').textContent = paybackMonths + ' months';
+
+        const committeeText = `"Amazon QuickSight self-service analytics reduces IT dependency by 80%, freeing ${(currentItHours - quicksightItHours).toFixed(0)} hours annually for strategic projects. Officers answer operational questions in real-time instead of waiting 7 days for reports. For ${quicksightUsers} users, annual savings of £${totalSavings.toLocaleString()} against £${quicksightCost.toLocaleString()} cost delivers ${roiRatio}:1 return on investment with payback in ${paybackMonths} months."`;
+        document.getElementById('committee-language').innerHTML = '<strong>Committee language:</strong> ' + committeeText;
+
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    }
+  });
+</script>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Understanding the 80% IT dependency reduction</h3>
+
+<p class="govuk-body">
+  Self-service analytics doesn't eliminate IT involvement - it shifts IT from repetitive report requests
+  to strategic value-add work:
+</p>
+
+<div class="ndx-it-shift">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <h4 class="govuk-heading-s">Before QuickSight (IT bottleneck)</h4>
+      <p class="govuk-body-s"><strong>IT time allocation:</strong></p>
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+        <li>80% on ad-hoc report requests (480 hours/year)</li>
+        <li>15% on system maintenance</li>
+        <li>5% on strategic projects</li>
+      </ul>
+      <p class="govuk-body-s"><strong>Officer experience:</strong></p>
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+        <li>Submit ticket for simple question</li>
+        <li>Wait 3-7 days for Excel report</li>
+        <li>Report answers original question but raises new ones</li>
+        <li>Submit new ticket, wait another week</li>
+        <li>Limited exploration of data</li>
+      </ul>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <h4 class="govuk-heading-s">After QuickSight (IT enablement)</h4>
+      <p class="govuk-body-s"><strong>IT time allocation:</strong></p>
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+        <li>20% on ad-hoc reports (complex queries only, 96 hours/year)</li>
+        <li>15% on system maintenance</li>
+        <li>65% on strategic projects (digital transformation, automation)</li>
+      </ul>
+      <p class="govuk-body-s"><strong>Officer experience:</strong></p>
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+        <li>Open dashboard, answer question instantly</li>
+        <li>Follow-up questions answered through filters and drill-down</li>
+        <li>Explore data freely without IT involvement</li>
+        <li>IT engaged only for complex analysis beyond dashboard scope</li>
+        <li>Data-driven culture flourishes</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Beyond ROI: Intangible benefits</h3>
+
+<p class="govuk-body">
+  Financial ROI is important, but self-service analytics delivers strategic value that's harder to quantify:
+</p>
+
+<ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+  <li>
+    <strong>Faster decision-making:</strong> Service managers act on same-day data instead of week-old reports.
+    Problems identified and resolved faster.
+  </li>
+  <li>
+    <strong>Data-driven culture:</strong> When answers are instant, officers ask more questions. This curiosity
+    drives continuous improvement and innovation.
+  </li>
+  <li>
+    <strong>Democratic transparency:</strong> Councillors access same dashboard as officers for oversight.
+    Committee questions answered with live data during meetings.
+  </li>
+  <li>
+    <strong>IT strategic focus:</strong> IT freed from repetitive tasks to work on automation, digital services,
+    transformation initiatives that deliver long-term value.
+  </li>
+  <li>
+    <strong>Foundation for data lake:</strong> S3 data storage enables future AI/ML projects (predictive
+    maintenance, demand forecasting, resource optimization).
+  </li>
+</ul>
+
+<div class="ndx-reflection-section govuk-!-margin-top-6">
+  <h3 class="govuk-heading-m">Think about your council's data challenges</h3>
+
+  <div class="govuk-inset-text" style="border-left-color: #00703c;">
+    <p class="govuk-!-font-size-24" style="font-weight: 700;">
+      How many operational questions could officers answer themselves?
+    </p>
+  </div>
+
+  <p class="govuk-body">
+    Common questions officers ask (currently requiring IT reports):
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+    <li>"How many total cases are we handling?" → Read Total Cases KPI card (267,334), 5 seconds</li>
+    <li>"Which service area has the highest volume?" → Read Cases by Service Area chart, 10 seconds</li>
+    <li>"How is Housing performing in London?" → Apply Service Area + Region filters, 15 seconds</li>
+    <li>"What's our average satisfaction score?" → Read Average Satisfaction KPI card (4.15), 5 seconds</li>
+    <li>"Can I compare regions for a service area?" → Filter to service area, compare table rows, 20 seconds</li>
+  </ul>
+
+  <p class="govuk-body">
+    <strong>Impact:</strong> If each officer asks 2-3 questions per week, and each question takes 5 days for IT
+    to respond, that's 10-15 days of decision lag per officer. With QuickSight, all questions answered in minutes
+    - faster decision-making, better service delivery.
+  </p>
+</div>
+
+<div class="ndx-walkthrough-nav govuk-!-margin-top-8">
+  <a href="/walkthroughs/quicksight-dashboard/step-3/" class="govuk-link ndx-walkthrough-nav__back">
+    ← Back to Step 3
+  </a>
+  <a href="/walkthroughs/quicksight-dashboard/complete/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    Complete walkthrough
+  </a>
+</div>
+
+<style>
+  .ndx-roi-calculator {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-roi-results {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 2px solid #00703c;
+  }
+
+  .ndx-roi-results h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-it-shift {
+    padding: 25px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-it-shift h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-reflection-section {
+    padding: 30px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-reflection-section h3 {
+    margin-top: 0;
+  }
+
+  .ndx-walkthrough-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-nav__back {
+    font-size: 19px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-walkthrough-nav {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ndx-walkthrough-nav__back {
+      margin-bottom: 15px;
+    }
+  }
+</style>

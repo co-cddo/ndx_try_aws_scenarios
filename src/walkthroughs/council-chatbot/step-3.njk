@@ -1,0 +1,260 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Try Your Own Question - Council Chatbot Walkthrough"
+description: Explore different service areas with 10 sample questions
+currentStep: 3
+totalSteps: 4
+timeEstimate: "4 minutes"
+scenarioId: council-chatbot
+---
+
+{#
+  Step 3: Try Your Own Question (AC-3.2.5, AC-3.2.6)
+  - All 10 sample questions documented
+  - Multiple categories to explore
+  - Free-form exploration encouraged
+#}
+
+<h1 class="govuk-heading-xl">Try Your Own Question</h1>
+
+<p class="govuk-body-l">
+  Now explore different council services. We've prepared 10 realistic questions
+  across 4 service areas. Try at least 3 different questions to see how the chatbot
+  handles different topics.
+</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Tip:</strong> You can also try your own questions! The chatbot is trained on
+    common council services and can handle variations of these questions.
+  </p>
+</div>
+
+{# Display all sample questions by category #}
+{% for category in chatbotSampleQuestions.categories %}
+  <div class="ndx-question-category">
+    <h2 class="govuk-heading-l">
+      <span class="ndx-question-category__icon">{{ category.icon }}</span>
+      {{ category.name }}
+    </h2>
+
+    {% for question in category.questions %}
+      <div class="ndx-question-card" id="question-{{ loop.index0 }}">
+        <h3 class="govuk-heading-m ndx-question-card__title">
+          {{ loop.index }}. {{ question.question }}
+        </h3>
+
+        {# Copy-to-clipboard section #}
+        <div class="ndx-walkthrough-step__copy-section">
+          <div class="ndx-walkthrough-step__copy-container">
+            <pre class="ndx-walkthrough-step__copy-text" id="copy-text-{{ category.name | slug }}-{{ loop.index }}">{{ question.copyText }}</pre>
+            <button type="button"
+                    class="govuk-button govuk-button--secondary ndx-walkthrough-step__copy-btn"
+                    data-copy-target="copy-text-{{ category.name | slug }}-{{ loop.index }}"
+                    data-step="3"
+                    aria-label="Copy {{ question.shortQuestion }} question to clipboard">
+              <span class="ndx-walkthrough-step__copy-icon">📋</span>
+              <span class="ndx-walkthrough-step__copy-label">Copy</span>
+            </button>
+          </div>
+
+          {# Copy confirmation #}
+          <div class="ndx-walkthrough-step__copy-confirmation"
+               id="copy-confirmation-{{ category.name | slug }}-{{ loop.index }}"
+               role="status"
+               aria-live="polite"
+               aria-atomic="true"
+               hidden>
+            <span class="ndx-walkthrough-step__copy-success">✓ Copied to clipboard!</span>
+          </div>
+        </div>
+
+        {# Expected response #}
+        <details class="govuk-details govuk-!-margin-top-3">
+          <summary class="govuk-details__summary">
+            <span class="govuk-details__summary-text">
+              Expected response
+            </span>
+          </summary>
+          <div class="govuk-details__text">
+            <div class="ndx-expected-response">
+              {{ question.expectedResponse }}
+            </div>
+            {% if question.technicalNote %}
+              <p class="govuk-body-s govuk-!-margin-top-3" style="color: #505a5f; font-style: italic;">
+                <strong>Technical note:</strong> {{ question.technicalNote }}
+              </p>
+            {% endif %}
+          </div>
+        </details>
+      </div>
+    {% endfor %}
+  </div>
+{% endfor %}
+
+{# Wow Moment 2 - Context Awareness (AC-3.2.13) #}
+<div class="govuk-!-margin-top-8">
+  {% set wowMoment2 = chatbotSampleQuestions.wowMoments[1] %}
+  {% set title = wowMoment2.title %}
+  {% set explanation = wowMoment2.explanation %}
+  {% set technicalDetail = wowMoment2.technicalDetail %}
+  {% set icon = "🧠" %}
+  {% include "components/wow-moment.njk" %}
+</div>
+
+<h2 class="govuk-heading-l govuk-!-margin-top-6">Try your own variations</h2>
+
+<p class="govuk-body">
+  Feel free to ask the chatbot your own questions! Here are some ideas:
+</p>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">Follow-up questions</h3>
+    <ul class="govuk-list govuk-list--bullet govuk-body-s">
+      <li>"What about green bin collections?"</li>
+      <li>"Can I pay by phone?"</li>
+      <li>"What if I miss the deadline?"</li>
+      <li>"Tell me more about that"</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">Different phrasings</h3>
+    <ul class="govuk-list govuk-list--bullet govuk-body-s">
+      <li>"Bin day for B15?" (shorter)</li>
+      <li>"I need to know when my rubbish is collected" (conversational)</li>
+      <li>"Collection schedule postcode B15 2NW" (formal)</li>
+      <li>"When do you collect bins?" (you/we)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>What to notice:</strong>
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>Context memory:</strong> The chatbot remembers previous questions in the conversation</li>
+    <li><strong>Flexible language:</strong> It understands different ways of asking the same thing</li>
+    <li><strong>Service coverage:</strong> It can handle queries across different council departments</li>
+    <li><strong>Helpful guidance:</strong> It provides next steps and actionable information</li>
+  </ul>
+</div>
+
+{# Tips for evaluation #}
+<div class="govuk-warning-text govuk-!-margin-top-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Important</span>
+    Try asking 3-4 different questions from different categories to get a full sense of the chatbot's capabilities.
+  </strong>
+</div>
+
+<h2 class="govuk-heading-m">Questions to ask yourself</h2>
+
+<p class="govuk-body">As you try these questions, consider:</p>
+
+<div class="govuk-accordion" data-module="govuk-accordion" id="evaluation-accordion">
+  <div class="govuk-accordion__section">
+    <div class="govuk-accordion__section-header">
+      <h3 class="govuk-accordion__section-heading">
+        <span class="govuk-accordion__section-button" id="accordion-heading-1">
+          For service managers
+        </span>
+      </h3>
+    </div>
+    <div id="accordion-content-1" class="govuk-accordion__section-content" aria-labelledby="accordion-heading-1" hidden>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Which of these questions do you get most often in your call centre?</li>
+        <li>Would residents be satisfied with these responses?</li>
+        <li>What percentage of your call volume could this handle?</li>
+        <li>Which services would benefit most from 24/7 AI support?</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="govuk-accordion__section">
+    <div class="govuk-accordion__section-header">
+      <h3 class="govuk-accordion__section-heading">
+        <span class="govuk-accordion__section-button" id="accordion-heading-2">
+          For technical staff
+        </span>
+      </h3>
+    </div>
+    <div id="accordion-content-2" class="govuk-accordion__section-content" aria-labelledby="accordion-heading-2" hidden>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>How accurate are the responses compared to your knowledge base?</li>
+        <li>How would you integrate this with existing systems (CRM, case management)?</li>
+        <li>What data sources would you connect to make this production-ready?</li>
+        <li>How would you handle edge cases or unusual questions?</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="govuk-accordion__section">
+    <div class="govuk-accordion__section-header">
+      <h3 class="govuk-accordion__section-heading">
+        <span class="govuk-accordion__section-button" id="accordion-heading-3">
+          For leadership
+        </span>
+      </h3>
+    </div>
+    <div id="accordion-content-3" class="govuk-accordion__section-content" aria-labelledby="accordion-heading-3" hidden>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>What's the business case for implementing this?</li>
+        <li>What are the risks (accuracy, data protection, public perception)?</li>
+        <li>What resources would we need to deploy this in production?</li>
+        <li>How would we measure success and ROI?</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ndx-question-category {
+    margin-bottom: 50px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #b1b4b6;
+  }
+
+  .ndx-question-category:last-child {
+    border-bottom: none;
+  }
+
+  .ndx-question-category__icon {
+    font-size: 32px;
+    margin-right: 12px;
+  }
+
+  .ndx-question-card {
+    margin-bottom: 40px;
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-question-card__title {
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+
+  .ndx-expected-response {
+    padding: 15px;
+    background-color: #ffffff;
+    border-left: 3px solid #00703c;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-question-category__icon {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .ndx-question-card {
+      padding: 15px;
+    }
+  }
+</style>

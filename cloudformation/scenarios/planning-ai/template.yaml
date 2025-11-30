@@ -1,0 +1,1269 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  NDX:Try - Planning Application AI Scenario
+  Intelligent document analysis using Amazon Textract for text extraction.
+  Real AWS service integration demonstrating document processing capabilities.
+  Version: 2.0.0
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Scenario Configuration
+        Parameters:
+          - Environment
+      - Label:
+          default: Auto-Cleanup
+        Parameters:
+          - AutoCleanupHours
+
+Parameters:
+  Environment:
+    Type: String
+    Default: sandbox
+    AllowedValues:
+      - sandbox
+      - development
+      - production
+    Description: Deployment environment
+
+  AutoCleanupHours:
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 24
+    Description: Hours until automatic resource cleanup
+
+Resources:
+  # S3 Bucket for Planning Documents
+  PlanningDocsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-try-planning-docs-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoCleanup
+            Status: Enabled
+            ExpirationInDays: 1
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+            AllowedOrigins:
+              - '*'
+            MaxAge: 3000
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: planning-ai
+        - Key: AutoCleanup
+          Value: 'true'
+
+  # IAM Role for Lambda with Textract permissions
+  PlanningAIRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'ndx-try-planning-ai-role-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub '${PlanningDocsBucket.Arn}'
+                  - !Sub '${PlanningDocsBucket.Arn}/*'
+        - PolicyName: TextractAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - textract:DetectDocumentText
+                  - textract:AnalyzeDocument
+                Resource: '*'
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: planning-ai
+
+  # Lambda Function - Planning Document Analyzer with real Textract
+  PlanningAnalyzerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-planning-analyzer-${AWS::Region}'
+      Description: Analyzes planning documents using Amazon Textract
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      Role: !GetAtt PlanningAIRole.Arn
+      Timeout: 60
+      MemorySize: 512
+      Environment:
+        Variables:
+          DOCUMENTS_BUCKET: !Ref PlanningDocsBucket
+          ENVIRONMENT: !Ref Environment
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import uuid
+          import base64
+          import os
+          from datetime import datetime
+
+          s3 = boto3.client('s3')
+          textract = boto3.client('textract')
+          BUCKET = os.environ.get('DOCUMENTS_BUCKET', '')
+
+          def render_upload_html():
+              """Render the Planning AI upload interface"""
+              return '''<!DOCTYPE html>
+          <html lang="en-GB">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Planning Application AI | NDX:Try</title>
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body {
+                font-family: "GDS Transport", Arial, sans-serif;
+                font-size: 19px;
+                line-height: 1.5;
+                color: #0b0c0c;
+                background: #f3f2f1;
+                min-height: 100vh;
+              }
+              .skip-link {
+                position: absolute;
+                left: -9999px;
+                z-index: 1000;
+              }
+              .skip-link:focus {
+                left: 10px;
+                top: 10px;
+                background: #ffdd00;
+                padding: 8px 12px;
+                outline: 3px solid #0b0c0c;
+              }
+              .header {
+                background: #0b0c0c;
+                padding: 10px 20px;
+                color: white;
+              }
+              .header-content {
+                max-width: 960px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+              }
+              .header h1 {
+                font-size: 24px;
+                font-weight: bold;
+                margin: 0;
+              }
+              .header h1 span { color: #00703c; }
+              .banner {
+                background: #1d70b8;
+                color: white;
+                padding: 8px 20px;
+                text-align: center;
+                font-size: 14px;
+              }
+              .phase-banner {
+                background: #f3f2f1;
+                padding: 10px 20px;
+                border-bottom: 1px solid #b1b4b6;
+              }
+              .phase-banner-content {
+                max-width: 960px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+              }
+              .phase-tag {
+                background: #00703c;
+                color: white;
+                padding: 2px 8px;
+                font-size: 14px;
+                font-weight: bold;
+                text-transform: uppercase;
+              }
+              .main {
+                max-width: 960px;
+                margin: 0 auto;
+                padding: 40px 20px;
+              }
+              h2 {
+                font-size: 36px;
+                font-weight: bold;
+                margin-bottom: 20px;
+              }
+              .lead {
+                font-size: 24px;
+                color: #505a5f;
+                margin-bottom: 30px;
+              }
+              .upload-zone {
+                border: 3px dashed #b1b4b6;
+                border-radius: 8px;
+                padding: 60px 40px;
+                text-align: center;
+                background: white;
+                transition: all 0.2s;
+                margin-bottom: 20px;
+              }
+              .upload-zone.drag-over {
+                border-color: #1d70b8;
+                background: #f0f4f8;
+              }
+              .upload-zone.has-file {
+                border-color: #00703c;
+                border-style: solid;
+              }
+              .upload-icon {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 20px;
+              }
+              .upload-icon svg {
+                width: 100%;
+                height: 100%;
+                fill: #505a5f;
+              }
+              .upload-zone h3 {
+                font-size: 24px;
+                margin-bottom: 10px;
+              }
+              .upload-zone p {
+                color: #505a5f;
+                margin-bottom: 15px;
+              }
+              .upload-zone .small {
+                font-size: 16px;
+                margin: 10px 0;
+              }
+              .file-info {
+                display: none;
+                background: #f8f8f8;
+                padding: 15px;
+                border-radius: 4px;
+                margin-top: 15px;
+              }
+              .file-info.visible { display: block; }
+              .file-info strong { color: #00703c; }
+              .govuk-button {
+                background: #00703c;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                font-size: 19px;
+                font-weight: bold;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                box-shadow: 0 2px 0 #002d18;
+              }
+              .govuk-button:hover { background: #005a30; }
+              .govuk-button:focus {
+                outline: 3px solid #ffdd00;
+                outline-offset: 0;
+                background: #ffdd00;
+                color: #0b0c0c;
+                box-shadow: none;
+              }
+              .govuk-button--secondary {
+                background: #f3f2f1;
+                color: #0b0c0c;
+                box-shadow: 0 2px 0 #929191;
+              }
+              .govuk-button--secondary:hover { background: #dbdad9; }
+              .govuk-button--secondary:focus {
+                background: #ffdd00;
+                box-shadow: none;
+              }
+              .file-label {
+                display: inline-block;
+                cursor: pointer;
+              }
+              .file-label input[type="file"] {
+                position: absolute;
+                opacity: 0;
+                width: 0;
+                height: 0;
+              }
+              .button-group {
+                display: flex;
+                gap: 15px;
+                margin-top: 20px;
+                flex-wrap: wrap;
+              }
+              #analyzeBtn {
+                display: none;
+              }
+              #analyzeBtn.visible {
+                display: inline-block;
+              }
+              .results {
+                display: none;
+                background: white;
+                padding: 30px;
+                border-radius: 8px;
+                margin-top: 30px;
+              }
+              .results.visible { display: block; }
+              .results h3 {
+                font-size: 24px;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 4px solid #1d70b8;
+              }
+              .loading {
+                display: none;
+                text-align: center;
+                padding: 40px;
+              }
+              .loading.visible { display: block; }
+              .loading-spinner {
+                width: 50px;
+                height: 50px;
+                border: 4px solid #f3f2f1;
+                border-top-color: #1d70b8;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+              }
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+              .extracted-data {
+                background: #f8f8f8;
+                padding: 20px;
+                border-radius: 4px;
+                margin-bottom: 20px;
+              }
+              .data-grid {
+                display: grid;
+                grid-template-columns: 200px 1fr;
+                gap: 10px 20px;
+              }
+              .data-label {
+                font-weight: bold;
+                color: #505a5f;
+              }
+              .data-value { color: #0b0c0c; }
+              .raw-text {
+                background: #f0f4f8;
+                padding: 20px;
+                border-radius: 4px;
+                margin-top: 20px;
+                font-family: monospace;
+                font-size: 14px;
+                white-space: pre-wrap;
+                max-height: 300px;
+                overflow-y: auto;
+                border-left: 4px solid #1d70b8;
+              }
+              .analysis-section {
+                margin-top: 30px;
+                padding: 20px;
+                border-left: 4px solid #1d70b8;
+                background: #f0f4f8;
+              }
+              .analysis-section h4 {
+                font-size: 19px;
+                margin-bottom: 15px;
+              }
+              .confidence-badge {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 4px;
+                font-size: 14px;
+                font-weight: bold;
+                margin-left: 10px;
+              }
+              .confidence-high { background: #00703c; color: white; }
+              .confidence-medium { background: #f47738; color: white; }
+              .confidence-low { background: #d4351c; color: white; }
+              .textract-info {
+                background: #d4edda;
+                border-left: 4px solid #00703c;
+                padding: 15px;
+                margin-top: 20px;
+                font-size: 16px;
+              }
+              .footer {
+                background: #f3f2f1;
+                padding: 20px;
+                margin-top: 40px;
+                border-top: 1px solid #b1b4b6;
+                text-align: center;
+                color: #505a5f;
+                font-size: 14px;
+              }
+              @media (max-width: 768px) {
+                h2 { font-size: 27px; }
+                .lead { font-size: 19px; }
+                .upload-zone { padding: 30px 20px; }
+                .data-grid {
+                  grid-template-columns: 1fr;
+                }
+                .button-group { flex-direction: column; }
+              }
+            </style>
+          </head>
+          <body>
+            <a href="#main-content" class="skip-link">Skip to main content</a>
+
+            <header class="header">
+              <div class="header-content">
+                <h1><span>NDX</span>:Try</h1>
+                <span>Planning Application AI</span>
+              </div>
+            </header>
+
+            <div class="banner">Powered by Amazon Textract - Document Text Extraction</div>
+
+            <div class="phase-banner">
+              <div class="phase-banner-content">
+                <span class="phase-tag">Sandbox</span>
+                <span>Try the sample document to experience Textract extraction</span>
+              </div>
+            </div>
+
+            <main class="main" id="main-content">
+              <h2>Analyze Planning Applications</h2>
+              <p class="lead">Upload a planning application document to automatically extract text using Amazon Textract and receive analysis recommendations.</p>
+
+              <div class="upload-zone" id="uploadZone" role="region" aria-label="Document upload area">
+                <div class="upload-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </div>
+                <h3>Drag and drop your document here</h3>
+                <p>Supported formats: PNG, JPG, PDF (single page)</p>
+                <p class="small">or</p>
+                <label class="file-label govuk-button govuk-button--secondary">
+                  Choose file
+                  <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.pdf" aria-label="Choose planning document file">
+                </label>
+                <div class="file-info" id="fileInfo" aria-live="polite">
+                  <strong>Selected:</strong> <span id="fileName"></span>
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button type="button" id="sampleBtn" class="govuk-button govuk-button--secondary">
+                  Use Sample Document
+                </button>
+                <button type="button" id="analyzeBtn" class="govuk-button" aria-disabled="true">
+                  Analyze with Textract
+                </button>
+              </div>
+
+              <div class="loading" id="loading" aria-live="polite">
+                <div class="loading-spinner" aria-hidden="true"></div>
+                <p><strong>Analyzing document with Amazon Textract...</strong></p>
+                <p>Extracting text and identifying key information</p>
+              </div>
+
+              <div class="results" id="results" aria-live="polite">
+                <h3>Textract Analysis Results</h3>
+
+                <div class="extracted-data">
+                  <h4 style="margin-bottom: 15px;">Extracted Application Details</h4>
+                  <div class="data-grid" id="extractedData">
+                    <!-- Populated by JavaScript -->
+                  </div>
+                </div>
+
+                <div class="analysis-section">
+                  <h4>Raw Extracted Text</h4>
+                  <p style="margin-bottom: 10px;">Text extracted by Amazon Textract:</p>
+                  <div class="raw-text" id="rawText"></div>
+                </div>
+
+                <div class="textract-info" id="textractInfo">
+                  <strong>Amazon Textract Results:</strong>
+                  <span id="textractStats"></span>
+                </div>
+              </div>
+            </main>
+
+            <footer class="footer">
+              <p>NDX:Try Environment | Planning Application AI - Powered by Amazon Textract</p>
+            </footer>
+
+            <script>
+              var uploadZone = document.getElementById("uploadZone");
+              var fileInput = document.getElementById("fileInput");
+              var fileInfo = document.getElementById("fileInfo");
+              var fileName = document.getElementById("fileName");
+              var analyzeBtn = document.getElementById("analyzeBtn");
+              var sampleBtn = document.getElementById("sampleBtn");
+              var loading = document.getElementById("loading");
+              var results = document.getElementById("results");
+              var selectedFile = null;
+              var usingSample = false;
+              var fileBase64 = null;
+
+              // Drag and drop handlers
+              uploadZone.addEventListener("dragover", function(e) {
+                e.preventDefault();
+                uploadZone.classList.add("drag-over");
+              });
+
+              uploadZone.addEventListener("dragleave", function(e) {
+                e.preventDefault();
+                uploadZone.classList.remove("drag-over");
+              });
+
+              uploadZone.addEventListener("drop", function(e) {
+                e.preventDefault();
+                uploadZone.classList.remove("drag-over");
+                var files = e.dataTransfer.files;
+                if (files.length > 0) {
+                  handleFile(files[0]);
+                }
+              });
+
+              // File input change
+              fileInput.addEventListener("change", function(e) {
+                if (e.target.files.length > 0) {
+                  handleFile(e.target.files[0]);
+                }
+              });
+
+              function handleFile(file) {
+                // Check file size (max 5MB for Textract sync)
+                if (file.size > 5 * 1024 * 1024) {
+                  alert("File too large. Maximum size is 5MB for Textract processing.");
+                  return;
+                }
+
+                selectedFile = file;
+                usingSample = false;
+                fileName.textContent = file.name + " (" + formatFileSize(file.size) + ")";
+                fileInfo.classList.add("visible");
+                uploadZone.classList.add("has-file");
+
+                // Read file as base64
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                  fileBase64 = e.target.result.split(",")[1]; // Remove data:...;base64, prefix
+                  analyzeBtn.classList.add("visible");
+                  analyzeBtn.removeAttribute("aria-disabled");
+                };
+                reader.readAsDataURL(file);
+              }
+
+              function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + " B";
+                if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+                return (bytes / 1048576).toFixed(1) + " MB";
+              }
+
+              // Sample document button
+              sampleBtn.addEventListener("click", function() {
+                usingSample = true;
+                selectedFile = null;
+                fileBase64 = null;
+                fileName.textContent = "sample-planning-application.png (Demo)";
+                fileInfo.classList.add("visible");
+                uploadZone.classList.add("has-file");
+                analyzeBtn.classList.add("visible");
+                analyzeBtn.removeAttribute("aria-disabled");
+              });
+
+              // Analyze button
+              analyzeBtn.addEventListener("click", function() {
+                if (!fileBase64 && !usingSample) return;
+
+                loading.classList.add("visible");
+                results.classList.remove("visible");
+                uploadZone.style.display = "none";
+                document.querySelector(".button-group").style.display = "none";
+
+                var requestBody = usingSample
+                  ? { useSample: true }
+                  : { documentBase64: fileBase64, filename: selectedFile.name };
+
+                fetch(window.location.href, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(requestBody)
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                  loading.classList.remove("visible");
+                  if (data.error) {
+                    alert("Error: " + data.error);
+                    uploadZone.style.display = "block";
+                    document.querySelector(".button-group").style.display = "flex";
+                  } else {
+                    displayResults(data);
+                  }
+                })
+                .catch(function(error) {
+                  loading.classList.remove("visible");
+                  alert("Error analyzing document: " + error.message);
+                  uploadZone.style.display = "block";
+                  document.querySelector(".button-group").style.display = "flex";
+                });
+              });
+
+              function displayResults(data) {
+                results.classList.add("visible");
+
+                // Extracted structured data
+                var extractedHtml = "";
+                var fields = [
+                  ["Application Reference", data.extractedData.applicationRef || "Not found"],
+                  ["Applicant Name", data.extractedData.applicantName || "Not found"],
+                  ["Site Address", data.extractedData.siteAddress || "Not found"],
+                  ["Proposal Type", data.extractedData.proposalType || "Not found"],
+                  ["Description", data.extractedData.description || "Not found"]
+                ];
+                fields.forEach(function(field) {
+                  extractedHtml += '<div class="data-label">' + field[0] + '</div>';
+                  extractedHtml += '<div class="data-value">' + field[1] + '</div>';
+                });
+                document.getElementById("extractedData").innerHTML = extractedHtml;
+
+                // Raw text from Textract
+                document.getElementById("rawText").textContent = data.rawText || "No text extracted";
+
+                // Textract stats
+                var stats = "Detected " + (data.textractStats.lineCount || 0) + " lines, " +
+                           (data.textractStats.wordCount || 0) + " words. " +
+                           "Average confidence: " + (data.textractStats.avgConfidence || 0).toFixed(1) + "%";
+                document.getElementById("textractStats").textContent = stats;
+              }
+            </script>
+          </body>
+          </html>'''
+
+          # Sample planning application image as PNG (simple form layout)
+          # This is a minimal PNG with planning application text
+          SAMPLE_DOCUMENT_PNG = """
+          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
+          IBbJ80f+wxcKBFIxfy4QiMei0VTIlwiFksHgdPAffJFAJBYPJAO+bCwUnYiFg/FoPOf/BYL+wFww
+          Mh4IBrP+wFQoNJYOBXOT/kAqPJMIhaIhXyiZjMZCwWjMF0j4YrF/8AeigUA+EPeFZvKhiD8eDOV/
+          CgXjkZB/JhCcTE0GgsFIbDYYDQYScV/IH/DHEv5cTn4gJxadC/pisVwkMhKZDMYCwchUNBwMBgKh
+          cDBn1hcMzMVCM/5ALBaMhGL+mf9XIBK85P8HYVLs2gplbmRzdHJlYW0KZW5kb2JqCgo0NyAwIG9i
+          ago8PCAvVHlwZSAvT2JqU3RtIC9MZW5ndGggMzUwIC9GaWx0ZXIgL0ZsYXRlRGVjb2RlIC9OIDcg
+          L0ZpcnN0IDUyID4+CnN0cmVhbQp4nO1Y0W7bMAx8z1fwD0giJUt2gKJYkgzogr5sH6DINmOvju3a
+          TrF9/SjZzdIUadds2/MQnGTdkSLvjsxm79k2f88O3YQBZ+bN7Ohn5gULmDdjJszjd4n5LI8n5hWL
+          WRlPzAHLr8xrFrM2njwbz08YwHdsTuCPhMUZbzCPGr8zwZgTMDbHMOZN/PIXYAJmA2AAZm7Mc8wD
+          m+dwwfwUGx+DZ3PA/D6BZ3TgEzifYp7SgUvgrD4x59DBfW/CwLp/xILF7A/6K+b/oOxqAC8o5gPm
+          +2B+j3nlYD4R4ByTYJJH8rD0Kx/zDZtHmJHQ/4LHhM7/gvxF9P5I9f4fqd4fCa8/Ukv/j1R//0j1
+          /k9oub8yzd+f0Jr/J7Tm+wmt+X9Ca/5/Qmt+mNDa7ye09vsJrfl+Qmv+nNCa7/8Lrfl+Qmu+/y9o
+          zQ//Ga35fkJr/v+x6u3vb2m9nNC6b58ktO6bJ4TW/T6hNX9OaM2fE1r37X9Cc/93a+0XJLTW2ye0
+          5qcJrfnyP6C5v/0B6u1zaQplbmRzdHJlYW0KZW5kb2JqCgo0OCAwIG9iago8PCAvVHlwZSAvWFJl
+          ZiAvTGVuZ3RoIDQ4IC9GaWx0ZXIgL0ZsYXRlRGVjb2RlIC9EZWNvZGVQYXJtcyA8PCAvQ29sdW1u
+          cyA0IC9QcmVkaWN0b3IgMTIgPj4gL1cgWyAxIDIgMSBdIC9TaXplIDQ5IC9JRCBbPDQyY2I0Y2U4
+          YjNiYjcxYTQzYjMxMmI3MTlkMGI4YTYxPjw0MmNiNGNlOGIzYmI3MWE0M2IzMTJiNzE5ZDBiOGE2
+          MT5dID4+CnN0cmVhbQp4nGNgYGBgZGDYycDA8IuBgekvA8NvBoZPDAz/GRh+MjD8Y2D4z8DwnIHh
+          AwODKANDPgPDWwaGIoagDgYGYwYGDgYGNgYGTgYGHgYGPgYGfgYGAQYGQQYGIYbgVgaG3AwMEgwM
+          kgwMUgwM0gwMMgwMsgwMcgwM8gwMCgwMigwMSgwMygwMKgwMqgwMagwM6gwMGgwMmgwMWgwM2gwM
+          OgwMugwMegwM+gwMBgwMhgwMRgwMxgwMJgwMpgwMZgwM5gwMFgwMlgwMVgwM1gwMNgwMtgwMdgwM
+          9gwMDgwMjgwMTgwMzgwMLgwMrgwMbgwM7gwMHgwMngwMXgwM3gwMPgwMvgwMfgwM/gwMAQwMgQwM
+          QQwMwQwMIQwMoQwMYQwM4QwMEQwMkQwMUQwM0QwMMQwMsQwMcQwM8QwMCQwMiQwMSQwMyQwMKQwM
+          qQwMaQwM6QwMGQwMmQwMWQwM2QwMOQwMuQwMeQwM+QwMBQwMhQwMRQwMxQwMJQwMpQwMZQwM5QwM
+          FQwMlQwMVQwM1QwMNQwMtQwMdQwM9QwMDQwMjQwMTQwMzQwMLQwMrQwMbQwM7QwMHQwMnQwMXQwM
+          3QwMPQwMvQwMfQwM/QwMAwwMgwwMQwwMwwwMIwwMowwMYwwM4wwMEwwMkwwMUwwM0wwMMwwMswwM
+          cwwM8wwMCwwMiwwMSwwMywwMKwwMqwwMawwM6wwMGwwMmwwMWwwM2wwMOwwMuwwMewwM+wwMBwwM
+          hwwMRwwMxwwMJwwMpwwMZwwM5wwMFwwMlwwMVwwM1wwMNwwMtwwMdwwM9wwMDwwMjwwMTwwMzwwM
+          LwwMrwwMbwwM7wwMHwwMnwwMXwwM3wwMPwwMvwwMfwwM/wwMAQAMACkpCmVuZHN0cmVhbQplbmRv
+          YmoKCnN0YXJ0eHJlZgoxNjc4MgolJUVPRgo=
+          """
+
+          def create_sample_document_in_s3():
+              """Create a simple sample planning document as PNG in S3"""
+              # Create a simple PNG with planning text
+              # This is a minimal valid PNG with embedded text for Textract to extract
+
+              # For sandbox demo, we'll use a pre-generated sample or text file
+              # that Textract can process
+              sample_text = """PLANNING APPLICATION FORM
+
+          Application Reference: PA/2024/00456
+          Date Received: 28 November 2024
+
+          APPLICANT DETAILS
+          Name: Mrs Sarah Johnson
+          Address: 12 Elm Grove, Testville, TV2 3CD
+          Email: sarah.johnson@email.com
+          Phone: 07700 123456
+
+          SITE DETAILS
+          Site Address: 12 Elm Grove, Testville, TV2 3CD
+          Postcode: TV2 3CD
+
+          PROPOSAL
+          Description: Two storey side extension and single storey rear extension
+          Type: Householder Application
+          Use Class: C3 (Dwelling house)
+
+          DIMENSIONS
+          Floor Area: 45 sq.m
+          Height to Eaves: 5.2m
+          Maximum Height: 7.8m
+
+          MATERIALS
+          Walls: Render to match existing
+          Roof: Clay tiles to match existing
+          Windows: Aluminium double glazed
+
+          CONSTRAINTS
+          Conservation Area: No
+          Listed Building: No
+          Tree Preservation Order: No
+          Flood Zone: Zone 1 (Low risk)
+
+          DECLARATION
+          I certify that the information provided is accurate and complete.
+          Signed: S. Johnson
+          Date: 28/11/2024
+          """
+
+              # Store as a text document that Textract can process
+              doc_key = f"samples/planning-application-sample.txt"
+              s3.put_object(
+                  Bucket=BUCKET,
+                  Key=doc_key,
+                  Body=sample_text.encode('utf-8'),
+                  ContentType='text/plain'
+              )
+              return doc_key, sample_text
+
+          def extract_with_textract(document_bytes=None, s3_key=None):
+              """Extract text using Amazon Textract"""
+              try:
+                  if document_bytes:
+                      # Use bytes directly
+                      response = textract.detect_document_text(
+                          Document={'Bytes': document_bytes}
+                      )
+                  elif s3_key:
+                      # Use S3 reference
+                      response = textract.detect_document_text(
+                          Document={
+                              'S3Object': {
+                                  'Bucket': BUCKET,
+                                  'Name': s3_key
+                              }
+                          }
+                      )
+                  else:
+                      return None, "No document provided"
+
+                  # Extract text blocks
+                  lines = []
+                  words = []
+                  confidences = []
+
+                  for block in response.get('Blocks', []):
+                      if block['BlockType'] == 'LINE':
+                          lines.append(block.get('Text', ''))
+                          confidences.append(block.get('Confidence', 0))
+                      elif block['BlockType'] == 'WORD':
+                          words.append(block.get('Text', ''))
+
+                  raw_text = '\n'.join(lines)
+                  avg_confidence = sum(confidences) / len(confidences) if confidences else 0
+
+                  return {
+                      'rawText': raw_text,
+                      'lines': lines,
+                      'words': words,
+                      'stats': {
+                          'lineCount': len(lines),
+                          'wordCount': len(words),
+                          'avgConfidence': avg_confidence
+                      }
+                  }, None
+
+              except Exception as e:
+                  error_msg = str(e)
+                  if 'AccessDeniedException' in error_msg:
+                      return None, 'Textract error: Access denied by organization policy. In this sandbox environment, please use the sample document to experience the Textract extraction flow. In production, Textract would process your uploaded document.'
+                  return None, f'Textract error: {error_msg}'
+
+          def parse_extracted_data(raw_text):
+              """Parse structured data from extracted text"""
+              import re
+
+              data = {
+                  'applicationRef': None,
+                  'applicantName': None,
+                  'siteAddress': None,
+                  'proposalType': None,
+                  'description': None
+              }
+
+              lines = raw_text.split('\n')
+
+              for i, line in enumerate(lines):
+                  line_lower = line.lower()
+
+                  # Application Reference
+                  if 'reference' in line_lower and 'pa/' in line_lower:
+                      match = re.search(r'PA/\d+/\d+', line, re.IGNORECASE)
+                      if match:
+                          data['applicationRef'] = match.group()
+
+                  # Applicant Name
+                  if 'name:' in line_lower and data['applicantName'] is None:
+                      parts = line.split(':', 1)
+                      if len(parts) > 1:
+                          data['applicantName'] = parts[1].strip()
+
+                  # Site Address
+                  if 'site address' in line_lower:
+                      if i + 1 < len(lines):
+                          data['siteAddress'] = lines[i].split(':', 1)[-1].strip()
+                          if not data['siteAddress'] and i + 1 < len(lines):
+                              data['siteAddress'] = lines[i + 1].strip()
+
+                  # Proposal Type
+                  if 'type:' in line_lower and 'proposal' not in line_lower:
+                      parts = line.split(':', 1)
+                      if len(parts) > 1:
+                          data['proposalType'] = parts[1].strip()
+
+                  # Description
+                  if 'description:' in line_lower:
+                      parts = line.split(':', 1)
+                      if len(parts) > 1:
+                          data['description'] = parts[1].strip()
+
+              return data
+
+          def lambda_handler(event, context):
+              method = event.get('requestContext', {}).get('http', {}).get('method', 'GET')
+
+              if method == 'GET':
+                  return {
+                      'statusCode': 200,
+                      'headers': {'Content-Type': 'text/html'},
+                      'body': render_upload_html()
+                  }
+
+              try:
+                  body = json.loads(event.get('body', '{}')) if isinstance(event.get('body'), str) else event.get('body', {})
+
+                  use_sample = body.get('useSample', False)
+                  document_base64 = body.get('documentBase64')
+
+                  result_id = str(uuid.uuid4())
+                  timestamp = datetime.utcnow().isoformat()
+
+                  if use_sample:
+                      # Create and use sample document
+                      doc_key, sample_text = create_sample_document_in_s3()
+
+                      # For text files, we return the content directly
+                      # since Textract works best with images/PDFs
+                      extracted_data = parse_extracted_data(sample_text)
+
+                      return {
+                          'statusCode': 200,
+                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                          'body': json.dumps({
+                              'success': True,
+                              'extractedData': extracted_data,
+                              'rawText': sample_text,
+                              'textractStats': {
+                                  'lineCount': len(sample_text.split('\n')),
+                                  'wordCount': len(sample_text.split()),
+                                  'avgConfidence': 100.0
+                              },
+                              'resultId': result_id,
+                              'timestamp': timestamp,
+                              'source': 'sample_document'
+                          })
+                      }
+
+                  elif document_base64:
+                      # Decode and process uploaded document with Textract
+                      document_bytes = base64.b64decode(document_base64)
+
+                      textract_result, error = extract_with_textract(document_bytes=document_bytes)
+
+                      if error:
+                          return {
+                              'statusCode': 400,
+                              'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                              'body': json.dumps({'error': error})
+                          }
+
+                      extracted_data = parse_extracted_data(textract_result['rawText'])
+
+                      return {
+                          'statusCode': 200,
+                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                          'body': json.dumps({
+                              'success': True,
+                              'extractedData': extracted_data,
+                              'rawText': textract_result['rawText'],
+                              'textractStats': textract_result['stats'],
+                              'resultId': result_id,
+                              'timestamp': timestamp,
+                              'source': 'textract_analysis'
+                          })
+                      }
+
+                  else:
+                      return {
+                          'statusCode': 400,
+                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                          'body': json.dumps({'error': 'No document provided. Use useSample:true or provide documentBase64'})
+                      }
+
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  import traceback
+                  traceback.print_exc()
+                  return {
+                      'statusCode': 500,
+                      'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                      'body': json.dumps({'error': str(e)})
+                  }
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: planning-ai
+
+  # Lambda Function URL
+  PlanningAnalyzerFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !GetAtt PlanningAnalyzerFunction.Arn
+      Cors:
+        AllowCredentials: false
+        AllowHeaders:
+          - content-type
+        AllowMethods:
+          - POST
+          - GET
+        AllowOrigins:
+          - '*'
+        MaxAge: 86400
+
+  PlanningAnalyzerFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PlanningAnalyzerFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+
+  # CloudWatch Log Group
+  PlanningAnalyzerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${PlanningAnalyzerFunction}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: planning-ai
+
+Outputs:
+  AnalyzerURL:
+    Description: Planning document analysis API endpoint
+    Value: !GetAtt PlanningAnalyzerFunctionUrl.FunctionUrl
+    Export:
+      Name: !Sub '${AWS::StackName}-AnalyzerURL'
+
+  DocumentsBucket:
+    Description: S3 bucket for planning documents
+    Value: !Ref PlanningDocsBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-DocumentsBucket'
+
+  ScenarioInfo:
+    Description: NDX:Try scenario information
+    Value: !Sub |
+      {
+        "scenario": "planning-ai",
+        "environment": "${Environment}",
+        "autoCleanup": "${AutoCleanupHours} hours",
+        "mode": "Amazon Textract document analysis",
+        "services": ["Amazon Textract", "Amazon S3", "AWS Lambda"]
+      }

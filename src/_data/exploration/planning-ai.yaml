@@ -1,0 +1,211 @@
+# Planning Application AI Exploration Data (Story 7.1)
+# Defines all exploration activities for the Planning Application AI scenario
+
+scenario_id: planning-ai
+scenario_title: Planning Application AI
+total_time_estimate: "45 minutes"
+description: "Explore document processing AI beyond the basic walkthrough"
+
+# Persona paths
+personas:
+  visual:
+    id: visual
+    title: "Service Manager / Non-Technical"
+    description: "Explore through screenshots, diagrams, and guided interactions"
+    icon: "eye"
+    time_estimate: "25 minutes"
+  technical:
+    id: technical
+    title: "Developer / Technical"
+    description: "Explore through AWS Console, code, and architecture details"
+    icon: "code"
+    time_estimate: "35 minutes"
+
+# All exploration activities
+activities:
+  # Document Processing Experiments (Story 7.2)
+  - id: exp1
+    title: "Document Quality Test"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "Input quality directly affects AI extraction accuracy"
+    is_first: true
+    safe_badge: true
+    input_text: "Compare extraction results between high and low quality scans"
+    expected_output: "Clear difference in extraction accuracy - high quality yields better results"
+    screenshot: "experiments/exp1-quality-comparison.png"
+
+  - id: exp2
+    title: "Handwritten Notes Recognition"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "Handwriting recognition is improving but not perfect"
+    safe_badge: true
+    input_text: "Upload a document with handwritten annotations in the margins"
+    expected_output: "Some handwriting recognized accurately, some missed or misinterpreted"
+    screenshot: "experiments/exp2-handwriting.png"
+
+  - id: exp3
+    title: "Multi-Page Processing"
+    category: experiments
+    persona: both
+    time_estimate: "10 min"
+    learning: "Longer documents take proportionally longer to process"
+    safe_badge: true
+    input_text: "Compare processing of 1-page vs 15-page planning applications"
+    expected_output: "Processing time scales with document length"
+    screenshot: "experiments/exp3-multipage.png"
+
+  - id: exp4
+    title: "File Format Comparison"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "Native PDF extracts better than image formats"
+    safe_badge: true
+    input_text: "Upload the same document as PDF, PNG, and TIFF"
+    expected_output: "PDF yields best extraction, images may lose quality"
+    screenshot: "experiments/exp4-formats.png"
+
+  - id: exp5
+    title: "Partially Filled Forms"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "AI can detect missing required fields"
+    safe_badge: true
+    input_text: "Upload a planning application with blank required fields"
+    expected_output: "AI identifies which fields are missing or incomplete"
+    screenshot: "experiments/exp5-incomplete.png"
+
+  # Visual Architecture Tour (Story 7.3)
+  - id: arch-visual
+    title: "Visual Architecture Tour"
+    category: architecture
+    persona: visual
+    time_estimate: "10 min"
+    learning: "How documents flow through AWS services for extraction"
+    steps:
+      - title: "Document Upload to S3"
+        description: "Your document is securely uploaded to AWS cloud storage"
+        screenshot: "architecture/step1-s3-upload.png"
+      - title: "Textract OCR Processing"
+        description: "Amazon Textract reads text from the document like a human would"
+        screenshot: "architecture/step2-textract.png"
+      - title: "Comprehend Entity Extraction"
+        description: "Amazon Comprehend identifies key entities (names, addresses, dates)"
+        screenshot: "architecture/step3-comprehend.png"
+      - title: "Bedrock Intelligence"
+        description: "AWS Bedrock AI interprets and validates the extracted data"
+        screenshot: "architecture/step4-bedrock.png"
+      - title: "Results Stored"
+        description: "Extracted data is stored for review and export"
+        screenshot: "architecture/step5-results.png"
+
+  # Console Architecture Tour (Story 7.3)
+  - id: arch-console
+    title: "Console Architecture Tour"
+    category: architecture
+    persona: technical
+    time_estimate: "15 min"
+    learning: "Navigate AWS Console to understand document processing infrastructure"
+    steps:
+      - title: "S3 Buckets"
+        console_url: "https://console.aws.amazon.com/s3/home"
+        what_to_look_for: "Input and output buckets, folder structure, lifecycle policies"
+        screenshot: "architecture/console-s3.png"
+      - title: "Textract Results"
+        console_url: "https://console.aws.amazon.com/textract/home"
+        what_to_look_for: "Analysis results, confidence scores, detected fields"
+        screenshot: "architecture/console-textract.png"
+      - title: "Lambda Processing"
+        console_url: "https://console.aws.amazon.com/lambda/home"
+        what_to_look_for: "Processing function, environment variables, memory settings"
+        screenshot: "architecture/console-lambda.png"
+      - title: "Step Functions Workflow"
+        console_url: "https://console.aws.amazon.com/states/home"
+        what_to_look_for: "Workflow visualization, execution history, error handling"
+        screenshot: "architecture/console-stepfunctions.png"
+      - title: "CloudWatch Logs"
+        console_url: "https://console.aws.amazon.com/cloudwatch/home"
+        what_to_look_for: "Processing logs, error messages, performance metrics"
+        screenshot: "architecture/console-cloudwatch.png"
+
+  # Boundary Challenges (Story 7.4)
+  - id: limit1
+    title: "Empty Document"
+    category: limits
+    persona: both
+    time_estimate: "5 min"
+    learning: "AI needs content to extract - empty pages are handled gracefully"
+    challenge_description: "Upload a blank or nearly empty PDF document"
+    sample_text: "Try uploading a blank page or a document with minimal content"
+    expected_behavior: "System indicates no extractable content found"
+    business_implication: "Helps identify incorrectly scanned or empty submissions"
+    recovery: "Upload a document with readable content"
+    screenshot: "limits/limit1-empty-document.png"
+
+  - id: limit2
+    title: "Very Large Document"
+    category: limits
+    persona: both
+    time_estimate: "10 min"
+    learning: "Document size affects processing time and costs"
+    challenge_description: "Upload a document with 50+ pages"
+    sample_text: "Try uploading a large planning application bundle"
+    expected_behavior: "Processing takes longer, may require splitting"
+    business_implication: "Consider splitting large submissions into parts"
+    recovery: "Split into smaller documents or wait for processing to complete"
+    screenshot: "limits/limit2-large-document.png"
+
+  - id: limit3
+    title: "Corrupted or Unsupported File"
+    category: limits
+    persona: both
+    time_estimate: "5 min"
+    learning: "System validates file integrity and format"
+    challenge_description: "Upload a corrupted PDF or unsupported file type"
+    sample_text: "Try uploading a .exe file or corrupted PDF"
+    expected_behavior: "Clear error message indicating file cannot be processed"
+    business_implication: "Users receive immediate feedback on invalid uploads"
+    recovery: "Verify file is not corrupted and use supported format (PDF, PNG, TIFF)"
+    screenshot: "limits/limit3-corrupted-file.png"
+
+# Production guidance topics (Story 7.5)
+production_guidance:
+  - id: scale
+    title: "What Would Change at Scale"
+    topics:
+      - "Document volume: From 10s to 1000s of applications per day"
+      - "Processing capacity: Parallel processing, queue management"
+      - "Storage: Long-term archive, retention policies"
+      - "Integration: Planning portal, back-office systems"
+  - id: customization
+    title: "Customization Options"
+    topics:
+      - "Field mapping: Map extracted data to your planning system schema"
+      - "Validation rules: Custom validation for your authority requirements"
+      - "Document types: Train on your specific form layouts"
+      - "Output formats: Export to CSV, XML, or direct API integration"
+  - id: costs
+    title: "Cost Projection"
+    demo_costs:
+      textract: "~$1.50"
+      comprehend: "~$0.30"
+      bedrock: "~$0.50"
+      total: "~$2.30 per document"
+    production_costs:
+      textract: "$750-1500/month"
+      comprehend: "$150-300/month"
+      bedrock: "$250-500/month"
+      total: "$1150-2300/month (500 applications)"
+  - id: security
+    title: "Security Hardening Checklist"
+    items:
+      - "Enable S3 encryption at rest (SSE-S3 or SSE-KMS)"
+      - "Configure S3 bucket policies for least privilege"
+      - "Enable VPC endpoints for private processing"
+      - "Set up CloudTrail for document access auditing"
+      - "Configure retention policies for GDPR compliance"

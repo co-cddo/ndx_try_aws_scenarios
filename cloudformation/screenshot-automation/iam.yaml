@@ -1,0 +1,221 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  IAM Federation Service Account for NDX Screenshot Automation
+  Creates IAM user with scoped federation permissions for AWS Console screenshot capture.
+  Security: Read-only console access with explicit deny on all modifications.
+  Sprint: Sprint 0 - Story S0.1
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Security Configuration
+        Parameters:
+          - FederationSessionDuration
+    ParameterLabels:
+      FederationSessionDuration:
+        default: Maximum session duration (seconds)
+
+Parameters:
+  FederationSessionDuration:
+    Type: Number
+    Default: 3600
+    MinValue: 900
+    MaxValue: 3600
+    Description: Maximum duration for federation sessions (default 1 hour, min 15 minutes)
+
+Resources:
+  # IAM User for screenshot automation
+  ScreenshotAutomationUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: ndx-screenshot-automation
+      Tags:
+        - Key: Purpose
+          Value: ScreenshotAutomation
+        - Key: Project
+          Value: NDXTryAWSScenarios
+        - Key: Sprint
+          Value: Sprint0
+        - Key: Story
+          Value: S0.1
+
+  # IAM Policy allowing federation token generation
+  FederationTokenPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ndx-federation-token-generation
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # Allow GetFederationToken - this is the only write permission
+          - Sid: AllowFederationTokenGeneration
+            Effect: Allow
+            Action:
+              - sts:GetFederationToken
+            Resource: '*'
+
+          # Allow read-only console access via explicit allowlist
+          - Sid: AllowReadOnlyConsoleAccess
+            Effect: Allow
+            Action:
+              # EC2 - Virtual machines, networking
+              - ec2:Describe*
+
+              # S3 - Object storage
+              - s3:List*
+              - s3:Get*
+              - s3:GetBucketLocation
+              - s3:GetObject
+              - s3:GetObjectVersion
+
+              # Lambda - Serverless functions
+              - lambda:List*
+              - lambda:Get*
+
+              # CloudFormation - Infrastructure as code
+              - cloudformation:Describe*
+              - cloudformation:List*
+              - cloudformation:Get*
+
+              # DynamoDB - NoSQL database
+              - dynamodb:Describe*
+              - dynamodb:List*
+
+              # CloudWatch Logs - Log monitoring
+              - logs:Describe*
+              - logs:Get*
+              - logs:FilterLogEvents
+
+              # CloudWatch - Metrics and monitoring
+              - cloudwatch:Describe*
+              - cloudwatch:Get*
+              - cloudwatch:List*
+
+              # IoT - Internet of Things
+              - iot:Describe*
+              - iot:List*
+              - iot:Get*
+
+              # Polly - Text-to-speech
+              - polly:Describe*
+              - polly:List*
+              - polly:Get*
+
+              # Comprehend - Natural language processing
+              - comprehend:Describe*
+              - comprehend:List*
+
+              # Textract - Document analysis
+              - textract:Get*
+              - textract:Describe*
+
+              # Bedrock - Generative AI
+              - bedrock:List*
+              - bedrock:Get*
+
+              # QuickSight - Business intelligence
+              - quicksight:Describe*
+              - quicksight:List*
+              - quicksight:Get*
+
+              # SNS - Notifications
+              - sns:List*
+              - sns:Get*
+
+              # SQS - Message queuing
+              - sqs:List*
+              - sqs:Get*
+            Resource: '*'
+
+          # Explicit deny on all modifications
+          - Sid: DenyAllModifications
+            Effect: Deny
+            Action:
+              # Deny IAM and Organizations (account-level changes)
+              - iam:*
+              - organizations:*
+
+              # Deny all Create actions
+              - '*:Create*'
+
+              # Deny all Delete actions
+              - '*:Delete*'
+
+              # Deny all Update actions
+              - '*:Update*'
+
+              # Deny all Put actions (writes)
+              - '*:Put*'
+
+              # Deny all Start actions (state changes)
+              - '*:Start*'
+
+              # Deny all Stop actions (state changes)
+              - '*:Stop*'
+
+              # Deny all Invoke actions (execution)
+              - '*:Invoke*'
+
+              # Deny all Modify actions
+              - '*:Modify*'
+
+              # Deny all Run actions
+              - '*:Run*'
+
+              # Deny all Terminate actions
+              - '*:Terminate*'
+
+              # Deny all Execute actions
+              - '*:Execute*'
+            Resource: '*'
+      Users:
+        - !Ref ScreenshotAutomationUser
+
+  # Access key for GitHub Actions
+  ScreenshotAutomationAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref ScreenshotAutomationUser
+      Status: Active
+
+Outputs:
+  FederationUserArn:
+    Description: ARN of the IAM federation user
+    Value: !GetAtt ScreenshotAutomationUser.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-UserArn'
+
+  FederationAccessKeyId:
+    Description: Access Key ID for screenshot automation (store in GitHub Secrets as AWS_FEDERATION_ACCESS_KEY_ID)
+    Value: !Ref ScreenshotAutomationAccessKey
+    # Export removed - credentials should only be retrieved via describe-stacks with explicit stack name
+
+  FederationSecretAccessKey:
+    Description: Secret Access Key for screenshot automation (store in GitHub Secrets as AWS_FEDERATION_SECRET_ACCESS_KEY)
+    Value: !GetAtt ScreenshotAutomationAccessKey.SecretAccessKey
+    NoEcho: true
+    # CRITICAL: NoEcho prevents secret from appearing in console/CLI outputs
+    # Export removed - prevents credential discovery via list-exports
+    # IMPORTANT: Retrieve from CloudFormation stack outputs immediately after deployment
+
+  FederationUserName:
+    Description: IAM user name
+    Value: !Ref ScreenshotAutomationUser
+    Export:
+      Name: !Sub '${AWS::StackName}-UserName'
+
+  FederationSessionDuration:
+    Description: Maximum session duration in seconds
+    Value: !Ref FederationSessionDuration
+    Export:
+      Name: !Sub '${AWS::StackName}-SessionDuration'
+
+  DeploymentInstructions:
+    Description: Next steps after stack creation
+    Value: |
+      1. Retrieve FederationSecretAccessKey from stack outputs (it won't be shown again)
+      2. Add AWS_FEDERATION_ACCESS_KEY_ID to GitHub Secrets
+      3. Add AWS_FEDERATION_SECRET_ACCESS_KEY to GitHub Secrets
+      4. Verify federation: aws sts get-federation-token --name test-session
+      5. Review docs/ops/federation-credentials.md for rotation procedure

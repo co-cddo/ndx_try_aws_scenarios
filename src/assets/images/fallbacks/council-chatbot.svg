@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="council-chatbot-fallback-title council-chatbot-fallback-desc">
+  <title id="council-chatbot-fallback-title">Council Chatbot Screenshot</title>
+  <desc id="council-chatbot-fallback-desc">Screenshot temporarily unavailable - showing placeholder for Council Chatbot scenario</desc>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="#f3f2f1"/>
+
+  <!-- GOV.UK Blue header bar -->
+  <rect width="1920" height="100" fill="#1d70b8"/>
+
+  <!-- Central content area -->
+  <rect x="360" y="200" width="1200" height="680" rx="4" fill="#ffffff" stroke="#b1b4b6" stroke-width="2"/>
+
+  <!-- Chat icon -->
+  <g transform="translate(860, 400)">
+    <rect width="200" height="160" rx="20" fill="#1d70b8" opacity="0.1"/>
+    <path d="M50 40h100c11 0 20 9 20 20v60c0 11-9 20-20 20h-20l-30 30v-30h-50c-11 0-20-9-20-20v-60c0-11 9-20 20-20z" fill="#1d70b8"/>
+    <circle cx="70" cy="90" r="8" fill="#ffffff"/>
+    <circle cx="100" cy="90" r="8" fill="#ffffff"/>
+    <circle cx="130" cy="90" r="8" fill="#ffffff"/>
+  </g>
+
+  <!-- "Screenshot updating" text -->
+  <text x="960" y="620" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#505a5f">
+    Screenshot updating - please check back soon
+  </text>
+
+  <!-- Scenario label -->
+  <text x="960" y="680" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#0b0c0c" font-weight="600">
+    Council Chatbot
+  </text>
+
+  <!-- AWS Bedrock badge -->
+  <rect x="835" y="720" width="250" height="36" rx="4" fill="#232f3e"/>
+  <text x="960" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">
+    Powered by Amazon Bedrock
+  </text>
+</svg>

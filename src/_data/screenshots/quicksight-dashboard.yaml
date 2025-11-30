@@ -1,0 +1,151 @@
+# Screenshot data for QuickSight Dashboard scenario (Story 13.2)
+# Used by screenshot.njk component to display screenshots
+# Updated to reflect real deployed dashboard in us-east-1
+
+scenario: quicksight-dashboard
+scenarioTitle: "QuickSight Dashboard"
+awsService: "Amazon QuickSight"
+totalSteps: 4
+
+# Step-specific screenshots
+steps:
+  - step: 1
+    title: "Access QuickSight"
+    screenshots:
+      - id: cloudformation-outputs
+        filename: step-1-cloudformation-outputs.png
+        alt: "CloudFormation stack outputs showing the QuickSight dashboard embed URL"
+        caption: "Find your QuickSight access URL in CloudFormation Outputs"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "10%"
+            y: "42%"
+            label: "QuickSightDashboardURL output"
+            arrow: "right"
+
+      - id: quicksight-dashboard-loaded
+        filename: quicksight-dashboard-overview.png
+        alt: "QuickSight dashboard loaded showing 3 KPI cards, bar charts, and performance table"
+        caption: "The dashboard loads with council service performance data"
+        width: 1920
+        height: 1080
+
+  - step: 2
+    title: "Explore the Dashboard"
+    screenshots:
+      - id: dashboard-overview
+        filename: quicksight-dashboard-overview.png
+        alt: "QuickSight dashboard showing council service metrics with KPI cards, bar charts, and performance table"
+        caption: "Interactive dashboard with key council performance indicators"
+        width: 1920
+        height: 1080
+
+      - id: kpi-section
+        filename: quicksight-dashboard-overview.png
+        alt: "KPI cards showing Total Cases Received (267,334), Average Resolution Rate (0.85), and Average Satisfaction Score (4.15)"
+        caption: "Key performance indicators at a glance - 267K cases, 85% resolution, 4.15 satisfaction"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "26%"
+            y: "16%"
+            label: "3 KPI cards"
+            arrow: "down"
+
+      - id: bar-charts
+        filename: quicksight-dashboard-overview.png
+        alt: "Horizontal bar charts showing Cases by Service Area and Satisfaction by Service Area"
+        caption: "Bar charts compare service areas by volume and satisfaction"
+        width: 1920
+        height: 1080
+
+  - step: 3
+    title: "Use Interactive Filters"
+    screenshots:
+      - id: filter-controls
+        filename: quicksight-filter-panel-open.png
+        alt: "Dashboard filter panel with Service Area and Region dropdown selectors"
+        caption: "Filter data by Service Area or Region using the Controls panel"
+        width: 1920
+        height: 1080
+        annotations:
+          - number: 1
+            x: "9%"
+            y: "37%"
+            label: "Filter panel"
+            arrow: "right"
+
+      - id: filtered-view
+        filename: quicksight-filtered-housing.png
+        alt: "Dashboard filtered to show only Housing service data across 8 regions"
+        caption: "Filtered view showing Housing service metrics (29,760 cases)"
+        width: 1920
+        height: 1080
+
+      - id: data-table
+        filename: quicksight-dashboard-overview.png
+        alt: "Service Performance Breakdown table showing service_area, region, cases_received, cases_resolved, satisfaction_score"
+        caption: "Detailed performance table with sortable columns"
+        width: 1920
+        height: 1080
+
+  - step: 4
+    title: "Understand the Value"
+    screenshots:
+      - id: data-sources
+        filename: quicksight-dashboard-overview.png
+        alt: "Full dashboard view showing data from council service database"
+        caption: "The dashboard connects to council service request data"
+        width: 1920
+        height: 1080
+
+      - id: service-comparison
+        filename: quicksight-filtered-housing.png
+        alt: "Filtered view demonstrating self-service analytics capability"
+        caption: "Self-service filtering lets officers explore data without IT support"
+        width: 1920
+        height: 1080
+
+# Explore section screenshots (Epic 11 content)
+explore:
+  architecture:
+    - id: architecture-overview
+      filename: quicksight-dashboard-overview.png
+      alt: "Dashboard showing data flow from S3 to SPICE to QuickSight visuals"
+      caption: "How QuickSight Dashboard connects to council data"
+      width: 1920
+      height: 1080
+
+  experiments:
+    - id: filter-experiment
+      filename: quicksight-filter-panel-open.png
+      alt: "Filter dropdown showing 9 service areas available for selection"
+      caption: "Experiment with different filter combinations"
+      width: 1920
+      height: 1080
+
+    - id: filtered-results
+      filename: quicksight-filtered-housing.png
+      alt: "Dashboard showing filtered results for Housing service"
+      caption: "See immediate results when applying filters"
+      width: 1920
+      height: 1080
+
+  limits:
+    - id: data-volume
+      filename: quicksight-dashboard-overview.png
+      alt: "Dashboard showing 267,334 total cases across all service areas"
+      caption: "Understand data volume and SPICE capacity"
+      width: 1920
+      height: 1080
+
+  production:
+    - id: production-embedding
+      filename: quicksight-dashboard-overview.png
+      alt: "Embedded dashboard ready for intranet integration"
+      caption: "Embed dashboards securely in your council intranet"
+      width: 1920
+      height: 1080

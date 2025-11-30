@@ -1,0 +1,129 @@
+{#
+  Citizen Journey Impact Section (Service Manager Deep - AC-4.1.11)
+
+  Variables:
+  - service_manager_evaluation: Service Manager evaluation data
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    Citizen Journey Impact
+  </h2>
+
+  {% include "evidence-pack/partials/persona-header.njk" %}
+
+  {% if service_manager_evaluation and service_manager_evaluation.resident_impact and service_manager_evaluation.resident_impact.citizen_journey %}
+  {% set journey = service_manager_evaluation.resident_impact.citizen_journey %}
+
+  <h3 class="govuk-heading-m">Before & After Experience Comparison</h3>
+
+  <div class="govuk-grid-row ndx-journey-comparison">
+    <div class="govuk-grid-column-one-half">
+      <h4 class="govuk-heading-s">Current Experience (Before)</h4>
+      <div class="govuk-panel" style="border: 2px solid #d4351c; background-color: #fff;">
+        <ol class="govuk-list govuk-list--number" style="text-align: left; margin-left: 20px;">
+          {% for step in journey.before %}
+            <li style="color: #0b0c0c; margin-bottom: 10px;">{{ step.step }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+      <p class="govuk-body-s govuk-!-margin-top-2">
+        <strong>Pain Points:</strong> Long wait times, limited availability, manual information lookup
+      </p>
+    </div>
+
+    <div class="govuk-grid-column-one-half">
+      <h4 class="govuk-heading-s">Improved Experience (After)</h4>
+      <div class="govuk-panel govuk-panel--confirmation">
+        <ol class="govuk-list govuk-list--number" style="text-align: left; margin-left: 20px;">
+          {% for step in journey.after %}
+            <li style="color: #fff; margin-bottom: 10px;">{{ step.step }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+      <p class="govuk-body-s govuk-!-margin-top-2">
+        <strong>Benefits:</strong> Instant response, 24/7 availability, consistent accurate answers
+      </p>
+    </div>
+  </div>
+
+  <h3 class="govuk-heading-m">Time Savings for Residents</h3>
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Average time reduction:</strong> From 20 minutes to 2 minutes per query
+      <br>
+      <strong>Time saved per interaction:</strong> 18 minutes (90% reduction)
+      <br>
+      <strong>Annual resident time saved:</strong> 12,000 hours (based on 40,000 queries/year)
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-m">Accessibility Improvements</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>24/7 Availability:</strong> No longer limited to office hours (9am-5pm weekdays)</li>
+    <li><strong>Multi-channel Access:</strong> Website, mobile app, and future voice integration</li>
+    <li><strong>Consistent Service:</strong> Same quality of response regardless of time or day</li>
+    <li><strong>Language Support:</strong> Potential for multi-language support for diverse communities</li>
+    <li><strong>Reduced Wait Times:</strong> Instant response eliminates phone queue frustration</li>
+  </ul>
+
+  <h3 class="govuk-heading-m">Equity & Inclusion Considerations</h3>
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      Maintain phone and in-person channels for residents who prefer human interaction or lack digital access. The chatbot should complement, not replace, existing channels.
+    </strong>
+  </div>
+
+  <h3 class="govuk-heading-m">Resident Segmentation</h3>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Resident Segment</th>
+        <th scope="col" class="govuk-table__header">Primary Benefit</th>
+        <th scope="col" class="govuk-table__header">Consideration</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Working Professionals</th>
+        <td class="govuk-table__cell">24/7 access outside office hours</td>
+        <td class="govuk-table__cell">Mobile-first design essential</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Parents & Carers</th>
+        <td class="govuk-table__cell">Quick answers while multitasking</td>
+        <td class="govuk-table__cell">Simple, clear language needed</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Elderly Residents</th>
+        <td class="govuk-table__cell">No phone queue waiting</td>
+        <td class="govuk-table__cell">Maintain phone option, simple UI</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Digitally Excluded</th>
+        <td class="govuk-table__cell">Phone agents freed for complex queries</td>
+        <td class="govuk-table__cell">Preserve traditional channels</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="govuk-heading-m">Quality Assurance</h3>
+  <p class="govuk-body">
+    To ensure consistent, accurate resident experience:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Regular review of chatbot conversations and accuracy</li>
+    <li>Feedback mechanism for residents to report incorrect information</li>
+    <li>Monthly knowledge base updates from service teams</li>
+    <li>Escalation path for complex queries to human agents</li>
+    <li>Performance monitoring against service standards</li>
+  </ul>
+
+  {% else %}
+  <p class="govuk-body">
+    Detailed citizen journey mapping will be developed during implementation planning.
+  </p>
+  {% endif %}
+</div>

@@ -1,0 +1,514 @@
+# Text-to-Speech Sample Data
+# Story 3.6 - AC-3.6.1, AC-3.6.2, AC-3.6.3, AC-3.6.4, AC-3.6.5
+#
+# Sample council announcements for text-to-speech conversion with Amazon Polly.
+# Demonstrates accessibility use cases and multiple UK English neural voices.
+
+sampleAnnouncements:
+  - id: "bin-collection-change"
+    title: "Bin Collection Changes - Bank Holiday"
+    category: "Service Disruption"
+    priority: "Standard"
+    text: "Due to the upcoming bank holiday on Monday 27th May, bin collections will be delayed by one day across all areas. If your usual collection day is Monday, your bins will be collected on Tuesday. Tuesday collections move to Wednesday, and so on. Please leave your bins out by 7am on your revised collection day. Normal service resumes the following week. For more information, visit our website or call 01234 567890."
+    characterCount: 427
+    estimatedCost: "£0.007"
+    estimatedDuration: "25 seconds"
+    useCase: "Weekly service updates, routine announcements"
+    targetAudience: "All residents"
+    accessibility:
+      - "Visually impaired residents who cannot read website updates"
+      - "Elderly residents who prefer audio information"
+      - "Commuters who listen while driving"
+
+  - id: "weather-warning"
+    title: "Severe Weather Warning - Heavy Snow Expected"
+    category: "Emergency Alert"
+    priority: "Urgent"
+    text: "The Met Office has issued a severe weather warning for our area. Heavy snow is expected from 6pm this evening through to midday tomorrow. Residents are advised to avoid non-essential travel. Gritting teams are on standby, but icy conditions are likely on minor roads. Schools will remain open unless conditions worsen overnight. Check our website for live updates or follow us on social media. In an emergency, call 999. For non-urgent council services, call 01234 567890."
+    characterCount: 497
+    estimatedCost: "£0.008"
+    estimatedDuration: "29 seconds"
+    useCase: "Time-sensitive emergency alerts, safety warnings"
+    targetAudience: "All residents, particularly vulnerable groups"
+    accessibility:
+      - "Critical safety information accessible to visually impaired"
+      - "Phone system integration for automated weather alerts"
+      - "Multi-channel delivery via website, phone, social media"
+
+  - id: "planning-meeting"
+    title: "Planning Committee Meeting - Public Attendance"
+    category: "Committee Announcement"
+    priority: "Standard"
+    text: "The Planning Committee will meet on Wednesday 15th June at 7pm in the Council Chamber, Town Hall. The agenda includes applications for 45 new homes on the former industrial site at Riverside Road, and a change of use application for the old Post Office building on High Street. Members of the public are welcome to attend and may speak during the public participation session. To register to speak, contact Democratic Services by 5pm on Tuesday 14th June on 01234 567890 or email planning@council.gov.uk. The full agenda and supporting documents are available on our website."
+    characterCount: 608
+    estimatedCost: "£0.010"
+    estimatedDuration: "36 seconds"
+    useCase: "Committee announcements, formal notices"
+    targetAudience: "Interested residents, planning applicants, objectors"
+    accessibility:
+      - "Planning process accessible to blind or partially sighted residents"
+      - "WCAG 2.1 AA compliance for statutory notices"
+      - "Alternative format for legal publication requirements"
+
+  - id: "vaccination-clinic"
+    title: "COVID-19 and Flu Vaccination Clinics"
+    category: "Public Health"
+    priority: "Standard"
+    text: "Walk-in vaccination clinics are available every Tuesday and Thursday from 9am to 5pm at the Community Centre on Park Lane. COVID-19 boosters and flu jabs are available for eligible residents. No appointment needed - just bring your NHS number if you have it. The clinics are wheelchair accessible with free parking. For eligibility information, visit NHS dot UK or call NHS 119. Vaccinations are free for those eligible under the NHS programme. Protect yourself and your community this winter."
+    characterCount: 520
+    estimatedCost: "£0.008"
+    estimatedDuration: "31 seconds"
+    useCase: "Public health information, community services"
+    targetAudience: "Eligible residents for vaccination programmes"
+    accessibility:
+      - "Health information accessible to those with reading difficulties"
+      - "Multilingual support (Polly supports 29 languages)"
+      - "Phone hotline integration for automated clinic information"
+
+pollyVoices:
+  - id: "Amy"
+    engine: "neural"
+    language: "en-GB"
+    languageName: "British English"
+    gender: "Female"
+    style: "Conversational, friendly"
+    bestFor: "General announcements, service updates, community information"
+    description: "Amy's warm, conversational tone is perfect for routine council communications. She sounds natural and approachable, making announcements feel personal rather than bureaucratic."
+    useCase: "Bin collection changes, library hours, park events, general service updates"
+    sampleText: "The library will be closed for refurbishment from Monday 10th July through Friday 4th August. During this time, you can still access online resources and use the mobile library service."
+
+  - id: "Brian"
+    engine: "neural"
+    language: "en-GB"
+    languageName: "British English"
+    gender: "Male"
+    style: "Authoritative, clear, formal"
+    bestFor: "Emergency alerts, official statements, urgent announcements"
+    description: "Brian's authoritative tone commands attention and conveys importance. His clear delivery ensures critical information is understood immediately, ideal for safety-critical announcements."
+    useCase: "Weather warnings, emergency alerts, road closures, urgent safety information"
+    sampleText: "This is an urgent announcement. Due to a major incident on the M25, all approach roads are closed. Residents should avoid travel to Junction 15 until further notice. Emergency services are at the scene."
+
+  - id: "Emma"
+    engine: "neural"
+    language: "en-GB"
+    languageName: "British English"
+    gender: "Female"
+    style: "Formal, professional, precise"
+    bestFor: "Committee announcements, legal notices, formal statements"
+    description: "Emma's formal, professional tone is ideal for official council business. Her precise delivery ensures accuracy and conveys the seriousness of statutory notices and committee proceedings."
+    useCase: "Planning committee notices, council meeting agendas, legal announcements, formal consultations"
+    sampleText: "Notice is hereby given that the Council's Cabinet will meet on Thursday 20th July at 2pm to consider the annual budget. The public may attend and ask questions during the designated participation period."
+
+accessibilityUseCases:
+  title: "Who Benefits from Text-to-Speech?"
+  introduction: "Amazon Polly text-to-speech makes council information accessible to residents who cannot or prefer not to read text-based content."
+
+  userGroups:
+    - group: "Visually Impaired Residents"
+      population: "2% of UK population (1.3 million people)"
+      needs:
+        - "Cannot read text on websites or printed notices"
+        - "Rely on screen readers and audio content"
+        - "WCAG 2.1 AA requires alternative text formats"
+      benefit: "Audio versions of all council announcements available instantly"
+      compliance: "Meets PSBAR 2018 accessibility requirements"
+
+    - group: "People with Reading Difficulties"
+      population: "16% of UK adults have literacy below Level 1"
+      needs:
+        - "Struggle with complex council terminology"
+        - "Find dense text overwhelming"
+        - "Prefer audio explanations"
+      benefit: "Listen to announcements instead of reading them"
+      compliance: "Supports Plain English Campaign goals"
+
+    - group: "Elderly Residents"
+      population: "19% of UK population aged 65+"
+      needs:
+        - "May have age-related vision decline"
+        - "Prefer phone-based information"
+        - "Not always comfortable with websites"
+      benefit: "Phone hotline plays audio announcements automatically"
+      compliance: "Digital inclusion for older residents"
+
+    - group: "Busy Commuters"
+      population: "Multi-channel information delivery"
+      needs:
+        - "No time to read website updates"
+        - "Want audio versions for car journeys"
+        - "Prefer podcasts over reading"
+      benefit: "Listen to council news while commuting"
+      compliance: "Modern service delivery expectations"
+
+    - group: "Non-Native English Speakers"
+      population: "14% of UK residents speak English as second language"
+      needs:
+        - "May find written English difficult"
+        - "Audio helps with pronunciation understanding"
+        - "Polly supports 29 languages for multilingual content"
+      benefit: "Audio announcements in multiple languages"
+      compliance: "Equality Act 2010 language access"
+
+roiCalculation:
+  currentState:
+    description: "Traditional studio recording for audio announcements"
+    studioRecording:
+      costPerAnnouncement: 200  # £150-£300 average
+      setupTime: 120  # 2 hours to book, brief, record, edit
+      turnaroundDays: 10  # 1-2 weeks typical
+      qualityConsistency: "Variable - depends on voice talent availability"
+      revisionCost: 100  # £100 per re-recording if text changes
+    announcementsPerYear: 50
+    totalAnnualCost: 10000  # 50 × £200 = £10,000
+    complianceRisk: "High - often no audio version produced due to cost"
+
+  withPolly:
+    description: "Automated text-to-speech with Amazon Polly"
+    pollyCost:
+      pricePerMillion: 16  # £16 per million characters (neural)
+      avgAnnouncementChars: 500
+      costPerAnnouncement: 0.008  # £0.008 for 500 chars
+    setupTime: 1  # 1 minute to paste text, select voice, generate
+    turnaroundSeconds: 30  # Instant audio generation
+    qualityConsistency: "Perfect - same neural voice every time"
+    revisionCost: 0.008  # Same £0.008 to regenerate with changes
+    announcementsPerYear: 50
+    totalAnnualCost: 0.40  # 50 × £0.008 = £0.40
+    complianceRisk: "Low - audio version always generated"
+
+  savings:
+    annualCostSavings: 9999.60  # £10,000 - £0.40
+    timeSavingsPerAnnouncement: 119  # 120 min - 1 min = 119 minutes saved
+    totalTimeSavingsHours: 99  # (119 min × 50) / 60 = 99 hours
+    complianceValue: 20000  # Avoid up to £20K penalty per accessibility breach
+    totalAnnualBenefit: 29999.60  # £9,999.60 + £20,000 compliance
+
+  returnOnInvestment:
+    costSavingsPercent: "99.996%"  # (£9,999.60 / £10,000) × 100
+    paybackPeriod: "Immediate - pay-per-use pricing"
+    roiRatio: "74,999:1"  # £29,999.60 / £0.40
+
+  committeeLanguage: "Amazon Polly text-to-speech reduces audio production costs by 99.99% - from £10,000 to £0.40 annually for 50 announcements. More importantly, it enables 100% accessibility compliance (WCAG 2.1 AA, PSBAR 2018) by providing instant audio versions of all council communications, avoiding potential penalties up to £20K per breach. Total annual value: £30K in cost savings and compliance protection."
+
+wcagCompliance:
+  standard: "WCAG 2.1 Level AA"
+  regulation: "Public Sector Bodies (Websites and Mobile Applications) Accessibility Regulations 2018"
+
+  requirements:
+    - criterion: "1.1.1 Non-text Content (Level A)"
+      description: "All non-text content must have a text alternative"
+      pollyBenefit: "Audio announcements provide alternative to text-only website content"
+
+    - criterion: "1.2.1 Audio-only and Video-only (Level A)"
+      description: "Prerecorded audio-only content must have a text transcript"
+      pollyBenefit: "Original text serves as transcript for audio announcements"
+
+    - criterion: "1.4.2 Audio Control (Level A)"
+      description: "Users must be able to pause/stop audio"
+      pollyBenefit: "HTML5 audio player provides full playback controls"
+
+  complianceProcess:
+    - step: "Conduct accessibility audit of council website"
+      status: "Identify gaps in audio content provision"
+
+    - step: "Implement Polly text-to-speech for all announcements"
+      status: "Generate audio versions automatically"
+
+    - step: "Add audio player to website pages"
+      status: "HTML5 player with keyboard controls"
+
+    - step: "Document accessibility statement"
+      status: "Reference audio alternatives in compliance statement"
+
+    - step: "Monitor and report"
+      status: "Track audio usage, user feedback, compliance metrics"
+
+workflowIntegration:
+  title: "How Text-to-Speech Integrates with Council Workflows"
+
+  steps:
+    - step: 1
+      component: "Communications Officer"
+      action: "Write council announcement in Word/CMS"
+      output: "Draft text approved by relevant department"
+
+    - step: 2
+      component: "Polly API / Web Interface"
+      action: "Paste text, select voice (Amy/Brian/Emma), click Generate"
+      output: "MP3 audio file generated in 30 seconds"
+
+    - step: 3
+      component: "S3 Bucket Storage"
+      action: "Audio file automatically saved to S3"
+      output: "Permanent URL for audio file (e.g., https://s3.../bin-collection.mp3)"
+
+    - step: 4
+      component: "Website / CMS"
+      action: "Embed audio player on announcement page"
+      output: "Residents can read or listen to announcement"
+
+    - step: 5
+      component: "Phone System (Optional)"
+      action: "Integrate audio with IVR phone system"
+      output: "Residents call hotline, hear announcement automatically"
+
+    - step: 6
+      component: "Social Media (Optional)"
+      action: "Upload MP3 to Twitter/Facebook as audio post"
+      output: "Multi-channel delivery - web, phone, social media"
+
+  integrationOptions:
+    manual:
+      description: "Paste text into Polly web console, download MP3, upload to website manually"
+      effort: "1-2 minutes per announcement"
+      bestFor: "Small councils, occasional announcements, initial trial"
+
+    semiAutomated:
+      description: "CMS plugin generates audio when announcement published"
+      effort: "One-click audio generation from CMS"
+      bestFor: "Regular announcements, medium-sized councils"
+
+    fullyAutomated:
+      description: "Lambda function triggers Polly when new content published, embeds player automatically"
+      effort: "Zero manual effort - fully automated workflow"
+      bestFor: "High-volume announcements, large councils, enterprise CMS"
+
+troubleshooting:
+  scenarios:
+    - symptom: "Audio file not generating"
+      possibleCauses:
+        - "IAM permissions missing for Polly API"
+        - "Invalid characters in input text (unsupported symbols)"
+        - "Text exceeds 3000 character limit (API request)"
+      solutions:
+        - "Check CloudFormation outputs for Polly console URL with embedded credentials"
+        - "Remove special characters like emojis, Unicode symbols"
+        - "Split long announcements into multiple audio files or use SynthesizeSpeech streaming"
+
+    - symptom: "Voice sounds robotic, not natural"
+      possibleCauses:
+        - "Using standard engine instead of neural engine"
+        - "Selected wrong voice (non-UK English voice)"
+        - "Low bitrate audio output setting"
+      solutions:
+        - "Ensure voice ID is 'Amy', 'Brian', or 'Emma' (neural UK English)"
+        - "Verify engine parameter set to 'neural' not 'standard'"
+        - "Select 24kHz sample rate for highest quality"
+
+    - symptom: "Mispronounced words (place names, technical terms)"
+      possibleCauses:
+        - "Polly doesn't recognize specialized council terminology"
+        - "Ambiguous pronunciation (e.g., 'Reading' as 'reed-ing' vs 'red-ing')"
+        - "Abbreviations read as words instead of spelled out"
+      solutions:
+        - "Use SSML phoneme tags to specify pronunciation: <phoneme alphabet='ipa' ph='rɛdɪŋ'>Reading</phoneme>"
+        - "Add pronunciation lexicon to Polly (upload custom pronunciation rules)"
+        - "Spell out abbreviations where natural pronunciation preferred (NHS as 'N H S')"
+
+    - symptom: "Audio playback not working in browser"
+      possibleCauses:
+        - "Browser codec support (older IE versions)"
+        - "CORS policy blocking S3 audio file"
+        - "Audio file URL expired (presigned URL timeout)"
+      solutions:
+        - "Use MP3 format (universally supported in modern browsers)"
+        - "Configure S3 bucket CORS policy to allow audio playback from your domain"
+        - "Use CloudFront for permanent public audio URLs (no expiry)"
+        - "Check browser console for errors (F12 Developer Tools)"
+
+    - symptom: "Audio cuts off mid-sentence"
+      possibleCauses:
+        - "Input text exceeds character limit for synchronous API"
+        - "Lambda timeout before audio fully generated"
+        - "Network interruption during download"
+      solutions:
+        - "Split text into chunks <3000 characters for SynthesizeSpeech API"
+        - "Use StartSpeechSynthesisTask for long-form audio (asynchronous, no limit)"
+        - "Check CloudWatch logs for Lambda timeout errors"
+
+    - symptom: "High cost / unexpected charges"
+      possibleCauses:
+        - "Regenerating audio repeatedly during testing"
+        - "Very long announcements (many characters)"
+        - "Using neural voices instead of standard (4× cost, but worth it for quality)"
+      solutions:
+        - "Cache generated audio files - don't regenerate for same text"
+        - "Monitor character count before generation (500 chars = £0.008)"
+        - "Set up CloudWatch billing alarm for Polly usage"
+        - "Neural voices cost more but quality justifies it for public-facing content"
+
+advancedFeatures:
+  title: "Beyond Basic Text-to-Speech"
+
+  ssml:
+    name: "SSML (Speech Synthesis Markup Language)"
+    description: "Add emphasis, pauses, pronunciation, and prosody to make audio more expressive"
+    examples:
+      - name: "Emphasis"
+        code: "The library will be <emphasis level='strong'>closed</emphasis> tomorrow."
+        effect: "Word 'closed' spoken louder and slower for emphasis"
+
+      - name: "Pauses"
+        code: "Call us on 01234 567890 <break time='500ms'/> for more information."
+        effect: "500 millisecond pause after phone number (easier to write down)"
+
+      - name: "Speak As (phone, date)"
+        code: "Contact us on <say-as interpret-as='telephone'>0123-456-7890</say-as>."
+        effect: "Phone number spoken with pauses between digit groups"
+
+      - name: "Custom pronunciation"
+        code: "Welcome to <phoneme alphabet='ipa' ph='rɛdɪŋ'>Reading</phoneme> Council."
+        effect: "Town name 'Reading' pronounced correctly as 'red-ing' not 'reed-ing'"
+
+  multiLanguage:
+    name: "Multilingual Support"
+    description: "Polly supports 29 languages - provide announcements in multiple languages"
+    ukRelevantLanguages:
+      - language: "Polish (pl-PL)"
+        voice: "Jacek (Male)"
+        population: "~1M Polish speakers in UK"
+
+      - language: "Punjabi (pa-IN)"
+        voice: "Aditi (Female)"
+        population: "~700K Punjabi speakers in UK"
+
+      - language: "Urdu (ur-IN)"
+        voice: "Zeina (Female, Arabic base)"
+        population: "~400K Urdu speakers in UK"
+
+      - language: "Bengali (bn-IN)"
+        voice: "Aditi (Female)"
+        population: "~400K Bengali speakers in UK"
+
+    useCase: "Translate key announcements (weather warnings, vaccination clinics) and generate audio in multiple languages for diverse communities"
+
+  ivrIntegration:
+    name: "Phone System (IVR) Integration"
+    description: "Use Polly to generate audio for automated phone menus and announcements"
+    examples:
+      - scenario: "Council hotline greeting"
+        text: "Thank you for calling the council. For bin collection information, press 1. For council tax, press 2. For planning, press 3."
+        benefit: "Update phone menu instantly by regenerating audio - no studio recording needed"
+
+      - scenario: "Service status updates"
+        text: "Our offices are currently closed due to severe weather. We will reopen tomorrow at 9am. For emergencies, please call 999."
+        benefit: "Change phone announcement in minutes during emergencies"
+
+    integration: "Amazon Connect (cloud contact center) has native Polly integration for dynamic IVR menus"
+
+  podcastGeneration:
+    name: "Council Podcast / Newsletter"
+    description: "Convert written newsletters to audio podcasts automatically"
+    workflow:
+      - "Write monthly council newsletter as usual"
+      - "Paste text into Polly, generate 5-10 minute audio episode"
+      - "Publish as podcast on Spotify, Apple Podcasts, council website"
+      - "Residents subscribe and listen during commute"
+    benefit: "Reach residents who prefer audio content - no podcast studio needed"
+
+committeeLanguage:
+  title: "Presenting Text-to-Speech to Decision Makers"
+
+  executiveSummary: "Amazon Polly text-to-speech enables instant conversion of council announcements to high-quality audio at 99.99% lower cost than studio recording. This delivers accessibility compliance (WCAG 2.1 AA, PSBAR 2018) while freeing communications staff from expensive, time-consuming audio production. For 50 announcements per year, annual savings of £10,000 plus £20,000 compliance risk reduction = £30,000 total value."
+
+  problemStatement:
+    title: "The Accessibility Challenge"
+    points:
+      - "Current state: Council announcements published as text only on website and printed notices"
+      - "Visually impaired residents cannot access this information (2% of population = 1.3M UK residents)"
+      - "PSBAR 2018 requires accessible alternatives - audio versions mandated for compliance"
+      - "Studio recording costs £150-£300 per announcement, taking 1-2 weeks turnaround"
+      - "Due to cost, we rarely produce audio versions = non-compliance risk"
+      - "Potential penalty: Up to £20,000 per accessibility breach under Equality Act 2010"
+
+  solution:
+    title: "Text-to-Speech Automation"
+    points:
+      - "Amazon Polly generates broadcast-quality audio from text in 30 seconds"
+      - "UK English neural voices (Amy, Brian, Emma) sound natural, not robotic"
+      - "Cost: £0.016 per 1000 characters = £0.008 per typical announcement"
+      - "Communications officer pastes text, selects voice, generates audio - 1 minute total"
+      - "Audio file automatically saved to website, playable in all browsers"
+      - "Optional: Integrate with phone system for automated announcements"
+
+  benefits:
+    financial:
+      - "Annual cost savings: £9,999.60 (from £10,000 to £0.40 for 50 announcements)"
+      - "Time savings: 99 hours per year freed from studio recording coordination"
+      - "No upfront investment - pay per use only"
+
+    compliance:
+      - "100% WCAG 2.1 AA compliance - audio version for every announcement"
+      - "PSBAR 2018 compliant - meet Public Sector accessibility regulations"
+      - "Avoid penalties up to £20K per breach"
+      - "Demonstrates due diligence to Equality and Human Rights Commission"
+
+    operational:
+      - "Instant turnaround - 30 seconds vs 1-2 weeks for studio recording"
+      - "Easy text updates - regenerate audio in 30 seconds if announcement changes"
+      - "Consistent voice quality - same neural voice every time"
+      - "Multi-channel delivery - website, phone system, social media, podcasts"
+
+    strategic:
+      - "Digital inclusion - serve residents who prefer audio content"
+      - "Foundation for multilingual announcements (Polly supports 29 languages)"
+      - "Modernizes council communications with AI technology"
+      - "Enhances reputation as accessible, inclusive council"
+
+  risks:
+    title: "Risk Assessment and Mitigation"
+    items:
+      - risk: "Voice quality not acceptable to residents"
+        likelihood: "Low"
+        mitigation: "Neural voices are broadcast-quality; pilot with 5-10 announcements to gather feedback"
+
+      - risk: "Mispronounced local place names"
+        likelihood: "Medium"
+        mitigation: "Use SSML phoneme tags for custom pronunciation; create council-specific pronunciation lexicon"
+
+      - risk: "Staff resistance to new technology"
+        likelihood: "Low"
+        mitigation: "Simple paste-and-click interface; 1-hour training session sufficient; trial with comms team before rollout"
+
+      - risk: "Ongoing costs exceed budget"
+        likelihood: "Very Low"
+        mitigation: "£0.40 per year for 50 announcements; set CloudWatch billing alarm at £50/month as safety limit"
+
+  implementationPlan:
+    phase1:
+      title: "Pilot (Month 1-2)"
+      activities:
+        - "Deploy Polly via AWS Innovation Sandbox (this walkthrough)"
+        - "Generate audio for 10 announcements (mix of routine and urgent)"
+        - "Embed audio players on 10 website pages"
+        - "Survey residents and staff for feedback"
+      success: "90% positive feedback on voice quality and usefulness"
+      cost: "£0.10 (10 announcements × £0.01 average)"
+
+    phase2:
+      title: "Integration (Month 3-4)"
+      activities:
+        - "Integrate Polly with council CMS (WordPress, Drupal, etc.)"
+        - "Train 5 communications officers on audio generation workflow"
+        - "Create pronunciation lexicon for common council terms and place names"
+        - "Publish audio for all new announcements going forward"
+      success: "100% of new announcements have audio versions within 5 minutes of publication"
+      cost: "£0.30 (30 announcements)"
+
+    phase3:
+      title: "Scale and Enhance (Month 5-6)"
+      activities:
+        - "Backfill audio for top 50 most-viewed historical announcements"
+        - "Integrate with phone system for automated hotline updates"
+        - "Launch council podcast using Polly for monthly newsletter"
+        - "Explore multilingual audio for key announcements"
+      success: "Accessibility compliance achieved; positive ICO audit outcome"
+      cost: "£0.50 (50 backfill announcements)"
+
+  nextSteps:
+    - "Complete this AWS Innovation Sandbox walkthrough (10 minutes)"
+    - "Present findings to IT and Communications teams"
+    - "Prepare business case for Finance committee (template available)"
+    - "Secure approval for 2-month pilot (£0.20 budget)"
+    - "Deploy pilot and measure resident satisfaction"
+    - "Scale to full production based on pilot success"

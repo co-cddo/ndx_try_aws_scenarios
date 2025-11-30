@@ -1,0 +1,197 @@
+{#
+  Technical Implementation Details Section (Developer Persona - AC-4.1.5)
+
+  Variables:
+  - scenarioData: scenario object
+  - developer_evaluation: Developer evaluation data
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    Technical Implementation Details
+  </h2>
+
+  {% include "evidence-pack/partials/persona-header.njk" %}
+
+  <h3 class="govuk-heading-m">Technology Stack</h3>
+  <p class="govuk-body">AWS Services Used:</p>
+  <ul class="govuk-list govuk-list--bullet">
+    {% for service in scenarioData.awsServices %}
+      <li><strong>{{ service }}</strong></li>
+    {% endfor %}
+  </ul>
+
+  {% if developer_evaluation and developer_evaluation.technical_implementation %}
+  {% set impl = developer_evaluation.technical_implementation %}
+
+  <h3 class="govuk-heading-m">Architecture Components</h3>
+  {% if impl.architecture_components %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Component</th>
+        <th scope="col" class="govuk-table__header">Purpose</th>
+        <th scope="col" class="govuk-table__header">Complexity</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for component in impl.architecture_components %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">{{ component.component }}</th>
+        <td class="govuk-table__cell">{{ component.purpose }}</td>
+        <td class="govuk-table__cell">
+          <strong class="govuk-tag govuk-tag--{% if component.complexity == 'Low' %}green{% elif component.complexity == 'Medium' %}yellow{% else %}red{% endif %}">
+            {{ component.complexity }}
+          </strong>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Integration Points</h3>
+  {% if impl.integration_points %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">System</th>
+        <th scope="col" class="govuk-table__header">Integration Method</th>
+        <th scope="col" class="govuk-table__header">Estimated Effort</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for integration in impl.integration_points %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">{{ integration.system }}</th>
+        <td class="govuk-table__cell">{{ integration.method }}</td>
+        <td class="govuk-table__cell">
+          <strong class="govuk-tag govuk-tag--{% if integration.effort.startsWith('Low') %}green{% elif integration.effort.startsWith('Medium') %}yellow{% else %}red{% endif %}">
+            {{ integration.effort }}
+          </strong>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Integration Note:</strong> CRM integration will require REST API development and potentially middleware for data transformation. Allocate sufficient development time and testing resources.
+    </p>
+  </div>
+
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Deployment Configuration</h3>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Template Type
+      </dt>
+      <dd class="govuk-summary-list__value">
+        AWS CloudFormation (YAML)
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Template Location
+      </dt>
+      <dd class="govuk-summary-list__value">
+        <code style="font-size: 14px;">{{ scenarioData.deployment.templateS3Url }}</code>
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Region
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ scenarioData.deployment.region | upper }} (London)
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Stack Naming
+      </dt>
+      <dd class="govuk-summary-list__value">
+        <code style="font-size: 14px;">{{ scenarioData.deployment.stackNamePrefix }}-[timestamp]</code>
+      </dd>
+    </div>
+  </dl>
+
+  <h3 class="govuk-heading-m">Environment Parameters</h3>
+  {% if scenarioData.deployment.parameters %}
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Parameter</th>
+        <th scope="col" class="govuk-table__header">Value</th>
+        <th scope="col" class="govuk-table__header">Description</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for param in scenarioData.deployment.parameters %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header"><code>{{ param.name }}</code></th>
+        <td class="govuk-table__cell"><code>{{ param.value }}</code></td>
+        <td class="govuk-table__cell">{{ param.description }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Stack Outputs</h3>
+  {% if scenarioData.deployment.outputs %}
+  <p class="govuk-body">
+    The CloudFormation stack provides the following outputs for integration:
+  </p>
+  <dl class="govuk-summary-list">
+    {% for output in scenarioData.deployment.outputs %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        <code>{{ output.name }}</code>
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ output.description }}
+      </dd>
+    </div>
+    {% endfor %}
+  </dl>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Security Configuration</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>IAM Roles:</strong> Least privilege policies for Lambda execution and service access</li>
+    <li><strong>Encryption:</strong> KMS encryption for S3 buckets and DynamoDB tables</li>
+    <li><strong>Network:</strong> VPC endpoints for private AWS service communication (production)</li>
+    <li><strong>Secrets:</strong> AWS Secrets Manager for API keys and credentials</li>
+    <li><strong>Logging:</strong> CloudTrail and CloudWatch Logs enabled for audit trail</li>
+  </ul>
+
+  <h3 class="govuk-heading-m">Development & Testing</h3>
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Local Development:</strong> AWS SAM CLI allows local testing of Lambda functions before deployment.
+    </p>
+    <p class="govuk-body">
+      <strong>CI/CD:</strong> Consider GitHub Actions or AWS CodePipeline for automated testing and deployment.
+    </p>
+    <p class="govuk-body">
+      <strong>Testing Strategy:</strong> Unit tests for Lambda functions, integration tests for API endpoints, end-to-end tests for conversation flows.
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-m">Production Readiness Checklist</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Deploy to production AWS account (not Innovation Sandbox)</li>
+    <li>Configure VPC for network isolation</li>
+    <li>Enable AWS WAF for API protection</li>
+    <li>Set up CloudWatch alarms for critical metrics</li>
+    <li>Configure backup and disaster recovery</li>
+    <li>Implement cost monitoring and budget alerts</li>
+    <li>Document runbook procedures</li>
+    <li>Train operations team on monitoring and troubleshooting</li>
+  </ul>
+</div>

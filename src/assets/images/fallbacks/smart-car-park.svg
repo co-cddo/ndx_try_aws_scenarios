@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="smart-car-park-fallback-title smart-car-park-fallback-desc">
+  <title id="smart-car-park-fallback-title">Smart Car Park Screenshot</title>
+  <desc id="smart-car-park-fallback-desc">Screenshot temporarily unavailable - showing placeholder for Smart Car Park IoT scenario</desc>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="#f3f2f1"/>
+
+  <!-- GOV.UK Blue header bar -->
+  <rect width="1920" height="100" fill="#1d70b8"/>
+
+  <!-- Central content area -->
+  <rect x="360" y="200" width="1200" height="680" rx="4" fill="#ffffff" stroke="#b1b4b6" stroke-width="2"/>
+
+  <!-- IoT/Car Park icon -->
+  <g transform="translate(860, 400)">
+    <rect width="200" height="160" rx="20" fill="#1d70b8" opacity="0.1"/>
+    <!-- Car icon -->
+    <rect x="60" y="70" width="80" height="40" rx="10" fill="#1d70b8"/>
+    <rect x="50" y="90" width="100" height="25" rx="4" fill="#1d70b8"/>
+    <circle cx="70" cy="115" r="12" fill="#0b0c0c"/>
+    <circle cx="130" cy="115" r="12" fill="#0b0c0c"/>
+    <rect x="70" y="80" width="15" height="10" rx="2" fill="#b8d0e8"/>
+    <rect x="115" y="80" width="15" height="10" rx="2" fill="#b8d0e8"/>
+    <!-- IoT signal waves -->
+    <path d="M100 50c-15 0-27 12-27 27" stroke="#00703c" stroke-width="3" fill="none" opacity="0.5"/>
+    <path d="M100 40c-20 0-37 17-37 37" stroke="#00703c" stroke-width="3" fill="none" opacity="0.7"/>
+    <path d="M100 30c-26 0-47 21-47 47" stroke="#00703c" stroke-width="3" fill="none"/>
+    <circle cx="100" cy="50" r="5" fill="#00703c"/>
+  </g>
+
+  <!-- "Screenshot updating" text -->
+  <text x="960" y="620" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#505a5f">
+    Screenshot updating - please check back soon
+  </text>
+
+  <!-- Scenario label -->
+  <text x="960" y="680" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#0b0c0c" font-weight="600">
+    Smart Car Park IoT
+  </text>
+
+  <!-- AWS IoT badge -->
+  <rect x="835" y="720" width="250" height="36" rx="4" fill="#232f3e"/>
+  <text x="960" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">
+    Powered by AWS IoT Core
+  </text>
+</svg>

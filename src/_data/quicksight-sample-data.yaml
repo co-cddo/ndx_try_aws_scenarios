@@ -1,0 +1,829 @@
+# QuickSight Dashboard Sample Data
+# Story 3.7 - AC-3.7.1, AC-3.7.3, AC-3.7.4, AC-3.7.5
+#
+# Sample council service metrics for self-service analytics dashboard.
+# Demonstrates business intelligence use cases and interactive data exploration.
+
+councilServiceMetrics:
+  - id: "waste-collection"
+    serviceName: "Waste Collection"
+    category: "Environmental Services"
+    description: "Bin collection, recycling, and waste management services"
+    kpis:
+      completionRate: "98.5%"
+      completionRateValue: 98.5
+      avgResponseTime: "24 hours"
+      avgResponseTimeValue: 24
+      requestsPerMonth: 1250
+      satisfactionScore: "4.2/5"
+      satisfactionScoreValue: 4.2
+      trendVsLastMonth: "+2.3%"
+      trendIndicator: "up"
+    insights:
+      - "Completion rate improved 2.3% this month due to new route optimization"
+      - "Peak request days: Monday and Tuesday after bank holidays"
+      - "Ward with highest requests: Central Ward (15% of total)"
+
+  - id: "planning-applications"
+    serviceName: "Planning Applications"
+    category: "Planning & Development"
+    description: "Planning permission, building control, and enforcement"
+    kpis:
+      avgProcessingDays: "42 days"
+      avgProcessingDaysValue: 42
+      approvalRate: "78%"
+      approvalRateValue: 78
+      applicationsPerMonth: 85
+      complexityScore: "Medium-High"
+      trendVsLastMonth: "-5 days"
+      trendIndicator: "up"
+    insights:
+      - "Processing time reduced by 5 days through digital document submission"
+      - "78% approval rate consistent with regional average"
+      - "Complex applications (major developments) account for 30% but take 60% of processing time"
+
+  - id: "housing-requests"
+    serviceName: "Housing Requests"
+    category: "Housing Services"
+    description: "Housing repairs, allocations, and homelessness support"
+    kpis:
+      avgResponseTime: "3.2 days"
+      avgResponseTimeValue: 3.2
+      completionRate: "92%"
+      completionRateValue: 92
+      requestsPerMonth: 450
+      urgentRequests: "18%"
+      urgentRequestsValue: 18
+      trendVsLastMonth: "-0.8 days"
+      trendIndicator: "up"
+    insights:
+      - "Response time improved 0.8 days through mobile workforce app"
+      - "Urgent repairs (heating, water, security) resolved within 24 hours: 95%"
+      - "Top request types: heating (28%), damp (22%), plumbing (19%)"
+
+  - id: "customer-service"
+    serviceName: "Customer Service"
+    category: "Contact Centre"
+    description: "Phone, email, and webchat support for residents"
+    kpis:
+      callsPerMonth: 3200
+      avgWaitTime: "2m 15s"
+      avgWaitTimeValue: 2.25
+      firstCallResolution: "84%"
+      firstCallResolutionValue: 84
+      satisfactionScore: "4.1/5"
+      satisfactionScoreValue: 4.1
+      trendVsLastMonth: "-30s wait"
+      trendIndicator: "up"
+    insights:
+      - "Wait time reduced by 30 seconds through IVR self-service for bin collections"
+      - "First call resolution improved 3% with new knowledge base"
+      - "Peak call times: 9-11am weekdays (40% of daily volume)"
+
+  - id: "council-tax"
+    serviceName: "Council Tax"
+    category: "Finance & Revenue"
+    description: "Council tax billing, collection, and support"
+    kpis:
+      collectionRate: "96.8%"
+      collectionRateValue: 96.8
+      inquiriesPerMonth: 520
+      avgProcessingTime: "5 days"
+      avgProcessingTimeValue: 5
+      onlinePayments: "72%"
+      onlinePaymentsValue: 72
+      trendVsLastMonth: "+1.2%"
+      trendIndicator: "up"
+    insights:
+      - "Collection rate up 1.2% through automated payment reminders"
+      - "Online payments increased 5% year-on-year (reduced admin workload)"
+      - "Peak inquiry period: April-May (new tax year setup)"
+
+dashboardWidgets:
+  - id: "kpi-waste-completion"
+    type: "KPI Card"
+    title: "Waste Collection Completion Rate"
+    value: "98.5%"
+    previousValue: "96.2%"
+    trend: "+2.3%"
+    trendIndicator: "up"
+    description: "Percentage of scheduled collections completed on time"
+    icon: "check-circle"
+
+  - id: "kpi-planning-time"
+    type: "KPI Card"
+    title: "Avg Planning Application Processing"
+    value: "42 days"
+    previousValue: "47 days"
+    trend: "-5 days"
+    trendIndicator: "up"
+    description: "Average time from submission to decision"
+    icon: "clock"
+
+  - id: "kpi-housing-response"
+    type: "KPI Card"
+    title: "Housing Request Response Time"
+    value: "3.2 days"
+    previousValue: "4.0 days"
+    trend: "-0.8 days"
+    trendIndicator: "up"
+    description: "Average time to respond to housing repair requests"
+    icon: "home"
+
+  - id: "kpi-customer-satisfaction"
+    type: "KPI Card"
+    title: "Customer Satisfaction Score"
+    value: "4.1/5"
+    previousValue: "3.9/5"
+    trend: "+0.2"
+    trendIndicator: "up"
+    description: "Average satisfaction rating across all services"
+    icon: "star"
+
+  - id: "bar-service-requests"
+    type: "Bar Chart"
+    title: "Service Requests by Month"
+    xAxis: "Month"
+    yAxis: "Request Count"
+    data:
+      - month: "Jan"
+        waste: 1150
+        planning: 75
+        housing: 420
+        customerService: 3100
+        councilTax: 680
+      - month: "Feb"
+        waste: 1100
+        planning: 68
+        housing: 390
+        customerService: 2950
+        councilTax: 520
+      - month: "Mar"
+        waste: 1200
+        planning: 82
+        housing: 430
+        customerService: 3150
+        councilTax: 490
+      - month: "Apr"
+        waste: 1180
+        planning: 88
+        housing: 450
+        customerService: 3250
+        councilTax: 820
+      - month: "May"
+        waste: 1250
+        planning: 85
+        housing: 450
+        customerService: 3200
+        councilTax: 520
+
+  - id: "pie-request-types"
+    type: "Pie Chart"
+    title: "Request Types Breakdown (Last Month)"
+    data:
+      - category: "Waste Collection"
+        value: 1250
+        percentage: 21.9
+        color: "#00703c"
+      - category: "Planning Applications"
+        value: 85
+        percentage: 1.5
+        color: "#1d70b8"
+      - category: "Housing Requests"
+        value: 450
+        percentage: 7.9
+        color: "#f47738"
+      - category: "Customer Service Calls"
+        value: 3200
+        percentage: 56.1
+        color: "#5694ca"
+      - category: "Council Tax Inquiries"
+        value: 520
+        percentage: 9.1
+        color: "#d4351c"
+      - category: "Other Services"
+        value: 200
+        percentage: 3.5
+        color: "#b1b4b6"
+
+  - id: "line-response-time-trend"
+    type: "Line Chart"
+    title: "Average Response Time Trend (Hours)"
+    xAxis: "Month"
+    yAxis: "Response Time (hours)"
+    data:
+      - month: "Jan"
+        waste: 28
+        planning: 1152
+        housing: 96
+        customerService: 2.5
+        councilTax: 144
+      - month: "Feb"
+        waste: 26
+        planning: 1128
+        housing: 90
+        customerService: 2.4
+        councilTax: 138
+      - month: "Mar"
+        waste: 25
+        planning: 1080
+        housing: 84
+        customerService: 2.3
+        councilTax: 132
+      - month: "Apr"
+        waste: 24.5
+        planning: 1056
+        housing: 78
+        customerService: 2.2
+        councilTax: 126
+      - month: "May"
+        waste: 24
+        planning: 1008
+        housing: 77
+        customerService: 2.25
+        councilTax: 120
+
+  - id: "table-service-details"
+    type: "Table"
+    title: "Service Performance Details"
+    columns:
+      - field: "service"
+        header: "Service"
+      - field: "requests"
+        header: "Requests"
+      - field: "avgTime"
+        header: "Avg Time"
+      - field: "completion"
+        header: "Completion Rate"
+      - field: "satisfaction"
+        header: "Satisfaction"
+    data:
+      - service: "Waste Collection"
+        requests: 1250
+        avgTime: "24 hours"
+        completion: "98.5%"
+        satisfaction: "4.2/5"
+      - service: "Planning Applications"
+        requests: 85
+        avgTime: "42 days"
+        completion: "100%"
+        satisfaction: "3.8/5"
+      - service: "Housing Requests"
+        requests: 450
+        avgTime: "3.2 days"
+        completion: "92%"
+        satisfaction: "4.0/5"
+      - service: "Customer Service"
+        requests: 3200
+        avgTime: "2.25 min"
+        completion: "84%"
+        satisfaction: "4.1/5"
+      - service: "Council Tax"
+        requests: 520
+        avgTime: "5 days"
+        completion: "96.8%"
+        satisfaction: "3.9/5"
+
+filterDefinitions:
+  - id: "date-range"
+    type: "Date Range"
+    label: "Date Range"
+    options:
+      - "Last 7 days"
+      - "Last 30 days"
+      - "Last 90 days"
+      - "Last 12 months"
+      - "Custom range"
+    defaultValue: "Last 30 days"
+    description: "Filter all metrics by date range"
+
+  - id: "service-type"
+    type: "Multi-select"
+    label: "Service Type"
+    options:
+      - "Waste Collection"
+      - "Planning Applications"
+      - "Housing Requests"
+      - "Customer Service"
+      - "Council Tax"
+      - "All Services"
+    defaultValue: "All Services"
+    description: "Filter metrics by service category"
+
+  - id: "ward-area"
+    type: "Dropdown"
+    label: "Ward / Area"
+    options:
+      - "All Wards"
+      - "Central Ward"
+      - "North Ward"
+      - "South Ward"
+      - "East Ward"
+      - "West Ward"
+    defaultValue: "All Wards"
+    description: "Filter metrics by geographic ward"
+
+  - id: "metric-type"
+    type: "Button Group"
+    label: "Metric Type"
+    options:
+      - "Volume"
+      - "Response Time"
+      - "Satisfaction"
+      - "Completion Rate"
+    defaultValue: "Volume"
+    description: "Switch between different metric views"
+
+awsArchitecture:
+  title: "How QuickSight Connects to Council Data"
+
+  components:
+    - name: "Amazon S3"
+      role: "Data Lake Storage"
+      description: "Stores council service data in CSV, Parquet, or JSON format"
+      exampleData: "service-requests-2024-05.csv, waste-collection-metrics.parquet"
+      cost: "£0.023 per GB per month (first 50 TB)"
+
+    - name: "Amazon Athena"
+      role: "Serverless SQL Queries"
+      description: "Queries S3 data using standard SQL without loading into database"
+      exampleQuery: "SELECT service_type, AVG(response_time) FROM requests WHERE month = '2024-05' GROUP BY service_type"
+      cost: "£5 per TB of data scanned (only pay when running queries)"
+
+    - name: "AWS Glue Data Catalog"
+      role: "Metadata Repository"
+      description: "Defines table schemas for S3 data (columns, data types, partitions)"
+      exampleTable: "council_service_requests (request_id, service_type, request_date, response_time, ward)"
+      cost: "£1 per 100,000 objects stored per month"
+
+    - name: "Amazon QuickSight"
+      role: "Business Intelligence Dashboard"
+      description: "Visualizes Athena query results with interactive charts and filters"
+      features: "KPI cards, bar charts, pie charts, line charts, tables, drill-down, export to PDF/Excel"
+      cost: "£18 per user per month (Reader) or £24 per user per month (Author)"
+
+  dataFlow:
+    - step: 1
+      component: "Council Systems"
+      action: "Export service data to CSV/JSON daily or weekly"
+      output: "Data files with service metrics (requests, response times, satisfaction scores)"
+
+    - step: 2
+      component: "Amazon S3"
+      action: "Upload data files to S3 bucket (manual or automated via Lambda)"
+      output: "s3://council-data-lake/service-requests/2024/05/requests.csv"
+
+    - step: 3
+      component: "AWS Glue Crawler"
+      action: "Scan S3 bucket and create/update table schema in Data Catalog"
+      output: "Table: council_service_requests with columns and data types"
+
+    - step: 4
+      component: "Amazon Athena"
+      action: "Query table using SQL (SELECT, WHERE, GROUP BY, JOIN)"
+      output: "Query results: aggregated metrics, filtered by service/ward/date"
+
+    - step: 5
+      component: "Amazon QuickSight"
+      action: "Connect to Athena, build dashboard with charts and filters"
+      output: "Interactive dashboard accessible via web browser"
+
+    - step: 6
+      component: "Council Officers"
+      action: "Access dashboard, apply filters, drill down into data, export reports"
+      output: "Instant answers to operational questions, PDF reports for committees"
+
+roiCalculation:
+  currentState:
+    description: "Manual Excel reporting with IT dependency"
+    analystTime:
+      hoursPerWeek: 4
+      taskDescription: "Creating weekly Excel reports for service managers"
+      annualHours: 208  # 4 hours × 52 weeks
+      hourlyRate: 25
+      annualCost: 5200  # 208 hours × £25
+    itTime:
+      adHocReportsPerMonth: 20
+      hoursPerReport: 2
+      monthlyHours: 40  # 20 reports × 2 hours
+      annualHours: 480  # 40 hours × 12 months
+      hourlyRate: 35
+      annualCost: 16800  # 480 hours × £35
+    reportingLag:
+      description: "7-day average lag for ad-hoc report requests (waiting for IT availability)"
+      decisionDelay: "Service managers make decisions on week-old data"
+    selfServiceCapability:
+      description: "Officers cannot answer their own questions - must request reports from IT"
+      satisfactionScore: "2/5 - frustrated by delays and limited flexibility"
+
+  withQuickSight:
+    description: "Self-service analytics with real-time data access"
+    analystTime:
+      hoursPerWeek: 1
+      taskDescription: "Maintaining dashboard and adding new metrics as needed"
+      annualHours: 52  # 1 hour × 52 weeks
+      hourlyRate: 25
+      annualCost: 1300  # 52 hours × £25
+      timeSaved: 156  # 208 - 52 hours
+    itTime:
+      adHocReportsPerMonth: 4
+      description: "80% reduction in ad-hoc report requests (officers self-serve)"
+      hoursPerReport: 2
+      monthlyHours: 8  # 4 reports × 2 hours
+      annualHours: 96  # 8 hours × 12 months
+      hourlyRate: 35
+      annualCost: 3360  # 96 hours × £35
+      timeSaved: 384  # 480 - 96 hours
+    reportingLag:
+      description: "Zero lag - officers access real-time dashboard 24/7"
+      decisionSpeed: "Decisions made on same-day data, not week-old data"
+    selfServiceCapability:
+      description: "Officers answer 80% of questions themselves without IT involvement"
+      satisfactionScore: "4.5/5 - empowered by instant insights"
+    quickSightCost:
+      readerUsers: 10
+      monthlyPerUser: 18  # £18 per Reader user per month
+      monthlyCost: 180  # 10 users × £18
+      annualCost: 2160  # 180 × 12 months
+    athenaCost:
+      monthlyQueries: 50
+      dataScannedPerQueryTB: 0.01  # 10 GB average
+      totalDataScannedTB: 0.5  # 50 queries × 0.01 TB
+      costPerTB: 5
+      monthlyCost: 2.50  # 0.5 TB × £5
+      annualCost: 30  # 2.50 × 12 months
+    s3Cost:
+      dataStorageGB: 100
+      monthlyPerGB: 0.023
+      monthlyCost: 2.30  # 100 GB × £0.023
+      annualCost: 28  # 2.30 × 12 months
+    totalAwsCost: 2218  # £2,160 + £30 + £28
+
+  savings:
+    analystTimeSavings: 3900  # (208 - 52) hours × £25 = £3,900
+    itTimeSavings: 13440  # (480 - 96) hours × £35 = £13,440
+    totalAnnualSavings: 17340  # £3,900 + £13,440
+    totalAwsCost: 2218
+    netAnnualBenefit: 15122  # £17,340 - £2,218
+    roiRatio: "6.8:1"  # £15,122 / £2,218
+    paybackPeriod: "1.5 months"  # £2,218 / (£17,340 / 12)
+
+  intangibleBenefits:
+    - benefit: "Faster decision-making"
+      description: "Service managers act on real-time data, not week-old reports"
+      value: "Improved service delivery responsiveness"
+
+    - benefit: "Data-driven culture"
+      description: "Officers ask more questions when they can answer them instantly"
+      value: "Increased innovation and continuous improvement"
+
+    - benefit: "IT focus on strategic work"
+      description: "IT freed from repetitive report requests to work on strategic projects"
+      value: "Higher-value IT contributions to council transformation"
+
+    - benefit: "Committee transparency"
+      description: "Councillors access same dashboard as officers for oversight"
+      value: "Enhanced democratic accountability and evidence-based governance"
+
+  committeeLanguage: "Amazon QuickSight self-service analytics reduces IT dependency by 80%, freeing 384 hours annually for strategic projects. Officers answer operational questions in real-time instead of waiting 7 days for reports. For 10 users, annual savings of £17,340 against £2,218 cost delivers 6.8:1 ROI with payback in 1.5 months."
+
+selfServiceUseCases:
+  title: "Questions Officers Can Answer Instantly (Without IT)"
+
+  operationalQuestions:
+    - question: "How many waste collection requests did we receive last month?"
+      currentProcess: "Submit ticket to IT, wait 3-5 days for Excel report"
+      withQuickSight: "Filter dashboard to last month, read KPI card - 2 clicks, 10 seconds"
+      businessValue: "Immediate answer enables weekly team meeting discussions"
+
+    - question: "Which ward has the highest planning application rejection rate?"
+      currentProcess: "Email IT with request, wait 7 days for custom query"
+      withQuickSight: "Apply ward filter, sort table by rejection rate - 3 clicks, 15 seconds"
+      businessValue: "Identify wards needing planning support/training"
+
+    - question: "Are housing repair response times improving or getting worse?"
+      currentProcess: "Wait for quarterly report from IT, 3-month lag"
+      withQuickSight: "View line chart showing month-over-month trend - 1 click, 5 seconds"
+      businessValue: "Spot problems early, adjust resource allocation before complaints escalate"
+
+    - question: "What time of day do we receive the most customer service calls?"
+      currentProcess: "Request ad-hoc report from IT, 5-day turnaround"
+      withQuickSight: "Drill down into hourly call volume chart - 2 clicks, 10 seconds"
+      businessValue: "Optimize staffing rota to match demand peaks"
+
+    - question: "How does our council tax collection rate compare to last year?"
+      currentProcess: "Wait for annual finance report, 1-year lag"
+      withQuickSight: "View year-over-year comparison chart - 1 click, 5 seconds"
+      businessValue: "Early warning if collection rate declining, enabling intervention"
+
+  trendAnalysis:
+    - question: "Is customer satisfaction improving after we launched the new website?"
+      currentProcess: "Manual Excel analysis of survey data, 2 weeks analyst time"
+      withQuickSight: "View satisfaction trend line before/after website launch - 1 click"
+      businessValue: "Measure impact of service improvements, justify further investment"
+
+    - question: "Which services are seeing request volume growth?"
+      currentProcess: "IT creates custom multi-tab Excel workbook, 1-week turnaround"
+      withQuickSight: "Sort bar chart by month-over-month growth % - 2 clicks"
+      businessValue: "Forecast resource needs, budget for capacity increases"
+
+  committeeReporting:
+    - question: "What's the summary performance across all services for this month's committee meeting?"
+      currentProcess: "Analyst spends 4 hours creating PowerPoint slides from multiple Excel files"
+      withQuickSight: "Export dashboard to PDF with all charts and KPIs - 1 click, 30 seconds"
+      businessValue: "Committee papers prepared in minutes, not hours - more time for analysis"
+
+    - question: "Can we drill down into the detail behind the high-level KPIs?"
+      currentProcess: "Councillor asks question at meeting, officer promises to 'get back to them' after IT provides data"
+      withQuickSight: "Officer shares screen, clicks into underlying data table during meeting"
+      businessValue: "Answer questions immediately, no follow-up actions"
+
+interactiveFeatures:
+  title: "Interactive Dashboard Features to Demonstrate"
+
+  filters:
+    - name: "Date Range Filter"
+      description: "Select time period to analyze (last 7 days, 30 days, 90 days, 12 months, custom)"
+      action: "Click filter, select 'Last 90 days', watch all charts update instantly"
+      wowMoment: "All 12 widgets recalculate in milliseconds - millions of rows queried in <1 second"
+
+    - name: "Service Type Filter"
+      description: "Focus on specific services (Waste, Planning, Housing, Customer Service, Council Tax)"
+      action: "Select 'Housing Requests' checkbox, see only housing metrics across all charts"
+      wowMoment: "Isolate single service across entire dashboard with one click"
+
+    - name: "Ward/Area Filter"
+      description: "Compare performance across geographic wards"
+      action: "Select 'Central Ward' dropdown, see how metrics differ by location"
+      wowMoment: "Identify geographic patterns - which wards need more resources"
+
+  drillDown:
+    - name: "Click a Bar Chart to See Detail"
+      description: "Click a bar in 'Service Requests by Month' to see underlying data rows"
+      action: "Click 'May' bar for 'Waste Collection', see table of all 1,250 individual requests"
+      wowMoment: "Navigate from high-level summary to granular detail without leaving dashboard"
+
+    - name: "Sort Table by Any Column"
+      description: "Click table column headers to sort by that metric"
+      action: "Click 'Avg Time' column header in Service Performance table to sort by fastest/slowest"
+      wowMoment: "Instantly identify best and worst performing services"
+
+    - name: "Drill Down by Hierarchy"
+      description: "Click aggregate metric to drill into subcategories"
+      action: "Click 'Customer Service' in pie chart to see breakdown by inquiry type (billing, technical, general)"
+      wowMoment: "Multi-level drill-down from department → service → subcategory"
+
+  exportOptions:
+    - name: "Export to PDF"
+      description: "Download current dashboard view as PDF report for committee papers"
+      action: "Click 'Export' button, select 'PDF', download report with all charts as they appear"
+      use: "Attach to committee agenda as evidence-based report"
+
+    - name: "Export to Excel"
+      description: "Download underlying data as Excel spreadsheet for further analysis"
+      action: "Click 'Export' button, select 'Excel', download CSV/XLSX with all data rows"
+      use: "Perform custom calculations not available in dashboard"
+
+    - name: "Schedule Email Reports"
+      description: "Automatically email dashboard snapshot daily/weekly/monthly"
+      action: "Set up scheduled email to service managers every Monday morning with last week's performance"
+      use: "Proactive reporting without manual work - managers receive updates automatically"
+
+  sharing:
+    - name: "Share Dashboard URL"
+      description: "Send dashboard link to colleagues for read-only access"
+      action: "Copy dashboard URL, send via email or Slack to team members"
+      use: "Everyone views same live data, no version control issues with Excel files"
+
+    - name: "Embed in Website"
+      description: "Embed dashboard into council intranet or public website"
+      action: "Use iframe embed code to display live dashboard on SharePoint page"
+      use: "Transparency - residents see same performance metrics as officers"
+
+troubleshooting:
+  scenarios:
+    - symptom: "Dashboard not loading or 'Access Denied' error"
+      possibleCauses:
+        - "QuickSight reader access not configured in CloudFormation"
+        - "Dashboard sharing permissions not set"
+        - "IAM role missing QuickSight permissions"
+      solutions:
+        - "Check CloudFormation outputs for dashboard URL with embedded user credentials"
+        - "Verify QuickSight subscription activated (one-time setup)"
+        - "Ensure dashboard shared with 'Everyone in this account' or specific users"
+
+    - symptom: "Dashboard loads but shows 'No data' or empty charts"
+      possibleCauses:
+        - "Athena query failed to execute"
+        - "S3 bucket empty or CSV files not uploaded"
+        - "Glue table schema doesn't match S3 data format"
+      solutions:
+        - "Go to Athena console, run sample query to verify data exists"
+        - "Check S3 bucket for CSV files at expected path (s3://bucket/data/)"
+        - "Run Glue crawler to refresh table schema if data format changed"
+
+    - symptom: "Filters not working or showing no results"
+      possibleCauses:
+        - "Filter field doesn't match dataset column name (case-sensitive)"
+        - "Dataset not refreshed after adding new fields"
+        - "SPICE import failed, using stale cached data"
+      solutions:
+        - "Edit dataset, verify filter parameter name matches Athena table column exactly"
+        - "Refresh SPICE dataset to pull latest data from Athena"
+        - "Check dataset refresh schedule - set to daily or on-demand"
+
+    - symptom: "Dashboard very slow to load or filter"
+      possibleCauses:
+        - "Large dataset not using SPICE (querying Athena directly on every interaction)"
+        - "Athena query scanning too much data (not using partitions)"
+        - "Too many users accessing simultaneously"
+      solutions:
+        - "Enable SPICE import for in-memory caching (10x faster, up to 10 GB free tier)"
+        - "Partition S3 data by date (year/month/day folders) to reduce Athena scan cost and time"
+        - "Upgrade to QuickSight Enterprise for higher concurrency and SPICE capacity"
+
+    - symptom: "Cannot export dashboard to PDF or Excel"
+      possibleCauses:
+        - "QuickSight Reader user doesn't have export permissions"
+        - "Dashboard not published (in draft mode)"
+        - "Browser blocking download due to pop-up blocker"
+      solutions:
+        - "Upgrade user to QuickSight Author for full export capabilities (£24/month vs £18/month)"
+        - "Publish dashboard (not just save) to enable export"
+        - "Allow pop-ups from QuickSight domain in browser settings"
+
+    - symptom: "Data not updating / showing yesterday's data"
+      possibleCauses:
+        - "SPICE dataset not refreshing automatically"
+        - "S3 data upload job failed"
+        - "Glue crawler not running after new data arrives"
+      solutions:
+        - "Check dataset refresh schedule - set to daily at specific time (e.g., 6am)"
+        - "Verify S3 upload automation (Lambda function, cron job, etc.) running successfully"
+        - "Trigger Glue crawler manually or set up EventBridge rule to run on S3 file upload"
+
+productionConsiderations:
+  title: "Deploying QuickSight for Real Council Analytics"
+
+  dataIntegration:
+    description: "Connecting QuickSight to council systems"
+    options:
+      - name: "CSV Upload to S3"
+        description: "Export data from council systems as CSV, upload to S3 manually or via script"
+        effort: "Low - works with any system that can export CSV"
+        frequency: "Daily or weekly batch uploads"
+        bestFor: "Getting started, proof of concept, legacy systems without APIs"
+
+      - name: "API Integration with Lambda"
+        description: "Lambda function calls council system API, transforms data, writes to S3"
+        effort: "Medium - requires API credentials and data transformation logic"
+        frequency: "Hourly or real-time updates"
+        bestFor: "Modern council systems with REST/SOAP APIs"
+
+      - name: "Direct Database Connection"
+        description: "QuickSight connects directly to council database (SQL Server, MySQL, PostgreSQL)"
+        effort: "Medium - requires VPC configuration and database credentials"
+        frequency: "Real-time or near-real-time queries"
+        bestFor: "Council systems with relational databases accessible via VPC"
+
+  costOptimization:
+    description: "Keeping QuickSight costs predictable and low"
+    strategies:
+      - strategy: "Use Reader users for most officers (£18/month)"
+        savings: "40% cheaper than Author users (£24/month)"
+        tradeoff: "Readers can view and filter but not create/edit dashboards - sufficient for 90% of users"
+
+      - strategy: "Partition S3 data by date"
+        savings: "Reduce Athena scan costs by 90% (only scan relevant date partitions)"
+        implementation: "Organize S3 as s3://bucket/year=2024/month=05/day=15/data.csv"
+
+      - strategy: "Use SPICE for frequently accessed data"
+        savings: "10x faster queries, no per-query Athena cost, 10 GB free tier"
+        tradeoff: "Data refreshes on schedule (hourly, daily) not real-time"
+
+      - strategy: "Set CloudWatch billing alarms"
+        savings: "Prevent unexpected costs from runaway queries or forgotten resources"
+        implementation: "Alarm at £100/month threshold, email to finance team"
+
+  governanceAndSecurity:
+    description: "Ensuring data security and access control"
+    controls:
+      - control: "Row-Level Security (RLS)"
+        description: "Each ward manager sees only their ward's data in shared dashboard"
+        implementation: "Define RLS rules in dataset mapping user email to ward field"
+
+      - control: "Column-Level Security"
+        description: "Hide sensitive fields (personal data, financial details) from certain user groups"
+        implementation: "Create filtered datasets with different column visibility"
+
+      - control: "VPC Deployment"
+        description: "QuickSight accesses council databases via private VPC, not public internet"
+        implementation: "Configure VPC connection in QuickSight settings"
+
+      - control: "Audit Logging"
+        description: "Track who accessed which dashboards when (GDPR audit trail)"
+        implementation: "Enable CloudTrail logging for QuickSight API calls"
+
+committeeLanguage:
+  title: "Presenting QuickSight to Decision Makers"
+
+  executiveSummary: "Amazon QuickSight transforms council data into interactive dashboards, enabling officers to answer operational questions in real-time without IT dependency. Self-service analytics reduces IT workload by 80% (384 hours/year freed) while empowering service managers with instant insights. For 10 users, annual savings of £17,340 against £2,218 cost delivers 6.8:1 ROI."
+
+  problemStatement:
+    title: "The Data Access Challenge"
+    points:
+      - "Current state: Officers submit tickets to IT for ad-hoc reports, 7-day average wait"
+      - "Impact: Decisions made on week-old data, not real-time insights"
+      - "IT bottleneck: 20 ad-hoc report requests per month = 40 hours IT time"
+      - "Limited self-service: Officers cannot explore data or answer follow-up questions independently"
+      - "Manual reporting: Data analyst spends 4 hours/week creating Excel reports for service managers"
+      - "Opportunity cost: IT time spent on repetitive reports instead of strategic transformation projects"
+
+  solution:
+    title: "Self-Service Business Intelligence"
+    points:
+      - "Amazon QuickSight provides interactive dashboards accessible 24/7 via web browser"
+      - "Officers apply filters, drill down into data, and export reports without IT involvement"
+      - "Real-time data: Dashboard reflects latest service metrics (updated daily or hourly)"
+      - "80% reduction in ad-hoc IT report requests - officers self-serve for routine questions"
+      - "Analyst time reduced from 4 hours/week to 1 hour/week (dashboard maintenance only)"
+      - "Committee reporting: Export dashboard to PDF in 30 seconds for committee papers"
+
+  benefits:
+    financial:
+      - "Analyst time savings: 156 hours/year × £25 = £3,900"
+      - "IT time savings: 384 hours/year × £35 = £13,440"
+      - "Total annual savings: £17,340"
+      - "QuickSight cost: £2,218/year (10 Reader users + Athena + S3)"
+      - "Net annual benefit: £15,122 (6.8:1 ROI)"
+      - "Payback period: 1.5 months"
+
+    operational:
+      - "Zero-lag reporting: Officers access real-time dashboard instead of waiting 7 days for reports"
+      - "Faster decision-making: Service managers act on same-day data, not week-old reports"
+      - "Increased question volume: Officers ask more questions when answers are instant (data-driven culture)"
+      - "IT focus shift: IT freed from repetitive reports to work on strategic projects (digital transformation, automation)"
+
+    strategic:
+      - "Democratic transparency: Councillors access same dashboard as officers for oversight and accountability"
+      - "Evidence-based governance: Committee decisions backed by live data, not anecdotal reports"
+      - "Foundation for data lake: S3 data storage enables future AI/ML projects (predictive analytics, trend forecasting)"
+      - "Scalability: Add more dashboards (finance, HR, housing) without linear cost increase"
+
+  risks:
+    title: "Risk Assessment and Mitigation"
+    items:
+      - risk: "Officers lack SQL/data skills to use dashboard"
+        likelihood: "Low"
+        mitigation: "Pre-built dashboards with point-and-click filters (no SQL required); 1-hour training session; 95% of users only need filtering and export"
+
+      - risk: "Data quality issues (inaccurate metrics)"
+        likelihood: "Medium"
+        mitigation: "Pilot with 2-3 services to validate data accuracy; automated data quality checks; data steward ownership"
+
+      - risk: "Ongoing costs exceed budget"
+        likelihood: "Low"
+        mitigation: "Predictable £18/user/month cost; CloudWatch billing alarms at £100/month; SPICE caching reduces Athena query costs"
+
+      - risk: "Dashboard performance degrades with more data"
+        likelihood: "Low"
+        mitigation: "SPICE in-memory caching for <10 GB datasets; S3 partitioning reduces scan costs; QuickSight Enterprise for larger datasets"
+
+  implementationPlan:
+    phase1:
+      title: "Pilot (Month 1-2)"
+      activities:
+        - "Deploy QuickSight via AWS Innovation Sandbox (this walkthrough)"
+        - "Create dashboard for 2 services (Waste Collection, Housing Requests)"
+        - "Onboard 5 pilot users (2 service managers, 2 officers, 1 analyst)"
+        - "Gather feedback on usability, accuracy, and usefulness"
+      success: "Pilot users answer 80% of questions without IT help"
+      cost: "£90 (5 users × £18/month × 1 month pilot)"
+
+    phase2:
+      title: "Integration (Month 3-4)"
+      activities:
+        - "Expand dashboard to all 5 services (add Planning, Customer Service, Council Tax)"
+        - "Automate S3 data upload from council systems (Lambda or scheduled script)"
+        - "Train 10 officers and managers on dashboard usage (1-hour session per group)"
+        - "Set up scheduled email reports for committee meetings"
+      success: "10 users actively using dashboard weekly; IT ad-hoc requests down 60%"
+      cost: "£360 (10 users × £18/month × 2 months)"
+
+    phase3:
+      title: "Scale and Enhance (Month 5-6)"
+      activities:
+        - "Add row-level security for ward managers (each sees only their ward data)"
+        - "Create additional dashboards (Finance, HR, Assets)"
+        - "Integrate with SharePoint intranet for one-click dashboard access"
+        - "Measure ROI: track IT time saved, questions answered, user satisfaction"
+      success: "IT ad-hoc report requests down 80%; user satisfaction >4/5"
+      cost: "£360 (10 users × £18/month × 2 months)"
+
+  nextSteps:
+    - "Complete this AWS Innovation Sandbox walkthrough (10 minutes)"
+    - "Present findings to IT and Service Delivery teams"
+    - "Prepare business case for Finance committee (template available)"
+    - "Secure approval for 2-month pilot (£450 budget)"
+    - "Deploy pilot and measure IT time savings"
+    - "Scale to full production based on pilot success"

@@ -1,0 +1,134 @@
+{#
+  Mobile Navigation Component (Story 14.5)
+
+  Renders the mobile hamburger menu with:
+  - Hamburger toggle button (shown at <768px)
+  - Slide-in panel from right
+  - Accordion expand/collapse for Scenarios and Walkthroughs
+  - 44x44px touch targets
+  - Focus trapping when open
+
+  Usage:
+    {% include "components/mobile-nav.njk" %}
+
+  Requires:
+    - scenarios data (from scenarios.yaml)
+    - mobile-nav.js for interactivity
+#}
+
+{# Hamburger toggle button #}
+<button type="button"
+        class="ndx-mobile-nav-toggle"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobile-nav">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <line x1="3" y1="6" x2="21" y2="6"/>
+    <line x1="3" y1="12" x2="21" y2="12"/>
+    <line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+{# Backdrop #}
+<div class="ndx-mobile-nav__backdrop" aria-hidden="true"></div>
+
+{# Mobile navigation panel #}
+<div id="mobile-nav" class="ndx-mobile-nav" role="dialog" aria-modal="true" aria-label="Navigation menu">
+  <div class="ndx-mobile-nav__header">
+    <span class="ndx-mobile-nav__title">Menu</span>
+    <button type="button"
+            class="ndx-mobile-nav__close"
+            aria-label="Close menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <ul class="ndx-mobile-nav__list">
+    {# Home link #}
+    <li class="ndx-mobile-nav__item">
+      <a href="/" class="ndx-mobile-nav__link">Home</a>
+    </li>
+
+    {# Scenarios accordion #}
+    <li class="ndx-mobile-nav__item">
+      <button type="button"
+              class="ndx-mobile-nav__accordion-trigger"
+              aria-expanded="false"
+              aria-controls="mobile-nav-scenarios">
+        Scenarios
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div id="mobile-nav-scenarios" class="ndx-mobile-nav__accordion-content">
+        <ul class="ndx-mobile-nav__sublist">
+          {% for scenario in scenarios.scenarios %}
+            <li class="ndx-mobile-nav__subitem">
+              <a href="{{ scenario.url }}" class="ndx-mobile-nav__sublink">
+                <span class="ndx-mobile-nav__sublink-title">{{ scenario.name }}</span>
+                <span class="ndx-mobile-nav__sublink-desc">{{ scenario.headline | truncate(50) }}</span>
+              </a>
+            </li>
+          {% endfor %}
+          <li class="ndx-mobile-nav__subitem">
+            <a href="/scenarios/" class="ndx-mobile-nav__sublink">
+              <span class="ndx-mobile-nav__sublink-title">View all scenarios</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+    {# Walkthroughs accordion #}
+    <li class="ndx-mobile-nav__item">
+      <button type="button"
+              class="ndx-mobile-nav__accordion-trigger"
+              aria-expanded="false"
+              aria-controls="mobile-nav-walkthroughs">
+        Walkthroughs
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <div id="mobile-nav-walkthroughs" class="ndx-mobile-nav__accordion-content">
+        <ul class="ndx-mobile-nav__sublist">
+          {% for scenario in scenarios.scenarios %}
+            <li class="ndx-mobile-nav__subitem">
+              <a href="/walkthroughs/{{ scenario.id }}/" class="ndx-mobile-nav__sublink">
+                <span class="ndx-mobile-nav__sublink-title">{{ scenario.name }}</span>
+                <span class="ndx-mobile-nav__sublink-desc">{{ scenario.timeEstimate }}</span>
+              </a>
+            </li>
+          {% endfor %}
+          <li class="ndx-mobile-nav__subitem">
+            <a href="/walkthroughs/" class="ndx-mobile-nav__sublink">
+              <span class="ndx-mobile-nav__sublink-title">View all walkthroughs</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+    {# Quiz link #}
+    <li class="ndx-mobile-nav__item">
+      <a href="/quiz/" class="ndx-mobile-nav__link">Find Your Scenario</a>
+    </li>
+
+    {# Get Started link #}
+    <li class="ndx-mobile-nav__item">
+      <a href="/get-started/" class="ndx-mobile-nav__link">Get Started</a>
+    </li>
+
+    {# Secondary links #}
+    <li class="ndx-mobile-nav__item">
+      <a href="/contact/" class="ndx-mobile-nav__link">Contact</a>
+    </li>
+
+    <li class="ndx-mobile-nav__item">
+      <a href="/about/" class="ndx-mobile-nav__link">About NDX:Try</a>
+    </li>
+  </ul>
+</div>

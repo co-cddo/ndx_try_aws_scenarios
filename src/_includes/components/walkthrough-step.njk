@@ -1,0 +1,354 @@
+{#
+  Walkthrough Step Component (Story 3.2 - AC-3.2.2, AC-3.2.3, AC-3.2.4, AC-3.2.12)
+  Updated: Story 13.3-13.8 - Screenshot integration with S3-hosted images
+
+  Reusable component for displaying individual walkthrough steps with:
+  - Step title and description
+  - Screenshot with alt text (now from S3 via screenshot.njk component)
+  - Expected outcome section with checkmarks
+  - Copy-to-clipboard functionality with visual confirmation
+  - Placeholder hint text for chatbot interface
+  - Click-to-zoom lightbox support
+
+  Props:
+    - stepNumber: number (required) - Step number in sequence
+    - stepTitle: string (required) - Title of the step
+    - stepDescription: string (required) - Description of what to do
+    - scenarioId: string (optional) - Scenario ID for S3 screenshot URLs
+    - screenshotUrl: string (optional) - Legacy: local URL to screenshot image
+    - screenshotAlt: string (required if screenshotUrl) - Alt text for screenshot
+    - screenshotCaption: string (optional) - Caption below screenshot
+    - screenshots: array (optional) - Array of screenshot objects from YAML data
+    - expectedOutcomes: array (optional) - List of expected outcomes
+    - copyText: string (optional) - Text to copy to clipboard
+    - placeholderHint: string (optional) - Hint text for chatbot input
+    - timeEstimate: string (optional) - Time estimate for this step
+
+  Usage:
+    {% include "components/walkthrough-step.njk" %}
+
+  Accessibility:
+    - Keyboard accessible copy button and screenshot zoom
+    - Visual confirmation on copy
+    - ARIA live region for copy confirmation
+    - Semantic heading hierarchy
+    - Focus management for lightbox
+#}
+
+<div class="ndx-walkthrough-step" id="step-{{ stepNumber }}">
+  {# Step header #}
+  <div class="ndx-walkthrough-step__header">
+    <span class="ndx-walkthrough-step__number govuk-tag govuk-tag--blue">
+      Step {{ stepNumber }}
+    </span>
+    {% if timeEstimate %}
+      <span class="ndx-walkthrough-step__time govuk-body-s">
+        {{ timeEstimate }}
+      </span>
+    {% endif %}
+  </div>
+
+  <h2 class="govuk-heading-l ndx-walkthrough-step__title">
+    {{ stepTitle }}
+  </h2>
+
+  <p class="govuk-body-l ndx-walkthrough-step__description">
+    {{ stepDescription }}
+  </p>
+
+  {# Screenshot section - Story 13.3-13.8 integration #}
+  {% if screenshots and screenshots.length > 0 %}
+    {# New: Multiple screenshots from YAML data #}
+    <div class="ndx-walkthrough-step__screenshots">
+      {% for shot in screenshots %}
+        {% set scenario = scenarioId %}
+        {% set filename = shot.filename %}
+        {% set alt = shot.alt %}
+        {% set caption = shot.caption %}
+        {% set width = shot.width %}
+        {% set height = shot.height %}
+        {% include "components/screenshot.njk" %}
+      {% endfor %}
+    </div>
+  {% elif scenarioId and screenshotFilename %}
+    {# New: Single screenshot using S3 URL pattern #}
+    {% set scenario = scenarioId %}
+    {% set filename = screenshotFilename %}
+    {% set alt = screenshotAlt %}
+    {% set caption = screenshotCaption %}
+    {% include "components/screenshot.njk" %}
+  {% elif screenshotUrl %}
+    {# Legacy: Local screenshot URL (backward compatibility) #}
+    <div class="ndx-walkthrough-step__screenshot">
+      <img src="{{ screenshotUrl }}"
+           alt="{{ screenshotAlt }}"
+           class="ndx-walkthrough-step__image"
+           loading="lazy">
+      {% if screenshotCaption %}
+        <p class="ndx-walkthrough-step__screenshot-caption govuk-body-s">{{ screenshotCaption }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {# Copy-to-clipboard section #}
+  {% if copyText %}
+    <div class="ndx-walkthrough-step__copy-section">
+      <h3 class="govuk-heading-s">Try this question</h3>
+
+      {% if placeholderHint %}
+        <p class="govuk-body-s ndx-walkthrough-step__hint">
+          Hint: {{ placeholderHint }}
+        </p>
+      {% endif %}
+
+      <div class="ndx-walkthrough-step__copy-container">
+        <pre class="ndx-walkthrough-step__copy-text" id="copy-text-{{ stepNumber }}">{{ copyText }}</pre>
+        <button type="button"
+                class="govuk-button govuk-button--secondary ndx-walkthrough-step__copy-btn"
+                data-copy-target="copy-text-{{ stepNumber }}"
+                data-step="{{ stepNumber }}"
+                aria-label="Copy question to clipboard">
+          <span class="ndx-walkthrough-step__copy-icon">📋</span>
+          <span class="ndx-walkthrough-step__copy-label">Copy</span>
+        </button>
+      </div>
+
+      {# Copy confirmation message - hidden by default #}
+      <div class="ndx-walkthrough-step__copy-confirmation"
+           id="copy-confirmation-{{ stepNumber }}"
+           role="status"
+           aria-live="polite"
+           aria-atomic="true"
+           hidden>
+        <span class="ndx-walkthrough-step__copy-success">✓ Copied to clipboard!</span>
+      </div>
+    </div>
+  {% endif %}
+
+  {# Expected outcomes section #}
+  {% if expectedOutcomes and expectedOutcomes.length > 0 %}
+    <div class="ndx-walkthrough-step__outcomes">
+      <h3 class="govuk-heading-s">Expected outcome</h3>
+      <ul class="govuk-list ndx-walkthrough-step__outcome-list">
+        {% for outcome in expectedOutcomes %}
+          <li class="ndx-walkthrough-step__outcome-item">
+            <span class="ndx-walkthrough-step__checkmark" aria-hidden="true">✓</span>
+            {{ outcome }}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  {# Step content area - for custom content #}
+  <div class="ndx-walkthrough-step__content">
+    {{ caller() if caller }}
+  </div>
+</div>
+
+<style>
+  .ndx-walkthrough-step {
+    margin-bottom: 60px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-step:last-child {
+    border-bottom: none;
+  }
+
+  .ndx-walkthrough-step__header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .ndx-walkthrough-step__number {
+    font-size: 16px;
+  }
+
+  .ndx-walkthrough-step__time {
+    color: #505a5f;
+    margin: 0;
+  }
+
+  .ndx-walkthrough-step__title {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-walkthrough-step__description {
+    margin-bottom: 25px;
+  }
+
+  /* Multiple screenshots container - Story 13.3-13.8 */
+  .ndx-walkthrough-step__screenshots {
+    margin: 30px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .ndx-walkthrough-step__screenshot {
+    margin: 30px 0;
+    border: 1px solid #b1b4b6;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .ndx-walkthrough-step__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .ndx-walkthrough-step__screenshot-caption {
+    padding: 10px 15px;
+    background-color: #f3f2f1;
+    margin: 0;
+    color: #505a5f;
+  }
+
+  .ndx-walkthrough-step__copy-section {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-walkthrough-step__hint {
+    color: #505a5f;
+    margin-bottom: 15px;
+    font-style: italic;
+  }
+
+  .ndx-walkthrough-step__copy-container {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .ndx-walkthrough-step__copy-text {
+    flex: 1;
+    padding: 15px;
+    background-color: #ffffff;
+    border: 2px solid #0b0c0c;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+  }
+
+  .ndx-walkthrough-step__copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+
+  .ndx-walkthrough-step__copy-btn:focus {
+    outline: 3px solid #ffdd00;
+    outline-offset: 0;
+  }
+
+  .ndx-walkthrough-step__copy-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .ndx-walkthrough-step__copy-label {
+    font-size: 19px;
+  }
+
+  .ndx-walkthrough-step__copy-confirmation {
+    margin-top: 15px;
+  }
+
+  .ndx-walkthrough-step__copy-success {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #00703c;
+    color: #ffffff;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .ndx-walkthrough-step__outcomes {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-walkthrough-step__outcome-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ndx-walkthrough-step__outcome-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 19px;
+    line-height: 1.6;
+  }
+
+  .ndx-walkthrough-step__outcome-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .ndx-walkthrough-step__checkmark {
+    color: #003618;
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .ndx-walkthrough-step__content {
+    margin-top: 30px;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 640px) {
+    .ndx-walkthrough-step__copy-container {
+      flex-direction: column;
+    }
+
+    .ndx-walkthrough-step__copy-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .ndx-walkthrough-step__copy-text {
+      font-size: 14px;
+    }
+
+    .ndx-walkthrough-step__outcome-item {
+      font-size: 16px;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .ndx-walkthrough-step {
+      page-break-inside: avoid;
+    }
+
+    .ndx-walkthrough-step__copy-btn {
+      display: none;
+    }
+
+    .ndx-walkthrough-step__copy-text {
+      border: 1px solid #000000;
+    }
+  }
+</style>

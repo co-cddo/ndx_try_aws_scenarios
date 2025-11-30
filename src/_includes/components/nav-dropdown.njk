@@ -1,0 +1,173 @@
+{#
+  Navigation Dropdown Component (Story 14.4)
+
+  Renders the desktop header navigation with dropdown menus for:
+  - Scenarios: Lists all 6 scenarios with descriptions
+  - Walkthroughs: Lists walkthroughs grouped by category
+
+  Features:
+  - 150ms hover delay on desktop
+  - Click support for touch devices
+  - Full keyboard navigation
+  - ARIA attributes for accessibility
+
+  Usage:
+    {% include "components/nav-dropdown.njk" %}
+
+  Requires:
+    - scenarios data (from scenarios.yaml)
+    - nav-dropdown.js for interactivity
+#}
+
+<nav class="ndx-nav" aria-label="Main navigation">
+  <ul class="ndx-nav__list">
+    {# Scenarios dropdown #}
+    <li class="ndx-nav__item">
+      <button type="button"
+              class="ndx-nav__trigger"
+              aria-expanded="false"
+              aria-haspopup="true"
+              aria-controls="nav-dropdown-scenarios">
+        Scenarios
+        <svg class="ndx-nav__icon" aria-hidden="true" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div id="nav-dropdown-scenarios"
+           class="ndx-nav__dropdown"
+           role="menu"
+           aria-hidden="true">
+        <ul class="ndx-nav__dropdown-list">
+          {% for scenario in scenarios.scenarios %}
+            {% set category = scenario | scenarioCategory %}
+            <li role="none">
+              <a href="{{ scenario.url }}"
+                 class="ndx-nav__dropdown-link"
+                 role="menuitem">
+                <span class="ndx-nav__dropdown-title">
+                  {{ scenario.name }}
+                  {% if scenario.isMostPopular %}
+                    <span class="ndx-nav__dropdown-popular">Popular</span>
+                  {% endif %}
+                </span>
+                <span class="ndx-nav__dropdown-desc">{{ scenario.headline | truncate(60) }}</span>
+                <span class="ndx-nav__dropdown-tag ndx-nav__dropdown-tag--{{ category }}">{{ category | upper }}</span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+        <div class="ndx-nav__dropdown-footer">
+          <a href="/scenarios/">
+            View all scenarios
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </li>
+
+    {# Walkthroughs dropdown #}
+    <li class="ndx-nav__item">
+      <button type="button"
+              class="ndx-nav__trigger"
+              aria-expanded="false"
+              aria-haspopup="true"
+              aria-controls="nav-dropdown-walkthroughs">
+        Walkthroughs
+        <svg class="ndx-nav__icon" aria-hidden="true" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div id="nav-dropdown-walkthroughs"
+           class="ndx-nav__dropdown"
+           role="menu"
+           aria-hidden="true">
+        {# AI Category #}
+        <div class="ndx-nav__dropdown-group">
+          <span class="ndx-nav__dropdown-group-label">AI</span>
+          <ul class="ndx-nav__dropdown-list">
+            {% for scenario in scenarios.scenarios %}
+              {% set category = scenario | scenarioCategory %}
+              {% if category == 'ai' %}
+                <li role="none">
+                  <a href="/walkthroughs/{{ scenario.id }}/"
+                     class="ndx-nav__dropdown-link"
+                     role="menuitem">
+                    <span class="ndx-nav__dropdown-title">{{ scenario.name }}</span>
+                    <span class="ndx-nav__dropdown-desc">{{ scenario.timeEstimate }} walkthrough</span>
+                  </a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+        {# IoT Category #}
+        <div class="ndx-nav__dropdown-group">
+          <span class="ndx-nav__dropdown-group-label">IoT</span>
+          <ul class="ndx-nav__dropdown-list">
+            {% for scenario in scenarios.scenarios %}
+              {% set category = scenario | scenarioCategory %}
+              {% if category == 'iot' %}
+                <li role="none">
+                  <a href="/walkthroughs/{{ scenario.id }}/"
+                     class="ndx-nav__dropdown-link"
+                     role="menuitem">
+                    <span class="ndx-nav__dropdown-title">{{ scenario.name }}</span>
+                    <span class="ndx-nav__dropdown-desc">{{ scenario.timeEstimate }} walkthrough</span>
+                  </a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+        {# Analytics Category #}
+        <div class="ndx-nav__dropdown-group">
+          <span class="ndx-nav__dropdown-group-label">Analytics</span>
+          <ul class="ndx-nav__dropdown-list">
+            {% for scenario in scenarios.scenarios %}
+              {% set category = scenario | scenarioCategory %}
+              {% if category == 'analytics' %}
+                <li role="none">
+                  <a href="/walkthroughs/{{ scenario.id }}/"
+                     class="ndx-nav__dropdown-link"
+                     role="menuitem">
+                    <span class="ndx-nav__dropdown-title">{{ scenario.name }}</span>
+                    <span class="ndx-nav__dropdown-desc">{{ scenario.timeEstimate }} walkthrough</span>
+                  </a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="ndx-nav__dropdown-footer">
+          <a href="/walkthroughs/">
+            View all walkthroughs
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </li>
+
+    {# Quiz link (no dropdown) #}
+    <li class="ndx-nav__item">
+      <a href="/quiz/" class="ndx-nav__trigger">
+        Find Your Scenario
+      </a>
+    </li>
+
+    {# Get Started link (no dropdown) #}
+    <li class="ndx-nav__item">
+      <a href="/get-started/" class="ndx-nav__trigger">
+        Get Started
+      </a>
+    </li>
+  </ul>
+</nav>

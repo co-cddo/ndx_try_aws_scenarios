@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="text-to-speech-fallback-title text-to-speech-fallback-desc">
+  <title id="text-to-speech-fallback-title">Text to Speech Screenshot</title>
+  <desc id="text-to-speech-fallback-desc">Screenshot temporarily unavailable - showing placeholder for Text to Speech scenario</desc>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="#f3f2f1"/>
+
+  <!-- GOV.UK Blue header bar -->
+  <rect width="1920" height="100" fill="#1d70b8"/>
+
+  <!-- Central content area -->
+  <rect x="360" y="200" width="1200" height="680" rx="4" fill="#ffffff" stroke="#b1b4b6" stroke-width="2"/>
+
+  <!-- Text to Speech icon -->
+  <g transform="translate(860, 400)">
+    <rect width="200" height="160" rx="20" fill="#1d70b8" opacity="0.1"/>
+    <!-- Document/text icon -->
+    <rect x="30" y="30" width="70" height="100" rx="4" fill="#ffffff" stroke="#1d70b8" stroke-width="3"/>
+    <rect x="40" y="50" width="50" height="6" rx="2" fill="#1d70b8" opacity="0.5"/>
+    <rect x="40" y="65" width="40" height="6" rx="2" fill="#1d70b8" opacity="0.5"/>
+    <rect x="40" y="80" width="45" height="6" rx="2" fill="#1d70b8" opacity="0.5"/>
+    <rect x="40" y="95" width="35" height="6" rx="2" fill="#1d70b8" opacity="0.5"/>
+    <!-- Arrow -->
+    <path d="M110 80h20l-7-7m7 7l-7 7" stroke="#00703c" stroke-width="3" fill="none"/>
+    <!-- Speaker icon -->
+    <g transform="translate(130, 55)">
+      <path d="M0 25v30l20-15 20 15v-30l-20 15z" fill="#1d70b8"/>
+      <path d="M50 35c5 5 5 20 0 25" stroke="#00703c" stroke-width="3" fill="none"/>
+      <path d="M55 25c10 10 10 40 0 50" stroke="#00703c" stroke-width="3" fill="none" opacity="0.7"/>
+      <path d="M60 15c15 15 15 60 0 75" stroke="#00703c" stroke-width="3" fill="none" opacity="0.4"/>
+    </g>
+  </g>
+
+  <!-- "Screenshot updating" text -->
+  <text x="960" y="620" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#505a5f">
+    Screenshot updating - please check back soon
+  </text>
+
+  <!-- Scenario label -->
+  <text x="960" y="680" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#0b0c0c" font-weight="600">
+    Text to Speech
+  </text>
+
+  <!-- AWS Polly badge -->
+  <rect x="835" y="720" width="250" height="36" rx="4" fill="#232f3e"/>
+  <text x="960" y="745" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#ffffff">
+    Powered by Amazon Polly
+  </text>
+</svg>

@@ -1,0 +1,80 @@
+{#
+  Partner Tour Section Component (Story 2.6)
+
+  Displays "Need Hands-On Guidance?" section on scenario detail pages.
+  Provides alternative path for councils preferring guided evaluation.
+
+  Features (AC-2.6.1):
+    - "Need Hands-On Guidance?" heading
+    - "Schedule a Partner Tour" button
+    - Brief explanation of partner-led evaluation sessions
+    - Links to dedicated partner tour request form/page
+
+  Expects scenarioData context from parent template.
+#}
+
+{% if scenarioData %}
+<div class="ndx-partner-tour-section" id="partner-tour">
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+  <h2 class="govuk-heading-l">Need hands-on guidance?</h2>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <p class="govuk-body-l">
+        Not ready to deploy yourself? Our implementation partners can guide your team through a live evaluation session.
+      </p>
+
+      <p class="govuk-body">
+        During a <strong>30-60 minute guided tour</strong>, a vetted implementation partner will:
+      </p>
+
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Walk through the {{ scenarioData.name }} scenario with your team</li>
+        <li>Answer technical and business questions in real-time</li>
+        <li>Help you understand how this applies to your council's needs</li>
+        <li>Provide guidance on next steps and procurement options</li>
+      </ul>
+
+      <p class="govuk-body">
+        <strong>No AWS account required</strong> - the partner handles the deployment while you observe and learn.
+      </p>
+    </div>
+
+    <div class="govuk-grid-column-one-third">
+      <div class="ndx-partner-tour-section__cta">
+        <a href="/partner-tour/?scenario={{ scenarioData.id }}"
+           class="govuk-button govuk-button--secondary ndx-partner-tour-section__button"
+           data-module="govuk-button">
+          Schedule a partner tour
+        </a>
+
+        <p class="govuk-body-s govuk-!-margin-top-2">
+          Free of charge. No commitment required.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {# Additional info in details component #}
+  <details class="govuk-details govuk-!-margin-top-4" data-module="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        About our implementation partners
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p>Our implementation partners are:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Vetted by AWS</strong> - accredited AWS Partners with local government experience</li>
+        <li><strong>Public sector specialists</strong> - experienced in council requirements and procurement</li>
+        <li><strong>G-Cloud listed</strong> - available through existing public sector frameworks</li>
+        <li><strong>Regional coverage</strong> - partners available across the UK</li>
+      </ul>
+      <p>
+        <a href="/contact/" class="govuk-link">Contact us</a> if you'd like to learn more about our partner network.
+      </p>
+    </div>
+  </details>
+</div>
+{% endif %}

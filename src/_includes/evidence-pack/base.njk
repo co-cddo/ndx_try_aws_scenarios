@@ -1,0 +1,70 @@
+{#
+  Evidence Pack Base Template (AC-4.1.1)
+
+  Single template with persona conditionals that generates
+  customized evidence packs for different stakeholders.
+
+  Usage:
+    Set persona to 'cto', 'service-manager', 'finance', or 'developer'
+    Set scenarioId to scenario ID from scenarios.yaml
+    Set session to evaluation session data object
+    Include this template with "evidence-pack/base.njk"
+
+  Variables Required:
+  - persona: 'cto' | 'service-manager' | 'finance' | 'developer'
+  - scenarioId: scenario ID from scenarios.yaml
+  - session: evaluation session data object
+  - cto_evaluation: (optional) CTO-specific data
+  - service_manager_evaluation: (optional) Service Manager data
+  - finance_evaluation: (optional) Finance data
+  - developer_evaluation: (optional) Developer data
+  - evaluation_summary: (optional) Shared evaluation summary
+  - roi_projection: (optional) Shared ROI data
+  - next_steps: (optional) Shared next steps
+#}
+
+{# Load scenario data #}
+{% set scenarioData = scenarios.scenarios | selectattr("id", "equalto", scenarioId) | first %}
+
+{# Include print styles #}
+{% include "evidence-pack/partials/print-styles.njk" %}
+
+{# Evidence Pack Container #}
+<div class="ndx-evidence-pack">
+
+  {# Cover Page (always included) #}
+  {% include "evidence-pack/sections/cover.njk" %}
+
+  {# Executive Summary (always included) #}
+  {% include "evidence-pack/sections/executive-summary.njk" %}
+
+  {# Persona-Specific Sections #}
+
+  {% if persona == 'cto' %}
+    {# CTO Persona Sections (AC-4.1.2, AC-4.1.10) #}
+    {% include "evidence-pack/sections/architecture.njk" %}
+    {% include "evidence-pack/sections/security-compliance.njk" %}
+
+  {% elif persona == 'service-manager' %}
+    {# Service Manager Persona Sections (AC-4.1.3, AC-4.1.11) #}
+    {% include "evidence-pack/sections/resident-impact.njk" %}
+    {% include "evidence-pack/sections/citizen-journey.njk" %}
+
+  {% elif persona == 'finance' %}
+    {# Finance Persona Sections (AC-4.1.4, AC-4.1.12) #}
+    {% include "evidence-pack/sections/cost-analysis.njk" %}
+    {% include "evidence-pack/sections/tco-projection.njk" %}
+
+  {% elif persona == 'developer' %}
+    {# Developer Persona Sections (AC-4.1.5, AC-4.1.13) #}
+    {% include "evidence-pack/sections/technical-impl.njk" %}
+    {% include "evidence-pack/sections/technical-runbook.njk" %}
+
+  {% endif %}
+
+  {# Shared Sections (AC-4.1.6) - Always included for all personas #}
+  {% include "evidence-pack/sections/evaluation-summary.njk" %}
+  {% include "evidence-pack/sections/roi-projection.njk" %}
+  {% include "evidence-pack/sections/next-steps.njk" %}
+
+</div>

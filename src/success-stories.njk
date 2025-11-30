@@ -1,0 +1,146 @@
+---
+title: Success Stories
+layout: page
+description: Real-world case studies from UK councils who have deployed NDX:Try AWS scenarios
+---
+
+{% if success-stories.coming_soon %}
+<div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+  <div class="govuk-notification-banner__header">
+    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+      Coming Soon
+    </h2>
+  </div>
+  <div class="govuk-notification-banner__content">
+    <p class="govuk-notification-banner__heading">
+      {{ success-stories.placeholder_message }}
+    </p>
+  </div>
+</div>
+{% endif %}
+
+<p class="govuk-body-l">
+  Learn from councils who have deployed NDX:Try scenarios and seen real results. These case studies showcase the impact of AWS cloud solutions in UK local government.
+</p>
+
+<div class="ndx-success-stories">
+  {% for story in success-stories.stories %}
+  <div class="ndx-success-story-card">
+    {% if story.status == 'placeholder' %}
+    <div class="govuk-tag govuk-tag--grey govuk-!-margin-bottom-3">Placeholder Content</div>
+    {% endif %}
+
+    <h2 class="govuk-heading-l govuk-!-margin-bottom-3">
+      {{ story.headline }}
+    </h2>
+
+    <dl class="govuk-summary-list govuk-summary-list--no-border govuk-!-margin-bottom-5">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Council</dt>
+        <dd class="govuk-summary-list__value">{{ story.council }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Type</dt>
+        <dd class="govuk-summary-list__value">{{ story.council_type }}</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Region</dt>
+        <dd class="govuk-summary-list__value">{{ story.region }}</dd>
+      </div>
+      {% if story.population %}
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Population</dt>
+        <dd class="govuk-summary-list__value">{{ story.population }}</dd>
+      </div>
+      {% endif %}
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Scenario</dt>
+        <dd class="govuk-summary-list__value">
+          <a href="/scenarios/{{ story.scenario }}/" class="govuk-link">{{ story.scenario_name }}</a>
+        </dd>
+      </div>
+      {% if story.deployment_date %}
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Deployed</dt>
+        <dd class="govuk-summary-list__value">{{ story.deployment_date | readableDate }}</dd>
+      </div>
+      {% endif %}
+    </dl>
+
+    <h3 class="govuk-heading-m">The Challenge</h3>
+    <p class="govuk-body">{{ story.challenge }}</p>
+
+    <h3 class="govuk-heading-m">The Solution</h3>
+    <p class="govuk-body">{{ story.solution }}</p>
+
+    <h3 class="govuk-heading-m">The Results</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      {% for result in story.results %}
+      <li><strong>{{ result }}</strong></li>
+      {% endfor %}
+    </ul>
+
+    {% if story.quote %}
+    <div class="govuk-inset-text">
+      <p class="govuk-body">
+        "{{ story.quote }}"
+      </p>
+      {% if story.quote_attribution %}
+      <p class="govuk-body-s govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+        <strong>— {{ story.quote_attribution }}</strong>
+      </p>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if story.tags and story.tags.length > 0 %}
+    <p class="govuk-body-s govuk-!-margin-top-4">
+      {% for tag in story.tags %}
+      <span class="govuk-tag govuk-tag--grey govuk-!-margin-right-1">{{ tag }}</span>
+      {% endfor %}
+    </p>
+    {% endif %}
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible govuk-!-margin-top-6">
+  </div>
+  {% endfor %}
+</div>
+
+{% if success-stories.cta.enabled %}
+<div class="ndx-cta-section govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">{{ success-stories.cta.title }}</h2>
+  <p class="govuk-body">
+    {{ success-stories.cta.description }}
+  </p>
+
+  {% if success-stories.cta.requirements %}
+  <p class="govuk-body govuk-!-font-weight-bold">Requirements:</p>
+  <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-5">
+    {% for requirement in success-stories.cta.requirements %}
+    <li>{{ requirement }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <a href="{{ success-stories.cta.button_link }}" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    {{ success-stories.cta.button_text }}
+  </a>
+</div>
+{% endif %}
+
+<div class="govuk-grid-row govuk-!-margin-top-8">
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-m">Related Resources</h2>
+    <ul class="govuk-list govuk-list--spaced">
+      <li>
+        <a href="/scenarios/" class="govuk-link">Browse all scenarios</a> - Find solutions for your council
+      </li>
+      <li>
+        <a href="/analytics/" class="govuk-link">Analytics & Metrics</a> - How we measure success
+      </li>
+      <li>
+        <a href="https://www.local.gov.uk/our-support/cyber-digital-and-technology/artificial-intelligence" class="govuk-link" target="_blank" rel="noopener noreferrer">LGA AI Hub<span class="govuk-visually-hidden"> (opens in new tab)</span></a> - Policy guidance and research
+      </li>
+    </ul>
+  </div>
+</div>

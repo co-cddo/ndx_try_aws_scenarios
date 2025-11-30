@@ -1,0 +1,394 @@
+---
+layout: layouts/exploration
+title: "How Does It Work? - Architecture Tour"
+description: "Understand the technology behind the Council Chatbot through visual diagrams or AWS Console exploration"
+scenarioId: council-chatbot
+eleventyNavigation:
+  key: council-chatbot-architecture
+  parent: council-chatbot-explore
+  title: Architecture Tour
+---
+
+{# Story 6.3: Council Chatbot Architecture Tour Page #}
+
+{% set scenarioId = "council-chatbot" %}
+{% set explorationData = exploration[scenarioId] %}
+{% set activities = explorationData.activities %}
+
+{# Get architecture activities #}
+{% set visualTour = null %}
+{% set consoleTour = null %}
+{% for activity in activities %}
+  {% if activity.id == "arch-visual" %}
+    {% set visualTour = activity %}
+  {% endif %}
+  {% if activity.id == "arch-console" %}
+    {% set consoleTour = activity %}
+  {% endif %}
+{% endfor %}
+
+{# Introduction #}
+<section class="ndx-architecture-intro" aria-labelledby="intro-heading">
+  <h2 class="govuk-heading-l" id="intro-heading">Understand How It Works</h2>
+
+  <p class="govuk-body-l">
+    Choose your path: explore through visual diagrams or dive into the AWS Console to see the real infrastructure.
+  </p>
+
+  <div class="govuk-inset-text">
+    <strong>Choose based on your role:</strong>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Visual Tour</strong> - Best for service managers, decision makers, and non-technical stakeholders</li>
+      <li><strong>Console Tour</strong> - Best for developers, architects, and technical evaluators</li>
+    </ul>
+  </div>
+</section>
+
+{# Stack expiration check #}
+{% set stackExpired = false %}
+{% include "components/exploration/fallback-banner.njk" %}
+
+{# Tabbed Tour Interface #}
+<div class="govuk-tabs" data-module="govuk-tabs">
+  <h2 class="govuk-tabs__title">
+    Architecture tour options
+  </h2>
+
+  <ul class="govuk-tabs__list" role="tablist">
+    <li class="govuk-tabs__list-item govuk-tabs__list-item--selected" role="presentation">
+      <a class="govuk-tabs__tab" href="#visual-tour" id="tab-visual" role="tab" aria-controls="visual-tour" aria-selected="true" tabindex="0">
+        Visual Tour
+        <span class="govuk-body-s">({{ visualTour.time_estimate }})</span>
+      </a>
+    </li>
+    <li class="govuk-tabs__list-item" role="presentation">
+      <a class="govuk-tabs__tab" href="#console-tour" id="tab-console" role="tab" aria-controls="console-tour" aria-selected="false" tabindex="-1">
+        Console Tour
+        <span class="govuk-body-s">({{ consoleTour.time_estimate }})</span>
+      </a>
+    </li>
+  </ul>
+
+  {# Visual Tour Panel #}
+  <div class="govuk-tabs__panel" id="visual-tour" role="tabpanel" aria-labelledby="tab-visual">
+    <h3 class="govuk-heading-l">{{ visualTour.title }}</h3>
+    <p class="govuk-body-l">{{ visualTour.learning }}</p>
+
+    <p class="govuk-body">
+      Follow the journey of a resident's question from web interface to AI-generated response.
+    </p>
+
+    <ol class="ndx-visual-tour-steps">
+      {% for step in visualTour.steps %}
+        <li class="ndx-visual-tour-step{% if loop.index is even %} ndx-visual-tour-step--alternate{% endif %}" data-step="{{ loop.index }}">
+          <div class="ndx-visual-tour-step__content">
+            <span class="ndx-visual-tour-step__number">{{ loop.index }}</span>
+            <h4 class="govuk-heading-m">{{ step.title }}</h4>
+            <p class="govuk-body">{{ step.description }}</p>
+          </div>
+          <div class="ndx-visual-tour-step__image">
+            <img src="/assets/images/exploration/{{ scenarioId }}/{{ step.screenshot }}"
+                 alt="Diagram showing: {{ step.title }} - {{ step.description }}"
+                 loading="lazy"
+                 width="500"
+                 height="300">
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+
+    <div class="ndx-tour-actions">
+      <button type="button"
+              class="govuk-button"
+              onclick="completeActivity('{{ scenarioId }}', '{{ visualTour.id }}')">
+        Mark Visual Tour as complete
+      </button>
+    </div>
+  </div>
+
+  {# Console Tour Panel #}
+  <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="console-tour" role="tabpanel" aria-labelledby="tab-console">
+    <h3 class="govuk-heading-l">{{ consoleTour.title }}</h3>
+    <p class="govuk-body-l">{{ consoleTour.learning }}</p>
+
+    {% if stackExpired %}
+      <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <strong class="govuk-warning-text__text">
+          <span class="govuk-visually-hidden">Warning</span>
+          Console links require an active deployment.
+          <a href="/scenarios/{{ scenarioId }}/" class="govuk-link">Deploy the scenario</a> to explore the real infrastructure.
+        </strong>
+      </div>
+    {% endif %}
+
+    <ol class="ndx-console-tour-steps">
+      {% for step in consoleTour.steps %}
+        <li class="ndx-console-tour-step" data-step="{{ loop.index }}">
+          <div class="ndx-console-tour-step__header">
+            <span class="ndx-console-tour-step__number">{{ loop.index }}</span>
+            <h4 class="govuk-heading-m">{{ step.title }}</h4>
+          </div>
+
+          <div class="ndx-console-tour-step__content">
+            <div class="ndx-console-tour-step__guidance">
+              <strong>What to look for:</strong>
+              <p class="govuk-body">{{ step.what_to_look_for }}</p>
+
+              <a href="{{ step.console_url }}"
+                 class="govuk-button govuk-button--secondary"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-describedby="console-link-info-{{ loop.index }}">
+                Open in AWS Console
+                <span class="govuk-visually-hidden">(opens in new tab)</span>
+              </a>
+              <p id="console-link-info-{{ loop.index }}" class="govuk-hint">
+                Opens the AWS Console in a new tab. You'll need to be signed in.
+              </p>
+            </div>
+
+            <div class="ndx-console-tour-step__screenshot">
+              <img src="/assets/images/exploration/{{ scenarioId }}/{{ step.screenshot }}"
+                   alt="AWS Console screenshot showing {{ step.title }}"
+                   loading="lazy"
+                   width="600"
+                   height="400">
+              <p class="govuk-body-s">Reference screenshot - your console may look slightly different</p>
+            </div>
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+
+    <div class="ndx-tour-actions">
+      <button type="button"
+              class="govuk-button"
+              onclick="completeActivity('{{ scenarioId }}', '{{ consoleTour.id }}')">
+        Mark Console Tour as complete
+      </button>
+    </div>
+  </div>
+</div>
+
+{# What's Next #}
+<section class="ndx-architecture-next" aria-labelledby="next-heading">
+  <h2 class="govuk-heading-l" id="next-heading">What's Next?</h2>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-third">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-s">Try Experiments</h3>
+        <p class="govuk-body-s">
+          Test the chatbot's capabilities hands-on.
+        </p>
+        <a href="/walkthroughs/{{ scenarioId }}/explore/experiments/" class="govuk-link">
+          Start experimenting
+        </a>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-s">Test the Limits</h3>
+        <p class="govuk-body-s">
+          Push the boundaries safely.
+        </p>
+        <a href="/walkthroughs/{{ scenarioId }}/explore/#limits" class="govuk-link">
+          Explore the limits
+        </a>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-s">Production Guidance</h3>
+        <p class="govuk-body-s">
+          Learn what changes for real-world use.
+        </p>
+        <a href="/walkthroughs/{{ scenarioId }}/explore/production/" class="govuk-link">
+          View guidance
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ndx-architecture-intro {
+    margin-bottom: 40px;
+  }
+
+  /* Visual Tour Styles */
+  .ndx-visual-tour-steps {
+    list-style: none;
+    padding: 0;
+    margin: 30px 0;
+  }
+
+  .ndx-visual-tour-step {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    padding: 30px 0;
+    border-bottom: 1px solid #b1b4b6;
+    align-items: center;
+  }
+
+  .ndx-visual-tour-step--alternate {
+    direction: rtl;
+  }
+
+  .ndx-visual-tour-step--alternate > * {
+    direction: ltr;
+  }
+
+  .ndx-visual-tour-step__content {
+    position: relative;
+    padding-left: 50px;
+  }
+
+  .ndx-visual-tour-step__number {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 36px;
+    height: 36px;
+    background: #1d70b8;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .ndx-visual-tour-step__image img {
+    width: 100%;
+    height: auto;
+    border: 1px solid #b1b4b6;
+    border-radius: 4px;
+  }
+
+  /* Console Tour Styles */
+  .ndx-console-tour-steps {
+    list-style: none;
+    padding: 0;
+    margin: 30px 0;
+  }
+
+  .ndx-console-tour-step {
+    border: 1px solid #b1b4b6;
+    margin-bottom: 20px;
+    background: #fff;
+  }
+
+  .ndx-console-tour-step__header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: #f8f8f8;
+    border-bottom: 1px solid #b1b4b6;
+  }
+
+  .ndx-console-tour-step__number {
+    width: 32px;
+    height: 32px;
+    background: #00703c;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .ndx-console-tour-step__header h4 {
+    margin: 0;
+  }
+
+  .ndx-console-tour-step__content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .ndx-console-tour-step__guidance {
+    padding-right: 20px;
+    border-right: 1px solid #b1b4b6;
+  }
+
+  .ndx-console-tour-step__screenshot img {
+    width: 100%;
+    height: auto;
+    border: 1px solid #b1b4b6;
+  }
+
+  .ndx-console-tour-step__screenshot p {
+    margin-top: 10px;
+    color: #505a5f;
+  }
+
+  /* Actions */
+  .ndx-tour-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  /* Next Section */
+  .ndx-architecture-next {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 4px solid #1d70b8;
+  }
+
+  .ndx-next-card {
+    padding: 20px;
+    background: #f8f8f8;
+    height: 100%;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .ndx-visual-tour-step {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-visual-tour-step--alternate {
+      direction: ltr;
+    }
+
+    .ndx-console-tour-step__content {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-console-tour-step__guidance {
+      padding-right: 0;
+      border-right: none;
+      border-bottom: 1px solid #b1b4b6;
+      padding-bottom: 20px;
+    }
+
+    .ndx-next-card {
+      margin-bottom: 20px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Track tour tab selection
+    const tabs = document.querySelectorAll('.govuk-tabs__tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        const tourType = this.id === 'tab-visual' ? 'visual' : 'console';
+        if (window.NDXAnalytics) {
+          window.NDXAnalytics.trackExplorationActivityStarted('{{ scenarioId }}', 'arch-' + tourType, 'architecture');
+        }
+      });
+    });
+  });
+</script>

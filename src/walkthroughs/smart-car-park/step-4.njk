@@ -1,0 +1,428 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Explore Occupancy Trends & ROI - Smart Car Park Walkthrough"
+description: Analyze parking patterns and calculate business value with ROI calculator
+currentStep: 4
+totalSteps: 4
+timeEstimate: "3 minutes"
+scenarioId: smart-car-park
+---
+
+{#
+  Step 4: Explore Occupancy Trends & Analytics (AC-3.5.3)
+  - Analyze 24-hour patterns
+  - Identify peak vs off-peak hours
+  - Interactive ROI calculator
+  - Committee language
+#}
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Explore Occupancy Trends & ROI" %}
+{% set stepDescription = "Analyze occupancy patterns to identify opportunities and calculate return on investment." %}
+{% set timeEstimate = "3 minutes" %}
+{# Load screenshots from YAML data - Story 13.6 #}
+{% set screenshotData = screenshots["smart-car-park"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 4) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "You identify peak occupancy hours",
+  "You understand zone-specific patterns",
+  "You calculate ROI for your council's car parks",
+  "You have committee-ready language for business case"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Analyzing the 24-hour occupancy pattern</h3>
+
+<p class="govuk-body">
+  Look at the "Total Occupancy Over Time" line graph on your dashboard. You should see a clear
+  pattern emerging across the 24-hour period:
+</p>
+
+<div class="ndx-pattern-analysis govuk-!-margin-top-4">
+  <div class="ndx-pattern-card ndx-pattern-peak">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-pattern-badge" style="background-color: #d4351c;">Peak Hours</span>
+    </h4>
+    <p class="govuk-body"><strong>Time periods:</strong> 8am-10am, 12pm-2pm, 5pm-7pm</p>
+    <p class="govuk-body"><strong>Average occupancy:</strong> 85% (42-43 out of 50 spaces occupied)</p>
+    <p class="govuk-body"><strong>What this means:</strong></p>
+    <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+      <li>Morning commuters (8-10am) - workers parking for the day</li>
+      <li>Lunch period (12-2pm) - shoppers and short-stay visitors</li>
+      <li>Evening peak (5-7pm) - workers departing, evening visitors arriving</li>
+      <li>Very limited availability - only 7-8 spaces free</li>
+    </ul>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Opportunity:</strong> During peak hours, you could charge premium rates for Ground
+        Floor (most desirable) or guide overflow traffic to nearby car parks via real-time signage.
+      </p>
+    </div>
+  </div>
+
+  <div class="ndx-pattern-card ndx-pattern-offpeak govuk-!-margin-top-3">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-pattern-badge" style="background-color: #cb4e0f;">Off-Peak Hours</span>
+    </h4>
+    <p class="govuk-body"><strong>Time periods:</strong> 10am-12pm, 2pm-5pm, 7pm-10pm</p>
+    <p class="govuk-body"><strong>Average occupancy:</strong> 60% (30 out of 50 spaces occupied)</p>
+    <p class="govuk-body"><strong>What this means:</strong></p>
+    <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+      <li>Mid-morning and mid-afternoon lulls</li>
+      <li>20 spaces consistently available</li>
+      <li>Good time for planned maintenance or cleaning</li>
+      <li>Opportunity to attract more short-stay visitors</li>
+    </ul>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Opportunity:</strong> Offer discounted rates during off-peak to increase utilization
+        (e.g., "Park for £3 between 10am-2pm"). Every additional occupied space = revenue.
+      </p>
+    </div>
+  </div>
+
+  <div class="ndx-pattern-card ndx-pattern-overnight govuk-!-margin-top-3">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-pattern-badge" style="background-color: #1d70b8;">Overnight</span>
+    </h4>
+    <p class="govuk-body"><strong>Time periods:</strong> 10pm-8am</p>
+    <p class="govuk-body"><strong>Average occupancy:</strong> 20% (10 out of 50 spaces occupied)</p>
+    <p class="govuk-body"><strong>What this means:</strong></p>
+    <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+      <li>Mostly residents with overnight permits</li>
+      <li>40 empty spaces generating no revenue</li>
+      <li>Very low utilization (80% of capacity unused)</li>
+      <li>Potential for alternative revenue streams</li>
+    </ul>
+    <div class="govuk-inset-text">
+      <p class="govuk-body-s">
+        <strong>Opportunity:</strong> Partner with hotels, night venues, or shift workers. Offer
+        overnight parking packages (6pm-8am) to monetize unused capacity.
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Zone-specific insights</h3>
+
+<p class="govuk-body">
+  Look at the "Occupancy by Zone" stacked area chart. Notice how different zones fill at different rates:
+</p>
+
+<div class="ndx-zone-insights">
+  <table class="govuk-table">
+    <caption class="govuk-table__caption govuk-table__caption--s">
+      Zone occupancy patterns during peak hours
+    </caption>
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Zone</th>
+        <th scope="col" class="govuk-table__header">Peak Occupancy</th>
+        <th scope="col" class="govuk-table__header">Why</th>
+        <th scope="col" class="govuk-table__header">Optimization Strategy</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Ground Floor</th>
+        <td class="govuk-table__cell">90% (18/20)</td>
+        <td class="govuk-table__cell">Most convenient, accessible spaces, EV charging</td>
+        <td class="govuk-table__cell">Premium pricing during peak hours</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Level 1</th>
+        <td class="govuk-table__cell">87% (13/15)</td>
+        <td class="govuk-table__cell">Covered parking, short walk</td>
+        <td class="govuk-table__cell">Standard pricing, good for medium-stay</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Level 2</th>
+        <td class="govuk-table__cell">73% (11/15)</td>
+        <td class="govuk-table__cell">Furthest from entrance, less desirable</td>
+        <td class="govuk-table__cell">Discount pricing to increase utilization</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="govuk-inset-text govuk-!-margin-top-3">
+  <p class="govuk-body">
+    <strong>Insight:</strong> Level 2 has 4 spaces unused even at peak. By offering £1 discount
+    for Level 2, you could fill those spaces: 4 spaces × £4/day × 260 days = £4,160 additional
+    revenue annually.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Calculate your ROI</h3>
+
+<p class="govuk-body">
+  Use this interactive calculator to estimate the return on investment for IoT sensors in your
+  council's car parks:
+</p>
+
+<div class="ndx-roi-calculator govuk-!-margin-top-4">
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="total-spaces">
+      Total parking spaces
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="total-spaces" name="total-spaces" type="number" value="50">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="current-occupancy">
+      Current average occupancy (%)
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="current-occupancy" name="current-occupancy" type="number" value="60">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="price-per-day">
+      Average price per day (£)
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="price-per-day" name="price-per-day" type="number" value="5">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="manual-hours">
+      Manual counting hours per day
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="manual-hours" name="manual-hours" type="number" step="0.5" value="1.5">
+  </div>
+
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="hourly-rate">
+      Staff hourly rate (£)
+    </label>
+    <input class="govuk-input govuk-input--width-5" id="hourly-rate" name="hourly-rate" type="number" value="25">
+  </div>
+
+  <button class="govuk-button" data-module="govuk-button" id="calculate-roi">
+    Calculate ROI
+  </button>
+
+  <div id="roi-results" class="ndx-roi-results" style="display: none;">
+    <h4 class="govuk-heading-s">Your ROI Calculation</h4>
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Current annual revenue</dt>
+        <dd class="govuk-summary-list__value" id="current-revenue">£39,000</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Revenue with IoT (85% occupancy)</dt>
+        <dd class="govuk-summary-list__value" id="iot-revenue">£55,250</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Revenue increase</dt>
+        <dd class="govuk-summary-list__value" id="revenue-increase">£16,250</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Manual counting cost (eliminated)</dt>
+        <dd class="govuk-summary-list__value" id="labor-savings">£9,750</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Total annual benefit</dt>
+        <dd class="govuk-summary-list__value" id="total-benefit" style="font-weight: 700;">£26,000</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">AWS annual cost</dt>
+        <dd class="govuk-summary-list__value">£145</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Net annual benefit</dt>
+        <dd class="govuk-summary-list__value" id="net-benefit" style="font-weight: 700; color: #00703c;">£25,855</dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Return on investment</dt>
+        <dd class="govuk-summary-list__value" id="roi-percentage" style="font-weight: 700; color: #00703c;">178:1</dd>
+      </div>
+    </dl>
+
+    <div class="govuk-inset-text govuk-!-margin-top-3">
+      <p class="govuk-body" id="committee-language">
+        <strong>Committee language:</strong> "IoT sensors transform car park management from reactive
+        to proactive. Real-time occupancy data increases revenue by £16,250 annually while eliminating
+        manual counting costs of £9,750. Total annual benefit of £26,000 against AWS costs of £145
+        delivers a 178:1 return on investment."
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const calculateBtn = document.getElementById('calculate-roi');
+    const resultsDiv = document.getElementById('roi-results');
+
+    if (calculateBtn) {
+      calculateBtn.addEventListener('click', function() {
+        // Get input values
+        const totalSpaces = parseInt(document.getElementById('total-spaces').value) || 50;
+        const currentOccupancy = parseInt(document.getElementById('current-occupancy').value) || 60;
+        const pricePerDay = parseInt(document.getElementById('price-per-day').value) || 5;
+        const manualHours = parseFloat(document.getElementById('manual-hours').value) || 1.5;
+        const hourlyRate = parseInt(document.getElementById('hourly-rate').value) || 25;
+
+        const daysPerYear = 260; // Operating days
+        const iotOccupancy = 85; // Target occupancy with IoT
+        const awsAnnualCost = 145; // £145/year
+
+        // Calculate revenues
+        const currentRevenue = totalSpaces * (currentOccupancy / 100) * pricePerDay * daysPerYear;
+        const iotRevenue = totalSpaces * (iotOccupancy / 100) * pricePerDay * daysPerYear;
+        const revenueIncrease = iotRevenue - currentRevenue;
+
+        // Calculate labor savings
+        const laborSavings = manualHours * daysPerYear * hourlyRate;
+
+        // Calculate totals
+        const totalBenefit = revenueIncrease + laborSavings;
+        const netBenefit = totalBenefit - awsAnnualCost;
+        const roiRatio = Math.round(netBenefit / awsAnnualCost);
+
+        // Update results
+        document.getElementById('current-revenue').textContent = '£' + currentRevenue.toLocaleString();
+        document.getElementById('iot-revenue').textContent = '£' + iotRevenue.toLocaleString();
+        document.getElementById('revenue-increase').textContent = '£' + revenueIncrease.toLocaleString();
+        document.getElementById('labor-savings').textContent = '£' + laborSavings.toLocaleString();
+        document.getElementById('total-benefit').textContent = '£' + totalBenefit.toLocaleString();
+        document.getElementById('net-benefit').textContent = '£' + netBenefit.toLocaleString();
+        document.getElementById('roi-percentage').textContent = roiRatio + ':1';
+
+        // Update committee language
+        const committeeText = `"IoT sensors transform car park management from reactive to proactive. Real-time occupancy data increases revenue by £${revenueIncrease.toLocaleString()} annually while eliminating manual counting costs of £${laborSavings.toLocaleString()}. Total annual benefit of £${totalBenefit.toLocaleString()} against AWS costs of £${awsAnnualCost} delivers a ${roiRatio}:1 return on investment."`;
+        document.getElementById('committee-language').innerHTML = '<strong>Committee language:</strong> ' + committeeText;
+
+        // Show results
+        resultsDiv.style.display = 'block';
+        resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    }
+  });
+</script>
+
+{# Reflection prompt #}
+<div class="ndx-reflection-section govuk-!-margin-top-6">
+  <h3 class="govuk-heading-m">Think about your council</h3>
+
+  <div class="govuk-inset-text" style="border-left-color: #00703c;">
+    <p class="govuk-!-font-size-24" style="font-weight: 700;">
+      How many car parks does your council manage?
+    </p>
+  </div>
+
+  <p class="govuk-body">
+    Multiply your ROI calculation by the number of car parks to see total council-wide impact.
+    For example, if you manage 5 car parks of similar size:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+    <li><strong>Total annual benefit:</strong> £26,000 × 5 = £130,000/year</li>
+    <li><strong>Total AWS cost:</strong> £145 × 5 = £725/year</li>
+    <li><strong>Net benefit:</strong> £129,275/year</li>
+    <li><strong>Payback period:</strong> Less than 1 week</li>
+  </ul>
+
+  <p class="govuk-body govuk-!-margin-top-3">
+    Beyond financial ROI, consider strategic benefits:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+    <li>Foundation for smart city initiatives (IoT infrastructure can expand to other uses)</li>
+    <li>Improved citizen experience (real-time availability via website/mobile app)</li>
+    <li>Reduced congestion and emissions (less circling looking for spaces)</li>
+    <li>Data-driven decision making (evidence for future capacity planning)</li>
+  </ul>
+</div>
+
+{# Navigation #}
+<div class="ndx-walkthrough-nav govuk-!-margin-top-8">
+  <a href="/walkthroughs/smart-car-park/step-3/" class="govuk-link ndx-walkthrough-nav__back">
+    ← Back to Step 3
+  </a>
+  <a href="/walkthroughs/smart-car-park/complete/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    Complete walkthrough
+  </a>
+</div>
+
+<style>
+  .ndx-pattern-analysis {
+    margin-top: 30px;
+  }
+
+  .ndx-pattern-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-pattern-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-pattern-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 3px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .ndx-zone-insights {
+    margin-top: 20px;
+  }
+
+  .ndx-roi-calculator {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-roi-results {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 2px solid #00703c;
+  }
+
+  .ndx-roi-results h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-reflection-section {
+    padding: 30px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-reflection-section h3 {
+    margin-top: 0;
+  }
+
+  .ndx-walkthrough-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-nav__back {
+    font-size: 19px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-walkthrough-nav {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ndx-walkthrough-nav__back {
+      margin-bottom: 15px;
+    }
+  }
+</style>

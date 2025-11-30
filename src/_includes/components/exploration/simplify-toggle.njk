@@ -1,0 +1,48 @@
+{#
+  Simplify Toggle Component (Story 6.1)
+
+  Sticky header toggle that switches between:
+  - Full mode: All technical details visible
+  - Simplified mode: Technical details hidden for non-technical users
+
+  Usage:
+    {% include "components/exploration/simplify-toggle.njk" %}
+#}
+
+<div class="ndx-simplify-toggle" data-exploration-simplify-toggle>
+  <div class="govuk-form-group govuk-!-margin-bottom-0">
+    <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+      <div class="govuk-checkboxes__item">
+        <input class="govuk-checkboxes__input"
+               id="simplify-toggle"
+               name="simplify-toggle"
+               type="checkbox"
+               value="true"
+               aria-describedby="simplify-toggle-hint">
+        <label class="govuk-label govuk-checkboxes__label" for="simplify-toggle">
+          Simplify for me
+        </label>
+      </div>
+    </div>
+    <div id="simplify-toggle-hint" class="govuk-hint govuk-!-margin-top-1 govuk-!-font-size-14">
+      Hide technical details
+    </div>
+  </div>
+</div>
+
+<style>
+  .ndx-simplify-toggle {
+    display: inline-block;
+  }
+
+  .ndx-simplify-toggle .govuk-hint {
+    margin-left: 36px;
+    color: #505a5f;
+  }
+
+  /* When simplified mode is active */
+  .ndx-simplified .ndx-simplify-toggle .govuk-checkboxes__label::after {
+    background: #00703c;
+    border-color: #00703c;
+  }
+</style>

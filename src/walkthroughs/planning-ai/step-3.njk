@@ -1,0 +1,349 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Upload & Process Document - Planning AI Walkthrough"
+description: Upload your planning application and watch AI extract information in real-time
+currentStep: 3
+totalSteps: 4
+timeEstimate: "2 minutes"
+scenarioId: planning-ai
+---
+
+{#
+  Step 3: Upload & Process Document (AC-3.3.2, AC-3.3.3, AC-3.3.5)
+  - Upload instructions
+  - Real-time processing feedback
+  - Wow moment highlighting AI extraction
+#}
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Upload & Process Document" %}
+{% set stepDescription = "Upload the planning application PDF and watch AI automatically extract applicant information in real-time." %}
+{% set timeEstimate = "2 minutes" %}
+{# Load screenshots from YAML data - Story 13.4 #}
+{% set screenshotData = screenshots["planning-ai"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 3) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "Document uploads successfully",
+  "Processing progress indicator shows real-time status",
+  "Extraction completes in 8-20 seconds",
+  "Extracted fields appear automatically"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Upload your document</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Locate the upload area</strong>
+    <p class="govuk-body">
+      On the document processing interface, find the upload section. It should say
+      "Drag and drop your planning application here, or click to browse".
+    </p>
+  </li>
+
+  <li>
+    <strong>Upload the PDF</strong>
+    <p class="govuk-body">
+      You can either:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Drag and drop:</strong> Drag the PDF file from your downloads folder and drop it on the upload area</li>
+      <li><strong>Click to browse:</strong> Click the upload area, then select the PDF from your file browser</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Watch the upload progress</strong>
+    <p class="govuk-body">
+      You'll see a progress bar as the file uploads to AWS S3. For a 1-4 MB file,
+      this typically takes 1-3 seconds.
+    </p>
+  </li>
+
+  <li>
+    <strong>Wait for AI processing</strong>
+    <p class="govuk-body">
+      After upload completes, AI extraction begins automatically. You'll see:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Status changes to "Processing with Amazon Textract..."</li>
+      <li>Animated spinner or progress indicator</li>
+      <li>Estimated time remaining (8-20 seconds depending on document)</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Extraction completes</strong>
+    <p class="govuk-body">
+      When done, you'll see "Extraction complete!" and the extracted fields appear on screen.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>What's happening behind the scenes:</strong>
+  </p>
+  <ol class="govuk-list govuk-list--number govuk-body-s">
+    <li>Your PDF uploads to a secure S3 bucket</li>
+    <li>Lambda function triggers Amazon Textract API</li>
+    <li>Textract performs OCR and identifies text regions</li>
+    <li>AI models extract key-value pairs (applicant name, address, etc.)</li>
+    <li>Results return to your browser in structured JSON</li>
+  </ol>
+</div>
+
+{# AC-3.3.5: Wow Moment - AI Extraction Capability #}
+{% set wowTitle = "The AI Extraction Magic" %}
+{% set wowExplanation = "In those 8-20 seconds, Amazon Textract and Comprehend worked together to read your multi-page PDF, identify text blocks, understand document structure, recognize UK address formats, and extract specific planning fields. This replaced 45 minutes of manual typing - with zero transcription errors. The AI didn't just scan text; it understood context, like knowing 'James Smith' is an applicant name and 'B15 2AB' is part of an address." %}
+{% set wowTechnicalDetail = "Amazon Textract uses deep learning models trained on millions of documents to perform Optical Character Recognition (OCR) and intelligent key-value extraction. It identifies forms, tables, and text relationships. Amazon Comprehend adds natural language understanding to classify entity types (person names, locations, etc.). The Lambda function orchestrates both services and applies planning-specific logic to map extracted data to expected fields. Total processing: 97-99% accuracy on typed documents, with confidence scores for each extracted field." %}
+{% set wowIcon = "🤖" %}
+
+{% include "components/wow-moment.njk" %}
+
+<h3 class="govuk-heading-m">What to watch for</h3>
+
+<p class="govuk-body">
+  Pay attention to these impressive capabilities during processing:
+</p>
+
+<div class="ndx-capabilities-grid">
+  <div class="ndx-capability-card">
+    <h4 class="govuk-heading-s">
+      <span style="font-size: 32px; margin-right: 10px;" aria-hidden="true">📄</span>
+      Multi-page processing
+    </h4>
+    <p class="govuk-body-s">
+      AI reads all pages of the PDF, not just page 1. It finds information wherever
+      it appears in the document.
+    </p>
+  </div>
+
+  <div class="ndx-capability-card">
+    <h4 class="govuk-heading-s">
+      <span style="font-size: 32px; margin-right: 10px;" aria-hidden="true">🏠</span>
+      UK address recognition
+    </h4>
+    <p class="govuk-body-s">
+      Accurately identifies UK postcodes, street addresses, and location formats.
+      Handles "Land adjacent to..." descriptions.
+    </p>
+  </div>
+
+  <div class="ndx-capability-card">
+    <h4 class="govuk-heading-s">
+      <span style="font-size: 32px; margin-right: 10px;" aria-hidden="true">📋</span>
+      Context understanding
+    </h4>
+    <p class="govuk-body-s">
+      Distinguishes between applicant name, agent name, site address, and billing address
+      even when multiple names/addresses appear.
+    </p>
+  </div>
+
+  <div class="ndx-capability-card">
+    <h4 class="govuk-heading-s">
+      <span style="font-size: 32px; margin-right: 10px;" aria-hidden="true">⚡</span>
+      Speed at scale
+    </h4>
+    <p class="govuk-body-s">
+      Processing 200 applications/year takes 50 hours with AI vs 150 hours manually.
+      No degradation in speed regardless of volume.
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Processing time expectations</h3>
+
+<p class="govuk-body">
+  Different document types have different processing times:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Document Type</th>
+      <th scope="col" class="govuk-table__header">File Size</th>
+      <th scope="col" class="govuk-table__header">Processing Time</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">House Extension</td>
+      <td class="govuk-table__cell">1.2 MB</td>
+      <td class="govuk-table__cell">8-12 seconds</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Change of Use</td>
+      <td class="govuk-table__cell">2.8 MB</td>
+      <td class="govuk-table__cell">12-18 seconds</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">New Dwelling</td>
+      <td class="govuk-table__cell">3.5 MB</td>
+      <td class="govuk-table__cell">15-20 seconds</td>
+    </tr>
+  </tbody>
+</table>
+
+{# AC-3.3.7: Troubleshooting upload failures #}
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      File too large error (max 10MB)
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you see "File too large" error:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check file size in file properties - must be under 10 MB</li>
+      <li>Use a PDF compression tool to reduce file size</li>
+      <li>Try splitting very large multi-page applications</li>
+      <li>Remove high-resolution images or photos if possible</li>
+      <li>Export at lower quality from your planning software</li>
+    </ul>
+    <p class="govuk-body">
+      Our sample documents are all under 4 MB and should work without issues.
+    </p>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Wrong format error (PDF, JPEG, PNG only)
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you see "Unsupported file format" error:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Only PDF, JPEG, and PNG files are supported</li>
+      <li>Convert Word documents (.doc, .docx) to PDF first</li>
+      <li>Check the file extension is .pdf, .jpg, .jpeg, or .png</li>
+      <li>Don't upload compressed files (.zip, .rar)</li>
+      <li>Ensure you downloaded the PDF, not just opened it in browser</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Processing timeout (over 30 seconds)
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If processing takes longer than 30 seconds or stalls:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Refresh the page and try uploading again</li>
+      <li>Try a different sample document to rule out document corruption</li>
+      <li>Check AWS CloudWatch logs for Lambda timeout errors</li>
+      <li>Verify Textract API quotas haven't been exceeded</li>
+      <li>Wait 2-3 minutes then retry - may be temporary API slowness</li>
+    </ul>
+    <p class="govuk-body">
+      Normal processing is 8-20 seconds. Anything over 30 seconds indicates an issue.
+    </p>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      API errors (500, 503 responses)
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you see server error messages:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Wait 1-2 minutes and retry - may be temporary service issue</li>
+      <li>Check <a href="https://health.aws.amazon.com/health/status" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS Service Health Dashboard</a></li>
+      <li>Verify Lambda function has IAM permissions for Textract</li>
+      <li>Check Lambda execution role includes <code>textract:AnalyzeDocument</code></li>
+      <li>Monitor CloudWatch Logs for detailed error messages</li>
+      <li><a href="/contact/" class="govuk-link">Contact support</a> if errors persist</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Upload succeeds but no extracted fields
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If upload completes but extraction returns empty:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check the document contains machine-readable text (not scanned handwriting)</li>
+      <li>Verify PDF isn't password-protected or encrypted</li>
+      <li>Try opening the PDF locally to confirm it's not corrupted</li>
+      <li>Check CloudWatch logs for Textract response errors</li>
+      <li>Try uploading one of our sample documents to rule out service issues</li>
+    </ul>
+  </div>
+</details>
+
+{# Screenshot placeholder notice #}
+<div class="govuk-warning-text govuk-!-margin-top-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Note</span>
+    Screenshot placeholder: In production, this page would include screenshots showing the upload
+    interface, processing progress animation, and the moment when extracted fields appear.
+  </strong>
+</div>
+
+<style>
+  .ndx-capabilities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-capability-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-capability-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .ndx-capability-card p {
+    margin-bottom: 0;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-capabilities-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

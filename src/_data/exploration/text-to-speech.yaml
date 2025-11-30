@@ -1,0 +1,262 @@
+# Text-to-Speech Exploration Data
+# Epic 10: Hands-On Exploration for Text-to-Speech Scenario
+
+scenario_id: text-to-speech
+scenario_title: Text to Speech
+total_time_estimate: "35 minutes"
+
+# Persona paths for different user types
+personas:
+  accessibility_lead:
+    id: accessibility
+    title: "Accessibility Lead"
+    description: "Focus on voice quality and WCAG compliance"
+    time_estimate: "25 minutes"
+    recommended_path:
+      - exp1
+      - exp2
+      - exp5
+      - arch-visual
+      - limit1
+  content_manager:
+    id: content
+    title: "Content Manager"
+    description: "Focus on content types and production workflow"
+    time_estimate: "30 minutes"
+    recommended_path:
+      - exp1
+      - exp3
+      - exp4
+      - exp5
+      - arch-visual
+      - arch-console
+      - limit2
+      - limit3
+
+# All exploration activities
+activities:
+  # ========================================
+  # EXPERIMENTS (5 guided experiments)
+  # ========================================
+  - id: exp1
+    title: "Voice Comparison"
+    category: experiments
+    time_estimate: "5 minutes"
+    learning: "Different voices suit different content types and accessibility needs"
+    steps:
+      - title: "Select a Sample Text"
+        action: "Use a council announcement or service description"
+      - title: "Generate with Amy (Female)"
+        action: "Listen to the natural British female voice"
+      - title: "Generate with Brian (Male)"
+        action: "Compare the British male voice alternative"
+      - title: "Try Emma (Female)"
+        action: "Another female option with different characteristics"
+    expected_outcome: "You can distinguish voice characteristics and identify which suits your content"
+    what_to_observe:
+      - "Tone and warmth differences"
+      - "Pronunciation clarity"
+      - "Suitability for different audiences"
+
+  - id: exp2
+    title: "Neural vs Standard Engine"
+    category: experiments
+    time_estimate: "4 minutes"
+    learning: "Neural engine sounds more natural but costs more; understand the trade-offs"
+    steps:
+      - title: "Generate with Standard Engine"
+        action: "Use the same text with standard Polly voices"
+      - title: "Generate with Neural Engine"
+        action: "Switch to neural voices and regenerate"
+      - title: "Listen Side-by-Side"
+        action: "Compare quality, naturalness, and pacing"
+      - title: "Review Cost Difference"
+        action: "Note the per-character cost difference displayed"
+    expected_outcome: "Neural voices sound notably more natural; cost is 4x higher but often worth it for public content"
+    what_to_observe:
+      - "Prosody and intonation"
+      - "Natural pauses"
+      - "Cost per 1000 characters"
+
+  - id: exp3
+    title: "SSML Markup Effects"
+    category: experiments
+    time_estimate: "6 minutes"
+    learning: "SSML gives fine control over pronunciation, pauses, and emphasis"
+    steps:
+      - title: "Start with Plain Text"
+        action: "Generate speech without any markup"
+      - title: "Add Pauses"
+        action: "Insert <break time='500ms'/> between sentences"
+      - title: "Add Emphasis"
+        action: "Use <emphasis level='strong'> for key terms"
+      - title: "Correct Pronunciation"
+        action: "Use <phoneme> for council-specific terms"
+    expected_outcome: "SSML significantly improves professional audio quality and accessibility"
+    what_to_observe:
+      - "Impact of pauses on comprehension"
+      - "How emphasis guides attention"
+      - "Pronunciation improvements"
+
+  - id: exp4
+    title: "Council Terminology"
+    category: experiments
+    time_estimate: "4 minutes"
+    learning: "AI handles most terms well but some council-specific language needs guidance"
+    steps:
+      - title: "Try Common Abbreviations"
+        action: "Generate speech with FOI, GDPR, LGA, WCAG"
+      - title: "Test Place Names"
+        action: "Include local place names and ward names"
+      - title: "Test Council Jargon"
+        action: "Try terms like 'precept', 'scrutiny committee', 'Section 106'"
+      - title: "Note Problem Areas"
+        action: "Identify terms that need SSML correction"
+    expected_outcome: "Most standard terms work well; local names and jargon may need phoneme hints"
+    what_to_observe:
+      - "Abbreviation handling"
+      - "Place name pronunciation"
+      - "Technical term accuracy"
+
+  - id: exp5
+    title: "Content Type Comparison"
+    category: experiments
+    time_estimate: "5 minutes"
+    learning: "Different content types benefit from different voice and speed settings"
+    steps:
+      - title: "Try a News Announcement"
+        action: "Generate speech for a council news item"
+      - title: "Try Service Information"
+        action: "Generate speech for bin collection details"
+      - title: "Try Emergency Alert"
+        action: "Generate urgent-sounding road closure notice"
+      - title: "Try Formal Document"
+        action: "Generate speech for policy excerpt"
+    expected_outcome: "You can match voice characteristics to content purpose"
+    what_to_observe:
+      - "How tone affects perception"
+      - "Speed appropriateness"
+      - "Formality matching"
+
+  # ========================================
+  # ARCHITECTURE TOURS (Visual + Console)
+  # ========================================
+  - id: arch-visual
+    title: "Visual Architecture Tour"
+    category: architecture
+    time_estimate: "5 minutes"
+    learning: "Understand the text-to-speech synthesis pipeline"
+    steps:
+      - title: "Text Input"
+        description: "User provides text content, optionally with SSML markup. Voice and engine selection determine synthesis parameters."
+      - title: "Amazon Polly Processing"
+        description: "Polly receives the request, selects the appropriate neural or standard engine, and synthesizes audio using deep learning models."
+      - title: "Audio Generation"
+        description: "Speech is generated as an audio stream in MP3 format. Neural voices use more compute but produce more natural results."
+      - title: "S3 Storage"
+        description: "Generated audio is stored in S3 with appropriate cache headers. Repeated requests for the same content serve from cache."
+      - title: "Presigned URL"
+        description: "A time-limited URL is generated for secure audio playback without exposing S3 directly."
+      - title: "Audio Playback"
+        description: "The HTML5 audio player streams content to the user, with download option for offline accessibility."
+
+  - id: arch-console
+    title: "Console Architecture Tour"
+    category: architecture
+    time_estimate: "8 minutes"
+    learning: "Explore the actual AWS resources powering text-to-speech"
+    requires_deployment: true
+    steps:
+      - title: "Amazon Polly Console"
+        console_url: "https://console.aws.amazon.com/polly/home"
+        what_to_look_for: "Available voices, neural engine options, SSML examples, usage metrics"
+      - title: "S3 Audio Bucket"
+        console_url: "https://console.aws.amazon.com/s3/home"
+        what_to_look_for: "Audio file storage, cache headers, file naming patterns, storage costs"
+      - title: "Lambda Function"
+        console_url: "https://console.aws.amazon.com/lambda/home#/functions"
+        what_to_look_for: "Synthesis function code, environment variables for voice selection, CloudWatch logs"
+      - title: "CloudWatch Metrics"
+        console_url: "https://console.aws.amazon.com/cloudwatch/home#/metrics"
+        what_to_look_for: "Polly character count, synthesis latency, error rates"
+
+  # ========================================
+  # BOUNDARY CHALLENGES (3 limit tests)
+  # ========================================
+  - id: limit1
+    title: "Very Long Text"
+    category: limits
+    time_estimate: "4 minutes"
+    learning: "Polly has character limits; long content needs chunking"
+    challenge_description: "Try to synthesize a very long document (3000+ characters)"
+    sample_text: "Paste an entire council policy page or meeting minutes excerpt"
+    expected_behavior: "Content is automatically chunked into segments; may take longer to process"
+    business_implication: "Long documents work but need planning for seamless playback"
+    recovery: "Content is processed in chunks. Listen through to verify no content is lost at chunk boundaries."
+
+  - id: limit2
+    title: "Non-English Content"
+    category: limits
+    time_estimate: "3 minutes"
+    learning: "British English voices handle most content but struggle with foreign words"
+    challenge_description: "Include Welsh, French, or other non-English words in your text"
+    sample_text: "The meeting was held at Llanfairpwllgwyngyll community centre"
+    expected_behavior: "British voices approximate foreign words; may sound unnatural"
+    business_implication: "Bilingual councils may need Welsh voice option or phoneme hints"
+    recovery: "Use SSML phoneme tags to guide pronunciation of specific words."
+
+  - id: limit3
+    title: "Special Characters and Numbers"
+    category: limits
+    time_estimate: "3 minutes"
+    learning: "Numbers, dates, and special characters need consistent formatting"
+    challenge_description: "Include various number formats: dates, currencies, phone numbers"
+    sample_text: "Call 01onal 123 456 before 31/12/2025. Fees are £150.00 per application."
+    expected_behavior: "Most formats handled well; some may need SSML say-as hints"
+    business_implication: "Consistent formatting in source content ensures reliable speech"
+    recovery: "Use SSML <say-as> tags: <say-as interpret-as='date'>31/12/2025</say-as>"
+
+# ========================================
+# PRODUCTION GUIDANCE
+# ========================================
+production_guidance:
+  - id: scale
+    title: "Scale Considerations"
+    topics:
+      - "Content volume: pre-generate for static pages, real-time for dynamic"
+      - "Caching strategy: hash-based keys prevent regeneration of unchanged content"
+      - "Multi-language: consider Welsh voices for bilingual councils"
+      - "Batch processing: generate audio during off-peak hours for cost efficiency"
+
+  - id: customization
+    title: "Customization Options"
+    topics:
+      - "Voice selection: choose voices matching your council's brand"
+      - "SSML templates: create reusable templates for common content types"
+      - "Pronunciation dictionary: maintain list of local terms and phonemes"
+      - "Audio player styling: match to council website accessibility standards"
+
+  - id: costs
+    title: "Cost Comparison"
+    demo_costs:
+      polly_neural: "~$0.05 (1000 chars)"
+      polly_standard: "~$0.01 (1000 chars)"
+      s3: "~$0.01"
+      lambda: "~$0.01"
+      total: "~$0.08 per synthesis"
+    production_costs:
+      polly_neural: "$40-100/month (1M chars/month)"
+      polly_standard: "$10-25/month (1M chars/month)"
+      s3: "$5-10/month"
+      lambda: "$5-10/month"
+      total: "$60-145/month (neural) or $30-55/month (standard)"
+
+  - id: security
+    title: "Security Checklist"
+    items:
+      - "Presigned URLs with short expiry (1 hour)"
+      - "S3 bucket policy restricting direct access"
+      - "Lambda function with minimal IAM permissions"
+      - "CloudFront for high-traffic audio delivery"
+      - "Content sanitization before synthesis"
+      - "Rate limiting to prevent abuse"

@@ -1,0 +1,203 @@
+{#
+  Cost Analysis & Budget Impact Section (Finance Persona - AC-4.1.4)
+
+  Variables:
+  - scenarioData: scenario object
+  - finance_evaluation: Finance evaluation data
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    Cost Analysis & Budget Impact
+  </h2>
+
+  {% include "evidence-pack/partials/persona-header.njk" %}
+
+  <h3 class="govuk-heading-m">Evaluation Cost Summary</h3>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Estimated Cost
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ scenarioData.estimatedCost }}
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Maximum Cost
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ scenarioData.maximumCost }}
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Auto-Cleanup
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ scenarioData.deployment.costBreakdown.autoCleanup }}
+      </dd>
+    </div>
+  </dl>
+
+  <h3 class="govuk-heading-m">AWS Service Cost Breakdown</h3>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Service</th>
+        <th scope="col" class="govuk-table__header">Evaluation Cost</th>
+        <th scope="col" class="govuk-table__header">Notes</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for service in scenarioData.deployment.costBreakdown.services %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">{{ service.name }}</th>
+        <td class="govuk-table__cell">{{ service.cost }}</td>
+        <td class="govuk-table__cell">{{ service.note }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if finance_evaluation and finance_evaluation.cost_analysis %}
+  {% set costs = finance_evaluation.cost_analysis %}
+
+  <h3 class="govuk-heading-m">Current vs. Projected Costs</h3>
+
+  <h4 class="govuk-heading-s">Current Service Costs (Annual)</h4>
+  <dl class="govuk-summary-list">
+    {% if costs.current_costs.call_center_annual %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Call Center Operations
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ costs.current_costs.call_center_annual }}
+      </dd>
+    </div>
+    {% endif %}
+    {% if costs.current_costs.staff_fte %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Staff (FTE)
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ costs.current_costs.staff_fte }}
+      </dd>
+    </div>
+    {% endif %}
+    {% if costs.current_costs.avg_cost_per_query %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Cost per Query
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ costs.current_costs.avg_cost_per_query }}
+      </dd>
+    </div>
+    {% endif %}
+    {% if costs.current_costs.annual_query_volume %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Annual Query Volume
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ costs.current_costs.annual_query_volume | replace(",", "") | int | string | replace(r/\B(?=(\d{3})+(?!\d))/, ",") }}
+      </dd>
+    </div>
+    {% endif %}
+  </dl>
+
+  <h4 class="govuk-heading-s">Projected AWS Solution Costs</h4>
+
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Cost Category</th>
+        <th scope="col" class="govuk-table__header">Year 1</th>
+        <th scope="col" class="govuk-table__header">Year 2</th>
+        <th scope="col" class="govuk-table__header">Year 3</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% if costs.aws_costs.year_1.setup %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Setup & Implementation</th>
+        <td class="govuk-table__cell">{{ costs.aws_costs.year_1.setup }}</td>
+        <td class="govuk-table__cell">-</td>
+        <td class="govuk-table__cell">-</td>
+      </tr>
+      {% endif %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">AWS Services (Annual)</th>
+        <td class="govuk-table__cell">{{ costs.aws_costs.year_1.aws_annual }}</td>
+        <td class="govuk-table__cell">{{ costs.aws_costs.year_2.aws_annual }}</td>
+        <td class="govuk-table__cell">{{ costs.aws_costs.year_3.aws_annual }}</td>
+      </tr>
+      {% if costs.aws_costs.year_1.integration %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Integration Development</th>
+        <td class="govuk-table__cell">{{ costs.aws_costs.year_1.integration }}</td>
+        <td class="govuk-table__cell">-</td>
+        <td class="govuk-table__cell">-</td>
+      </tr>
+      {% endif %}
+      {% if costs.aws_costs.year_1.training %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Training</th>
+        <td class="govuk-table__cell">{{ costs.aws_costs.year_1.training }}</td>
+        <td class="govuk-table__cell">-</td>
+        <td class="govuk-table__cell">-</td>
+      </tr>
+      {% endif %}
+      {% if costs.aws_costs.year_2.support %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Support & Maintenance</th>
+        <td class="govuk-table__cell">-</td>
+        <td class="govuk-table__cell">{{ costs.aws_costs.year_2.support }}</td>
+        <td class="govuk-table__cell">{{ costs.aws_costs.year_3.support }}</td>
+      </tr>
+      {% endif %}
+      {% if costs.aws_costs.year_2.enhancements %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">Enhancements</th>
+        <td class="govuk-table__cell">-</td>
+        <td class="govuk-table__cell">{{ costs.aws_costs.year_2.enhancements }}</td>
+        <td class="govuk-table__cell">{{ costs.aws_costs.year_3.enhancements }}</td>
+      </tr>
+      {% endif %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header"><strong>Total</strong></th>
+        <td class="govuk-table__cell"><strong>{{ costs.aws_costs.year_1.total }}</strong></td>
+        <td class="govuk-table__cell"><strong>{{ costs.aws_costs.year_2.total }}</strong></td>
+        <td class="govuk-table__cell"><strong>{{ costs.aws_costs.year_3.total }}</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Cost Model</h3>
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Pay-per-use pricing:</strong> AWS costs scale with actual usage, not peak capacity.
+    </p>
+    <p class="govuk-body">
+      <strong>No upfront hardware costs:</strong> Cloud infrastructure eliminates capital expenditure for servers and data centers.
+    </p>
+    <p class="govuk-body">
+      <strong>Predictable monthly costs:</strong> Usage-based billing with cost monitoring and alerts to prevent overruns.
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-m">Budget Planning Considerations</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>Variable costs:</strong> AWS charges vary with usage volume - monitor and forecast regularly</li>
+    <li><strong>Cost optimization:</strong> Reserved capacity and savings plans can reduce costs by 30-50%</li>
+    <li><strong>Growth planning:</strong> Factor in potential usage growth as adoption increases</li>
+    <li><strong>Training budget:</strong> Allocate funds for staff AWS training and certification</li>
+    <li><strong>Integration costs:</strong> Budget for CRM and system integration development</li>
+  </ul>
+</div>

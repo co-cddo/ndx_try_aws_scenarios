@@ -1,0 +1,21 @@
+{
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "Update:*",
+      "Principal": "*",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:PrincipalArn": "arn:aws:iam::*:user/ndx-screenshot-automation"
+        }
+      }
+    },
+    {
+      "Effect": "Deny",
+      "Action": ["Update:Replace", "Update:Delete"],
+      "Principal": "*",
+      "Resource": "*"
+    }
+  ]
+}

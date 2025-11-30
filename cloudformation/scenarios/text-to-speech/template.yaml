@@ -1,0 +1,646 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  NDX:Try - Text to Speech Scenario
+  Converts council documents and content to natural-sounding speech using Amazon Polly.
+  Improves accessibility for visually impaired residents.
+  Version: 1.0.0
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Scenario Configuration
+        Parameters:
+          - Environment
+          - VoiceId
+          - OutputFormat
+      - Label:
+          default: Auto-Cleanup
+        Parameters:
+          - AutoCleanupHours
+
+Parameters:
+  Environment:
+    Type: String
+    Default: sandbox
+    AllowedValues:
+      - sandbox
+      - development
+      - production
+    Description: Deployment environment
+
+  VoiceId:
+    Type: String
+    Default: Amy
+    AllowedValues:
+      - Amy
+      - Emma
+      - Brian
+      - Arthur
+    Description: Amazon Polly voice (British English voices)
+
+  OutputFormat:
+    Type: String
+    Default: mp3
+    AllowedValues:
+      - mp3
+      - ogg_vorbis
+      - pcm
+    Description: Audio output format
+
+  AutoCleanupHours:
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 24
+    Description: Hours until automatic resource cleanup
+
+Resources:
+  # S3 Bucket for Audio Files
+  AudioBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-try-tts-audio-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: AutoCleanup
+            Status: Enabled
+            ExpirationInDays: 1
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+            AllowedOrigins:
+              - '*'
+            MaxAge: 3000
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: text-to-speech
+        - Key: AutoCleanup
+          Value: 'true'
+
+  # IAM Role for Lambda
+  TextToSpeechRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'ndx-try-tts-role-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: PollyAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - polly:SynthesizeSpeech
+                  - polly:DescribeVoices
+                Resource: '*'
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                Resource: !Sub '${AudioBucket.Arn}/*'
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: text-to-speech
+
+  # Lambda Function - Text to Speech Converter
+  TextToSpeechFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-tts-converter-${AWS::Region}'
+      Description: Converts text to speech using Amazon Polly with web UI
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      Role: !GetAtt TextToSpeechRole.Arn
+      Timeout: 60
+      MemorySize: 256
+      Environment:
+        Variables:
+          AUDIO_BUCKET: !Ref AudioBucket
+          VOICE_ID: !Ref VoiceId
+          OUTPUT_FORMAT: !Ref OutputFormat
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+          import uuid
+          from datetime import datetime
+
+          polly = boto3.client('polly')
+          s3 = boto3.client('s3')
+
+          def render_html():
+              return '''<!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Text to Speech - NDX:Try</title>
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #0b0c0c; background: #f3f2f1; }
+              a { color: #1d70b8; }
+              a:focus { outline: 3px solid #ffdd00; background: #ffdd00; }
+              .skip-link { position: absolute; top: -40px; left: 0; background: #ffdd00; color: #0b0c0c; padding: 8px; z-index: 100; }
+              .skip-link:focus { top: 0; }
+              .phase-banner { background: #f3f2f1; border-bottom: 1px solid #b1b4b6; padding: 10px 0; }
+              .phase-banner-inner { max-width: 960px; margin: 0 auto; padding: 0 15px; }
+              .phase-tag { display: inline-block; background: #1d70b8; color: white; padding: 2px 8px; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+              .header { background: #0b0c0c; padding: 15px 0; }
+              .header-inner { max-width: 960px; margin: 0 auto; padding: 0 15px; }
+              .header-title { color: white; font-size: 24px; font-weight: bold; text-decoration: none; }
+              .header-title:hover { text-decoration: underline; }
+              .main { max-width: 960px; margin: 0 auto; padding: 30px 15px; }
+              h1 { font-size: 36px; font-weight: 700; margin-bottom: 20px; }
+              .intro { font-size: 18px; margin-bottom: 30px; color: #505a5f; }
+              .form-group { margin-bottom: 25px; }
+              .form-label { display: block; font-weight: bold; margin-bottom: 8px; }
+              .form-hint { color: #505a5f; font-size: 14px; margin-bottom: 8px; }
+              .text-input { width: 100%; min-height: 200px; padding: 15px; font-size: 16px; font-family: inherit; border: 2px solid #0b0c0c; border-radius: 0; resize: vertical; }
+              .text-input:focus { outline: 3px solid #ffdd00; outline-offset: 0; border-color: #0b0c0c; }
+              .char-counter { text-align: right; font-size: 14px; color: #505a5f; margin-top: 5px; }
+              .char-counter.warning { color: #f47738; }
+              .char-counter.error { color: #d4351c; }
+              .sample-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+              .sample-card { background: white; border: 2px solid #b1b4b6; border-radius: 4px; padding: 15px; cursor: pointer; transition: border-color 0.2s; }
+              .sample-card:hover, .sample-card:focus { border-color: #1d70b8; outline: none; }
+              .sample-card:focus { box-shadow: 0 0 0 3px #ffdd00; }
+              .sample-card-title { font-weight: bold; margin-bottom: 5px; }
+              .sample-card-preview { font-size: 14px; color: #505a5f; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+              .voice-select { width: 100%; max-width: 300px; padding: 10px; font-size: 16px; border: 2px solid #0b0c0c; border-radius: 0; background: white; }
+              .voice-select:focus { outline: 3px solid #ffdd00; }
+              .voice-preview { display: inline-flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+              .voice-preview-btn { padding: 8px 12px; font-size: 14px; background: #f3f2f1; border: 1px solid #b1b4b6; border-radius: 4px; cursor: pointer; }
+              .voice-preview-btn:hover { background: #e8e6e4; }
+              .voice-preview-btn:focus { outline: 3px solid #ffdd00; }
+              .btn { display: inline-block; padding: 12px 24px; font-size: 18px; font-weight: bold; text-decoration: none; border: none; border-radius: 0; cursor: pointer; }
+              .btn:focus { outline: 3px solid #ffdd00; outline-offset: 2px; }
+              .btn-primary { background: #00703c; color: white; }
+              .btn-primary:hover { background: #005a30; }
+              .btn-primary:disabled { background: #b1b4b6; cursor: not-allowed; }
+              .btn-secondary { background: #f3f2f1; color: #0b0c0c; border: 2px solid #0b0c0c; }
+              .btn-secondary:hover { background: #e8e6e4; }
+              .action-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+              .loading { display: none; align-items: center; gap: 10px; margin-top: 15px; }
+              .loading.visible { display: flex; }
+              .spinner { width: 24px; height: 24px; border: 3px solid #f3f2f1; border-top-color: #1d70b8; border-radius: 50%; animation: spin 1s linear infinite; }
+              @keyframes spin { to { transform: rotate(360deg); } }
+              .result-panel { display: none; background: white; border-left: 5px solid #00703c; padding: 20px; margin-top: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+              .result-panel.visible { display: block; }
+              .result-panel.error { border-left-color: #d4351c; }
+              .result-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; }
+              .audio-player { width: 100%; margin: 20px 0; }
+              .audio-info { display: flex; gap: 20px; flex-wrap: wrap; font-size: 14px; color: #505a5f; margin-bottom: 15px; }
+              .audio-info-item { display: flex; align-items: center; gap: 5px; }
+              .download-btn { margin-top: 15px; }
+              .error-message { color: #d4351c; padding: 15px; background: #fef7f7; border-left: 5px solid #d4351c; }
+              .sample-note { background: #f3f2f1; border-left: 5px solid #1d70b8; padding: 15px 20px; margin-top: 30px; font-size: 14px; }
+              @media (max-width: 640px) {
+                h1 { font-size: 28px; }
+                .btn { width: 100%; text-align: center; }
+                .action-row { flex-direction: column; }
+              }
+            </style>
+          </head>
+          <body>
+            <a href="#main-content" class="skip-link">Skip to main content</a>
+
+            <div class="phase-banner">
+              <div class="phase-banner-inner">
+                <span class="phase-tag">Sandbox</span>
+                <span>This is a sandbox demo - uses Amazon Polly neural voices</span>
+              </div>
+            </div>
+
+            <header class="header">
+              <div class="header-inner">
+                <a href="/" class="header-title">NDX:Try - Text to Speech</a>
+              </div>
+            </header>
+
+            <main class="main" id="main-content">
+              <h1>Convert Text to Speech</h1>
+              <p class="intro">Enter text and convert it to natural-sounding speech using Amazon Polly. Perfect for accessibility testing and document audio conversion.</p>
+
+              <div class="form-group">
+                <label class="form-label" for="voiceSelect">Choose a voice</label>
+                <p class="form-hint">British English neural voices available</p>
+                <select id="voiceSelect" class="voice-select" aria-describedby="voice-hint">
+                  <option value="Amy">Amy (Female, British)</option>
+                  <option value="Emma">Emma (Female, British)</option>
+                  <option value="Brian">Brian (Male, British)</option>
+                  <option value="Arthur">Arthur (Male, British)</option>
+                </select>
+                <div class="voice-preview" role="group" aria-label="Voice preview buttons">
+                  <button type="button" class="voice-preview-btn" data-voice="Amy" aria-label="Preview Amy voice">Preview Amy</button>
+                  <button type="button" class="voice-preview-btn" data-voice="Emma" aria-label="Preview Emma voice">Preview Emma</button>
+                  <button type="button" class="voice-preview-btn" data-voice="Brian" aria-label="Preview Brian voice">Preview Brian</button>
+                  <button type="button" class="voice-preview-btn" data-voice="Arthur" aria-label="Preview Arthur voice">Preview Arthur</button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Try a sample announcement</label>
+                <p class="form-hint">Click a card to load sample text</p>
+                <div class="sample-cards" role="group" aria-label="Sample text options">
+                  <button type="button" class="sample-card" tabindex="0" data-sample="council-meeting">
+                    <div class="sample-card-title">Council Meeting Notice</div>
+                    <div class="sample-card-preview">The next full council meeting will be held on Thursday 15th December...</div>
+                  </button>
+                  <button type="button" class="sample-card" tabindex="0" data-sample="bin-collection">
+                    <div class="sample-card-title">Bin Collection Update</div>
+                    <div class="sample-card-preview">Due to the bank holiday, bin collections will be one day later...</div>
+                  </button>
+                  <button type="button" class="sample-card" tabindex="0" data-sample="road-closure">
+                    <div class="sample-card-title">Road Closure Notice</div>
+                    <div class="sample-card-preview">High Street will be closed from Monday 12th to Friday 16th December...</div>
+                  </button>
+                  <button type="button" class="sample-card" tabindex="0" data-sample="library-hours">
+                    <div class="sample-card-title">Library Opening Hours</div>
+                    <div class="sample-card-preview">During the festive period, the central library will operate reduced hours...</div>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="textInput">Enter or paste your text</label>
+                <p class="form-hint" id="text-hint">Maximum 3,000 characters</p>
+                <textarea id="textInput" class="text-input" rows="8" maxlength="3000" aria-describedby="text-hint char-count" placeholder="Type or paste the text you want to convert to speech..."></textarea>
+                <div class="char-counter" id="charCounter" aria-live="polite">
+                  <span id="charCount">0</span> / 3,000 characters
+                </div>
+              </div>
+
+              <div class="action-row">
+                <button type="button" id="convertBtn" class="btn btn-primary" disabled aria-describedby="convert-status">
+                  Convert to Speech
+                </button>
+                <button type="button" id="clearBtn" class="btn btn-secondary">
+                  Clear Text
+                </button>
+              </div>
+
+              <div class="loading" id="loading" role="status" aria-live="polite">
+                <div class="spinner" aria-hidden="true"></div>
+                <span id="convert-status">Generating audio with Amazon Polly...</span>
+              </div>
+
+              <div class="result-panel" id="resultPanel" role="region" aria-label="Conversion result">
+                <div class="result-title">Audio Generated Successfully</div>
+                <div class="audio-info">
+                  <div class="audio-info-item">
+                    <strong>Voice:</strong> <span id="resultVoice">-</span>
+                  </div>
+                  <div class="audio-info-item">
+                    <strong>Characters:</strong> <span id="resultChars">-</span>
+                  </div>
+                  <div class="audio-info-item">
+                    <strong>Format:</strong> <span id="resultFormat">MP3</span>
+                  </div>
+                </div>
+                <audio id="audioPlayer" class="audio-player" controls aria-label="Generated speech audio">
+                  Your browser does not support the audio element.
+                </audio>
+                <button type="button" id="downloadBtn" class="btn btn-secondary download-btn">
+                  Download MP3
+                </button>
+              </div>
+
+              <div class="error-message" id="errorPanel" style="display: none;" role="alert">
+                <strong>Error:</strong> <span id="errorText"></span>
+              </div>
+
+              <div class="sample-note">
+                <strong>About this demo:</strong> This uses Amazon Polly's neural text-to-speech engine with British English voices. In a production environment, you could integrate this with document management systems to automatically generate audio versions of council publications, improving accessibility for visually impaired residents.
+              </div>
+            </main>
+
+            <script>
+              const SAMPLE_TEXTS = {
+                'council-meeting': "The next full council meeting will be held on Thursday 15th December 2024 at 7pm in the Council Chamber, Town Hall. Members of the public are welcome to attend. The agenda includes: Budget proposals for 2025, Local Plan review update, Climate action progress report, and Questions from the public. If you wish to ask a question, please submit it in writing by 5pm on Wednesday 14th December.",
+                'bin-collection': "Due to the bank holiday on Monday 26th December, bin collections will be one day later than usual for the whole week. If your normal collection day is Monday, your bins will be collected on Tuesday. Tuesday collections move to Wednesday, and so on. Please ensure your bins are at the kerbside by 7am on your revised collection day. Garden waste collections are suspended until January.",
+                'road-closure': "High Street will be closed to through traffic from Monday 12th to Friday 16th December between the hours of 9am and 5pm. This is to allow essential maintenance work on the water mains. Access will be maintained for residents and businesses. A signed diversion route will be in place via Market Street and Bridge Road. We apologise for any inconvenience caused.",
+                'library-hours': "During the festive period, the central library will operate reduced hours. From 19th December, opening hours will be 10am to 4pm Monday to Friday. The library will be closed on 24th, 25th, 26th, 27th December and 1st, 2nd January. Normal opening hours resume on Tuesday 3rd January. Online services including e-books and digital newspapers remain available throughout."
+              };
+
+              const textInput = document.getElementById('textInput');
+              const charCount = document.getElementById('charCount');
+              const charCounter = document.getElementById('charCounter');
+              const convertBtn = document.getElementById('convertBtn');
+              const clearBtn = document.getElementById('clearBtn');
+              const voiceSelect = document.getElementById('voiceSelect');
+              const loading = document.getElementById('loading');
+              const resultPanel = document.getElementById('resultPanel');
+              const errorPanel = document.getElementById('errorPanel');
+              const audioPlayer = document.getElementById('audioPlayer');
+              const downloadBtn = document.getElementById('downloadBtn');
+
+              let currentAudioUrl = null;
+
+              // Character counter
+              textInput.addEventListener('input', function() {
+                const length = this.value.length;
+                charCount.textContent = length;
+                convertBtn.disabled = length === 0;
+
+                charCounter.classList.remove('warning', 'error');
+                if (length > 2700) charCounter.classList.add('error');
+                else if (length > 2400) charCounter.classList.add('warning');
+              });
+
+              // Sample text loading
+              document.querySelectorAll('.sample-card').forEach(card => {
+                card.addEventListener('click', function() {
+                  const sampleKey = this.dataset.sample;
+                  textInput.value = SAMPLE_TEXTS[sampleKey];
+                  textInput.dispatchEvent(new Event('input'));
+                  textInput.focus();
+                });
+              });
+
+              // Clear button
+              clearBtn.addEventListener('click', function() {
+                textInput.value = '';
+                textInput.dispatchEvent(new Event('input'));
+                resultPanel.classList.remove('visible');
+                errorPanel.style.display = 'none';
+                textInput.focus();
+              });
+
+              // Voice preview buttons
+              document.querySelectorAll('.voice-preview-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                  const voice = this.dataset.voice;
+                  const previewText = "Hello, I am " + voice + ". This is how I sound when reading your council documents.";
+
+                  this.textContent = 'Loading...';
+                  this.disabled = true;
+
+                  try {
+                    const response = await fetch(window.location.href, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ text: previewText, voice_id: voice })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                      const audio = new Audio(data.audioUrl);
+                      audio.play();
+                    }
+                  } catch (err) {
+                    console.error('Preview error:', err);
+                  } finally {
+                    this.textContent = 'Preview ' + voice;
+                    this.disabled = false;
+                  }
+                });
+              });
+
+              // Convert button
+              convertBtn.addEventListener('click', async function() {
+                const text = textInput.value.trim();
+                const voice = voiceSelect.value;
+
+                if (!text) return;
+
+                convertBtn.disabled = true;
+                loading.classList.add('visible');
+                resultPanel.classList.remove('visible');
+                errorPanel.style.display = 'none';
+
+                try {
+                  const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text, voice_id: voice })
+                  });
+
+                  const data = await response.json();
+
+                  if (data.success) {
+                    currentAudioUrl = data.audioUrl;
+                    audioPlayer.src = data.audioUrl;
+                    document.getElementById('resultVoice').textContent = data.voiceId;
+                    document.getElementById('resultChars').textContent = data.characterCount;
+                    document.getElementById('resultFormat').textContent = data.format.toUpperCase();
+                    resultPanel.classList.add('visible');
+                  } else {
+                    throw new Error(data.error || 'Conversion failed');
+                  }
+                } catch (err) {
+                  document.getElementById('errorText').textContent = err.message;
+                  errorPanel.style.display = 'block';
+                } finally {
+                  loading.classList.remove('visible');
+                  convertBtn.disabled = textInput.value.length === 0;
+                }
+              });
+
+              // Download button
+              downloadBtn.addEventListener('click', function() {
+                if (currentAudioUrl) {
+                  const a = document.createElement('a');
+                  a.href = currentAudioUrl;
+                  a.download = 'council-audio.mp3';
+                  a.click();
+                }
+              });
+            </script>
+          </body>
+          </html>'''
+
+          def lambda_handler(event, context):
+              # Check HTTP method for GET vs POST
+              http_method = event.get('requestContext', {}).get('http', {}).get('method', 'GET')
+
+              if http_method == 'GET':
+                  return {
+                      'statusCode': 200,
+                      'headers': {'Content-Type': 'text/html; charset=utf-8'},
+                      'body': render_html()
+                  }
+
+              # POST request - handle API call
+              try:
+                  # Parse request body
+                  if isinstance(event.get('body'), str):
+                      body = json.loads(event['body'])
+                  else:
+                      body = event.get('body', event)
+
+                  text = body.get('text', '')
+                  voice_id = body.get('voice_id', os.environ.get('VOICE_ID', 'Amy'))
+                  output_format = body.get('output_format', os.environ.get('OUTPUT_FORMAT', 'mp3'))
+
+                  if not text:
+                      return {
+                          'statusCode': 400,
+                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                          'body': json.dumps({'error': 'Text is required'})
+                      }
+
+                  # Limit text length for sandbox
+                  if len(text) > 3000:
+                      text = text[:3000]
+
+                  # Synthesize speech
+                  response = polly.synthesize_speech(
+                      Text=text,
+                      VoiceId=voice_id,
+                      OutputFormat=output_format,
+                      Engine='neural'
+                  )
+
+                  # Generate unique filename
+                  audio_stream = response['AudioStream'].read()
+                  file_ext = 'mp3' if output_format == 'mp3' else 'ogg' if output_format == 'ogg_vorbis' else 'pcm'
+                  filename = f"audio/{datetime.utcnow().strftime('%Y%m%d')}/{uuid.uuid4()}.{file_ext}"
+
+                  # Upload to S3
+                  bucket = os.environ['AUDIO_BUCKET']
+                  s3.put_object(
+                      Bucket=bucket,
+                      Key=filename,
+                      Body=audio_stream,
+                      ContentType=f'audio/{file_ext}'
+                  )
+
+                  # Generate presigned URL (valid for 1 hour)
+                  presigned_url = s3.generate_presigned_url(
+                      'get_object',
+                      Params={'Bucket': bucket, 'Key': filename},
+                      ExpiresIn=3600
+                  )
+
+                  return {
+                      'statusCode': 200,
+                      'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                      'body': json.dumps({
+                          'success': True,
+                          'audioUrl': presigned_url,
+                          'voiceId': voice_id,
+                          'format': output_format,
+                          'characterCount': len(text),
+                          'message': 'Audio generated successfully'
+                      })
+                  }
+
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  return {
+                      'statusCode': 500,
+                      'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                      'body': json.dumps({'error': str(e)})
+                  }
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: text-to-speech
+
+  # Lambda Function URL (simpler than API Gateway for demos)
+  TextToSpeechFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !GetAtt TextToSpeechFunction.Arn
+      Cors:
+        AllowCredentials: false
+        AllowHeaders:
+          - content-type
+        AllowMethods:
+          - GET
+          - POST
+        AllowOrigins:
+          - '*'
+        MaxAge: 86400
+
+  # Permission for Function URL
+  TextToSpeechFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref TextToSpeechFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+
+  # CloudWatch Log Group
+  TextToSpeechLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${TextToSpeechFunction}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: text-to-speech
+
+Outputs:
+  ConvertURL:
+    Description: Text-to-speech conversion API endpoint
+    Value: !GetAtt TextToSpeechFunctionUrl.FunctionUrl
+    Export:
+      Name: !Sub '${AWS::StackName}-ConvertURL'
+
+  AudioBucket:
+    Description: S3 bucket for generated audio files
+    Value: !Sub 's3://${AudioBucket}'
+    Export:
+      Name: !Sub '${AWS::StackName}-AudioBucket'
+
+  AudioBucketURL:
+    Description: S3 bucket URL for generated audio files
+    Value: !Sub 'https://${AudioBucket}.s3.${AWS::Region}.amazonaws.com'
+    Export:
+      Name: !Sub '${AWS::StackName}-AudioBucketURL'
+
+  VoiceId:
+    Description: Amazon Polly voice being used
+    Value: !Ref VoiceId
+    Export:
+      Name: !Sub '${AWS::StackName}-VoiceId'
+
+  ScenarioInfo:
+    Description: NDX:Try scenario information
+    Value: !Sub |
+      {
+        "scenario": "text-to-speech",
+        "environment": "${Environment}",
+        "autoCleanup": "${AutoCleanupHours} hours",
+        "voice": "${VoiceId}",
+        "format": "${OutputFormat}"
+      }

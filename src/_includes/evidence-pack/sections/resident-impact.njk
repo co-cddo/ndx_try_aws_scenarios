@@ -1,0 +1,133 @@
+{#
+  Resident Impact & Service Improvement Section (Service Manager Persona - AC-4.1.3)
+
+  Variables:
+  - scenarioData: scenario object
+  - service_manager_evaluation: Service Manager evaluation data
+  - session: evaluation session data
+#}
+
+<div class="ndx-evidence-pack__section">
+  <h2 class="govuk-heading-l ndx-evidence-pack__section-title">
+    Resident Impact & Service Improvement
+  </h2>
+
+  {% include "evidence-pack/partials/persona-header.njk" %}
+
+  <h3 class="govuk-heading-m">Business Outcomes</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    {% for outcome in scenarioData.businessOutcomes %}
+      <li>{{ outcome }}</li>
+    {% endfor %}
+  </ul>
+
+  {% if service_manager_evaluation and service_manager_evaluation.resident_impact %}
+  {% set impact = service_manager_evaluation.resident_impact %}
+
+  <h3 class="govuk-heading-m">Current State Challenges</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    {% for challenge in impact.current_state %}
+      <li>{{ challenge }}</li>
+    {% endfor %}
+  </ul>
+
+  <h3 class="govuk-heading-m">Future State Vision</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    {% for benefit in impact.future_state %}
+      <li>{{ benefit }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if service_manager_evaluation and service_manager_evaluation.service_improvement %}
+  {% set improvement = service_manager_evaluation.service_improvement %}
+
+  <h3 class="govuk-heading-m">Service Performance Indicators</h3>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Metric</th>
+        <th scope="col" class="govuk-table__header">Current</th>
+        <th scope="col" class="govuk-table__header">Target</th>
+        <th scope="col" class="govuk-table__header">Improvement</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for kpi in improvement.kpis %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">{{ kpi.metric }}</th>
+        <td class="govuk-table__cell">{{ kpi.current }}</td>
+        <td class="govuk-table__cell">{{ kpi.target }}</td>
+        <td class="govuk-table__cell">
+          {% set currentNum = kpi.current | replace("%", "") | float %}
+          {% set targetNum = kpi.target | replace("%", "") | float %}
+          {% if targetNum > currentNum %}
+            <strong class="govuk-tag govuk-tag--green">
+              +{{ ((targetNum - currentNum) / currentNum * 100) | round }}%
+            </strong>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if improvement.resident_feedback_themes %}
+  <h3 class="govuk-heading-m">Expected Resident Feedback</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    {% for theme in improvement.resident_feedback_themes %}
+      <li>{{ theme }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endif %}
+
+  {% if session.estimated_call_reduction %}
+  <h3 class="govuk-heading-m">Impact Projections</h3>
+  <dl class="govuk-summary-list">
+    {% if session.estimated_call_reduction %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Call Volume Reduction
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ session.estimated_call_reduction }}
+      </dd>
+    </div>
+    {% endif %}
+    {% if session.staff_time_saved_hours %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Staff Time Saved
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ session.staff_time_saved_hours }}
+      </dd>
+    </div>
+    {% endif %}
+    {% if session.resident_satisfaction_impact %}
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">
+        Resident Satisfaction
+      </dt>
+      <dd class="govuk-summary-list__value">
+        {{ session.resident_satisfaction_impact }}
+      </dd>
+    </div>
+    {% endif %}
+  </dl>
+  {% endif %}
+
+  <h3 class="govuk-heading-m">Implementation Considerations</h3>
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Change Management:</strong> Staff training and resident communication will be essential for successful adoption.
+    </p>
+    <p class="govuk-body">
+      <strong>Phased Rollout:</strong> Consider piloting with a limited service area before full deployment.
+    </p>
+    <p class="govuk-body">
+      <strong>Feedback Loop:</strong> Establish mechanisms to capture resident feedback and continuously improve the service.
+    </p>
+  </div>
+</div>

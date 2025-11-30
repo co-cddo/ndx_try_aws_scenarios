@@ -1,0 +1,368 @@
+# FOI Sample Documents Data
+# Story 3.4 - AC-3.4.1, AC-3.4.2, AC-3.4.3
+#
+# Sample FOI response documents for AI redaction walkthrough.
+# Each document includes metadata and expected PII detection results.
+
+foiSampleDocuments:
+  - id: "foi-response-001"
+    title: "Council Tax Enquiry Response"
+    type: "Council Tax"
+    description: "FOI response containing resident council tax enquiry with personal details"
+    documentUrl: "/assets/documents/foi/sample-council-tax-response.pdf"
+    thumbnailUrl: "/assets/images/foi/sample-council-tax-thumb.png"
+    fileSize: "850 KB"
+    timeToProcess: "15-20 seconds"
+    piiLocations:
+      - type: "name"
+        text: "[SAMPLE] John David Smith"
+        description: "Resident name in council tax records"
+        location: "Page 1, applicant details section"
+      - type: "address"
+        text: "[SAMPLE] 15 Elm Street, Manchester, M1 4BT"
+        description: "Residential address"
+        location: "Page 1, property information"
+      - type: "phone"
+        text: "[SAMPLE] 07712 345678"
+        description: "Mobile phone number"
+        location: "Page 2, contact details"
+      - type: "email"
+        text: "[SAMPLE] john.smith@example.com"
+        description: "Personal email address"
+        location: "Page 2, correspondence section"
+    expectedRedactions: 4
+    expectedConfidence:
+      - type: "name"
+        confidence: 0.98
+        threshold: "high"
+      - type: "address"
+        confidence: 0.95
+        threshold: "high"
+      - type: "phone"
+        confidence: 0.99
+        threshold: "high"
+      - type: "email"
+        confidence: 0.99
+        threshold: "high"
+    wowFactors:
+      - "Detected all 4 PII types with >95% confidence"
+      - "Found PII across multiple pages automatically"
+      - "Correctly identified UK mobile number format"
+      - "Recognized UK postcode pattern (M1 4BT)"
+
+  - id: "foi-response-002"
+    title: "Planning Application Correspondence"
+    type: "Planning"
+    description: "FOI response with planning objection letter containing objector details"
+    documentUrl: "/assets/documents/foi/sample-planning-correspondence.pdf"
+    thumbnailUrl: "/assets/images/foi/sample-planning-thumb.png"
+    fileSize: "1.2 MB"
+    timeToProcess: "18-25 seconds"
+    piiLocations:
+      - type: "name"
+        text: "[SAMPLE] Sarah Elizabeth Thompson"
+        description: "Planning objector name"
+        location: "Page 1, letter header"
+      - type: "address"
+        text: "[SAMPLE] 42 Oak Lane, Birmingham, B15 2TT"
+        description: "Objector's residential address"
+        location: "Page 1, contact information"
+      - type: "phone"
+        text: "[SAMPLE] 0121 456 7890"
+        description: "Landline phone number"
+        location: "Page 2, footer"
+    expectedRedactions: 3
+    expectedConfidence:
+      - type: "name"
+        confidence: 0.97
+        threshold: "high"
+      - type: "address"
+        confidence: 0.94
+        threshold: "medium"
+      - type: "phone"
+        confidence: 0.98
+        threshold: "high"
+    wowFactors:
+      - "Identified name variations (Sarah Elizabeth Thompson)"
+      - "Extracted complete UK address with postcode"
+      - "Recognized Birmingham area code (0121)"
+
+  - id: "foi-response-003"
+    title: "Housing Benefit Decision Letter"
+    type: "Housing"
+    description: "FOI response with housing benefit decision containing sensitive personal data"
+    documentUrl: "/assets/documents/foi/sample-housing-benefit.pdf"
+    thumbnailUrl: "/assets/images/foi/sample-housing-thumb.png"
+    fileSize: "950 KB"
+    timeToProcess: "16-22 seconds"
+    piiLocations:
+      - type: "name"
+        text: "[SAMPLE] Robert James Wilson"
+        description: "Housing benefit claimant name"
+        location: "Page 1, claimant details"
+      - type: "address"
+        text: "[SAMPLE] Flat 7, Tower House, Leeds, LS1 5AB"
+        description: "Claimant's residential address"
+        location: "Page 1, property section"
+      - type: "email"
+        text: "[SAMPLE] r.wilson@email.co.uk"
+        description: "Claimant's contact email"
+        location: "Page 2, correspondence details"
+      - type: "nino"
+        text: "[SAMPLE] AB 12 34 56 C"
+        description: "National Insurance number"
+        location: "Page 1, claimant reference"
+    expectedRedactions: 4
+    expectedConfidence:
+      - type: "name"
+        confidence: 0.96
+        threshold: "high"
+      - type: "address"
+        confidence: 0.93
+        threshold: "medium"
+      - type: "email"
+        confidence: 0.99
+        threshold: "high"
+      - type: "nino"
+        confidence: 0.99
+        threshold: "high"
+    wowFactors:
+      - "Detected National Insurance number pattern"
+      - "Handled complex address (Flat 7, Tower House)"
+      - "Identified email with .co.uk domain"
+      - "All 4 sensitive data types found automatically"
+
+# PII Types and Redaction Markers
+piiTypes:
+  name:
+    label: "Person Name"
+    marker: "[REDACTED: NAME]"
+    detectionMethod: "Amazon Comprehend PII Entity Detection"
+    examples:
+      - "John Smith"
+      - "Sarah Elizabeth Thompson"
+      - "Dr. Robert Wilson"
+  address:
+    label: "Address"
+    marker: "[REDACTED: ADDRESS]"
+    detectionMethod: "Amazon Comprehend PII Entity Detection + UK postcode regex"
+    examples:
+      - "15 Elm Street, Manchester, M1 4BT"
+      - "Flat 7, Tower House, Leeds, LS1 5AB"
+  phone:
+    label: "Phone Number"
+    marker: "[REDACTED: PHONE]"
+    detectionMethod: "Regex pattern + Amazon Comprehend"
+    examples:
+      - "07712 345678"
+      - "0121 456 7890"
+      - "+44 20 7946 0958"
+  email:
+    label: "Email Address"
+    marker: "[REDACTED: EMAIL]"
+    detectionMethod: "Regex pattern + Amazon Comprehend"
+    examples:
+      - "john.smith@example.com"
+      - "r.wilson@email.co.uk"
+  nino:
+    label: "National Insurance Number"
+    marker: "[REDACTED: NINO]"
+    detectionMethod: "UK NINO regex pattern"
+    examples:
+      - "AB 12 34 56 C"
+      - "QQ123456C"
+
+# Confidence Score Guidance
+confidenceScores:
+  thresholds:
+    high:
+      range: "0.95 - 1.00"
+      meaning: "Very high confidence - PII detected with near certainty"
+      action: "Auto-redact (safe for production)"
+      color: "green"
+    medium:
+      range: "0.80 - 0.94"
+      meaning: "Medium confidence - likely PII but some uncertainty"
+      action: "Flag for human review before redaction"
+      color: "yellow"
+    low:
+      range: "Below 0.80"
+      meaning: "Low confidence - possible false positive"
+      action: "Manual review required"
+      color: "red"
+  explanation: |
+    Confidence scores represent how certain the AI is that detected text is actually PII.
+    Scores above 0.95 are highly reliable and can be automatically redacted in production.
+    Lower scores should be reviewed by FOI officers to avoid over-redaction or missed PII.
+
+# ROI Calculation Data
+roiCalculation:
+  scenario: "FOI Request Redaction"
+  currentState:
+    requestsPerYear: 500
+    minutesPerRequest: 30
+    totalHoursPerYear: 250
+    hourlyRate: 25
+    annualStaffCost: 6250
+  withAI:
+    autoRedactionPercentage: 80
+    manualReviewPercentage: 20
+    timeSavingsPercentage: 80
+    hoursSavedPerYear: 200
+    remainingManualHours: 50
+    annualSavings: 5000
+  committeePitch:
+    headline: "Free up 200 hours annually with AI-powered FOI redaction"
+    bullets:
+      - "Currently spending 250 hours/year manually reviewing FOI documents for PII"
+      - "AI redaction reduces this to 50 hours - an 80% time saving"
+      - "Cost benefit: £5,000 per year in staff time saved"
+      - "Compliance benefit: Reduced risk of accidental PII disclosure"
+      - "FOI officers can focus on complex exemptions, not line-by-line redaction"
+  additionalBenefits:
+    - "Consistent PII detection across all documents (eliminates human fatigue errors)"
+    - "Faster FOI response times (currently 80% respond within 20 working days)"
+    - "Audit trail of all detected and redacted PII for ICO compliance"
+    - "24/7 processing capability without additional FOI officer hours"
+    - "Scales to handle FOI volume spikes without overtime costs"
+
+# Troubleshooting Common Issues
+troubleshooting:
+  uploadTooLarge:
+    title: "File too large (max 10MB)"
+    symptoms:
+      - "Upload fails with size error"
+      - "Error message mentions file size limit"
+    solutions:
+      - "Check file size in file manager (right-click > Properties)"
+      - "Use PDF compression tool (Adobe Acrobat, online compressor)"
+      - "Split multi-page FOI documents into smaller batches"
+      - "Remove embedded images if not needed for redaction"
+    preventiveMeasure: "Keep FOI response documents under 10MB by using moderate resolution scans"
+
+  wrongFormat:
+    title: "Wrong file format (PDF, DOCX, TXT only)"
+    symptoms:
+      - "Upload rejected with format error"
+      - "File extension not supported"
+    solutions:
+      - "Convert Word documents to PDF first"
+      - "Export emails as PDF or plain text"
+      - "Save scanned images as PDF with OCR layer"
+      - "Use 'Save As PDF' from original application"
+    preventiveMeasure: "Use PDF format for best PII detection accuracy"
+
+  processingTimeout:
+    title: "Processing timeout (over 60 seconds)"
+    symptoms:
+      - "Upload succeeds but PII detection never completes"
+      - "Loading spinner continues indefinitely"
+      - "Browser shows 'waiting for response' message"
+    solutions:
+      - "Refresh the page and try again (document may have processed)"
+      - "Check document isn't corrupted (try opening in PDF reader)"
+      - "Try with a different sample document to isolate issue"
+      - "Check AWS CloudWatch logs for Comprehend API errors"
+      - "Verify Lambda function timeout is set to 60 seconds minimum"
+    preventiveMeasure: "Use clean, machine-readable text (not handwritten scans)"
+
+  missedPII:
+    title: "PII not detected (false negatives)"
+    symptoms:
+      - "Known PII in document not flagged by AI"
+      - "Some names or addresses missed"
+      - "Incomplete redaction results"
+    solutions:
+      - "Check if PII is in unusual format (e.g., all caps, no spacing)"
+      - "Verify text is machine-readable (run OCR if scanned image)"
+      - "Look for handwritten text (Comprehend works best on typed text)"
+      - "Check if PII is in tables or unusual document structures"
+      - "Manually review low-confidence results - PII may be there but flagged uncertain"
+    preventiveMeasure: "Always perform final human review before publishing FOI responses"
+
+  falsePositives:
+    title: "Non-PII flagged as PII (false positives)"
+    symptoms:
+      - "Organization names flagged as person names"
+      - "Street names without numbers flagged as addresses"
+      - "Generic email addresses flagged (e.g., info@council.gov.uk)"
+    solutions:
+      - "Review confidence scores - low scores indicate uncertainty"
+      - "Manually un-mark false positives in review interface"
+      - "Add common false positives to allowlist (e.g., council building names)"
+      - "Train custom Comprehend model with your FOI document patterns"
+    preventiveMeasure: "Set confidence threshold to 0.95+ to reduce false positives"
+
+  apiErrors:
+    title: "API errors (500, 503 responses)"
+    symptoms:
+      - "Error message mentions server error"
+      - "Intermittent failures during processing"
+      - "Comprehend API unavailable message"
+    solutions:
+      - "Wait 1-2 minutes and retry (temporary AWS service issue)"
+      - "Check AWS service health dashboard for Comprehend outages"
+      - "Verify Lambda has correct IAM permissions for Comprehend"
+      - "Check Comprehend API quotas not exceeded (requests per second)"
+      - "Review CloudWatch logs for detailed error messages"
+    preventiveMeasure: "Monitor AWS service quotas and set up CloudWatch alarms for API errors"
+
+# AWS Services Used
+awsServices:
+  comprehend:
+    name: "Amazon Comprehend"
+    purpose: "PII entity detection and classification"
+    features:
+      - "Detects 18 types of PII entities"
+      - "Confidence scores for each detection"
+      - "Supports multiple languages (English for UK FOI)"
+      - "Batch processing for multiple documents"
+    pricing: "Pay per text unit (100 characters = 1 unit)"
+
+  s3:
+    name: "Amazon S3"
+    purpose: "Secure document storage"
+    features:
+      - "Encrypted at rest (AES-256)"
+      - "Versioning for audit trail"
+      - "Lifecycle policies for automatic deletion"
+      - "Access logging for compliance"
+    pricing: "Pay per GB stored + data transfer"
+
+  lambda:
+    name: "AWS Lambda"
+    purpose: "Processing orchestration"
+    features:
+      - "Coordinates document upload, PII detection, redaction"
+      - "Serverless (no servers to manage)"
+      - "Auto-scales for multiple concurrent FOI requests"
+      - "Timeout: 60 seconds per document"
+    pricing: "Pay per request + compute time"
+
+  textract:
+    name: "Amazon Textract (optional)"
+    purpose: "OCR for scanned documents"
+    features:
+      - "Extracts text from scanned FOI responses"
+      - "Handles poor quality scans"
+      - "Preserves document structure"
+    pricing: "Pay per page processed"
+
+# Sample Redacted Output Examples
+redactedOutputExamples:
+  beforeAfter:
+    - original: "The applicant, John David Smith, resides at 15 Elm Street, Manchester, M1 4BT."
+      redacted: "The applicant, [REDACTED: NAME], resides at [REDACTED: ADDRESS]."
+    - original: "Please contact Sarah Thompson on 0121 456 7890 or sarah.thompson@email.com"
+      redacted: "Please contact [REDACTED: NAME] on [REDACTED: PHONE] or [REDACTED: EMAIL]"
+    - original: "National Insurance number: AB 12 34 56 C"
+      redacted: "National Insurance number: [REDACTED: NINO]"
+
+# References
+references:
+  - source: "docs/sprint-artifacts/tech-spec-epic-3.md"
+    section: "AC-3.4 FOI Redaction Walkthrough"
+  - source: "docs/epics.md"
+    section: "Story 3.4: FOI Redaction Walkthrough"
+  - source: "docs/prd.md"
+    section: "FR13-15: AI-Powered Walkthroughs"

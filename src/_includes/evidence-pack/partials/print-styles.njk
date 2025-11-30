@@ -1,0 +1,327 @@
+{#
+  Print Styles for Evidence Pack (AC-4.1.7, AC-4.1.8)
+
+  Optimized for A4 PDF generation with:
+  - A4 paper size (210mm x 297mm)
+  - 15mm margins
+  - Page breaks at section boundaries
+  - High contrast for printing
+  - GOV.UK typography
+#}
+
+<style>
+  @media print {
+    /* A4 Page Setup */
+    @page {
+      size: A4;
+      margin: 15mm;
+    }
+
+    /* Reset print margins */
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Hide non-printable elements */
+    .govuk-header,
+    .govuk-footer,
+    .govuk-back-link,
+    .govuk-button,
+    .govuk-breadcrumbs,
+    .ndx-print-hide,
+    nav,
+    .no-print {
+      display: none !important;
+    }
+
+    /* Evidence Pack Container */
+    .ndx-evidence-pack {
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Cover Page */
+    .ndx-evidence-pack__cover {
+      page-break-after: always;
+      min-height: 250mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .ndx-evidence-pack__cover-title {
+      font-size: 36pt;
+      font-weight: 700;
+      color: #0b0c0c;
+      margin-bottom: 20pt;
+    }
+
+    .ndx-evidence-pack__cover-subtitle {
+      font-size: 24pt;
+      color: #0b0c0c;
+      margin-bottom: 40pt;
+    }
+
+    .ndx-evidence-pack__cover-meta {
+      font-size: 14pt;
+      color: #0b0c0c;
+      line-height: 1.6;
+    }
+
+    /* Section Breaks */
+    .ndx-evidence-pack__section {
+      page-break-before: always;
+      page-break-inside: avoid;
+      margin-bottom: 20pt;
+    }
+
+    /* First section should not break before */
+    .ndx-evidence-pack__section:first-of-type {
+      page-break-before: auto;
+    }
+
+    /* Section Headings */
+    .ndx-evidence-pack__section-title {
+      font-size: 24pt;
+      font-weight: 700;
+      color: #0b0c0c;
+      margin-top: 0;
+      margin-bottom: 16pt;
+      page-break-after: avoid;
+    }
+
+    .ndx-evidence-pack__section-subtitle {
+      font-size: 18pt;
+      font-weight: 700;
+      color: #0b0c0c;
+      margin-top: 16pt;
+      margin-bottom: 12pt;
+      page-break-after: avoid;
+    }
+
+    .ndx-evidence-pack__subsection-title {
+      font-size: 14pt;
+      font-weight: 700;
+      color: #0b0c0c;
+      margin-top: 12pt;
+      margin-bottom: 8pt;
+      page-break-after: avoid;
+    }
+
+    /* Typography */
+    .ndx-evidence-pack p,
+    .ndx-evidence-pack li {
+      font-size: 12pt;
+      line-height: 1.5;
+      color: #0b0c0c;
+      margin-bottom: 10pt;
+      orphans: 3;
+      widows: 3;
+    }
+
+    .ndx-evidence-pack strong {
+      font-weight: 700;
+      color: #0b0c0c;
+    }
+
+    /* Lists */
+    .ndx-evidence-pack ul,
+    .ndx-evidence-pack ol {
+      margin-left: 20pt;
+      margin-bottom: 12pt;
+      page-break-inside: avoid;
+    }
+
+    .ndx-evidence-pack li {
+      margin-bottom: 6pt;
+    }
+
+    /* Tables */
+    .govuk-table {
+      width: 100%;
+      border-collapse: collapse;
+      page-break-inside: avoid;
+      margin-bottom: 16pt;
+      font-size: 11pt;
+    }
+
+    .govuk-table__header,
+    .govuk-table__cell {
+      border: 1px solid #0b0c0c;
+      padding: 8pt;
+      color: #0b0c0c;
+    }
+
+    .govuk-table__header {
+      font-weight: 700;
+      background-color: #f3f2f1;
+    }
+
+    /* Summary Lists */
+    .govuk-summary-list {
+      page-break-inside: avoid;
+      margin-bottom: 16pt;
+      font-size: 11pt;
+    }
+
+    .govuk-summary-list__row {
+      border-bottom: 1px solid #b1b4b6;
+      page-break-inside: avoid;
+      padding: 6pt 0;
+    }
+
+    .govuk-summary-list__key {
+      font-weight: 700;
+      color: #0b0c0c;
+      width: 40%;
+    }
+
+    .govuk-summary-list__value {
+      color: #0b0c0c;
+    }
+
+    /* Persona Badge */
+    .ndx-persona-badge {
+      display: inline-block;
+      padding: 4pt 8pt;
+      border: 2px solid #0b0c0c;
+      font-weight: 700;
+      font-size: 11pt;
+      margin-bottom: 12pt;
+      color: #0b0c0c;
+    }
+
+    /* Tags */
+    .govuk-tag {
+      display: inline-block;
+      padding: 3pt 6pt;
+      font-size: 10pt;
+      font-weight: 700;
+      border: 1px solid #0b0c0c;
+      color: #0b0c0c;
+      background-color: transparent;
+      margin-right: 4pt;
+    }
+
+    /* Inset Text */
+    .govuk-inset-text {
+      border-left: 4pt solid #0b0c0c;
+      padding-left: 12pt;
+      margin-bottom: 16pt;
+      page-break-inside: avoid;
+      font-size: 11pt;
+    }
+
+    /* Warning Text */
+    .govuk-warning-text {
+      border-left: 4pt solid #0b0c0c;
+      padding-left: 12pt;
+      margin-bottom: 16pt;
+      page-break-inside: avoid;
+      font-size: 11pt;
+      font-weight: 700;
+    }
+
+    /* Panel */
+    .govuk-panel {
+      border: 2pt solid #0b0c0c;
+      padding: 16pt;
+      margin-bottom: 16pt;
+      page-break-inside: avoid;
+    }
+
+    .govuk-panel__title {
+      font-size: 18pt;
+      font-weight: 700;
+      color: #0b0c0c;
+    }
+
+    .govuk-panel__body {
+      font-size: 14pt;
+      color: #0b0c0c;
+    }
+
+    /* Avoid page breaks inside these elements */
+    .govuk-summary-list,
+    .govuk-table,
+    .govuk-inset-text,
+    .govuk-panel,
+    .ndx-cost-breakdown,
+    .ndx-roi-chart,
+    .ndx-journey-comparison {
+      page-break-inside: avoid;
+    }
+
+    /* Headings should not be orphaned */
+    h1, h2, h3, h4, h5, h6 {
+      page-break-after: avoid;
+      orphans: 3;
+      widows: 3;
+    }
+
+    /* Links - show URL in print */
+    a[href^="http"]:after {
+      content: " (" attr(href) ")";
+      font-size: 10pt;
+      color: #0b0c0c;
+    }
+
+    /* Don't show URLs for internal links */
+    a[href^="/"]:after,
+    a[href^="#"]:after {
+      content: "";
+    }
+
+    /* Header and Footer for each page */
+    .ndx-evidence-pack__header {
+      position: running(header);
+      font-size: 9pt;
+      color: #0b0c0c;
+      border-bottom: 1pt solid #0b0c0c;
+      padding-bottom: 4pt;
+      margin-bottom: 12pt;
+    }
+
+    @page {
+      @top-center {
+        content: element(header);
+      }
+
+      @bottom-right {
+        content: "Page " counter(page);
+        font-size: 9pt;
+        color: #0b0c0c;
+      }
+    }
+
+    /* High contrast for printing */
+    * {
+      background: transparent !important;
+      color: #0b0c0c !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+    }
+
+    /* Ensure minimum contrast */
+    a,
+    a:visited {
+      text-decoration: underline;
+      color: #0b0c0c !important;
+    }
+
+    /* Print-specific utilities */
+    .print-only {
+      display: block !important;
+    }
+
+    .print-page-break {
+      page-break-before: always;
+    }
+
+    .print-avoid-break {
+      page-break-inside: avoid;
+    }
+  }
+</style>

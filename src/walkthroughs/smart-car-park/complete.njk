@@ -1,0 +1,411 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - Smart Car Park IoT"
+description: You've completed the IoT car park management walkthrough
+currentStep: 4
+totalSteps: 4
+scenarioId: smart-car-park
+---
+
+<div class="ndx-completion-banner">
+  <h1 class="govuk-heading-xl">
+    <span class="ndx-completion-icon" aria-hidden="true" style="color: #00703c;">✓</span>
+    Walkthrough complete!
+  </h1>
+  <p class="govuk-body-l">
+    You've experienced how IoT sensors provide real-time car park occupancy monitoring.
+    Here's what you learned and what to do next.
+  </p>
+</div>
+
+<h2 class="govuk-heading-l govuk-!-margin-top-6">What you learned</h2>
+
+<div class="govuk-grid-row ndx-takeaways-grid">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-takeaway-card">
+      <h3 class="govuk-heading-m">
+        <span class="ndx-takeaway-number">1</span>
+        Real-time monitoring eliminates manual work
+      </h3>
+      <p class="govuk-body">
+        50 IoT sensors continuously detect vehicle presence and publish occupancy data to AWS.
+        No clipboards, no manual counting, no outdated spreadsheets. Dashboard always shows
+        current state with 15-second latency maximum.
+      </p>
+      <p class="govuk-body">
+        <strong>Impact:</strong> Eliminates 1.5 hours/day of manual labor = £9,750 annual savings
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-takeaway-card">
+      <h3 class="govuk-heading-m">
+        <span class="ndx-takeaway-number">2</span>
+        Multi-zone visibility guides optimization
+      </h3>
+      <p class="govuk-body">
+        Seeing all zones simultaneously reveals patterns impossible to detect manually. Ground Floor
+        fills to 90% while Level 2 sits at 73% - clear opportunity for differential pricing or
+        better signage.
+      </p>
+      <p class="govuk-body">
+        <strong>Impact:</strong> Fill unused capacity = £4,160 additional revenue from Level 2 alone
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-takeaway-card">
+      <h3 class="govuk-heading-m">
+        <span class="ndx-takeaway-number">3</span>
+        Historical trends enable data-driven decisions
+      </h3>
+      <p class="govuk-body">
+        24-hour patterns show 85% occupancy at peak (8-10am, 12-2pm, 5-7pm) but only 60% off-peak.
+        This data supports dynamic pricing, targeted promotions, and capacity planning.
+      </p>
+      <p class="govuk-body">
+        <strong>Impact:</strong> Revenue optimization through demand-based pricing strategies
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-takeaway-card">
+      <h3 class="govuk-heading-m">
+        <span class="ndx-takeaway-number">4</span>
+        AWS IoT scales affordably
+      </h3>
+      <p class="govuk-body">
+        IoT Core, Lambda, DynamoDB, and CloudWatch handle millions of sensor messages for just
+        £145/year. No servers to manage, automatic scaling, pay-per-use pricing. ROI is 178:1.
+      </p>
+      <p class="govuk-body">
+        <strong>Impact:</strong> Enterprise-grade IoT infrastructure at fraction of traditional cost
+      </p>
+    </div>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l govuk-!-margin-top-8">Committee-ready talking points</h2>
+
+<div class="ndx-committee-section">
+  <p class="govuk-body">
+    Use these talking points when presenting this scenario to leadership, finance, or IT committees:
+  </p>
+
+  <details class="govuk-details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text govuk-!-font-size-19">
+        <strong>For Finance Committee: ROI justification</strong>
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        "Implementing IoT sensors in our car parks delivers immediate financial returns. For a
+        typical 50-space car park:"
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Revenue increase:</strong> Improve occupancy from 60% to 85% = £16,250 additional
+        revenue annually</li>
+        <li><strong>Operational savings:</strong> Eliminate manual counting = £9,750 saved annually</li>
+        <li><strong>Total benefit:</strong> £26,000 per car park per year</li>
+        <li><strong>Technology cost:</strong> £145/year for AWS services (IoT Core, Lambda, DynamoDB,
+        CloudWatch)</li>
+        <li><strong>Net ROI:</strong> 178:1 return - every £1 spent returns £178 in value</li>
+        <li><strong>Payback period:</strong> 2 days for AWS costs, 4 months including sensor hardware</li>
+      </ul>
+      <p class="govuk-body">
+        "Multiply by our [X] car parks council-wide for total annual benefit of £[X × 26,000].
+        This is not a technology expense - it's a revenue generation and efficiency investment."
+      </p>
+    </div>
+  </details>
+
+  <details class="govuk-details govuk-!-margin-top-3">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text govuk-!-font-size-19">
+        <strong>For IT Committee: Technical architecture and security</strong>
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        "The solution uses AWS managed services with enterprise-grade security and scalability:"
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>AWS IoT Core:</strong> Managed MQTT broker handling sensor authentication,
+        TLS encryption, and message routing. Scales to millions of devices automatically.</li>
+        <li><strong>AWS Lambda:</strong> Serverless processing - no EC2 instances to patch or maintain.
+        Auto-scales from zero to thousands of concurrent executions.</li>
+        <li><strong>Amazon DynamoDB:</strong> NoSQL database with 99.99% availability SLA. 7-day
+        data retention via TTL minimizes storage costs.</li>
+        <li><strong>Amazon CloudWatch:</strong> Real-time dashboards and alarms. No third-party
+        monitoring software required.</li>
+        <li><strong>Security:</strong> All data encrypted in transit (TLS) and at rest (AES-256).
+        IAM controls who can access dashboard. Sensor authentication via X.509 certificates.</li>
+        <li><strong>No vendor lock-in:</strong> Standard MQTT protocol - sensors work with any
+        MQTT-compatible platform if we need to migrate.</li>
+      </ul>
+      <p class="govuk-body">
+        "Operational burden is minimal: AWS manages patching, scaling, and availability. Our team
+        focuses on business logic, not infrastructure management."
+      </p>
+    </div>
+  </details>
+
+  <details class="govuk-details govuk-!-margin-top-3">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text govuk-!-font-size-19">
+        <strong>For Leadership: Strategic smart city positioning</strong>
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        "Car park IoT is a pilot for broader smart city transformation:"
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Immediate value:</strong> Car parks deliver ROI within days, funding expansion
+        to other use cases</li>
+        <li><strong>Citizen experience:</strong> Real-time availability via website/app reduces
+        frustration, cuts circling time, lowers emissions</li>
+        <li><strong>Foundation for scale:</strong> Same IoT infrastructure extends to waste bin fill
+        sensors (£50K/year savings via route optimization), street lighting (£30K/year energy savings),
+        flood detection, air quality monitoring</li>
+        <li><strong>Data-driven governance:</strong> Shift from reactive (respond to complaints) to
+        proactive (prevent problems with real-time alerts)</li>
+        <li><strong>Innovation leadership:</strong> Demonstrates council's digital maturity, attracts
+        investment, improves resident satisfaction</li>
+      </ul>
+      <p class="govuk-body">
+        "This is not just about car parks - it's about positioning our council as a leader in
+        digital transformation and smart city innovation."
+      </p>
+    </div>
+  </details>
+</div>
+
+<h2 class="govuk-heading-l govuk-!-margin-top-8">Production deployment guidance</h2>
+
+<div class="ndx-production-section">
+  <p class="govuk-body">
+    Ready to deploy IoT sensors in your real car parks? Here's the roadmap:
+  </p>
+
+  <h3 class="govuk-heading-m">Phase 1: Pilot (1 car park, 3 months)</h3>
+  <ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+    <li>
+      <strong>Procure hardware:</strong> 50 ultrasonic sensors (~£6,000), 1 LoRaWAN gateway (~£400),
+      installation labor (~£2,000) = £8,400 total
+    </li>
+    <li>
+      <strong>Deploy AWS infrastructure:</strong> Use CloudFormation template from this walkthrough
+      as baseline, customize for your needs
+    </li>
+    <li>
+      <strong>Install sensors:</strong> Mount above each parking space, connect to LoRaWAN gateway,
+      test connectivity
+    </li>
+    <li>
+      <strong>Integrate with existing systems:</strong> Website widget showing real-time availability,
+      mobile app API integration
+    </li>
+    <li>
+      <strong>Monitor for 3 months:</strong> Validate sensor accuracy, measure occupancy improvements,
+      calculate actual ROI
+    </li>
+  </ol>
+
+  <h3 class="govuk-heading-m govuk-!-margin-top-4">Phase 2: Scale (remaining car parks, 6 months)</h3>
+  <ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+    <li>
+      Present pilot results to decision-makers with ROI data
+    </li>
+    <li>
+      Procure sensors for remaining car parks (bulk discount available)
+    </li>
+    <li>
+      Roll out in waves (2-3 car parks per month) to manage installation workload
+    </li>
+    <li>
+      Centralize monitoring: Single CloudWatch dashboard for all council car parks
+    </li>
+    <li>
+      Optimize pricing and signage based on multi-car park data patterns
+    </li>
+  </ol>
+
+  <h3 class="govuk-heading-m govuk-!-margin-top-4">Phase 3: Expand (other IoT use cases, 12 months)</h3>
+  <ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+    <li>
+      Leverage same AWS IoT Core infrastructure for waste management sensors
+    </li>
+    <li>
+      Add street lighting monitoring and adaptive dimming
+    </li>
+    <li>
+      Deploy air quality sensors at strategic locations
+    </li>
+    <li>
+      Implement flood detection in drainage systems
+    </li>
+    <li>
+      Build unified smart city dashboard showing all IoT data streams
+    </li>
+  </ol>
+
+  <div class="govuk-warning-text govuk-!-margin-top-4">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      Start with pilot before full rollout. Validate ROI assumptions, test sensor accuracy, and
+      gain operational experience with small-scale deployment first.
+    </strong>
+  </div>
+</div>
+
+{# Story 15.3: Completion next steps with proper links #}
+{% set scenarioId = "smart-car-park" %}
+{% set scenarioName = "Smart Car Park IoT" %}
+{% set totalSteps = 4 %}
+{% include "components/completion-next-steps.njk" %}
+
+<h2 class="govuk-heading-l govuk-!-margin-top-8">Clean up your AWS resources</h2>
+
+<div class="ndx-cleanup-section">
+  <p class="govuk-body">
+    Your Innovation Sandbox deployment will auto-delete after 2 hours. If you want to manually
+    clean up now:
+  </p>
+
+  <ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+    <li>
+      Go to the <a href="https://console.aws.amazon.com/cloudformation/" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console</a>
+    </li>
+    <li>
+      Find your <code>ndx-try-smart-car-park-[timestamp]</code> stack
+    </li>
+    <li>
+      Click "Delete" and confirm
+    </li>
+    <li>
+      Wait 3-5 minutes for deletion to complete
+    </li>
+  </ol>
+
+  <p class="govuk-body govuk-!-margin-top-3">
+    <strong>Note:</strong> Deletion removes all resources (IoT Core rules, Lambda functions, DynamoDB
+    table, CloudWatch dashboard). Sample sensor data is also deleted - no data persists after cleanup.
+  </p>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/scenarios/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    Explore more scenarios
+  </a>
+
+  <p class="govuk-body govuk-!-margin-top-3">
+    <a href="/contact/" class="govuk-link">Contact us</a> if you have questions about deploying IoT
+    in production or need help with your smart city strategy.
+  </p>
+</div>
+
+<style>
+  .ndx-completion-banner {
+    padding: 30px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-completion-banner h1 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-completion-icon {
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 48px;
+    line-height: 1;
+  }
+
+  .ndx-takeaways-grid {
+    margin-top: 30px;
+  }
+
+  .ndx-takeaway-card {
+    margin-bottom: 30px;
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    min-height: 300px;
+  }
+
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-takeaway-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    background-color: #1d70b8;
+    color: #ffffff;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .ndx-committee-section {
+    padding: 25px;
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-production-section {
+    padding: 25px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-next-steps {
+    margin-top: 20px;
+  }
+
+  .ndx-next-step-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+    min-height: 200px;
+  }
+
+  .ndx-next-step-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-cleanup-section {
+    padding: 25px;
+    background-color: #fff4e6;
+    border-left: 4px solid #f47738;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-takeaway-card,
+    .ndx-next-step-card {
+      min-height: auto;
+    }
+  }
+</style>

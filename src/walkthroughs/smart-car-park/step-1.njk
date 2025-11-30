@@ -1,0 +1,230 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 1: Access CloudWatch Dashboard - Smart Car Park Walkthrough"
+description: Find and open the CloudWatch dashboard showing real-time car park occupancy
+currentStep: 1
+totalSteps: 4
+timeEstimate: "2 minutes"
+scenarioId: smart-car-park
+---
+
+{#
+  Step 1: Access CloudWatch Dashboard (AC-3.5.2)
+  - Locate CloudFormation stack outputs
+  - Find CloudWatch dashboard URL
+  - Open dashboard in browser
+#}
+
+{% set stepNumber = 1 %}
+{% set stepTitle = "Access CloudWatch Dashboard" %}
+{% set stepDescription = "Locate your deployed CloudWatch dashboard URL and open it to view real-time car park occupancy data." %}
+{% set timeEstimate = "2 minutes" %}
+{# Load screenshots from YAML data - Story 13.6 #}
+{% set screenshotData = screenshots["smart-car-park"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 1) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "CloudFormation stack is in CREATE_COMPLETE status",
+  "Outputs tab shows DashboardURL value",
+  "CloudWatch dashboard opens in a new browser tab",
+  "Dashboard displays car park occupancy widgets"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">How to access the dashboard</h3>
+
+<p class="govuk-body">
+  Your CloudWatch dashboard was created when you deployed the Smart Car Park scenario.
+  The dashboard URL is available in your CloudFormation stack outputs.
+</p>
+
+<div class="govuk-!-margin-top-4">
+  <ol class="govuk-list govuk-list--number govuk-!-font-size-19">
+    <li>
+      <strong>Open the AWS CloudFormation console:</strong>
+      <br>
+      <a href="https://console.aws.amazon.com/cloudformation/home" target="_blank" rel="noopener noreferrer" class="govuk-link">
+        AWS CloudFormation Console
+      </a>
+      <p class="govuk-body-s govuk-!-margin-top-1" style="color: #505a5f;">
+        Make sure you're in the same region where you deployed the scenario
+      </p>
+    </li>
+
+    <li>
+      <strong>Find your Smart Car Park stack:</strong>
+      <br>
+      <p class="govuk-body govuk-!-margin-top-1">
+        Look for a stack name starting with <code>ndx-try-smart-car-park-</code> followed by a timestamp
+      </p>
+      <p class="govuk-body-s" style="color: #505a5f;">
+        The stack status should be <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span>
+      </p>
+    </li>
+
+    <li>
+      <strong>Click on the stack name</strong> to open the stack details page
+    </li>
+
+    <li>
+      <strong>Click the "Outputs" tab</strong> near the top of the page
+    </li>
+
+    <li>
+      <strong>Find the "DashboardURL" output:</strong>
+      <br>
+      <p class="govuk-body govuk-!-margin-top-1">
+        Look for an output key named <code>DashboardURL</code> or <code>CloudWatchDashboardURL</code>
+      </p>
+      <p class="govuk-body-s" style="color: #505a5f;">
+        The value will be a long URL starting with <code>https://console.aws.amazon.com/cloudwatch/</code>
+      </p>
+    </li>
+
+    <li>
+      <strong>Click the URL</strong> to open the CloudWatch dashboard in a new tab
+      <p class="govuk-body-s govuk-!-margin-top-1" style="color: #505a5f;">
+        The URL includes embedded credentials so you won't need to log in again
+      </p>
+    </li>
+  </ol>
+</div>
+
+<h3 class="govuk-heading-m">What you should see</h3>
+
+<p class="govuk-body">
+  After clicking the dashboard URL, you should see:
+</p>
+
+<ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+  <li>
+    <strong>Dashboard title:</strong> "Smart Car Park - Real-Time Occupancy" at the top
+  </li>
+  <li>
+    <strong>Multiple widgets:</strong> Charts and numbers showing car park metrics
+  </li>
+  <li>
+    <strong>Current occupancy:</strong> A number widget showing available spaces right now
+  </li>
+  <li>
+    <strong>Zone breakdown:</strong> Charts comparing occupancy across Ground, Level 1, and Level 2
+  </li>
+  <li>
+    <strong>Auto-refresh indicator:</strong> Dashboard set to refresh every 10 seconds
+  </li>
+</ul>
+
+<div class="govuk-inset-text govuk-!-margin-top-3">
+  <p class="govuk-body">
+    <strong>Tip:</strong> If the dashboard appears empty or shows "No data", wait 30 seconds and click
+    the refresh button (circular arrow icon) in the top-right corner. The IoT simulator may still be
+    populating initial sensor readings.
+  </p>
+</div>
+
+{# Troubleshooting section #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text govuk-!-font-size-19">
+      <strong>Something went wrong?</strong> Troubleshooting help
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <h4 class="govuk-heading-s">I can't find my CloudFormation stack</h4>
+    <p class="govuk-body">Possible solutions:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>
+        <strong>Check the AWS region</strong> - Use the region selector (top-right) to switch
+        to the region where you deployed the scenario
+      </li>
+      <li>
+        <strong>Verify deployment completed</strong> - If you just deployed, wait a few more minutes
+        for the stack to finish creating
+      </li>
+      <li>
+        <strong>Check stack status</strong> - If status shows CREATE_FAILED or ROLLBACK_COMPLETE,
+        the deployment encountered errors. Delete the stack and try deploying again.
+      </li>
+    </ul>
+
+    <h4 class="govuk-heading-s govuk-!-margin-top-4">I don't see a DashboardURL output</h4>
+    <p class="govuk-body">Possible solutions:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>
+        <strong>Wait for stack creation to complete</strong> - Outputs only appear when status is CREATE_COMPLETE
+      </li>
+      <li>
+        <strong>Look for alternative output names</strong> - Try <code>CloudWatchDashboardURL</code>,
+        <code>DashboardLink</code>, or <code>MonitoringDashboard</code>
+      </li>
+      <li>
+        <strong>Check the Resources tab</strong> - Find the Dashboard resource and note its physical ID,
+        then manually navigate to CloudWatch → Dashboards and open it
+      </li>
+    </ul>
+
+    <h4 class="govuk-heading-s govuk-!-margin-top-4">Dashboard URL gives "Access Denied" error</h4>
+    <p class="govuk-body">Possible solutions:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>
+        <strong>Confirm correct AWS account</strong> - Ensure you're logged into the same AWS account
+        where you deployed the stack
+      </li>
+      <li>
+        <strong>Re-generate the URL</strong> - Go back to CloudFormation Outputs and copy the URL again
+        (embedded credentials may have expired)
+      </li>
+      <li>
+        <strong>Use IAM permissions</strong> - Manually navigate to CloudWatch → Dashboards and open
+        the dashboard using your IAM permissions instead of the embedded URL
+      </li>
+    </ul>
+
+    <h4 class="govuk-heading-s govuk-!-margin-top-4">Dashboard loads but shows no data</h4>
+    <p class="govuk-body">This is covered in Step 2 - click "Continue" to learn how to verify sensor data is flowing</p>
+  </div>
+</details>
+
+{# Navigation #}
+<div class="ndx-walkthrough-nav govuk-!-margin-top-8">
+  <a href="/walkthroughs/smart-car-park/" class="govuk-link ndx-walkthrough-nav__back">
+    ← Back to overview
+  </a>
+  <a href="/walkthroughs/smart-car-park/step-2/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    Continue to Step 2
+  </a>
+</div>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-walkthrough-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid #b1b4b6;
+  }
+
+  .ndx-walkthrough-nav__back {
+    font-size: 19px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-walkthrough-nav {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ndx-walkthrough-nav__back {
+      margin-bottom: 15px;
+    }
+  }
+</style>

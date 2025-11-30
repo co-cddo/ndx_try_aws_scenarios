@@ -1,0 +1,98 @@
+# Council Chatbot Sample Questions (Story 3.2)
+# 10 sample questions with expected responses for walkthrough demonstration
+
+categories:
+  - name: "Waste & Recycling"
+    icon: "♻️"
+    questions:
+      - question: "When is my bin collection day?"
+        shortQuestion: "Bin collection day"
+        copyText: "When is my bin collection day for postcode B15 2NW?"
+        expectedResponse: "Your bin collection days depend on your postcode area. For postcode B15 2NW, your collections are: Black bin (general waste): Every Tuesday, Blue bin (recycling): Every other Tuesday. Green bin (garden waste): Monthly on the second Friday. You can check your specific collection dates by entering your full postcode on our bin collection checker at birmingham.gov.uk/bincollection"
+        technicalNote: "Response uses RAG (Retrieval Augmented Generation) from council knowledge base with postcode-indexed bin collection schedules"
+
+      - question: "How do I report a missed bin collection?"
+        shortQuestion: "Report missed collection"
+        copyText: "How do I report a missed bin collection?"
+        expectedResponse: "To report a missed bin collection: 1) Check it's after 6pm on your collection day, 2) Ensure your bin was out by 7am, 3) Report online at birmingham.gov.uk/missed-bin or call 0121 303 1112. Have your postcode ready. We aim to collect within 48 hours of a missed collection report. If your bin was contaminated (wrong items), we'll leave a notice explaining why it wasn't collected."
+        technicalNote: "Response demonstrates multi-step process handling with conditional logic"
+
+      - question: "What can I put in my recycling bin?"
+        shortQuestion: "Recyclable items"
+        copyText: "What can I put in my recycling bin?"
+        expectedResponse: "You can recycle: Paper and cardboard (newspapers, magazines, cereal boxes, cardboard packaging), Plastic bottles (drinks bottles, cleaning product bottles - lids on), Metal cans and tins (food cans, drink cans), Glass bottles and jars. DO NOT PUT IN: Plastic bags, food waste, clothing, nappies, polystyrene, black plastic, or crisp packets. These contaminate recycling and may mean your whole bin isn't collected."
+        technicalNote: "Response shows knowledge of UK council-specific recycling rules with emphasis on contamination prevention"
+
+  - name: "Council Tax"
+    icon: "💷"
+    questions:
+      - question: "How do I pay my council tax?"
+        shortQuestion: "Council tax payment"
+        copyText: "How do I pay my council tax?"
+        expectedResponse: "You can pay your council tax in several ways: 1) Direct Debit (recommended) - set up at birmingham.gov.uk/directdebit for automatic monthly payments, 2) Online at birmingham.gov.uk/paycounciltax using debit/credit card, 3) By phone on 0121 303 1112, 4) At PayPoint locations using your payment card. Direct Debit spreads payments over 10 or 12 months and you'll never miss a payment. You'll need your council tax reference number (on your bill)."
+        technicalNote: "Response prioritizes recommended option (Direct Debit) while providing alternatives for different user needs"
+
+      - question: "Am I eligible for council tax reduction?"
+        shortQuestion: "Council tax reduction"
+        copyText: "Am I eligible for council tax reduction?"
+        expectedResponse: "You may be eligible for Council Tax Reduction if you're on a low income or benefits. Eligibility depends on: Your income and savings, Whether you receive benefits (Universal Credit, JSA, ESA, Pension Credit), Your household circumstances, Number of people in your home. You could get up to 100% reduction. Apply online at birmingham.gov.uk/ctaxreduction. You'll need: Proof of income, Benefit letters, Bank statements (last 2 months). Processing takes around 14 days."
+        technicalNote: "Response handles complex eligibility criteria with document checklist for application completion"
+
+  - name: "Planning"
+    icon: "🏗️"
+    questions:
+      - question: "Do I need planning permission for a shed?"
+        shortQuestion: "Shed planning permission"
+        copyText: "Do I need planning permission for a garden shed?"
+        expectedResponse: "Garden sheds typically don't require planning permission if they meet these conditions: No more than 2.5m high (if within 2m of boundary), No more than 4m high otherwise, Covers no more than 50% of your garden, Not at the front of your property, Not used for business purposes. If your property is Listed or in a Conservation Area, you may need permission even for small structures. Check our planning portal at birmingham.gov.uk/planning or call 0121 303 1115 for advice specific to your property."
+        technicalNote: "Response demonstrates conditional logic with UK Permitted Development rules and escalation path for complex cases"
+
+      - question: "How do I object to a planning application?"
+        shortQuestion: "Object to planning"
+        copyText: "How do I object to a planning application?"
+        expectedResponse: "To comment on a planning application: 1) Find the application at birmingham.gov.uk/planningsearch using the reference number or address, 2) Comments must be submitted within 21 days of the application being published, 3) Focus on planning matters (privacy, traffic, design, impact on character of area), 4) Submit online via the planning portal or email planning@birmingham.gov.uk. Personal opinions about applicant or property values are not planning considerations. All comments are public and will be published online."
+        technicalNote: "Response guides users through formal process with time constraints and valid objection grounds"
+
+  - name: "General Services"
+    icon: "🏛️"
+    questions:
+      - question: "What are the town hall opening hours?"
+        shortQuestion: "Town hall hours"
+        copyText: "What are the town hall opening hours?"
+        expectedResponse: "Birmingham Town Hall opening hours: Monday to Friday: 9:00 AM to 5:00 PM, Closed weekends and bank holidays. For urgent matters outside these hours, call our out-of-hours emergency line: 0121 675 4806. Many council services are available 24/7 online at birmingham.gov.uk. Note: Individual departments may have different hours - check the specific service page online."
+        technicalNote: "Response provides core information plus alternative access channels for different urgency levels"
+
+      - question: "How do I report a pothole?"
+        shortQuestion: "Report pothole"
+        copyText: "How do I report a pothole?"
+        expectedResponse: "Report potholes online through our highways portal at birmingham.gov.uk/potholes or call 0121 303 1111. You'll need: The exact location (street name, nearest junction, or what3words reference), Size of pothole (approximate depth and width), Photo if possible. We prioritize by severity: Dangerous potholes (over 40mm deep, on busy routes) fixed within 24 hours. Other potholes fixed within 28 days. You'll get a reference number to track your report."
+        technicalNote: "Response shows service-level agreements with prioritization criteria and tracking capability"
+
+      - question: "How do I register to vote?"
+        shortQuestion: "Register to vote"
+        copyText: "How do I register to vote?"
+        expectedResponse: "Register to vote online at gov.uk/register-to-vote - it takes about 5 minutes. You'll need your National Insurance number. Eligibility: British, Irish, or qualifying Commonwealth citizen, 16 or over (can vote at 18), UK resident or British citizen living abroad (last 15 years). The deadline is 12 working days before an election. For postal or proxy voting, apply separately at birmingham.gov.uk/voting. Contact our Electoral Services team on 0121 303 1111 for help."
+        technicalNote: "Response correctly refers to national gov.uk service while providing local council contact for support - demonstrates federation awareness"
+
+# Additional metadata for walkthrough flow
+walkthrough:
+  recommendedStartQuestion: "When is my bin collection day for postcode B15 2NW?"
+  estimatedTimePerQuestion: "2 minutes"
+  totalQuestions: 10
+
+# Wow moments - key technical achievements to highlight
+wowMoments:
+  - step: 2
+    title: "Natural Language Understanding"
+    explanation: "Notice how the chatbot understood your question without exact keywords. This uses Amazon Bedrock's Claude 3 Haiku model - the same AI that powers intelligent assistants, now available for council use."
+    technicalDetail: "RAG (Retrieval Augmented Generation) combines large language model intelligence with your council's specific knowledge base"
+
+  - step: 3
+    title: "Context Awareness"
+    explanation: "The chatbot remembers your previous questions in the conversation. Ask a follow-up like 'What about garden waste?' and it knows you're still talking about bin collections."
+    technicalDetail: "Conversation memory maintained in Amazon Lex session with contextual understanding from Bedrock"
+
+  - step: 4
+    title: "Multi-Modal Responses"
+    explanation: "Responses can include links, lists, and structured information - not just plain text. This makes complex information (like eligibility criteria) easier to understand."
+    technicalDetail: "Rich response formatting with clickable links, numbered lists, and conditional content based on user's situation"

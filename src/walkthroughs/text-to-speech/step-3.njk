@@ -1,0 +1,388 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Generate Audio - Text-to-Speech Walkthrough"
+description: Convert announcement text to speech with different neural voices
+currentStep: 3
+totalSteps: 4
+timeEstimate: "3 minutes"
+scenarioId: text-to-speech
+---
+
+{#
+  Step 3: Generate Audio with Different Voices (AC-3.6.2, AC-3.6.4)
+  - Generate audio with Amy voice
+  - Generate audio with Brian voice
+  - Generate audio with Emma voice
+  - Wow moment: Neural voice quality
+#}
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Generate Audio with Different Voices" %}
+{% set stepDescription = "Convert your chosen announcement to audio using three UK English neural voices to compare their styles." %}
+{% set timeEstimate = "3 minutes" %}
+{# Load screenshots from YAML data - Story 13.7 #}
+{% set screenshotData = screenshots["text-to-speech"] %}
+{% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 3) | first %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+{% set expectedOutcomes = [
+  "Generated audio with Amy (conversational voice)",
+  "Generated audio with Brian (authoritative voice)",
+  "Generated audio with Emma (formal voice)",
+  "Heard the difference in voice styles",
+  "Understand which voice suits which announcement type"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Generate with three voices</h3>
+
+<p class="govuk-body">
+  Amazon Polly offers three UK English neural voices, each with a distinct style. Let's generate
+  audio with all three to compare:
+</p>
+
+<div class="ndx-voice-generation-steps">
+  <div class="ndx-voice-step">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-step-number">1</span>
+      Amy - Conversational &amp; Friendly
+    </h4>
+    <ol class="govuk-list govuk-list--number govuk-body-s">
+      <li>In the Polly console, verify your announcement text is pasted in the input area</li>
+      <li>Set "Engine" to <strong>Neural</strong></li>
+      <li>Set "Language" to <strong>British English (en-GB)</strong></li>
+      <li>Select voice <strong>Amy</strong> from the dropdown</li>
+      <li>Click the orange <strong>"Listen"</strong> button</li>
+      <li>Audio generates in 5-10 seconds - listen to the full announcement</li>
+    </ol>
+    <div class="govuk-inset-text" style="margin-top: 15px;">
+      <p class="govuk-body-s">
+        <strong>What to notice:</strong> Amy's tone is warm and approachable. She sounds like a
+        friendly council officer explaining information in person. Best for routine service updates
+        and general community announcements.
+      </p>
+    </div>
+  </div>
+
+  <div class="ndx-voice-step">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-step-number">2</span>
+      Brian - Authoritative &amp; Clear
+    </h4>
+    <ol class="govuk-list govuk-list--number govuk-body-s">
+      <li>Keep the same announcement text in the input area</li>
+      <li>Change voice to <strong>Brian</strong> from the dropdown</li>
+      <li>Click <strong>"Listen"</strong> again</li>
+      <li>Listen to the full announcement with Brian's voice</li>
+    </ol>
+    <div class="govuk-inset-text" style="margin-top: 15px;">
+      <p class="govuk-body-s">
+        <strong>What to notice:</strong> Brian's tone is more formal and commanding. He conveys
+        authority and importance. Best for emergency alerts, weather warnings, and urgent safety
+        announcements where residents need to take immediate action.
+      </p>
+    </div>
+  </div>
+
+  <div class="ndx-voice-step">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-step-number">3</span>
+      Emma - Formal &amp; Professional
+    </h4>
+    <ol class="govuk-list govuk-list--number govuk-body-s">
+      <li>Keep the same announcement text in the input area</li>
+      <li>Change voice to <strong>Emma</strong> from the dropdown</li>
+      <li>Click <strong>"Listen"</strong> once more</li>
+      <li>Listen to the full announcement with Emma's voice</li>
+    </ol>
+    <div class="govuk-inset-text" style="margin-top: 15px;">
+      <p class="govuk-body-s">
+        <strong>What to notice:</strong> Emma's tone is precise and professional. She sounds
+        official and measured. Best for committee announcements, planning notices, formal consultations,
+        and legal statements where gravitas and accuracy matter.
+      </p>
+    </div>
+  </div>
+</div>
+
+{# AC-3.6.4, AC-3.6.5: Wow Moment - Neural Voice Quality #}
+{% set title = "Hear the Neural Voice Quality" %}
+{% set explanation = "These are not the robotic computer voices of the past. Amazon Polly neural engine uses deep learning to generate speech that sounds remarkably human. Notice the natural inflection, breathing patterns, and emotional tone appropriate for each voice. Amy sounds warm for service updates. Brian sounds urgent for emergency alerts. Emma sounds professional for formal notices. Residents listening to these announcements will not realize it is AI-generated - the quality rivals professional voice recording studios." %}
+{% set technicalDetail = "Polly neural text-to-speech (NTTS) uses a sequence-to-sequence model trained on hours of native British English speakers. It generates speech by predicting audio waveforms directly from text, capturing prosody (rhythm, stress, intonation) that makes speech sound natural. The UK-specific training means Polly correctly pronounces British place names, postcodes, and council terminology - critical for local government communications." %}
+{% set icon = "🔊" %}
+{% include "components/wow-moment.njk" %}
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Voice comparison guide</h3>
+
+<p class="govuk-body">
+  Understanding which voice to use for different announcements:
+</p>
+
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--s">
+    Voice selection guide by announcement type
+  </caption>
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Announcement Type</th>
+      <th scope="col" class="govuk-table__header">Recommended Voice</th>
+      <th scope="col" class="govuk-table__header">Why This Voice?</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Bin collection changes</th>
+      <td class="govuk-table__cell">Amy</td>
+      <td class="govuk-table__cell">Friendly, conversational - puts residents at ease</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Library hours</th>
+      <td class="govuk-table__cell">Amy</td>
+      <td class="govuk-table__cell">Welcoming tone encourages community engagement</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Park events</th>
+      <td class="govuk-table__cell">Amy</td>
+      <td class="govuk-table__cell">Warm delivery makes events sound appealing</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Weather warnings</th>
+      <td class="govuk-table__cell">Brian</td>
+      <td class="govuk-table__cell">Authoritative tone conveys urgency and seriousness</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Road closures (urgent)</th>
+      <td class="govuk-table__cell">Brian</td>
+      <td class="govuk-table__cell">Clear, commanding - ensures message is heard</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Emergency alerts</th>
+      <td class="govuk-table__cell">Brian</td>
+      <td class="govuk-table__cell">Inspires confidence and prompts immediate action</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Planning committee notices</th>
+      <td class="govuk-table__cell">Emma</td>
+      <td class="govuk-table__cell">Formal tone matches legal/statutory requirements</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Council meeting agendas</th>
+      <td class="govuk-table__cell">Emma</td>
+      <td class="govuk-table__cell">Professional delivery conveys official business</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Legal consultations</th>
+      <td class="govuk-table__cell">Emma</td>
+      <td class="govuk-table__cell">Precise pronunciation ensures accuracy in formal contexts</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 class="govuk-heading-m">Before and after comparison</h3>
+
+<div class="ndx-before-after">
+  <div class="ndx-before-column">
+    <h4 class="govuk-heading-s">Before: Studio Recording</h4>
+    <ul class="govuk-list govuk-list--bullet govuk-body-s">
+      <li><strong>Process:</strong> Book voice talent, schedule recording session, brief talent, record multiple takes, edit audio, approve final version</li>
+      <li><strong>Time:</strong> 1-2 weeks from brief to final audio</li>
+      <li><strong>Cost:</strong> £150-£300 per announcement (talent fee, studio time, editing)</li>
+      <li><strong>Revisions:</strong> £100 per re-recording if text changes</li>
+      <li><strong>Consistency:</strong> Variable - depends on talent availability and performance</li>
+      <li><strong>Result:</strong> Due to cost and time, councils rarely produce audio versions = non-compliance with PSBAR 2018</li>
+    </ul>
+  </div>
+
+  <div class="ndx-after-column">
+    <h4 class="govuk-heading-s">After: Polly Text-to-Speech</h4>
+    <ul class="govuk-list govuk-list--bullet govuk-body-s">
+      <li><strong>Process:</strong> Paste text, select voice (Amy/Brian/Emma), click "Listen" to preview, click "Synthesize to S3" to save</li>
+      <li><strong>Time:</strong> 30 seconds from text to audio file</li>
+      <li><strong>Cost:</strong> £0.008 per typical announcement (500 characters)</li>
+      <li><strong>Revisions:</strong> £0.008 to regenerate with text changes (instant)</li>
+      <li><strong>Consistency:</strong> Perfect - same neural voice every time</li>
+      <li><strong>Result:</strong> 100% of announcements have audio versions = full WCAG 2.1 AA compliance</li>
+    </ul>
+  </div>
+</div>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>Time savings:</strong> 1-2 weeks reduced to 30 seconds = 99.98% faster.<br>
+    <strong>Cost savings:</strong> £200 reduced to £0.008 = 99.996% cheaper.<br>
+    <strong>Compliance improvement:</strong> 0% audio coverage to 100% = full accessibility.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Understanding audio quality</h3>
+
+<div class="ndx-quality-guide">
+  <h4 class="govuk-heading-s">Neural vs Standard engine</h4>
+  <p class="govuk-body-s">
+    You may have noticed the "Engine" dropdown offers "Standard" as well as "Neural". Here's the difference:
+  </p>
+  <dl class="govuk-summary-list">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Neural engine</dt>
+      <dd class="govuk-summary-list__value">
+        <p class="govuk-body-s">Deep learning generates natural speech with emotion, breathing patterns, and inflection. Sounds like a real person. £0.016 per 1000 characters.</p>
+        <p class="govuk-body-s"><strong>Recommendation:</strong> Always use for public-facing content.</p>
+      </dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Standard engine</dt>
+      <dd class="govuk-summary-list__value">
+        <p class="govuk-body-s">Older concatenative synthesis. Sounds robotic and unnatural. £0.004 per 1000 characters (4× cheaper).</p>
+        <p class="govuk-body-s"><strong>Use case:</strong> Only for internal testing or non-public content where cost matters more than quality.</p>
+      </dd>
+    </div>
+  </dl>
+</div>
+
+<h3 class="govuk-heading-m">Troubleshooting</h3>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Audio sounds robotic, not natural
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If voice quality is poor:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check "Engine" is set to <strong>Neural</strong> not Standard</li>
+      <li>Verify you selected Amy, Brian, or Emma (UK neural voices)</li>
+      <li>If using Joanna, Kendra, Matthew, etc. - these are US voices or older standard voices</li>
+      <li>Ensure "Language" is set to "British English (en-GB)" not "English (US)"</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Polly mispronounces place names or council terms
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If specific words are mispronounced:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Use SSML phoneme tags to specify pronunciation (advanced feature)</li>
+      <li>Example: &lt;phoneme alphabet='ipa' ph='rɛdɪŋ'&gt;Reading&lt;/phoneme&gt; for the town name</li>
+      <li>Create pronunciation lexicon for common council-specific terms (upload to Polly)</li>
+      <li>Spell out abbreviations if needed (NHS as "N H S" instead of "nuss")</li>
+      <li>Most UK place names and postcodes are pronounced correctly by default</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      "Listen" button takes a long time (>30 seconds)
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If audio generation is slow:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check announcement length - very long text (>2000 chars) takes longer</li>
+      <li>Network latency may delay audio streaming - check internet connection</li>
+      <li>AWS region may be experiencing high load - try again in a few minutes</li>
+      <li>Typical generation time: 5-15 seconds for 500-character announcement</li>
+    </ul>
+  </div>
+</details>
+
+<div class="govuk-!-margin-top-6">
+  <p class="govuk-body">
+    Once you've heard all three voices, you're ready to compare them side-by-side and calculate ROI.
+  </p>
+</div>
+
+<style>
+  .ndx-voice-generation-steps {
+    margin: 30px 0;
+  }
+
+  .ndx-voice-step {
+    margin-bottom: 30px;
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-voice-step h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ndx-step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: #1d70b8;
+    color: #ffffff;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .ndx-before-after {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-before-column,
+  .ndx-after-column {
+    padding: 20px;
+    border: 2px solid #b1b4b6;
+  }
+
+  .ndx-before-column {
+    background-color: #fff7e6;
+    border-left: 4px solid #f47738;
+  }
+
+  .ndx-after-column {
+    background-color: #f8fbf8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-before-column h4,
+  .ndx-after-column h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-quality-guide {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    margin: 20px 0;
+  }
+
+  .ndx-quality-guide h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-before-after {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

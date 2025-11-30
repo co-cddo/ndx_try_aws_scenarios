@@ -1,0 +1,485 @@
+# Smart Car Park IoT Sample Data
+# Story 3.5 - AC-3.5.1, AC-3.5.2, AC-3.5.3, AC-3.5.4, AC-3.5.5
+#
+# Sample IoT sensor data for smart car park walkthrough.
+# Simulates 50 parking spaces with occupancy sensors across 3 zones.
+
+carParkConfig:
+  name: "Council Multi-Storey Car Park"
+  location: "City Centre"
+  totalSpaces: 50
+  zones:
+    - id: "ground"
+      name: "Ground Floor"
+      spaces: 20
+      sensors: 20
+      prefix: "GF-"
+      description: "Accessible spaces, EV charging bays, short-stay"
+      features:
+        - "4 accessible spaces"
+        - "6 EV charging points"
+        - "10 standard spaces"
+    - id: "level1"
+      name: "Level 1"
+      spaces: 15
+      sensors: 15
+      prefix: "L1-"
+      description: "Standard parking, medium-stay"
+      features:
+        - "15 standard spaces"
+        - "Covered parking"
+    - id: "level2"
+      name: "Level 2"
+      spaces: 15
+      sensors: 15
+      prefix: "L2-"
+      description: "Standard parking, long-stay"
+      features:
+        - "15 standard spaces"
+        - "Covered parking"
+        - "Lower traffic"
+
+sensorTypes:
+  occupancy:
+    type: "Ultrasonic Distance Sensor"
+    manufacturer: "BOSCH Parking Lot Sensor"
+    model: "PLS-200"
+    accuracy: "99.5%"
+    detectionRange: "30-230cm"
+    updateFrequency: "Every 2 minutes when state changes"
+    powerSource: "Solar + battery backup"
+    connectivity: "LoRaWAN → AWS IoT Core"
+    description: "Ultrasonic sensors detect vehicle presence via distance measurement"
+
+iotDataFlow:
+  steps:
+    - step: 1
+      component: "IoT Sensor"
+      action: "Detect vehicle presence via ultrasonic distance measurement"
+      technology: "BOSCH PLS-200 sensor"
+      output: "Occupancy state (true/false) + timestamp"
+    - step: 2
+      component: "LoRaWAN Gateway"
+      action: "Collect sensor data from 50 sensors and forward to cloud"
+      technology: "LoRaWAN network"
+      output: "MQTT message to AWS IoT Core"
+    - step: 3
+      component: "AWS IoT Core"
+      action: "Receive MQTT messages on topic car-park/sensors/{sensorId}"
+      technology: "MQTT broker"
+      output: "Trigger IoT Rule"
+    - step: 4
+      component: "IoT Rule"
+      action: "Route message to Lambda function for processing"
+      technology: "AWS IoT Rules Engine"
+      output: "Invoke ProcessSensorData Lambda"
+    - step: 5
+      component: "Lambda: ProcessSensorData"
+      action: "Parse sensor reading, validate data, calculate zone metrics"
+      technology: "Python Lambda function"
+      output: "Write to DynamoDB + publish CloudWatch metrics"
+    - step: 6
+      component: "Amazon DynamoDB"
+      action: "Store historical sensor readings (time-series data)"
+      technology: "DynamoDB with TTL (7-day retention)"
+      output: "Historical data for trend analysis"
+    - step: 7
+      component: "Amazon CloudWatch"
+      action: "Display metrics in dashboard, trigger alarms if thresholds exceeded"
+      technology: "CloudWatch Metrics + Dashboard"
+      output: "Real-time visual dashboard + SNS alerts"
+
+sampleSensorReadings:
+  description: "1000 simulated sensor readings across 50 sensors over 24 hours"
+  totalReadings: 1000
+  timeRange: "24 hours (2024-11-27 00:00 to 2024-11-28 00:00)"
+  readingsPerSensor: 20  # Average, simulates readings every ~1.2 hours
+
+  # Sample readings for demonstration (actual data seeded by CloudFormation Lambda)
+  examples:
+    - sensorId: "GF-001"
+      location: "Ground Floor, Bay 1 (Accessible)"
+      zone: "ground"
+      readings:
+        - timestamp: "2024-11-27T08:00:00Z"
+          occupied: true
+          confidence: 0.99
+          duration: 45  # minutes
+        - timestamp: "2024-11-27T08:45:00Z"
+          occupied: false
+          confidence: 0.98
+          duration: 0
+        - timestamp: "2024-11-27T12:30:00Z"
+          occupied: true
+          confidence: 0.99
+          duration: 120  # 2 hours
+
+    - sensorId: "L1-008"
+      location: "Level 1, Bay 8"
+      zone: "level1"
+      readings:
+        - timestamp: "2024-11-27T09:15:00Z"
+          occupied: true
+          confidence: 0.97
+          duration: 180  # 3 hours
+        - timestamp: "2024-11-27T12:15:00Z"
+          occupied: false
+          confidence: 0.98
+          duration: 0
+
+    - sensorId: "L2-012"
+      location: "Level 2, Bay 12"
+      zone: "level2"
+      readings:
+        - timestamp: "2024-11-27T07:30:00Z"
+          occupied: true
+          confidence: 0.99
+          duration: 540  # 9 hours (all-day parker)
+        - timestamp: "2024-11-27T16:30:00Z"
+          occupied: false
+          confidence: 0.99
+          duration: 0
+
+occupancyPatterns:
+  peak:
+    label: "Peak Hours"
+    hours: ["08:00-10:00", "12:00-14:00", "17:00-19:00"]
+    averageOccupancy: 0.85  # 85% occupied (42-43 spaces)
+    description: "Morning commute, lunch period, evening peak"
+    zones:
+      ground: 0.90  # 18/20 spaces
+      level1: 0.87  # 13/15 spaces
+      level2: 0.73  # 11/15 spaces
+
+  offPeak:
+    label: "Off-Peak Hours"
+    hours: ["10:00-12:00", "14:00-17:00", "19:00-22:00"]
+    averageOccupancy: 0.60  # 60% occupied (30 spaces)
+    description: "Mid-morning, mid-afternoon, evening shopping"
+    zones:
+      ground: 0.65  # 13/20 spaces
+      level1: 0.60  # 9/15 spaces
+      level2: 0.53  # 8/15 spaces
+
+  overnight:
+    label: "Overnight"
+    hours: ["22:00-08:00"]
+    averageOccupancy: 0.20  # 20% occupied (10 spaces)
+    description: "Residents, overnight workers"
+    zones:
+      ground: 0.15  # 3/20 spaces
+      level1: 0.20  # 3/15 spaces
+      level2: 0.27  # 4/15 spaces
+
+cloudWatchDashboard:
+  name: "Smart Car Park - Real-Time Occupancy"
+  refreshInterval: "10 seconds"
+  widgets:
+    - id: "total-occupancy"
+      type: "line"
+      title: "Total Occupancy Over Time"
+      metric: "CarPark/Occupancy/TotalPercentage"
+      unit: "Percent"
+      period: 300  # 5 minutes
+      statistic: "Average"
+      description: "Shows occupancy percentage for entire car park over last 24 hours"
+
+    - id: "zone-breakdown"
+      type: "stacked-area"
+      title: "Occupancy by Zone"
+      metrics:
+        - "CarPark/Occupancy/GroundFloor"
+        - "CarPark/Occupancy/Level1"
+        - "CarPark/Occupancy/Level2"
+      unit: "Count"
+      period: 300
+      statistic: "Sum"
+      description: "Compares occupancy across the three zones"
+
+    - id: "current-status"
+      type: "number"
+      title: "Available Spaces Right Now"
+      metric: "CarPark/Occupancy/AvailableSpaces"
+      unit: "Count"
+      statistic: "Average"
+      description: "Live count of currently available parking spaces"
+
+    - id: "peak-hours-heatmap"
+      type: "heatmap"
+      title: "Occupancy Patterns (24-Hour View)"
+      metric: "CarPark/Occupancy/TotalPercentage"
+      period: 3600  # 1 hour buckets
+      description: "Visualize busy vs quiet times across the day"
+
+    - id: "sensor-health"
+      type: "table"
+      title: "Sensor Status (Last Reading)"
+      metrics:
+        - "CarPark/Sensors/LastReading"
+        - "CarPark/Sensors/BatteryLevel"
+      description: "Shows last reading timestamp and battery level for each sensor"
+
+    - id: "average-duration"
+      type: "number"
+      title: "Average Parking Duration"
+      metric: "CarPark/Metrics/AverageDuration"
+      unit: "Minutes"
+      statistic: "Average"
+      description: "How long vehicles typically stay parked"
+
+cloudWatchAlarms:
+  - alarmName: "HighOccupancy-GroundFloor"
+    description: "Alert when ground floor reaches 95% occupancy"
+    metric: "CarPark/Occupancy/GroundFloor"
+    threshold: 19  # 95% of 20 spaces
+    comparison: "GreaterThanThreshold"
+    evaluationPeriods: 2
+    period: 300
+    action: "Send SNS notification to facilities team"
+
+  - alarmName: "SensorOffline"
+    description: "Alert when sensor hasn't reported in 30 minutes"
+    metric: "CarPark/Sensors/LastReading"
+    threshold: 1800  # 30 minutes in seconds
+    comparison: "GreaterThanThreshold"
+    evaluationPeriods: 1
+    period: 300
+    action: "Send SNS notification for sensor maintenance"
+
+  - alarmName: "LowBattery"
+    description: "Alert when sensor battery below 20%"
+    metric: "CarPark/Sensors/BatteryLevel"
+    threshold: 20
+    comparison: "LessThanThreshold"
+    evaluationPeriods: 1
+    period: 3600
+    action: "Send SNS notification for battery replacement"
+
+roiCalculation:
+  currentState:
+    description: "Manual car park management without IoT"
+    manualCounting:
+      staff: 2
+      roundsPerDay: 3
+      minutesPerRound: 15
+      hoursPerDay: 1.5
+      daysPerYear: 260
+      hourlyRate: 25  # £25/hour
+      annualCost: 9750  # £9,750
+    averageOccupancy: 0.60  # 60%
+    pricePerDay: 5  # £5/day
+    totalSpaces: 50
+    annualRevenue: 39000  # 50 × 0.60 × £5 × 260 = £39,000
+
+  withIoT:
+    description: "Automated car park management with IoT sensors"
+    manualCountingCost: 0  # Eliminated
+    averageOccupancy: 0.85  # 85% (improved via real-time guidance)
+    pricePerDay: 5  # £5/day
+    totalSpaces: 50
+    annualRevenue: 55250  # 50 × 0.85 × £5 × 260 = £55,250
+    revenueIncrease: 16250  # £55,250 - £39,000 = £16,250
+    laborSavings: 9750  # Eliminated manual counting
+    totalAnnualBenefit: 26000  # £16,250 + £9,750 = £26,000
+
+  awsCosts:
+    iotCore:
+      messagesPerMonth: 2160000  # 50 sensors × 30 msg/hour × 24h × 30 days
+      pricePerMillion: 1.00  # $1.00 per million messages
+      monthlyCost: 2.16  # £2.16
+    lambda:
+      invocationsPerMonth: 2160000
+      pricePerMillion: 0.20  # $0.20 per million invocations
+      monthlyCost: 0.43  # £0.43
+    dynamoDB:
+      writeCapacityUnits: 5
+      readCapacityUnits: 5
+      storageGB: 2
+      monthlyCost: 3.50  # ~£3.50
+    cloudWatch:
+      customMetrics: 10
+      dashboards: 1
+      alarms: 3
+      monthlyCost: 5.00  # ~£5.00
+    dataTransfer:
+      monthlyCost: 1.00  # ~£1.00
+    totalMonthlyCost: 12.09  # ~£12/month
+    totalAnnualCost: 145  # ~£145/year (rounded)
+
+  netROI:
+    totalBenefit: 26000  # £26,000/year
+    totalCost: 145  # £145/year
+    netBenefit: 25855  # £25,855/year
+    returnOnInvestment: "17,831%"  # (£25,855 / £145) × 100
+    paybackPeriod: "2.1 days"  # (£145 / £26,000) × 365
+
+  committeeLanguage: "IoT sensors transform car park management from reactive to proactive. Real-time occupancy data increases revenue by £16K annually while eliminating manual counting costs of £9.75K. Total annual benefit of £26K against AWS costs of £145 delivers a 178:1 return on investment, with payback achieved in just 2 days."
+
+wowMomentDetails:
+  title: "Watch the Dashboard Update in Real-Time"
+  triggerPoint: "Step 3: Understand IoT Data Flow"
+  description: "As the IoT simulator publishes sensor readings, you'll see the CloudWatch dashboard metrics change every 5-10 seconds"
+
+  observations:
+    - label: "Real-time updates"
+      description: "Dashboard metrics refresh automatically - no manual refresh needed"
+      technicalDetail: "CloudWatch auto-refresh configured to 10-second interval"
+      icon: "refresh"
+
+    - label: "Multi-zone visibility"
+      description: "See all 3 floors simultaneously - impossible with manual counting"
+      technicalDetail: "Lambda aggregates readings across 50 sensors in milliseconds"
+      icon: "layers"
+
+    - label: "Historical trends"
+      description: "24 hours of occupancy patterns visible instantly"
+      technicalDetail: "DynamoDB stores time-series data with 7-day retention"
+      icon: "chart"
+
+    - label: "Automated insights"
+      description: "Peak hours, average duration, zone comparison - all automatic"
+      technicalDetail: "CloudWatch calculates statistics from metric data"
+      icon: "lightbulb"
+
+  userExperience:
+    before: "Manual counting requires 2 staff walking 3 floors every few hours, recording numbers on clipboards, then entering into spreadsheets. By the time data is analyzed, it's already outdated."
+    after: "Open the CloudWatch dashboard and see live occupancy across all zones. Patterns and trends are visible immediately. Alarms notify you before problems occur. Zero manual effort."
+    impactStatement: "What took 1.5 hours of manual work daily now happens automatically in real-time."
+
+troubleshooting:
+  scenarios:
+    - symptom: "Dashboard not loading"
+      possibleCauses:
+        - "IAM permissions missing"
+        - "Incorrect dashboard URL"
+        - "CloudFormation deployment incomplete"
+      solutions:
+        - "Check CloudFormation Outputs tab for the correct dashboard URL (includes embedded credentials)"
+        - "Verify stack status is CREATE_COMPLETE"
+        - "Ensure you're using the same AWS account where you deployed the scenario"
+
+    - symptom: "No data showing on dashboard"
+      possibleCauses:
+        - "IoT simulator Lambda not running"
+        - "No sensor data seeded during deployment"
+        - "CloudWatch metrics not publishing"
+      solutions:
+        - "Go to Lambda console, find 'IoTSimulator' function, check Recent invocations"
+        - "Check DynamoDB table 'SensorReadings' has records (should have ~1000 entries)"
+        - "Verify CloudWatch Logs for ProcessSensorData Lambda - should show metric publications"
+
+    - symptom: "Stale data (older than 5 minutes)"
+      possibleCauses:
+        - "Simulator Lambda stopped/failed"
+        - "IoT Rule disabled"
+        - "Lambda function errors"
+      solutions:
+        - "Check Lambda function CloudWatch Logs for errors"
+        - "Manually invoke IoTSimulator Lambda to restart data generation"
+        - "Verify IoT Core rule is enabled in IoT console"
+
+    - symptom: "'Access Denied' error"
+      possibleCauses:
+        - "Using different AWS account"
+        - "CloudFormation outputs URL expired"
+        - "IAM role not attached to dashboard URL"
+      solutions:
+        - "Confirm you're logged into the same AWS account where you deployed the stack"
+        - "Re-generate dashboard URL from CloudFormation Outputs"
+        - "Check CloudFormation stack still exists (not deleted)"
+
+    - symptom: "Metrics showing flat lines"
+      possibleCauses:
+        - "DynamoDB throttling (write capacity exceeded)"
+        - "Lambda concurrent execution limit"
+        - "IoT Core throttling"
+      solutions:
+        - "Check DynamoDB table metrics for throttled requests"
+        - "Check Lambda concurrent executions in CloudWatch metrics"
+        - "Reduce simulator frequency if hitting AWS service limits"
+
+committeeLanguage:
+  smartCityInitiative:
+    title: "Smart City Car Park Initiative - Business Case"
+    executiveSummary: "Deploy IoT sensors across council car parks to increase revenue, reduce operational costs, and improve citizen experience through real-time occupancy visibility."
+
+    benefits:
+      revenue:
+        - "Increase occupancy from 60% to 85% through real-time guidance = £16,250 additional annual revenue per 50-space car park"
+        - "Multiply across all council car parks for total revenue impact"
+        - "Enable dynamic pricing during peak hours to optimize revenue"
+
+      operationalSavings:
+        - "Eliminate manual counting: Save £9,750 annually per car park"
+        - "Reduce customer service calls about space availability"
+        - "Data-driven maintenance scheduling (fix sensors only when needed)"
+
+      citizenExperience:
+        - "Real-time availability via website/mobile app reduces circling time"
+        - "Faster parking = reduced congestion and emissions"
+        - "Better accessibility management (reserved space monitoring)"
+
+      strategicValue:
+        - "Foundation for broader smart city initiatives"
+        - "Demonstrates digital transformation leadership"
+        - "Scalable to other IoT use cases (waste bins, streetlights, air quality)"
+
+    costs:
+      infrastructure:
+        - "50 IoT sensors @ £120 each = £6,000 (one-time)"
+        - "1 LoRaWAN gateway = £400 (one-time)"
+        - "Installation labor = £2,000 (one-time)"
+        - "Total upfront: £8,400"
+
+      awsOperational:
+        - "AWS IoT Core, Lambda, DynamoDB, CloudWatch = £145/year"
+        - "Minimal ongoing costs due to serverless architecture"
+
+      maintenance:
+        - "Sensor battery replacement every 5 years = £1,200 (£240/year)"
+        - "Technical support contingency = £500/year"
+        - "Total annual operating costs: £885/year"
+
+    financialSummary:
+      upfrontInvestment: 8400  # £8,400
+      annualBenefit: 26000  # £26,000
+      annualOperatingCost: 885  # £885
+      netAnnualBenefit: 25115  # £25,115
+      paybackPeriod: "4 months"  # £8,400 / £25,115 ≈ 0.33 years
+      fiveYearROI: "1,397%"  # ((£25,115 × 5) - £8,400 - (£885 × 5)) / £8,400
+
+    riskMitigation:
+      - "Pilot with 1 car park before scaling to all locations"
+      - "AWS Innovation Sandbox trial period validates technology before procurement"
+      - "No vendor lock-in - sensor data owned by council, transferable"
+      - "Phased rollout limits financial exposure"
+
+    nextSteps:
+      - "Complete AWS Innovation Sandbox walkthrough (this demonstration)"
+      - "Present business case to finance and IT committees"
+      - "Procure sensors and gateway for pilot car park"
+      - "Deploy pilot, measure results for 3 months"
+      - "Scale to remaining car parks based on pilot success"
+
+additionalUseCases:
+  title: "Beyond Car Parks - Other IoT Applications"
+  examples:
+    - name: "Waste Management"
+      description: "Sensors in bins detect fill levels, optimize collection routes"
+      benefit: "Reduce fuel costs by 30%, fewer missed collections"
+
+    - name: "Street Lighting"
+      description: "Monitor lamp status, detect failures automatically"
+      benefit: "Faster repairs, energy savings from adaptive dimming"
+
+    - name: "Air Quality Monitoring"
+      description: "Real-time pollution data across the city"
+      benefit: "Evidence-based traffic management, public health alerts"
+
+    - name: "Flood Detection"
+      description: "Water level sensors in drainage systems"
+      benefit: "Early warning system, prevent property damage"
+
+    - name: "Park & Ride Utilization"
+      description: "Track bus capacity and car park occupancy"
+      benefit: "Optimize bus frequency, improve commuter experience"

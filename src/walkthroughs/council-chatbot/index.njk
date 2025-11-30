@@ -1,0 +1,254 @@
+---
+layout: layouts/walkthrough.njk
+title: Council Chatbot Walkthrough
+description: Step-by-step guide to trying the Council Chatbot with realistic queries
+currentStep: 0
+totalSteps: 4
+scenarioId: council-chatbot
+---
+
+{#
+  Walkthrough Landing Page (Story 3.2)
+  AC-3.2.1, AC-3.2.11, AC-3.2.14, AC-3.2.15, AC-3.2.16
+#}
+
+<h1 class="govuk-heading-xl">Try the Council Chatbot</h1>
+
+{# AC-3.2.16: Value proposition - 10 minutes to understand if this solves your problem #}
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    10 minutes to see if this solves your problem
+  </h2>
+  <div class="govuk-panel__body">
+    No deployment needed. Experience the chatbot with realistic council questions right now.
+  </div>
+</div>
+
+{# AC-3.2.11: Technical reassurance - no technical knowledge required #}
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you step-by-step through asking questions to the chatbot.
+    You'll copy and paste sample questions - that's it. Perfect for service managers,
+    councillors, and anyone evaluating AI for council services.
+  </p>
+</div>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this 10-minute walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Access the chatbot</strong> - Find the chatbot URL from your deployed stack (2 minutes)
+  </li>
+  <li>
+    <strong>Ask your first question</strong> - Copy and paste a bin collection query to see instant AI responses (3 minutes)
+  </li>
+  <li>
+    <strong>Try your own questions</strong> - Explore 10 sample questions across different council services (4 minutes)
+  </li>
+  <li>
+    <strong>Notice the details</strong> - See how the chatbot handles complex queries, context, and UK-specific information (1 minute)
+  </li>
+</ol>
+
+{# AC-3.2.14: Sample data status with live verification #}
+{# AC-3.2.15: Manual seeding fallback instructions #}
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already deployed the Council Chatbot scenario to your Innovation Sandbox account.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/council-chatbot/" class="govuk-link">Deploy the Council Chatbot scenario</a> if you haven't already.
+    Deployment takes 3-5 minutes.
+  </p>
+
+  {# Sample Data Status Component - AC-3.2.14, AC-3.2.15 #}
+  <div class="govuk-!-margin-top-4">
+    <h3 class="govuk-heading-s">Sample data check</h3>
+    {% include "components/sample-data-status.njk" %}
+  </div>
+
+  {# Sample Data Explanation Panel (Story 12.2) - AC1, AC2, AC3 #}
+  <div class="govuk-!-margin-top-4">
+    {% include "components/sample-data-panel.njk" %}
+  </div>
+
+  {# Manual seeding fallback - AC-3.2.15 #}
+  <details class="govuk-details govuk-!-margin-top-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Manual data seeding instructions (if automatic seeding failed)
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">If the automated sample data seeding failed during deployment, you can manually seed the data:</p>
+
+      <ol class="govuk-list govuk-list--number">
+        <li>
+          Go to the <a href="https://console.aws.amazon.com/lambda/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS Lambda console</a>
+        </li>
+        <li>
+          Find the function named <code>ndx-try-council-chatbot-[timestamp]-SampleDataSeeder</code>
+        </li>
+        <li>
+          Click the "Test" tab
+        </li>
+        <li>
+          Create a new test event with name <code>ManualSeed</code> and this JSON:
+          <pre class="ndx-code-block"><code>{
+  "action": "seed",
+  "scenario": "council-chatbot",
+  "recordCount": 200
+}</code></pre>
+        </li>
+        <li>
+          Click "Test" to run the function
+        </li>
+        <li>
+          Wait 30-60 seconds for the function to complete
+        </li>
+        <li>
+          Refresh this page and check the sample data status above shows "Ready"
+        </li>
+      </ol>
+
+      <p class="govuk-body">
+        If you continue to have issues, <a href="/contact/" class="govuk-link">contact support</a>.
+      </p>
+    </div>
+  </details>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For service managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How residents would interact with the chatbot</li>
+      <li>Types of questions it can answer accurately</li>
+      <li>How it handles complex multi-step queries</li>
+      <li>Potential call centre volume reduction</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical staff</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Natural language understanding capabilities</li>
+      <li>Context retention across conversation</li>
+      <li>Integration with council knowledge bases</li>
+      <li>Response quality and accuracy</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">Sample questions you'll try</h2>
+
+<p class="govuk-body">
+  We've prepared 10 realistic council questions across different service areas:
+</p>
+
+<div class="govuk-grid-row ndx-sample-questions-preview">
+  {% for category in chatbotSampleQuestions.categories %}
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-sample-category">
+        <h3 class="govuk-heading-s">
+          <span class="ndx-sample-category__icon">{{ category.icon }}</span>
+          {{ category.name }} ({{ category.questions.length }})
+        </h3>
+        <ul class="govuk-list govuk-list--bullet govuk-body-s">
+          {% for q in category.questions %}
+            <li>{{ q.shortQuestion }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/council-chatbot/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 10 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-code-block {
+    background-color: #f3f2f1;
+    border: 2px solid #b1b4b6;
+    padding: 15px;
+    overflow-x: auto;
+    font-size: 14px;
+  }
+
+  .ndx-code-block code {
+    font-family: monospace;
+    white-space: pre;
+  }
+
+  .ndx-sample-questions-preview {
+    margin-top: 20px;
+  }
+
+  .ndx-sample-category {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-sample-category__icon {
+    font-size: 24px;
+    margin-right: 8px;
+  }
+
+  .ndx-sample-category h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-sample-category ul {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-sample-category__icon {
+      display: block;
+      margin-bottom: 10px;
+    }
+  }
+</style>
