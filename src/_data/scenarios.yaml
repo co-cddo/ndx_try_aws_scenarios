@@ -45,9 +45,9 @@ scenarios:
     featured: true
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-us-west-2.s3.us-west-2.amazonaws.com/scenarios/council-chatbot/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-us-west-2/scenarios/council-chatbot/template.yaml"
-      region: "us-west-2"
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/council-chatbot/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/council-chatbot/template.yaml"
+      region: "eu-west-2"
       stackNamePrefix: "ndx-try-council-chatbot"
       parameters:
         - name: "Environment"
@@ -135,7 +135,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (us-west-2 London region)"
+      data_residency: "UK (eu-west-2 London region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
       data_handling: "No data leaves UK; AWS shared responsibility model applies"
 
@@ -203,9 +203,9 @@ scenarios:
     featured: true
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-us-west-2.s3.us-west-2.amazonaws.com/scenarios/planning-ai/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-us-west-2/scenarios/planning-ai/template.yaml"
-      region: "us-west-2"
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/planning-ai/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/planning-ai/template.yaml"
+      region: "eu-west-2"
       stackNamePrefix: "ndx-try-planning-ai"
       parameters:
         - name: "Environment"
@@ -294,7 +294,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (us-west-2 London region)"
+      data_residency: "UK (eu-west-2 London region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
       data_handling: "No data leaves UK; sample data only in sandbox; AWS shared responsibility model"
 
@@ -362,9 +362,9 @@ scenarios:
     featured: false
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-us-west-2.s3.us-west-2.amazonaws.com/scenarios/foi-redaction/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-us-west-2/scenarios/foi-redaction/template.yaml"
-      region: "us-west-2"
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/foi-redaction/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/foi-redaction/template.yaml"
+      region: "eu-west-2"
       stackNamePrefix: "ndx-try-foi-redaction"
       parameters:
         - name: "Environment"
@@ -449,7 +449,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (us-west-2 London region)"
+      data_residency: "UK (eu-west-2 London region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
       data_handling: "Synthetic data only in sandbox; production data never leaves UK; AWS shared responsibility model"
 
@@ -517,9 +517,9 @@ scenarios:
     featured: false
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-us-west-2.s3.us-west-2.amazonaws.com/scenarios/smart-car-park/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-us-west-2/scenarios/smart-car-park/template.yaml"
-      region: "us-west-2"
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/smart-car-park/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/smart-car-park/template.yaml"
+      region: "eu-west-2"
       stackNamePrefix: "ndx-try-smart-car-park"
       parameters:
         - name: "Environment"
@@ -613,7 +613,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (us-west-2 London region)"
+      data_residency: "UK (eu-west-2 London region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit, IoT device certificates"
       data_handling: "Simulated sensor data in sandbox; production IoT data encrypted in transit; AWS shared responsibility model"
 
@@ -679,9 +679,9 @@ scenarios:
     featured: true
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-us-west-2.s3.us-west-2.amazonaws.com/scenarios/text-to-speech/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-us-west-2/scenarios/text-to-speech/template.yaml"
-      region: "us-west-2"
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/text-to-speech/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/text-to-speech/template.yaml"
+      region: "eu-west-2"
       stackNamePrefix: "ndx-try-text-to-speech"
       parameters:
         - name: "Environment"
@@ -766,7 +766,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (us-west-2 London region)"
+      data_residency: "UK (eu-west-2 London region)"
       encryption: "AES-256 at rest for audio files, TLS 1.3 in transit"
       data_handling: "Sample content only in sandbox; no personal data processed; AWS shared responsibility model"
 
@@ -833,9 +833,9 @@ scenarios:
     featured: false
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-us-west-2.s3.us-west-2.amazonaws.com/scenarios/quicksight-dashboard/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-us-west-2/scenarios/quicksight-dashboard/template.yaml"
-      region: "us-west-2"
+      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/quicksight-dashboard/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/quicksight-dashboard/template.yaml"
+      region: "eu-west-2"
       stackNamePrefix: "ndx-try-quicksight-dashboard"
       parameters:
         - name: "Environment"
@@ -919,7 +919,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (us-west-2 London region)"
+      data_residency: "UK (eu-west-2 London region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit, QuickSight row-level security"
       data_handling: "Sample council metrics in sandbox; production data access controls via IAM; AWS shared responsibility model"
 

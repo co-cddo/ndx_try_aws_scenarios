@@ -4,7 +4,7 @@
 
 set -e
 
-REGION="${1:-us-west-2}"
+REGION="${1:-us-east-1}"
 STACK_NAME="${2:-sample-data-seeder}"
 LAYER_ARN="${3}"
 S3_BUCKET="${4}"
@@ -22,7 +22,7 @@ if [ -z "$LAYER_ARN" ]; then
     echo "Usage: ./deploy.sh [region] [stack-name] [layer-arn] [s3-bucket]"
     echo ""
     echo "Example:"
-    echo "./deploy.sh us-west-2 sample-data-seeder arn:aws:lambda:us-west-2:123456789012:layer:uk-data-generator:1 my-deployment-bucket"
+    echo "./deploy.sh us-east-1 sample-data-seeder arn:aws:lambda:us-east-1:123456789012:layer:uk-data-generator:1 my-deployment-bucket"
     exit 1
 fi
 
@@ -32,7 +32,7 @@ if [ -z "$S3_BUCKET" ]; then
     echo "Usage: ./deploy.sh [region] [stack-name] [layer-arn] [s3-bucket]"
     echo ""
     echo "Example:"
-    echo "./deploy.sh us-west-2 sample-data-seeder arn:aws:lambda:us-west-2:123456789012:layer:uk-data-generator:1 my-deployment-bucket"
+    echo "./deploy.sh us-east-1 sample-data-seeder arn:aws:lambda:us-east-1:123456789012:layer:uk-data-generator:1 my-deployment-bucket"
     exit 1
 fi
 

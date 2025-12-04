@@ -25,7 +25,7 @@ import { basename } from 'path';
 // ============================================================================
 
 const BUCKET_NAME = process.env.SCREENSHOT_BUCKET_NAME || `ndx-screenshots-${process.env.AWS_ACCOUNT_ID}`;
-const REGION = process.env.AWS_REGION || 'us-west-2';
+const REGION = process.env.AWS_REGION || 'us-east-1';
 
 const DISCLAIMER_TEXT =
   'This screenshot was captured from a previous deployment and may not reflect current state';

@@ -12,7 +12,7 @@
  *   node scripts/update-baselines.mjs --bucket ndx-screenshots-123456 --batch-id 2025-11-29T03:00:00Z-abc123
  *
  * Environment Variables:
- *   AWS_REGION - AWS region (default: us-west-2)
+ *   AWS_REGION - AWS region (default: us-east-1)
  *   AWS_ACCESS_KEY_ID - AWS access key
  *   AWS_SECRET_ACCESS_KEY - AWS secret key
  */
@@ -31,7 +31,7 @@ for (let i = 0; i < args.length; i += 2) {
 
 const bucketName = argsMap.bucket || process.env.SCREENSHOT_BUCKET_NAME;
 const batchId = argsMap['batch-id'];
-const region = process.env.AWS_REGION || 'us-west-2';
+const region = process.env.AWS_REGION || 'us-east-1';
 const topicArn = argsMap['topic-arn'] || process.env.SNS_TOPIC_ARN;
 const cfnVersion = argsMap['cfn-version'] || 'unknown';
 

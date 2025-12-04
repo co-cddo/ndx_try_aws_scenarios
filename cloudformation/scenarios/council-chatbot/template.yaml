@@ -133,7 +133,7 @@ Resources:
           from datetime import datetime
 
           # Initialize Bedrock client
-          bedrock = boto3.client('bedrock-runtime', region_name='us-west-2')
+          bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
 
           # Council assistant system prompt
           SYSTEM_PROMPT = """You are a helpful UK local council service assistant for a sample council.

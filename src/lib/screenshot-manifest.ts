@@ -46,7 +46,7 @@ export function createManifest(
 export async function uploadManifestToS3(
   manifest: ScreenshotManifest,
   bucketName: string,
-  region: string = 'us-west-2'
+  region: string = 'us-east-1'
 ): Promise<void> {
   const client = new S3Client({ region });
   const key = `manifests/${manifest.batch_id}.json`;
@@ -64,7 +64,7 @@ export async function uploadScreenshotToS3(
   filename: string,
   scenario: string,
   bucketName: string,
-  region: string = 'us-west-2'
+  region: string = 'us-east-1'
 ): Promise<void> {
   const client = new S3Client({ region });
   const key = `current/${scenario}/${filename}`;
@@ -80,7 +80,7 @@ export async function uploadScreenshotToS3(
 export async function sendNotification(
   manifest: ScreenshotManifest,
   topicArn: string,
-  region: string = 'us-west-2'
+  region: string = 'us-east-1'
 ): Promise<void> {
   const client = new SNSClient({ region });
 

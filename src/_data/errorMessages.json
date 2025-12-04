@@ -93,9 +93,9 @@
       "pattern": "template.*not.*found|bucket.*does.*not.*exist.*in.*region",
       "userMessage": "The deployment is configured for a different AWS region.",
       "troubleshootingSteps": [
-        "Check you're in the us-west-2 (London) region",
+        "Check you're in the eu-west-2 (London) region",
         "Click the region selector in the top-right of AWS Console",
-        "Select 'Europe (London) us-west-2'"
+        "Select 'Europe (London) eu-west-2'"
       ],
       "supportLink": "/help/region-mismatch"
     },

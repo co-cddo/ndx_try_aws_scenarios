@@ -42,7 +42,7 @@ scenarioId: text-to-speech
   <li>
     <strong>Open the CloudFormation console</strong>
     <p class="govuk-body">
-      Go to <a href="https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console (us-west-2 London)</a>
+      Go to <a href="https://eu-west-2.console.aws.amazon.com/cloudformation/home?region=eu-west-2#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console (eu-west-2 London)</a>
     </p>
   </li>
 
@@ -204,7 +204,7 @@ scenarioId: text-to-speech
       If you don't see the Text-to-Speech stack:
     </p>
     <ul class="govuk-list govuk-list--bullet">
-      <li>Check you're in the correct AWS region (us-west-2 London)</li>
+      <li>Check you're in the correct AWS region (eu-west-2 London)</li>
       <li>Verify you deployed the scenario (go to <a href="/scenarios/text-to-speech/" class="govuk-link">Text-to-Speech scenario page</a>)</li>
       <li>If stack shows CREATE_IN_PROGRESS, wait 2-3 more minutes for completion</li>
       <li>If stack shows CREATE_FAILED, delete and redeploy (check CloudWatch logs for error details)</li>
@@ -229,7 +229,7 @@ scenarioId: text-to-speech
       <li>Ensure IAM permissions were created correctly (check CloudFormation Events tab for errors)</li>
     </ul>
     <p class="govuk-body">
-      If still blocked, go directly to the <a href="https://us-west-2.console.aws.amazon.com/polly/home/SynthesizeSpeech" target="_blank" rel="noopener noreferrer" class="govuk-link">Polly console (direct link)</a> and manually configure.
+      If still blocked, go directly to the <a href="https://eu-west-2.console.aws.amazon.com/polly/home/SynthesizeSpeech" target="_blank" rel="noopener noreferrer" class="govuk-link">Polly console (direct link)</a> and manually configure.
     </p>
   </div>
 </details>
@@ -267,7 +267,7 @@ scenarioId: text-to-speech
     <ul class="govuk-list govuk-list--bullet">
       <li>Ensure "Engine" dropdown is set to <strong>Neural</strong> (not Standard)</li>
       <li>Ensure "Language" is set to <strong>British English (en-GB)</strong> not US English</li>
-      <li>Neural voices may not be available in all AWS regions - confirm you're in us-west-2 (London)</li>
+      <li>Neural voices may not be available in all AWS regions - confirm you're in eu-west-2 (London)</li>
       <li>If using Polly API directly, verify you have neural engine permissions in IAM</li>
     </ul>
   </div>
