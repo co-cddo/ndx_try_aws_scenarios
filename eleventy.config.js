@@ -130,7 +130,7 @@ export default function(eleventyConfig) {
     }
 
     const deployment = scenario.deployment;
-    const region = deployment.region || 'us-west-2';
+    const region = deployment.region || 'eu-west-2';
     const templateUrl = deployment.templateUrl || deployment.templateS3Url;
 
     if (!templateUrl) {
