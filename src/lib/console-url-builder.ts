@@ -82,10 +82,10 @@ export interface ScenarioUrls {
  * ```typescript
  * const url = buildConsoleUrl({
  *   service: 'lambda',
- *   region: 'us-east-1',
+ *   region: 'us-west-2',
  *   resourceIdentifier: 'my-function'
  * });
- * // Returns: https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/functions/my-function
+ * // Returns: https://us-west-2.console.aws.amazon.com/lambda/home?region=us-west-2#/functions/my-function
  * ```
  */
 export function buildConsoleUrl(config: ConsoleUrlConfig): string {
@@ -135,22 +135,22 @@ export function buildConsoleUrl(config: ConsoleUrlConfig): string {
 /**
  * Extract resource identifier and region from AWS ARN
  *
- * @param arn - AWS ARN (e.g., arn:aws:lambda:us-east-1:123456789012:function:my-function)
+ * @param arn - AWS ARN (e.g., arn:aws:lambda:us-west-2:123456789012:function:my-function)
  * @param defaultRegion - Default region for services without region in ARN (e.g., S3)
  * @returns Resource identifier and region
  *
  * @example
  * ```typescript
  * const { resourceId, region } = extractResourceFromArn(
- *   'arn:aws:lambda:us-east-1:123456789012:function:my-function'
+ *   'arn:aws:lambda:us-west-2:123456789012:function:my-function'
  * );
  * // resourceId: 'my-function'
- * // region: 'us-east-1'
+ * // region: 'us-west-2'
  * ```
  */
 export function extractResourceFromArn(
   arn: string,
-  defaultRegion: string = 'us-east-1'
+  defaultRegion: string = 'us-west-2'
 ): {
   resourceId: string;
   region: string;
@@ -203,18 +203,18 @@ export function extractResourceFromArn(
  * Get CloudFormation stack outputs
  *
  * @param stackName - Name of the CloudFormation stack
- * @param region - AWS region (defaults to us-east-1)
+ * @param region - AWS region (defaults to us-west-2)
  * @returns Stack outputs as key-value map
  *
  * @example
  * ```typescript
- * const outputs = await getStackOutputs('ndx-reference', 'us-east-1');
+ * const outputs = await getStackOutputs('ndx-reference', 'us-west-2');
  * const lambdaArn = outputs['CouncilChatbotLambdaArn'];
  * ```
  */
 export async function getStackOutputs(
   stackName: string,
-  region: string = 'us-east-1'
+  region: string = 'us-west-2'
 ): Promise<Record<string, string>> {
   // Get credentials from environment
   const credentials =
@@ -258,7 +258,7 @@ export async function getStackOutputs(
  * Build scenario-specific console URLs from reference stack outputs
  *
  * @param stackName - Name of the reference stack (default: ndx-reference)
- * @param region - AWS region (defaults to us-east-1)
+ * @param region - AWS region (defaults to us-west-2)
  * @returns Scenario URLs for all 6 scenarios
  *
  * @example
@@ -269,7 +269,7 @@ export async function getStackOutputs(
  */
 export async function buildScenarioUrls(
   stackName: string = 'ndx-reference',
-  region: string = 'us-east-1'
+  region: string = 'us-west-2'
 ): Promise<ScenarioUrls[]> {
   const outputs = await getStackOutputs(stackName, region);
 

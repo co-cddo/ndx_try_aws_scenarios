@@ -1,6 +1,6 @@
 # Screenshot data for QuickSight Dashboard scenario (Story 13.2)
 # Used by screenshot.njk component to display screenshots
-# Updated to reflect real deployed dashboard in us-east-1
+# Updated to reflect real deployed dashboard in us-west-2
 
 scenario: quicksight-dashboard
 scenarioTitle: "QuickSight Dashboard"

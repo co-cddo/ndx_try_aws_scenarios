@@ -4,7 +4,7 @@
 
 set -e
 
-REGION="${1:-us-east-1}"
+REGION="${1:-us-west-2}"
 STACK_NAME="${2:-uk-data-generator-layer}"
 LAYER_NAME="uk-data-generator"
 

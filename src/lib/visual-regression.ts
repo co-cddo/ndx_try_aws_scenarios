@@ -84,7 +84,7 @@ export async function downloadBaseline(
   scenario: string,
   filename: string,
   bucketName: string,
-  region: string = 'us-east-1'
+  region: string = 'us-west-2'
 ): Promise<Buffer | null> {
   const client = new S3Client({ region });
   const key = `baselines/${scenario}/${filename}`;
@@ -120,7 +120,7 @@ export async function downloadCurrentScreenshot(
   scenario: string,
   filename: string,
   bucketName: string,
-  region: string = 'us-east-1'
+  region: string = 'us-west-2'
 ): Promise<Buffer> {
   const client = new S3Client({ region });
   const key = `current/${scenario}/${filename}`;
@@ -149,7 +149,7 @@ export async function uploadDiffImage(
   diffBuffer: Buffer,
   path: string,
   bucketName: string,
-  region: string = 'us-east-1'
+  region: string = 'us-west-2'
 ): Promise<string> {
   const client = new S3Client({ region });
   const key = `diffs/${path}`;
@@ -174,7 +174,7 @@ export async function compareScreenshot(
   filename: string,
   bucketName: string,
   batchId: string,
-  region: string = 'us-east-1',
+  region: string = 'us-west-2',
   cfnTemplateVersion?: string
 ): Promise<RegressionResult> {
   // Download current and baseline
@@ -219,7 +219,7 @@ export async function compareScreenshot(
 export async function compareAllScreenshots(
   manifest: ScreenshotManifest,
   bucketName: string,
-  region: string = 'us-east-1'
+  region: string = 'us-west-2'
 ): Promise<RegressionReport> {
   const results: RegressionResult[] = [];
 
@@ -272,7 +272,7 @@ export async function compareAllScreenshots(
  */
 export async function publishMetrics(
   report: RegressionReport,
-  region: string = 'us-east-1'
+  region: string = 'us-west-2'
 ): Promise<void> {
   const client = new CloudWatchClient({ region });
 
@@ -317,7 +317,7 @@ export async function publishMetrics(
  */
 export async function listBaselines(
   bucketName: string,
-  region: string = 'us-east-1'
+  region: string = 'us-west-2'
 ): Promise<string[]> {
   const client = new S3Client({ region });
   const baselines: string[] = [];

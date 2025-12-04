@@ -45,7 +45,7 @@ const session = await openAwsConsoleInPlaywright({
 
 // Use the authenticated page
 await session.page.goto(
-  'https://us-east-1.console.aws.amazon.com/lambda'
+  'https://us-west-2.console.aws.amazon.com/lambda'
 );
 
 // Take actions in the console
@@ -65,7 +65,7 @@ const session = await openAwsConsoleInPlaywright(
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
-  'https://us-east-1.console.aws.amazon.com/cloudformation'
+  'https://us-west-2.console.aws.amazon.com/cloudformation'
 );
 ```
 
@@ -102,35 +102,35 @@ import { buildConsoleUrl } from '../src/lib/aws-federation.js';
 
 // Lambda function
 const lambdaUrl = buildConsoleUrl(
-  'arn:aws:lambda:us-east-1:123456789012:function:my-function',
+  'arn:aws:lambda:us-west-2:123456789012:function:my-function',
   'lambda'
 );
-// https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/functions/my-function
+// https://us-west-2.console.aws.amazon.com/lambda/home?region=us-west-2#/functions/my-function
 
 // S3 bucket
 const s3Url = buildConsoleUrl('arn:aws:s3:::my-bucket', 's3');
-// https://us-east-1.console.aws.amazon.com/s3/buckets/my-bucket
+// https://us-west-2.console.aws.amazon.com/s3/buckets/my-bucket
 
 // CloudFormation stack
 const cfnUrl = buildConsoleUrl(
-  'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc',
+  'arn:aws:cloudformation:us-west-2:123456789012:stack/my-stack/abc',
   'cloudformation'
 );
-// https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=...
+// https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/stackinfo?stackId=...
 
 // DynamoDB table
 const ddbUrl = buildConsoleUrl(
-  'arn:aws:dynamodb:us-east-1:123456789012:table/my-table',
+  'arn:aws:dynamodb:us-west-2:123456789012:table/my-table',
   'dynamodb'
 );
-// https://us-east-1.console.aws.amazon.com/dynamodbv2/home?region=us-east-1#table?name=my-table
+// https://us-west-2.console.aws.amazon.com/dynamodbv2/home?region=us-west-2#table?name=my-table
 
 // CloudWatch
 const cwUrl = buildConsoleUrl(
-  'arn:aws:cloudwatch:us-east-1:123456789012:alarm:my-alarm',
+  'arn:aws:cloudwatch:us-west-2:123456789012:alarm:my-alarm',
   'cloudwatch'
 );
-// https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1
+// https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2
 ```
 
 ### getStackOutputs
@@ -140,7 +140,7 @@ Fetch CloudFormation stack outputs as a key-value map:
 ```typescript
 import { getStackOutputs } from '../src/lib/aws-federation.js';
 
-const outputs = await getStackOutputs('my-stack', 'us-east-1');
+const outputs = await getStackOutputs('my-stack', 'us-west-2');
 const bucketName = outputs['BucketName'];
 const functionArn = outputs['FunctionArn'];
 ```
@@ -155,7 +155,7 @@ interface FederationConfig {
   secretAccessKey: string;     // AWS Secret Access Key
   durationSeconds?: number;    // Session duration (default: 3600, max: 129600)
   policy?: string;             // Optional inline IAM policy (JSON string)
-  region?: string;             // AWS region (default: us-east-1)
+  region?: string;             // AWS region (default: us-west-2)
 }
 ```
 

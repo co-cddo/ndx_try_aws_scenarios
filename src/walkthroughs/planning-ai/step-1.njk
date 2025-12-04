@@ -37,7 +37,7 @@ scenarioId: planning-ai
   <li>
     <strong>Open the CloudFormation console</strong>
     <p class="govuk-body">
-      Go to <a href="https://eu-west-2.console.aws.amazon.com/cloudformation/home?region=eu-west-2#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console in eu-west-2 (London)<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+      Go to <a href="https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console in us-west-2 (London)<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
     </p>
   </li>
 
@@ -71,7 +71,7 @@ scenarioId: planning-ai
       Look for the row with Key: <code>ProcessingURL</code>
     </p>
     <p class="govuk-body">
-      The Value will be a URL like: <code>https://[random-id].execute-api.eu-west-2.amazonaws.com/prod/extract</code>
+      The Value will be a URL like: <code>https://[random-id].execute-api.us-west-2.amazonaws.com/prod/extract</code>
     </p>
   </li>
 
@@ -166,12 +166,12 @@ scenarioId: planning-ai
       If the processing interface page shows an error or won't load:
     </p>
     <ul class="govuk-list govuk-list--bullet">
-      <li>Check you're using the correct region (eu-west-2)</li>
+      <li>Check you're using the correct region (us-west-2)</li>
       <li>Check your browser isn't blocking the page (HTTPS should work)</li>
       <li>Try opening in an incognito/private window</li>
       <li>Check the stack Events tab for any errors during API Gateway or Lambda setup</li>
       <li>Wait a few minutes - API Gateway endpoints can take 1-2 minutes to activate after deployment</li>
-      <li>Verify Textract service is available in eu-west-2 region</li>
+      <li>Verify Textract service is available in us-west-2 region</li>
     </ul>
   </div>
 </details>

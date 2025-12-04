@@ -46,7 +46,7 @@ export interface FederationConfig {
   durationSeconds?: number;
   /** Optional inline IAM policy to further restrict federated session permissions */
   policy?: string;
-  /** AWS region (default: us-east-1) */
+  /** AWS region (default: us-west-2) */
   region?: string;
 }
 
@@ -151,7 +151,7 @@ async function withRetry<T>(
 async function getFederatedCredentials(
   config: FederationConfig
 ): Promise<FederatedCredentials> {
-  const region = config.region || 'us-east-1';
+  const region = config.region || 'us-west-2';
   const stsClient = new STSClient({
     region,
     credentials: {
@@ -235,7 +235,7 @@ async function getSigninToken(
  * Construct AWS Console login URL with signin token (AC2.4)
  *
  * @param signinToken - Token from AWS federation endpoint
- * @param destination - Console destination URL (defaults to us-east-1 home)
+ * @param destination - Console destination URL (defaults to us-west-2 home)
  * @returns Complete login URL
  */
 function buildFederationLoginUrl(
@@ -243,7 +243,7 @@ function buildFederationLoginUrl(
   destination?: string
 ): string {
   const defaultDestination =
-    'https://us-east-1.console.aws.amazon.com/console/home?region=us-east-1';
+    'https://us-west-2.console.aws.amazon.com/console/home?region=us-west-2';
   const dest = destination || defaultDestination;
 
   const params = new URLSearchParams({
@@ -300,7 +300,7 @@ async function waitForAuthentication(page: Page): Promise<void> {
  * });
  *
  * // Use session.page for testing
- * await session.page.goto('https://us-east-1.console.aws.amazon.com/lambda');
+ * await session.page.goto('https://us-west-2.console.aws.amazon.com/lambda');
  *
  * // Clean up when done
  * await closeConsoleSession(session);
@@ -407,10 +407,10 @@ export async function closeConsoleSession(
  * @example
  * ```typescript
  * const lambdaUrl = buildConsoleUrl(
- *   'arn:aws:lambda:us-east-1:123456789012:function:my-function',
+ *   'arn:aws:lambda:us-west-2:123456789012:function:my-function',
  *   'lambda'
  * );
- * // Returns: https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/functions/my-function
+ * // Returns: https://us-west-2.console.aws.amazon.com/lambda/home?region=us-west-2#/functions/my-function
  * ```
  */
 export function buildConsoleUrl(
@@ -420,7 +420,7 @@ export function buildConsoleUrl(
 ): string {
   // Parse ARN: arn:partition:service:region:account-id:resource
   const arnParts = arn.split(':');
-  const arnRegion = region || arnParts[3] || 'us-east-1';
+  const arnRegion = region || arnParts[3] || 'us-west-2';
   const resourcePart = arnParts.slice(5).join(':'); // Everything after account-id
 
   const baseUrl = `https://${arnRegion}.console.aws.amazon.com`;
@@ -466,19 +466,19 @@ export function buildConsoleUrl(
  * Get CloudFormation stack outputs as key-value map
  *
  * @param stackName - Name of the CloudFormation stack
- * @param region - AWS region (defaults to us-east-1)
+ * @param region - AWS region (defaults to us-west-2)
  * @returns Map of output keys to values
  *
  * @example
  * ```typescript
- * const outputs = await getStackOutputs('my-stack', 'us-east-1');
+ * const outputs = await getStackOutputs('my-stack', 'us-west-2');
  * const bucketName = outputs['BucketName'];
  * const functionArn = outputs['FunctionArn'];
  * ```
  */
 export async function getStackOutputs(
   stackName: string,
-  region: string = 'us-east-1'
+  region: string = 'us-west-2'
 ): Promise<Record<string, string>> {
   // Get credentials from environment
   const credentials =

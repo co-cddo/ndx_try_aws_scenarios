@@ -1,0 +1,238 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  NDX:Try - QuickSight Account Subscription
+  Creates QuickSight account subscription if not already subscribed.
+  Must be deployed before quicksight-dashboard main template.
+
+Parameters:
+  NotificationEmail:
+    Type: String
+    Default: 'noreply@example.com'
+    Description: Email for QuickSight notifications
+
+Resources:
+  QuickSightSubscriptionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'ndx-quicksight-subscription-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: QuickSightSubscriptionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - quicksight:CreateAccountSubscription
+                  - quicksight:DescribeAccountSubscription
+                  - quicksight:DeleteAccountSubscription
+                  - quicksight:ListUsers
+                  - quicksight:RegisterUser
+                  - quicksight:DescribeUser
+                  - ds:DescribeDirectories
+                  - ds:AuthorizeApplication
+                  - ds:UnauthorizeApplication
+                  - ds:CheckAlias
+                  - ds:CreateAlias
+                  - ds:CreateIdentityPoolDirectory
+                  - ds:DeleteDirectory
+                  - iam:CreateServiceLinkedRole
+                Resource: '*'
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-subscription
+
+  QuickSightSubscriptionFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ndx-quicksight-subscription-${AWS::Region}'
+      Description: Creates QuickSight account subscription if not exists
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt QuickSightSubscriptionRole.Arn
+      Timeout: 300
+      MemorySize: 256
+      Environment:
+        Variables:
+          ACCOUNT_ID: !Ref AWS::AccountId
+          REGION: !Ref AWS::Region
+          NOTIFICATION_EMAIL: !Ref NotificationEmail
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import urllib3
+          import os
+          import time
+
+          http = urllib3.PoolManager()
+
+          def send_cfn_response(event, context, status, data=None, physical_id=None, reason=None):
+              response_body = {
+                  'Status': status,
+                  'Reason': reason or f'See CloudWatch Log Stream: {context.log_stream_name}',
+                  'PhysicalResourceId': physical_id or context.log_stream_name,
+                  'StackId': event['StackId'],
+                  'RequestId': event['RequestId'],
+                  'LogicalResourceId': event['LogicalResourceId'],
+                  'Data': data or {}
+              }
+              json_response = json.dumps(response_body).encode('utf-8')
+              headers = {'Content-Type': 'application/json', 'Content-Length': str(len(json_response))}
+              try:
+                  http.request('PUT', event['ResponseURL'], body=json_response, headers=headers)
+              except Exception as e:
+                  print(f"Failed to send response: {str(e)}")
+
+          def handler(event, context):
+              print(f"Event: {json.dumps(event)}")
+
+              account_id = os.environ['ACCOUNT_ID']
+              region = os.environ['REGION']
+              notification_email = os.environ['NOTIFICATION_EMAIL']
+              request_type = event.get('RequestType')
+
+              quicksight = boto3.client('quicksight', region_name=region)
+
+              try:
+                  if request_type == 'Delete':
+                      send_cfn_response(event, context, 'SUCCESS',
+                          physical_id=f'quicksight-subscription-{account_id}',
+                          reason='QuickSight subscription retained')
+                      return
+
+                  def get_active_user():
+                      """Find an active QuickSight user for CloudFormation permissions"""
+                      try:
+                          users = quicksight.list_users(AwsAccountId=account_id, Namespace='default')
+                          # First try to find an active user (preferring simple names without /)
+                          active_users = [u for u in users.get('UserList', []) if u.get('Active', False)]
+                          for user in active_users:
+                              uname = user.get('UserName', '')
+                              if '/' not in uname:
+                                  print(f"Found active user without slash: {uname}")
+                                  return uname
+                          # If no simple active user, use any active user
+                          if active_users:
+                              uname = active_users[0].get('UserName', '')
+                              print(f"Using active user: {uname}")
+                              return uname
+                          # No active users - return any user
+                          if users.get('UserList'):
+                              uname = users['UserList'][0].get('UserName', '')
+                              print(f"No active users, using: {uname}")
+                              return uname
+                      except Exception as e:
+                          print(f"Could not list users: {e}")
+                      return 'admin'
+
+                  # Check if already subscribed
+                  try:
+                      response = quicksight.describe_account_subscription(AwsAccountId=account_id)
+                      account_info = response.get('AccountInfo', {})
+                      print(f"QuickSight already subscribed: {account_info}")
+
+                      # Get an active user for CloudFormation permissions
+                      username = get_active_user()
+
+                      send_cfn_response(event, context, 'SUCCESS',
+                          data={'AccountName': account_info.get('AccountName', ''), 'Username': username, 'AlreadySubscribed': 'true'},
+                          physical_id=f'quicksight-subscription-{account_id}',
+                          reason='QuickSight already subscribed')
+                      return
+
+                  except quicksight.exceptions.ResourceNotFoundException:
+                      print("QuickSight not subscribed, creating subscription...")
+                  except Exception as e:
+                      if 'ResourceNotFoundException' in str(type(e).__name__) or 'not found' in str(e).lower():
+                          print("QuickSight not subscribed, creating subscription...")
+                      else:
+                          raise
+
+                  print("Creating QuickSight account subscription...")
+                  response = quicksight.create_account_subscription(
+                      AwsAccountId=account_id,
+                      AccountName=f'ndx-try-{account_id}',
+                      NotificationEmail=notification_email,
+                      Edition='ENTERPRISE',
+                      AuthenticationMethod='IAM_AND_QUICKSIGHT'
+                  )
+                  print(f"Subscription response: {response}")
+
+                  # Wait for subscription to be ready
+                  for i in range(30):
+                      time.sleep(10)
+                      try:
+                          desc = quicksight.describe_account_subscription(AwsAccountId=account_id)
+                          status = desc.get('AccountInfo', {}).get('AccountSubscriptionStatus', '')
+                          print(f"Subscription status: {status}")
+                          if status == 'ACCOUNT_CREATED':
+                              break
+                      except Exception as e:
+                          print(f"Waiting for subscription... {e}")
+
+                  # Get an active user for CloudFormation permissions
+                  username = get_active_user()
+
+                  send_cfn_response(event, context, 'SUCCESS',
+                      data={'AccountName': f'ndx-try-{account_id}', 'Username': username, 'AlreadySubscribed': 'false'},
+                      physical_id=f'quicksight-subscription-{account_id}',
+                      reason='QuickSight subscription created')
+
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  send_cfn_response(event, context, 'FAILED', reason=str(e))
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-subscription
+
+  QuickSightSubscriptionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${QuickSightSubscriptionFunction}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-subscription
+
+  QuickSightSubscription:
+    Type: AWS::CloudFormation::CustomResource
+    DependsOn:
+      - QuickSightSubscriptionLogGroup
+    Properties:
+      ServiceToken: !GetAtt QuickSightSubscriptionFunction.Arn
+      ServiceTimeout: 300
+      Timestamp: !Sub '${AWS::StackName}-subscription-v3'
+
+Outputs:
+  QuickSightUsername:
+    Description: QuickSight username for resource permissions
+    Value: !GetAtt QuickSightSubscription.Username
+    Export:
+      Name: !Sub '${AWS::StackName}-QuickSightUsername'
+
+  QuickSightAccountName:
+    Description: QuickSight account name
+    Value: !GetAtt QuickSightSubscription.AccountName
+    Export:
+      Name: !Sub '${AWS::StackName}-QuickSightAccountName'
+
+  AlreadySubscribed:
+    Description: Whether QuickSight was already subscribed
+    Value: !GetAtt QuickSightSubscription.AlreadySubscribed
+    Export:
+      Name: !Sub '${AWS::StackName}-AlreadySubscribed'

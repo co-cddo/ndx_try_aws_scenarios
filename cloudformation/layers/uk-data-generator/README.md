@@ -80,7 +80,7 @@ zip -r uk-data-generator.zip python/
 aws cloudformation deploy \
   --template-file layer.yaml \
   --stack-name uk-data-generator-layer \
-  --region us-east-1
+  --region us-west-2
 ```
 
 ## API Reference

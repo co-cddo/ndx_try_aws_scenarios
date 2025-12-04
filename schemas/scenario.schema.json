@@ -158,8 +158,8 @@
               "region": {
                 "type": "string",
                 "pattern": "^[a-z]{2}-[a-z]+-\\d$",
-                "default": "eu-west-2",
-                "description": "AWS region for deployment (default: eu-west-2 London)"
+                "default": "us-west-2",
+                "description": "AWS region for deployment (default: us-west-2 London)"
               },
               "stackNamePrefix": {
                 "type": "string",
@@ -484,7 +484,7 @@
               },
               "data_residency": {
                 "type": "string",
-                "description": "Data residency statement (e.g., UK (eu-west-2 London region))"
+                "description": "Data residency statement (e.g., UK (us-west-2 London region))"
               },
               "encryption": {
                 "type": "string",

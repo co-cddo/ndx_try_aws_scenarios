@@ -6,7 +6,7 @@
  *
  * Environment variables required:
  * - SCREENSHOT_BUCKET_NAME: S3 bucket name
- * - AWS_REGION: AWS region (default: us-east-1)
+ * - AWS_REGION: AWS region (default: us-west-2)
  */
 
 import { readFileSync } from 'fs';
@@ -26,7 +26,7 @@ if (!bucketName) {
   process.exit(1);
 }
 
-const region = process.env.AWS_REGION || 'us-east-1';
+const region = process.env.AWS_REGION || 'us-west-2';
 
 try {
   // Read manifest file

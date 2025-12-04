@@ -1,6 +1,6 @@
 # Screenshot data for Planning Application AI scenario (Story 13.2)
 # Used by screenshot.njk component to display S3-hosted screenshots
-# S3 Base: https://ndx-try-screenshots.s3.eu-west-2.amazonaws.com/current/planning-ai/
+# S3 Base: https://ndx-try-screenshots.s3.us-west-2.amazonaws.com/current/planning-ai/
 
 scenario: planning-ai
 scenarioTitle: "Planning Application AI"

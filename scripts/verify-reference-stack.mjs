@@ -28,7 +28,7 @@ import { S3Client, HeadBucketCommand } from '@aws-sdk/client-s3';
 // ============================================================================
 
 const STACK_NAME = process.env.REFERENCE_STACK_NAME || 'ndx-reference';
-const REGION = process.env.AWS_REGION || 'us-east-1';
+const REGION = process.env.AWS_REGION || 'us-west-2';
 
 // Expected outputs from reference stack
 const REQUIRED_OUTPUTS = [

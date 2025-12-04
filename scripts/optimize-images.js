@@ -53,7 +53,7 @@ const CONFIG = {
 
   // S3 bucket for screenshots
   s3Bucket: 'ndx-try-screenshots',
-  s3Region: 'eu-west-2',
+  s3Region: 'us-west-2',
 
   // Scenarios to process
   scenarios: [
