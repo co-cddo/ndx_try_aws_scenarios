@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Story Context XML for Story 2-2
+  Generated: 2025-11-28
+  Generator: story-context workflow
+-->
+<story-context version="1.0">
+  <metadata>
+    <story-id>2-2-real-time-deployment-progress-tracking-cloudformation-events</story-id>
+    <epic-id>epic-2</epic-id>
+    <generated-date>2025-11-28</generated-date>
+    <project>ndx_try_aws_scenarios</project>
+  </metadata>
+
+  <story-summary>
+    <title>Real-Time Deployment Progress Tracking - CloudFormation Events</title>
+    <objective>Guide council users through CloudFormation deployment monitoring with clear expectations, estimated times, and post-deployment access points</objective>
+    <user-value>Users know their deployment is working and don't give up thinking it's stuck</user-value>
+  </story-summary>
+
+  <acceptance-criteria>
+    <criterion id="AC-2.2.1">After clicking "Deploy to Innovation Sandbox", user is guided to AWS CloudFormation console where real-time stack events are visible</criterion>
+    <criterion id="AC-2.2.2">Portal provides clear guidance on what to expect in CloudFormation console (resource creation in progress, estimated time, success indicators)</criterion>
+    <criterion id="AC-2.2.3">Deployment status guidance shows green checkmark description when stack creation succeeds, red X and error message guidance if deployment fails, "Access Your Scenario" guidance appears when complete</criterion>
+    <criterion id="AC-2.2.4">If deployment fails, error message mapping provides plain English guidance (not CloudFormation technical jargon)</criterion>
+    <criterion id="AC-2.2.5">User can easily navigate to full CloudFormation events in AWS Console (link provided)</criterion>
+    <criterion id="AC-2.2.6">Portal displays estimated deployment time based on scenario complexity</criterion>
+    <criterion id="AC-2.2.7">Post-deployment success page or section shows immediate access points (dashboard URLs, API endpoints)</criterion>
+  </acceptance-criteria>
+
+  <architectural-constraints>
+    <constraint id="ADR-1">Static Site + CloudFormation Console - Portal guides users to AWS Console, does NOT embed CloudFormation or poll AWS APIs</constraint>
+    <constraint id="ADR-4">Vanilla JavaScript only - no frameworks for any progress indicators</constraint>
+    <constraint id="ADR-6">GOV.UK Frontend 5.13.0 - use notification banner, timeline, and accordion components</constraint>
+    <constraint id="static">Portal is static, cannot poll CloudFormation status. Portal shows what to look for in CloudFormation console, doesn't show real status</constraint>
+    <constraint id="deep-links">Use CloudFormation console URLs with region/stack filters for direct navigation</constraint>
+    <constraint id="static-outputs">Scenario outputs are template-based patterns, not actual deployed values</constraint>
+  </architectural-constraints>
+
+  <previous-story-learnings source="2-1-one-click-cloudformation-deployment-pre-configured-parameters">
+    <learning id="L1">Scenario Layout Pattern: src/_includes/layouts/scenario.njk established as the scenario detail page layout - extend this with deployment progress sections</learning>
+    <learning id="L2">Progressive Enhancement: deploy-url.js uses IIFE pattern with graceful fallback - follow same pattern for any new JavaScript</learning>
+    <learning id="L3">Error Messages: src/_data/errorMessages.json contains 15 CloudFormation error mappings with userMessage, troubleshootingSteps, and supportUrl - extend this for deployment-specific errors</learning>
+    <learning id="L4">Error Display Component: src/_includes/components/error-messages.njk renders errors in GOV.UK accordion - reuse pattern for deployment guidance</learning>
+    <learning id="L5">Security Controls: URL validation via isValidAWSConsoleUrl() function - use same pattern for any new external links</learning>
+    <learning id="L6">Eleventy Filters: Custom filters like deployUrl, difficultyColor, personaColor available in eleventy.config.js - add new filters for deployment time formatting</learning>
+    <learning id="L7">Schema Validation: schemas/scenario.schema.json enforces scenario data structure - extend for new output fields</learning>
+    <learning id="L8">Accessibility Fixes: Decorative icons removed from scenario-card.njk for color contrast - avoid decorative elements that affect accessibility</learning>
+  </previous-story-learnings>
+
+  <existing-code-analysis>
+    <file path="src/_includes/layouts/scenario.njk" role="base-layout">
+      <description>Scenario detail page layout with deploy button, confirmation modal, cost breakdown, and error troubleshooting sections. This is the primary file to extend with deployment progress guidance.</description>
+      <extension-points>
+        <point>After deploy button section (line ~221): Add "What Happens Next" deployment guide component</point>
+        <point>Before Related section (line ~269): Add "Access Your Scenario" post-deployment success component</point>
+      </extension-points>
+    </file>
+
+    <file path="src/assets/js/deploy-url.js" role="progressive-enhancement">
+      <description>IIFE pattern JavaScript handling deploy button, modal, analytics tracking. Contains isValidAWSConsoleUrl() security function.</description>
+      <pattern>Use same IIFE structure for any new JS. Follow graceful fallback pattern.</pattern>
+    </file>
+
+    <file path="src/_data/scenarios.yaml" role="data-source">
+      <description>Contains all 6 scenarios with deployment metadata including templateUrl, region, stackNamePrefix, parameters, costBreakdown, tags, capabilities</description>
+      <extension-needed>
+        <field name="deploymentTime">Estimated deployment time per scenario (e.g., "3-5 minutes")</field>
+        <field name="deploymentPhases">Array describing what happens during deployment</field>
+        <field name="outputs">Expected endpoints and access points after deployment</field>
+      </extension-needed>
+    </file>
+
+    <file path="src/_data/errorMessages.json" role="error-mapping">
+      <description>15 CloudFormation error mappings with pattern matching, userMessage, troubleshootingSteps, supportLink</description>
+      <extension-needed>
+        <error type="deployment-progress">Add time-based messages (e.g., "deployment taking longer than expected")</error>
+        <error type="error-detection-guidance">Add guidance on what error patterns to look for in CloudFormation</error>
+      </extension-needed>
+    </file>
+
+    <file path="src/_includes/components/error-messages.njk" role="component">
+      <description>GOV.UK accordion component rendering error messages from errorMessages.json</description>
+      <pattern>Reuse accordion pattern for deployment guidance display</pattern>
+    </file>
+
+    <file path="schemas/scenario.schema.json" role="validation">
+      <description>JSON Schema for scenarios.yaml validation. Includes deployment object schema.</description>
+      <extension-needed>Add deploymentTime, deploymentPhases, and outputs properties to deployment schema</extension-needed>
+    </file>
+
+    <file path="eleventy.config.js" role="configuration">
+      <description>Eleventy configuration with custom filters: deployUrl, isAllowedReturnUrl, difficultyColor, personaColor</description>
+      <extension-needed>Add formatDeploymentTime filter for displaying estimated times</extension-needed>
+    </file>
+
+    <file path="src/assets/css/custom.css" role="styling">
+      <description>Custom CSS with BEM naming: ndx-scenario-card, ndx-deploy-action, ndx-modal, ndx-prereq-checklist</description>
+      <extension-needed>Add ndx-deployment-guide, ndx-deployment-timeline, ndx-deployment-success styles</extension-needed>
+    </file>
+  </existing-code-analysis>
+
+  <component-patterns>
+    <pattern name="GOV.UK-Timeline">
+      <description>Use for deployment phases visualization showing Creating → In Progress → Complete</description>
+      <usage>govuk-timeline component with custom ndx-deployment-timeline styling</usage>
+    </pattern>
+    <pattern name="GOV.UK-Notification-Banner">
+      <description>Use for post-deployment success section with access points</description>
+      <usage>govuk-notification-banner--success for deployment complete state</usage>
+    </pattern>
+    <pattern name="GOV.UK-Details">
+      <description>Use for collapsible "Troubleshooting common deployment issues" sections</description>
+      <usage>Already implemented in scenario.njk, extend for deployment-specific content</usage>
+    </pattern>
+    <pattern name="GOV.UK-Summary-List">
+      <description>Use for displaying scenario outputs (dashboard URLs, API endpoints)</description>
+      <usage>govuk-summary-list for key-value display of deployment outputs</usage>
+    </pattern>
+  </component-patterns>
+
+  <cloudformation-console-integration>
+    <deep-link-pattern>
+      <url-format>https://console.aws.amazon.com/cloudformation/home?region={region}#/stacks/events?stackId={stackName}</url-format>
+      <description>Deep link to CloudFormation stack events page with auto-refresh</description>
+    </deep-link-pattern>
+    <guidance-content>
+      <what-to-expect>
+        <item>Stack status changes from CREATE_IN_PROGRESS to CREATE_COMPLETE</item>
+        <item>Individual resources show their own status (Lambda, S3, IAM, etc.)</item>
+        <item>Events auto-refresh every few seconds</item>
+        <item>Green checkmark indicates successful completion</item>
+        <item>Red X with ROLLBACK indicates failure</item>
+      </what-to-expect>
+      <success-indicators>
+        <indicator>Stack status shows CREATE_COMPLETE in green</indicator>
+        <indicator>All resources show CREATE_COMPLETE</indicator>
+        <indicator>Outputs tab becomes available with access URLs</indicator>
+      </success-indicators>
+      <failure-indicators>
+        <indicator>Stack status shows ROLLBACK_COMPLETE or ROLLBACK_IN_PROGRESS</indicator>
+        <indicator>One or more resources show CREATE_FAILED</indicator>
+        <indicator>Events tab shows error message for failed resource</indicator>
+      </failure-indicators>
+    </guidance-content>
+  </cloudformation-console-integration>
+
+  <deployment-time-estimates>
+    <scenario id="council-chatbot" time="3-5 minutes" complexity="beginner">
+      <phases>
+        <phase order="1">Creating IAM roles (~30 seconds)</phase>
+        <phase order="2">Creating S3 bucket (~10 seconds)</phase>
+        <phase order="3">Creating Lambda functions (~60 seconds)</phase>
+        <phase order="4">Configuring Amazon Lex (~120 seconds)</phase>
+        <phase order="5">Setting up Bedrock integration (~30 seconds)</phase>
+      </phases>
+    </scenario>
+    <scenario id="planning-ai" time="5-8 minutes" complexity="intermediate">
+      <phases>
+        <phase order="1">Creating IAM roles (~30 seconds)</phase>
+        <phase order="2">Creating S3 buckets (~20 seconds)</phase>
+        <phase order="3">Creating Lambda functions (~90 seconds)</phase>
+        <phase order="4">Configuring Textract (~60 seconds)</phase>
+        <phase order="5">Setting up Comprehend (~60 seconds)</phase>
+        <phase order="6">Configuring Bedrock integration (~60 seconds)</phase>
+      </phases>
+    </scenario>
+    <scenario id="foi-redaction" time="4-6 minutes" complexity="intermediate" />
+    <scenario id="smart-car-park" time="8-12 minutes" complexity="advanced" />
+    <scenario id="text-to-speech" time="2-4 minutes" complexity="beginner" />
+    <scenario id="quicksight-dashboard" time="5-8 minutes" complexity="intermediate" />
+  </deployment-time-estimates>
+
+  <expected-outputs-by-scenario>
+    <scenario id="council-chatbot">
+      <output name="ChatbotURL" description="Web interface URL to interact with the chatbot" pattern="https://{api-id}.execute-api.us-west-2.amazonaws.com/prod/chat" />
+      <output name="LexBotId" description="Amazon Lex bot identifier for API integration" pattern="XXXXXXXXXX" />
+    </scenario>
+    <scenario id="planning-ai">
+      <output name="UploadURL" description="S3 presigned URL endpoint for document upload" pattern="https://{bucket}.s3.us-west-2.amazonaws.com/upload" />
+      <output name="ResultsURL" description="API endpoint to retrieve analysis results" pattern="https://{api-id}.execute-api.us-west-2.amazonaws.com/prod/results" />
+    </scenario>
+    <scenario id="foi-redaction">
+      <output name="UploadURL" description="Document upload endpoint" pattern="https://{bucket}.s3.us-west-2.amazonaws.com/input" />
+      <output name="RedactedURL" description="Redacted document download location" pattern="https://{bucket}.s3.us-west-2.amazonaws.com/output" />
+    </scenario>
+    <scenario id="smart-car-park">
+      <output name="DashboardURL" description="QuickSight dashboard URL" pattern="https://us-west-2.quicksight.aws.amazon.com/sn/dashboards/{dashboard-id}" />
+      <output name="AvailabilityAPI" description="Public API for parking availability" pattern="https://{api-id}.execute-api.us-west-2.amazonaws.com/prod/availability" />
+    </scenario>
+    <scenario id="text-to-speech">
+      <output name="ConvertURL" description="Text-to-speech conversion API" pattern="https://{api-id}.execute-api.us-west-2.amazonaws.com/prod/convert" />
+      <output name="AudioBucket" description="S3 bucket for generated audio files" pattern="s3://ndx-try-tts-audio-{account-id}" />
+    </scenario>
+    <scenario id="quicksight-dashboard">
+      <output name="DashboardURL" description="QuickSight dashboard URL" pattern="https://us-west-2.quicksight.aws.amazon.com/sn/dashboards/{dashboard-id}" />
+      <output name="DatasetId" description="QuickSight dataset identifier" pattern="XXXXXXXXXX" />
+    </scenario>
+  </expected-outputs-by-scenario>
+
+  <testing-requirements>
+    <accessibility>
+      <test id="PA11Y">Run pa11y validation on updated scenario pages</test>
+      <test id="KEYBOARD">Test keyboard navigation through deployment guidance</test>
+      <test id="SCREEN-READER">Verify screen reader compatibility of status indicators</test>
+    </accessibility>
+    <functional>
+      <test>Verify CloudFormation console deep links work with correct region and stack filters</test>
+      <test>Confirm deployment time estimates display correctly per scenario</test>
+      <test>Validate error message guidance renders in accordion format</test>
+      <test>Test post-deployment success section with output patterns</test>
+    </functional>
+    <progressive-enhancement>
+      <test>Verify guidance works without JavaScript enabled</test>
+      <test>Test fallback behavior when JS disabled</test>
+    </progressive-enhancement>
+  </testing-requirements>
+
+  <files-to-create>
+    <file path="src/_includes/components/deployment-guide.njk" purpose="Show what to expect after clicking deploy, deployment phases timeline, estimated time" />
+    <file path="src/_includes/components/deployment-success.njk" purpose="Post-deployment access points, try-it-out links, cleanup reminder" />
+  </files-to-create>
+
+  <files-to-modify>
+    <file path="src/_includes/layouts/scenario.njk" changes="Add deployment guide and success components between deploy button and error troubleshooting" />
+    <file path="src/_data/scenarios.yaml" changes="Add deploymentTime, deploymentPhases, and outputs to each scenario" />
+    <file path="src/_data/errorMessages.json" changes="Add deployment progress and timing error messages" />
+    <file path="schemas/scenario.schema.json" changes="Add schema for deploymentTime, deploymentPhases, outputs" />
+    <file path="eleventy.config.js" changes="Add formatDeploymentTime filter" />
+    <file path="src/assets/css/custom.css" changes="Add deployment timeline and success section styles" />
+    <file path=".pa11yci.json" changes="Ensure scenario pages with new components are tested" />
+  </files-to-modify>
+
+  <reference-documents>
+    <document path="docs/epics.md" section="Story-2.2" />
+    <document path="docs/sprint-artifacts/tech-spec-epic-2.md" section="AC-2.2" />
+    <document path="docs/prd.md" section="FR9-FR10" />
+    <document path="docs/architecture.md" section="ADR-1,ADR-4,ADR-6" />
+  </reference-documents>
+</story-context>

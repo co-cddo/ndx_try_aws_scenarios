@@ -1,0 +1,29 @@
+{
+    "success": true,
+    "redactedText": "My name is [REDACTED:NAME], I live at [REDACTED:ADDRESS]. My email is [REDACTED:EMAIL] and phone is [REDACTED:PHONE].",
+    "redactionCount": 4,
+    "redactions": [
+        {
+            "type": "PHONE",
+            "confidence": 1.0,
+            "original_length": 12
+        },
+        {
+            "type": "EMAIL",
+            "confidence": 1.0,
+            "original_length": 16
+        },
+        {
+            "type": "ADDRESS",
+            "confidence": 1.0,
+            "original_length": 14
+        },
+        {
+            "type": "NAME",
+            "confidence": 1.0,
+            "original_length": 10
+        }
+    ],
+    "originalLength": 104,
+    "confidenceThreshold": 0.85
+}

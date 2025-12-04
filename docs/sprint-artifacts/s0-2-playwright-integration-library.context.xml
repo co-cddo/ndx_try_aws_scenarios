@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Story Context: S0.2 - Playwright Integration Library
+  Generated: 2025-11-29
+  Sprint: Sprint 0 - Screenshot Automation Infrastructure
+-->
+<story-context>
+  <metadata>
+    <story-id>S0.2</story-id>
+    <story-key>s0-2-playwright-integration-library</story-key>
+    <story-title>Playwright Integration Library</story-title>
+    <epic-id>sprint-0</epic-id>
+    <points>8</points>
+    <generated>2025-11-29</generated>
+    <prerequisite>S0.1 - AWS Federation Service Account Setup (done)</prerequisite>
+  </metadata>
+
+  <user-story>
+    <as-a>test engineer writing screenshot automation</as-a>
+    <i-want>a reusable library that handles AWS Console authentication via federation</i-want>
+    <so-that>I can write Playwright tests that navigate authenticated console pages</so-that>
+  </user-story>
+
+  <acceptance-criteria>
+    <criterion id="AC2.1" status="pending">
+      <description>openAwsConsoleInPlaywright(config, destination) function exported from src/lib/aws-federation.ts</description>
+      <test-approach>Unit test verifying function export and signature</test-approach>
+    </criterion>
+    <criterion id="AC2.2" status="pending">
+      <description>Function calls STS GetFederationToken with scoped policy</description>
+      <test-approach>Mock STS client and verify GetFederationToken call parameters</test-approach>
+    </criterion>
+    <criterion id="AC2.3" status="pending">
+      <description>Function exchanges credentials for SigninToken via https://signin.aws.amazon.com/federation</description>
+      <test-approach>Mock axios and verify federation endpoint call</test-approach>
+    </criterion>
+    <criterion id="AC2.4" status="pending">
+      <description>Function constructs Login URL with SigninToken and destination</description>
+      <test-approach>Unit test URL construction logic with various destinations</test-approach>
+    </criterion>
+    <criterion id="AC2.5" status="pending">
+      <description>Function opens Chromium browser and navigates to Login URL</description>
+      <test-approach>Integration test with Playwright browser launch</test-approach>
+    </criterion>
+    <criterion id="AC2.6" status="pending">
+      <description>Function waits for authenticated state (logout button visible or timeout)</description>
+      <test-approach>Integration test verifying auth state detection</test-approach>
+    </criterion>
+    <criterion id="AC2.7" status="pending">
+      <description>Handles rate limits with exponential backoff (3 retries, max 10 seconds total)</description>
+      <test-approach>Unit test retry logic with mocked delays</test-approach>
+    </criterion>
+    <criterion id="AC2.8" status="pending">
+      <description>closeConsoleSession() cleans up browser context and clears credentials from memory</description>
+      <test-approach>Unit test verifying cleanup behavior</test-approach>
+    </criterion>
+    <criterion id="AC2.9" status="pending">
+      <description>TypeScript interfaces exported: FederatedCredentials, FederationConfig, FederationResponse</description>
+      <test-approach>TypeScript compilation test verifying interface exports</test-approach>
+    </criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="1" description="Create TypeScript library structure">
+      <subtask id="1.1">Create src/lib/aws-federation.ts file</subtask>
+      <subtask id="1.2">Define and export FederatedCredentials interface</subtask>
+      <subtask id="1.3">Define and export FederationConfig interface</subtask>
+      <subtask id="1.4">Define and export FederationResponse interface</subtask>
+      <subtask id="1.5">Export main functions</subtask>
+      <subtask id="1.6">Export helper functions</subtask>
+    </task>
+    <task id="2" description="Implement STS federation token acquisition">
+      <subtask id="2.1">Create internal getFederationToken function</subtask>
+      <subtask id="2.2">Use @aws-sdk/client-sts</subtask>
+      <subtask id="2.3">Apply scoped inline policy</subtask>
+      <subtask id="2.4">Set DurationSeconds to 3600</subtask>
+      <subtask id="2.5">Return FederatedCredentials with expiration</subtask>
+    </task>
+    <task id="3" description="Implement SigninToken exchange">
+      <subtask id="3.1">Create getSigninToken function</subtask>
+      <subtask id="3.2">POST to federation endpoint</subtask>
+      <subtask id="3.3">Include SessionDuration and Session JSON</subtask>
+      <subtask id="3.4">Parse SigninToken from response</subtask>
+      <subtask id="3.5">Create buildFederationLoginUrl function</subtask>
+      <subtask id="3.6">Construct URL with SigninToken and destination</subtask>
+    </task>
+    <task id="4" description="Implement Playwright browser session">
+      <subtask id="4.1">Launch Chromium browser</subtask>
+      <subtask id="4.2">Navigate to Login URL</subtask>
+      <subtask id="4.3">Wait for authenticated state</subtask>
+      <subtask id="4.4">Handle authentication timeout</subtask>
+      <subtask id="4.5">Return browser and page objects</subtask>
+    </task>
+    <task id="5" description="Implement retry logic">
+      <subtask id="5.1">Create withRetry helper</subtask>
+      <subtask id="5.2">Implement exponential backoff</subtask>
+      <subtask id="5.3">Handle rate limit errors</subtask>
+      <subtask id="5.4">Cap retry time at 10 seconds</subtask>
+      <subtask id="5.5">Use error codes only</subtask>
+    </task>
+    <task id="6" description="Implement session cleanup">
+      <subtask id="6.1">Implement closeConsoleSession</subtask>
+      <subtask id="6.2">Close browser context</subtask>
+      <subtask id="6.3">Clear credentials from memory</subtask>
+      <subtask id="6.4">Handle cleanup errors</subtask>
+    </task>
+    <task id="7" description="Write unit tests">
+      <subtask id="7.1">Create tests/unit/aws-federation.test.ts</subtask>
+      <subtask id="7.2">Test interface exports</subtask>
+      <subtask id="7.3">Test URL construction</subtask>
+      <subtask id="7.4">Test retry logic</subtask>
+      <subtask id="7.5">Test error handling</subtask>
+    </task>
+    <task id="8" description="Write integration tests">
+      <subtask id="8.1">Create tests/e2e/federation-flow.spec.ts</subtask>
+      <subtask id="8.2">Test actual federation flow</subtask>
+      <subtask id="8.3">Test console navigation</subtask>
+      <subtask id="8.4">Test session cleanup</subtask>
+    </task>
+  </tasks>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-sprint-0.md</path>
+        <title>Sprint 0 Technical Specification</title>
+        <section>APIs and Interfaces, Data Models</section>
+        <snippet>Defines openAwsConsoleInPlaywright API, FederatedCredentials interface, FederationConfig interface, and internal function signatures.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/s0-1-aws-federation-service-account-setup.md</path>
+        <title>S0.1 Story (Prerequisite)</title>
+        <section>Dev Agent Record, Completion Notes</section>
+        <snippet>IAM policy created. Tests use Vitest. Dependencies ready including @aws-sdk/client-sts.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Definitions</title>
+        <section>Story S0.2</section>
+        <snippet>FR108-FR110, FR123 covered. Library location: src/lib/aws-federation.ts</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>cloudformation/screenshot-automation/iam.yaml</path>
+        <kind>cloudformation-template</kind>
+        <symbol>FederationTokenPolicy</symbol>
+        <reason>Defines the IAM policy that federation tokens will use - library must work within these permissions</reason>
+      </file>
+      <file>
+        <path>tests/unit/iam-federation-policy.test.ts</path>
+        <kind>test</kind>
+        <symbol>describe blocks</symbol>
+        <reason>Test structure pattern to follow for aws-federation.test.ts</reason>
+      </file>
+      <file>
+        <path>playwright.config.ts</path>
+        <kind>config</kind>
+        <symbol>defineConfig</symbol>
+        <reason>Existing Playwright configuration - library must work with these settings</reason>
+      </file>
+      <file>
+        <path>vitest.config.ts</path>
+        <kind>config</kind>
+        <symbol>defineConfig</symbol>
+        <reason>Test configuration for unit tests</reason>
+      </file>
+      <file>
+        <path>package.json</path>
+        <kind>manifest</kind>
+        <symbol>dependencies</symbol>
+        <reason>Dependencies available - @aws-sdk/client-sts, @playwright/test, vitest</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <npm>
+        <package name="@aws-sdk/client-sts" version="^3.600.0" dev="true">STS GetFederationToken - AVAILABLE</package>
+        <package name="@aws-sdk/client-cloudformation" version="^3.600.0" dev="true" required="true">CloudFormation DescribeStacks - TO BE ADDED</package>
+        <package name="axios" version="^1.6.0" dev="true" required="true">HTTP client for SigninToken - TO BE ADDED</package>
+        <package name="@playwright/test" version="^1.49.0" dev="true">Browser automation - AVAILABLE</package>
+        <package name="vitest" version="^1.0.0" dev="true">Unit testing - AVAILABLE</package>
+      </npm>
+    </dependencies>
+  </artifacts>
+
+  <interfaces>
+    <interface>
+      <name>openAwsConsoleInPlaywright</name>
+      <kind>async function</kind>
+      <signature>
+        async function openAwsConsoleInPlaywright(
+          config: FederationConfig,
+          destination?: string
+        ): Promise&lt;FederationResponse&gt;
+      </signature>
+      <path>src/lib/aws-federation.ts</path>
+    </interface>
+    <interface>
+      <name>closeConsoleSession</name>
+      <kind>async function</kind>
+      <signature>
+        async function closeConsoleSession(
+          response: FederationResponse
+        ): Promise&lt;void&gt;
+      </signature>
+      <path>src/lib/aws-federation.ts</path>
+    </interface>
+    <interface>
+      <name>buildConsoleUrl</name>
+      <kind>function</kind>
+      <signature>
+        function buildConsoleUrl(
+          arn: string,
+          service: 'lambda' | 's3' | 'cloudformation' | 'dynamodb' | 'cloudwatch',
+          region?: string
+        ): string
+      </signature>
+      <path>src/lib/aws-federation.ts</path>
+    </interface>
+    <interface>
+      <name>getStackOutputs</name>
+      <kind>async function</kind>
+      <signature>
+        async function getStackOutputs(
+          stackName: string,
+          region?: string
+        ): Promise&lt;Record&lt;string, string&gt;&gt;
+      </signature>
+      <path>src/lib/aws-federation.ts</path>
+    </interface>
+    <interface>
+      <name>FederatedCredentials</name>
+      <kind>TypeScript interface</kind>
+      <signature>
+        interface FederatedCredentials {
+          accessKeyId: string;
+          secretAccessKey: string;
+          sessionToken: string;
+          expiration: Date;
+        }
+      </signature>
+      <path>src/lib/aws-federation.ts</path>
+    </interface>
+    <interface>
+      <name>FederationConfig</name>
+      <kind>TypeScript interface</kind>
+      <signature>
+        interface FederationConfig {
+          accessKeyId: string;
+          secretAccessKey: string;
+          durationSeconds?: number;
+          policy?: string;
+        }
+      </signature>
+      <path>src/lib/aws-federation.ts</path>
+    </interface>
+    <interface>
+      <name>FederationResponse</name>
+      <kind>TypeScript interface</kind>
+      <signature>
+        interface FederationResponse {
+          browser: Browser;
+          page: Page;
+          credentials: FederatedCredentials;
+        }
+      </signature>
+      <path>src/lib/aws-federation.ts</path>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <constraint source="NFR49">Credentials MUST be server-side only - never exposed in client code</constraint>
+    <constraint source="NFR50">Session max 1 hour, no refresh capability</constraint>
+    <constraint source="tech-spec">Never log credentials - use error codes only (FEDERATION_FAILED, SIGNIN_TOKEN_FAILED, etc.)</constraint>
+    <constraint source="tech-spec">Retry logic must cap at 10 seconds total</constraint>
+    <constraint source="tech-spec">Must clear credentials from memory after session close</constraint>
+    <constraint source="S0.1">Federation token must work within IAM policy defined in cloudformation/screenshot-automation/iam.yaml</constraint>
+    <constraint source="tech-spec">Use exponential backoff: 1s, 2s, 4s (max 3 retries)</constraint>
+  </constraints>
+
+  <tests>
+    <standards>
+      Unit tests use Vitest (pattern established in S0.1). Integration tests use Playwright.
+      Mock AWS SDK and axios for unit tests. Integration tests require actual AWS credentials.
+      Follow test structure from tests/unit/iam-federation-policy.test.ts.
+    </standards>
+    <locations>
+      <location>tests/unit/aws-federation.test.ts</location>
+      <location>tests/e2e/federation-flow.spec.ts</location>
+    </locations>
+    <ideas>
+      <idea ac="AC2.1, AC2.9">Test that all functions and interfaces are exported correctly</idea>
+      <idea ac="AC2.2">Mock STS client and verify GetFederationToken call with correct parameters</idea>
+      <idea ac="AC2.3">Mock axios and verify federation endpoint request format</idea>
+      <idea ac="AC2.4">Unit test buildFederationLoginUrl with various destinations</idea>
+      <idea ac="AC2.7">Test retry logic with mocked timers - verify exponential backoff</idea>
+      <idea ac="AC2.8">Test that credentials object is cleared after closeConsoleSession</idea>
+    </ideas>
+  </tests>
+
+  <files-to-create>
+    <file>src/lib/aws-federation.ts</file>
+    <file>tests/unit/aws-federation.test.ts</file>
+    <file>tests/e2e/federation-flow.spec.ts</file>
+  </files-to-create>
+
+  <files-to-modify>
+    <file reason="Add axios and @aws-sdk/client-cloudformation dependencies">package.json</file>
+  </files-to-modify>
+
+  <previous-story-learnings>
+    <source>docs/sprint-artifacts/s0-1-aws-federation-service-account-setup.md</source>
+    <status>done</status>
+    <new-files>
+      <file>cloudformation/screenshot-automation/iam.yaml</file>
+      <file>tests/unit/iam-federation-policy.test.ts</file>
+      <file>docs/ops/federation-credentials.md</file>
+      <file>vitest.config.ts</file>
+    </new-files>
+    <new-services>
+      <service>IAM federation user: ndx-screenshot-automation</service>
+      <service>IAM policy: read-only console access with explicit deny</service>
+    </new-services>
+    <architectural-decisions>
+      <decision>Use allowlist (explicit allow) for IAM policy instead of denylist</decision>
+      <decision>GitHub Secrets for credential storage (not AWS Secrets Manager)</decision>
+    </architectural-decisions>
+    <testing-patterns>
+      <pattern>Use Vitest for unit tests with describe blocks per AC</pattern>
+      <pattern>Parse CloudFormation YAML to validate policy structure</pattern>
+    </testing-patterns>
+  </previous-story-learnings>
+</story-context>

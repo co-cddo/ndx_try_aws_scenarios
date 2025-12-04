@@ -1,0 +1,77 @@
+{
+    "success": true,
+    "summary": {
+        "totalCases": 15078,
+        "totalResolved": 12278,
+        "overallResolutionRate": 81.4,
+        "avgSatisfaction": 4.08,
+        "totalComplaints": 265,
+        "period": "90 days"
+    },
+    "serviceBreakdown": [
+        {
+            "name": "Benefits",
+            "totalCases": 1831,
+            "resolved": 1446,
+            "resolutionRate": 79.0,
+            "avgSatisfaction": 4.0
+        },
+        {
+            "name": "Council Tax",
+            "totalCases": 1790,
+            "resolved": 1539,
+            "resolutionRate": 86.0,
+            "avgSatisfaction": 4.25
+        },
+        {
+            "name": "Waste Collection",
+            "totalCases": 1762,
+            "resolved": 1458,
+            "resolutionRate": 82.7,
+            "avgSatisfaction": 4.09
+        },
+        {
+            "name": "Housing",
+            "totalCases": 1747,
+            "resolved": 1442,
+            "resolutionRate": 82.5,
+            "avgSatisfaction": 4.07
+        },
+        {
+            "name": "Environmental Health",
+            "totalCases": 1685,
+            "resolved": 1292,
+            "resolutionRate": 76.7,
+            "avgSatisfaction": 3.98
+        },
+        {
+            "name": "Planning Applications",
+            "totalCases": 1602,
+            "resolved": 1261,
+            "resolutionRate": 78.7,
+            "avgSatisfaction": 4.11
+        },
+        {
+            "name": "Highways",
+            "totalCases": 1582,
+            "resolved": 1361,
+            "resolutionRate": 86.0,
+            "avgSatisfaction": 4.18
+        },
+        {
+            "name": "Customer Services",
+            "totalCases": 1549,
+            "resolved": 1234,
+            "resolutionRate": 79.7,
+            "avgSatisfaction": 4.08
+        },
+        {
+            "name": "Parking",
+            "totalCases": 1530,
+            "resolved": 1245,
+            "resolutionRate": 81.4,
+            "avgSatisfaction": 3.97
+        }
+    ],
+    "timestamp": "2025-11-28T21:16:43.047400"
+}

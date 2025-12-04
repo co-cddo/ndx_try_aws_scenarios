@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context story-id="s0-5-reference-deployment-environment" version="1.0">
+  <metadata>
+    <generated>2025-11-29</generated>
+    <epic>sprint-0</epic>
+    <story-status>drafted</story-status>
+    <priority>high</priority>
+    <dependencies>
+      <dependency>s0-1-aws-federation-service-account-setup</dependency>
+      <dependency>s0-2-playwright-integration-library</dependency>
+      <dependency>s0-3-screenshot-capture-pipeline</dependency>
+    </dependencies>
+  </metadata>
+
+  <story-summary>
+    <title>Reference Deployment Environment</title>
+    <objective>Create a dedicated reference deployment stack with pre-loaded sample data and health monitoring to provide a consistent, reliable source for screenshot capture independent of user deployments.</objective>
+    <acceptance-criteria-count>9</acceptance-criteria-count>
+    <estimated-complexity>high</estimated-complexity>
+  </story-summary>
+
+  <acceptance-criteria>
+    <ac id="AC5.1" source="tech-spec-sprint-0.md">
+      <description>Dedicated CloudFormation stack ndx-reference deployed in same AWS account</description>
+      <implementation>
+        <file>cloudformation/screenshot-automation/reference-stack.yaml</file>
+        <stack-name>ndx-reference</stack-name>
+      </implementation>
+    </ac>
+    <ac id="AC5.2" source="tech-spec-sprint-0.md">
+      <description>Stack uses same templates as user deployments (version aligned via git tags)</description>
+      <implementation>
+        <version-alignment>Git tags for template versioning</version-alignment>
+        <nested-stacks>Reference to scenario-specific stacks</nested-stacks>
+      </implementation>
+    </ac>
+    <ac id="AC5.3" source="tech-spec-sprint-0.md">
+      <description>Known-good sample data preloaded for all 6 scenarios</description>
+      <implementation>
+        <file>cloudformation/screenshot-automation/sample-data.yaml</file>
+        <scenarios>
+          <scenario>council-chatbot</scenario>
+          <scenario>planning-ai</scenario>
+          <scenario>foi-redaction</scenario>
+          <scenario>smart-car-park</scenario>
+          <scenario>text-to-speech</scenario>
+          <scenario>quicksight</scenario>
+        </scenarios>
+      </implementation>
+    </ac>
+    <ac id="AC5.4" source="tech-spec-sprint-0.md">
+      <description>Stack maintained in COMPLETE state during screenshot windows</description>
+      <implementation>
+        <health-monitoring>Lambda health check</health-monitoring>
+        <pre-capture-validation>verify-reference-stack.mjs</pre-capture-validation>
+      </implementation>
+    </ac>
+    <ac id="AC5.5" source="tech-spec-sprint-0.md">
+      <description>Pre-capture verification script validates stack health before capture</description>
+      <implementation>
+        <file>scripts/verify-reference-stack.mjs</file>
+        <checks>
+          <check>CloudFormation stack status</check>
+          <check>Nested stack outputs</check>
+          <check>Sample data accessibility</check>
+        </checks>
+      </implementation>
+    </ac>
+    <ac id="AC5.6" source="tech-spec-sprint-0.md">
+      <description>Fallback screenshots stored in S3 fallback/ prefix with disclaimer</description>
+      <implementation>
+        <s3-prefix>fallback/</s3-prefix>
+        <metadata>disclaimer text</metadata>
+        <file>scripts/upload-fallback-screenshots.mjs</file>
+      </implementation>
+    </ac>
+    <ac id="AC5.7" source="tech-spec-sprint-0.md">
+      <description>Console URLs built from stack outputs (not hardcoded ARNs)</description>
+      <implementation>
+        <file>src/lib/console-url-builder.ts</file>
+        <source>CloudFormation stack outputs</source>
+      </implementation>
+    </ac>
+    <ac id="AC5.8" source="tech-spec-sprint-0.md">
+      <description>Lambda function ndx-reference-stack-health-check runs hourly</description>
+      <implementation>
+        <file>cloudformation/screenshot-automation/health-check.yaml</file>
+        <function-name>ndx-reference-stack-health-check</function-name>
+        <schedule>rate(1 hour)</schedule>
+      </implementation>
+    </ac>
+    <ac id="AC5.9" source="tech-spec-sprint-0.md">
+      <description>Stack Policy prevents accidental modifications except by automation user</description>
+      <implementation>
+        <file>cloudformation/screenshot-automation/reference-stack.yaml</file>
+        <policy>Allow automation user, deny replace/delete for others</policy>
+      </implementation>
+    </ac>
+  </acceptance-criteria>
+
+  <technical-context>
+    <architecture>
+      <component name="reference-stack">
+        <location>cloudformation/screenshot-automation/reference-stack.yaml</location>
+        <responsibility>Main CloudFormation stack for reference deployment</responsibility>
+        <outputs>
+          <output>CouncilChatbotLambdaArn</output>
+          <output>PlanningAiTextractEndpoint</output>
+          <output>FoiRedactionComprehendEndpoint</output>
+          <output>SmartCarParkIotEndpoint</output>
+          <output>TextToSpeechPollyEndpoint</output>
+          <output>QuickSightDashboardId</output>
+        </outputs>
+      </component>
+      <component name="health-check-lambda">
+        <location>cloudformation/screenshot-automation/health-check.yaml</location>
+        <responsibility>Hourly health monitoring of reference stack</responsibility>
+        <metrics>
+          <metric>stack_health_status</metric>
+          <metric>outputs_available_count</metric>
+          <metric>sample_data_accessible</metric>
+        </metrics>
+      </component>
+      <component name="console-url-builder">
+        <location>src/lib/console-url-builder.ts</location>
+        <responsibility>Build AWS Console URLs from stack outputs</responsibility>
+        <exports>
+          <function>buildConsoleUrl(arn, service, region): string</function>
+          <function>getStackOutputs(stackName): Record</function>
+          <function>buildScenarioUrls(stackName): ScenarioUrls</function>
+        </exports>
+      </component>
+      <component name="verify-reference-stack">
+        <location>scripts/verify-reference-stack.mjs</location>
+        <responsibility>Pre-capture stack health validation</responsibility>
+        <exit-codes>
+          <code value="0">Stack healthy</code>
+          <code value="1">Stack unhealthy or not found</code>
+        </exit-codes>
+      </component>
+    </architecture>
+
+    <interfaces>
+      <interface name="ReferenceStackOutputs">
+        <definition><![CDATA[
+interface ReferenceStackOutputs {
+  // Council Chatbot
+  CouncilChatbotLambdaArn: string;
+  CouncilChatbotApiEndpoint: string;
+  CouncilChatbotDynamoTableArn: string;
+
+  // Planning AI
+  PlanningAiTextractEndpoint: string;
+  PlanningAiS3BucketArn: string;
+
+  // FOI Redaction
+  FoiRedactionComprehendEndpoint: string;
+  FoiRedactionS3BucketArn: string;
+
+  // Smart Car Park
+  SmartCarParkIotEndpoint: string;
+  SmartCarParkDynamoTableArn: string;
+
+  // Text-to-Speech
+  TextToSpeechPollyEndpoint: string;
+  TextToSpeechS3BucketArn: string;
+
+  // QuickSight
+  QuickSightDashboardId: string;
+  QuickSightDataSetArn: string;
+}
+        ]]></definition>
+      </interface>
+      <interface name="HealthCheckResult">
+        <definition><![CDATA[
+interface HealthCheckResult {
+  stack_name: string;
+  status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+  timestamp: string;
+  checks: {
+    cloudformation_status: 'CREATE_COMPLETE' | 'UPDATE_COMPLETE' | string;
+    nested_stacks_healthy: boolean;
+    outputs_available: boolean;
+    sample_data_accessible: boolean;
+  };
+  issues?: string[];
+}
+        ]]></definition>
+      </interface>
+      <interface name="FallbackScreenshot">
+        <definition><![CDATA[
+interface FallbackScreenshot {
+  path: string;
+  original_capture_date: string;
+  template_version: string;
+  disclaimer: string;
+}
+        ]]></definition>
+      </interface>
+      <interface name="ConsoleUrlConfig">
+        <definition><![CDATA[
+interface ConsoleUrlConfig {
+  service: 'lambda' | 's3' | 'dynamodb' | 'cloudwatch' | 'iot' | 'quicksight';
+  region: string;
+  resourceIdentifier: string;
+}
+        ]]></definition>
+      </interface>
+    </interfaces>
+
+    <console-url-patterns>
+      <pattern service="lambda" template="https://{region}.console.aws.amazon.com/lambda/home?region={region}#/functions/{functionName}" />
+      <pattern service="s3" template="https://s3.console.aws.amazon.com/s3/buckets/{bucketName}?region={region}" />
+      <pattern service="dynamodb" template="https://{region}.console.aws.amazon.com/dynamodbv2/home?region={region}#table?name={tableName}" />
+      <pattern service="cloudwatch" template="https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#logsV2:log-groups/log-group/{logGroupName}" />
+      <pattern service="iot" template="https://{region}.console.aws.amazon.com/iot/home?region={region}#/thing/{thingName}" />
+      <pattern service="quicksight" template="https://{region}.quicksight.aws.amazon.com/sn/dashboards/{dashboardId}" />
+    </console-url-patterns>
+  </technical-context>
+
+  <dependencies>
+    <npm-packages>
+      <package name="@aws-sdk/client-cloudformation" version="^3.600.0" purpose="Stack operations and output retrieval" />
+      <package name="@aws-sdk/client-lambda" version="^3.600.0" purpose="Health check invocation (if needed)" />
+      <package name="@aws-sdk/client-s3" version="^3.600.0" purpose="Already installed - fallback screenshots" />
+      <package name="@aws-sdk/client-dynamodb" version="^3.600.0" purpose="Sample data verification" />
+    </npm-packages>
+    <existing-infrastructure>
+      <resource name="IAM User" stack="cloudformation/screenshot-automation/iam.yaml" from="S0.1" />
+      <resource name="AWS Federation Library" file="src/lib/aws-federation.ts" from="S0.2" />
+      <resource name="S3 Bucket" stack="cloudformation/screenshot-automation/s3-bucket.yaml" from="S0.3" />
+      <resource name="CloudWatch Monitoring" stack="cloudformation/screenshot-automation/monitoring.yaml" from="S0.4" />
+    </existing-infrastructure>
+    <story-dependencies>
+      <dependency story-id="s0-1-aws-federation-service-account-setup" status="done" />
+      <dependency story-id="s0-2-playwright-integration-library" status="done" />
+      <dependency story-id="s0-3-screenshot-capture-pipeline" status="done" />
+      <dependency story-id="s0-4-visual-regression-detection" status="done" />
+    </story-dependencies>
+  </dependencies>
+
+  <file-structure>
+    <new-files>
+      <file path="cloudformation/screenshot-automation/reference-stack.yaml" type="cloudformation">Main reference stack template</file>
+      <file path="cloudformation/screenshot-automation/sample-data.yaml" type="cloudformation">Sample data resources</file>
+      <file path="cloudformation/screenshot-automation/health-check.yaml" type="cloudformation">Health check Lambda and EventBridge</file>
+      <file path="scripts/verify-reference-stack.mjs" type="script">Pre-capture verification script</file>
+      <file path="scripts/upload-fallback-screenshots.mjs" type="script">Fallback screenshot management</file>
+      <file path="src/lib/console-url-builder.ts" type="library">Console URL builder library</file>
+      <file path="tests/unit/console-url-builder.test.ts" type="test">Unit tests for URL builder</file>
+      <file path="tests/unit/verify-reference-stack.test.ts" type="test">Unit tests for verification script</file>
+      <file path="tests/integration/reference-stack.test.ts" type="test">Integration tests</file>
+    </new-files>
+    <modified-files>
+      <file path="cloudformation/screenshot-automation/s3-bucket.yaml">Add fallback/ prefix configuration</file>
+      <file path=".github/workflows/screenshot-capture.yml">Add pre-capture verification step</file>
+    </modified-files>
+  </file-structure>
+
+  <existing-code-patterns>
+    <pattern name="CloudFormation Stack Operations" source="tech-spec-sprint-0.md">
+      <code><![CDATA[
+import { CloudFormationClient, DescribeStacksCommand, ListStackResourcesCommand } from '@aws-sdk/client-cloudformation';
+
+const cfnClient = new CloudFormationClient({ region: process.env.AWS_REGION || 'us-west-2' });
+
+export async function getStackStatus(stackName: string): Promise<string> {
+  const response = await cfnClient.send(new DescribeStacksCommand({
+    StackName: stackName
+  }));
+  return response.Stacks?.[0]?.StackStatus || 'NOT_FOUND';
+}
+
+export async function getStackOutputs(stackName: string): Promise<Record<string, string>> {
+  const response = await cfnClient.send(new DescribeStacksCommand({
+    StackName: stackName
+  }));
+  const outputs: Record<string, string> = {};
+  for (const output of response.Stacks?.[0]?.Outputs || []) {
+    if (output.OutputKey && output.OutputValue) {
+      outputs[output.OutputKey] = output.OutputValue;
+    }
+  }
+  return outputs;
+}
+      ]]></code>
+    </pattern>
+    <pattern name="S3 Fallback Pattern" source="s0-3 implementation">
+      <code><![CDATA[
+export async function downloadFallbackScreenshot(
+  scenario: string,
+  filename: string,
+  bucketName: string,
+  region: string = 'us-west-2'
+): Promise<{ buffer: Buffer; metadata: FallbackScreenshot } | null> {
+  const client = new S3Client({ region });
+  const key = `fallback/${scenario}/${filename}`;
+
+  try {
+    const response = await client.send(new GetObjectCommand({
+      Bucket: bucketName,
+      Key: key
+    }));
+
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of response.Body as any) {
+      chunks.push(chunk);
+    }
+
+    return {
+      buffer: Buffer.concat(chunks),
+      metadata: {
+        path: key,
+        original_capture_date: response.Metadata?.['original-capture-date'] || 'unknown',
+        template_version: response.Metadata?.['template-version'] || 'unknown',
+        disclaimer: response.Metadata?.['disclaimer'] || 'Fallback screenshot'
+      }
+    };
+  } catch (error: any) {
+    if (error.name === 'NoSuchKey') return null;
+    throw error;
+  }
+}
+      ]]></code>
+    </pattern>
+  </existing-code-patterns>
+
+  <test-strategy>
+    <unit-tests>
+      <test-file>tests/unit/console-url-builder.test.ts</test-file>
+      <test-cases>
+        <case>buildConsoleUrl generates correct Lambda URL</case>
+        <case>buildConsoleUrl generates correct S3 URL</case>
+        <case>buildConsoleUrl generates correct DynamoDB URL</case>
+        <case>buildConsoleUrl generates correct CloudWatch URL</case>
+        <case>buildConsoleUrl generates correct IoT URL</case>
+        <case>buildConsoleUrl generates correct QuickSight URL</case>
+        <case>buildConsoleUrl handles different regions</case>
+        <case>extractResourceFromArn parses ARNs correctly</case>
+      </test-cases>
+    </unit-tests>
+    <unit-tests>
+      <test-file>tests/unit/verify-reference-stack.test.ts</test-file>
+      <test-cases>
+        <case>verifyStackHealth returns HEALTHY for CREATE_COMPLETE</case>
+        <case>verifyStackHealth returns HEALTHY for UPDATE_COMPLETE</case>
+        <case>verifyStackHealth returns UNHEALTHY for failed states</case>
+        <case>verifyOutputsAvailable detects missing outputs</case>
+        <case>verifySampleDataAccessible validates data presence</case>
+      </test-cases>
+    </unit-tests>
+    <integration-tests>
+      <test-file>tests/integration/reference-stack.test.ts</test-file>
+      <test-cases>
+        <case>Full health check workflow with mock CloudFormation</case>
+        <case>Stack output retrieval and URL building end-to-end</case>
+        <case>Fallback screenshot selection when stack unhealthy</case>
+      </test-cases>
+    </integration-tests>
+  </test-strategy>
+
+  <stack-policy>
+    <policy><![CDATA[
+{
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "Update:*",
+      "Principal": "*",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:PrincipalArn": "arn:aws:iam::*:user/ndx-screenshot-automation"
+        }
+      }
+    },
+    {
+      "Effect": "Deny",
+      "Action": ["Update:Replace", "Update:Delete"],
+      "Principal": "*",
+      "Resource": "*"
+    }
+  ]
+}
+    ]]></policy>
+  </stack-policy>
+
+  <health-check-config>
+    <lambda>
+      <function-name>ndx-reference-stack-health-check</function-name>
+      <runtime>nodejs20.x</runtime>
+      <timeout>30</timeout>
+      <memory>256</memory>
+    </lambda>
+    <eventbridge>
+      <schedule>rate(1 hour)</schedule>
+      <target>ndx-reference-stack-health-check</target>
+    </eventbridge>
+    <cloudwatch>
+      <namespace>AWS/NDXScreenshot</namespace>
+      <metrics>
+        <metric name="stack_health_status" unit="None" description="1=healthy, 0=unhealthy" />
+        <metric name="health_check_duration_ms" unit="Milliseconds" />
+      </metrics>
+      <alarm>
+        <name>ReferenceStackUnhealthy</name>
+        <metric>stack_health_status</metric>
+        <threshold>1</threshold>
+        <comparison>LessThanThreshold</comparison>
+        <period>3600</period>
+        <evaluation-periods>2</evaluation-periods>
+      </alarm>
+    </cloudwatch>
+  </health-check-config>
+
+  <security-notes>
+    <note>Health check Lambda needs cloudformation:DescribeStacks permission</note>
+    <note>Stack policy restricts modifications to automation user only</note>
+    <note>Sample data should not contain PII or sensitive information</note>
+    <note>Fallback screenshots should be sanitized before upload</note>
+  </security-notes>
+
+  <learnings-from-previous-stories>
+    <learning source="S0.4">Use GITHUB_OUTPUT file approach for GitHub Actions outputs</learning>
+    <learning source="S0.4">Export functions for testability</learning>
+    <learning source="S0.4">CloudFormation: don't mix MetricName with Metrics array in alarms</learning>
+    <learning source="S0.4">Include integration tests from the start</learning>
+    <learning source="S0.3">Generate outputs from actual results, not placeholder data</learning>
+    <learning source="S0.3">Circuit breaker should throw errors for proper failure recording</learning>
+  </learnings-from-previous-stories>
+</story-context>

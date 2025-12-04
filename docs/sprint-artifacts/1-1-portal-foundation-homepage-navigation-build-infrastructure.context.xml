@@ -1,0 +1,251 @@
+<story-context id="bmad/bmm/story-context" v="1.0">
+  <metadata>
+    <epicId>epic-1</epicId>
+    <storyId>1.1</storyId>
+    <title>Portal Foundation - Homepage, Navigation &amp; Build Infrastructure</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-1-portal-foundation-homepage-navigation-build-infrastructure.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>council digital services team member</asA>
+    <iWant>a clear, welcoming homepage that introduces NDX:Try with professional navigation and a working build pipeline</iWant>
+    <soThat>I understand what this platform is, can navigate confidently, and the portal can be continuously deployed</soThat>
+    <tasks>
+      <task id="1" name="Project setup and Eleventy infrastructure">
+        <subtasks>
+          <subtask>1.1 Create package.json with dependencies (eleventy, govuk-frontend, @x-govuk/govuk-eleventy-plugin)</subtask>
+          <subtask>1.2 Create .nvmrc specifying Node 20.x LTS</subtask>
+          <subtask>1.3 Create .eleventy.js configuration with X-GOV plugin</subtask>
+          <subtask>1.4 Set up Sass compilation for GOV.UK Frontend</subtask>
+          <subtask>1.5 Create schemas/scenario.schema.json for validation</subtask>
+          <subtask>1.6 Set up AJV validation in build process</subtask>
+        </subtasks>
+      </task>
+      <task id="2" name="GitHub Actions CI/CD pipeline">
+        <subtasks>
+          <subtask>2.1 Create .github/workflows/build-deploy.yml</subtask>
+          <subtask>2.2 Configure schema validation job</subtask>
+          <subtask>2.3 Configure Eleventy build job</subtask>
+          <subtask>2.4 Configure accessibility testing (axe-core + pa11y)</subtask>
+          <subtask>2.5 Configure GitHub Pages deployment</subtask>
+          <subtask>2.6 Set up Lighthouse CI action</subtask>
+          <subtask>2.7 Verify build completes in &lt;3 minutes</subtask>
+        </subtasks>
+      </task>
+      <task id="3" name="Base layout and navigation">
+        <subtasks>
+          <subtask>3.1 Create src/_includes/layouts/base.njk with GOV.UK template structure</subtask>
+          <subtask>3.2 Create src/_includes/components/header.njk with navigation</subtask>
+          <subtask>3.3 Create src/_includes/components/footer.njk with GitHub link and official status</subtask>
+          <subtask>3.4 Create src/_data/navigation.yaml with all nav items</subtask>
+          <subtask>3.5 Create src/_data/site.yaml with global configuration</subtask>
+          <subtask>3.6 Verify keyboard navigation works on all interactive elements</subtask>
+          <subtask>3.7 Add skip link for screen readers</subtask>
+        </subtasks>
+      </task>
+      <task id="4" name="Homepage implementation">
+        <subtasks>
+          <subtask>4.1 Create src/index.md with frontmatter</subtask>
+          <subtask>4.2 Implement hero section with UK Council headline</subtask>
+          <subtask>4.3 Implement value proposition section</subtask>
+          <subtask>4.4 Implement trust indicators (50+ councils, 15 minutes, Zero commitment)</subtask>
+          <subtask>4.5 Add "What is NDX:Try" explanatory section/link</subtask>
+          <subtask>4.6 Create scenario preview grid (6 placeholder cards)</subtask>
+          <subtask>4.7 Implement primary CTA "Find Your Scenario" button</subtask>
+          <subtask>4.8 Implement secondary "Browse All Scenarios" link</subtask>
+          <subtask>4.9 Add LGA acknowledgment placeholder</subtask>
+          <subtask>4.10 Add GitHub "Open Source (MIT)" indicator</subtask>
+          <subtask>4.11 Add safety messaging ("Innovation Sandbox isolated")</subtask>
+          <subtask>4.12 Verify homepage loads in &lt;2 seconds</subtask>
+        </subtasks>
+      </task>
+      <task id="5" name="Supporting pages">
+        <subtasks>
+          <subtask>5.1 Create src/accessibility.md accessibility statement page</subtask>
+          <subtask>5.2 Create src/contact.md contact page</subtask>
+          <subtask>5.3 Create src/404.md custom error page</subtask>
+          <subtask>5.4 Verify 404 page displays correctly for invalid URLs</subtask>
+        </subtasks>
+      </task>
+      <task id="6" name="Scenario data foundation">
+        <subtasks>
+          <subtask>6.1 Create src/_data/scenarios.yaml with 6 scenario entries</subtask>
+          <subtask>6.2 Ensure all schema fields populated (id, name, headline, description, etc.)</subtask>
+          <subtask>6.3 Add scenario card component src/_includes/components/scenario-card.njk</subtask>
+          <subtask>6.4 Verify schema validation passes</subtask>
+          <subtask>6.5 Test that invalid schema produces actionable error message</subtask>
+        </subtasks>
+      </task>
+      <task id="7" name="Accessibility testing">
+        <subtasks>
+          <subtask>7.1 Configure axe-core testing</subtask>
+          <subtask>7.2 Configure pa11y testing</subtask>
+          <subtask>7.3 Run automated accessibility tests on all pages</subtask>
+          <subtask>7.4 Verify CI fails on accessibility errors</subtask>
+          <subtask>7.5 Manual keyboard navigation test</subtask>
+          <subtask>7.6 Manual screen reader test (VoiceOver or NVDA)</subtask>
+        </subtasks>
+      </task>
+      <task id="8" name="Final verification and deployment">
+        <subtasks>
+          <subtask>8.1 Run full build locally</subtask>
+          <subtask>8.2 Verify all ACs via verification methods</subtask>
+          <subtask>8.3 Push to main branch</subtask>
+          <subtask>8.4 Verify GitHub Actions completes successfully</subtask>
+          <subtask>8.5 Verify site deployed to GitHub Pages</subtask>
+          <subtask>8.6 Validate deployment at target URL</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <group id="AC-1.1" name="Portal Foundation &amp; Infrastructure">
+      <criterion id="AC-1.1.1">Homepage loads in &lt;2 seconds on 10 Mbps connection (Lighthouse CI)</criterion>
+      <criterion id="AC-1.1.2">All pages pass WCAG 2.2 AA automated validation (axe-core + pa11y)</criterion>
+      <criterion id="AC-1.1.3">All pages navigable via keyboard only (Manual testing)</criterion>
+      <criterion id="AC-1.1.4">Screen reader announces all content correctly (VoiceOver/NVDA test)</criterion>
+      <criterion id="AC-1.1.5">Build completes in &lt;3 minutes (GitHub Actions timer)</criterion>
+      <criterion id="AC-1.1.6">Build fails on accessibility errors (CI gate validation)</criterion>
+      <criterion id="AC-1.1.7">Navigation bar renders on all pages (Visual inspection)</criterion>
+      <criterion id="AC-1.1.8">Footer includes GitHub link and official status (Visual inspection)</criterion>
+      <criterion id="AC-1.1.9">404 page displays user-friendly error (Navigate to /nonexistent)</criterion>
+    </group>
+    <group id="AC-1.2" name="Homepage Content &amp; Trust Architecture">
+      <criterion id="AC-1.2.1">Headline explicitly includes "UK Councils" (Visual inspection)</criterion>
+      <criterion id="AC-1.2.2">Value proposition visible above fold (768px viewport test)</criterion>
+      <criterion id="AC-1.2.3">Trust indicators display (council count, time, commitment) (Visual inspection)</criterion>
+      <criterion id="AC-1.2.4">"What is NDX:Try" link/section present (Visual inspection)</criterion>
+      <criterion id="AC-1.2.5">Scenario preview grid shows 6 cards (Card count)</criterion>
+      <criterion id="AC-1.2.6">Primary CTA "Find Your Scenario" visible (Visual inspection)</criterion>
+      <criterion id="AC-1.2.7">Secondary "Browse All" link visible (Visual inspection)</criterion>
+      <criterion id="AC-1.2.8">LGA acknowledgment placeholder present (Visual inspection)</criterion>
+      <criterion id="AC-1.2.9">GitHub "Open Source (MIT)" indicator present (Visual inspection)</criterion>
+      <criterion id="AC-1.2.10">Safety messaging visible ("Innovation Sandbox isolated") (Visual inspection)</criterion>
+    </group>
+    <group id="AC-1.7" name="Schema Validation &amp; Build Pipeline">
+      <criterion id="AC-1.7.1">scenarios.yaml validated against JSON schema (CI log inspection)</criterion>
+      <criterion id="AC-1.7.2">Build fails on invalid scenario metadata (Invalid YAML test)</criterion>
+      <criterion id="AC-1.7.3">Error messages are actionable (show missing field) (Error output test)</criterion>
+      <criterion id="AC-1.7.4">Build logs available in GitHub Actions (CI inspection)</criterion>
+      <criterion id="AC-1.7.5">Lighthouse CI runs on every PR (CI log inspection)</criterion>
+      <criterion id="AC-1.7.6">Deploy triggers only on main branch (PR test - no deploy)</criterion>
+    </group>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc type="prd" path="docs/prd.md">Product Requirements Document - NDX:Try AWS Scenarios Portal</doc>
+      <doc type="architecture" path="docs/architecture.md">System Architecture with ADRs - Static Site Generation (Eleventy), GOV.UK Frontend 5.13.0</doc>
+      <doc type="ux-design" path="docs/ux-design-specification.md">UX Design Specification - Component patterns and accessibility requirements</doc>
+      <doc type="epics" path="docs/epics.md">Epic breakdown with all story definitions</doc>
+      <doc type="tech-spec" path="docs/sprint-artifacts/tech-spec-epic-1.md">Epic 1 Technical Specification - 68 acceptance criteria, domain confirmed</doc>
+    </docs>
+    <code>
+      <file path="src/_data/forms.yaml" description="Forms configuration - Quiz and Evidence Pack form URLs and metadata"/>
+      <file path="src/index.njk" description="Existing homepage template - needs to be replaced with Story 1.1 implementation"/>
+    </code>
+    <dependencies>
+      <dependency name="eleventy" version="2.x" purpose="Static site generator"/>
+      <dependency name="govuk-frontend" version="5.13.0" purpose="GOV.UK Design System"/>
+      <dependency name="@x-govuk/govuk-eleventy-plugin" version="latest" purpose="GOV.UK Eleventy integration"/>
+      <dependency name="sass" version="latest" purpose="Sass compilation for GOV.UK styles"/>
+      <dependency name="ajv" version="8.x" purpose="JSON Schema validation"/>
+      <dependency name="axe-core" version="latest" purpose="Accessibility testing"/>
+      <dependency name="pa11y" version="latest" purpose="Accessibility CI testing"/>
+      <dependency name="lighthouse-ci" version="latest" purpose="Performance testing"/>
+      <dependency name="node" version="20.x LTS" purpose="Build runtime"/>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architectural">No runtime infrastructure - all pages pre-generated at build time (ADR-1)</constraint>
+    <constraint type="architectural">No database - all data stored in YAML files</constraint>
+    <constraint type="architectural">Static hosting via GitHub Pages</constraint>
+    <constraint type="architectural">Progressive enhancement - core functionality works without JavaScript</constraint>
+    <constraint type="performance">Homepage load time: &lt;2 seconds (10 Mbps baseline)</constraint>
+    <constraint type="performance">Time to First Contentful Paint: &lt;1.2 seconds</constraint>
+    <constraint type="performance">Largest Contentful Paint: &lt;2.5 seconds</constraint>
+    <constraint type="performance">Build time: &lt;3 minutes</constraint>
+    <constraint type="accessibility">WCAG 2.2 AA compliance required</constraint>
+    <constraint type="accessibility">Lighthouse accessibility score: 95+</constraint>
+    <constraint type="design">GOV.UK Frontend 5.13.0 design system compliance</constraint>
+    <constraint type="domain">Target domain: aws.try.ndx.digital.cabinet-office.gov.uk</constraint>
+    <constraint type="domain">Initial deployment: GitHub Pages default URL</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface type="data">scenarios.yaml - Validated against schemas/scenario.schema.json</interface>
+    <interface type="data">navigation.yaml - Navigation structure for header</interface>
+    <interface type="data">site.yaml - Global site configuration</interface>
+    <interface type="data">forms.yaml - Form URLs and metadata (existing)</interface>
+    <interface type="template">layouts/base.njk - Base GOV.UK template structure</interface>
+    <interface type="template">components/header.njk - Navigation header</interface>
+    <interface type="template">components/footer.njk - Footer with GitHub link</interface>
+    <interface type="template">components/scenario-card.njk - Scenario preview card</interface>
+    <interface type="ci">GitHub Actions workflow - build, test, deploy pipeline</interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard type="schema">JSON Schema validation via AJV for scenarios.yaml</standard>
+      <standard type="accessibility">axe-core + pa11y for WCAG 2.2 AA compliance</standard>
+      <standard type="performance">Lighthouse CI thresholds: performance 80, accessibility 95</standard>
+      <standard type="manual">Keyboard navigation test - tab through all elements</standard>
+      <standard type="manual">Screen reader testing - VoiceOver or NVDA</standard>
+    </standards>
+    <locations>
+      <location path=".github/workflows/build-deploy.yml">CI pipeline with all automated tests</location>
+      <location path="schemas/scenario.schema.json">JSON Schema for scenario validation</location>
+    </locations>
+    <ideas>
+      <idea>Test 404 page by navigating to /nonexistent URL</idea>
+      <idea>Test build failure with intentionally invalid scenarios.yaml</idea>
+      <idea>Verify LCP &lt;2.5s with Lighthouse</idea>
+      <idea>Test responsive layout at 768px viewport</idea>
+      <idea>Verify skip link functionality for screen readers</idea>
+    </ideas>
+  </tests>
+
+  <contentTonePrinciples>
+    <principle id="1">Grant permission to try - "You're not the first, you won't be the last"</principle>
+    <principle id="2">Reduce imposter syndrome - "No AWS expertise required"</principle>
+    <principle id="3">Promise safety - "Isolated sandbox, automatic cleanup, capped cost"</principle>
+    <principle id="4">Respect time - "15 minutes to decide, not 15 hours"</principle>
+    <principle id="5">Enable sharing - "Easy to forward to your team/leadership"</principle>
+  </contentTonePrinciples>
+
+  <projectStructure>
+    <expectedFiles>
+      <file>.eleventy.js</file>
+      <file>.nvmrc</file>
+      <file>package.json</file>
+      <file>.github/workflows/build-deploy.yml</file>
+      <file>schemas/scenario.schema.json</file>
+      <file>src/_data/forms.yaml (existing)</file>
+      <file>src/_data/navigation.yaml</file>
+      <file>src/_data/scenarios.yaml</file>
+      <file>src/_data/site.yaml</file>
+      <file>src/_includes/layouts/base.njk</file>
+      <file>src/_includes/components/header.njk</file>
+      <file>src/_includes/components/footer.njk</file>
+      <file>src/_includes/components/scenario-card.njk</file>
+      <file>src/index.md (replace existing index.njk)</file>
+      <file>src/accessibility.md</file>
+      <file>src/contact.md</file>
+      <file>src/404.md</file>
+    </expectedFiles>
+  </projectStructure>
+
+  <scenarios>
+    <scenario id="council-chatbot" name="Council Chatbot">AI-powered resident Q&amp;A assistant using Amazon Bedrock</scenario>
+    <scenario id="planning-ai" name="Planning Application AI">Document analysis for planning decisions</scenario>
+    <scenario id="foi-redaction" name="FOI Redaction">Automated sensitive data redaction</scenario>
+    <scenario id="smart-car-park" name="Smart Car Park">Real-time parking availability with IoT</scenario>
+    <scenario id="text-to-speech" name="Text to Speech">Accessibility audio generation</scenario>
+    <scenario id="quicksight-dashboard" name="QuickSight Dashboard">Service performance analytics</scenario>
+  </scenarios>
+</story-context>

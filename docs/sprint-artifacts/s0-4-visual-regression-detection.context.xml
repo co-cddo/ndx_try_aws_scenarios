@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context story-id="s0-4-visual-regression-detection" version="1.0">
+  <metadata>
+    <generated>2025-11-29</generated>
+    <epic>sprint-0</epic>
+    <story-status>drafted</story-status>
+    <priority>high</priority>
+    <dependencies>
+      <dependency>s0-3-screenshot-capture-pipeline</dependency>
+    </dependencies>
+  </metadata>
+
+  <story-summary>
+    <title>Visual Regression Detection</title>
+    <objective>Implement automated visual regression detection using pixelmatch to compare AWS Console screenshots against baselines, with threshold-based classification and GitHub PR approval workflow for baseline updates.</objective>
+    <acceptance-criteria-count>10</acceptance-criteria-count>
+    <estimated-complexity>high</estimated-complexity>
+  </story-summary>
+
+  <acceptance-criteria>
+    <ac id="AC4.1" source="tech-spec-sprint-0.md">
+      <description>Compares new screenshots against baselines using pixelmatch</description>
+      <implementation>
+        <file>src/lib/visual-regression.ts</file>
+        <function>compareScreenshot(current, baseline)</function>
+        <test>tests/unit/visual-regression.test.ts</test>
+      </implementation>
+    </ac>
+    <ac id="AC4.2" source="tech-spec-sprint-0.md">
+      <description>Flags screenshots with >10% pixel difference for manual review</description>
+      <implementation>
+        <threshold>0.10</threshold>
+        <status-mapping>review</status-mapping>
+        <action>Create GitHub PR for approval</action>
+      </implementation>
+    </ac>
+    <ac id="AC4.3" source="tech-spec-sprint-0.md">
+      <description>Auto-fails tests with >15% pixel difference (NFR56)</description>
+      <implementation>
+        <threshold>0.15</threshold>
+        <status-mapping>fail</status-mapping>
+        <action>Block workflow, require investigation</action>
+      </implementation>
+    </ac>
+    <ac id="AC4.4" source="tech-spec-sprint-0.md">
+      <description>Generates visual diff report showing changed regions</description>
+      <implementation>
+        <file>src/lib/diff-report.ts</file>
+        <outputs>
+          <output>HTML report with side-by-side comparisons</output>
+          <output>Diff images with highlighted changes</output>
+          <output>Summary statistics</output>
+        </outputs>
+      </implementation>
+    </ac>
+    <ac id="AC4.5" source="tech-spec-sprint-0.md">
+      <description>Creates GitHub PR for manual approval of baseline changes</description>
+      <implementation>
+        <file>.github/workflows/visual-regression.yml</file>
+        <file>.github/workflows/baseline-update.yml</file>
+        <workflow>
+          <step>Detect >10% diff in any screenshot</step>
+          <step>Create branch baseline-update/{timestamp}</step>
+          <step>Open PR with diff report in body</step>
+          <step>On approval, trigger baseline-update workflow</step>
+        </workflow>
+      </implementation>
+    </ac>
+    <ac id="AC4.6" source="tech-spec-sprint-0.md">
+      <description>Tags screenshots with CloudFormation template version</description>
+      <implementation>
+        <s3-metadata>cfn-template-version</s3-metadata>
+        <source>cloudformation/*/template.yaml version tag</source>
+      </implementation>
+    </ac>
+    <ac id="AC4.7" source="tech-spec-sprint-0.md">
+      <description>S3 bucket versioning retains last 10 versions</description>
+      <implementation>
+        <file>cloudformation/screenshot-automation/s3-bucket.yaml</file>
+        <lifecycle-rule>NoncurrentVersionExpiration: NoncurrentDays: 1, NewerNoncurrentVersions: 10</lifecycle-rule>
+      </implementation>
+    </ac>
+    <ac id="AC4.8" source="tech-spec-sprint-0.md">
+      <description>Lifecycle policy transitions versions >90 days to Glacier</description>
+      <implementation>
+        <file>cloudformation/screenshot-automation/s3-bucket.yaml</file>
+        <lifecycle-rule>NoncurrentVersionTransition: NoncurrentDays: 90, StorageClass: GLACIER</lifecycle-rule>
+      </implementation>
+    </ac>
+    <ac id="AC4.9" source="tech-spec-sprint-0.md">
+      <description>CloudWatch metrics emitted: screenshot_success_count, screenshot_failure_count, screenshot_drift_detected</description>
+      <implementation>
+        <file>cloudformation/screenshot-automation/monitoring.yaml</file>
+        <file>src/lib/visual-regression.ts</file>
+        <namespace>AWS/NDXScreenshot</namespace>
+        <metrics>
+          <metric name="screenshot_success_count" unit="Count" />
+          <metric name="screenshot_failure_count" unit="Count" />
+          <metric name="screenshot_drift_detected" unit="None" />
+        </metrics>
+      </implementation>
+    </ac>
+    <ac id="AC4.10" source="tech-spec-sprint-0.md">
+      <description>CloudWatch alarms trigger when success rate less than 90% or drift greater than 20%</description>
+      <implementation>
+        <file>cloudformation/screenshot-automation/monitoring.yaml</file>
+        <alarms>
+          <alarm name="ScreenshotSuccessRateLow" threshold="90" comparison="LessThanThreshold" />
+          <alarm name="ScreenshotDriftHigh" threshold="0.2" comparison="GreaterThanThreshold" />
+        </alarms>
+      </implementation>
+    </ac>
+  </acceptance-criteria>
+
+  <technical-context>
+    <architecture>
+      <component name="visual-regression-library">
+        <location>src/lib/visual-regression.ts</location>
+        <responsibility>Pixel-level image comparison using pixelmatch</responsibility>
+        <exports>
+          <function>compareScreenshot(currentPath, baselinePath): RegressionResult</function>
+          <function>compareAllScreenshots(manifest): RegressionReport</function>
+          <function>downloadBaseline(scenario, name): Buffer</function>
+          <function>uploadDiffImage(diffBuffer, path): string</function>
+          <function>publishMetrics(results): void</function>
+        </exports>
+      </component>
+      <component name="diff-report-generator">
+        <location>src/lib/diff-report.ts</location>
+        <responsibility>Generate diff images and HTML reports</responsibility>
+        <exports>
+          <function>generateDiffImage(current, baseline): Buffer</function>
+          <function>generateHtmlReport(results): string</function>
+          <function>formatPrBody(report): string</function>
+        </exports>
+      </component>
+      <component name="visual-regression-workflow">
+        <location>.github/workflows/visual-regression.yml</location>
+        <triggers>
+          <trigger>workflow_dispatch</trigger>
+          <trigger>workflow_run: aws-console-screenshots.yml</trigger>
+        </triggers>
+      </component>
+      <component name="baseline-update-workflow">
+        <location>.github/workflows/baseline-update.yml</location>
+        <triggers>
+          <trigger>pull_request: types: [closed], labels: [baseline-update]</trigger>
+        </triggers>
+      </component>
+    </architecture>
+
+    <interfaces>
+      <interface name="RegressionResult">
+        <definition><![CDATA[
+interface RegressionResult {
+  screenshot_path: string;
+  baseline_path: string;
+  diff_percentage: number;
+  status: 'pass' | 'review' | 'fail';
+  diff_image_path?: string;
+  cfn_template_version?: string;
+}
+        ]]></definition>
+      </interface>
+      <interface name="RegressionReport">
+        <definition><![CDATA[
+interface RegressionReport {
+  batch_id: string;
+  timestamp: string;
+  results: RegressionResult[];
+  summary: {
+    total: number;
+    passed: number;
+    review: number;
+    failed: number;
+  };
+}
+        ]]></definition>
+      </interface>
+    </interfaces>
+
+    <thresholds>
+      <threshold name="pass" percentage="10" description="Auto-accept; minor rendering differences" />
+      <threshold name="review" percentage="15" description="10-15% difference requires PR approval" />
+      <threshold name="fail" percentage="100" description="Above 15% is automatic failure" />
+    </thresholds>
+  </technical-context>
+
+  <dependencies>
+    <npm-packages>
+      <package name="pixelmatch" version="^5.3.0" purpose="Pixel-level image comparison" />
+      <package name="pngjs" version="^7.0.0" purpose="PNG parsing for pixelmatch" />
+      <package name="@aws-sdk/client-cloudwatch" version="^3.600.0" purpose="CloudWatch metrics publishing" />
+      <package name="@aws-sdk/client-s3" version="^3.600.0" purpose="Already installed from S0.3" />
+    </npm-packages>
+    <existing-infrastructure>
+      <resource name="S3 Bucket" stack="cloudformation/screenshot-automation/s3-bucket.yaml" />
+      <resource name="SNS Topic" stack="cloudformation/screenshot-automation/s3-bucket.yaml" />
+      <resource name="IAM Upload User" stack="cloudformation/screenshot-automation/github-upload-permissions.yaml" />
+    </existing-infrastructure>
+    <story-dependencies>
+      <dependency story-id="s0-3-screenshot-capture-pipeline" status="done" />
+    </story-dependencies>
+  </dependencies>
+
+  <file-structure>
+    <new-files>
+      <file path="src/lib/visual-regression.ts" type="library">Visual regression comparison library</file>
+      <file path="src/lib/diff-report.ts" type="library">Diff report and HTML generation</file>
+      <file path="scripts/update-baselines.mjs" type="script">Baseline management utility</file>
+      <file path="tests/unit/visual-regression.test.ts" type="test">Unit tests for visual regression</file>
+      <file path="tests/unit/diff-report.test.ts" type="test">Unit tests for diff report</file>
+      <file path="tests/integration/visual-regression.test.ts" type="test">Integration tests</file>
+      <file path=".github/workflows/visual-regression.yml" type="workflow">Visual regression workflow</file>
+      <file path=".github/workflows/baseline-update.yml" type="workflow">Baseline update workflow</file>
+      <file path="cloudformation/screenshot-automation/monitoring.yaml" type="cloudformation">CloudWatch resources</file>
+    </new-files>
+    <modified-files>
+      <file path="cloudformation/screenshot-automation/s3-bucket.yaml">Add lifecycle rules for version retention and Glacier transition</file>
+      <file path="package.json">Add pngjs dependency</file>
+    </modified-files>
+  </file-structure>
+
+  <existing-code-patterns>
+    <pattern name="S3 Upload Pattern" source="src/lib/screenshot-manifest.ts">
+      <code><![CDATA[
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+
+const s3Client = new S3Client({ region: process.env.AWS_REGION || 'us-west-2' });
+
+export async function uploadToS3(
+  bucketName: string,
+  key: string,
+  body: Buffer,
+  contentType: string
+): Promise<string> {
+  await s3Client.send(new PutObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+    Body: body,
+    ContentType: contentType,
+  }));
+  return `s3://${bucketName}/${key}`;
+}
+      ]]></code>
+    </pattern>
+    <pattern name="SNS Notification Pattern" source="src/lib/screenshot-manifest.ts">
+      <code><![CDATA[
+import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
+
+export async function sendNotification(
+  topicArn: string,
+  subject: string,
+  message: string
+): Promise<void> {
+  const snsClient = new SNSClient({ region: process.env.AWS_REGION || 'us-west-2' });
+  await snsClient.send(new PublishCommand({
+    TopicArn: topicArn,
+    Subject: subject,
+    Message: message,
+  }));
+}
+      ]]></code>
+    </pattern>
+    <pattern name="Retry Pattern" source="src/lib/aws-federation.ts">
+      <code><![CDATA[
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelayMs: number = 1000
+): Promise<T> {
+  let lastError: Error | undefined;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw lastError;
+}
+      ]]></code>
+    </pattern>
+  </existing-code-patterns>
+
+  <test-strategy>
+    <unit-tests>
+      <test-file>tests/unit/visual-regression.test.ts</test-file>
+      <test-cases>
+        <case>compareScreenshot returns pass for identical images</case>
+        <case>compareScreenshot returns review for 10-15% diff</case>
+        <case>compareScreenshot returns fail for above 15% diff</case>
+        <case>compareAllScreenshots aggregates results correctly</case>
+        <case>downloadBaseline fetches from correct S3 path</case>
+        <case>publishMetrics sends correct CloudWatch data</case>
+      </test-cases>
+    </unit-tests>
+    <unit-tests>
+      <test-file>tests/unit/diff-report.test.ts</test-file>
+      <test-cases>
+        <case>generateDiffImage creates valid PNG buffer</case>
+        <case>generateDiffImage highlights changed pixels in red</case>
+        <case>generateHtmlReport includes all results</case>
+        <case>generateHtmlReport embeds diff images</case>
+        <case>formatPrBody creates valid markdown</case>
+      </test-cases>
+    </unit-tests>
+    <integration-tests>
+      <test-file>tests/integration/visual-regression.test.ts</test-file>
+      <test-cases>
+        <case>Full workflow with mock S3 and CloudWatch</case>
+        <case>Baseline fetch and comparison end-to-end</case>
+        <case>Metric publishing verifiable in CloudWatch</case>
+      </test-cases>
+    </integration-tests>
+  </test-strategy>
+
+  <cloudwatch-config>
+    <namespace>AWS/NDXScreenshot</namespace>
+    <metrics>
+      <metric>
+        <name>screenshot_success_count</name>
+        <unit>Count</unit>
+        <dimensions>scenario, region</dimensions>
+      </metric>
+      <metric>
+        <name>screenshot_failure_count</name>
+        <unit>Count</unit>
+        <dimensions>scenario, region, error_type</dimensions>
+      </metric>
+      <metric>
+        <name>screenshot_drift_detected</name>
+        <unit>None</unit>
+        <dimensions>scenario, threshold</dimensions>
+        <description>1 if drift detected, 0 otherwise</description>
+      </metric>
+    </metrics>
+    <alarms>
+      <alarm>
+        <name>ScreenshotSuccessRateLow</name>
+        <metric>screenshot_success_count / (screenshot_success_count + screenshot_failure_count)</metric>
+        <threshold>0.9</threshold>
+        <comparison>LessThanThreshold</comparison>
+        <evaluation-periods>1</evaluation-periods>
+        <period>3600</period>
+        <action>SNS notification</action>
+      </alarm>
+      <alarm>
+        <name>ScreenshotDriftHigh</name>
+        <metric>screenshot_drift_detected</metric>
+        <statistic>Average</statistic>
+        <threshold>0.2</threshold>
+        <comparison>GreaterThanThreshold</comparison>
+        <evaluation-periods>1</evaluation-periods>
+        <period>3600</period>
+        <action>SNS notification</action>
+      </alarm>
+    </alarms>
+  </cloudwatch-config>
+
+  <workflow-config>
+    <visual-regression-workflow>
+      <name>visual-regression.yml</name>
+      <triggers>
+        <trigger type="workflow_dispatch">Manual trigger</trigger>
+        <trigger type="workflow_run">After aws-console-screenshots.yml completes</trigger>
+      </triggers>
+      <jobs>
+        <job name="compare">
+          <steps>
+            <step>Checkout repository</step>
+            <step>Configure AWS credentials (upload user)</step>
+            <step>Setup Node.js</step>
+            <step>Install dependencies</step>
+            <step>Download latest screenshots from S3 current/</step>
+            <step>Download baselines from S3 baselines/</step>
+            <step>Run comparison</step>
+            <step>Upload diff images to S3 diffs/</step>
+            <step>Publish CloudWatch metrics</step>
+            <step>Create PR if review status detected</step>
+            <step>Send SNS notification</step>
+          </steps>
+        </job>
+      </jobs>
+    </visual-regression-workflow>
+    <baseline-update-workflow>
+      <name>baseline-update.yml</name>
+      <triggers>
+        <trigger type="pull_request">Closed + merged + baseline-update label</trigger>
+      </triggers>
+      <jobs>
+        <job name="update-baselines">
+          <steps>
+            <step>Checkout repository</step>
+            <step>Configure AWS credentials</step>
+            <step>Copy current/ to baselines/ in S3</step>
+            <step>Update baseline manifest with version tags</step>
+            <step>Send confirmation notification</step>
+          </steps>
+        </job>
+      </jobs>
+    </baseline-update-workflow>
+  </workflow-config>
+
+  <security-notes>
+    <note>Use AWS_UPLOAD_ACCESS_KEY_ID/SECRET for S3 write operations (same as S0.3)</note>
+    <note>CloudWatch metrics use same IAM permissions path</note>
+    <note>GitHub GITHUB_TOKEN automatically available for PR creation</note>
+    <note>Never log pixel data or image contents</note>
+  </security-notes>
+
+  <learnings-from-s0-3>
+    <learning>Separate IAM credentials for federation (read-only) vs uploads (write-only)</learning>
+    <learning>Generate reports from actual test results, not placeholder data</learning>
+    <learning>Use throw Error instead of test.skip for circuit breaker to ensure proper failure recording</learning>
+    <learning>All workflow steps should have proper error handling with continue-on-error where appropriate</learning>
+  </learnings-from-s0-3>
+</story-context>

@@ -1,0 +1,185 @@
+<story-context id="2-1-one-click-cloudformation-deployment-pre-configured-parameters" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>1</storyId>
+    <title>One-Click CloudFormation Deployment - Pre-Configured Parameters</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-1-one-click-cloudformation-deployment-pre-configured-parameters.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>council CTO or technical team member</asA>
+    <iWant>to deploy a scenario CloudFormation template with pre-configured parameters and zero manual steps</iWant>
+    <soThat>I don't need to understand CloudFormation syntax or wrestle with parameters</soThat>
+    <tasks>
+      <task id="1" name="Create Scenario Detail Page Template">
+        <subtask id="1.1">Create src/scenarios/{scenario-id}.njk template for individual scenario pages</subtask>
+        <subtask id="1.2">Add page layout with scenario metadata (title, description, time, cost, difficulty)</subtask>
+        <subtask id="1.3">Implement "Deploy to Innovation Sandbox" button component</subtask>
+        <subtask id="1.4">Add pre-deployment checklist section with advisory checks</subtask>
+      </task>
+      <task id="2" name="Implement CloudFormation URL Generator">
+        <subtask id="2.1">Create src/assets/js/deploy-url.js module for CloudFormation URL construction</subtask>
+        <subtask id="2.2">Build URL with templateURL parameter pointing to S3/GitHub raw URL</subtask>
+        <subtask id="2.3">Pre-fill all required parameters (ScenarioTag, CleanupTimeout, MaxCostTag)</subtask>
+        <subtask id="2.4">Generate unique stack name using pattern ndx-try-{scenario-id}-{timestamp}</subtask>
+        <subtask id="2.5">Implement return URL allowlist validation (security control)</subtask>
+        <subtask id="2.6">Add Eleventy filter for server-side URL generation as fallback</subtask>
+      </task>
+      <task id="3" name="Extend scenarios.yaml with Deployment Metadata">
+        <subtask id="3.1">Add deployment section to each scenario in src/_data/scenarios.yaml</subtask>
+        <subtask id="3.2">Include templateUrl, region, stackNamePrefix, and parameters</subtask>
+        <subtask id="3.3">Define cost breakdown with estimatedMin, estimatedMax, maximumExpected</subtask>
+        <subtask id="3.4">Add CloudFormation tags configuration (scenario, git-hash, git-tag, max-cost, auto-cleanup)</subtask>
+        <subtask id="3.5">Create/update JSON schema for deployment metadata validation</subtask>
+      </task>
+      <task id="4" name="Implement Error Message Mapping">
+        <subtask id="4.1">Create src/_data/errorMessages.json with error code mappings</subtask>
+        <subtask id="4.2">Map CloudFormation errors to user-friendly messages</subtask>
+        <subtask id="4.3">Include troubleshooting steps and support links for each error</subtask>
+        <subtask id="4.4">Add fallback message for unmapped errors</subtask>
+        <subtask id="4.5">Create error display component in scenario detail page</subtask>
+      </task>
+      <task id="5" name="Implement Deploy Button with Confirmation Modal">
+        <subtask id="5.1">Create GOV.UK-styled confirmation modal using GOV.UK Frontend patterns</subtask>
+        <subtask id="5.2">Modal shows: "You're leaving NDX:Try" with Continue/Cancel buttons</subtask>
+        <subtask id="5.3">Deploy button disabled until prerequisites acknowledged (progressive enhancement)</subtask>
+        <subtask id="5.4">Track deployment started event for analytics (placeholder for Epic 5)</subtask>
+        <subtask id="5.5">Ensure modal works without JavaScript (link fallback)</subtask>
+      </task>
+      <task id="6" name="Accessibility Testing">
+        <subtask id="6.1">Test deploy button and modal with keyboard navigation</subtask>
+        <subtask id="6.2">Verify ARIA labels and focus management in modal</subtask>
+        <subtask id="6.3">Run pa11y validation on scenario detail pages</subtask>
+        <subtask id="6.4">Test with screen reader (VoiceOver)</subtask>
+      </task>
+      <task id="7" name="Integration Testing">
+        <subtask id="7.1">Test CloudFormation URL generation with sample template</subtask>
+        <subtask id="7.2">Verify URL parameters are correctly encoded</subtask>
+        <subtask id="7.3">Test stack name uniqueness across multiple deploys</subtask>
+        <subtask id="7.4">Verify error message display for common failure scenarios</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-2.1.1">Clicking "Deploy to Innovation Sandbox" redirects to AWS CloudFormation Console with template pre-loaded via S3 URL</criterion>
+    <criterion id="AC-2.1.2">All CloudFormation parameters are pre-filled with sensible defaults (region: us-west-2, scenario tag, git hash)</criterion>
+    <criterion id="AC-2.1.3">Stack name is pre-filled with pattern ndx-try-{scenario-id}-{timestamp} and is &lt;=128 characters</criterion>
+    <criterion id="AC-2.1.4">No manual parameter editing required for successful deployment</criterion>
+    <criterion id="AC-2.1.5">Stack resources include tags: scenario, git-hash, git-tag, max-cost, auto-cleanup=true</criterion>
+    <criterion id="AC-2.1.6">Deployment succeeds &gt;=95% of the time (first-attempt success rate)</criterion>
+    <criterion id="AC-2.1.7">Failed deployments show actionable error message in plain English</criterion>
+    <criterion id="AC-2.1.8">Return URL passes allowlist validation before redirect (security control)</criterion>
+    <criterion id="quality-1">Page passes WCAG 2.2 AA validation (automated + manual testing)</criterion>
+    <criterion id="quality-2">Keyboard navigation works through all interactive elements</criterion>
+    <criterion id="quality-3">Deploy button and confirmation modal work without JavaScript (progressive enhancement)</criterion>
+    <criterion id="quality-4">Deploy URL generation tested with sample CloudFormation template</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/architecture.md" title="Architecture" section="ADR-1: Portal Model" snippet="Portal links to AWS CloudFormation console with pre-loaded template URLs. No backend execution - portal only generates URLs." />
+      <doc path="docs/architecture.md" title="Architecture" section="ADR-4: Form Handling" snippet="Pure HTML + Vanilla JavaScript (Progressive Enhancement). No framework overhead." />
+      <doc path="docs/architecture.md" title="Architecture" section="ADR-5: Analytics" snippet="CloudFormation Resource Tagging for post-deployment tracking. Tags include scenario name, git-hash, git-tag." />
+      <doc path="docs/architecture.md" title="Architecture" section="ADR-6: Design System" snippet="GOV.UK Frontend 5.13.0. Use button, modal, notification components consistently." />
+      <doc path="docs/sprint-artifacts/tech-spec-epic-2.md" title="Tech Spec Epic 2" section="Deployment URL Generator" snippet="Constructs CloudFormation console URL with pre-loaded template and parameters. Uses Eleventy filter for server-side generation." />
+      <doc path="docs/sprint-artifacts/tech-spec-epic-2.md" title="Tech Spec Epic 2" section="Error Message Mapping" snippet="Translates CloudFormation errors to human-readable guidance. Top 15 common errors covered with fallback for unknown errors." />
+      <doc path="docs/sprint-artifacts/tech-spec-epic-2.md" title="Tech Spec Epic 2" section="Scenario Deployment Metadata" snippet="Extension to scenarios.yaml with deployment section including templateUrl, region, stackNamePrefix, parameters, cost breakdown." />
+    </docs>
+    <code>
+      <file path="src/scenarios/index.njk" kind="page" reason="Pattern for scenario pages - shows Nunjucks iteration over scenarios data" />
+      <file path="src/_data/scenarios.yaml" kind="data" reason="Scenarios metadata - needs extension with deployment section per tech spec" />
+      <file path="src/_includes/components/scenario-card.njk" kind="component" reason="Existing component pattern to follow for new deploy button component" />
+      <file path="src/assets/js/quiz.js" kind="javascript" reason="Existing vanilla JS pattern with IIFE and progressive enhancement" />
+      <file path="src/assets/js/gallery-filter.js" kind="javascript" reason="Existing vanilla JS filtering pattern to follow" />
+      <file path="src/assets/css/custom.css" kind="styles" reason="Custom CSS file - add deploy button and modal styling here" />
+      <file path="schemas/scenario.schema.json" kind="schema" reason="JSON schema for scenario validation - needs extension for deployment metadata" />
+      <file path="eleventy.config.js" kind="config" reason="Eleventy config - add custom filter for CloudFormation URL generation" />
+      <file path="src/get-started.njk" kind="page" reason="Example of complex Nunjucks page with GOV.UK components and journey steps" />
+    </code>
+    <dependencies>
+      <node>
+        <package name="@x-govuk/govuk-eleventy-plugin" version="^7.0.0" />
+        <package name="govuk-frontend" version="5.13.0" />
+        <package name="@11ty/eleventy" version="^3.0.0" dev="true" />
+        <package name="ajv" version="^8.17.1" dev="true" />
+        <package name="ajv-formats" version="^3.0.1" dev="true" />
+        <package name="pa11y-ci" version="^3.1.0" dev="true" />
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="ADR-1">Portal does NOT execute CloudFormation deployments - only generates redirect URLs to AWS Console</constraint>
+    <constraint source="ADR-4">Vanilla JavaScript only - no frameworks. Use IIFE pattern for progressive enhancement.</constraint>
+    <constraint source="ADR-5">All CloudFormation templates must include tags: scenario, git-hash, git-tag, max-cost, auto-cleanup</constraint>
+    <constraint source="ADR-6">Use GOV.UK Frontend 5.13.0 components. Breakpoints: 641px and 1020px (not 768/1024)</constraint>
+    <constraint source="Security">Return URL must be allowlisted to prevent open redirects</constraint>
+    <constraint source="Epic-1-Learnings">Use .njk extension for pages with complex HTML/Nunjucks content</constraint>
+    <constraint source="Epic-1-Learnings">Progressive enhancement: functionality must work without JavaScript</constraint>
+    <constraint source="Tech-Spec">Stack name pattern: ndx-try-{scenario-id}-{timestamp}, max 128 characters</constraint>
+    <constraint source="Tech-Spec">Default region: us-west-2 (London)</constraint>
+    <constraint source="Tech-Spec">CloudFormation URL format: https://console.aws.amazon.com/cloudformation/home?region={region}#/stacks/quickcreate?templateURL={url}&amp;stackName={name}&amp;param_X=Y</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="CloudFormation Quick Create URL" kind="external-redirect">
+      <signature>https://console.aws.amazon.com/cloudformation/home?region={region}#/stacks/quickcreate?templateURL={encoded-url}&amp;stackName={name}&amp;param_{ParamName}={value}</signature>
+      <path>AWS CloudFormation Console</path>
+      <notes>URL parameters must be properly encoded. Stack name limited to 128 chars.</notes>
+    </interface>
+    <interface name="Eleventy Data Cascade" kind="data">
+      <signature>{{ scenarios.scenarios }} - Array of scenario objects from scenarios.yaml</signature>
+      <path>src/_data/scenarios.yaml</path>
+    </interface>
+    <interface name="Eleventy Filter" kind="filter">
+      <signature>eleventyConfig.addFilter('deployUrl', function(scenario) { return url; })</signature>
+      <path>eleventy.config.js</path>
+      <notes>Server-side URL generation as progressive enhancement fallback</notes>
+    </interface>
+    <interface name="GOV.UK Button Component" kind="component">
+      <signature>&lt;a href="{url}" role="button" draggable="false" class="govuk-button" data-module="govuk-button"&gt;</signature>
+      <path>GOV.UK Frontend 5.13.0</path>
+    </interface>
+    <interface name="GOV.UK Modal Pattern" kind="component">
+      <signature>Dialog pattern with aria-modal, aria-labelledby, focus trap</signature>
+      <path>GOV.UK Design System patterns</path>
+      <notes>No built-in modal - implement custom using GOV.UK patterns</notes>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing uses pa11y-ci for accessibility validation and Lighthouse CI for performance. All pages must pass WCAG 2.2 AA. Manual keyboard navigation testing required for interactive components. Schema validation runs on build via scripts/validate-schema.js.
+    </standards>
+    <locations>
+      <location>.pa11yci.json - pa11y-ci configuration</location>
+      <location>lighthouserc.js - Lighthouse CI configuration</location>
+      <location>scripts/validate-schema.js - Schema validation script</location>
+      <location>schemas/*.schema.json - JSON schemas for data validation</location>
+    </locations>
+    <ideas>
+      <idea ac="AC-2.1.1">Test deploy button generates correct CloudFormation Console URL with template pre-loaded</idea>
+      <idea ac="AC-2.1.2">Verify all parameters in URL match scenario defaults (region, tags)</idea>
+      <idea ac="AC-2.1.3">Test stack name generation: format, uniqueness, 128-char limit</idea>
+      <idea ac="AC-2.1.4">Verify URL works without modification when pasted into browser</idea>
+      <idea ac="AC-2.1.5">Validate CloudFormation template includes required tags</idea>
+      <idea ac="AC-2.1.7">Test error message mapping for common CloudFormation errors</idea>
+      <idea ac="AC-2.1.8">Test allowlist validation rejects malicious return URLs</idea>
+      <idea ac="quality-1">Run pa11y-ci on /scenarios/{id}/ paths</idea>
+      <idea ac="quality-2">Manual keyboard navigation test: Tab through deploy flow, modal interaction</idea>
+      <idea ac="quality-3">Test with JavaScript disabled: deploy button works as link</idea>
+    </ideas>
+  </tests>
+
+  <devNotes>
+    <note source="Epic-1-Learnings">CSS Pattern: Journey step component at src/assets/css/custom.css - timeline layout can be adapted for deployment steps</note>
+    <note source="Epic-1-Learnings">Progressive Enhancement: IIFE pattern applied - deploy button should work as standard link without JavaScript</note>
+    <note source="Tech-Spec">CloudFormation templates hosted at GitHub raw URLs or S3 bucket (ndx-try-templates)</note>
+    <note source="Tech-Spec">Modal must be GOV.UK-styled confirmation: "You're leaving NDX:Try" with Continue/Cancel</note>
+    <note source="Architecture">No backend execution - portal only generates URLs, AWS Console handles deployment</note>
+  </devNotes>
+</story-context>

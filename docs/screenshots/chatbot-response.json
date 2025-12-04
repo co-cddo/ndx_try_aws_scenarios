@@ -1,0 +1,8 @@
+{
+    "success": true,
+    "response": "Here's information about bin collections in our area:\n\n\ud83d\uddd1\ufe0f **General waste (black bin):** Collected every two weeks on Monday\n\u267b\ufe0f **Recycling (blue bin):** Collected every two weeks on Thursday\n\ud83c\udf3f **Garden waste (green bin):** Fortnightly Apr-Nov, monthly Dec-Mar\n\n**Missed collection?** Report within 48 hours via our website or call 01234-123-4567.\n\n**Tip:** You can check your exact collection days using your postcode on our website.",
+    "topic": "Bin Collections",
+    "query": "When is my bin collection?",
+    "timestamp": "2025-11-28T21:16:37.774572",
+    "note": "Sandbox demo - production version uses Amazon Bedrock AI"
+}

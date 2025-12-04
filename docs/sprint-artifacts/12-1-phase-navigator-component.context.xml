@@ -1,0 +1,347 @@
+<story-context id="12.1-phase-navigator-component" v="1.0">
+  <metadata>
+    <epicId>12</epicId>
+    <storyId>12.1</storyId>
+    <title>Phase Navigator Component</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-11-29</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/12-1-phase-navigator-component.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>council officer exploring AWS scenarios</asA>
+    <iWant>a persistent phase navigator showing my journey through TRY → WALK THROUGH → EXPLORE</iWant>
+    <soThat>I always know where I am in my evaluation journey and what's ahead</soThat>
+    <tasks>
+      <task id="1" title="Create phase configuration data file" acs="1,4">
+        <subtasks>
+          <subtask>Create src/_data/phase-config.yaml with phases array (try, walkthrough, explore)</subtask>
+          <subtask>Define phase schema: id, label, sublabel, time, benefit, order, optional, fork</subtask>
+          <subtask>Add costReassurance message</subtask>
+          <subtask>Add scenario-specific phase configurations</subtask>
+        </subtasks>
+      </task>
+      <task id="2" title="Create phase state management JavaScript" acs="2,3,9,10">
+        <subtasks>
+          <subtask>Create src/assets/js/phase-state.js with PhaseState interface</subtask>
+          <subtask>Implement getPhaseState() - read from URL params with sessionStorage fallback</subtask>
+          <subtask>Implement setPhaseState(state) - write to URL and sessionStorage</subtask>
+          <subtask>Implement completePhase() - mark current phase complete and advance</subtask>
+          <subtask>Implement isStackExpired() - check if 90+ minutes since started</subtask>
+          <subtask>Implement getShareableUrl() - generate URL with state params</subtask>
+          <subtask>Add URL parameter parsing: ?phase=, ?completed=, ?scenario=, ?started=</subtask>
+        </subtasks>
+      </task>
+      <task id="3" title="Create phase navigator component" acs="1,2,3,4,6,7,14,16">
+        <subtasks>
+          <subtask>Create src/_includes/components/phase-navigator.njk</subtask>
+          <subtask>Implement three-phase horizontal progress indicator</subtask>
+          <subtask>Add "You are here" indicator styling for current phase</subtask>
+          <subtask>Add checkmark icon for completed phases</subtask>
+          <subtask>Add branching visual for Explore fork option</subtask>
+          <subtask>Add cost reassurance text as first line</subtask>
+          <subtask>Add skeleton loading state placeholder</subtask>
+          <subtask>Use BEM naming: ndx-phase-navigator, ndx-phase-navigator__phase, etc.</subtask>
+        </subtasks>
+      </task>
+      <task id="4" title="Create mobile sticky bottom bar styles" acs="11">
+        <subtasks>
+          <subtask>Add CSS media query for viewport less than 768px</subtask>
+          <subtask>Implement position: sticky; bottom: 0; with safe area insets</subtask>
+          <subtask>Ensure minimum 44x44px touch targets</subtask>
+          <subtask>Add padding for content below navigator</subtask>
+          <subtask>Test iOS Safari safe area behaviour</subtask>
+        </subtasks>
+      </task>
+      <task id="5" title="Add ARIA accessibility attributes" acs="12,13,14">
+        <subtasks>
+          <subtask>Add nav role="navigation" aria-label="Journey progress"</subtask>
+          <subtask>Add aria-current="step" to current phase</subtask>
+          <subtask>Add aria-label="[Phase name] completed" to completed phases</subtask>
+          <subtask>Implement keyboard navigation (tabindex, Enter/Space activation)</subtask>
+          <subtask>Ensure focus indicators visible (not just colour)</subtask>
+        </subtasks>
+      </task>
+      <task id="6" title="Create noscript fallback" acs="15">
+        <subtasks>
+          <subtask>Add noscript message within navigator component</subtask>
+          <subtask>Ensure static navigation links function without JS</subtask>
+          <subtask>Test complete user flow with JavaScript disabled</subtask>
+        </subtasks>
+      </task>
+      <task id="7" title="Update scenario cards with journey preview" acs="5">
+        <subtasks>
+          <subtask>Modify src/_includes/components/scenario-card.njk</subtask>
+          <subtask>Add "3 phases" badge to card</subtask>
+          <subtask>Update CTA text to "Start Free Journey - 15 min"</subtask>
+        </subtasks>
+      </task>
+      <task id="8" title="Integrate navigator on deployment progress page" acs="6">
+        <subtasks>
+          <subtask>Update deployment progress template to include phase-navigator</subtask>
+          <subtask>Wire navigator state to deployment progress events</subtask>
+          <subtask>Show time remaining based on phase start timestamp</subtask>
+        </subtasks>
+      </task>
+      <task id="9" title="Create transition CTA component" acs="8">
+        <subtasks>
+          <subtask>Create transition CTA styling for post-walkthrough</subtask>
+          <subtask>Include benefit text for next phase</subtask>
+          <subtask>Wire to phase state for next phase detection</subtask>
+        </subtasks>
+      </task>
+      <task id="10" title="Handle parallel entry detection" acs="9">
+        <subtasks>
+          <subtask>Detect missing TRY phase in URL/sessionStorage</subtask>
+          <subtask>Display "Start from TRY phase" prompt</subtask>
+          <subtask>Provide link back to scenario page</subtask>
+        </subtasks>
+      </task>
+      <task id="11" title="Handle stale session state" acs="10">
+        <subtasks>
+          <subtask>Check stack expiration (90 minutes threshold)</subtask>
+          <subtask>Display "Stack expired" message</subtask>
+          <subtask>Offer re-deploy and zero-deployment options</subtask>
+        </subtasks>
+      </task>
+      <task id="12" title="Add analytics events" acs="17,18">
+        <subtasks>
+          <subtask>Extend src/assets/js/analytics.js with journey events</subtask>
+          <subtask>Add journey_phase_changed event: scenario_id, from_phase, to_phase, timestamp</subtask>
+          <subtask>Add journey_drop_off event: scenario_id, phase, timestamp, completion_percent</subtask>
+          <subtask>Add journey_completed event for completion tracking</subtask>
+        </subtasks>
+      </task>
+      <task id="13" title="Apply navigator to all scenario pages (18+ pages)">
+        <subtasks>
+          <subtask>Update scenario detail pages to include phase-navigator</subtask>
+          <subtask>Update walkthrough pages to include phase-navigator</subtask>
+          <subtask>Update exploration pages to include phase-navigator</subtask>
+          <subtask>Verify navigator appears consistently across all 18+ pages</subtask>
+        </subtasks>
+      </task>
+      <task id="14" title="Performance optimization" acs="16">
+        <subtasks>
+          <subtask>Measure navigator render time (target less than 100ms)</subtask>
+          <subtask>Verify page load impact less than 50KB added</subtask>
+          <subtask>Test CLS with Lighthouse (target less than 0.1)</subtask>
+          <subtask>Inline critical CSS for skeleton state</subtask>
+        </subtasks>
+      </task>
+      <task id="15" title="Integration testing">
+        <subtasks>
+          <subtask>Test URL parameter state persistence across page refreshes</subtask>
+          <subtask>Test sessionStorage fallback when URL manipulation blocked</subtask>
+          <subtask>Test multi-tab state independence</subtask>
+          <subtask>Test browser back/forward navigation</subtask>
+          <subtask>Test rapid phase transitions (debounce verification)</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Navigator displays TRY, WALK THROUGH, EXPLORE phases with time estimates</criterion>
+    <criterion id="2">Current phase shows "You are here" indicator with aria-current="step"</criterion>
+    <criterion id="3">Completed phases show checkmark with aria-label including "completed"</criterion>
+    <criterion id="4">Cost reassurance "This demo costs nothing to deploy" appears first</criterion>
+    <criterion id="5">Scenario cards show "3 phases" badge and "Start Free Journey - 15 min" CTA</criterion>
+    <criterion id="6">Navigator appears on deployment progress page with real-time updates</criterion>
+    <criterion id="7">Branching visual shows Evidence Pack as main path, Explore as fork</criterion>
+    <criterion id="8">Transition CTA appears at walkthrough completion with benefit text</criterion>
+    <criterion id="9">Parallel entry detection prompts "Start from TRY phase"</criterion>
+    <criterion id="10">Stale session (>90 min) shows expired state with re-deploy option</criterion>
+    <criterion id="11">Mobile (<768px) shows sticky bottom bar with 44x44px touch targets</criterion>
+    <criterion id="12">Navigator uses nav role="navigation" aria-label="Journey progress"</criterion>
+    <criterion id="13">Keyboard navigation works through all phases</criterion>
+    <criterion id="14">Colour is not the only state indicator (icons + text used)</criterion>
+    <criterion id="15">Noscript shows "Enable JavaScript for journey tracking"</criterion>
+    <criterion id="16">Skeleton screens prevent layout shift during load (CLS less than 0.1)</criterion>
+    <criterion id="17">journey_phase_changed event fires with correct data</criterion>
+    <criterion id="18">journey_drop_off event fires with correct data</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-12.md</path>
+        <title>Epic 12 Technical Specification</title>
+        <section>Detailed Design - Services and Modules</section>
+        <snippet>Phase Navigator Component: Render phase progress, handle state transitions at _includes/components/phase-navigator.njk. Phase State Manager: URL param read/write, sessionStorage sync at assets/js/phase-state.js</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-12.md</path>
+        <title>Epic 12 Technical Specification</title>
+        <section>Data Models and Contracts</section>
+        <snippet>Phase Configuration Schema defines phases array with id, label, sublabel, time, benefit, order, optional, fork. URL State Schema: ?phase=walkthrough&amp;completed=try&amp;scenario=council-chatbot&amp;started=1732873200000</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Decision 4: Form Handling (Client-Side Interaction)</section>
+        <snippet>Pure HTML + Vanilla JavaScript (Progressive Enhancement). GOV.UK Frontend components are plain HTML/CSS. Minimal JS for interaction, analytics, progressive disclosure.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics Document</title>
+        <section>Story 12.1: Phase Navigator Component</section>
+        <snippet>Implement as reusable _includes/components/phase-navigator.njk. Apply to 18+ pages across scenarios, walkthroughs, and exploration. Use GOV.UK Step-by-step navigation pattern as reference.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>src/assets/js/analytics.js</path>
+        <kind>module</kind>
+        <symbol>NDXAnalytics</symbol>
+        <lines>1-192</lines>
+        <reason>Must extend with journey_phase_changed, journey_drop_off, journey_completed events. Follow existing track() pattern and event structure.</reason>
+      </file>
+      <file>
+        <path>src/assets/js/exploration-state.js</path>
+        <kind>module</kind>
+        <symbol>ExplorationState</symbol>
+        <lines>1-265</lines>
+        <reason>Reference implementation for LocalStorage state management with graceful degradation. PhaseState should follow similar patterns for isAvailable(), load(), save() methods.</reason>
+      </file>
+      <file>
+        <path>src/_includes/components/scenario-card.njk</path>
+        <kind>component</kind>
+        <symbol>scenario-card</symbol>
+        <lines>1-138</lines>
+        <reason>Must modify to add "3 phases" badge and update CTA text to "Start Free Journey - 15 min". Follow existing BEM naming and GOV.UK tag patterns.</reason>
+      </file>
+      <file>
+        <path>src/_includes/layouts/base.njk</path>
+        <kind>layout</kind>
+        <symbol>base layout</symbol>
+        <lines>1-60</lines>
+        <reason>Extends govuk/template.njk. May need to include phase-navigator.njk in layout for global availability, or include selectively in child layouts.</reason>
+      </file>
+      <file>
+        <path>src/_includes/layouts/scenario.njk</path>
+        <kind>layout</kind>
+        <symbol>scenario layout</symbol>
+        <reason>Scenario detail pages layout - add phase-navigator include here</reason>
+      </file>
+      <file>
+        <path>src/_includes/layouts/walkthrough.njk</path>
+        <kind>layout</kind>
+        <symbol>walkthrough layout</symbol>
+        <reason>Walkthrough pages layout - add phase-navigator include here</reason>
+      </file>
+      <file>
+        <path>src/_includes/layouts/exploration.njk</path>
+        <kind>layout</kind>
+        <symbol>exploration layout</symbol>
+        <reason>Exploration pages layout - add phase-navigator include here</reason>
+      </file>
+      <file>
+        <path>src/assets/css/custom.css</path>
+        <kind>stylesheet</kind>
+        <symbol>custom styles</symbol>
+        <reason>Add ndx-phase-navigator BEM styles here. Follow existing component CSS patterns.</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <node>
+        <package name="govuk-frontend" version="5.13.0">GOV.UK Design System components including Details, Tags, and Step-by-step navigation patterns</package>
+        <package name="@x-govuk/govuk-eleventy-plugin" version="^7.0.0">Eleventy integration for GOV.UK Frontend</package>
+        <package name="@11ty/eleventy" version="^3.0.0">Static site generator</package>
+        <package name="@playwright/test" version="^1.49.0">E2E testing framework for visual and integration tests</package>
+        <package name="pa11y-ci" version="^3.1.0">Accessibility testing</package>
+        <package name="@lhci/cli" version="^0.14.0">Lighthouse CI for performance testing</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Static-first architecture: All content generated at build time, JavaScript for progressive enhancement only</constraint>
+    <constraint>URL-first state: Primary state storage in URL parameters for shareability, sessionStorage as fallback</constraint>
+    <constraint>GOV.UK Design System: Use GOV.UK Frontend 5.13.0 components, follow GDS patterns</constraint>
+    <constraint>WCAG 2.1 AA: All interactive elements must be fully accessible</constraint>
+    <constraint>Performance: Navigator render less than 100ms, total added payload less than 50KB, CLS less than 0.1</constraint>
+    <constraint>BEM naming: CSS follows ndx-phase-navigator block naming convention</constraint>
+    <constraint>No external dependencies: All state local (no backend APIs)</constraint>
+    <constraint>Mobile-first: Sticky bottom bar for viewports under 768px with 44x44px touch targets</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>PhaseState</name>
+      <kind>JavaScript interface</kind>
+      <signature>
+        interface PhaseState {
+          currentPhase: 'try' | 'walkthrough' | 'explore';
+          completedPhases: string[];
+          scenario: string;
+          startedAt: number;
+        }
+      </signature>
+      <path>src/assets/js/phase-state.js</path>
+    </interface>
+    <interface>
+      <name>getPhaseState</name>
+      <kind>function</kind>
+      <signature>function getPhaseState(): PhaseState</signature>
+      <path>src/assets/js/phase-state.js</path>
+    </interface>
+    <interface>
+      <name>setPhaseState</name>
+      <kind>function</kind>
+      <signature>function setPhaseState(state: Partial&lt;PhaseState&gt;): void</signature>
+      <path>src/assets/js/phase-state.js</path>
+    </interface>
+    <interface>
+      <name>completePhase</name>
+      <kind>function</kind>
+      <signature>function completePhase(): void</signature>
+      <path>src/assets/js/phase-state.js</path>
+    </interface>
+    <interface>
+      <name>isStackExpired</name>
+      <kind>function</kind>
+      <signature>function isStackExpired(): boolean</signature>
+      <path>src/assets/js/phase-state.js</path>
+    </interface>
+    <interface>
+      <name>trackJourneyPhaseChanged</name>
+      <kind>function</kind>
+      <signature>function trackJourneyPhaseChanged(scenarioId: string, fromPhase: string, toPhase: string): boolean</signature>
+      <path>src/assets/js/analytics.js</path>
+    </interface>
+    <interface>
+      <name>trackJourneyDropOff</name>
+      <kind>function</kind>
+      <signature>function trackJourneyDropOff(scenarioId: string, phase: string, completionPercent: number): boolean</signature>
+      <path>src/assets/js/analytics.js</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      All components must pass Pa11y CI with zero errors. Playwright E2E tests required for critical user flows including phase navigation, state persistence, and mobile responsive behavior. Visual regression tests via Playwright screenshots. Performance validated via Lighthouse CI (CLS target less than 0.1). Unit tests for phase-state.js using Jest or Playwright test runner.
+    </standards>
+    <locations>
+      <location>tests/*.spec.ts</location>
+      <location>tests/e2e/*.spec.ts</location>
+      <location>.pa11yci.json</location>
+      <location>lighthouserc.js</location>
+    </locations>
+    <ideas>
+      <idea ac="1,2,3,4">Visual inspection test: Navigator displays all three phases with correct indicators and cost reassurance</idea>
+      <idea ac="5">Scenario card test: Verify "3 phases" badge and updated CTA text on scenario gallery</idea>
+      <idea ac="6">Deployment integration test: Navigator updates during deployment progress</idea>
+      <idea ac="7,8">Branching flow test: Post-walkthrough shows Evidence Pack main path and Explore fork</idea>
+      <idea ac="9">Parallel entry test: Direct URL to walkthrough without TRY triggers prompt</idea>
+      <idea ac="10">Stale session test: Mock 90+ minute timestamp shows expired state</idea>
+      <idea ac="11">Mobile responsive test: Viewport under 768px shows sticky bottom bar with correct touch targets</idea>
+      <idea ac="12,13,14">Accessibility audit: ARIA attributes, keyboard navigation, non-colour indicators</idea>
+      <idea ac="15">NoJS test: Disable JavaScript, verify noscript message and static links work</idea>
+      <idea ac="16">Performance test: Lighthouse CLS measurement, skeleton loading verification</idea>
+      <idea ac="17,18">Analytics test: Mock gtag and verify journey events fire with correct parameters</idea>
+    </ideas>
+  </tests>
+</story-context>

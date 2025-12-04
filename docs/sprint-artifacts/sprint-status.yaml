@@ -1,0 +1,426 @@
+# generated: 2025-11-29
+# project: ndx_try_aws_scenarios
+# project_key: ndx_try_aws_scenarios
+# tracking_system: file-system
+# story_location: {project-root}/docs/sprint-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Next epic tech context created by *epic-tech-context (required)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder by *create-story
+#   - ready-for-dev: Draft approved and story context created by *story-ready
+#   - in-progress: Developer actively working on implementation by *dev-story
+#   - review: Implementation complete, ready for review by *code-review
+#   - done: Story completed by *story-done
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done by *retrospective
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - SM typically drafts next story ONLY after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', dev reviews, then Dev moves to 'done'
+# - Epic 6-11 are from PRD Extension: Hands-On Exploration & Learning (Phase 2)
+
+generated: 2025-11-29
+project: ndx_try_aws_scenarios
+project_key: ndx_try_aws_scenarios
+tracking_system: file-system
+story_location: "{project-root}/docs/sprint-artifacts"
+
+development_status:
+  # ============================================================================
+  # ORIGINAL MVP (Epic 1-5) - COMPLETED
+  # ============================================================================
+
+  # Epic 1: Portal Foundation & Discovery
+  epic-1: contexted
+  1-1-portal-foundation-homepage-navigation-build-infrastructure: done
+  1-2-scenario-selector-quiz-3-question-discovery-flow: done
+  1-3-scenario-gallery-cards-filtering-metadata: done
+  1-4-quick-start-guide-your-15-minute-journey: done
+  epic-1-retrospective: completed
+
+  # Epic 2: Deployment Accessibility & Cost Transparency
+  epic-2: contexted
+  2-1-one-click-cloudformation-deployment-pre-configured-parameters: done
+  2-2-real-time-deployment-progress-tracking-cloudformation-events: done
+  2-3-deployment-cost-estimation-validation: done
+  2-4-demo-videos-5-10-minute-walkthroughs-zero-deployment-path: done
+  2-5-screenshot-gallery-annotated-visual-guide-zero-deployment-path: done
+  2-6-partner-led-guided-tour-contact-form: done
+  epic-2-retrospective: completed
+
+  # Epic 3: Guided Scenario Experiences
+  epic-3: contexted
+  3-1-sample-data-framework-realistic-uk-council-data-generation: done
+  3-2-council-chatbot-ask-the-chatbot-walkthrough: done
+  3-3-planning-application-ai-upload-and-extract-walkthrough: done
+  3-4-foi-redaction-walkthrough: done
+  3-5-smart-car-park-iot-walkthrough: done
+  3-6-text-to-speech-walkthrough: done
+  3-7-quicksight-dashboard-walkthrough: done
+  epic-3-retrospective: completed
+
+  # Epic 4: Evidence Generation & Committee-Ready Artifacts
+  epic-4: contexted
+  4-1-evidence-pack-template-single-template-with-persona-conditionals: done
+  4-2-what-you-experienced-reflection-guide-form: done
+  4-3-evidence-pack-pdf-generation-auto-population: done
+  4-4-service-specific-success-metrics-roi-guidance: done
+  epic-4-retrospective: completed
+
+  # Epic 5: Pathway Forward & Partner Ecosystem
+  epic-5: contexted
+  5-1-whats-next-guidance-pages-per-scenario-pathways: done
+  5-2-analytics-event-capture-5-7-core-events: done
+  5-3-analytics-dashboard-informed-decision-rate-key-metrics: done
+  5-4-post-deployment-cost-analysis-tool: done
+  5-5-lga-ai-hub-integration-listing-co-promotion: done
+  5-6-monthly-success-metrics-report-automated-manual: done
+  5-7-success-story-showcase-council-case-studies: done
+  epic-5-retrospective: completed
+
+  # ============================================================================
+  # PRD EXTENSION: Hands-On Exploration & Learning (Epic 6-11) - BACKLOG
+  # Added: 2025-11-28 | FRs: FR57-FR99 | NFRs: NFR37-NFR44
+  # ============================================================================
+
+  # Epic 6: Council Chatbot Exploration (REFERENCE IMPLEMENTATION)
+  # Per CBA5: Receives extra investment to establish patterns for Epic 7-11
+  epic-6: contexted
+  6-1-council-chatbot-exploration-landing-page: done
+  6-2-council-chatbot-what-can-i-change-experiments: done
+  6-3-council-chatbot-how-does-it-work-architecture-tour: done
+  6-4-council-chatbot-test-the-limits-boundary-exercise: done
+  6-5-council-chatbot-take-it-further-production-guidance: done
+  6-6-council-chatbot-screenshot-automation-pipeline: done
+  epic-6-retrospective: optional
+
+  # Epic 7: Planning Application AI Exploration
+  epic-7: contexted
+  7-1-planning-ai-exploration-landing-page: done
+  7-2-planning-ai-what-can-i-change-experiments: done
+  7-3-planning-ai-how-does-it-work-architecture-tour: done
+  7-4-planning-ai-test-the-limits-boundary-exercise: done
+  7-5-planning-ai-take-it-further-production-guidance: done
+  7-6-planning-ai-screenshot-automation-pipeline: done
+  epic-7-retrospective: optional
+
+  # Epic 8: FOI Redaction Exploration
+  epic-8: contexted
+  8-1-foi-redaction-exploration-landing-page: done
+  8-2-foi-redaction-what-can-i-change-experiments: done
+  8-3-foi-redaction-how-does-it-work-architecture-tour: done
+  8-4-foi-redaction-test-the-limits-boundary-exercise: done
+  8-5-foi-redaction-take-it-further-production-guidance: done
+  8-6-foi-redaction-screenshot-automation-pipeline: done
+  epic-8-retrospective: optional
+
+  # Epic 9: Smart Car Park IoT Exploration
+  epic-9: contexted
+  9-1-smart-car-park-exploration-landing-page: done
+  9-2-smart-car-park-what-can-i-change-experiments: done
+  9-3-smart-car-park-how-does-it-work-architecture-tour: done
+  9-4-smart-car-park-test-the-limits-boundary-exercise: done
+  9-5-smart-car-park-take-it-further-production-guidance: done
+  9-6-smart-car-park-screenshot-automation-pipeline: done
+  epic-9-retrospective: optional
+
+  # Epic 10: Text-to-Speech Exploration
+  epic-10: contexted
+  10-1-text-to-speech-exploration-landing-page: done
+  10-2-text-to-speech-what-can-i-change-experiments: done
+  10-3-text-to-speech-how-does-it-work-architecture-tour: done
+  10-4-text-to-speech-test-the-limits-boundary-exercise: done
+  10-5-text-to-speech-take-it-further-production-guidance: done
+  10-6-text-to-speech-screenshot-automation-pipeline: done
+  epic-10-retrospective: optional
+
+  # Epic 11: QuickSight Dashboard Exploration
+  epic-11: contexted
+  11-1-quicksight-exploration-landing-page: done
+  11-2-quicksight-what-can-i-change-experiments: done
+  11-3-quicksight-how-does-it-work-architecture-tour: done
+  11-4-quicksight-test-the-limits-boundary-exercise: done
+  11-5-quicksight-take-it-further-production-guidance: done
+  11-6-quicksight-screenshot-automation-pipeline: done
+  epic-11-retrospective: optional
+
+  # ============================================================================
+  # PRD v1.2 EXTENSION: Navigation & Sample Data Clarity (Epic 12) - COMPLETED
+  # Added: 2025-11-29 | FRs: FR100-FR101, FR106 | FR102 deferred to Phase 2
+  # ============================================================================
+
+  # Epic 12: Navigation & Sample Data Clarity
+  # Independent epic - can be implemented in parallel with Epic 6-11
+  epic-12: contexted
+  12-1-phase-navigator-component: done
+  12-2-sample-data-explanation-panels: done
+  epic-12-retrospective: completed
+
+  # ============================================================================
+  # PRD v1.3/v1.4 EXTENSION: AWS Federation Screenshot Automation - BACKLOG
+  # Added: 2025-11-29 | FRs: FR107-FR123 | NFRs: NFR48-NFR58
+  # CRITICAL: Sprint 0 MUST complete before Epic 6 screenshot stories can start
+  # ============================================================================
+
+  # Sprint 0: Screenshot Automation Infrastructure
+  # 26 story points - enables test-driven screenshot capture
+  # Saves 30 points across Epic 6-11 (net reduction: 4 points)
+  sprint-0: contexted
+  s0-1-aws-federation-service-account-setup: done
+  s0-2-playwright-integration-library: done
+  s0-3-screenshot-capture-pipeline: done
+  s0-4-visual-regression-detection: done
+  s0-5-reference-deployment-environment: done
+  sprint-0-retrospective: completed
+
+  # ============================================================================
+  # PRD v1.5 EXTENSION: Screenshot Integration & Navigation (Epic 13-16) - BACKLOG
+  # Added: 2025-11-29 | FRs: FR124-FR150 | NFRs: NFR59-NFR66
+  # 143 story points - integrates Sprint 0 infrastructure into portal
+  # Dependencies: Sprint 0 Complete ✓
+  # ============================================================================
+
+  # Epic 13: Screenshot Content Population
+  # 51 story points - Core value delivery: real screenshots in walkthroughs
+  epic-13: contexted
+  13-1-screenshot-component-with-metadata-display: done
+  13-2-screenshot-data-files-for-all-6-scenarios: done
+  13-3-council-chatbot-walkthrough-screenshot-integration: done
+  13-4-planning-ai-walkthrough-screenshot-integration: done
+  13-5-foi-redaction-walkthrough-screenshot-integration: done
+  13-6-smart-car-park-walkthrough-screenshot-integration: done
+  13-7-text-to-speech-walkthrough-screenshot-integration: done
+  13-8-quicksight-dashboard-walkthrough-screenshot-integration: done
+  13-9-click-to-zoom-lightbox-component: done
+  13-10-missing-screenshot-fallback-handling: done
+  epic-13-retrospective: optional
+
+  # Epic 14: Walkthrough Index & Navigation
+  # 37 story points - Navigation enables discovery of screenshot content
+  epic-14: contexted
+  14-1-walkthrough-index-page-layout-and-cards: done
+  14-2-category-filtering-and-badges: done
+  14-3-search-functionality-for-walkthroughs: done
+  14-4-header-navigation-component-with-dropdowns: done
+  14-5-mobile-navigation-hamburger-menu: done
+  14-6-breadcrumb-navigation-component: done
+  14-7-navigation-active-state-highlighting: done
+  epic-14-retrospective: optional
+
+  # Epic 15: Scenario-Walkthrough Linking
+  # 21 story points - Bidirectional connections maximize exposure
+  epic-15: contexted
+  15-1-start-walkthrough-cta-on-scenario-pages: done
+  15-2-walkthrough-progress-tracking-localstorage: done
+  15-3-walkthrough-completion-page-links: done
+  15-4-scenario-gallery-walkthrough-badges: done
+  15-5-cross-scenario-recommendations-on-completion: done
+  epic-15-retrospective: optional
+
+  # Epic 16: Visual Consistency & Accessibility
+  # 34 story points - Quality assurance, can run parallel with 13-15
+  epic-16: contexted
+  16-1-alt-text-and-caption-audit-population: done
+  16-2-screenshot-annotation-component: done
+  16-3-responsive-screenshot-sizing: done
+  16-4-webp-conversion-and-optimization: done
+  16-5-screenshot-gallery-component: done
+  16-6-accessibility-testing-and-remediation: done
+  16-7-navigation-keyboard-accessibility-audit: done
+  epic-16-retrospective: completed
+
+  # ============================================================================
+  # BUG FIX: Screenshot Content Migration (Epic 17) - CONTEXTED
+  # Added: 2025-11-30 | Root Cause: S3 bucket never populated, 101 screenshots 404
+  # Solution: Git-based storage, REAL AWS screenshots via Playwright, zero 404s
+  # REVISED: Changed from placeholder mockups to real AWS console captures
+  # ============================================================================
+
+  # Epic 17: Screenshot Content Migration (REAL AWS Screenshots)
+  # 43 story points - Critical bug fix for walkthrough screenshots
+  # 3 sprints: Infrastructure (11pts), Screenshots Part 1 (15pts), Screenshots Part 2 + Validation (17pts)
+  epic-17: contexted
+  17-0-deploy-sprint-0-screenshot-infrastructure: done
+  17-1-screenshot-component-migration-to-local-storage: done
+  17-2-screenshot-directory-structure-setup: done
+  17-3-council-chatbot-real-screenshots: done
+  17-4-planning-ai-real-screenshots: done
+  17-5-foi-redaction-real-screenshots: done
+  17-6-smart-car-park-real-screenshots: done
+  17-7-text-to-speech-real-screenshots: done
+  17-8-quicksight-dashboard-real-screenshots: done
+  17-9-automated-404-detection-script: done
+  17-10-zero-404-validation-epic-closure: done
+  epic-17-retrospective: optional
+
+  # ============================================================================
+  # PRD v1.6 EXTENSION: Scenario Application Web Frontends (Epic 18-23)
+  # Added: 2025-11-30 | FRs: FR151-FR210 | NFRs: NFR67-NFR72
+  # Critical Gap: Walkthroughs describe web UIs, but Lambda returns JSON only
+  # Solution: 6 web application frontends deployed via CloudFormation
+  # ============================================================================
+
+  # Epic 18: Council Chatbot Web Application (REFERENCE IMPLEMENTATION)
+  # 6 stories - Chat interface with GOV.UK styling
+  epic-18: contexted
+  18-1-chat-interface-foundation: done
+  18-2-api-integration-response-display: done
+  18-3-conversation-history-sample-questions: done
+  18-4-cloudformation-deployment-integration: done
+  18-5-screenshot-capture-validation: done
+  18-6-comprehensive-test-suite: done
+  epic-18-retrospective: optional
+
+  # Epic 19: Planning Application AI Web Application
+  # 6 stories - Document upload with drag-and-drop, extraction display
+  epic-19: contexted
+  19-1-upload-interface-foundation: done
+  19-2-processing-status-progress: done
+  19-3-extracted-data-display: done
+  19-4-cloudformation-deployment-integration: done
+  19-5-screenshot-capture-validation: done
+  19-6-comprehensive-test-suite: done
+  epic-19-retrospective: optional
+
+  # Epic 20: FOI Redaction Web Application
+  # 6 stories - Text input with PII redaction visualization
+  epic-20: contexted
+  20-1-text-input-interface: done
+  20-2-processing-feedback-display: done
+  20-3-redaction-display-visualization: done
+  20-4-cloudformation-deployment-integration: done
+  20-5-screenshot-capture-validation: done
+  20-6-comprehensive-test-suite: done
+  epic-20-retrospective: optional
+
+  # Epic 21: Smart Car Park IoT Web Application
+  # 6 stories - Real-time parking dashboard
+  epic-21: contexted
+  21-1-dashboard-foundation: done
+  21-2-real-time-updates: done
+  21-3-historical-data-charts: done
+  21-4-cloudformation-deployment-integration: done
+  21-5-screenshot-capture-validation: done
+  21-6-comprehensive-test-suite: done
+  epic-21-retrospective: optional
+
+  # Epic 22: Text-to-Speech Web Application
+  # 6 stories - Text input with audio playback controls
+  epic-22: contexted
+  22-1-input-interface-foundation: done
+  22-2-audio-player-controls: done
+  22-3-voice-options-preview: done
+  22-4-cloudformation-deployment-integration: done
+  22-5-screenshot-capture-validation: done
+  22-6-comprehensive-test-suite: done
+  epic-22-retrospective: optional
+
+  # Epic 23: QuickSight Dashboard Web Application
+  # 6 stories - Analytics dashboard with KPIs and charts
+  epic-23: contexted
+  23-1-kpi-summary-cards: done
+  23-2-service-breakdown-table: done
+  23-3-data-visualizations: done
+  23-4-cloudformation-deployment-integration: done
+  23-5-screenshot-capture-validation: done
+  23-6-comprehensive-test-suite: done
+  epic-23-retrospective: optional
+
+  # ============================================================================
+  # PRD v1.7 EXTENSION: Scenario Application Remediation (Epic 24)
+  # Added: 2025-11-30 | FRs: FR211-FR235 | NFRs: NFR73-NFR78
+  # Critical: Epic 18-23 delivered HTML mockups, not real AWS integrations
+  # Solution: Fix 403 errors, integrate Bedrock/Textract/Comprehend/DynamoDB
+  # ============================================================================
+
+  # Epic 24: Scenario Application Remediation
+  # 7 stories, 55 points - Fix broken scenarios, integrate real AWS services
+  epic-24: contexted
+  24-1-fix-lambda-function-url-access: done
+  24-2-council-chatbot-bedrock-integration: done
+  24-3-planning-ai-textract-comprehend-integration: done
+  24-4-foi-redaction-comprehend-pii-integration: done
+  24-5-smart-car-park-dynamodb-data-simulation: done
+  24-6-quicksight-dashboard-clarification: done
+  24-7-end-to-end-validation-all-scenarios: done
+  epic-24-retrospective: optional
+
+  # ============================================================================
+  # PRD: QuickSight Dashboard Migration (Epic 25-30)
+  # Added: 2025-11-30 | PRD: docs/prd-quicksight-migration.md
+  # Mission: Migrate from Chart.js prototype to real Amazon QuickSight
+  # Total: 32 stories, ~173 points
+  # ============================================================================
+
+  # Epic 25: QuickSight CloudFormation Infrastructure
+  # 6 stories, 47 points - Deploy real QuickSight resources via CloudFormation
+  # COMPLETED: 2025-11-30 - Real QuickSight deployed via CloudFormation
+  epic-25: contexted
+  25-1-s3-bucket-and-sample-data-lambda: done
+  25-2-quicksight-datasource-s3-manifest: done
+  25-3-quicksight-dataset-spice-import: done
+  25-4-quicksight-analysis-and-dashboard: done
+  25-5-dashboard-filters-and-embedding-config: done
+  25-6-integration-testing-validation: done
+  epic-25-retrospective: optional
+
+  # Epic 26: Sample Data Pipeline
+  # 5 stories, 22 points - Generate realistic UK council analytics data
+  epic-26: backlog
+  26-1-sample-data-schema-design: backlog
+  26-2-lambda-data-generator-implementation: backlog
+  26-3-s3-manifest-file-generation: backlog
+  26-4-spice-refresh-trigger-mechanism: backlog
+  26-5-data-validation-tests: backlog
+  epic-26-retrospective: optional
+
+  # Epic 27: Portal Embedding Integration
+  # 5 stories, 31 points - Embed QuickSight dashboard in NDX:Try portal
+  epic-27: backlog
+  27-1-embedding-url-generation-lambda: backlog
+  27-2-quicksight-embedding-sdk-integration: backlog
+  27-3-responsive-container-implementation: backlog
+  27-4-parameter-pass-through-configuration: backlog
+  27-5-error-handling-fallback-ui: backlog
+  epic-27-retrospective: optional
+
+  # Epic 28: Walkthrough Content Migration
+  # 5 stories, 22 points - Update all content to reflect real QuickSight
+  epic-28: backlog
+  28-1-scenario-page-content-updates: backlog
+  28-2-walkthrough-step-by-step-rewrite: backlog
+  28-3-architecture-diagram-update: backlog
+  28-4-evidence-pack-quicksight-section: backlog
+  28-5-whats-next-quicksight-guidance: backlog
+  epic-28-retrospective: optional
+
+  # Epic 29: Screenshot Pipeline & Visual Assets
+  # 5 stories, 27 points - Capture real QuickSight UI screenshots
+  epic-29: backlog
+  29-1-screenshot-automation-embedded-view: backlog
+  29-2-step-by-step-walkthrough-screenshots: backlog
+  29-3-filter-interaction-screenshots: backlog
+  29-4-export-dialog-screenshots: backlog
+  29-5-screenshot-verification-tests: backlog
+  epic-29-retrospective: optional
+
+  # Epic 30: Testing & Quality Assurance
+  # 6 stories, 37 points - Comprehensive test coverage
+  epic-30: backlog
+  30-1-cloudformation-template-validation: backlog
+  30-2-e2e-dashboard-loading-tests: backlog
+  30-3-accessibility-tests-embedded-dashboard: backlog
+  30-4-visual-regression-tests: backlog
+  30-5-integration-test-suite: backlog
+  30-6-documentation-review-qa: backlog
+  epic-30-retrospective: optional

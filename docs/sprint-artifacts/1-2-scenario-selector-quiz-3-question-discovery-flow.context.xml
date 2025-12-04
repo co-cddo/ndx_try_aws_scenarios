@@ -1,0 +1,254 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>2</storyId>
+    <title>Scenario Selector Quiz - 3-Question Discovery Flow</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-2-scenario-selector-quiz-3-question-discovery-flow.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>council service manager or CTO</asA>
+    <iWant>to answer 3 quick questions and get personalized scenario recommendations</iWant>
+    <soThat>I find the most relevant scenario for my problem without browsing all 6</soThat>
+    <tasks>
+      <task id="1" ac="1.5.1,1.5.6">Quiz configuration data structure
+        <subtask>1.1 Create src/_data/quiz-config.yaml with questions, options, and weights</subtask>
+        <subtask>1.2 Define weighted scoring matrix for all 6 scenarios</subtask>
+        <subtask>1.3 Add schema validation for quiz-config.yaml</subtask>
+        <subtask>1.4 Test weights produce sensible recommendations</subtask>
+      </task>
+      <task id="2" ac="1.5.1,1.5.9,1.5.10">Quiz page markup and styles
+        <subtask>2.1 Create src/quiz.md with quiz page layout</subtask>
+        <subtask>2.2 Implement GOV.UK Frontend radio button components</subtask>
+        <subtask>2.3 Add proper fieldset/legend structure for accessibility</subtask>
+        <subtask>2.4 Ensure touch targets ≥44px (GOV.UK default)</subtask>
+        <subtask>2.5 Add question progress indicator (Step 1 of 3)</subtask>
+        <subtask>2.6 Style with GOV.UK classes (no custom CSS needed)</subtask>
+      </task>
+      <task id="3" ac="1.5.1-8">Quiz JavaScript logic
+        <subtask>3.1 Create src/assets/js/quiz.js with progressive enhancement</subtask>
+        <subtask>3.2 Implement sequential question display</subtask>
+        <subtask>3.3 Add "Not Sure" escape routing to gallery (AC: 1.5.2, 1.5.3)</subtask>
+        <subtask>3.4 Implement back navigation for questions 2 and 3 (AC: 1.5.4)</subtask>
+        <subtask>3.5 Implement weighted scoring algorithm</subtask>
+        <subtask>3.6 Generate results with 1-3 recommendations (AC: 1.5.6)</subtask>
+        <subtask>3.7 Generate reasoning explanation (AC: 1.5.7)</subtask>
+        <subtask>3.8 Store quiz state in sessionStorage</subtask>
+      </task>
+      <task id="4" ac="1.5.6-8">Results page
+        <subtask>4.1 Create results section in quiz.md</subtask>
+        <subtask>4.2 Display ranked recommendations with reasoning</subtask>
+        <subtask>4.3 Add "Learn More" primary CTA linking to scenario</subtask>
+        <subtask>4.4 Add "Browse All Scenarios" secondary link (AC: 1.5.8)</subtask>
+        <subtask>4.5 Style recommendation cards consistently with scenario grid</subtask>
+      </task>
+      <task id="5" ac="1.5.11">Non-JavaScript fallback
+        <subtask>5.1 Implement noscript fallback showing all scenarios</subtask>
+        <subtask>5.2 Test with JavaScript disabled in browser</subtask>
+        <subtask>5.3 Ensure usable experience without JS</subtask>
+      </task>
+      <task id="6" ac="1.5.5,1.5.9,1.5.10">Testing and validation
+        <subtask>6.1 Test keyboard navigation through entire quiz flow</subtask>
+        <subtask>6.2 Test with screen reader (VoiceOver)</subtask>
+        <subtask>6.3 Time quiz completion (target &lt;30 seconds)</subtask>
+        <subtask>6.4 Test on mobile device (touch targets, responsive)</subtask>
+        <subtask>6.5 Run pa11y accessibility validation</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-1.5.1">Quiz presents 3 questions sequentially</criterion>
+    <criterion id="AC-1.5.2">Each question has "Not Sure" escape option</criterion>
+    <criterion id="AC-1.5.3">"Not Sure" navigates to full gallery</criterion>
+    <criterion id="AC-1.5.4">Back navigation available on questions 2 and 3</criterion>
+    <criterion id="AC-1.5.5">Quiz completes in &lt;30 seconds (measured)</criterion>
+    <criterion id="AC-1.5.6">Results page shows 1-3 recommendations</criterion>
+    <criterion id="AC-1.5.7">Results include reasoning explanation</criterion>
+    <criterion id="AC-1.5.8">"Browse All" alternative available from results</criterion>
+    <criterion id="AC-1.5.9">Quiz accessible via keyboard navigation</criterion>
+    <criterion id="AC-1.5.10">Quiz works on mobile (touch targets ≥44px)</criterion>
+    <criterion id="AC-1.5.11">Quiz functions without JavaScript (graceful degradation)</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Executive Summary, Success Criteria</section>
+        <snippet>NDX:Try bridges the evaluation gap for UK councils. Success target: 65-80% of councils take measurable action after evaluation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision Document</title>
+        <section>Decision 1: Portal Delivery Model, ADR-4: Vanilla JavaScript</section>
+        <snippet>Static site generation with Eleventy. All interactivity via vanilla JavaScript with progressive enhancement. No framework overhead.</snippet>
+      </doc>
+      <doc>
+        <path>docs/ux-design-specification.md</path>
+        <title>UX Design Specification</title>
+        <section>Interaction 1: Scenario Selector Quiz</section>
+        <snippet>Simple 3-question flow using GOV.UK radio buttons. Output: "We recommend Council Chatbot because..." with 1-3 ranked scenarios.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic Definitions</title>
+        <section>Story 1.2: Scenario Selector Quiz</section>
+        <snippet>Quiz logic: Weighted scoring based on 3 inputs → match to 6 scenarios. No database queries, all logic in JavaScript or Eleventy filters.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Epic 1 Technical Specification</title>
+        <section>Quiz Response Schema, AC-1.5</section>
+        <snippet>quiz-config.yaml structure with questions, options, weights. recommendation_algorithm: weighted_sum, threshold: 3, max_results: 3.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>src/index.md</path>
+        <kind>page</kind>
+        <symbol>homepage</symbol>
+        <lines>16-22, 133-135</lines>
+        <reason>Contains "Find Your Scenario" button already linking to /quiz/. Need to ensure quiz page exists at that URL.</reason>
+      </file>
+      <file>
+        <path>src/_data/scenarios.yaml</path>
+        <kind>data</kind>
+        <symbol>scenarios</symbol>
+        <lines>1-205</lines>
+        <reason>6 scenarios with id, name, difficulty, primaryPersona, tags fields used for quiz scoring weights.</reason>
+      </file>
+      <file>
+        <path>src/_includes/components/scenario-card.njk</path>
+        <kind>component</kind>
+        <symbol>scenario-card</symbol>
+        <lines>1-99</lines>
+        <reason>Reusable component for displaying scenario cards. Can be used in quiz results page for recommended scenarios.</reason>
+      </file>
+      <file>
+        <path>scripts/validate-schema.js</path>
+        <kind>script</kind>
+        <symbol>validateScenarios</symbol>
+        <lines>87-131</lines>
+        <reason>Schema validation script. Needs to be extended to validate quiz-config.yaml against new schema.</reason>
+      </file>
+      <file>
+        <path>eleventy.config.js</path>
+        <kind>config</kind>
+        <symbol>eleventyConfig</symbol>
+        <lines>1-90</lines>
+        <reason>Eleventy configuration with YAML data extension and passthrough for assets. Quiz.js will need passthrough copy.</reason>
+      </file>
+      <file>
+        <path>schemas/scenario.schema.json</path>
+        <kind>schema</kind>
+        <symbol>scenario.schema</symbol>
+        <reason>Reference for creating quiz-config.schema.json. Follow same validation patterns.</reason>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package name="@11ty/eleventy" version="^3.0.0">Static site generator</package>
+        <package name="@x-govuk/govuk-eleventy-plugin" version="^7.0.0">GOV.UK design system integration</package>
+        <package name="govuk-frontend" version="5.13.0">GOV.UK components including radios, buttons, fieldsets</package>
+        <package name="ajv" version="^8.17.1">JSON schema validation for quiz-config.yaml</package>
+        <package name="ajv-formats" version="^3.0.1">Additional AJV format validators</package>
+        <package name="yaml" version="^2.6.1">YAML parsing for quiz configuration</package>
+        <package name="js-yaml" version="^4.1.0">YAML parsing in Eleventy config</package>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Progressive enhancement - quiz must work without JavaScript (graceful degradation to showing all scenarios)</constraint>
+    <constraint type="architecture">Vanilla JavaScript only - no frameworks (ADR-4)</constraint>
+    <constraint type="architecture">Static site - all quiz logic client-side, no server-side processing</constraint>
+    <constraint type="accessibility">WCAG 2.2 AA compliance required (AC-1.5.9)</constraint>
+    <constraint type="accessibility">Touch targets minimum 44px for mobile (AC-1.5.10)</constraint>
+    <constraint type="accessibility">GOV.UK Frontend radio button component must be used for accessibility</constraint>
+    <constraint type="performance">Quiz completion target &lt;30 seconds (AC-1.5.5)</constraint>
+    <constraint type="ux">3 questions only - no branching logic</constraint>
+    <constraint type="ux">Each question must have "Not Sure" escape option routing to gallery</constraint>
+    <constraint type="data">Quiz state stored in sessionStorage (no cookies, no database)</constraint>
+    <constraint type="structure">Quiz page at /quiz/ URL - homepage already links there</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Quiz Configuration Data</name>
+      <kind>data-file</kind>
+      <signature>src/_data/quiz-config.yaml</signature>
+      <path>src/_data/quiz-config.yaml</path>
+      <structure>
+        questions[]:
+          - id: string (challenge|time|role)
+          - text: string
+          - options[]:
+            - id: string
+            - label: string
+            - description: string (optional)
+            - weight: {scenario-id: number} (optional)
+            - action: 'gallery' (optional, for escape)
+        recommendation_algorithm:
+          method: 'weighted_sum'
+          threshold: number
+          max_results: number
+      </structure>
+    </interface>
+    <interface>
+      <name>Scenario Data</name>
+      <kind>data-file</kind>
+      <signature>src/_data/scenarios.yaml</signature>
+      <path>src/_data/scenarios.yaml</path>
+      <note>Existing scenarios with id, name, difficulty, primaryPersona used for scoring</note>
+    </interface>
+    <interface>
+      <name>Quiz Page</name>
+      <kind>eleventy-page</kind>
+      <signature>src/quiz.md</signature>
+      <path>src/quiz.md</path>
+      <note>Markdown page with Nunjucks template rendering quiz questions and results</note>
+    </interface>
+    <interface>
+      <name>Quiz JavaScript</name>
+      <kind>client-script</kind>
+      <signature>src/assets/js/quiz.js</signature>
+      <path>src/assets/js/quiz.js</path>
+      <note>Progressive enhancement - controls question visibility, handles scoring, generates results</note>
+    </interface>
+    <interface>
+      <name>sessionStorage API</name>
+      <kind>browser-api</kind>
+      <signature>sessionStorage.setItem('quizState', JSON.stringify(state))</signature>
+      <note>Used for quiz progress persistence within session</note>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Testing uses pa11y-ci for accessibility validation and manual testing for functional acceptance. All pages must pass WCAG 2.2 AA automated checks. Keyboard navigation tested manually. Mobile touch targets verified on actual device or emulator.</standards>
+    <locations>
+      <location>Manual testing via browser</location>
+      <location>.pa11yci config for accessibility CI</location>
+      <location>scripts/validate-schema.js for data validation</location>
+    </locations>
+    <ideas>
+      <idea ac="AC-1.5.1">Test quiz loads with 3 visible question sections, only first active</idea>
+      <idea ac="AC-1.5.2">Verify each question has "Not sure" radio option</idea>
+      <idea ac="AC-1.5.3">Click "Not sure" on any question → redirects to /scenarios/</idea>
+      <idea ac="AC-1.5.4">Verify back button appears on questions 2 and 3, not on question 1</idea>
+      <idea ac="AC-1.5.5">Stopwatch test: complete quiz in under 30 seconds</idea>
+      <idea ac="AC-1.5.6">Complete quiz with various answers → always shows 1-3 recommendations</idea>
+      <idea ac="AC-1.5.7">Results include "Based on your interest in..." text</idea>
+      <idea ac="AC-1.5.8">Results page has "Browse All Scenarios" link visible</idea>
+      <idea ac="AC-1.5.9">Tab through entire quiz using keyboard only</idea>
+      <idea ac="AC-1.5.10">Mobile device test: all touch targets clickable on iPhone/Android</idea>
+      <idea ac="AC-1.5.11">Disable JavaScript → page shows all scenarios as fallback</idea>
+      <idea>Schema validation: quiz-config.yaml validates against quiz-config.schema.json</idea>
+      <idea>pa11y-ci: /quiz/ page passes accessibility scan</idea>
+    </ideas>
+  </tests>
+</story-context>

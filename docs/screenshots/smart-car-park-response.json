@@ -1,0 +1,49 @@
+{
+    "success": true,
+    "timestamp": "2025-11-28T21:16:41.549314",
+    "carParks": [
+        {
+            "id": "CP001",
+            "name": "Town Centre Multi-Storey",
+            "capacity": 450,
+            "occupied": 333,
+            "available": 117,
+            "percentFull": 74.1,
+            "status": "green",
+            "hourlyRate": "\u00a31.50"
+        },
+        {
+            "id": "CP002",
+            "name": "Market Square",
+            "capacity": 120,
+            "occupied": 87,
+            "available": 33,
+            "percentFull": 73.2,
+            "status": "amber",
+            "hourlyRate": "\u00a31.20"
+        },
+        {
+            "id": "CP003",
+            "name": "Railway Station",
+            "capacity": 280,
+            "occupied": 236,
+            "available": 44,
+            "percentFull": 84.5,
+            "status": "amber",
+            "hourlyRate": "\u00a32.00"
+        },
+        {
+            "id": "CP004",
+            "name": "Leisure Centre",
+            "capacity": 200,
+            "occupied": 153,
+            "available": 47,
+            "percentFull": 76.8,
+            "status": "amber",
+            "hourlyRate": "\u00a31.00"
+        }
+    ],
+    "totalCapacity": 1050,
+    "totalAvailable": 241,
+    "note": "Sandbox demo - in production uses IoT Core + Timestream"
+}

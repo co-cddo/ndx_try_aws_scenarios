@@ -1,0 +1,134 @@
+# NDX:Try AWS Scenarios - Live Deployment Endpoints
+# Deployed to us-west-2 on 2025-12-02
+# All 6 scenarios deployed and tested successfully
+
+region: us-west-2
+account: "831494785845"
+deployment_date: "2025-12-02T16:57:00Z"
+last_verified: "2025-12-02T16:57:00Z"
+
+# All 6 scenarios: WORKING
+# - Text-to-Speech: Uses Amazon Polly
+# - Council Chatbot: Uses Amazon Bedrock Nova Pro
+# - FOI Redaction: Uses Amazon Comprehend PII detection
+# - Planning AI: Uses Amazon Textract document analysis
+# - Smart Car Park: Lambda+DynamoDB
+# - QuickSight Dashboard: Real Amazon QuickSight with Lambda-created resources
+
+scenarios:
+  text-to-speech:
+    stack_name: ndx-try-text-to-speech
+    status: CREATE_COMPLETE
+    verified: true
+    api_endpoint: https://osc3olcsjzrna3oz3ia6lwnqm40ukmsf.lambda-url.us-west-2.on.aws/
+    audio_bucket: ndx-try-tts-audio-831494785845-us-west-2
+    voice_id: Amy
+    services_used:
+      - Amazon Polly
+      - Amazon S3
+      - AWS Lambda
+    test_request: |
+      curl -X POST https://osc3olcsjzrna3oz3ia6lwnqm40ukmsf.lambda-url.us-west-2.on.aws/ \
+        -H "Content-Type: application/json" \
+        -d '{"text": "Welcome to NDX Try. This is a test of our text to speech service."}'
+
+  council-chatbot:
+    stack_name: ndx-try-council-chatbot
+    status: CREATE_COMPLETE
+    verified: true
+    api_endpoint: https://4qg3xiuufj4cqktp34thbci4tm0uadef.lambda-url.us-west-2.on.aws/
+    knowledge_bucket: ndx-try-chatbot-kb-831494785845-us-west-2
+    mode: Amazon Nova Pro (real AI)
+    note: Real AI-powered responses using Amazon Bedrock Nova Pro
+    services_used:
+      - AWS Lambda
+      - Amazon S3
+      - Amazon Bedrock (Nova Pro)
+    test_request: |
+      curl -X POST https://4qg3xiuufj4cqktp34thbci4tm0uadef.lambda-url.us-west-2.on.aws/ \
+        -H "Content-Type: application/json" \
+        -d '{"message": "How do I report a pothole?"}'
+
+  foi-redaction:
+    stack_name: ndx-try-foi-redaction
+    status: CREATE_COMPLETE
+    verified: true
+    api_endpoint: https://ntcvch2mkjj5htn2a4bx3detty0jjsdh.lambda-url.us-west-2.on.aws/
+    documents_bucket: ndx-try-foi-docs-831494785845-us-west-2
+    confidence_threshold: 0.85
+    services_used:
+      - Amazon Comprehend
+      - Amazon S3
+      - AWS Lambda
+    test_request: |
+      curl -X POST https://ntcvch2mkjj5htn2a4bx3detty0jjsdh.lambda-url.us-west-2.on.aws/ \
+        -H "Content-Type: application/json" \
+        -d '{"text": "My name is John Smith and I live at 123 High Street. My email is john@example.com."}'
+
+  planning-ai:
+    stack_name: ndx-try-planning-ai
+    status: CREATE_COMPLETE
+    verified: true
+    api_endpoint: https://ygd7hditn5syfqwg4r37c2xmv40wqryq.lambda-url.us-west-2.on.aws/
+    documents_bucket: ndx-try-planning-docs-831494785845-us-west-2
+    mode: Amazon Textract document analysis
+    services_used:
+      - AWS Lambda
+      - Amazon S3
+      - Amazon Textract
+    test_request: |
+      curl -X POST https://ygd7hditn5syfqwg4r37c2xmv40wqryq.lambda-url.us-west-2.on.aws/ \
+        -H "Content-Type: application/json" \
+        -d '{"useSample":true}'
+
+  smart-car-park:
+    stack_name: ndx-try-smart-car-park
+    status: CREATE_COMPLETE
+    verified: true
+    api_endpoint: https://wg33deez5z6mh36epsnbntqcqy0izhlj.lambda-url.us-west-2.on.aws/
+    data_bucket: ndx-try-parking-data-831494785845-us-west-2
+    data_table: ndx-try-parking-data-us-west-2
+    simulated_sensors: 20
+    mode: Amazon DynamoDB (real persistence)
+    note: Sandbox uses Lambda+DynamoDB; production uses IoT Core+Timestream
+    services_used:
+      - AWS Lambda
+      - Amazon DynamoDB
+      - Amazon S3
+    test_request: |
+      curl -X POST https://wg33deez5z6mh36epsnbntqcqy0izhlj.lambda-url.us-west-2.on.aws/ \
+        -H "Content-Type: application/json" \
+        -d '{"action": "status"}'
+
+  quicksight-dashboard:
+    stack_name: ndx-try-quicksight-dashboard
+    status: CREATE_COMPLETE
+    verified: true
+    dashboard_url: https://us-west-2.quicksight.aws.amazon.com/sn/dashboards/ndx-council-dashboard-us-west-2
+    data_bucket: ndx-quicksight-data-831494785845-us-west-2
+    data_source_id: ndx-council-data-source-us-west-2
+    data_set_id: ndx-council-data-set-us-west-2
+    dashboard_id: ndx-council-dashboard-us-west-2
+    mode: Real Amazon QuickSight
+    note: Lambda Custom Resource creates QuickSight DataSource, DataSet, and Dashboard via SDK (bypasses CloudFormation EarlyValidation hook)
+    services_used:
+      - AWS Lambda
+      - Amazon S3
+      - Amazon QuickSight
+    test_access: |
+      # Dashboard requires QuickSight console access
+      # Login to AWS Console > QuickSight > Dashboards
+      # Or direct URL: https://us-west-2.quicksight.aws.amazon.com/sn/dashboards/ndx-council-dashboard-us-west-2
+
+# Auto-cleanup notes
+# All resources have AutoCleanup=true tag
+# S3 buckets have 7-day lifecycle policy
+# CloudWatch logs retained for 7 days
+
+# API Response Examples saved in docs/screenshots/
+# - text-to-speech-response.json
+# - chatbot-response.json
+# - foi-redaction-response.json
+# - planning-ai-response.json
+# - smart-car-park-response.json
+# - quicksight-response.json

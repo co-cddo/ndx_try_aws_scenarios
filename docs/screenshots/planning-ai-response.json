@@ -1,0 +1,52 @@
+{
+    "success": true,
+    "extractedData": {
+        "applicationRef": "PA/2024/00123",
+        "applicantName": "Mr John Smith",
+        "siteAddress": "45 Oak Street, Sampletown, ST1 2AB",
+        "proposalType": "Householder Application",
+        "proposalDescription": "Single storey rear extension measuring 4m depth x 6m width",
+        "floorArea": "24 sq.m",
+        "maxHeight": "3.2m",
+        "materials": {
+            "walls": "Matching brick",
+            "roof": "Slate tiles to match existing",
+            "windows": "uPVC double glazed"
+        },
+        "constraints": {
+            "conservationArea": false,
+            "listedBuilding": false,
+            "treePreservationOrder": false,
+            "floodZone": "Zone 1 (Low risk)"
+        }
+    },
+    "analysis": {
+        "keyDetails": {
+            "applicant": "Mr John Smith",
+            "site": "45 Oak Street, Sampletown, ST1 2AB",
+            "proposal": "Single storey rear extension measuring 4m depth x 6m width"
+        },
+        "measurements": {
+            "heightToEaves": "2.5m",
+            "maximumHeight": "3.2m",
+            "floorArea": "24 sq.m"
+        },
+        "policyConsiderations": [
+            "Local Plan Policy H4 - Extensions to dwellings",
+            "Permitted Development Rights - Part 1 Class A",
+            "Design Guide SPD - Residential Extensions"
+        ],
+        "potentialIssues": [
+            "No significant issues identified"
+        ],
+        "recommendations": [
+            "Standard conditions apply"
+        ],
+        "overallRecommendation": "APPROVE",
+        "rationale": "Application complies with permitted development limits and local planning policies. No constraints identified that would warrant refusal."
+    },
+    "processingTime": "1.2 seconds",
+    "resultId": "db044bf7-ab33-4719-a6fa-1987e5b4fccd",
+    "timestamp": "2025-11-28T21:18:54.861342",
+    "note": "Sandbox demo - production version uses Amazon Textract + Bedrock AI"
+}

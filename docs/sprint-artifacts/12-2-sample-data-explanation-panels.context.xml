@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context version="1.0">
+  <metadata>
+    <story-id>12-2</story-id>
+    <story-name>Sample Data Explanation Panels</story-name>
+    <generated-at>2025-11-29</generated-at>
+    <epic>12 - Navigation &amp; Sample Data Clarity</epic>
+    <points>3</points>
+    <fr-coverage>FR101</fr-coverage>
+  </metadata>
+
+  <story-definition>
+    <user-story>
+      As a council officer exploring scenarios,
+      I want contextual explanations of sample data,
+      So that I understand it's realistic demonstration data and not connected to real systems.
+    </user-story>
+
+    <acceptance-criteria>
+      <criterion id="AC1">Given a walkthrough or exploration page is displayed, When sample data is shown, Then a GOV.UK Details component is positioned near the data with summary text "About this sample data"</criterion>
+      <criterion id="AC2">Given any sample data section, When viewing the panel, Then key information (purpose, cost indicator) remains visible without expanding the details</criterion>
+      <criterion id="AC3">Given multiple sample data types exist on a page, When viewing the page, Then each data type has its own explanation panel positioned within visual proximity</criterion>
+      <criterion id="AC4">Given the user expands the details component, When viewing the content, Then it explains: the data is realistic but fictional, what the data represents, no connection to real council systems, and data generation methodology</criterion>
+      <criterion id="AC5">Given any scenario with sample data, When viewing explanation panels, Then panels use consistent terminology across all 6 scenarios</criterion>
+      <criterion id="AC6">Given the sample data panel, When inspecting accessibility, Then it meets WCAG 2.1 AA compliance with expand/collapse state announced to screen readers</criterion>
+      <criterion id="AC7">Given the sample data panel, When using keyboard navigation, Then expand/collapse is fully operable with Enter/Space keys and Tab navigation</criterion>
+    </acceptance-criteria>
+  </story-definition>
+
+  <artifacts>
+    <existing-files>
+      <file path="src/_data/sample-data-config.yaml" relevance="high">
+        Existing sample data configuration - needs to be extended with explanation content for each scenario
+      </file>
+      <file path="src/_includes/components/sample-data-status.njk" relevance="high">
+        Related component for sample data status/health check - follow similar patterns
+      </file>
+      <file path="src/_includes/components/phase-navigator.njk" relevance="medium">
+        Story 12.1 component - reference for BEM naming and accessibility patterns
+      </file>
+      <file path="src/assets/css/custom.css" relevance="high">
+        CSS file to add panel styles - follow existing BEM patterns
+      </file>
+    </existing-files>
+
+    <files-to-create>
+      <file path="src/_includes/components/sample-data-panel.njk">Sample data explanation panel component</file>
+    </files-to-create>
+
+    <files-to-modify>
+      <file path="src/_data/sample-data-config.yaml">Add explanation content for all 6 scenarios</file>
+      <file path="src/assets/css/custom.css">Add ndx-sample-data-panel styles</file>
+      <file path="src/walkthroughs/*/index.njk">Add sample data panel to walkthrough index pages</file>
+      <file path="src/walkthroughs/*/explore/experiments.njk">Add sample data panel near Re-seed buttons</file>
+    </files-to-modify>
+  </artifacts>
+
+  <interfaces>
+    <component name="govuk-details" type="njk-macro">
+      <description>GOV.UK Frontend Details component - collapsible content pattern</description>
+      <usage>
+        {{ govukDetails({
+          summaryText: "About this sample data",
+          text: "Expanded content here"
+        }) }}
+      </usage>
+    </component>
+
+    <data-schema name="sample-data-explanation">
+      <description>Schema for sample data explanation content per scenario</description>
+      <fields>
+        <field name="title" type="string">Panel title</field>
+        <field name="summary" type="string">Summary text for details component</field>
+        <field name="keyInfo.purpose" type="string">Purpose explanation (visible inline)</field>
+        <field name="keyInfo.costIndicator" type="string">Cost indicator (visible inline)</field>
+        <field name="expandedContent.description" type="string">What the data is</field>
+        <field name="expandedContent.represents" type="string">What the data represents</field>
+        <field name="expandedContent.disclaimer" type="string">Disclaimer about real systems</field>
+        <field name="expandedContent.methodology" type="string">How data was generated</field>
+      </fields>
+    </data-schema>
+  </interfaces>
+
+  <constraints>
+    <constraint type="accessibility">WCAG 2.1 AA compliance required</constraint>
+    <constraint type="design-system">Must use GOV.UK Frontend Details component</constraint>
+    <constraint type="progressive-enhancement">Component must work without JavaScript</constraint>
+    <constraint type="consistency">Same terminology across all 6 scenarios</constraint>
+    <constraint type="naming">BEM naming with ndx- prefix</constraint>
+  </constraints>
+
+  <test-ideas>
+    <test type="accessibility">Screen reader announces expand/collapse state correctly</test>
+    <test type="keyboard">Tab navigation reaches all interactive elements</test>
+    <test type="keyboard">Enter/Space toggles details open/closed</test>
+    <test type="visual">Key information visible without expanding</test>
+    <test type="visual">Panel positioned near sample data/Re-seed buttons</test>
+    <test type="consistency">All 6 scenarios use identical terminology</test>
+    <test type="pa11y">Automated accessibility checks pass</test>
+  </test-ideas>
+
+  <scenario-list>
+    <scenario id="council-chatbot" name="Council Chatbot" data-type="FAQ/Knowledge Base"/>
+    <scenario id="planning-ai" name="Planning Application AI" data-type="Planning Documents"/>
+    <scenario id="foi-redaction" name="FOI Redaction" data-type="FOI Requests"/>
+    <scenario id="smart-car-park" name="Smart Car Park" data-type="IoT Sensor Data"/>
+    <scenario id="text-to-speech" name="Text-to-Speech" data-type="Announcements"/>
+    <scenario id="quicksight-dashboard" name="QuickSight Dashboard" data-type="Service Requests"/>
+  </scenario-list>
+
+  <integration-points>
+    <integration target="walkthrough-index-pages" count="6">
+      Add sample data panel to each scenario's walkthrough index page
+    </integration>
+    <integration target="exploration-experiments-pages" count="6">
+      Add sample data panel near Re-seed buttons on experiments pages
+    </integration>
+  </integration-points>
+
+  <learnings-from-previous>
+    <learning source="Story 12.1">
+      BEM CSS naming convention: ndx-{component}__element--modifier
+    </learning>
+    <learning source="Story 12.1">
+      Progressive enhancement: component renders without JS
+    </learning>
+    <learning source="Story 12.1">
+      YAML-driven content for reusability
+    </learning>
+    <learning source="sample-data-status.njk">
+      Existing sample data component patterns to follow
+    </learning>
+  </learnings-from-previous>
+</story-context>
