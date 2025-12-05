@@ -188,10 +188,8 @@ production_guidance:
   - id: costs
     title: "Cost Projection"
     demo_costs:
-      comprehend: "~$0.50"
-      lambda: "~$0.10"
-      s3: "~$0.02"
-      total: "~$0.62 per document"
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
     production_costs:
       comprehend: "$250-500/month"
       lambda: "$25-50/month"

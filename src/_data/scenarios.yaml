@@ -14,8 +14,10 @@ scenarios:
     secondaryPersonas:
       - "technical"
       - "leadership"
-    estimatedCost: "Under £5 for evaluation"
-    maximumCost: "£10 maximum"
+    # FREE as part of NDX:Try programme - no cost to councils
+    relatedScenarios:
+      - "text-to-speech"
+      - "quicksight-dashboard"
     securitySummary: "Innovation Sandbox isolated - safe to experiment with full data protection"
     skillsLearned:
       - "Amazon Bedrock"
@@ -45,9 +47,9 @@ scenarios:
     featured: true
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/council-chatbot/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/council-chatbot/template.yaml"
-      region: "eu-west-2"
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/council-chatbot/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/council-chatbot/template.yaml"
+      region: "us-east-1"
       stackNamePrefix: "ndx-try-council-chatbot"
       parameters:
         - name: "Environment"
@@ -59,21 +61,6 @@ scenarios:
         - name: "KnowledgeBaseSource"
           value: "council-sample-data"
           description: "Sample council knowledge base for the chatbot"
-      costBreakdown:
-        services:
-          - name: "Amazon Bedrock"
-            cost: "~£3.00"
-            note: "Claude 3 Haiku model inference"
-          - name: "Amazon Lex"
-            cost: "~£0.50"
-            note: "Conversation handling"
-          - name: "AWS Lambda"
-            cost: "~£0.10"
-            note: "Processing functions"
-          - name: "Amazon S3"
-            cost: "~£0.05"
-            note: "Knowledge base storage"
-        autoCleanup: "Resources automatically deleted after 2 hours"
       tags:
         - key: "Project"
           value: "ndx-try"
@@ -135,7 +122,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (eu-west-2 London region)"
+      data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
       data_handling: "No data leaves UK; AWS shared responsibility model applies"
 
@@ -171,8 +158,10 @@ scenarios:
     gcloud_search_term: "planning application AI document processing"
     secondaryPersonas:
       - "service-manager"
-    estimatedCost: "Under £10 for evaluation"
-    maximumCost: "£20 maximum"
+    # FREE as part of NDX:Try programme - no cost to councils
+    relatedScenarios:
+      - "foi-redaction"
+      - "quicksight-dashboard"
     securitySummary: "Innovation Sandbox isolated - sample data only, no live documents"
     skillsLearned:
       - "Amazon Textract"
@@ -203,9 +192,9 @@ scenarios:
     featured: true
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/planning-ai/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/planning-ai/template.yaml"
-      region: "eu-west-2"
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/planning-ai/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/planning-ai/template.yaml"
+      region: "us-east-1"
       stackNamePrefix: "ndx-try-planning-ai"
       parameters:
         - name: "Environment"
@@ -217,24 +206,6 @@ scenarios:
         - name: "SampleDataBucket"
           value: "ndx-try-sample-planning-docs"
           description: "S3 bucket with sample planning documents"
-      costBreakdown:
-        services:
-          - name: "Amazon Textract"
-            cost: "~£4.00"
-            note: "Document text extraction"
-          - name: "Amazon Comprehend"
-            cost: "~£2.00"
-            note: "Entity and policy recognition"
-          - name: "Amazon Bedrock"
-            cost: "~£3.00"
-            note: "AI analysis and recommendations"
-          - name: "AWS Lambda"
-            cost: "~£0.20"
-            note: "Processing orchestration"
-          - name: "Amazon S3"
-            cost: "~£0.10"
-            note: "Document storage"
-        autoCleanup: "Resources automatically deleted after 2 hours"
       tags:
         - key: "Project"
           value: "ndx-try"
@@ -294,7 +265,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (eu-west-2 London region)"
+      data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
       data_handling: "No data leaves UK; sample data only in sandbox; AWS shared responsibility model"
 
@@ -331,8 +302,10 @@ scenarios:
     secondaryPersonas:
       - "technical"
       - "leadership"
-    estimatedCost: "Under £5 for evaluation"
-    maximumCost: "£15 maximum"
+    # FREE as part of NDX:Try programme - no cost to councils
+    relatedScenarios:
+      - "planning-ai"
+      - "council-chatbot"
     securitySummary: "Innovation Sandbox isolated - uses synthetic sample data only"
     skillsLearned:
       - "Amazon Comprehend"
@@ -362,9 +335,9 @@ scenarios:
     featured: false
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/foi-redaction/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/foi-redaction/template.yaml"
-      region: "eu-west-2"
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/foi-redaction/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/foi-redaction/template.yaml"
+      region: "us-east-1"
       stackNamePrefix: "ndx-try-foi-redaction"
       parameters:
         - name: "Environment"
@@ -376,21 +349,6 @@ scenarios:
         - name: "RedactionConfidenceThreshold"
           value: "0.85"
           description: "Minimum confidence score for automatic redaction"
-      costBreakdown:
-        services:
-          - name: "Amazon Comprehend"
-            cost: "~£2.50"
-            note: "PII and entity detection"
-          - name: "Amazon Textract"
-            cost: "~£1.50"
-            note: "Document text extraction"
-          - name: "AWS Lambda"
-            cost: "~£0.15"
-            note: "Redaction processing"
-          - name: "Amazon S3"
-            cost: "~£0.10"
-            note: "Document storage"
-        autoCleanup: "Resources automatically deleted after 2 hours"
       tags:
         - key: "Project"
           value: "ndx-try"
@@ -449,7 +407,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (eu-west-2 London region)"
+      data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
       data_handling: "Synthetic data only in sandbox; production data never leaves UK; AWS shared responsibility model"
 
@@ -485,8 +443,10 @@ scenarios:
     gcloud_search_term: "IoT smart parking local government"
     secondaryPersonas:
       - "service-manager"
-    estimatedCost: "Under £15 for evaluation"
-    maximumCost: "£25 maximum"
+    # FREE as part of NDX:Try programme - no cost to councils
+    relatedScenarios:
+      - "quicksight-dashboard"
+      - "council-chatbot"
     securitySummary: "Innovation Sandbox isolated - simulated IoT data, no real sensors"
     skillsLearned:
       - "AWS IoT Core"
@@ -517,9 +477,9 @@ scenarios:
     featured: false
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/smart-car-park/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/smart-car-park/template.yaml"
-      region: "eu-west-2"
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/smart-car-park/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/smart-car-park/template.yaml"
+      region: "us-east-1"
       stackNamePrefix: "ndx-try-smart-car-park"
       parameters:
         - name: "Environment"
@@ -534,24 +494,6 @@ scenarios:
         - name: "DataGenerationInterval"
           value: "30"
           description: "Seconds between simulated data points"
-      costBreakdown:
-        services:
-          - name: "AWS IoT Core"
-            cost: "~£5.00"
-            note: "Device messaging and rules"
-          - name: "Amazon Timestream"
-            cost: "~£4.00"
-            note: "Time-series data storage"
-          - name: "Amazon QuickSight"
-            cost: "~£3.00"
-            note: "Dashboard visualisation"
-          - name: "AWS Lambda"
-            cost: "~£0.50"
-            note: "Data processing"
-          - name: "Amazon API Gateway"
-            cost: "~£0.20"
-            note: "Public availability API"
-        autoCleanup: "Resources automatically deleted after 2 hours"
       tags:
         - key: "Project"
           value: "ndx-try"
@@ -613,7 +555,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (eu-west-2 London region)"
+      data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit, IoT device certificates"
       data_handling: "Simulated sensor data in sandbox; production IoT data encrypted in transit; AWS shared responsibility model"
 
@@ -649,8 +591,10 @@ scenarios:
     gcloud_search_term: "text to speech accessibility local government"
     secondaryPersonas:
       - "technical"
-    estimatedCost: "Under £3 for evaluation"
-    maximumCost: "£8 maximum"
+    # FREE as part of NDX:Try programme - no cost to councils
+    relatedScenarios:
+      - "council-chatbot"
+      - "foi-redaction"
     securitySummary: "Innovation Sandbox isolated - sample content only, no live data"
     skillsLearned:
       - "Amazon Polly"
@@ -679,9 +623,9 @@ scenarios:
     featured: true
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/text-to-speech/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/text-to-speech/template.yaml"
-      region: "eu-west-2"
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/text-to-speech/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/text-to-speech/template.yaml"
+      region: "us-east-1"
       stackNamePrefix: "ndx-try-text-to-speech"
       parameters:
         - name: "Environment"
@@ -696,18 +640,6 @@ scenarios:
         - name: "OutputFormat"
           value: "mp3"
           description: "Audio output format"
-      costBreakdown:
-        services:
-          - name: "Amazon Polly"
-            cost: "~£2.00"
-            note: "Neural text-to-speech conversion"
-          - name: "AWS Lambda"
-            cost: "~£0.10"
-            note: "Processing functions"
-          - name: "Amazon S3"
-            cost: "~£0.05"
-            note: "Audio file storage"
-        autoCleanup: "Resources automatically deleted after 2 hours"
       tags:
         - key: "Project"
           value: "ndx-try"
@@ -766,7 +698,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (eu-west-2 London region)"
+      data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest for audio files, TLS 1.3 in transit"
       data_handling: "Sample content only in sandbox; no personal data processed; AWS shared responsibility model"
 
@@ -803,8 +735,10 @@ scenarios:
     secondaryPersonas:
       - "service-manager"
       - "finance"
-    estimatedCost: "Under £10 for evaluation"
-    maximumCost: "£20 maximum"
+    # FREE as part of NDX:Try programme - no cost to councils
+    relatedScenarios:
+      - "smart-car-park"
+      - "planning-ai"
     securitySummary: "Innovation Sandbox isolated - sample council metrics only"
     skillsLearned:
       - "Amazon QuickSight"
@@ -833,9 +767,9 @@ scenarios:
     featured: false
     status: "active"
     deployment:
-      templateUrl: "https://ndx-try-templates-eu-west-2.s3.eu-west-2.amazonaws.com/scenarios/quicksight-dashboard/template.yaml"
-      templateS3Url: "s3://ndx-try-templates-eu-west-2/scenarios/quicksight-dashboard/template.yaml"
-      region: "eu-west-2"
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/quicksight-dashboard/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/quicksight-dashboard/template.yaml"
+      region: "us-east-1"
       stackNamePrefix: "ndx-try-quicksight-dashboard"
       parameters:
         - name: "Environment"
@@ -847,18 +781,6 @@ scenarios:
         - name: "SampleDataset"
           value: "council-metrics"
           description: "Sample council performance metrics dataset"
-      costBreakdown:
-        services:
-          - name: "Amazon QuickSight"
-            cost: "~£6.00"
-            note: "Business intelligence dashboards"
-          - name: "AWS Glue"
-            cost: "~£2.00"
-            note: "Data catalogue and ETL"
-          - name: "Amazon S3"
-            cost: "~£0.20"
-            note: "Data storage"
-        autoCleanup: "Resources automatically deleted after 2 hours"
       tags:
         - key: "Project"
           value: "ndx-try"
@@ -919,7 +841,7 @@ scenarios:
         - "SOC 2 Type II"
         - "Cyber Essentials Plus"
         - "UK G-Cloud 14"
-      data_residency: "UK (eu-west-2 London region)"
+      data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit, QuickSight row-level security"
       data_handling: "Sample council metrics in sandbox; production data access controls via IAM; AWS shared responsibility model"
 

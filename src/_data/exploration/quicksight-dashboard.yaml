@@ -237,12 +237,8 @@ production_guidance:
   - id: costs
     title: "Cost Comparison"
     demo_costs:
-      quicksight_author: "~$24/month (1 author)"
-      quicksight_reader: "~$0 (first 5 readers free)"
-      spice: "~$0.25/GB"
-      s3: "~$0.02"
-      glue: "~$0.01"
-      total: "~$24-25/month (demo)"
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
     production_costs:
       quicksight_author: "$216-480/month (3-20 authors)"
       quicksight_reader: "$50-200/month (50-200 readers)"

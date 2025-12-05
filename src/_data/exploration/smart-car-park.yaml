@@ -243,11 +243,8 @@ production_guidance:
   - id: costs
     title: "Cost Comparison"
     demo_costs:
-      iot_core: "~$0.10"
-      timestream: "~$0.50"
-      lambda: "~$0.02"
-      quicksight: "~$0 (included in demo)"
-      total: "~$0.62 per day"
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
     production_costs:
       iot_core: "$50-150/month (1000 sensors)"
       timestream: "$200-500/month"

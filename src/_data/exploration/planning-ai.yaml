@@ -192,10 +192,8 @@ production_guidance:
   - id: costs
     title: "Cost Projection"
     demo_costs:
-      textract: "~$1.50"
-      comprehend: "~$0.30"
-      bedrock: "~$0.50"
-      total: "~$2.30 per document"
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
     production_costs:
       textract: "$750-1500/month"
       comprehend: "$150-300/month"

@@ -83,39 +83,6 @@ scenarioId: smart-car-park
     {% include "components/sample-data-panel.njk" %}
   </div>
 
-  {# Manual seeding fallback #}
-  <details class="govuk-details govuk-!-margin-top-4">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        Manual data seeding (if automatic deployment failed)
-      </span>
-    </summary>
-    <div class="govuk-details__text">
-      <p class="govuk-body">If the automated sensor data seeding failed, you can manually trigger it:</p>
-
-      <ol class="govuk-list govuk-list--number">
-        <li>
-          Go to the <a href="https://console.aws.amazon.com/lambda/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS Lambda console</a>
-        </li>
-        <li>
-          Find the function named <code>SmartCarPark-DataSeeder-[timestamp]</code>
-        </li>
-        <li>
-          Click "Test" and create a new test event with default settings
-        </li>
-        <li>
-          Click "Test" to invoke the function - it will populate 1000 sensor readings
-        </li>
-        <li>
-          Refresh this page to verify sensor data is available
-        </li>
-      </ol>
-
-      <p class="govuk-body">
-        If you continue to have issues, <a href="/contact/" class="govuk-link">contact support</a>.
-      </p>
-    </div>
-  </details>
 </div>
 
 <h2 class="govuk-heading-m">What you'll learn</h2>

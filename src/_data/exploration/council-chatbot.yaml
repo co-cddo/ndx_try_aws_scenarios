@@ -196,10 +196,8 @@ production_guidance:
   - id: costs
     title: "Cost Projection"
     demo_costs:
-      bedrock: "~$0.50"
-      lambda: "~$0.10"
-      dynamodb: "~$0.05"
-      total: "~$0.65 per session"
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
     production_costs:
       bedrock: "$500-2000/month"
       lambda: "$50-100/month"

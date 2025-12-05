@@ -95,7 +95,7 @@
 
   {# View in CloudFormation Console #}
   <p class="govuk-body govuk-!-margin-top-4">
-    <a href="https://console.aws.amazon.com/cloudformation/home?region={{ scenarioData.deployment.region | default('eu-west-2') }}#/stacks?filteringStatus=active&filteringText=ndx-try" class="govuk-link" target="_blank" rel="noopener noreferrer">
+    <a href="https://console.aws.amazon.com/cloudformation/home?region={{ scenarioData.deployment.region | default('us-east-1') }}#/stacks?filteringStatus=active&filteringText=ndx-try" class="govuk-link" target="_blank" rel="noopener noreferrer">
       View your NDX:Try stacks in CloudFormation Console<span class="govuk-visually-hidden"> (opens in new tab)</span>
     </a>
   </p>
@@ -108,7 +108,7 @@
     </p>
     <ol class="govuk-list govuk-list--number">
       <li>
-        <a href="https://console.aws.amazon.com/cost-management/home?region={{ scenarioData.deployment.region | default('eu-west-2') }}#/cost-explorer?chartStyle=STACK&costAggregate=unBlendedCost&endDate={{ "now" | date: "%Y-%m-%d" }}&excludeForecasting=false&filter=%5B%7B%22dimension%22%3A%7B%22id%22%3A%22TagKey%22%2C%22displayValue%22%3A%22Tag%22%7D%2C%22operator%22%3A%22INCLUDES%22%2C%22values%22%3A%5B%7B%22value%22%3A%22Project%24ndx-try%22%7D%5D%7D%5D&futureRelativeRange=CUSTOM&granularity=Daily&groupBy=%5B%22Service%22%5D&historicalRelativeRange=LAST_7_DAYS&isDefault=true&reportName=NDX:Try%20Costs&showOnlyUncategorized=false&showOnlyUntagged=false&startDate={{ "now" | date: "%Y-%m-%d" }}&usageAggregate=undefined" class="govuk-link" target="_blank" rel="noopener noreferrer">
+        <a href="https://console.aws.amazon.com/cost-management/home?region={{ scenarioData.deployment.region | default('us-east-1') }}#/cost-explorer?chartStyle=STACK&costAggregate=unBlendedCost&endDate={{ "now" | date: "%Y-%m-%d" }}&excludeForecasting=false&filter=%5B%7B%22dimension%22%3A%7B%22id%22%3A%22TagKey%22%2C%22displayValue%22%3A%22Tag%22%7D%2C%22operator%22%3A%22INCLUDES%22%2C%22values%22%3A%5B%7B%22value%22%3A%22Project%24ndx-try%22%7D%5D%7D%5D&futureRelativeRange=CUSTOM&granularity=Daily&groupBy=%5B%22Service%22%5D&historicalRelativeRange=LAST_7_DAYS&isDefault=true&reportName=NDX:Try%20Costs&showOnlyUncategorized=false&showOnlyUntagged=false&startDate={{ "now" | date: "%Y-%m-%d" }}&usageAggregate=undefined" class="govuk-link" target="_blank" rel="noopener noreferrer">
           Open AWS Cost Explorer<span class="govuk-visually-hidden"> (opens in new tab)</span>
         </a>
         - Filter by tag "Project: ndx-try"

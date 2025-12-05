@@ -239,11 +239,8 @@ production_guidance:
   - id: costs
     title: "Cost Comparison"
     demo_costs:
-      polly_neural: "~$0.05 (1000 chars)"
-      polly_standard: "~$0.01 (1000 chars)"
-      s3: "~$0.01"
-      lambda: "~$0.01"
-      total: "~$0.08 per synthesis"
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
     production_costs:
       polly_neural: "$40-100/month (1M chars/month)"
       polly_standard: "$10-25/month (1M chars/month)"
