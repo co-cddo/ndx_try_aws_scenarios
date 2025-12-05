@@ -95,12 +95,10 @@ layout: page
           <dd class="govuk-summary-list__value">{{ scenarioData.timeEstimate }}</dd>
         </div>
         <div class="govuk-summary-list__row">
-          <dt class="govuk-summary-list__key">Est. cost</dt>
-          <dd class="govuk-summary-list__value">{{ scenarioData.estimatedCost }}</dd>
-        </div>
-        <div class="govuk-summary-list__row">
-          <dt class="govuk-summary-list__key">Max cost</dt>
-          <dd class="govuk-summary-list__value">{{ scenarioData.maximumCost }}</dd>
+          <dt class="govuk-summary-list__key">Cost</dt>
+          <dd class="govuk-summary-list__value">
+            <strong class="govuk-tag govuk-tag--green">FREE via NDX:Try</strong>
+          </dd>
         </div>
         <div class="govuk-summary-list__row">
           <dt class="govuk-summary-list__key">Audience</dt>
@@ -150,19 +148,10 @@ layout: page
   <h2 class="govuk-heading-l">Deploy to Innovation Sandbox</h2>
 
   {% if scenarioData.deployment %}
-    {# Cost Transparency Component (Story 2.3) #}
-    {% include "components/cost-transparency.njk" %}
+    {# Free Trial Banner - NDX:Try AWS Partnership #}
+    {% include "components/free-trial-banner.njk" %}
 
-    {# Cost Acknowledgment Warning #}
-    <div class="govuk-warning-text">
-      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-      <strong class="govuk-warning-text__text">
-        <span class="govuk-visually-hidden">Warning</span>
-        Maximum expected cost: {{ scenarioData.maximumCost }}. Your council is responsible for all AWS charges in your Innovation Sandbox account.
-      </strong>
-    </div>
-
-    {# Pre-deployment Acknowledgment Checklist (AC-2.3.4, AC-2.3.5) #}
+    {# Pre-deployment Acknowledgment Checklist #}
     <div class="ndx-prereq-checklist govuk-!-margin-bottom-6">
       <h3 class="govuk-heading-s">Before you deploy</h3>
       <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
@@ -177,12 +166,6 @@ layout: page
           <label class="govuk-label govuk-checkboxes__label" for="prereq-logged-in">
             I am logged into AWS Console
             <a href="https://console.aws.amazon.com/console/home" target="_blank" rel="noopener noreferrer" class="govuk-link govuk-!-margin-left-1">(Check now<span class="govuk-visually-hidden"> opens in new tab</span>)</a>
-          </label>
-        </div>
-        <div class="govuk-checkboxes__item">
-          <input class="govuk-checkboxes__input js-prereq-check" id="prereq-cost" name="prereq-cost" type="checkbox" value="cost">
-          <label class="govuk-label govuk-checkboxes__label" for="prereq-cost">
-            I understand the maximum expected cost is {{ scenarioData.maximumCost }}
           </label>
         </div>
         <div class="govuk-checkboxes__item">
@@ -267,9 +250,34 @@ layout: page
   </details>
 </div>
 
+{# Related Scenarios - Cross-linking #}
+{% set relatedScenarios = scenarioData | getRelatedScenarios(scenarios.scenarios) %}
+{% if relatedScenarios.length > 0 %}
+<div class="govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">Related scenarios to explore</h2>
+  <p class="govuk-body">These scenarios use similar AWS services or address related council needs:</p>
+  <div class="govuk-grid-row">
+    {% for related in relatedScenarios %}
+    <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+      <div class="ndx-related-card">
+        <h3 class="govuk-heading-s govuk-!-margin-bottom-1">
+          <a href="{{ related.url }}" class="govuk-link">{{ related.name }}</a>
+        </h3>
+        <p class="govuk-body-s govuk-!-margin-bottom-2">{{ related.headline }}</p>
+        <p class="govuk-body-s govuk-!-margin-bottom-0">
+          <strong class="govuk-tag govuk-tag--green govuk-!-margin-right-1">FREE</strong>
+          <span class="govuk-tag govuk-tag--{{ related.difficulty | difficultyColor }}">{{ related.difficulty | capitalize }}</span>
+        </p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 {# Related Links #}
 <div class="govuk-!-margin-top-6">
-  <h2 class="govuk-heading-m">Related</h2>
+  <h2 class="govuk-heading-m">Other resources</h2>
   <ul class="govuk-list">
     <li><a href="/scenarios/" class="govuk-link">Browse all scenarios</a></li>
     <li><a href="/quiz/" class="govuk-link">Find your scenario (quiz)</a></li>

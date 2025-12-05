@@ -178,6 +178,14 @@ export default function(eleventyConfig) {
     return deployUrl;
   });
 
+  // Get related scenarios by ID (Phase 4 - Cross-linking)
+  eleventyConfig.addFilter('getRelatedScenarios', (scenario, allScenarios) => {
+    if (!scenario || !scenario.relatedScenarios || !allScenarios) return [];
+    return allScenarios.filter(s =>
+      scenario.relatedScenarios.includes(s.id) && s.id !== scenario.id
+    );
+  });
+
   // Human-readable date filter (Story 2.4)
   eleventyConfig.addFilter('readableDate', (dateStr) => {
     if (!dateStr) return '';

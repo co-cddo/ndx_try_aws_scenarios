@@ -20,8 +20,6 @@
           "difficulty",
           "timeEstimate",
           "primaryPersona",
-          "estimatedCost",
-          "maximumCost",
           "awsServices",
           "securitySummary",
           "skillsLearned"
@@ -78,6 +76,14 @@
               "enum": ["technical", "service-manager", "finance", "leadership"]
             },
             "description": "Additional target audiences"
+          },
+          "relatedScenarios": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "description": "IDs of related scenarios for cross-linking"
           },
           "estimatedCost": {
             "type": "string",

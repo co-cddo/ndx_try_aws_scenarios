@@ -83,39 +83,6 @@ scenarioId: planning-ai
     {% include "components/sample-data-panel.njk" %}
   </div>
 
-  {# Manual seeding fallback #}
-  <details class="govuk-details govuk-!-margin-top-4">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        Manual document upload (if automatic deployment failed)
-      </span>
-    </summary>
-    <div class="govuk-details__text">
-      <p class="govuk-body">If the automated sample document deployment failed, you can manually upload documents:</p>
-
-      <ol class="govuk-list govuk-list--number">
-        <li>
-          Go to the <a href="https://console.aws.amazon.com/s3/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS S3 console</a>
-        </li>
-        <li>
-          Find the bucket named <code>ndx-try-planning-ai-[timestamp]-documents</code>
-        </li>
-        <li>
-          Download sample documents from <a href="/assets/documents/planning/" class="govuk-link">our sample document library</a>
-        </li>
-        <li>
-          Upload the PDF files to the S3 bucket under the <code>samples/</code> prefix
-        </li>
-        <li>
-          Refresh this page to verify documents are available
-        </li>
-      </ol>
-
-      <p class="govuk-body">
-        If you continue to have issues, <a href="/contact/" class="govuk-link">contact support</a>.
-      </p>
-    </div>
-  </details>
 </div>
 
 <h2 class="govuk-heading-m">What you'll learn</h2>

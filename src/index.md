@@ -10,7 +10,7 @@ description: Try AWS Before You Buy - Zero-cost evaluation platform for UK local
       <div class="govuk-grid-column-two-thirds">
         <h1 class="govuk-heading-xl ndx-hero__title">Try AWS Before You Buy for UK Councils</h1>
         <p class="govuk-body-l ndx-hero__description">
-          Evaluate AWS AI and cloud services with real local government scenarios. No cloud expertise required. Deploy in 15 minutes. Zero cost to try.
+          Evaluate AWS AI and cloud services with real local government scenarios. No cloud expertise required. Deploy in 15 minutes. <strong>Completely FREE as part of NDX:Try.</strong>
         </p>
         <div class="ndx-hero__cta">
           <a href="/quiz/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
@@ -47,8 +47,8 @@ description: Try AWS Before You Buy - Zero-cost evaluation platform for UK local
       <span class="ndx-trust-indicators__label">to first insight</span>
     </li>
     <li class="ndx-trust-indicators__item">
-      <span class="ndx-trust-indicators__value">Zero</span>
-      <span class="ndx-trust-indicators__label">commitment required</span>
+      <span class="ndx-trust-indicators__value">FREE</span>
+      <span class="ndx-trust-indicators__label">provided by AWS</span>
     </li>
   </ul>
 </div>
@@ -101,7 +101,9 @@ Choose from 6 AWS scenarios designed for UK local government:
           </div>
           <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key govuk-!-width-one-third">Cost</dt>
-            <dd class="govuk-summary-list__value">{{ scenario.estimatedCost }}</dd>
+            <dd class="govuk-summary-list__value">
+              <strong class="govuk-tag govuk-tag--green">FREE</strong>
+            </dd>
           </div>
         </dl>
         {% if scenario.tags and scenario.tags.length > 0 %}

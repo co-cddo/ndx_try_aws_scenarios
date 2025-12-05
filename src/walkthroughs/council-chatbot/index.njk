@@ -84,50 +84,6 @@ scenarioId: council-chatbot
     {% include "components/sample-data-panel.njk" %}
   </div>
 
-  {# Manual seeding fallback - AC-3.2.15 #}
-  <details class="govuk-details govuk-!-margin-top-4">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        Manual data seeding instructions (if automatic seeding failed)
-      </span>
-    </summary>
-    <div class="govuk-details__text">
-      <p class="govuk-body">If the automated sample data seeding failed during deployment, you can manually seed the data:</p>
-
-      <ol class="govuk-list govuk-list--number">
-        <li>
-          Go to the <a href="https://console.aws.amazon.com/lambda/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS Lambda console</a>
-        </li>
-        <li>
-          Find the function named <code>ndx-try-council-chatbot-[timestamp]-SampleDataSeeder</code>
-        </li>
-        <li>
-          Click the "Test" tab
-        </li>
-        <li>
-          Create a new test event with name <code>ManualSeed</code> and this JSON:
-          <pre class="ndx-code-block"><code>{
-  "action": "seed",
-  "scenario": "council-chatbot",
-  "recordCount": 200
-}</code></pre>
-        </li>
-        <li>
-          Click "Test" to run the function
-        </li>
-        <li>
-          Wait 30-60 seconds for the function to complete
-        </li>
-        <li>
-          Refresh this page and check the sample data status above shows "Ready"
-        </li>
-      </ol>
-
-      <p class="govuk-body">
-        If you continue to have issues, <a href="/contact/" class="govuk-link">contact support</a>.
-      </p>
-    </div>
-  </details>
 </div>
 
 <h2 class="govuk-heading-m">What you'll learn</h2>
