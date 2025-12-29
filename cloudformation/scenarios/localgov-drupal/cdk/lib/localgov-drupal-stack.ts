@@ -76,6 +76,16 @@ export class LocalGovDrupalStack extends cdk.Stack {
       deploymentMode,
     });
 
+    // Story 1.8 - WaitCondition for Drupal initialization
+    // Creates a presigned URL that the container uses to signal completion
+    const waitHandle = new cdk.CfnWaitConditionHandle(this, 'DrupalInitHandle');
+
+    const waitCondition = new cdk.CfnWaitCondition(this, 'DrupalInitCondition', {
+      handle: waitHandle.ref,
+      timeout: '900', // 15 minutes - allows for Aurora cold start + Drupal install
+      count: 1,
+    });
+
     // Story 1.7 - Compute construct (Fargate, ALB)
     const compute = new ComputeConstruct(this, 'Compute', {
       vpc: networking.vpc,
@@ -86,7 +96,11 @@ export class LocalGovDrupalStack extends cdk.Stack {
       fileSystem: storage.fileSystem,
       accessPoint: storage.accessPoint,
       deploymentMode,
+      waitConditionUrl: waitHandle.ref,
     });
+
+    // Ensure WaitCondition depends on the ECS service being created
+    waitCondition.node.addDependency(compute.service);
 
     // TODO: Story 1.12 - CloudFormation outputs
     // new cdk.CfnOutput(this, 'DrupalUrl', { ... });

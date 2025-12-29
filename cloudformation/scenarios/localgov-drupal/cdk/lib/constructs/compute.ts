@@ -55,6 +55,12 @@ export interface ComputeConstructProps {
    * @default 'production'
    */
   readonly deploymentMode?: 'development' | 'production';
+
+  /**
+   * Optional WaitCondition URL for signaling CloudFormation
+   * when Drupal initialization completes.
+   */
+  readonly waitConditionUrl?: string;
 }
 
 /**
@@ -210,6 +216,19 @@ export class ComputeConstruct extends Construct {
       },
     });
 
+    // Build environment variables
+    const containerEnvironment: Record<string, string> = {
+      DEPLOYMENT_MODE: deploymentMode,
+      DB_HOST: props.databaseCluster.clusterEndpoint.hostname,
+      DB_NAME: 'drupal',
+      DB_PORT: props.databaseCluster.clusterEndpoint.port.toString(),
+    };
+
+    // Add WaitCondition URL if provided
+    if (props.waitConditionUrl) {
+      containerEnvironment.WAIT_CONDITION_URL = props.waitConditionUrl;
+    }
+
     // Add container
     const container = taskDefinition.addContainer('drupal', {
       image: ecs.ContainerImage.fromRegistry('ghcr.io/localgovdrupal/localgov-drupal:latest'),
@@ -217,12 +236,7 @@ export class ComputeConstruct extends Construct {
         streamPrefix: 'drupal',
         logGroup,
       }),
-      environment: {
-        DEPLOYMENT_MODE: deploymentMode,
-        DB_HOST: props.databaseCluster.clusterEndpoint.hostname,
-        DB_NAME: 'drupal',
-        DB_PORT: props.databaseCluster.clusterEndpoint.port.toString(),
-      },
+      environment: containerEnvironment,
       secrets: {
         DB_USER: ecs.Secret.fromSecretsManager(props.databaseSecret, 'username'),
         DB_PASSWORD: ecs.Secret.fromSecretsManager(props.databaseSecret, 'password'),

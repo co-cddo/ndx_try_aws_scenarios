@@ -313,4 +313,55 @@ describe('LocalGovDrupalStack', () => {
       Protocol: 'HTTP',
     });
   });
+
+  // Story 1.8 - Drupal Init & WaitCondition tests
+  test('Stack creates WaitCondition for Drupal initialization', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify WaitCondition is created with 15 minute timeout
+    template.hasResourceProperties('AWS::CloudFormation::WaitCondition', {
+      Timeout: '900',
+      Count: 1,
+    });
+  });
+
+  test('Stack creates WaitConditionHandle for signaling', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify WaitConditionHandle is created
+    const handles = template.findResources('AWS::CloudFormation::WaitConditionHandle');
+    expect(Object.keys(handles).length).toBe(1);
+  });
+
+  test('Task definition includes WAIT_CONDITION_URL environment variable', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify task definition has container with WAIT_CONDITION_URL env var
+    template.hasResourceProperties('AWS::ECS::TaskDefinition', {
+      ContainerDefinitions: Match.arrayWith([
+        Match.objectLike({
+          Environment: Match.arrayWith([
+            Match.objectLike({
+              Name: 'WAIT_CONDITION_URL',
+            }),
+          ]),
+        }),
+      ]),
+    });
+  });
 });
