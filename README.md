@@ -1,6 +1,7 @@
 # NDX:Try AWS Scenarios
 
 [![Build and Deploy](https://github.com/co-cddo/ndx_try_aws_scenarios/actions/workflows/build-deploy.yml/badge.svg)](https://github.com/co-cddo/ndx_try_aws_scenarios/actions/workflows/build-deploy.yml)
+[![Docker Build](https://github.com/co-cddo/ndx_try_aws_scenarios/actions/workflows/docker-build.yml/badge.svg)](https://github.com/co-cddo/ndx_try_aws_scenarios/actions/workflows/docker-build.yml)
 ![GitHub License](https://img.shields.io/github/license/co-cddo/ndx_try_aws_scenarios)
 
 > Zero-cost AWS evaluation platform for UK local government. Try before you buy.
