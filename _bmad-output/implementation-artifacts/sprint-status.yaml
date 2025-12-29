@@ -43,7 +43,7 @@ development_status:
   # Epic 1: Deployable LocalGov Drupal Foundation
   epic-1: in-progress
   1-1-project-scaffolding-cdk-setup: done
-  1-2-localgov-drupal-container-image: backlog
+  1-2-localgov-drupal-container-image: done
   1-3-container-build-publish-pipeline: backlog
   1-4-cdk-networking-construct: backlog
   1-5-cdk-database-construct: backlog
