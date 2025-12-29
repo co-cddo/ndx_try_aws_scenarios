@@ -1,6 +1,6 @@
 # Story 1.1: Project Scaffolding & CDK Setup
 
-Status: review
+Status: done
 
 ## Story
 
