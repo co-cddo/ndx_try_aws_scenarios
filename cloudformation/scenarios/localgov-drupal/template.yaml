@@ -1,0 +1,14 @@
+Description: AI-Enhanced LocalGov Drupal on AWS - Demonstration Environment
+Resources:
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/zPSMzI21jNQTCwv1k1OydbNyUzSCy5JTM7WyctPSdXLKtYvMzLSM7TUM1DMKs7M1C0qzSvJzE3VC4LQAFKd5dM/AAAA
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/CDKMetadata/Default
+Parameters:
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
+
