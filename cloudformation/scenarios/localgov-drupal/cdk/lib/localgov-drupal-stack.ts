@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { NetworkingConstruct } from './constructs/networking';
 
 /**
  * Configuration properties for the LocalGov Drupal Stack
@@ -53,8 +54,10 @@ export class LocalGovDrupalStack extends cdk.Stack {
     cdk.Tags.of(this).add('DeploymentMode', deploymentMode);
     cdk.Tags.of(this).add('CouncilTheme', councilTheme);
 
-    // TODO: Story 1.4 - Networking construct (security groups)
-    // const networking = new NetworkingConstruct(this, 'Networking', { ... });
+    // Story 1.4 - Networking construct (security groups)
+    const networking = new NetworkingConstruct(this, 'Networking', {
+      deploymentMode,
+    });
 
     // TODO: Story 1.5 - Database construct (Aurora Serverless v2)
     // const database = new DatabaseConstruct(this, 'Database', { ... });

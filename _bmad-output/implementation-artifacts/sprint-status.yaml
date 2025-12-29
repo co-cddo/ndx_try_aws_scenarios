@@ -45,7 +45,7 @@ development_status:
   1-1-project-scaffolding-cdk-setup: done
   1-2-localgov-drupal-container-image: done
   1-3-container-build-publish-pipeline: done
-  1-4-cdk-networking-construct: backlog
+  1-4-cdk-networking-construct: done
   1-5-cdk-database-construct: backlog
   1-6-cdk-storage-construct: backlog
   1-7-cdk-compute-construct: backlog
