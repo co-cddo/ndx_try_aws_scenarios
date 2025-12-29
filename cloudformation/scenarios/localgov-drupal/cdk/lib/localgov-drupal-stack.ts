@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { DatabaseConstruct } from './constructs/database';
 import { NetworkingConstruct } from './constructs/networking';
+import { StorageConstruct } from './constructs/storage';
 
 /**
  * Configuration properties for the LocalGov Drupal Stack
@@ -67,8 +68,12 @@ export class LocalGovDrupalStack extends cdk.Stack {
       deploymentMode,
     });
 
-    // TODO: Story 1.6 - Storage construct (EFS)
-    // const storage = new StorageConstruct(this, 'Storage', { ... });
+    // Story 1.6 - Storage construct (EFS)
+    const storage = new StorageConstruct(this, 'Storage', {
+      vpc: networking.vpc,
+      securityGroup: networking.efsSecurityGroup,
+      deploymentMode,
+    });
 
     // TODO: Story 1.7 - Compute construct (Fargate, ALB)
     // const compute = new ComputeConstruct(this, 'Compute', { ... });

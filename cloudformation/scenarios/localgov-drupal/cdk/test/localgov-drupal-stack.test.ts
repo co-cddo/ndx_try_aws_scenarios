@@ -180,4 +180,59 @@ describe('LocalGovDrupalStack', () => {
       Engine: 'aurora-mysql',
     });
   });
+
+  // Story 1.6 - Storage construct tests
+  test('Stack creates EFS file system with encryption', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify EFS file system is created with encryption enabled
+    template.hasResourceProperties('AWS::EFS::FileSystem', {
+      Encrypted: true,
+      PerformanceMode: 'generalPurpose',
+      ThroughputMode: 'bursting',
+    });
+  });
+
+  test('Stack creates EFS access point', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify access point is created with correct POSIX user (www-data UID/GID 33)
+    template.hasResourceProperties('AWS::EFS::AccessPoint', {
+      PosixUser: {
+        Uid: '33',
+        Gid: '33',
+      },
+      RootDirectory: Match.objectLike({
+        Path: '/drupal-files',
+        CreationInfo: {
+          OwnerUid: '33',
+          OwnerGid: '33',
+          Permissions: '0755',
+        },
+      }),
+    });
+  });
+
+  test('Stack creates EFS mount targets', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify mount targets exist (at least one)
+    const mountTargets = template.findResources('AWS::EFS::MountTarget');
+    expect(Object.keys(mountTargets).length).toBeGreaterThan(0);
+  });
 });
