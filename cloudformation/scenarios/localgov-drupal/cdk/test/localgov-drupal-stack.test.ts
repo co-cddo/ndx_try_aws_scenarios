@@ -235,4 +235,82 @@ describe('LocalGovDrupalStack', () => {
     const mountTargets = template.findResources('AWS::EFS::MountTarget');
     expect(Object.keys(mountTargets).length).toBeGreaterThan(0);
   });
+
+  // Story 1.7 - Compute construct tests
+  test('Stack creates ECS cluster', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify ECS cluster is created
+    template.hasResourceProperties('AWS::ECS::Cluster', {
+      ClusterName: Match.stringLikeRegexp('NdxDrupal'),
+    });
+  });
+
+  test('Stack creates Fargate task definition', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify Fargate task definition with correct resources
+    template.hasResourceProperties('AWS::ECS::TaskDefinition', {
+      Cpu: '512',
+      Memory: '1024',
+      RequiresCompatibilities: ['FARGATE'],
+      NetworkMode: 'awsvpc',
+    });
+  });
+
+  test('Stack creates Application Load Balancer', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify ALB is created as internet-facing
+    template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
+      Scheme: 'internet-facing',
+      Type: 'application',
+    });
+  });
+
+  test('Stack creates ECS service', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify ECS service is created with desired count 1
+    template.hasResourceProperties('AWS::ECS::Service', {
+      DesiredCount: 1,
+      LaunchType: 'FARGATE',
+    });
+  });
+
+  test('Stack creates ALB target group with health check', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify target group has health check configured
+    template.hasResourceProperties('AWS::ElasticLoadBalancingV2::TargetGroup', {
+      HealthCheckPath: '/',
+      TargetType: 'ip',
+      Protocol: 'HTTP',
+    });
+  });
 });

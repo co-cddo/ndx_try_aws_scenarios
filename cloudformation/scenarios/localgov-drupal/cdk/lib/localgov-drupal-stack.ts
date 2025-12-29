@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { ComputeConstruct } from './constructs/compute';
 import { DatabaseConstruct } from './constructs/database';
 import { NetworkingConstruct } from './constructs/networking';
 import { StorageConstruct } from './constructs/storage';
@@ -75,8 +76,17 @@ export class LocalGovDrupalStack extends cdk.Stack {
       deploymentMode,
     });
 
-    // TODO: Story 1.7 - Compute construct (Fargate, ALB)
-    // const compute = new ComputeConstruct(this, 'Compute', { ... });
+    // Story 1.7 - Compute construct (Fargate, ALB)
+    const compute = new ComputeConstruct(this, 'Compute', {
+      vpc: networking.vpc,
+      albSecurityGroup: networking.albSecurityGroup,
+      fargateSecurityGroup: networking.fargateSecurityGroup,
+      databaseCluster: database.cluster,
+      databaseSecret: database.secret,
+      fileSystem: storage.fileSystem,
+      accessPoint: storage.accessPoint,
+      deploymentMode,
+    });
 
     // TODO: Story 1.12 - CloudFormation outputs
     // new cdk.CfnOutput(this, 'DrupalUrl', { ... });
