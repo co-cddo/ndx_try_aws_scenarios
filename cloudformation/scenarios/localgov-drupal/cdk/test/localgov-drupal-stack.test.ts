@@ -124,4 +124,60 @@ describe('LocalGovDrupalStack', () => {
       ]),
     });
   });
+
+  // Story 1.5 - Database construct tests
+  test('Stack creates Aurora Serverless v2 cluster', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify Aurora cluster is created with correct engine
+    template.hasResourceProperties('AWS::RDS::DBCluster', {
+      Engine: 'aurora-mysql',
+      EngineVersion: Match.stringLikeRegexp('8.0'),
+      ServerlessV2ScalingConfiguration: {
+        MinCapacity: 0.5,
+        MaxCapacity: 2,
+      },
+      DatabaseName: 'drupal',
+      StorageEncrypted: true,
+    });
+  });
+
+  test('Stack creates Secrets Manager secret for database', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify Secrets Manager secret is created
+    template.hasResourceProperties('AWS::SecretsManager::Secret', {
+      Description: Match.stringLikeRegexp('Database credentials'),
+      GenerateSecretString: Match.objectLike({
+        SecretStringTemplate: Match.stringLikeRegexp('drupal'),
+        GenerateStringKey: 'password',
+        ExcludePunctuation: true,
+      }),
+    });
+  });
+
+  test('Stack creates Aurora writer instance', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify writer instance is created as serverless v2
+    template.hasResourceProperties('AWS::RDS::DBInstance', {
+      DBInstanceClass: 'db.serverless',
+      Engine: 'aurora-mysql',
+    });
+  });
 });

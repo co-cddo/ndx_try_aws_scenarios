@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { DatabaseConstruct } from './constructs/database';
 import { NetworkingConstruct } from './constructs/networking';
 
 /**
@@ -59,8 +60,12 @@ export class LocalGovDrupalStack extends cdk.Stack {
       deploymentMode,
     });
 
-    // TODO: Story 1.5 - Database construct (Aurora Serverless v2)
-    // const database = new DatabaseConstruct(this, 'Database', { ... });
+    // Story 1.5 - Database construct (Aurora Serverless v2)
+    const database = new DatabaseConstruct(this, 'Database', {
+      vpc: networking.vpc,
+      securityGroup: networking.auroraSecurityGroup,
+      deploymentMode,
+    });
 
     // TODO: Story 1.6 - Storage construct (EFS)
     // const storage = new StorageConstruct(this, 'Storage', { ... });
