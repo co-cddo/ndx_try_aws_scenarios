@@ -1,0 +1,56 @@
+{#
+/**
+ * @file
+ * AI Error State component.
+ *
+ * Displays an error message with retry functionality for failed AI operations.
+ * Uses GOV.UK Design System error pattern with red (#d4351c) left border.
+ *
+ * Available variables:
+ * - message: Error message to display (required)
+ * - error_code: Technical error code for logging/debugging (optional)
+ * - show_retry: Whether to show retry button (optional, default: true)
+ * - retry_label: Custom retry button label (optional, default: 'Try again')
+ * - retry_action: Data action for retry handler (optional, default: 'retry')
+ * - id: Unique ID for the component (optional)
+ * - attributes: Additional HTML attributes (optional)
+ *
+ * Story 3.3: AI Component Design System
+ * WCAG 2.2 AA Compliance:
+ * - role="alert" for immediate screen reader announcement
+ * - Error styling follows GOV.UK error pattern
+ * - Retry button meets 44x44px touch target
+ */
+#}
+{% set error_id = id|default('ai-error-' ~ random()) %}
+{% set retry_button_label = retry_label|default('Try again') %}
+
+<div
+  id="{{ error_id }}"
+  class="ai-error-state"
+  role="alert"
+  aria-live="assertive"
+  {{ attributes ? attributes : '' }}
+>
+  <div class="ai-error-state__content">
+    <span class="ai-error-state__icon" aria-hidden="true">&#9888;</span>
+    <div class="ai-error-state__message-wrapper">
+      <p class="ai-error-state__message">{{ message }}</p>
+      {% if error_code %}
+        <p class="ai-error-state__code">
+          <span class="visually-hidden">Error code: </span>
+          <code>{{ error_code }}</code>
+        </p>
+      {% endif %}
+    </div>
+  </div>
+  {% if show_retry is not defined or show_retry %}
+    <button
+      type="button"
+      class="ai-error-state__retry ai-action-button govuk-button govuk-button--secondary"
+      data-ai-action="{{ retry_action|default('retry') }}"
+    >
+      {{ retry_button_label }}
+    </button>
+  {% endif %}
+</div>

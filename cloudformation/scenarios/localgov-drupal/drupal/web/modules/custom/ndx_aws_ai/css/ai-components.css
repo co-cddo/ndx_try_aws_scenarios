@@ -1,0 +1,442 @@
+/**
+ * @file
+ * AI Component Design System styles.
+ *
+ * Implements GOV.UK Design System patterns for AI-powered UI components.
+ * Follows WCAG 2.2 AA accessibility requirements.
+ *
+ * Story 3.3: AI Component Design System
+ *
+ * GOV.UK Design System Colour Palette:
+ * - Primary Blue: #1d70b8 (links, primary actions)
+ * - Black: #0b0c0c (text)
+ * - White: #ffffff (backgrounds)
+ * - Red: #d4351c (errors)
+ * - Green: #00703c (success)
+ * - Yellow: #ffdd00 (focus, warnings)
+ * - Grey: #505a5f (secondary text)
+ * - Light Grey: #f3f2f1 (backgrounds)
+ */
+
+/* ==========================================================================
+   CSS Custom Properties (Design Tokens)
+   ========================================================================== */
+
+:root {
+  /* GOV.UK Primary Colours */
+  --ai-color-blue: #1d70b8;
+  --ai-color-blue-hover: #003078;
+  --ai-color-black: #0b0c0c;
+  --ai-color-white: #ffffff;
+
+  /* Status Colours */
+  --ai-color-red: #d4351c;
+  --ai-color-green: #00703c;
+  --ai-color-yellow: #ffdd00;
+
+  /* Secondary Colours */
+  --ai-color-grey: #505a5f;
+  --ai-color-light-grey: #f3f2f1;
+  --ai-color-mid-grey: #b1b4b6;
+
+  /* Focus Ring */
+  --ai-focus-width: 3px;
+  --ai-focus-offset: 2px;
+
+  /* Spacing */
+  --ai-spacing-xs: 5px;
+  --ai-spacing-sm: 10px;
+  --ai-spacing-md: 15px;
+  --ai-spacing-lg: 20px;
+
+  /* Touch target */
+  --ai-touch-target: 44px;
+
+  /* Border radius */
+  --ai-border-radius: 0;
+
+  /* Transitions */
+  --ai-transition-duration: 0.15s;
+}
+
+/* ==========================================================================
+   AI Action Button
+   ========================================================================== */
+
+.ai-action-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ai-spacing-xs);
+  min-height: var(--ai-touch-target);
+  min-width: var(--ai-touch-target);
+  padding: var(--ai-spacing-sm) var(--ai-spacing-md);
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--ai-color-blue);
+  background-color: var(--ai-color-white);
+  border: 2px solid var(--ai-color-blue);
+  border-radius: var(--ai-border-radius);
+  cursor: pointer;
+  text-decoration: none;
+  vertical-align: middle;
+  box-shadow: 0 2px 0 var(--ai-color-blue);
+  transition: background-color var(--ai-transition-duration) ease;
+}
+
+.ai-action-button:hover {
+  background-color: var(--ai-color-light-grey);
+  color: var(--ai-color-blue-hover);
+  border-color: var(--ai-color-blue-hover);
+  box-shadow: 0 2px 0 var(--ai-color-blue-hover);
+}
+
+.ai-action-button:active {
+  top: 2px;
+  box-shadow: none;
+}
+
+/* Focus state - GOV.UK yellow ring */
+.ai-action-button:focus,
+.ai-action-button:focus-visible {
+  outline: var(--ai-focus-width) solid var(--ai-color-yellow);
+  outline-offset: var(--ai-focus-offset);
+  background-color: var(--ai-color-yellow);
+  color: var(--ai-color-black);
+  border-color: var(--ai-color-black);
+  box-shadow: none;
+}
+
+/* Disabled state */
+.ai-action-button--disabled,
+.ai-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Small variant */
+.ai-action-button--small {
+  font-size: 16px;
+  padding: var(--ai-spacing-xs) var(--ai-spacing-sm);
+  min-height: 36px;
+}
+
+/* Button icon */
+.ai-action-button__icon {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.ai-action-button__label {
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   AI Loading State
+   ========================================================================== */
+
+.ai-loading-state {
+  display: flex;
+  align-items: center;
+  gap: var(--ai-spacing-sm);
+  padding: var(--ai-spacing-md);
+  background-color: var(--ai-color-light-grey);
+  border-left: 4px solid var(--ai-color-blue);
+}
+
+.ai-loading-state__spinner {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.ai-loading-state__spinner-svg {
+  width: 100%;
+  height: 100%;
+  animation: ai-spin 1.5s linear infinite;
+}
+
+.ai-loading-state__spinner-circle {
+  stroke: var(--ai-color-blue);
+  stroke-linecap: round;
+  stroke-dasharray: 80, 200;
+  stroke-dashoffset: 0;
+  animation: ai-dash 1.5s ease-in-out infinite;
+}
+
+.ai-loading-state__message {
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  line-height: 1.25;
+  color: var(--ai-color-black);
+}
+
+/* Spinner animations */
+@keyframes ai-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ai-dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -124;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .ai-loading-state__spinner-svg {
+    animation: none;
+  }
+
+  .ai-loading-state__spinner-circle {
+    animation: none;
+    stroke-dasharray: none;
+  }
+
+  /* Simple pulsing opacity for reduced motion users */
+  .ai-loading-state__spinner {
+    animation: ai-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes ai-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+}
+
+/* ==========================================================================
+   AI Error State
+   ========================================================================== */
+
+.ai-error-state {
+  padding: var(--ai-spacing-md);
+  background-color: var(--ai-color-white);
+  border-left: 4px solid var(--ai-color-red);
+}
+
+.ai-error-state__content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ai-spacing-sm);
+  margin-bottom: var(--ai-spacing-md);
+}
+
+.ai-error-state__icon {
+  flex-shrink: 0;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ai-color-red);
+}
+
+.ai-error-state__message-wrapper {
+  flex: 1;
+}
+
+.ai-error-state__message {
+  margin: 0 0 var(--ai-spacing-xs) 0;
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ai-color-black);
+}
+
+.ai-error-state__code {
+  margin: 0;
+  font-family: monospace;
+  font-size: 14px;
+  color: var(--ai-color-grey);
+}
+
+.ai-error-state__code code {
+  padding: 2px 6px;
+  background-color: var(--ai-color-light-grey);
+  border-radius: 2px;
+}
+
+.ai-error-state__retry {
+  margin-top: var(--ai-spacing-sm);
+}
+
+/* ==========================================================================
+   AI Success State
+   ========================================================================== */
+
+.ai-success-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ai-spacing-sm);
+  padding: var(--ai-spacing-md);
+  background-color: var(--ai-color-white);
+  border-left: 4px solid var(--ai-color-green);
+}
+
+.ai-success-state__content {
+  display: flex;
+  align-items: center;
+  gap: var(--ai-spacing-sm);
+}
+
+.ai-success-state__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  color: var(--ai-color-white);
+  background-color: var(--ai-color-green);
+  border-radius: 50%;
+}
+
+.ai-success-state__message {
+  margin: 0;
+  font-family: "GDS Transport", arial, sans-serif;
+  font-size: 19px;
+  line-height: 1.25;
+  color: var(--ai-color-black);
+}
+
+.ai-success-state__dismiss {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ai-touch-target);
+  height: var(--ai-touch-target);
+  padding: 0;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ai-color-grey);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color var(--ai-transition-duration) ease;
+}
+
+.ai-success-state__dismiss:hover {
+  background-color: var(--ai-color-light-grey);
+  color: var(--ai-color-black);
+}
+
+.ai-success-state__dismiss:focus,
+.ai-success-state__dismiss:focus-visible {
+  outline: var(--ai-focus-width) solid var(--ai-color-yellow);
+  outline-offset: var(--ai-focus-offset);
+  background-color: var(--ai-color-yellow);
+  color: var(--ai-color-black);
+}
+
+/* Fade out animation for auto-dismiss */
+.ai-success-state--dismissing {
+  animation: ai-fade-out 0.3s ease-out forwards;
+}
+
+@keyframes ai-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-success-state--dismissing {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   Visually Hidden (Screen Reader Only)
+   ========================================================================== */
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ==========================================================================
+   State Transitions (used by JavaScript)
+   ========================================================================== */
+
+.ai-state-container {
+  position: relative;
+}
+
+.ai-state-container > * {
+  transition: opacity var(--ai-transition-duration) ease;
+}
+
+.ai-state-container--loading .ai-action-button {
+  display: none;
+}
+
+.ai-state-container--success .ai-action-button,
+.ai-state-container--success .ai-loading-state {
+  display: none;
+}
+
+.ai-state-container--error .ai-action-button,
+.ai-state-container--error .ai-loading-state {
+  display: none;
+}
+
+/* ==========================================================================
+   High Contrast Mode Support
+   ========================================================================== */
+
+@media (forced-colors: active) {
+  .ai-action-button {
+    border: 2px solid ButtonText;
+  }
+
+  .ai-action-button:focus {
+    outline: 3px solid Highlight;
+    border-color: Highlight;
+  }
+
+  .ai-loading-state,
+  .ai-error-state,
+  .ai-success-state {
+    border-left: 4px solid ButtonText;
+  }
+
+  .ai-loading-state__spinner-circle {
+    stroke: ButtonText;
+  }
+}

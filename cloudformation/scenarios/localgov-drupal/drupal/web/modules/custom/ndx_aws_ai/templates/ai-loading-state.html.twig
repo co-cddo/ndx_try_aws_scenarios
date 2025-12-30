@@ -1,0 +1,48 @@
+{#
+/**
+ * @file
+ * AI Loading State component.
+ *
+ * Displays a loading indicator while AI operations are in progress.
+ * Uses GOV.UK Design System blue (#1d70b8) with accessible animations.
+ *
+ * Available variables:
+ * - message: Loading message text (optional, default: 'AI is thinking...')
+ * - show_spinner: Whether to show the spinner animation (optional, default: true)
+ * - id: Unique ID for the component (optional)
+ * - attributes: Additional HTML attributes (optional)
+ *
+ * Story 3.3: AI Component Design System
+ * WCAG 2.2 AA Compliance:
+ * - aria-live="polite" for screen reader announcements
+ * - prefers-reduced-motion support for spinner animation
+ * - role="status" for assistive technology
+ */
+#}
+{% set loading_id = id|default('ai-loading-' ~ random()) %}
+{% set loading_message = message|default('AI is thinking...') %}
+
+<div
+  id="{{ loading_id }}"
+  class="ai-loading-state"
+  role="status"
+  aria-live="polite"
+  aria-busy="true"
+  {{ attributes ? attributes : '' }}
+>
+  {% if show_spinner is not defined or show_spinner %}
+    <div class="ai-loading-state__spinner" aria-hidden="true">
+      <svg class="ai-loading-state__spinner-svg" viewBox="0 0 50 50" aria-hidden="true">
+        <circle
+          class="ai-loading-state__spinner-circle"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke-width="4"
+        />
+      </svg>
+    </div>
+  {% endif %}
+  <span class="ai-loading-state__message">{{ loading_message }}</span>
+</div>

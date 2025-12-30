@@ -1,0 +1,15 @@
+# Libraries for NDX AWS AI module.
+#
+# Story 3.3: AI Component Design System
+
+ai_components:
+  version: VERSION
+  css:
+    component:
+      css/ai-components.css: {}
+  js:
+    js/ai-components.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupal.announce

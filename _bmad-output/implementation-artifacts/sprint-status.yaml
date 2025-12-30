@@ -74,7 +74,7 @@ development_status:
   epic-3: in-progress
   3-1-ndx-aws-ai-module-foundation: done
   3-2-bedrock-service-integration: done
-  3-3-ai-component-design-system: backlog
+  3-3-ai-component-design-system: done
   3-4-ckeditor-ai-toolbar-plugin: backlog
   3-5-ai-writing-assistant: backlog
   3-6-readability-simplification: backlog

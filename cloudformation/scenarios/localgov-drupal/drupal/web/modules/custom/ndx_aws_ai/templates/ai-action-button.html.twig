@@ -1,0 +1,53 @@
+{#
+/**
+ * @file
+ * AI Action Button component.
+ *
+ * Provides a consistent button style for AI-powered actions following
+ * GOV.UK Design System patterns with AI-specific enhancements.
+ *
+ * Available variables:
+ * - label: The button text label (required)
+ * - icon: Icon type: 'sparkle', 'simplify', 'translate', 'accessibility' (optional)
+ * - action: Data action attribute for JavaScript handlers (optional)
+ * - disabled: Whether the button is disabled (optional, default: false)
+ * - type: Button type: 'button', 'submit' (optional, default: 'button')
+ * - attributes: Additional HTML attributes (optional)
+ * - size: Button size: 'normal', 'small' (optional, default: 'normal')
+ *
+ * Story 3.3: AI Component Design System
+ * WCAG 2.2 AA Compliance:
+ * - Minimum touch target: 44x44px
+ * - 3px yellow (#ffdd00) focus ring with 2px offset
+ * - GOV.UK secondary button pattern (#1d70b8 border)
+ */
+#}
+{% set button_classes = [
+  'ai-action-button',
+  'govuk-button',
+  'govuk-button--secondary',
+  size == 'small' ? 'ai-action-button--small' : '',
+  disabled ? 'ai-action-button--disabled' : '',
+]|filter(v => v)|join(' ') %}
+
+{% set icon_map = {
+  'sparkle': '&#10024;',
+  'simplify': '&#9998;',
+  'translate': '&#127760;',
+  'accessibility': '&#9855;',
+  'listen': '&#128266;',
+  'image': '&#128444;',
+} %}
+
+<button
+  type="{{ type|default('button') }}"
+  class="{{ button_classes }}"
+  {% if action %}data-ai-action="{{ action }}"{% endif %}
+  {% if disabled %}disabled aria-disabled="true"{% endif %}
+  {{ attributes ? attributes : '' }}
+>
+  {% if icon and icon_map[icon] is defined %}
+    <span class="ai-action-button__icon" aria-hidden="true">{{ icon_map[icon]|raw }}</span>
+  {% endif %}
+  <span class="ai-action-button__label">{{ label }}</span>
+</button>
