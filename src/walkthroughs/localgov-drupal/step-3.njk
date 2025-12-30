@@ -1,0 +1,202 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Edit Content - LocalGov Drupal Walkthrough"
+description: Make changes to an existing service page
+currentStep: 3
+totalSteps: 5
+timeEstimate: "4 minutes"
+scenarioId: localgov-drupal
+---
+
+{#
+  Step 3: Edit Content (Story 2.4)
+  - Finding content to edit
+  - Using the WYSIWYG editor
+  - Saving and previewing changes
+#}
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Edit Content" %}
+{% set stepDescription = "Learn how to edit existing content using Drupal's WYSIWYG editor." %}
+{% set timeEstimate = "4 minutes" %}
+{% set expectedOutcomes = [
+  "You can find and open content for editing",
+  "You've made a simple text change",
+  "You've previewed and saved your changes"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Finding content to edit</h3>
+
+<p class="govuk-body">
+  There are two ways to edit content in LocalGov Drupal:
+</p>
+
+<div class="ndx-edit-methods">
+  <div class="ndx-edit-method">
+    <h4 class="govuk-heading-s">Method 1: From the page itself</h4>
+    <ol class="govuk-list govuk-list--number">
+      <li>Navigate to any page on the site</li>
+      <li>Click the "Edit" tab in the admin toolbar</li>
+      <li>The page opens in editing mode</li>
+    </ol>
+    <p class="govuk-body-s">
+      <strong>Best for:</strong> Quick edits when you're browsing the site
+    </p>
+  </div>
+
+  <div class="ndx-edit-method">
+    <h4 class="govuk-heading-s">Method 2: From the Content admin</h4>
+    <ol class="govuk-list govuk-list--number">
+      <li>Click "Content" in the admin toolbar</li>
+      <li>Find the page you want to edit</li>
+      <li>Click "Edit" in the Operations column</li>
+    </ol>
+    <p class="govuk-body-s">
+      <strong>Best for:</strong> Managing multiple pages, bulk operations
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Try editing a service page</h3>
+
+<p class="govuk-body">
+  Let's edit the "Waste & Recycling" service page:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Navigate to the page</strong>
+    <p class="govuk-body">
+      Click "Waste & Recycling" in the main navigation
+    </p>
+  </li>
+
+  <li>
+    <strong>Click "Edit" in the admin toolbar</strong>
+    <p class="govuk-body">
+      You'll see the editing form with all the page fields
+    </p>
+  </li>
+
+  <li>
+    <strong>Find the body text field</strong>
+    <p class="govuk-body">
+      Scroll down to the main content area with the WYSIWYG editor
+    </p>
+  </li>
+
+  <li>
+    <strong>Make a simple change</strong>
+    <p class="govuk-body">
+      Add a sentence at the end of the first paragraph, for example:<br>
+      <code>"We're committed to making recycling easy for all residents."</code>
+    </p>
+  </li>
+
+  <li>
+    <strong>Preview your changes</strong>
+    <p class="govuk-body">
+      Click the "Preview" button at the bottom of the form
+    </p>
+  </li>
+
+  <li>
+    <strong>Save the page</strong>
+    <p class="govuk-body">
+      Click "Save" to publish your changes
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">The WYSIWYG editor</h3>
+
+<p class="govuk-body">
+  LocalGov Drupal uses CKEditor, a familiar word processor-style editor:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Bold, italic, underline</strong> - Format text like a word processor</li>
+  <li><strong>Headings</strong> - Use the Format dropdown to apply H2, H3, etc.</li>
+  <li><strong>Lists</strong> - Create bulleted or numbered lists</li>
+  <li><strong>Links</strong> - Highlight text and click the link button</li>
+  <li><strong>Images</strong> - Upload or embed images in content</li>
+  <li><strong>Tables</strong> - Insert tables for structured data</li>
+</ul>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Accessibility tip:</strong> Always use proper headings (H2, H3, H4)
+    instead of just making text bold. This helps screen readers navigate your content.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Revision history</h3>
+
+<p class="govuk-body">
+  Every edit creates a revision, so you can always go back:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>Click the "Revisions" tab when viewing a page</li>
+  <li>See all previous versions with timestamps</li>
+  <li>Compare changes between versions</li>
+  <li>Revert to a previous version if needed</li>
+</ul>
+
+<div class="ndx-try-this">
+  <p class="govuk-body">
+    <strong>Try this:</strong> After saving your edit, click "Revisions" to see
+    your change in the revision history.
+  </p>
+</div>
+
+{# Screenshot placeholder #}
+<div class="govuk-warning-text govuk-!-margin-top-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Note</span>
+    Screenshot placeholder: In production, this page would include screenshots of the editing interface and WYSIWYG editor.
+  </strong>
+</div>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-edit-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-edit-method {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-edit-method h4 {
+    margin-top: 0;
+  }
+
+  .ndx-try-this {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #00703c;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-edit-methods {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

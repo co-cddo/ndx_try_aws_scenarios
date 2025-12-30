@@ -30,8 +30,10 @@
   "author": "NDX Partnership",
   "license": "MIT",
   "dependencies": {
+    "@sindresorhus/slugify": "^3.0.0",
     "@x-govuk/govuk-eleventy-plugin": "^7.0.0",
-    "govuk-frontend": "5.13.0"
+    "govuk-frontend": "5.13.0",
+    "markdown-it": "^14.1.0"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0",

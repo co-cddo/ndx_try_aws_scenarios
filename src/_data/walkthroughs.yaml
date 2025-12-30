@@ -4,6 +4,20 @@
 # Step titles describe what users achieve at each step
 
 walkthroughs:
+  localgov-drupal:
+    totalSteps: 5
+    url: "/walkthroughs/localgov-drupal/"
+    title: "LocalGov Drupal Walkthrough"
+    duration: "15 minutes"
+    hasWalkthrough: true
+    category: "cms"
+    steps:
+      - title: "Logged in to Drupal"
+      - title: "Homepage explored"
+      - title: "Content edited"
+      - title: "DEMO banner understood"
+      - title: "Cleanup prepared"
+
   council-chatbot:
     totalSteps: 4
     url: "/walkthroughs/council-chatbot/"
