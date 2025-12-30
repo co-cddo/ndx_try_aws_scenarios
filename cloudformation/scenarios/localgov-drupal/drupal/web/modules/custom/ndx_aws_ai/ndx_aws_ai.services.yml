@@ -70,3 +70,19 @@ services:
       - '@cache.default'
       - '@file_system'
       - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.2: Translate Rate Limiter - implements exponential backoff for Translate API calls
+  ndx_aws_ai.translate_rate_limiter:
+    class: Drupal\ndx_aws_ai\RateLimiter\TranslateRateLimiter
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.2: Translate Service - multi-language translation with 75+ languages
+  ndx_aws_ai.translate:
+    class: Drupal\ndx_aws_ai\Service\TranslateService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@ndx_aws_ai.translate_rate_limiter'
+      - '@cache.default'
+      - '@logger.channel.ndx_aws_ai'
