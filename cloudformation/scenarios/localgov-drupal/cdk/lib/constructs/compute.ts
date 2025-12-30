@@ -96,6 +96,11 @@ export class ComputeConstruct extends Construct {
    */
   public readonly loadBalancerDnsName: string;
 
+  /**
+   * The CloudWatch Log Group for container logs.
+   */
+  public readonly logGroup: logs.ILogGroup;
+
   constructor(scope: Construct, id: string, props: ComputeConstructProps) {
     super(scope, id);
 
@@ -113,7 +118,7 @@ export class ComputeConstruct extends Construct {
     // ==========================================================================
     // CloudWatch Log Group
     // ==========================================================================
-    const logGroup = new logs.LogGroup(this, 'LogGroup', {
+    this.logGroup = new logs.LogGroup(this, 'LogGroup', {
       logGroupName: `/ndx-drupal/${deploymentMode}`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -186,7 +191,7 @@ export class ComputeConstruct extends Construct {
     taskRole.addToPolicy(
       new iam.PolicyStatement({
         actions: ['logs:CreateLogStream', 'logs:PutLogEvents'],
-        resources: [logGroup.logGroupArn],
+        resources: [this.logGroup.logGroupArn],
       }),
     );
 
@@ -234,7 +239,7 @@ export class ComputeConstruct extends Construct {
       image: ecs.ContainerImage.fromRegistry('ghcr.io/localgovdrupal/localgov-drupal:latest'),
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: 'drupal',
-        logGroup,
+        logGroup: this.logGroup,
       }),
       environment: containerEnvironment,
       secrets: {

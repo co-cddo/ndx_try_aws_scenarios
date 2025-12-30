@@ -102,7 +102,40 @@ export class LocalGovDrupalStack extends cdk.Stack {
     // Ensure WaitCondition depends on the ECS service being created
     waitCondition.node.addDependency(compute.service);
 
-    // TODO: Story 1.12 - CloudFormation outputs
-    // new cdk.CfnOutput(this, 'DrupalUrl', { ... });
+    // ==========================================================================
+    // Story 1.12 - CloudFormation Outputs
+    // ==========================================================================
+
+    // Drupal URL - primary access point
+    new cdk.CfnOutput(this, 'DrupalUrl', {
+      description: 'URL to access LocalGov Drupal',
+      value: `http://${compute.loadBalancerDnsName}`,
+      exportName: `${this.stackName}-DrupalUrl`,
+    });
+
+    // Admin credentials for first-time login
+    new cdk.CfnOutput(this, 'AdminUsername', {
+      description: 'Drupal admin username',
+      value: 'admin',
+    });
+
+    // Admin password from Secrets Manager (dynamic reference)
+    new cdk.CfnOutput(this, 'AdminPassword', {
+      description: 'Drupal admin password (from Secrets Manager)',
+      value: database.secret.secretValueFromJson('password').unsafeUnwrap(),
+    });
+
+    // CloudWatch Logs URL for monitoring initialization
+    new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
+      description: 'CloudWatch Logs for initialization monitoring',
+      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent(compute.logGroup.logGroupName)}`,
+    });
+
+    // Quick Create URL template (for documentation)
+    new cdk.CfnOutput(this, 'StackDescription', {
+      description: 'Stack description',
+      value: 'AI-Enhanced LocalGov Drupal - Try AWS Scenarios',
+    });
   }
 }
+

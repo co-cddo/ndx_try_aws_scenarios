@@ -364,4 +364,62 @@ describe('LocalGovDrupalStack', () => {
       ]),
     });
   });
+
+  // Story 1.12 - CloudFormation Outputs tests
+  test('Stack outputs DrupalUrl', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify DrupalUrl output exists with correct description
+    template.hasOutput('DrupalUrl', {
+      Description: 'URL to access LocalGov Drupal',
+    });
+  });
+
+  test('Stack outputs AdminUsername', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify AdminUsername output exists with value 'admin'
+    template.hasOutput('AdminUsername', {
+      Description: 'Drupal admin username',
+      Value: 'admin',
+    });
+  });
+
+  test('Stack outputs AdminPassword from Secrets Manager', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify AdminPassword output exists
+    template.hasOutput('AdminPassword', {
+      Description: 'Drupal admin password (from Secrets Manager)',
+    });
+  });
+
+  test('Stack outputs CloudWatchLogsUrl', () => {
+    const app = new cdk.App();
+    const stack = new LocalGovDrupalStack(app, 'TestStack', {
+      env: testEnv,
+    });
+
+    const template = Template.fromStack(stack);
+
+    // Verify CloudWatchLogsUrl output exists
+    template.hasOutput('CloudWatchLogsUrl', {
+      Description: 'CloudWatch Logs for initialization monitoring',
+    });
+  });
 });
