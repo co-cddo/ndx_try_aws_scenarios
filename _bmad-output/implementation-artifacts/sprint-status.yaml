@@ -103,7 +103,7 @@ development_status:
   5-4-content-generation-orchestrator: done
   5-5-image-specification-collector: done
   5-6-batch-image-generation: done
-  5-7-drush-generation-command: backlog
+  5-7-drush-generation-command: done
   5-8-dynamic-council-mini-guide: backlog
   epic-5-retrospective: optional
 

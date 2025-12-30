@@ -73,3 +73,17 @@ services:
   logger.channel.ndx_council_generator:
     parent: logger.channel_base
     arguments: ['ndx_council_generator']
+
+  # Story 5.7: Drush Generation Command
+  ndx_council_generator.commands:
+    class: Drupal\ndx_council_generator\Commands\CouncilGeneratorCommands
+    arguments:
+      - '@ndx_council_generator.identity_generator'
+      - '@ndx_council_generator.content_orchestrator'
+      - '@ndx_council_generator.image_batch_processor'
+      - '@ndx_council_generator.image_collector'
+      - '@ndx_council_generator.content_template_manager'
+      - '@ndx_council_generator.state_manager'
+      - '@logger.channel.ndx_council_generator'
+    tags:
+      - { name: drush.command }
