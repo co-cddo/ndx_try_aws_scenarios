@@ -30,6 +30,7 @@ const SCREENSHOTS_DIR = join(PROJECT_ROOT, 'src/assets/images/screenshots');
 
 // Scenarios to check
 const SCENARIOS = [
+  'localgov-drupal',
   'council-chatbot',
   'planning-ai',
   'foi-redaction',
