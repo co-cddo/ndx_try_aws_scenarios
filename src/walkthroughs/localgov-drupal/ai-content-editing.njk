@@ -1,0 +1,651 @@
+---
+layout: layouts/guide.njk
+title: AI Content Editing Guide
+description: Learn how to use AI-powered content editing features in LocalGov Drupal
+scenarioId: localgov-drupal
+timeEstimate: 10 minutes
+---
+
+{#
+  AI Content Editing Mini-Guide (Story 3.8)
+  - Overview of AI writing features
+  - Step-by-step instructions with screenshots
+  - "Try this" prompts for different content types
+  - Tips for getting better results
+  - Common use cases for council content
+#}
+
+<h1 class="govuk-heading-xl">AI Content Editing Guide</h1>
+
+<p class="govuk-body-l">
+  Learn how to use AI-powered features to write and simplify content in LocalGov Drupal.
+</p>
+
+{# What you'll learn summary #}
+<div class="govuk-inset-text ndx-guide-summary">
+  <h2 class="govuk-heading-s">What you'll learn</h2>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>How to access and use the AI Write feature</li>
+    <li>How to simplify text to plain English</li>
+    <li>Tips for writing effective prompts</li>
+    <li>Common council content use cases</li>
+  </ul>
+</div>
+
+{# Introduction Section #}
+<h2 class="govuk-heading-l">What is AI-powered content editing?</h2>
+
+<p class="govuk-body">
+  LocalGov Drupal includes AI features powered by Amazon Bedrock that help content editors:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Generate draft content</strong> from a simple prompt</li>
+  <li><strong>Simplify existing text</strong> to plain English (reading age 9)</li>
+  <li><strong>Save time</strong> on routine content tasks</li>
+  <li><strong>Maintain consistency</strong> across council communications</li>
+</ul>
+
+<div class="govuk-warning-text">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Important</span>
+    AI-generated content should always be reviewed and edited before publishing.
+    The AI is a writing assistant, not a replacement for human judgement.
+  </strong>
+</div>
+
+{# Available Features Section #}
+<h2 class="govuk-heading-l">Available AI features</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-card">
+      <h3 class="govuk-heading-m">AI Write</h3>
+      <p class="govuk-body">
+        Generate new content from a prompt. Perfect for drafting service pages,
+        guides, news articles, and more.
+      </p>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        <span class="govuk-tag govuk-tag--blue">In CKEditor toolbar</span>
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-card">
+      <h3 class="govuk-heading-m">Simplify to Plain English</h3>
+      <p class="govuk-body">
+        Select existing text and simplify it. Great for making complex
+        information accessible to all residents.
+      </p>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        <span class="govuk-tag govuk-tag--green">Accessibility focused</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+{# Getting Started Section #}
+<h2 class="govuk-heading-l">Getting started</h2>
+
+<h3 class="govuk-heading-m">Accessing the AI toolbar</h3>
+
+<p class="govuk-body">
+  The AI features are available in any content edit form that uses the CKEditor:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Navigate to any content page</strong>
+    <p class="govuk-body">
+      Go to Content &gt; Add content, or edit an existing page
+    </p>
+  </li>
+  <li>
+    <strong>Find the Body field</strong>
+    <p class="govuk-body">
+      The rich text editor with the AI button is in the main Body field
+    </p>
+  </li>
+  <li>
+    <strong>Look for the AI button</strong>
+    <p class="govuk-body">
+      The AI button appears in the CKEditor toolbar (lightning bolt icon)
+    </p>
+  </li>
+</ol>
+
+{# Screenshot placeholder #}
+<div class="ndx-screenshot-placeholder" aria-hidden="true">
+  <p>Screenshot: CKEditor toolbar with AI button highlighted</p>
+</div>
+
+{# AI Write Walkthrough #}
+<h2 class="govuk-heading-l">Using AI Write</h2>
+
+<p class="govuk-body">
+  The AI Write feature generates new content based on your prompt.
+</p>
+
+<h3 class="govuk-heading-m">Step-by-step walkthrough</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Click the AI button</strong>
+    <p class="govuk-body">
+      In the CKEditor toolbar, click the AI dropdown menu
+    </p>
+  </li>
+  <li>
+    <strong>Select "AI Write"</strong>
+    <p class="govuk-body">
+      Choose the AI Write option from the dropdown
+    </p>
+  </li>
+  <li>
+    <strong>Enter your prompt</strong>
+    <p class="govuk-body">
+      Describe what content you want to create. Be specific about the topic,
+      audience, and any key points to include.
+    </p>
+  </li>
+  <li>
+    <strong>Click Generate</strong>
+    <p class="govuk-body">
+      Wait a few seconds while the AI generates your content
+    </p>
+  </li>
+  <li>
+    <strong>Review the result</strong>
+    <p class="govuk-body">
+      Read through the generated content carefully
+    </p>
+  </li>
+  <li>
+    <strong>Insert or regenerate</strong>
+    <p class="govuk-body">
+      Click "Insert" to add the content to your page, or "Regenerate" to try again
+    </p>
+  </li>
+</ol>
+
+{# Screenshot placeholder #}
+<div class="ndx-screenshot-placeholder" aria-hidden="true">
+  <p>Screenshot: AI Write dialog with example prompt</p>
+</div>
+
+<h3 class="govuk-heading-m">Expected results</h3>
+
+<p class="govuk-body">
+  The AI will generate structured content that typically includes:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>Clear headings and subheadings</li>
+  <li>Bullet points for lists of information</li>
+  <li>Plain English suitable for government content</li>
+  <li>Logical flow from introduction to conclusion</li>
+</ul>
+
+{# Simplify Walkthrough #}
+<h2 class="govuk-heading-l">Using Simplify to Plain English</h2>
+
+<p class="govuk-body">
+  The Simplify feature rewrites selected text to be more accessible.
+</p>
+
+<h3 class="govuk-heading-m">Step-by-step walkthrough</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Select the text</strong>
+    <p class="govuk-body">
+      Highlight the text you want to simplify in the editor
+    </p>
+  </li>
+  <li>
+    <strong>Click the AI button</strong>
+    <p class="govuk-body">
+      With text selected, click the AI dropdown menu
+    </p>
+  </li>
+  <li>
+    <strong>Select "Simplify to Plain English"</strong>
+    <p class="govuk-body">
+      Choose the Simplify option from the dropdown
+    </p>
+  </li>
+  <li>
+    <strong>Review the comparison</strong>
+    <p class="govuk-body">
+      See your original text alongside the simplified version
+    </p>
+  </li>
+  <li>
+    <strong>Toggle diff highlighting</strong>
+    <p class="govuk-body">
+      Use the checkbox to see exactly what changed (additions in green, removals in red)
+    </p>
+  </li>
+  <li>
+    <strong>Apply or cancel</strong>
+    <p class="govuk-body">
+      Click "Apply" to replace your text, or "Cancel" to keep the original
+    </p>
+  </li>
+</ol>
+
+{# Screenshot placeholder #}
+<div class="ndx-screenshot-placeholder" aria-hidden="true">
+  <p>Screenshot: Simplify dialog with before/after comparison</p>
+</div>
+
+{# Try This Prompts Section #}
+<h2 class="govuk-heading-l">Try this: example prompts</h2>
+
+<p class="govuk-body">
+  Here are some prompts you can try with the AI Write feature. Copy and paste
+  them into the prompt field to see how the AI responds.
+</p>
+
+{# Service Page Prompt #}
+<div class="ndx-prompt-card">
+  <div class="ndx-prompt-card__header">
+    <h3 class="govuk-heading-s govuk-!-margin-bottom-0">Service Page: Parking Permits</h3>
+    <span class="govuk-tag govuk-tag--blue">Beginner</span>
+  </div>
+  <div class="ndx-prompt-card__body">
+    <p class="govuk-body govuk-!-font-weight-bold">Prompt:</p>
+    <p class="ndx-prompt-text">
+      Write a service page for residents explaining how to apply for a parking permit.
+      Include eligibility criteria, required documents, and processing time.
+    </p>
+  </div>
+  <details class="govuk-details govuk-!-margin-bottom-0">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">What to expect</span>
+    </summary>
+    <div class="govuk-details__text">
+      A structured page with sections for eligibility, documents needed, how to apply,
+      and processing times. The content will be in plain English suitable for council websites.
+    </div>
+  </details>
+</div>
+
+{# How-to Guide Prompt #}
+<div class="ndx-prompt-card">
+  <div class="ndx-prompt-card__header">
+    <h3 class="govuk-heading-s govuk-!-margin-bottom-0">How-to Guide: Report a Pothole</h3>
+    <span class="govuk-tag govuk-tag--blue">Beginner</span>
+  </div>
+  <div class="ndx-prompt-card__body">
+    <p class="govuk-body govuk-!-font-weight-bold">Prompt:</p>
+    <p class="ndx-prompt-text">
+      Write a step-by-step guide for reporting potholes. Include what information
+      residents need to provide, expected response time, and how to track their report.
+    </p>
+  </div>
+  <details class="govuk-details govuk-!-margin-bottom-0">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">What to expect</span>
+    </summary>
+    <div class="govuk-details__text">
+      A numbered guide with clear steps, information about what details to include
+      (location, size, photos), and what happens after reporting.
+    </div>
+  </details>
+</div>
+
+{# News Article Prompt #}
+<div class="ndx-prompt-card">
+  <div class="ndx-prompt-card__header">
+    <h3 class="govuk-heading-s govuk-!-margin-bottom-0">News Article: New Recycling Service</h3>
+    <span class="govuk-tag govuk-tag--green">Intermediate</span>
+  </div>
+  <div class="ndx-prompt-card__body">
+    <p class="govuk-body govuk-!-font-weight-bold">Prompt:</p>
+    <p class="ndx-prompt-text">
+      Write a news article announcing a new food waste collection service starting
+      next month. Include collection days, what can be recycled, and how to request a bin.
+    </p>
+  </div>
+  <details class="govuk-details govuk-!-margin-bottom-0">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">What to expect</span>
+    </summary>
+    <div class="govuk-details__text">
+      A news-style article with a headline, lead paragraph summarising the key points,
+      and body content with details about the service, dates, and how to participate.
+    </div>
+  </details>
+</div>
+
+{# Directory Entry Prompt #}
+<div class="ndx-prompt-card">
+  <div class="ndx-prompt-card__header">
+    <h3 class="govuk-heading-s govuk-!-margin-bottom-0">Directory Entry: Community Centre</h3>
+    <span class="govuk-tag govuk-tag--blue">Beginner</span>
+  </div>
+  <div class="ndx-prompt-card__body">
+    <p class="govuk-body govuk-!-font-weight-bold">Prompt:</p>
+    <p class="ndx-prompt-text">
+      Write a directory entry for Riverside Community Centre. Include opening hours,
+      facilities available, booking information, and accessibility features.
+    </p>
+  </div>
+  <details class="govuk-details govuk-!-margin-bottom-0">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">What to expect</span>
+    </summary>
+    <div class="govuk-details__text">
+      A concise directory listing with contact details, opening times, a description
+      of facilities, and information about accessibility and how to book.
+    </div>
+  </details>
+</div>
+
+{# Consultation Response Prompt #}
+<div class="ndx-prompt-card">
+  <div class="ndx-prompt-card__header">
+    <h3 class="govuk-heading-s govuk-!-margin-bottom-0">Consultation: Public Feedback Summary</h3>
+    <span class="govuk-tag govuk-tag--green">Intermediate</span>
+  </div>
+  <div class="ndx-prompt-card__body">
+    <p class="govuk-body govuk-!-font-weight-bold">Prompt:</p>
+    <p class="ndx-prompt-text">
+      Write an introduction for a consultation page about proposed changes to local
+      bus routes. Explain why the council is consulting, how residents can have
+      their say, and the deadline for responses.
+    </p>
+  </div>
+  <details class="govuk-details govuk-!-margin-bottom-0">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">What to expect</span>
+    </summary>
+    <div class="govuk-details__text">
+      An engaging introduction that explains the context, invites participation,
+      and clearly states how to respond and by when.
+    </div>
+  </details>
+</div>
+
+{# Tips Section #}
+<h2 class="govuk-heading-l">Tips for better results</h2>
+
+<h3 class="govuk-heading-m">Be specific in your prompts</h3>
+
+<p class="govuk-body">
+  The more detail you provide, the better the result. Compare these prompts:
+</p>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-example-card ndx-example-card--bad">
+      <p class="govuk-body govuk-!-font-weight-bold">Less effective:</p>
+      <p class="govuk-body">"Write about bins"</p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-example-card ndx-example-card--good">
+      <p class="govuk-body govuk-!-font-weight-bold">More effective:</p>
+      <p class="govuk-body">"Write a guide explaining what can go in the blue recycling bin, including common mistakes residents make"</p>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Include context and audience</h3>
+
+<p class="govuk-body">
+  Tell the AI who the content is for:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>"Write for residents who have never used this service before"</li>
+  <li>"Write for business owners applying for a licence"</li>
+  <li>"Write in a friendly, helpful tone suitable for elderly residents"</li>
+</ul>
+
+<h3 class="govuk-heading-m">Review and edit AI output</h3>
+
+<div class="govuk-warning-text">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Important</span>
+    Always review AI-generated content before publishing. Check for:
+  </strong>
+</div>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Accuracy</strong> - Are the facts correct? Are dates and prices right?</li>
+  <li><strong>Tone</strong> - Does it match your council's voice?</li>
+  <li><strong>Completeness</strong> - Is anything missing?</li>
+  <li><strong>Links</strong> - The AI cannot create links, so you'll need to add these</li>
+</ul>
+
+<h3 class="govuk-heading-m">Accessibility considerations</h3>
+
+<p class="govuk-body">
+  The AI aims to write in plain English, but always check that:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>Sentences are short (under 25 words is ideal)</li>
+  <li>Technical terms are explained</li>
+  <li>Instructions are clear and actionable</li>
+  <li>Content can be understood by someone with a reading age of 9</li>
+</ul>
+
+{# Common Mistakes #}
+<h3 class="govuk-heading-m">Common mistakes to avoid</h3>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-mistake-card">
+      <h4 class="govuk-heading-s">Publishing without review</h4>
+      <p class="govuk-body-s">
+        The AI can make mistakes or include outdated information.
+        Always check facts before publishing.
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-mistake-card">
+      <h4 class="govuk-heading-s">Vague prompts</h4>
+      <p class="govuk-body-s">
+        One-word prompts produce generic content.
+        Be specific about what you need.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-grid-row govuk-!-margin-top-4">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-mistake-card">
+      <h4 class="govuk-heading-s">Including sensitive data</h4>
+      <p class="govuk-body-s">
+        Never include personal data, case numbers, or sensitive information in prompts.
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-mistake-card">
+      <h4 class="govuk-heading-s">Expecting perfect output</h4>
+      <p class="govuk-body-s">
+        The AI provides a starting point, not finished content.
+        Plan time for editing and refinement.
+      </p>
+    </div>
+  </div>
+</div>
+
+{# Common Use Cases #}
+<h2 class="govuk-heading-l">Common use cases</h2>
+
+<p class="govuk-body">
+  Here are ways council content teams are using AI features:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Use case</th>
+      <th scope="col" class="govuk-table__header">Feature</th>
+      <th scope="col" class="govuk-table__header">Time saved</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Drafting new service pages</td>
+      <td class="govuk-table__cell">AI Write</td>
+      <td class="govuk-table__cell">30-60 minutes per page</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Simplifying legal or technical content</td>
+      <td class="govuk-table__cell">Simplify</td>
+      <td class="govuk-table__cell">15-30 minutes per section</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Writing news announcements</td>
+      <td class="govuk-table__cell">AI Write</td>
+      <td class="govuk-table__cell">20-40 minutes per article</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Creating how-to guides</td>
+      <td class="govuk-table__cell">AI Write</td>
+      <td class="govuk-table__cell">45-90 minutes per guide</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Making content accessible</td>
+      <td class="govuk-table__cell">Simplify</td>
+      <td class="govuk-table__cell">10-20 minutes per page</td>
+    </tr>
+  </tbody>
+</table>
+
+{# Back to walkthrough #}
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/localgov-drupal/" class="govuk-link">
+    <svg class="ndx-back-icon" xmlns="http://www.w3.org/2000/svg" height="13" width="17" viewBox="0 0 17 13" aria-hidden="true">
+      <path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"></path>
+    </svg>
+    Back to LocalGov Drupal walkthrough
+  </a>
+</div>
+
+<style>
+  .ndx-guide-summary {
+    border-left-color: #1d70b8;
+  }
+
+  .ndx-guide-summary h2 {
+    margin-top: 0;
+  }
+
+  .ndx-feature-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    margin-bottom: 20px;
+    min-height: 160px;
+  }
+
+  .ndx-feature-card h3 {
+    margin-top: 0;
+  }
+
+  .ndx-screenshot-placeholder {
+    padding: 40px 20px;
+    background-color: #f3f2f1;
+    border: 2px dashed #b1b4b6;
+    text-align: center;
+    color: #505a5f;
+    margin: 20px 0;
+    font-style: italic;
+  }
+
+  .ndx-prompt-card {
+    margin-bottom: 20px;
+    border: 1px solid #b1b4b6;
+    background-color: #ffffff;
+  }
+
+  .ndx-prompt-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #f3f2f1;
+    border-bottom: 1px solid #b1b4b6;
+  }
+
+  .ndx-prompt-card__body {
+    padding: 20px;
+  }
+
+  .ndx-prompt-text {
+    background-color: #f8f8f8;
+    padding: 15px;
+    border-left: 4px solid #1d70b8;
+    font-family: monospace;
+    font-size: 14px;
+    margin-bottom: 0;
+  }
+
+  .ndx-prompt-card .govuk-details {
+    border-top: 1px solid #b1b4b6;
+    padding: 15px 20px;
+    margin-top: 0;
+    background-color: #fafafa;
+  }
+
+  .ndx-example-card {
+    padding: 15px;
+    border: 2px solid;
+    margin-bottom: 15px;
+  }
+
+  .ndx-example-card--bad {
+    border-color: #d4351c;
+    background-color: #fef7f6;
+  }
+
+  .ndx-example-card--good {
+    border-color: #00703c;
+    background-color: #f0f9f5;
+  }
+
+  .ndx-mistake-card {
+    padding: 15px;
+    background-color: #fff7f0;
+    border-left: 4px solid #f47738;
+    margin-bottom: 15px;
+  }
+
+  .ndx-mistake-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-mistake-card p {
+    margin-bottom: 0;
+  }
+
+  .ndx-back-icon {
+    fill: currentColor;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-feature-card {
+      min-height: auto;
+    }
+
+    .ndx-prompt-card__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+</style>
