@@ -2,6 +2,147 @@
 # This file is validated against schemas/scenario.schema.json during build
 
 scenarios:
+  - id: "localgov-drupal"
+    name: "LocalGov Drupal with AI"
+    headline: "AI-enhanced content management system for UK councils"
+    bestFor: "Councils exploring AI integration with LocalGov Drupal CMS"
+    description: "Deploy a fully functional LocalGov Drupal CMS with 7 AI-powered features: content editing assistance, readability simplification, auto alt-text generation, text-to-speech in 7 languages, content translation to 75+ languages, PDF-to-web conversion, and dynamic council identity generation."
+    difficulty: "beginner"
+    timeEstimate: "15 minutes"
+    primaryPersona: "service-manager"
+    gcloud_search_term: "LocalGov Drupal AI CMS local government"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "council-chatbot"
+      - "text-to-speech"
+      - "foi-redaction"
+    securitySummary: "Innovation Sandbox isolated - safe to experiment with full data protection"
+    skillsLearned:
+      - "Amazon Bedrock"
+      - "Amazon Polly"
+      - "Amazon Translate"
+      - "Amazon Textract"
+      - "Drupal CMS"
+      - "CloudFormation"
+    isMostPopular: false
+    featured: true
+    awsServices:
+      - "Amazon Bedrock"
+      - "Amazon Polly"
+      - "Amazon Translate"
+      - "Amazon Textract"
+      - "Amazon Rekognition"
+      - "AWS Fargate"
+      - "Amazon Aurora"
+      - "Amazon EFS"
+    tags:
+      - "AI"
+      - "CMS"
+      - "Content Management"
+      - "Accessibility"
+      - "LocalGov Drupal"
+      - "UK Councils"
+    businessOutcomes:
+      - "Experience AI-powered content editing in a familiar CMS"
+      - "Improve accessibility with auto alt-text and text-to-speech"
+      - "Simplify content to plain English with one click"
+      - "Generate unique council identities for engaging demos"
+    prerequisites:
+      - "AWS account (sandbox provided)"
+      - "No technical expertise required"
+    url: "/scenarios/localgov-drupal/"
+    order: 1
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/localgov-drupal/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/localgov-drupal/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-localgov-drupal"
+      parameters:
+        - name: "DeploymentMode"
+          value: "production"
+          description: "Deployment mode (development for debugging, production for demos)"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "localgov-drupal"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+      deploymentTime: "10-15 minutes"
+      deploymentPhases:
+        - "Creating VPC and networking (~30 seconds)"
+        - "Creating Aurora Serverless database (~180 seconds)"
+        - "Creating EFS file system (~60 seconds)"
+        - "Creating Fargate service (~120 seconds)"
+        - "Initializing Drupal (~300 seconds)"
+        - "Seeding sample content (~60 seconds)"
+      outputs:
+        - name: "DrupalUrl"
+          description: "URL to access LocalGov Drupal"
+        - name: "AdminUsername"
+          description: "Drupal admin username"
+        - name: "AdminPassword"
+          description: "Drupal admin password"
+        - name: "CloudWatchLogsUrl"
+          description: "CloudWatch Logs for monitoring"
+    video:
+      title: "LocalGov Drupal AI Demo Walkthrough"
+      duration: "12:00"
+      recordedDate: "2025-01-15"
+    screenshots:
+      steps: []
+    success_metrics:
+      service_area: "Content Management & Accessibility"
+      primary_metric: "Content creation and accessibility improvement"
+      baseline:
+        description: "Manual content editing averages 45 minutes per page, 30% accessibility compliance"
+        value: 45
+        unit: "minutes per content page"
+        source: "LocalGov Drupal Community Survey 2024"
+      projection:
+        description: "AI assistance reduces content creation time by 50% while achieving 100% accessibility"
+        value: 22
+        reduction_percent: 50
+      roi:
+        annual_savings: 40000
+        calculation: "800 pages/year × 23 min saved × £35/hour = £40,000 annual savings"
+        payback_months: 2
+        disclaimer: "Illustrative projection based on typical UK council content operations. Actual savings depend on content volume, complexity, and staff costs."
+      committee_language: "AI-powered CMS saves £40,000 annually while reducing content creation time by 50% and achieving 100% accessibility compliance"
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "US (us-east-1 N. Virginia region)"
+      encryption: "AES-256 at rest, TLS 1.3 in transit"
+      data_handling: "Sample data only in sandbox; AWS shared responsibility model"
+    tco_projection:
+      year_1:
+        aws_services: 3600
+        integration: 5000
+        training: 2000
+        support: 1200
+        total: 11800
+      year_2:
+        aws_services: 3900
+        integration: 0
+        training: 500
+        support: 1200
+        total: 5600
+      year_3:
+        aws_services: 4200
+        integration: 0
+        training: 500
+        support: 1200
+        total: 5900
+
   - id: "council-chatbot"
     name: "Council Chatbot"
     headline: "AI-powered resident Q&A assistant that answers queries 24/7"
@@ -43,7 +184,7 @@ scenarios:
       - "AWS account (sandbox provided)"
       - "No technical expertise required"
     url: "/scenarios/council-chatbot/"
-    order: 1
+    order: 2
     featured: true
     status: "active"
     deployment:
@@ -188,7 +329,7 @@ scenarios:
       - "AWS account (sandbox provided)"
       - "Sample planning documents provided"
     url: "/scenarios/planning-ai/"
-    order: 2
+    order: 3
     featured: true
     status: "active"
     deployment:
@@ -331,7 +472,7 @@ scenarios:
       - "AWS account (sandbox provided)"
       - "Sample documents provided"
     url: "/scenarios/foi-redaction/"
-    order: 3
+    order: 4
     featured: false
     status: "active"
     deployment:
@@ -473,7 +614,7 @@ scenarios:
       - "AWS account (sandbox provided)"
       - "Simulated sensor data provided"
     url: "/scenarios/smart-car-park/"
-    order: 4
+    order: 5
     featured: false
     status: "active"
     deployment:
@@ -619,7 +760,7 @@ scenarios:
       - "AWS account (sandbox provided)"
       - "Sample text content provided"
     url: "/scenarios/text-to-speech/"
-    order: 5
+    order: 6
     featured: true
     status: "active"
     deployment:
@@ -763,7 +904,7 @@ scenarios:
       - "AWS account (sandbox provided)"
       - "Sample council data provided"
     url: "/scenarios/quicksight-dashboard/"
-    order: 6
+    order: 7
     featured: false
     status: "active"
     deployment:
