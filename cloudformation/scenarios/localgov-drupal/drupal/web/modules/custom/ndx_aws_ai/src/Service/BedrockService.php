@@ -313,4 +313,27 @@ class BedrockService implements BedrockServiceInterface {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function isAvailable(): bool {
+    try {
+      // Check if we have a valid client configured.
+      // We don't make an actual API call to avoid unnecessary costs,
+      // but we verify the client is properly configured.
+      $config = $this->client->getConfig();
+
+      // Verify we have a region configured.
+      if (empty($config['region'])) {
+        return FALSE;
+      }
+
+      // The client exists and is configured - service is available.
+      return TRUE;
+    }
+    catch (\Exception $e) {
+      return FALSE;
+    }
+  }
+
 }

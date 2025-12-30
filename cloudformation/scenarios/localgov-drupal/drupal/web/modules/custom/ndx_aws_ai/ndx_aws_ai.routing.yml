@@ -13,3 +13,14 @@ ndx_aws_ai.connection_test:
     _title: 'Test AWS Connection'
   requirements:
     _permission: 'administer ndx aws ai'
+
+# Story 3.4: AI service status endpoint for CKEditor toolbar.
+ndx_aws_ai.status:
+  path: '/ndx-aws-ai/status'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\AiStatusController::status'
+    _title: 'AI Service Status'
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    no_cache: TRUE

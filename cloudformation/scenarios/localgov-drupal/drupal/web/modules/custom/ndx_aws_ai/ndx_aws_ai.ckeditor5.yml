@@ -1,0 +1,19 @@
+# CKEditor 5 AI Toolbar plugin configuration.
+#
+# Story 3.4: CKEditor AI Toolbar Plugin
+#
+# This file registers the AI toolbar plugin with Drupal's CKEditor 5 module.
+
+ndx_aws_ai_toolbar:
+  ckeditor5:
+    plugins:
+      - aiToolbar.AiToolbar
+  drupal:
+    label: "AI Toolbar"
+    library: ndx_aws_ai/ckeditor5.aiToolbar
+    toolbar_items:
+      aiToolbar:
+        label: "AI Assistant"
+    elements: false
+    admin_library: ndx_aws_ai/ckeditor5.aiToolbar.admin
+    conditions: []

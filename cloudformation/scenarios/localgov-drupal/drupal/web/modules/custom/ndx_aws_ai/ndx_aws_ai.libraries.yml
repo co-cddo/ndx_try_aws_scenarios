@@ -1,6 +1,7 @@
 # Libraries for NDX AWS AI module.
 #
 # Story 3.3: AI Component Design System
+# Story 3.4: CKEditor AI Toolbar Plugin
 
 ai_components:
   version: VERSION
@@ -13,3 +14,23 @@ ai_components:
     - core/drupal
     - core/once
     - core/drupal.announce
+
+# CKEditor 5 AI Toolbar plugin library.
+# Story 3.4: CKEditor AI Toolbar Plugin
+ckeditor5.aiToolbar:
+  version: VERSION
+  js:
+    js/ckeditor5_plugins/aiToolbar/src/index.js: { preprocess: false, minified: false }
+  css:
+    component:
+      css/ckeditor5-ai-toolbar.css: {}
+  dependencies:
+    - core/ckeditor5
+    - ndx_aws_ai/ai_components
+
+# Admin library for CKEditor 5 AI Toolbar configuration.
+ckeditor5.aiToolbar.admin:
+  version: VERSION
+  css:
+    theme:
+      css/ckeditor5-ai-toolbar-admin.css: {}

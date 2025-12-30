@@ -1,0 +1,10 @@
+# CKEditor 5 AI Toolbar plugin schema.
+#
+# Story 3.4: CKEditor AI Toolbar Plugin
+#
+# This file defines the configuration schema for the AI toolbar CKEditor plugin.
+
+ckeditor5.plugin.ndx_aws_ai_toolbar:
+  type: mapping
+  label: 'AI Toolbar'
+  mapping: {}

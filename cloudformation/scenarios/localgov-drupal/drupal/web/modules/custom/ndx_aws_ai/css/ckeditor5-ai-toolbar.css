@@ -1,0 +1,188 @@
+/**
+ * @file
+ * CKEditor 5 AI Toolbar plugin styles.
+ *
+ * Story 3.4: CKEditor AI Toolbar Plugin
+ *
+ * Styles for the AI toolbar dropdown in CKEditor 5,
+ * following GOV.UK Design System patterns.
+ */
+
+/* GOV.UK Design System colour variables */
+:root {
+  --ai-color-blue: #1d70b8;
+  --ai-color-black: #0b0c0c;
+  --ai-color-white: #ffffff;
+  --ai-color-grey: #505a5f;
+  --ai-color-light-grey: #f3f2f1;
+  --ai-color-yellow: #ffdd00;
+  --ai-color-red: #d4351c;
+  --ai-color-green: #00703c;
+}
+
+/* AI Toolbar Dropdown Container */
+.ck.ck-dropdown.ai-toolbar-dropdown-container {
+  position: relative;
+}
+
+/* AI Toolbar Dropdown Button */
+.ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button {
+  color: var(--ai-color-blue);
+  border: 2px solid var(--ai-color-blue);
+  border-radius: 0;
+  background: var(--ai-color-white);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 12px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+/* Button hover state */
+.ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button:hover {
+  background-color: var(--ai-color-light-grey);
+  border-color: var(--ai-color-blue);
+}
+
+/* Button focus state - GOV.UK yellow focus ring */
+.ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button:focus,
+.ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button:focus-visible {
+  outline: 3px solid var(--ai-color-yellow);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* Button active state */
+.ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button:active {
+  background-color: var(--ai-color-light-grey);
+  position: relative;
+  top: 2px;
+}
+
+/* Button disabled state */
+.ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button:disabled,
+.ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button.ck-disabled {
+  color: var(--ai-color-grey);
+  border-color: var(--ai-color-grey);
+  background-color: var(--ai-color-light-grey);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* AI unavailable indicator */
+.ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button.ai-unavailable {
+  color: var(--ai-color-grey);
+  border-color: var(--ai-color-grey);
+}
+
+/* Button icon */
+.ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button .ck-icon {
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+}
+
+/* Dropdown panel */
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ck-dropdown__panel {
+  border: 2px solid var(--ai-color-black);
+  border-radius: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: var(--ai-color-white);
+  min-width: 200px;
+}
+
+/* Dropdown list */
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ck-list {
+  padding: 0;
+  margin: 0;
+}
+
+/* Dropdown list items */
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ck-list__item {
+  padding: 0;
+  margin: 0;
+}
+
+/* Dropdown buttons (menu items) */
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ck-list__item .ck-button {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ai-color-black);
+  font-size: 16px;
+  line-height: 1.4;
+  text-align: left;
+  min-height: 44px;
+  justify-content: flex-start;
+}
+
+/* Menu item hover */
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ck-list__item .ck-button:hover {
+  background-color: var(--ai-color-light-grey);
+  color: var(--ai-color-black);
+}
+
+/* Menu item focus */
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ck-list__item .ck-button:focus,
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ck-list__item .ck-button:focus-visible {
+  outline: 3px solid var(--ai-color-yellow);
+  outline-offset: -3px;
+  background-color: var(--ai-color-light-grey);
+}
+
+/* Menu item disabled */
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ck-list__item .ck-button:disabled,
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ck-list__item .ck-button.ck-disabled {
+  color: var(--ai-color-grey);
+  cursor: not-allowed;
+}
+
+/* AI toolbar item - write */
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ai-toolbar-item--write::before {
+  content: '✨';
+  margin-right: 8px;
+}
+
+/* AI toolbar item - simplify */
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ai-toolbar-item--simplify::before {
+  content: '📝';
+  margin-right: 8px;
+}
+
+/* Separator between items */
+.ck.ck-dropdown.ai-toolbar-dropdown-container .ck-list__separator {
+  height: 1px;
+  background-color: var(--ai-color-light-grey);
+  margin: 4px 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button {
+    border-width: 3px;
+  }
+
+  .ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button:focus,
+  .ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button:focus-visible {
+    outline-width: 4px;
+  }
+
+  .ck.ck-dropdown.ai-toolbar-dropdown-container .ck-dropdown__panel {
+    border-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ck.ck-dropdown.ai-toolbar-dropdown-container > .ck-button {
+    transition: none;
+  }
+}
+
+/* Print styles - hide AI toolbar */
+@media print {
+  .ck.ck-dropdown.ai-toolbar-dropdown-container {
+    display: none !important;
+  }
+}

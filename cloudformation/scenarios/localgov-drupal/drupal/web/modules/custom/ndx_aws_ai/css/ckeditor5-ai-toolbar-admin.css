@@ -1,0 +1,27 @@
+/**
+ * @file
+ * CKEditor 5 AI Toolbar admin styles.
+ *
+ * Story 3.4: CKEditor AI Toolbar Plugin
+ *
+ * Styles for the AI toolbar button in the CKEditor 5 text format configuration.
+ */
+
+/* AI toolbar item in CKEditor 5 toolbar configuration */
+.ckeditor5-toolbar-item-aiToolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* AI toolbar item icon in configuration */
+.ckeditor5-toolbar-item-aiToolbar::before {
+  content: '✨';
+  font-size: 14px;
+}
+
+/* AI toolbar item label in configuration */
+.ckeditor5-toolbar-item-aiToolbar .ckeditor5-toolbar-item__label {
+  font-weight: 600;
+  color: #1d70b8;
+}

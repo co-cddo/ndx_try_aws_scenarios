@@ -80,4 +80,17 @@ interface BedrockServiceInterface {
    */
   public function describeImage(string $imageData, string $mimeType): string;
 
+  /**
+   * Check if the Bedrock service is available.
+   *
+   * Story 3.4: CKEditor AI Toolbar Plugin
+   *
+   * Performs a lightweight availability check to determine if the
+   * Bedrock service is configured and accessible.
+   *
+   * @return bool
+   *   TRUE if the service is available, FALSE otherwise.
+   */
+  public function isAvailable(): bool;
+
 }
