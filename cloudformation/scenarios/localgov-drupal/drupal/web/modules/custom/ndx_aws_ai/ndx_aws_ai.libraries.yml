@@ -108,3 +108,18 @@ content-translation:
     - core/drupalSettings
     - core/once
     - core/drupal.announce
+
+# PDF-to-Web Conversion library.
+# Story 4.8: PDF-to-Web Conversion
+pdf-conversion:
+  version: VERSION
+  js:
+    js/pdf-conversion.js: {}
+  css:
+    component:
+      css/pdf-conversion.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - core/drupal.announce

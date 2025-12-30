@@ -149,3 +149,13 @@ services:
     class: Drupal\ndx_aws_ai\Service\ContentExtractorService
     arguments:
       - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.8: PDF Conversion Service - PDF-to-Web content conversion
+  ndx_aws_ai.pdf_conversion:
+    class: Drupal\ndx_aws_ai\Service\PdfConversionService
+    arguments:
+      - '@ndx_aws_ai.textract'
+      - '@ndx_aws_ai.bedrock'
+      - '@entity_type.manager'
+      - '@state'
+      - '@logger.channel.ndx_aws_ai'

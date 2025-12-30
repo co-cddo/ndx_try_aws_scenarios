@@ -1,0 +1,232 @@
+/**
+ * @file
+ * PDF-to-Web conversion styles.
+ *
+ * GOV.UK Design System compliant styling for PDF conversion form.
+ *
+ * Story 4.8: PDF-to-Web Conversion
+ */
+
+/* Form container */
+.ndx-pdf-conversion-form {
+  max-width: 40rem;
+}
+
+.ndx-pdf-conversion-form .form-description {
+  margin-bottom: 1.5rem;
+}
+
+.ndx-pdf-conversion-form .form-description p {
+  font-size: 1.1875rem;
+  line-height: 1.31;
+  color: #0b0c0c;
+  margin: 0;
+}
+
+/* Progress container */
+.ndx-pdf-progress {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #f3f2f1;
+  border-left: 5px solid #1d70b8;
+}
+
+.ndx-pdf-progress .progress-status {
+  margin-bottom: 1rem;
+}
+
+.ndx-pdf-progress .progress-step {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0b0c0c;
+}
+
+/* Progress bar */
+.progress-bar-wrapper {
+  margin-top: 0.5rem;
+}
+
+.progress-bar {
+  height: 0.5rem;
+  background: #dee0e2;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #1d70b8;
+  transition: width 0.3s ease;
+  width: 0;
+}
+
+/* Result container */
+.ndx-pdf-result {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #f3f2f1;
+  border-left: 5px solid #00703c;
+}
+
+.ndx-pdf-result h3 {
+  font-size: 1.1875rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: #0b0c0c;
+}
+
+/* Preview content */
+.preview-content {
+  max-height: 25rem;
+  overflow-y: auto;
+  background: #ffffff;
+  padding: 1rem;
+  border: 1px solid #b1b4b6;
+  margin-bottom: 1rem;
+}
+
+.preview-content .preview-html {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.preview-content .preview-html h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem 0;
+}
+
+.preview-content .preview-html h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.preview-content .preview-html p {
+  margin: 0.5rem 0;
+}
+
+.preview-content .preview-html table {
+  margin: 1rem 0;
+  font-size: 0.875rem;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.preview-content .preview-html th,
+.preview-content .preview-html td {
+  padding: 0.5rem;
+  border: 1px solid #b1b4b6;
+  text-align: left;
+}
+
+.preview-content .preview-html th {
+  background: #f3f2f1;
+  font-weight: 700;
+}
+
+/* Stats */
+.result-stats {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #b1b4b6;
+}
+
+.stats-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.stats-list li {
+  font-size: 0.875rem;
+  color: #505a5f;
+  background: #ffffff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+}
+
+/* Error state */
+.ndx-pdf-conversion-form .messages--error {
+  margin: 1.5rem 0;
+}
+
+/* Actions */
+.ndx-pdf-conversion-form .form-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+/* Hide class */
+.js-hide {
+  display: none !important;
+}
+
+/* File upload styling */
+.ndx-pdf-conversion-form .form-managed-file {
+  margin-bottom: 1.5rem;
+}
+
+.ndx-pdf-conversion-form .file-upload-js-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .progress-bar-fill {
+    transition: none;
+  }
+}
+
+/* Focus states */
+.ndx-pdf-conversion-form button:focus,
+.ndx-pdf-conversion-form input:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+}
+
+/* High contrast mode */
+@media (forced-colors: active) {
+  .progress-bar {
+    border: 1px solid currentColor;
+  }
+
+  .progress-bar-fill {
+    background: Highlight;
+  }
+
+  .ndx-pdf-progress,
+  .ndx-pdf-result {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Responsive */
+@media screen and (max-width: 640px) {
+  .stats-list {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .ndx-pdf-conversion-form .form-actions {
+    flex-direction: column;
+  }
+
+  .ndx-pdf-conversion-form .form-actions button {
+    width: 100%;
+  }
+}
+
+/* Print */
+@media print {
+  .ndx-pdf-progress,
+  .ndx-pdf-conversion-form .form-actions {
+    display: none;
+  }
+}

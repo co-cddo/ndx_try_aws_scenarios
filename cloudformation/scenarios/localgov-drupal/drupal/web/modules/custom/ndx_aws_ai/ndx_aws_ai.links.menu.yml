@@ -4,3 +4,11 @@ ndx_aws_ai.settings:
   route_name: ndx_aws_ai.settings
   parent: system.admin_config_system
   weight: 50
+
+# Story 4.8: PDF-to-Web Conversion
+ndx_aws_ai.pdf.form:
+  title: 'Convert PDF to Web Content'
+  description: 'Upload PDF documents and convert them to accessible web pages.'
+  route_name: ndx_aws_ai.pdf.form
+  parent: system.admin_content
+  weight: 10

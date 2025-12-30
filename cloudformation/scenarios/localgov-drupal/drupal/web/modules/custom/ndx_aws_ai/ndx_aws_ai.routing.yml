@@ -89,3 +89,55 @@ ndx_aws_ai.translation.languages:
   methods: [GET]
   requirements:
     _permission: 'access content'
+
+# Story 4.8: PDF-to-Web Conversion endpoints.
+ndx_aws_ai.pdf.form:
+  path: '/admin/content/pdf-to-web'
+  defaults:
+    _form: '\Drupal\ndx_aws_ai\Form\PdfConversionForm'
+    _title: 'Convert PDF to Web Content'
+  requirements:
+    _permission: 'administer content'
+  options:
+    _admin_route: TRUE
+
+ndx_aws_ai.pdf.convert:
+  path: '/api/ndx-ai/pdf/convert'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\PdfConversionController::convert'
+    _title: 'Convert PDF'
+  methods: [POST]
+  requirements:
+    _permission: 'administer content'
+  options:
+    no_cache: TRUE
+
+ndx_aws_ai.pdf.status:
+  path: '/api/ndx-ai/pdf/status/{jobId}'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\PdfConversionController::status'
+    _title: 'Conversion Status'
+  methods: [GET]
+  requirements:
+    _permission: 'administer content'
+    jobId: '[a-zA-Z0-9_-]+'
+
+ndx_aws_ai.pdf.create_node:
+  path: '/api/ndx-ai/pdf/create-node'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\PdfConversionController::createNode'
+    _title: 'Create Node from PDF'
+  methods: [POST]
+  requirements:
+    _permission: 'administer content'
+  options:
+    no_cache: TRUE
+
+ndx_aws_ai.pdf.availability:
+  path: '/api/ndx-ai/pdf/availability'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\PdfConversionController::checkAvailability'
+    _title: 'PDF Conversion Availability'
+  methods: [GET]
+  requirements:
+    _permission: 'administer content'
