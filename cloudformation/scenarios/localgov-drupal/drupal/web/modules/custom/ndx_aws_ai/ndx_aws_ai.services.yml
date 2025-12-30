@@ -100,3 +100,17 @@ services:
       - '@ndx_aws_ai.client_factory'
       - '@ndx_aws_ai.error_handler'
       - '@ndx_aws_ai.vision_rate_limiter'
+
+  # Story 4.4: Textract Rate Limiter - implements exponential backoff for Textract API calls
+  ndx_aws_ai.textract_rate_limiter:
+    class: Drupal\ndx_aws_ai\RateLimiter\TextractRateLimiter
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.4: Textract Service - document text extraction with tables and forms
+  ndx_aws_ai.textract:
+    class: Drupal\ndx_aws_ai\Service\TextractService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@ndx_aws_ai.textract_rate_limiter'
