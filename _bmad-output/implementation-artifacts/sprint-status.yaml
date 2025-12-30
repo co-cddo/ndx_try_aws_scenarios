@@ -96,7 +96,7 @@ development_status:
   epic-4-retrospective: optional
 
   # Epic 5: Dynamic Council Generation
-  epic-5: in-progress
+  epic-5: done
   5-1-ndx-council-generator-module-foundation: done
   5-2-council-identity-generator: done
   5-3-content-generation-templates: done
