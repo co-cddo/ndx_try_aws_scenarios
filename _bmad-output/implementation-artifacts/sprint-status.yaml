@@ -104,7 +104,7 @@ development_status:
   5-5-image-specification-collector: done
   5-6-batch-image-generation: done
   5-7-drush-generation-command: done
-  5-8-dynamic-council-mini-guide: backlog
+  5-8-dynamic-council-mini-guide: done
   epic-5-retrospective: optional
 
   # Epic 6: Polish, Integration & Enhanced Walkthrough

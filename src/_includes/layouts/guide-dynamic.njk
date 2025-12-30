@@ -1,0 +1,147 @@
+---
+layout: page
+---
+{#
+  Dynamic Guide Layout (Story 5.8)
+
+  Layout for documentation guides with configurable sidebar navigation.
+  Unlike guide.njk, this layout accepts navigation items from front matter.
+
+  Expects front matter:
+    title: string
+    description: string
+    scenarioId: string
+    timeEstimate: string (optional)
+    guideNav: array of {title, href} objects
+#}
+
+{% set scenarioId = scenarioId if scenarioId is defined else "localgov-drupal" %}
+
+{# Phase Navigator - Story 12.1 #}
+{% include "components/phase-navigator.njk" %}
+
+{# Breadcrumb navigation - Story 14.6 #}
+{% set breadcrumbType = 'guide' %}
+{% include "components/breadcrumb.njk" %}
+
+{# Guide header with time estimate #}
+{% if timeEstimate %}
+<div class="ndx-guide-header govuk-!-margin-bottom-6">
+  <p class="govuk-body-s govuk-!-margin-bottom-0">
+    <span class="govuk-tag govuk-tag--blue">Guide</span>
+    <span class="govuk-!-margin-left-2">{{ timeEstimate }} to complete</span>
+  </p>
+</div>
+{% endif %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ content | safe }}
+  </div>
+
+  <div class="govuk-grid-column-one-third">
+    {# Guide sidebar with dynamic navigation #}
+    <div class="ndx-guide-sidebar">
+      <h2 class="govuk-heading-s">On this page</h2>
+      <nav aria-label="Guide sections">
+        <ul class="govuk-list ndx-guide-nav">
+          {% if guideNav %}
+            {% for item in guideNav %}
+            <li><a href="{{ item.href }}" class="govuk-link">{{ item.title }}</a></li>
+            {% endfor %}
+          {% else %}
+            <li><a href="#" class="govuk-link">Introduction</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+
+    {# Related guides #}
+    <div class="ndx-guide-related govuk-!-margin-top-6">
+      <h2 class="govuk-heading-s">Related guides</h2>
+      <ul class="govuk-list">
+        <li><a href="/walkthroughs/{{ scenarioId }}/ai-content-editing/" class="govuk-link">AI Content Editing Guide</a></li>
+        <li><a href="/walkthroughs/{{ scenarioId }}/" class="govuk-link">Main walkthrough</a></li>
+        <li><a href="/scenarios/{{ scenarioId }}/" class="govuk-link">Scenario overview</a></li>
+      </ul>
+    </div>
+
+    {# Help section #}
+    <div class="ndx-guide-help govuk-!-margin-top-6">
+      <h2 class="govuk-heading-s">Need help?</h2>
+      <p class="govuk-body-s">
+        If you're stuck, check the <a href="/scenarios/{{ scenarioId }}/#troubleshooting" class="govuk-link">troubleshooting section</a> or <a href="/contact/" class="govuk-link">contact us</a>.
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ndx-guide-header {
+    padding-bottom: 15px;
+    border-bottom: 1px solid #b1b4b6;
+  }
+
+  .ndx-guide-sidebar {
+    position: sticky;
+    top: 20px;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-guide-sidebar h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-guide-nav {
+    margin-bottom: 0;
+  }
+
+  .ndx-guide-nav li {
+    margin-bottom: 10px;
+  }
+
+  .ndx-guide-nav li:last-child {
+    margin-bottom: 0;
+  }
+
+  .ndx-guide-nav a {
+    font-size: 14px;
+  }
+
+  .ndx-guide-related,
+  .ndx-guide-help {
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #b1b4b6;
+  }
+
+  .ndx-guide-related h2,
+  .ndx-guide-help h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-guide-help p {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 768px) {
+    .ndx-guide-sidebar {
+      position: static;
+      margin-top: 30px;
+    }
+  }
+
+  @media print {
+    .ndx-guide-sidebar,
+    .ndx-guide-related,
+    .ndx-guide-help {
+      display: none;
+    }
+  }
+</style>
+
+<script src="/assets/js/phase-state.js" defer></script>
