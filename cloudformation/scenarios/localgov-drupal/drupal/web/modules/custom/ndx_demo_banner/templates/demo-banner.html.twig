@@ -1,0 +1,21 @@
+{#
+/**
+ * @file
+ * Template for the NDX Demo Banner.
+ *
+ * Displays a prominent warning banner indicating this is a demonstration site.
+ *
+ * Available variables:
+ * - council_name: The name of the fictional council.
+ *
+ * Story 1.10: DEMO Banner Module
+ */
+#}
+<div class="demo-banner" role="complementary" aria-label="{{ 'Demonstration site notice'|t }}">
+  <div class="demo-banner__container">
+    <span class="demo-banner__icon" aria-hidden="true">&#9888;</span>
+    <span class="demo-banner__text">
+      {{ 'DEMONSTRATION SITE'|t }} &mdash; {{ council_name }} {{ 'is a fictional council'|t }}
+    </span>
+  </div>
+</div>

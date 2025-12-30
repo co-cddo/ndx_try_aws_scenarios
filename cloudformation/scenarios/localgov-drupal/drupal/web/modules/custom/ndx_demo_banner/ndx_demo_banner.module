@@ -1,0 +1,62 @@
+<?php
+
+/**
+ * @file
+ * NDX Demo Banner module.
+ *
+ * Displays a prominent demonstration site banner on all pages to clearly
+ * indicate this is not a real council website.
+ *
+ * Story 1.10: DEMO Banner Module
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ndx_demo_banner_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.ndx_demo_banner':
+      return '<p>' . t('Displays a demonstration site banner on all pages.') . '</p>';
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * Attaches the demo banner library to all pages.
+ */
+function ndx_demo_banner_page_attachments(array &$attachments) {
+  $attachments['#attached']['library'][] = 'ndx_demo_banner/demo-banner';
+}
+
+/**
+ * Implements hook_page_top().
+ *
+ * Adds the demo banner markup at the top of every page.
+ */
+function ndx_demo_banner_page_top(array &$page_top) {
+  // Get council name from environment or use default
+  $council_name = getenv('COUNCIL_NAME') ?: 'Westbridge Council';
+
+  $page_top['ndx_demo_banner'] = [
+    '#theme' => 'ndx_demo_banner',
+    '#council_name' => $council_name,
+    '#weight' => -1000, // Ensure it's at the very top
+  ];
+}
+
+/**
+ * Implements hook_theme().
+ */
+function ndx_demo_banner_theme() {
+  return [
+    'ndx_demo_banner' => [
+      'variables' => [
+        'council_name' => 'Westbridge Council',
+      ],
+      'template' => 'demo-banner',
+    ],
+  ];
+}

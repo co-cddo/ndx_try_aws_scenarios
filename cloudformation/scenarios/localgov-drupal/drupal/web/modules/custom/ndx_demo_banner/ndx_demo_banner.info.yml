@@ -1,0 +1,9 @@
+name: 'NDX Demo Banner'
+type: module
+description: 'Displays a demonstration site banner on all pages to clearly indicate this is not a real council site.'
+core_version_requirement: ^10
+package: NDX
+dependencies:
+  - drupal:system
+
+# Ensure banner loads on all pages

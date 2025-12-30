@@ -51,7 +51,7 @@ development_status:
   1-7-cdk-compute-construct: done
   1-8-drupal-init-waitcondition: done
   1-9-static-sample-content: done
-  1-10-demo-banner-module: backlog
+  1-10-demo-banner-module: done
   1-11-first-login-welcome-experience: backlog
   1-12-cloudformation-outputs-quick-create: backlog
   epic-1-retrospective: optional

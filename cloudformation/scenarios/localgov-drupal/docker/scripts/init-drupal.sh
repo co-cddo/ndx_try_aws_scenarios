@@ -246,6 +246,23 @@ import_sample_content() {
     return 0
 }
 
+enable_custom_modules() {
+    log "Enabling custom modules..."
+    update_status "Modules" "Enabling custom modules..." 75
+
+    cd "$DRUPAL_ROOT"
+
+    # Enable the NDX Demo Banner module (Story 1.10)
+    if [ -d "$DRUPAL_ROOT/web/modules/custom/ndx_demo_banner" ]; then
+        log "Enabling ndx_demo_banner module..."
+        ./vendor/bin/drush pm:enable ndx_demo_banner --yes 2>&1 | while read line; do log "  $line"; done || true
+    else
+        log "ndx_demo_banner module not found, skipping"
+    fi
+
+    return 0
+}
+
 # ============================================================================
 # Main Initialization Flow
 # ============================================================================
@@ -300,6 +317,9 @@ main() {
 
         # Import sample content (Story 1.9)
         import_sample_content
+
+        # Enable custom modules (Story 1.10)
+        enable_custom_modules
     else
         log "Existing installation detected, skipping install"
         update_status "Reconnecting" "Connecting to existing database..." 50
