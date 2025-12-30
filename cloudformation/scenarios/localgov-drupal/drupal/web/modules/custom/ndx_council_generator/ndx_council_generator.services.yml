@@ -43,6 +43,14 @@ services:
       - '@entity_type.manager'
       - '@config.factory'
       - '@logger.channel.ndx_council_generator'
+      - '@ndx_council_generator.image_collector'
+
+  # Story 5.5: Image Specification Collector
+  ndx_council_generator.image_collector:
+    class: Drupal\ndx_council_generator\Service\ImageSpecificationCollector
+    arguments:
+      - '@state'
+      - '@logger.channel.ndx_council_generator'
 
   logger.channel.ndx_council_generator:
     parent: logger.channel_base

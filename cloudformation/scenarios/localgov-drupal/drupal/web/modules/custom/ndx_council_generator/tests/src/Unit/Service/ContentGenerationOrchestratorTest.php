@@ -12,6 +12,7 @@ use Drupal\ndx_aws_ai\Service\BedrockServiceInterface;
 use Drupal\ndx_council_generator\Service\ContentGenerationOrchestrator;
 use Drupal\ndx_council_generator\Service\ContentTemplateManagerInterface;
 use Drupal\ndx_council_generator\Service\GenerationStateManagerInterface;
+use Drupal\ndx_council_generator\Service\ImageSpecificationCollectorInterface;
 use Drupal\ndx_council_generator\Value\ContentSpecification;
 use Drupal\ndx_council_generator\Value\CouncilIdentity;
 use Drupal\ndx_council_generator\Value\GenerationState;
@@ -405,6 +406,122 @@ class ContentGenerationOrchestratorTest extends TestCase {
 
     $this->assertEquals(3, $summary->totalProcessed);
     $this->assertEquals(3, $summary->successCount);
+  }
+
+  /**
+   * Tests image collector integration.
+   *
+   * @covers ::generateSingle
+   */
+  public function testImageCollectorIntegration(): void {
+    $spec = ContentSpecification::fromArray([
+      'id' => 'service-with-image',
+      'content_type' => 'page',
+      'title_template' => 'Test',
+      'prompt' => 'Generate',
+      'drupal_fields' => ['title' => 'title'],
+      'images' => [
+        [
+          'type' => 'hero',
+          'prompt' => 'A scenic view',
+          'dimensions' => '1200x630',
+          'style' => 'photo',
+        ],
+      ],
+    ]);
+
+    $this->templateManager->method('getTemplatesInOrder')
+      ->willReturn([$spec]);
+
+    $this->bedrockService->method('generateContent')
+      ->willReturn('{"title": "Test"}');
+
+    $node = $this->createMock(NodeInterface::class);
+    $node->method('id')->willReturn(123);
+
+    $nodeStorage = $this->createMock(EntityStorageInterface::class);
+    $nodeStorage->method('create')->willReturn($node);
+
+    $this->entityTypeManager->method('getStorage')
+      ->willReturn($nodeStorage);
+
+    // Create image collector mock.
+    $imageCollector = $this->createMock(ImageSpecificationCollectorInterface::class);
+
+    // Expect collectFromContent to be called.
+    $imageCollector->expects($this->once())
+      ->method('collectFromContent')
+      ->with(
+        $this->isInstanceOf(ContentSpecification::class),
+        $this->equalTo(123),
+        $this->isInstanceOf(CouncilIdentity::class)
+      );
+
+    // Create orchestrator with image collector.
+    $orchestratorWithCollector = new ContentGenerationOrchestrator(
+      $this->templateManager,
+      $this->bedrockService,
+      $this->stateManager,
+      $this->entityTypeManager,
+      $this->configFactory,
+      $this->logger,
+      $imageCollector
+    );
+
+    $summary = $orchestratorWithCollector->generateAll($this->identity);
+
+    $this->assertEquals(1, $summary->successCount);
+  }
+
+  /**
+   * Tests that image collector is not called for specs without images.
+   *
+   * @covers ::generateSingle
+   */
+  public function testImageCollectorNotCalledForNoImages(): void {
+    $spec = ContentSpecification::fromArray([
+      'id' => 'no-images',
+      'content_type' => 'page',
+      'title_template' => 'Test',
+      'prompt' => 'Generate',
+      'drupal_fields' => ['title' => 'title'],
+      'images' => [],
+    ]);
+
+    $this->templateManager->method('getTemplatesInOrder')
+      ->willReturn([$spec]);
+
+    $this->bedrockService->method('generateContent')
+      ->willReturn('{"title": "Test"}');
+
+    $node = $this->createMock(NodeInterface::class);
+    $node->method('id')->willReturn(123);
+
+    $nodeStorage = $this->createMock(EntityStorageInterface::class);
+    $nodeStorage->method('create')->willReturn($node);
+
+    $this->entityTypeManager->method('getStorage')
+      ->willReturn($nodeStorage);
+
+    // Create image collector mock.
+    $imageCollector = $this->createMock(ImageSpecificationCollectorInterface::class);
+
+    // Expect collectFromContent to NOT be called.
+    $imageCollector->expects($this->never())
+      ->method('collectFromContent');
+
+    // Create orchestrator with image collector.
+    $orchestratorWithCollector = new ContentGenerationOrchestrator(
+      $this->templateManager,
+      $this->bedrockService,
+      $this->stateManager,
+      $this->entityTypeManager,
+      $this->configFactory,
+      $this->logger,
+      $imageCollector
+    );
+
+    $orchestratorWithCollector->generateAll($this->identity);
   }
 
 }

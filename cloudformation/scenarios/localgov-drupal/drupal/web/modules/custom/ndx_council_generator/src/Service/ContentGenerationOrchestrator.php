@@ -38,6 +38,11 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
   protected ?GenerationProgress $currentProgress = NULL;
 
   /**
+   * The council identity for current generation run.
+   */
+  protected ?CouncilIdentity $currentIdentity = NULL;
+
+  /**
    * Constructs a ContentGenerationOrchestrator.
    *
    * @param \Drupal\ndx_council_generator\Service\ContentTemplateManagerInterface $templateManager
@@ -52,6 +57,8 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
    *   The config factory.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger.
+   * @param \Drupal\ndx_council_generator\Service\ImageSpecificationCollectorInterface|null $imageCollector
+   *   The image specification collector.
    */
   public function __construct(
     protected ContentTemplateManagerInterface $templateManager,
@@ -60,6 +67,7 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
     protected EntityTypeManagerInterface $entityTypeManager,
     protected ConfigFactoryInterface $configFactory,
     protected LoggerInterface $logger,
+    protected ?ImageSpecificationCollectorInterface $imageCollector = NULL,
   ) {}
 
   /**
@@ -71,6 +79,7 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
     $startedAt = time();
     $results = [];
 
+    $this->currentIdentity = $identity;
     $this->currentProgress = GenerationProgress::content(0, $totalItems, 'Starting');
 
     // Update state to content generation.
@@ -122,6 +131,13 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
     ]);
 
     $this->currentProgress = NULL;
+    $this->currentIdentity = NULL;
+
+    // Log image collection statistics.
+    if ($this->imageCollector !== NULL) {
+      $stats = $this->imageCollector->getStatistics();
+      $this->logger->info('Image queue: @stats', ['@stats' => $stats->getSummaryText()]);
+    }
 
     return $summary;
   }
@@ -153,6 +169,9 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
         '@id' => $spec->id,
         '@nodeId' => $nodeId,
       ]);
+
+      // Collect image specifications for later batch generation.
+      $this->collectImagesFromContent($spec, $nodeId, $identity);
 
       return ContentGenerationResult::fromSuccess($spec->id, $nodeId, $processingTimeMs);
     }
@@ -477,6 +496,28 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
     $identity['_metadata'] = $identity['_metadata'] ?? [];
     $identity['_metadata']['failed_specs'] = $failedSpecIds;
     $this->stateManager->setIdentity($identity);
+  }
+
+  /**
+   * Collect image specifications from content for batch processing.
+   *
+   * @param \Drupal\ndx_council_generator\Value\ContentSpecification $spec
+   *   The content specification.
+   * @param int $nodeId
+   *   The created node ID.
+   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
+   *   The council identity.
+   */
+  protected function collectImagesFromContent(ContentSpecification $spec, int $nodeId, CouncilIdentity $identity): void {
+    if ($this->imageCollector === NULL) {
+      return;
+    }
+
+    if (!$spec->hasImages()) {
+      return;
+    }
+
+    $this->imageCollector->collectFromContent($spec, $nodeId, $identity);
   }
 
 }
