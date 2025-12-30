@@ -1,0 +1,10 @@
+name: 'NDX AWS AI'
+type: module
+description: 'Provides AWS SDK integration for AI-powered features including Bedrock, Polly, Translate, Rekognition, and Textract.'
+core_version_requirement: ^10
+package: NDX
+dependencies:
+  - drupal:system
+
+# Story 3.1: ndx_aws_ai Module Foundation
+# This module provides the foundational AWS integration layer for all AI features.

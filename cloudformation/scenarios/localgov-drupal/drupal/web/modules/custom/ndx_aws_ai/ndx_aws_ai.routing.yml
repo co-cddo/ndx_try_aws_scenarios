@@ -1,0 +1,15 @@
+ndx_aws_ai.settings:
+  path: '/admin/config/system/ndx-aws-ai'
+  defaults:
+    _form: '\Drupal\ndx_aws_ai\Form\AwsSettingsForm'
+    _title: 'AWS AI Settings'
+  requirements:
+    _permission: 'administer ndx aws ai'
+
+ndx_aws_ai.connection_test:
+  path: '/admin/config/system/ndx-aws-ai/test'
+  defaults:
+    _form: '\Drupal\ndx_aws_ai\Form\AwsConnectionTestForm'
+    _title: 'Test AWS Connection'
+  requirements:
+    _permission: 'administer ndx aws ai'

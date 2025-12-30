@@ -1,0 +1,6 @@
+ndx_aws_ai.settings:
+  title: 'AWS AI Settings'
+  description: 'Configure AWS region and test connectivity for AI features.'
+  route_name: ndx_aws_ai.settings
+  parent: system.admin_config_system
+  weight: 50

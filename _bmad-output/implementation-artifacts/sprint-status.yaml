@@ -71,8 +71,8 @@ development_status:
   epic-2-retrospective: optional
 
   # Epic 3: AI-Powered Content Editing
-  epic-3: backlog
-  3-1-ndx-aws-ai-module-foundation: backlog
+  epic-3: in-progress
+  3-1-ndx-aws-ai-module-foundation: done
   3-2-bedrock-service-integration: backlog
   3-3-ai-component-design-system: backlog
   3-4-ckeditor-ai-toolbar-plugin: backlog

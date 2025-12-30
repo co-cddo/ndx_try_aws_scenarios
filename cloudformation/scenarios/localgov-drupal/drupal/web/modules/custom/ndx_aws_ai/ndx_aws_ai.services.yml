@@ -1,0 +1,14 @@
+services:
+  # AWS Client Factory - creates AWS service clients with IAM role credentials
+  ndx_aws_ai.client_factory:
+    class: Drupal\ndx_aws_ai\Service\AwsClientFactory
+    arguments:
+      - '@config.factory'
+      - '@logger.factory'
+
+  # AWS Error Handler - standardized error processing for AWS API failures
+  ndx_aws_ai.error_handler:
+    class: Drupal\ndx_aws_ai\Service\AwsErrorHandler
+    arguments:
+      - '@logger.factory'
+      - '@string_translation'
