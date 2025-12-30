@@ -12,3 +12,37 @@ services:
     arguments:
       - '@logger.factory'
       - '@string_translation'
+
+  # Prompt Template Manager - loads and renders YAML prompt templates
+  ndx_aws_ai.prompt_template_manager:
+    class: Drupal\ndx_aws_ai\PromptTemplate\PromptTemplateManager
+    arguments:
+      - '@module_handler'
+      - '@logger.channel.ndx_aws_ai'
+
+  # Bedrock Rate Limiter - implements exponential backoff for API calls
+  ndx_aws_ai.bedrock_rate_limiter:
+    class: Drupal\ndx_aws_ai\RateLimiter\BedrockRateLimiter
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Bedrock Response Parser - extracts content and usage from API responses
+  ndx_aws_ai.bedrock_response_parser:
+    class: Drupal\ndx_aws_ai\Response\BedrockResponseParser
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Bedrock Service - AI content generation using Amazon Nova models
+  ndx_aws_ai.bedrock:
+    class: Drupal\ndx_aws_ai\Service\BedrockService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@ndx_aws_ai.prompt_template_manager'
+      - '@ndx_aws_ai.bedrock_rate_limiter'
+      - '@ndx_aws_ai.bedrock_response_parser'
+
+  # Logger channel for ndx_aws_ai module
+  logger.channel.ndx_aws_ai:
+    parent: logger.channel_base
+    arguments: ['ndx_aws_ai']
