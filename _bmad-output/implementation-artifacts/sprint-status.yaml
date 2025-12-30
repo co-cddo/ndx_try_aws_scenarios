@@ -86,7 +86,7 @@ development_status:
   epic-4: in-progress
   4-1-polly-tts-service-integration: done
   4-2-amazon-translate-service-integration: done
-  4-3-nova-2-omni-vision-service: backlog
+  4-3-nova-2-omni-vision-service: done
   4-4-textract-service-integration: backlog
   4-5-auto-alt-text-on-media-upload: backlog
   4-6-listen-to-page-tts-button: backlog

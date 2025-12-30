@@ -86,3 +86,17 @@ services:
       - '@ndx_aws_ai.translate_rate_limiter'
       - '@cache.default'
       - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.3: Vision Rate Limiter - implements exponential backoff for Vision API calls
+  ndx_aws_ai.vision_rate_limiter:
+    class: Drupal\ndx_aws_ai\RateLimiter\VisionRateLimiter
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.3: Vision Service - image analysis and WCAG alt-text generation
+  ndx_aws_ai.vision:
+    class: Drupal\ndx_aws_ai\Service\VisionService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@ndx_aws_ai.vision_rate_limiter'
