@@ -57,7 +57,7 @@ development_status:
   epic-1-retrospective: optional
 
   # Epic 2: Guided Walkthrough Experience
-  epic-2: in-progress
+  epic-2: done
   2-1-portal-scenario-landing-page: done
   2-2-deployment-progress-component: done
   2-3-credentials-card-component: done
@@ -67,7 +67,7 @@ development_status:
   2-7-playwright-screenshot-foundation: done
   2-8-documentation-template-standards: done
   2-9-basic-evidence-pack-generation: done
-  2-10-cleanup-instructions: backlog
+  2-10-cleanup-instructions: done
   epic-2-retrospective: optional
 
   # Epic 3: AI-Powered Content Editing

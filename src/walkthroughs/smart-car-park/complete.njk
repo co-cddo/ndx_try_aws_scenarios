@@ -270,34 +270,8 @@ scenarioId: smart-car-park
 {% set totalSteps = 4 %}
 {% include "components/completion-next-steps.njk" %}
 
-<h2 class="govuk-heading-l govuk-!-margin-top-8">Clean up your AWS resources</h2>
-
-<div class="ndx-cleanup-section">
-  <p class="govuk-body">
-    Your Innovation Sandbox deployment will auto-delete after 2 hours. If you want to manually
-    clean up now:
-  </p>
-
-  <ol class="govuk-list govuk-list--number govuk-!-font-size-19">
-    <li>
-      Go to the <a href="https://console.aws.amazon.com/cloudformation/" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console</a>
-    </li>
-    <li>
-      Find your <code>ndx-try-smart-car-park-[timestamp]</code> stack
-    </li>
-    <li>
-      Click "Delete" and confirm
-    </li>
-    <li>
-      Wait 3-5 minutes for deletion to complete
-    </li>
-  </ol>
-
-  <p class="govuk-body govuk-!-margin-top-3">
-    <strong>Note:</strong> Deletion removes all resources (IoT Core rules, Lambda functions, DynamoDB
-    table, CloudWatch dashboard). Sample sensor data is also deleted - no data persists after cleanup.
-  </p>
-</div>
+{# Story 2.10: Cleanup Instructions Component #}
+{% include "components/cleanup-instructions.njk" %}
 
 <div class="govuk-!-margin-top-8">
   <a href="/scenarios/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
@@ -386,12 +360,6 @@ scenarioId: smart-car-park
   .ndx-next-step-card h3 {
     margin-top: 0;
     margin-bottom: 15px;
-  }
-
-  .ndx-cleanup-section {
-    padding: 25px;
-    background-color: #fff4e6;
-    border-left: 4px solid #f47738;
   }
 
   code {

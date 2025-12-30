@@ -148,64 +148,8 @@ scenarioId: quicksight-dashboard
 {% set totalSteps = 4 %}
 {% include "components/completion-next-steps.njk" %}
 
-<div class="govuk-warning-text govuk-!-margin-top-8">
-  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-  <strong class="govuk-warning-text__text">
-    <span class="govuk-visually-hidden">Important</span>
-    Remember to clean up your AWS resources
-  </strong>
-</div>
-
-<div class="ndx-cleanup-section">
-  <h2 class="govuk-heading-m">Clean up your resources</h2>
-
-  <p class="govuk-body">
-    Your QuickSight Dashboard resources will automatically delete after 2 hours, but you can delete them
-    now to stop any further charges:
-  </p>
-
-  <ol class="govuk-list govuk-list--number">
-    <li>
-      Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console</a>
-    </li>
-    <li>
-      Find your stack: <code>ndx-try-quicksight-dashboard-[timestamp]</code>
-    </li>
-    <li>
-      Select the stack and click "Delete"
-    </li>
-    <li>
-      Confirm deletion - this takes 3-5 minutes
-    </li>
-    <li>
-      S3 bucket and QuickSight dashboard will be automatically removed
-    </li>
-  </ol>
-
-  <p class="govuk-body">
-    <strong>Estimated cost so far:</strong> £1.50 for a 10-minute evaluation (QuickSight Reader user + SPICE cache + Athena queries)
-  </p>
-
-  <details class="govuk-details govuk-!-margin-top-4">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        What if I want to test with more council data?
-      </span>
-    </summary>
-    <div class="govuk-details__text">
-      <p class="govuk-body">
-        If you want to continue testing QuickSight:
-      </p>
-      <ul class="govuk-list govuk-list--bullet">
-        <li>Upload your own CSV files to the S3 bucket (check CloudFormation Resources tab for bucket name)</li>
-        <li>Run Glue crawler to create table schema from your CSV structure</li>
-        <li>Refresh QuickSight dataset to pull latest data from Athena</li>
-        <li>Cost: £18/user/month (Reader) + minimal Athena/S3 costs (~£5/month)</li>
-        <li>Test with real council service data (anonymize if using production data)</li>
-      </ul>
-    </div>
-  </details>
-</div>
+{# Story 2.10: Cleanup Instructions Component #}
+{% include "components/cleanup-instructions.njk" %}
 
 <div class="govuk-!-margin-top-8">
   <h2 class="govuk-heading-m">Production considerations</h2>
@@ -345,20 +289,6 @@ scenarioId: quicksight-dashboard
     padding: 30px;
     background-color: #f8f8f8;
     border-left: 4px solid #1d70b8;
-  }
-
-  .ndx-cleanup-section {
-    padding: 30px;
-    background-color: #fff7e6;
-    border-left: 4px solid #f47738;
-  }
-
-  .ndx-cleanup-section code {
-    background-color: #f3f2f1;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: monospace;
-    font-size: 16px;
   }
 
   .ndx-related-scenario {
