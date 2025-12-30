@@ -55,33 +55,18 @@ layout: page
     {{ content | safe }}
   </div>
 
-  {# Sidebar navigation - desktop only #}
-  <div class="govuk-grid-column-one-third ndx-walkthrough-sidebar">
-    <nav class="ndx-walkthrough-nav" aria-labelledby="walkthrough-nav-heading">
-      <h2 class="govuk-heading-s" id="walkthrough-nav-heading">Walkthrough steps</h2>
-      <ol class="ndx-walkthrough-nav__list">
-        <li class="ndx-walkthrough-nav__item{% if currentStep == 0 %} ndx-walkthrough-nav__item--current{% endif %}">
-          <a href="/walkthroughs/{{ scenarioId }}/" class="ndx-walkthrough-nav__link">
-            <span class="ndx-walkthrough-nav__number">Start</span>
-            <span class="ndx-walkthrough-nav__title">Introduction</span>
-          </a>
-        </li>
-        {% for stepNum in range(1, totalSteps + 1) %}
-        <li class="ndx-walkthrough-nav__item{% if currentStep == stepNum %} ndx-walkthrough-nav__item--current{% endif %}">
-          <a href="/walkthroughs/{{ scenarioId }}/step-{{ stepNum }}/" class="ndx-walkthrough-nav__link">
-            <span class="ndx-walkthrough-nav__number">{{ stepNum }}</span>
-            <span class="ndx-walkthrough-nav__title">{{ stepTitles[stepNum - 1].title if stepTitles[stepNum - 1] else "Step " ~ stepNum }}</span>
-          </a>
-        </li>
-        {% endfor %}
-        <li class="ndx-walkthrough-nav__item{% if currentStep == totalSteps + 1 %} ndx-walkthrough-nav__item--current{% endif %}">
-          <a href="/walkthroughs/{{ scenarioId }}/complete/" class="ndx-walkthrough-nav__link">
-            <span class="ndx-walkthrough-nav__number">✓</span>
-            <span class="ndx-walkthrough-nav__title">Complete</span>
-          </a>
-        </li>
-      </ol>
-    </nav>
+  {# Sidebar navigation with progress tracking - Story 2.6 #}
+  <div class="govuk-grid-column-one-third ndx-walkthrough-sidebar" data-total-steps="{{ totalSteps }}">
+    {# Set scenario title #}
+    {% set currentScenarioId = scenarioId %}
+    {% set currentScenarioTitle = walkthroughData.title if walkthroughData and walkthroughData.title else scenarioId | replace("-", " ") | title %}
+
+    {# Calculate progress percentage based on current step #}
+    {% set totalSections = totalSteps + 2 %}
+    {% set percentage = ((currentStep / totalSections) * 100) | round %}
+
+    {# Include progress sidebar component with inline sections #}
+    {% include "components/walkthrough-progress.njk" %}
 
     {# Quick help #}
     <div class="ndx-walkthrough-help govuk-!-margin-top-6">
@@ -303,7 +288,9 @@ layout: page
   }
 </style>
 
+<link rel="stylesheet" href="/assets/css/progress.css">
 <script src="/assets/js/phase-state.js" defer></script>
+<script src="/assets/js/progress-tracker.js" defer></script>
 <script src="/assets/js/walkthrough.js" defer></script>
 
 {# Lightbox component for screenshot zoom - Story 13.9 #}

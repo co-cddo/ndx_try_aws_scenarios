@@ -1,0 +1,124 @@
+{#
+  Step Checklist Component - Story 2.6
+
+  Displays walkthrough sections with completion status.
+  Shows checkmarks for completed, highlight for current, muted for upcoming.
+
+  Expected context variables from walkthrough.njk layout:
+  - currentScenarioId: String (scenario identifier)
+  - currentStep: Number (0 for intro, 1-N for steps, N+1 for complete)
+  - totalSteps: Number (total walkthrough steps)
+  - stepTitles: Array of step title objects
+
+  Usage:
+  {% include "components/step-checklist.njk" %}
+#}
+
+<nav class="ndx-step-checklist" aria-label="Walkthrough sections">
+  <ol class="ndx-step-checklist__list">
+    {# Introduction #}
+    {% set isCompleted = currentStep > 0 %}
+    {% set isCurrent = currentStep == 0 %}
+    <li class="ndx-step-checklist__item{% if isCompleted %} ndx-step-checklist__item--completed{% endif %}{% if isCurrent %} ndx-step-checklist__item--current{% endif %}"
+        data-section-id="intro">
+      {% if isCompleted %}
+      <span class="ndx-step-checklist__icon ndx-step-checklist__icon--completed" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="10" fill="#00703c"/>
+          <path d="M6 10L9 13L14 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <a href="/walkthroughs/{{ currentScenarioId }}/" class="ndx-step-checklist__link ndx-step-checklist__link--completed">
+        Introduction
+        <span class="govuk-visually-hidden">(completed)</span>
+      </a>
+      {% elif isCurrent %}
+      <span class="ndx-step-checklist__icon ndx-step-checklist__icon--current" aria-hidden="true">
+        <span class="ndx-step-checklist__number">Start</span>
+      </span>
+      <span class="ndx-step-checklist__link ndx-step-checklist__link--current" aria-current="step">
+        Introduction
+        <span class="govuk-visually-hidden">(current step)</span>
+      </span>
+      {% else %}
+      <span class="ndx-step-checklist__icon ndx-step-checklist__icon--upcoming" aria-hidden="true">
+        <span class="ndx-step-checklist__number">Start</span>
+      </span>
+      <a href="/walkthroughs/{{ currentScenarioId }}/" class="ndx-step-checklist__link ndx-step-checklist__link--upcoming">
+        Introduction
+      </a>
+      {% endif %}
+    </li>
+
+    {# Steps #}
+    {% for stepNum in range(1, totalSteps + 1) %}
+    {% set isCompleted = currentStep > stepNum %}
+    {% set isCurrent = currentStep == stepNum %}
+    {% set stepTitle = stepTitles[stepNum - 1].title if stepTitles[stepNum - 1] else "Step " ~ stepNum %}
+    <li class="ndx-step-checklist__item{% if isCompleted %} ndx-step-checklist__item--completed{% endif %}{% if isCurrent %} ndx-step-checklist__item--current{% endif %}"
+        data-section-id="step-{{ stepNum }}">
+      {% if isCompleted %}
+      <span class="ndx-step-checklist__icon ndx-step-checklist__icon--completed" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="10" fill="#00703c"/>
+          <path d="M6 10L9 13L14 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <a href="/walkthroughs/{{ currentScenarioId }}/step-{{ stepNum }}/" class="ndx-step-checklist__link ndx-step-checklist__link--completed">
+        {{ stepTitle }}
+        <span class="govuk-visually-hidden">(completed)</span>
+      </a>
+      {% elif isCurrent %}
+      <span class="ndx-step-checklist__icon ndx-step-checklist__icon--current" aria-hidden="true">
+        <span class="ndx-step-checklist__number">{{ stepNum }}</span>
+      </span>
+      <span class="ndx-step-checklist__link ndx-step-checklist__link--current" aria-current="step">
+        {{ stepTitle }}
+        <span class="govuk-visually-hidden">(current step)</span>
+      </span>
+      {% else %}
+      <span class="ndx-step-checklist__icon ndx-step-checklist__icon--upcoming" aria-hidden="true">
+        <span class="ndx-step-checklist__number">{{ stepNum }}</span>
+      </span>
+      <a href="/walkthroughs/{{ currentScenarioId }}/step-{{ stepNum }}/" class="ndx-step-checklist__link ndx-step-checklist__link--upcoming">
+        {{ stepTitle }}
+      </a>
+      {% endif %}
+    </li>
+    {% endfor %}
+
+    {# Complete #}
+    {% set isCompleted = currentStep > totalSteps %}
+    {% set isCurrent = currentStep == totalSteps + 1 %}
+    <li class="ndx-step-checklist__item{% if isCompleted %} ndx-step-checklist__item--completed{% endif %}{% if isCurrent %} ndx-step-checklist__item--current{% endif %}"
+        data-section-id="complete">
+      {% if isCompleted %}
+      <span class="ndx-step-checklist__icon ndx-step-checklist__icon--completed" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="10" fill="#00703c"/>
+          <path d="M6 10L9 13L14 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <a href="/walkthroughs/{{ currentScenarioId }}/complete/" class="ndx-step-checklist__link ndx-step-checklist__link--completed">
+        Complete
+        <span class="govuk-visually-hidden">(completed)</span>
+      </a>
+      {% elif isCurrent %}
+      <span class="ndx-step-checklist__icon ndx-step-checklist__icon--current" aria-hidden="true">
+        <span class="ndx-step-checklist__number">✓</span>
+      </span>
+      <span class="ndx-step-checklist__link ndx-step-checklist__link--current" aria-current="step">
+        Complete
+        <span class="govuk-visually-hidden">(current step)</span>
+      </span>
+      {% else %}
+      <span class="ndx-step-checklist__icon ndx-step-checklist__icon--upcoming" aria-hidden="true">
+        <span class="ndx-step-checklist__number">✓</span>
+      </span>
+      <a href="/walkthroughs/{{ currentScenarioId }}/complete/" class="ndx-step-checklist__link ndx-step-checklist__link--upcoming">
+        Complete
+      </a>
+      {% endif %}
+    </li>
+  </ol>
+</nav>
