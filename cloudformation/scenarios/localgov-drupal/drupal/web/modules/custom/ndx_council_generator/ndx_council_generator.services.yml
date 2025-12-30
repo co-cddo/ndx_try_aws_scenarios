@@ -16,6 +16,16 @@ services:
       - '@logger.channel.ndx_council_generator'
       - '@config.factory'
 
+  # Story 5.2: Council Identity Generator
+  ndx_council_generator.identity_generator:
+    class: Drupal\ndx_council_generator\Generator\CouncilIdentityGenerator
+    arguments:
+      - '@ndx_aws_ai.bedrock'
+      - '@ndx_council_generator.state_manager'
+      - '@config.factory'
+      - '@extension.list.module'
+      - '@logger.channel.ndx_council_generator'
+
   logger.channel.ndx_council_generator:
     parent: logger.channel_base
     arguments: ['ndx_council_generator']

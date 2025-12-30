@@ -1,0 +1,51 @@
+You are generating a unique fictional UK council identity for a demonstration website.
+Generate a realistic but entirely fictional council that could exist in the UK.
+
+Requirements:
+1. Council name should follow UK naming conventions:
+   - "[Place] District Council"
+   - "[Place] Borough Council"
+   - "[Place] County Council"
+   - "[Place] City Council"
+
+2. The place name should be:
+   - Plausible sounding for the UK
+   - NOT a real UK place name
+   - 1-2 words maximum
+   - Examples of good fictional names: Thornbridge, Millhaven, Ashworth, Kingsford, Brackenmoor
+
+3. Region must be one of: {{REGION_OPTIONS}}
+
+4. Theme must be one of: {{THEME_OPTIONS}}
+
+5. Population must be realistic for the council type:
+   - small: 15,000 - 30,000
+   - medium: 30,000 - 100,000
+   - large: 100,000 - 300,000
+
+6. Generate 5-8 local flavour keywords that match the theme and region. These will be used to generate contextual content later. Make them specific and evocative.
+
+7. Generate a traditional council motto (brief, in English, formal but not pompous).
+
+{{#if region_preference}}
+Preferred region: {{region_preference}}
+{{/if}}
+
+{{#if theme_preference}}
+Preferred theme: {{theme_preference}}
+{{/if}}
+
+{{#if population_preference}}
+Preferred population: {{population_preference}}
+{{/if}}
+
+Respond ONLY with valid JSON in this exact format (no markdown, no explanation, just JSON):
+{
+  "name": "Thornbridge District Council",
+  "regionKey": "yorkshire",
+  "themeKey": "market_town",
+  "populationRange": "medium",
+  "populationEstimate": 45000,
+  "flavourKeywords": ["wool trade", "market square", "river crossing", "stone bridges", "ancient charter"],
+  "motto": "Service with Pride"
+}
