@@ -1,0 +1,9 @@
+name: 'NDX Council Generator'
+type: module
+description: 'Generates unique fictional UK council identity and content using AWS Bedrock AI.'
+core_version_requirement: ^10
+package: NDX
+dependencies:
+  - ndx_aws_ai:ndx_aws_ai
+
+# Story 5.1: ndx_council_generator Module Foundation

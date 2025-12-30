@@ -1,0 +1,21 @@
+services:
+  # Story 5.1: ndx_council_generator Module Foundation
+
+  ndx_council_generator.state_manager:
+    class: Drupal\ndx_council_generator\Service\GenerationStateManager
+    arguments:
+      - '@state'
+      - '@logger.channel.ndx_council_generator'
+
+  ndx_council_generator.generator:
+    class: Drupal\ndx_council_generator\Service\CouncilGeneratorService
+    arguments:
+      - '@ndx_council_generator.state_manager'
+      - '@ndx_aws_ai.bedrock'
+      - '@entity_type.manager'
+      - '@logger.channel.ndx_council_generator'
+      - '@config.factory'
+
+  logger.channel.ndx_council_generator:
+    parent: logger.channel_base
+    arguments: ['ndx_council_generator']

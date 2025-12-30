@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * @file
+ * NDX Council Generator module.
+ *
+ * Provides AI-powered council identity and content generation using AWS Bedrock.
+ *
+ * Story 5.1: ndx_council_generator Module Foundation
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ndx_council_generator_help(string $route_name, RouteMatchInterface $route_match): string {
+  switch ($route_name) {
+    case 'help.page.ndx_council_generator':
+      return '<p>' . t('The NDX Council Generator module creates unique fictional UK council identities and content using AWS Bedrock AI. Each deployment produces a distinct council with contextual content and images.') . '</p>';
+
+    default:
+      return '';
+  }
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * Clean up stale generation states older than 24 hours.
+ */
+function ndx_council_generator_cron(): void {
+  /** @var \Drupal\ndx_council_generator\Service\GenerationStateManagerInterface $stateManager */
+  $stateManager = \Drupal::service('ndx_council_generator.state_manager');
+  $state = $stateManager->getState();
+
+  // Clean up stale states (started more than 24 hours ago and not complete).
+  if ($state->startedAt > 0 && !$state->isComplete()) {
+    $staleThreshold = time() - (24 * 60 * 60);
+    if ($state->startedAt < $staleThreshold) {
+      \Drupal::logger('ndx_council_generator')->warning('Clearing stale generation state started at @time', [
+        '@time' => date('Y-m-d H:i:s', $state->startedAt),
+      ]);
+      $stateManager->clearState();
+    }
+  }
+}

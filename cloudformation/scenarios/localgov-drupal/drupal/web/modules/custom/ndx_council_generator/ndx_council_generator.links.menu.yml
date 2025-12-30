@@ -1,0 +1,8 @@
+# Story 5.1: ndx_council_generator Module Foundation
+
+ndx_council_generator.status:
+  title: 'Council Generator'
+  description: 'Generate unique fictional council identity and content.'
+  route_name: ndx_council_generator.status
+  parent: system.admin_config_system
+  weight: 50
