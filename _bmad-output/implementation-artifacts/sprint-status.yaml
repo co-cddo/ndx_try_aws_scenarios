@@ -59,7 +59,7 @@ development_status:
   # Epic 2: Guided Walkthrough Experience
   epic-2: in-progress
   2-1-portal-scenario-landing-page: done
-  2-2-deployment-progress-component: backlog
+  2-2-deployment-progress-component: done
   2-3-credentials-card-component: backlog
   2-4-basic-walkthrough-content: backlog
   2-5-walkthrough-overlay-in-drupal: backlog
