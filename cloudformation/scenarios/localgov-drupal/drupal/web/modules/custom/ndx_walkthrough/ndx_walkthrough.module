@@ -1,0 +1,139 @@
+<?php
+
+/**
+ * @file
+ * NDX Walkthrough module.
+ *
+ * Provides an in-CMS guided tour for council officers exploring the
+ * Drupal admin interface. Features spotlight highlighting, step navigation,
+ * and progress persistence.
+ *
+ * Story 2.5: Walkthrough Overlay in Drupal
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ndx_walkthrough_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.ndx_walkthrough':
+      return '<p>' . t('Provides an in-CMS guided tour for exploring the Drupal admin interface.') . '</p>';
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * Attaches the walkthrough library to admin pages.
+ */
+function ndx_walkthrough_page_attachments(array &$attachments) {
+  // Only attach to admin routes.
+  $route = \Drupal::routeMatch()->getRouteObject();
+  if ($route && \Drupal::service('router.admin_context')->isAdminRoute($route)) {
+    $attachments['#attached']['library'][] = 'ndx_walkthrough/walkthrough';
+
+    // Pass walkthrough steps to JavaScript.
+    $steps = ndx_walkthrough_get_steps();
+    $attachments['#attached']['drupalSettings']['ndxWalkthrough'] = [
+      'steps' => $steps,
+      'storageKey' => 'ndx_walkthrough_progress',
+    ];
+  }
+}
+
+/**
+ * Implements hook_page_top().
+ *
+ * Adds the walkthrough modal markup to admin pages.
+ */
+function ndx_walkthrough_page_top(array &$page_top) {
+  // Only add to admin routes.
+  $route = \Drupal::routeMatch()->getRouteObject();
+  if ($route && \Drupal::service('router.admin_context')->isAdminRoute($route)) {
+    $page_top['ndx_walkthrough'] = [
+      '#theme' => 'ndx_walkthrough_modal',
+      '#weight' => 1000,
+    ];
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function ndx_walkthrough_theme() {
+  return [
+    'ndx_walkthrough_modal' => [
+      'variables' => [],
+      'template' => 'walkthrough-modal',
+    ],
+  ];
+}
+
+/**
+ * Get the walkthrough tour steps.
+ *
+ * @return array
+ *   Array of tour step configurations.
+ */
+function ndx_walkthrough_get_steps() {
+  return [
+    [
+      'id' => 'admin-toolbar',
+      'title' => 'Welcome to the Admin Toolbar',
+      'content' => 'This is your main navigation bar. From here, you can access all areas of your council website.',
+      'target' => '#toolbar-bar',
+      'position' => 'bottom',
+    ],
+    [
+      'id' => 'content-menu',
+      'title' => 'Content Management',
+      'content' => 'Click "Content" to view, edit, and create pages, news articles, services, and other content types.',
+      'target' => '#toolbar-item-administration-tray .toolbar-icon-system-admin-content',
+      'position' => 'bottom',
+    ],
+    [
+      'id' => 'add-content',
+      'title' => 'Adding New Content',
+      'content' => 'Use "Add content" to create new pages. LocalGov Drupal provides ready-made content types designed for councils.',
+      'target' => '.toolbar-icon-node-add',
+      'position' => 'bottom',
+    ],
+    [
+      'id' => 'structure-menu',
+      'title' => 'Site Structure',
+      'content' => 'The Structure section lets you manage menus, taxonomies, and how content is organized on your site.',
+      'target' => '.toolbar-icon-system-admin-structure',
+      'position' => 'bottom',
+    ],
+    [
+      'id' => 'appearance',
+      'title' => 'Appearance Settings',
+      'content' => 'Customize how your site looks. LocalGov Drupal uses the GOV.UK Design System for accessible, familiar styling.',
+      'target' => '.toolbar-icon-system-themes-page',
+      'position' => 'bottom',
+    ],
+    [
+      'id' => 'configuration',
+      'title' => 'Configuration',
+      'content' => 'Site-wide settings live here, including site name, contact information, and system settings.',
+      'target' => '.toolbar-icon-system-admin-config',
+      'position' => 'bottom',
+    ],
+    [
+      'id' => 'reports',
+      'title' => 'Reports & Status',
+      'content' => 'Check site health, view logs, and access useful reports about your website performance.',
+      'target' => '.toolbar-icon-system-admin-reports',
+      'position' => 'bottom',
+    ],
+    [
+      'id' => 'tour-complete',
+      'title' => 'Tour Complete!',
+      'content' => 'You\'ve completed the guided tour. Explore further, edit some content, and see how LocalGov Drupal can work for your council.',
+      'target' => null,
+      'position' => 'center',
+    ],
+  ];
+}

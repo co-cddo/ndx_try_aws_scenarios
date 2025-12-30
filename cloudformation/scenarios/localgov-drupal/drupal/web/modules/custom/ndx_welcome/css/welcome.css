@@ -53,6 +53,77 @@
   margin: 0;
 }
 
+/* Guided Tour CTA - Story 2.5 */
+.ndx-welcome__tour-cta {
+  margin-bottom: 20px;
+}
+
+.ndx-welcome__tour-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #1d70b8 0%, #003078 100%);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.ndx-welcome__tour-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ndx-welcome__tour-button:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background: #ffdd00;
+}
+
+.ndx-welcome__tour-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.ndx-welcome__tour-button:focus .ndx-welcome__tour-icon {
+  background: rgba(0, 0, 0, 0.1);
+  color: #0b0c0c;
+}
+
+.ndx-welcome__tour-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ndx-welcome__tour-text strong {
+  color: #ffffff;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.ndx-welcome__tour-text span {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
+.ndx-welcome__tour-button:focus .ndx-welcome__tour-text strong,
+.ndx-welcome__tour-button:focus .ndx-welcome__tour-text span {
+  color: #0b0c0c;
+}
+
 /* Start Here section */
 .ndx-welcome__start-here {
   margin-bottom: 16px;

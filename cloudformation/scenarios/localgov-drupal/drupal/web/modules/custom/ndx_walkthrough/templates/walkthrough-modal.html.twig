@@ -1,0 +1,86 @@
+{#
+/**
+ * @file
+ * Walkthrough modal overlay template.
+ *
+ * Provides the modal container for the guided tour with:
+ * - Spotlight overlay backdrop
+ * - Step content area
+ * - Navigation buttons (Previous, Next, Skip)
+ * - Step counter
+ * - ARIA attributes for accessibility
+ *
+ * Story 2.5: Walkthrough Overlay in Drupal
+ */
+#}
+
+{# Overlay backdrop for spotlight effect #}
+<div id="ndx-walkthrough-overlay" class="ndx-walkthrough-overlay" aria-hidden="true">
+</div>
+
+{# Modal dialog container #}
+<div id="ndx-walkthrough-modal"
+     class="ndx-walkthrough-modal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="ndx-walkthrough-title"
+     aria-describedby="ndx-walkthrough-content"
+     aria-hidden="true"
+     tabindex="-1">
+
+  {# Close button #}
+  <button type="button"
+          class="ndx-walkthrough-close"
+          aria-label="{{ 'Close tour'|t }}">
+    <span aria-hidden="true">&times;</span>
+  </button>
+
+  {# Step counter #}
+  <div id="ndx-walkthrough-counter"
+       class="ndx-walkthrough-counter"
+       aria-live="polite"
+       aria-atomic="true">
+    {# Populated by JavaScript: "Step X of Y" #}
+  </div>
+
+  {# Step title #}
+  <h2 id="ndx-walkthrough-title" class="ndx-walkthrough-title">
+    {# Populated by JavaScript #}
+  </h2>
+
+  {# Step content #}
+  <div id="ndx-walkthrough-content" class="ndx-walkthrough-content">
+    {# Populated by JavaScript #}
+  </div>
+
+  {# Navigation buttons #}
+  <div class="ndx-walkthrough-navigation">
+    <button type="button"
+            id="ndx-walkthrough-prev"
+            class="ndx-walkthrough-btn ndx-walkthrough-btn--secondary">
+      {{ 'Previous'|t }}
+    </button>
+
+    <button type="button"
+            id="ndx-walkthrough-next"
+            class="ndx-walkthrough-btn ndx-walkthrough-btn--primary">
+      {{ 'Next'|t }}
+    </button>
+
+    <button type="button"
+            id="ndx-walkthrough-skip"
+            class="ndx-walkthrough-btn ndx-walkthrough-btn--link">
+      {{ 'Skip tour'|t }}
+    </button>
+  </div>
+</div>
+
+{# Floating trigger button #}
+<button type="button"
+        id="ndx-walkthrough-trigger"
+        class="ndx-walkthrough-trigger"
+        aria-label="{{ 'Start guided tour'|t }}"
+        aria-expanded="false">
+  <span class="ndx-walkthrough-trigger__icon" aria-hidden="true">?</span>
+  <span class="ndx-walkthrough-trigger__text">{{ 'Guide'|t }}</span>
+</button>

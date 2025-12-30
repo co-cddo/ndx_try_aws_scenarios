@@ -1,0 +1,9 @@
+name: 'NDX Walkthrough'
+type: module
+description: 'Provides an in-CMS guided tour for council officers exploring the Drupal admin interface.'
+core_version_requirement: ^10
+package: NDX
+dependencies:
+  - drupal:system
+
+# Story 2.5: Walkthrough Overlay in Drupal
