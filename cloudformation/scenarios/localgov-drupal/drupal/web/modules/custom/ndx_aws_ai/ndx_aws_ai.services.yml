@@ -159,3 +159,11 @@ services:
       - '@entity_type.manager'
       - '@state'
       - '@logger.channel.ndx_aws_ai'
+
+  # Story 5.6: Image Generation Service - AI image generation using Titan
+  ndx_aws_ai.image_generation:
+    class: Drupal\ndx_aws_ai\Service\ImageGenerationService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@logger.channel.ndx_aws_ai'

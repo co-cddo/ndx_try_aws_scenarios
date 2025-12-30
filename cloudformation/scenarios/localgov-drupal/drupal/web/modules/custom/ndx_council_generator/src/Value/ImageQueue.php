@@ -168,6 +168,45 @@ final class ImageQueue {
   }
 
   /**
+   * Get all duplicate IDs that map to an original.
+   *
+   * @param string $originalId
+   *   The original item ID.
+   *
+   * @return array<string>
+   *   Array of duplicate IDs.
+   */
+  public function getDuplicatesOf(string $originalId): array {
+    $duplicateIds = [];
+    foreach ($this->duplicates as $dupId => $origId) {
+      if ($origId === $originalId) {
+        $duplicateIds[] = $dupId;
+      }
+    }
+    return $duplicateIds;
+  }
+
+  /**
+   * Get all items.
+   *
+   * @return array<string, ImageQueueItem>
+   *   All queue items.
+   */
+  public function getItems(): array {
+    return $this->items;
+  }
+
+  /**
+   * Get IDs of all pending items.
+   *
+   * @return array<string>
+   *   Array of pending item IDs.
+   */
+  public function getPendingIds(): array {
+    return array_keys($this->getPending());
+  }
+
+  /**
    * Get all pending items.
    *
    * @return array<string, ImageQueueItem>

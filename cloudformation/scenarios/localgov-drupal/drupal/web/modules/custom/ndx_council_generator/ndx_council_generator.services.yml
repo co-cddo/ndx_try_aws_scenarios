@@ -52,6 +52,24 @@ services:
       - '@state'
       - '@logger.channel.ndx_council_generator'
 
+  # Story 5.6: Batch Image Generation
+  ndx_council_generator.media_creator:
+    class: Drupal\ndx_council_generator\Service\MediaCreator
+    arguments:
+      - '@entity_type.manager'
+      - '@file_system'
+      - '@logger.channel.ndx_council_generator'
+
+  ndx_council_generator.image_batch_processor:
+    class: Drupal\ndx_council_generator\Service\ImageBatchProcessor
+    arguments:
+      - '@ndx_aws_ai.image_generation'
+      - '@ndx_council_generator.image_collector'
+      - '@ndx_council_generator.media_creator'
+      - '@ndx_council_generator.state_manager'
+      - '@config.factory'
+      - '@logger.channel.ndx_council_generator'
+
   logger.channel.ndx_council_generator:
     parent: logger.channel_base
     arguments: ['ndx_council_generator']
