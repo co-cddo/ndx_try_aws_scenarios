@@ -48,3 +48,20 @@ ai_writing_dialog:
     - core/drupal.dialog.ajax
     - core/jquery
     - ndx_aws_ai/ai_components
+
+# AI Simplify Dialog library.
+# Story 3.6: Readability Simplification
+ai_simplify_dialog:
+  version: VERSION
+  js:
+    js/ai-simplify-handler.js: {}
+  css:
+    component:
+      css/ai-simplify-dialog.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupal.ajax
+    - core/drupal.dialog.ajax
+    - core/jquery
+    - ndx_aws_ai/ai_components

@@ -35,3 +35,14 @@ ndx_aws_ai.write_dialog:
     _permission: 'use ndx aws ai'
   options:
     _admin_route: TRUE
+
+# Story 3.6: AI Simplify Dialog for plain English conversion.
+ndx_aws_ai.simplify_dialog:
+  path: '/ndx-aws-ai/simplify-dialog'
+  defaults:
+    _form: '\Drupal\ndx_aws_ai\Form\AiSimplifyDialogForm'
+    _title: 'Simplify to Plain English'
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    _admin_route: TRUE
