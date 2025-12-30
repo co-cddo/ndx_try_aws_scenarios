@@ -200,3 +200,61 @@
     border-top-color: #1d70b8;
   }
 }
+
+/* ==========================================================================
+   Diff View Integration (Story 3.7)
+   ========================================================================== */
+
+/* Hide diff views by default until content is ready */
+.ai-simplify-dialog .ai-diff-view {
+  display: none;
+  padding: 12px;
+  min-height: 180px;
+  background-color: #ffffff;
+  border: 2px solid #b1b4b6;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Original diff view styling */
+.ai-simplify-dialog #ai-diff-original {
+  background-color: #f3f2f1;
+  color: #505a5f;
+}
+
+/* Modified diff view styling */
+.ai-simplify-dialog #ai-diff-modified {
+  background-color: #ffffff;
+  border-color: #00703c;
+  color: #0b0c0c;
+}
+
+/* Diff toggle styling */
+.ai-simplify-dialog .ai-diff-toggle {
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.ai-simplify-dialog .ai-diff-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #0b0c0c;
+}
+
+.ai-simplify-dialog .ai-diff-toggle input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ai-simplify-dialog .ai-diff-toggle input[type="checkbox"]:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 2px;
+}

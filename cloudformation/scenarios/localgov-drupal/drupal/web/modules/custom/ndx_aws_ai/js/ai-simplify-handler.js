@@ -238,8 +238,121 @@
       once('ai-simplify-focus-trap', '.ai-simplify-dialog', context).forEach(function (dialog) {
         setupFocusTrap(dialog);
       });
+
+      // Handle diff toggle.
+      once('ai-diff-toggle', '#ai-diff-toggle', context).forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+          var container = document.querySelector('#ai-comparison-container');
+          if (container) {
+            Drupal.ndxAwsAi.diff.toggleHighlight(container, checkbox.checked);
+            updateViewVisibility(checkbox.checked);
+          }
+        });
+      });
+
+      // Update diff when simplified text changes.
+      once('ai-diff-update', '.ai-simplified-text', context).forEach(function (textarea) {
+        textarea.addEventListener('input', debounce(function () {
+          updateDiffDisplay();
+        }, 300));
+      });
     },
   };
+
+  /**
+   * Debounce helper function.
+   *
+   * @param {Function} func
+   *   The function to debounce.
+   * @param {number} wait
+   *   Wait time in milliseconds.
+   *
+   * @return {Function}
+   *   Debounced function.
+   */
+  function debounce(func, wait) {
+    var timeout;
+    return function () {
+      var args = arguments;
+      var that = this;
+      clearTimeout(timeout);
+      timeout = setTimeout(function () {
+        func.apply(that, args);
+      }, wait);
+    };
+  }
+
+  /**
+   * Update the diff display with current text values.
+   */
+  function updateDiffDisplay() {
+    var originalText = document.querySelector('.ai-original-text');
+    var simplifiedText = document.querySelector('.ai-simplified-text');
+    var container = document.querySelector('#ai-comparison-container');
+
+    if (!originalText || !simplifiedText || !container) {
+      return;
+    }
+
+    if (!Drupal.ndxAwsAi.diff || !Drupal.ndxAwsAi.diff.sideBySide) {
+      return;
+    }
+
+    var original = originalText.value || '';
+    var modified = simplifiedText.value || '';
+
+    if (!modified.trim()) {
+      return;
+    }
+
+    var result = Drupal.ndxAwsAi.diff.sideBySide(original, modified);
+
+    var diffOriginal = document.querySelector('#ai-diff-original');
+    var diffModified = document.querySelector('#ai-diff-modified');
+
+    if (diffOriginal) {
+      diffOriginal.innerHTML = result.originalHtml;
+    }
+    if (diffModified) {
+      diffModified.innerHTML = result.modifiedHtml;
+    }
+
+    // Show diff views, hide textareas when diff toggle is on.
+    var diffToggle = document.querySelector('#ai-diff-toggle');
+    if (diffToggle && diffToggle.checked) {
+      updateViewVisibility(true);
+    }
+  }
+
+  /**
+   * Toggle between diff view and textarea view.
+   *
+   * @param {boolean} showDiff
+   *   Whether to show diff view.
+   */
+  function updateViewVisibility(showDiff) {
+    var diffViews = document.querySelectorAll('.ai-diff-view');
+    var textareas = document.querySelectorAll('.ai-text-source');
+
+    diffViews.forEach(function (view) {
+      view.style.display = showDiff ? 'block' : 'none';
+    });
+
+    // Original textarea always hidden (it's read-only).
+    var originalTextarea = document.querySelector('.ai-original-text');
+    if (originalTextarea) {
+      originalTextarea.style.display = 'none';
+    }
+
+    // Simplified textarea shown when not in diff mode (for editing).
+    var simplifiedTextarea = document.querySelector('.ai-simplified-text');
+    if (simplifiedTextarea) {
+      simplifiedTextarea.style.display = showDiff ? 'none' : 'block';
+    }
+  }
+
+  // Expose updateDiffDisplay for AJAX callbacks.
+  Drupal.ndxAwsAi.updateDiffDisplay = updateDiffDisplay;
 
   /**
    * Set up focus trap for dialog accessibility.

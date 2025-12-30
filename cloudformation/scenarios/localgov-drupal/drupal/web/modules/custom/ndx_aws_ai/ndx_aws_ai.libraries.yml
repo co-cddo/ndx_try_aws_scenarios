@@ -65,3 +65,16 @@ ai_simplify_dialog:
     - core/drupal.dialog.ajax
     - core/jquery
     - ndx_aws_ai/ai_components
+
+# AI Diff Highlighting library.
+# Story 3.7: AI Preview Modal
+ai_diff_highlight:
+  version: VERSION
+  js:
+    js/ai-diff-highlight.js: {}
+  css:
+    component:
+      css/ai-diff-highlight.css: {}
+  dependencies:
+    - core/drupal
+    - ndx_aws_ai/ai_components

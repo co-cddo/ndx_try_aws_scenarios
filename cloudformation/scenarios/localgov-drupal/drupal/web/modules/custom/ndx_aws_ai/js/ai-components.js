@@ -330,4 +330,29 @@
     }
   };
 
+  /**
+   * jQuery method for AJAX announce callback.
+   *
+   * Called via InvokeCommand from PHP AJAX responses.
+   */
+  if (typeof jQuery !== 'undefined') {
+    jQuery.fn.ndxAwsAiAnnounce = function (message, priority) {
+      Drupal.ndxAwsAi.announce(message, priority);
+      return this;
+    };
+
+    /**
+     * jQuery method for AJAX diff update callback.
+     *
+     * Called via InvokeCommand from PHP AJAX responses.
+     * Story 3.7: AI Preview Modal
+     */
+    jQuery.fn.ndxAwsAiUpdateDiff = function () {
+      if (Drupal.ndxAwsAi && typeof Drupal.ndxAwsAi.updateDiffDisplay === 'function') {
+        Drupal.ndxAwsAi.updateDiffDisplay();
+      }
+      return this;
+    };
+  }
+
 })(Drupal, once);

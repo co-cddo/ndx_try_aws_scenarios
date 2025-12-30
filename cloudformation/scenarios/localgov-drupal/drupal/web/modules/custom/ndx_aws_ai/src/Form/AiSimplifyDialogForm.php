@@ -82,6 +82,7 @@ class AiSimplifyDialogForm extends FormBase {
     // Attach libraries.
     $form['#attached']['library'][] = 'ndx_aws_ai/ai_components';
     $form['#attached']['library'][] = 'ndx_aws_ai/ai_simplify_dialog';
+    $form['#attached']['library'][] = 'ndx_aws_ai/ai_diff_highlight';
 
     // Error if no text provided.
     if (empty(trim($this->originalText))) {
@@ -108,11 +109,30 @@ class AiSimplifyDialogForm extends FormBase {
       return $form;
     }
 
+    // Diff toggle control.
+    $form['diff_toggle'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['ai-diff-toggle'],
+        'id' => 'ai-diff-toggle-container',
+      ],
+    ];
+    $form['diff_toggle']['checkbox'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show changes highlighted'),
+      '#default_value' => TRUE,
+      '#attributes' => [
+        'class' => ['ai-diff-toggle__checkbox'],
+        'id' => 'ai-diff-toggle',
+      ],
+    ];
+
     // Comparison container.
     $form['comparison'] = [
       '#type' => 'container',
       '#attributes' => [
-        'class' => ['ai-comparison-container'],
+        'class' => ['ai-comparison-container', 'ai-diff-container', 'ai-diff-highlight-enabled'],
+        'id' => 'ai-comparison-container',
       ],
     ];
 
@@ -120,15 +140,28 @@ class AiSimplifyDialogForm extends FormBase {
     $form['comparison']['original_panel'] = [
       '#type' => 'container',
       '#attributes' => [
-        'class' => ['ai-comparison-panel', 'ai-comparison-original'],
+        'class' => ['ai-comparison-panel', 'ai-comparison-original', 'ai-diff-panel', 'ai-diff-panel--original'],
       ],
     ];
     $form['comparison']['original_panel']['label'] = [
       '#type' => 'html_tag',
       '#tag' => 'h3',
       '#value' => $this->t('Original'),
-      '#attributes' => ['class' => ['ai-comparison-label']],
+      '#attributes' => ['class' => ['ai-comparison-label', 'ai-diff-panel-label']],
     ];
+    // Diff view (shown when diff is enabled).
+    $form['comparison']['original_panel']['diff_view'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#value' => '',
+      '#attributes' => [
+        'class' => ['ai-diff-original', 'ai-diff-view'],
+        'id' => 'ai-diff-original',
+        'aria-label' => $this->t('Original text with removed words highlighted'),
+        'role' => 'region',
+      ],
+    ];
+    // Hidden textarea for raw original text.
     $form['comparison']['original_panel']['original_text'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Original text'),
@@ -137,7 +170,7 @@ class AiSimplifyDialogForm extends FormBase {
       '#disabled' => TRUE,
       '#rows' => 8,
       '#attributes' => [
-        'class' => ['ai-original-text'],
+        'class' => ['ai-original-text', 'ai-text-source'],
         'aria-label' => $this->t('Original text - read only'),
         'readonly' => 'readonly',
       ],
@@ -147,22 +180,35 @@ class AiSimplifyDialogForm extends FormBase {
     $form['comparison']['simplified_panel'] = [
       '#type' => 'container',
       '#attributes' => [
-        'class' => ['ai-comparison-panel', 'ai-comparison-simplified'],
+        'class' => ['ai-comparison-panel', 'ai-comparison-simplified', 'ai-diff-panel', 'ai-diff-panel--modified'],
       ],
     ];
     $form['comparison']['simplified_panel']['label'] = [
       '#type' => 'html_tag',
       '#tag' => 'h3',
       '#value' => $this->t('Simplified'),
-      '#attributes' => ['class' => ['ai-comparison-label']],
+      '#attributes' => ['class' => ['ai-comparison-label', 'ai-diff-panel-label']],
     ];
+    // Diff view (shown when diff is enabled).
+    $form['comparison']['simplified_panel']['diff_view'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#value' => '',
+      '#attributes' => [
+        'class' => ['ai-diff-modified', 'ai-diff-view'],
+        'id' => 'ai-diff-modified',
+        'aria-label' => $this->t('Simplified text with added words highlighted'),
+        'role' => 'region',
+      ],
+    ];
+    // Editable textarea.
     $form['comparison']['simplified_panel']['simplified_text'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Simplified text'),
       '#title_display' => 'invisible',
       '#rows' => 8,
       '#attributes' => [
-        'class' => ['ai-simplified-text'],
+        'class' => ['ai-simplified-text', 'ai-text-source'],
         'aria-label' => $this->t('Simplified text - you can edit this before applying'),
       ],
     ];
@@ -293,7 +339,10 @@ class AiSimplifyDialogForm extends FormBase {
       $response->addCommand(new InvokeCommand('.ai-simplified-text', 'prop', ['disabled', FALSE]));
       $response->addCommand(new InvokeCommand('#ai-simplify-apply-button', 'removeClass', ['ai-hidden']));
 
-      // Focus on simplified content.
+      // Trigger diff display update.
+      $response->addCommand(new InvokeCommand(NULL, 'ndxAwsAiUpdateDiff', []));
+
+      // Focus on simplified content (only if not in diff mode).
       $response->addCommand(new InvokeCommand('.ai-simplified-text', 'focus', []));
 
       // Announce to screen readers.
