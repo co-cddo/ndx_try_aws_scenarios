@@ -46,3 +46,10 @@ services:
   logger.channel.ndx_aws_ai:
     parent: logger.channel_base
     arguments: ['ndx_aws_ai']
+
+  # Story 3.5: Prompt History Service - stores recent prompts per user
+  ndx_aws_ai.prompt_history:
+    class: Drupal\ndx_aws_ai\Service\PromptHistoryService
+    arguments:
+      - '@tempstore.private'
+      - '@current_user'

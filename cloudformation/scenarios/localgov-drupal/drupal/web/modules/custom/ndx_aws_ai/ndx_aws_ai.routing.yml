@@ -24,3 +24,14 @@ ndx_aws_ai.status:
     _permission: 'use ndx aws ai'
   options:
     no_cache: TRUE
+
+# Story 3.5: AI Writing Dialog for content generation.
+ndx_aws_ai.write_dialog:
+  path: '/ndx-aws-ai/write-dialog'
+  defaults:
+    _form: '\Drupal\ndx_aws_ai\Form\AiWritingDialogForm'
+    _title: 'AI Writing Assistant'
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    _admin_route: TRUE
