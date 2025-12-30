@@ -1,0 +1,239 @@
+# Story 5.3: Content Generation Templates - Homepage
+# Generates homepage content sections for LocalGov Drupal
+
+content_type: page
+generation_order: 5
+
+style_guide: |
+  Style Guidelines (Homepage):
+  - Welcoming and accessible tone
+  - Highlight key services immediately
+  - Use the council identity throughout
+  - Keep text minimal, let navigation speak
+  - Mobile-first design thinking
+  - Clear calls to action
+
+items:
+  - id: homepage-hero
+    title_template: "Welcome to {{council_name}}"
+    prompt: |
+      Write homepage hero section content.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+      Motto: {{motto}}
+      Population: {{population}}
+      Flavour: {{flavour_keywords}}
+
+      Create:
+      - Welcoming headline (incorporating council name)
+      - Brief tagline (1 sentence about serving the community)
+      - 3-4 popular service quick links
+      - Search prompt text
+
+      Tone: Welcoming, efficient, community-focused
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "headline": "Welcome to {{council_name}}",
+        "tagline": "Serving our community of [population] residents...",
+        "quick_links": [
+          {"title": "Pay Council Tax", "url": "/council-tax"},
+          {"title": "Report a problem", "url": "/report"},
+          {"title": "Bin collection", "url": "/waste"}
+        ],
+        "search_prompt": "Search for services, information or contact details..."
+      }
+    images:
+      - type: hero
+        prompt: "Panoramic view of {{region_name}} town centre, civic buildings, market square or high street, British architecture, sunny day, community atmosphere"
+        dimensions: "1920x600"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: headline
+
+  - id: homepage-services-grid
+    title_template: "Our services"
+    prompt: |
+      Write content for the homepage services grid section.
+
+      Council: {{council_name}}
+
+      Create descriptions for 8 main service categories:
+      1. Council Tax and benefits
+      2. Housing
+      3. Waste and recycling
+      4. Planning and building
+      5. Parking and transport
+      6. Education and children
+      7. Adult care and health
+      8. Business and licensing
+
+      For each, provide:
+      - Short title (2-3 words)
+      - One-sentence description
+      - Primary action
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "section_title": "Our services",
+        "services": [
+          {
+            "title": "Council Tax",
+            "description": "Pay your bill, claim discounts, or set up Direct Debit",
+            "action": "Manage your account",
+            "icon": "currency-pound"
+          }
+        ]
+      }
+    drupal_fields:
+      title: section_title
+
+  - id: homepage-news-events
+    title_template: "News and events"
+    prompt: |
+      Write introductory text for the news and events section.
+
+      Council: {{council_name}}
+      Theme: {{theme_description}}
+
+      Create:
+      - Section heading
+      - Brief intro text (1-2 sentences)
+      - Call to action for full news page
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "section_title": "News and events",
+        "intro": "Stay informed about what's happening in your area",
+        "cta_text": "See all news",
+        "cta_url": "/news"
+      }
+    drupal_fields:
+      title: section_title
+
+  - id: homepage-alert-banner
+    title_template: "Important updates"
+    prompt: |
+      Write a template for the homepage alert/notice area.
+
+      Council: {{council_name}}
+
+      Create sample alerts for:
+      - Normal operations message
+      - Service change notice
+      - Seasonal information (e.g., winter gritting, summer activities)
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "default_message": "All council services are operating normally",
+        "sample_alerts": [
+          {
+            "type": "info",
+            "title": "Bin collection changes",
+            "message": "Check your revised collection dates for bank holidays"
+          },
+          {
+            "type": "warning",
+            "title": "Office closure",
+            "message": "Customer services will be closed on [date]"
+          }
+        ]
+      }
+    drupal_fields:
+      title: default_message
+
+  - id: homepage-about-council
+    title_template: "About {{council_name}}"
+    prompt: |
+      Write an "About the council" section for the homepage.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+      Population: {{population}}
+      Motto: {{motto}}
+      Flavour: {{flavour_keywords}}
+
+      Create:
+      - Brief overview paragraph (50-80 words)
+      - 3-4 key facts about the area
+      - Link to full about page
+      - Council motto if provided
+
+      Make it feel authentic to the region and theme.
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "section_title": "About {{council_name}}",
+        "overview": "A welcoming paragraph about the council and area...",
+        "key_facts": [
+          "Population: [number]",
+          "Key characteristic 1",
+          "Key characteristic 2",
+          "Key characteristic 3"
+        ],
+        "motto": "{{motto}}",
+        "cta_text": "Learn more about us",
+        "cta_url": "/about"
+      }
+    images:
+      - type: location
+        prompt: "Scenic view of {{region_name}} town, landmark building or natural feature, {{theme_description}} character visible, British landscape"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: section_title
+      body: overview
+
+  - id: homepage-contact
+    title_template: "Contact us"
+    prompt: |
+      Write content for the homepage contact section.
+
+      Council: {{council_name}}
+
+      Create:
+      - Section heading
+      - Brief intro encouraging contact
+      - Main contact methods (phone, email, visit)
+      - Social media links placeholder
+      - Emergency contact note
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "section_title": "Contact us",
+        "intro": "We're here to help with any questions or concerns",
+        "phone": {
+          "label": "Call us",
+          "number": "01onal placeholder",
+          "hours": "Monday to Friday, 9am to 5pm"
+        },
+        "email": {
+          "label": "Email us",
+          "address": "info@council.gov.uk",
+          "response_time": "We aim to respond within 5 working days"
+        },
+        "visit": {
+          "label": "Visit us",
+          "note": "Find your nearest customer service point"
+        },
+        "emergency": "For out-of-hours emergencies, call [number]"
+      }
+    drupal_fields:
+      title: section_title

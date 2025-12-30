@@ -26,6 +26,13 @@ services:
       - '@extension.list.module'
       - '@logger.channel.ndx_council_generator'
 
+  # Story 5.3: Content Generation Templates
+  ndx_council_generator.content_template_manager:
+    class: Drupal\ndx_council_generator\Service\ContentTemplateManager
+    arguments:
+      - '@extension.list.module'
+      - '@logger.channel.ndx_council_generator'
+
   logger.channel.ndx_council_generator:
     parent: logger.channel_base
     arguments: ['ndx_council_generator']

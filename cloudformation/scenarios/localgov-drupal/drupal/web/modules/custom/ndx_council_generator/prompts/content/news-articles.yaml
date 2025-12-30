@@ -1,0 +1,241 @@
+# Story 5.3: Content Generation Templates - News Articles
+# Generates 5 news articles for LocalGov Drupal
+
+content_type: localgov_news_article
+generation_order: 40
+
+style_guide: |
+  Style Guidelines (Council News):
+  - Lead with the most important information
+  - Include quotes from council officials
+  - Keep paragraphs short
+  - Include relevant dates
+  - End with next steps or contact info
+  - Use active voice
+  - Be factual and balanced
+
+items:
+  - id: news-new-service
+    title_template: "New online service launches at {{council_name}}"
+    prompt: |
+      Write a news article announcing a new council online service.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Motto: {{motto}}
+
+      The news is about:
+      - Launch of improved online service portal
+      - 24/7 access to council services
+      - Report issues, pay bills, apply for services
+      - Mobile-friendly design
+      - Accessibility improvements
+
+      Include:
+      - Date of launch (within last month)
+      - Quote from council leader
+      - Statistics on expected usage
+      - Link to the new service
+      - Help available for those without internet
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "2-3 sentence news summary",
+        "body": "Full article with paragraphs and quotes",
+        "date": "YYYY-MM-DD (recent date)",
+        "category": "Council news"
+      }
+    images:
+      - type: hero
+        prompt: "Person using tablet to access council services, modern interface visible, home setting, satisfied expression"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: news-community-event
+    title_template: "Community celebration planned for {{council_name}}"
+    prompt: |
+      Write a news article about an upcoming community event.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+      Flavour: {{flavour_keywords}}
+
+      The event is:
+      - Annual community festival/fair
+      - Free entry for residents
+      - Local performers and stalls
+      - Activities for all ages
+      - Food and drink vendors
+      - Celebrating local heritage
+
+      Include:
+      - Date and venue
+      - Headline attractions
+      - Quote from events organiser
+      - How to book/attend
+      - Accessibility information
+      - Volunteer opportunities
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "2-3 sentence event summary",
+        "body": "Full article",
+        "date": "YYYY-MM-DD",
+        "category": "Events"
+      }
+    images:
+      - type: hero
+        prompt: "British community festival, families enjoying outdoor event, bunting, stalls, summer day, {{region_name}} setting"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: news-budget-update
+    title_template: "{{council_name}} sets budget priorities"
+    prompt: |
+      Write a news article about council budget and spending.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Population: {{population}}
+
+      The news covers:
+      - Annual budget setting
+      - Key investment areas
+      - Service improvements planned
+      - Council tax information
+      - Public consultation results
+      - Financial challenges addressed
+
+      Include:
+      - Budget figures (appropriate for population size)
+      - Quote from finance cabinet member
+      - Key spending priorities
+      - Impact on residents
+      - Where to find more information
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "2-3 sentence summary",
+        "body": "Full article",
+        "date": "YYYY-MM-DD",
+        "category": "Council news"
+      }
+    images:
+      - type: hero
+        prompt: "Council meeting chamber, councillors seated, formal proceedings, British local government setting"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: news-environment-initiative
+    title_template: "{{council_name}} launches green initiative"
+    prompt: |
+      Write a news article about an environmental initiative.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      The initiative includes:
+      - Climate action plan progress
+      - Tree planting programme
+      - Electric vehicle infrastructure
+      - Recycling improvements
+      - Energy efficiency schemes
+      - Community involvement
+
+      Include:
+      - Specific targets and numbers
+      - Quote from environment portfolio holder
+      - How residents can get involved
+      - Environmental benefits
+      - Funding information
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "2-3 sentence summary",
+        "body": "Full article",
+        "date": "YYYY-MM-DD",
+        "category": "Environment"
+      }
+    images:
+      - type: hero
+        prompt: "Community tree planting event, volunteers with saplings, council workers, green space, {{region_name}} landscape"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: news-award-recognition
+    title_template: "{{council_name}} recognised for excellence"
+    prompt: |
+      Write a news article about council receiving recognition/award.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Motto: {{motto}}
+
+      The recognition is for:
+      - Customer service excellence
+      - Digital transformation
+      - Community engagement
+      - Environmental leadership
+      - Innovation in service delivery
+
+      Include:
+      - Award details and presenting body
+      - What the council was recognised for
+      - Quote from council chief executive
+      - Staff and resident contributions
+      - Future improvement plans
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "2-3 sentence summary",
+        "body": "Full article",
+        "date": "YYYY-MM-DD",
+        "category": "Council news"
+      }
+    images:
+      - type: hero
+        prompt: "Council staff celebrating award, group photo with certificate/trophy, town hall setting, professional attire"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
