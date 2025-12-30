@@ -68,3 +68,24 @@ ndx_aws_ai.tts.languages:
   methods: [GET]
   requirements:
     _permission: 'access content'
+
+# Story 4.7: Content Translation endpoints.
+ndx_aws_ai.translation.translate:
+  path: '/api/ndx-ai/translation/translate'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\ContentTranslationController::translate'
+    _title: 'Translate Content'
+  methods: [POST]
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+
+ndx_aws_ai.translation.languages:
+  path: '/api/ndx-ai/translation/languages'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\ContentTranslationController::getLanguages'
+    _title: 'Translation Languages'
+  methods: [GET]
+  requirements:
+    _permission: 'access content'

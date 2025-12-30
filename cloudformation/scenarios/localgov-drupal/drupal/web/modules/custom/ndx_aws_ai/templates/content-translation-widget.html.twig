@@ -1,0 +1,129 @@
+{#
+/**
+ * @file
+ * Template for the Content Translation widget.
+ *
+ * Available variables:
+ * - show_search: Boolean whether to show search input.
+ * - show_priority_languages: Boolean whether to show priority languages section.
+ * - priority_languages: Array of priority language codes and names.
+ * - all_languages: Array of all supported language codes and names.
+ * - attributes: HTML attributes for the widget container.
+ *
+ * Story 4.7: Content Translation
+ */
+#}
+<div{{ attributes.addClass('translation-widget') }}>
+  <h3 class="translation-widget__title">{{ 'Translate this page'|t }}</h3>
+
+  <div class="translation-widget__controls">
+    {# Search input (optional) #}
+    {% if show_search %}
+    <div class="govuk-form-group translation-widget__search-group">
+      <label class="govuk-label govuk-visually-hidden" for="translation-search">
+        {{ 'Search languages'|t }}
+      </label>
+      <input type="text"
+             id="translation-search"
+             class="govuk-input govuk-input--width-20 translation-search"
+             placeholder="{{ 'Search languages...'|t }}"
+             aria-describedby="translation-search-hint"
+             autocomplete="off">
+      <span id="translation-search-hint" class="govuk-hint govuk-visually-hidden">
+        {{ 'Type to filter the language list'|t }}
+      </span>
+    </div>
+    {% endif %}
+
+    {# Language selector #}
+    <div class="govuk-form-group translation-widget__select-group">
+      <label class="govuk-label govuk-visually-hidden" for="translation-language-select">
+        {{ 'Select language'|t }}
+      </label>
+      <select id="translation-language-select"
+              class="govuk-select translation-language-select"
+              aria-label="{{ 'Select language for translation'|t }}">
+        <option value="">{{ 'Choose a language...'|t }}</option>
+
+        {# Recently used languages (populated by JavaScript) #}
+        <optgroup label="{{ 'Recently used'|t }}" class="translation-recent-group" hidden>
+        </optgroup>
+
+        {# Priority languages for UK councils #}
+        {% if show_priority_languages and priority_languages %}
+        <optgroup label="{{ 'Common languages'|t }}" class="translation-priority-group">
+          {% for code, name in priority_languages %}
+            <option value="{{ code }}">{{ name }}</option>
+          {% endfor %}
+        </optgroup>
+        {% endif %}
+
+        {# All languages #}
+        <optgroup label="{{ 'All languages'|t }}" class="translation-all-group">
+          {% for code, name in all_languages %}
+            <option value="{{ code }}">{{ name }}</option>
+          {% endfor %}
+        </optgroup>
+      </select>
+    </div>
+
+    {# Translate button #}
+    <button type="button"
+            class="govuk-button translation-submit"
+            disabled
+            aria-describedby="translation-submit-hint">
+      {{ 'Translate'|t }}
+    </button>
+    <span id="translation-submit-hint" class="govuk-visually-hidden">
+      {{ 'Select a language first, then click to translate'|t }}
+    </span>
+  </div>
+
+  {# Translation banner (shown when translated) #}
+  <div class="translation-banner govuk-notification-banner govuk-notification-banner--info"
+       role="region"
+       aria-labelledby="translation-banner-title"
+       hidden>
+    <div class="govuk-notification-banner__header">
+      <h2 class="govuk-notification-banner__title" id="translation-banner-title">
+        {{ 'Translation'|t }}
+      </h2>
+    </div>
+    <div class="govuk-notification-banner__content">
+      <p class="translation-banner__message">
+        {{ 'This page has been translated to'|t }}
+        <strong class="translation-banner__language"></strong>.
+      </p>
+      <div class="translation-banner__actions">
+        <button type="button"
+                class="govuk-button govuk-button--secondary translation-revert"
+                aria-label="{{ 'Show original content'|t }}">
+          {{ 'Show original'|t }}
+        </button>
+        <div class="govuk-checkboxes govuk-checkboxes--small translation-remember-wrapper">
+          <div class="govuk-checkboxes__item">
+            <input type="checkbox"
+                   class="govuk-checkboxes__input translation-remember-checkbox"
+                   id="translation-remember">
+            <label class="govuk-label govuk-checkboxes__label" for="translation-remember">
+              {{ 'Remember my choice'|t }}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Loading indicator #}
+  <div class="translation-widget__loading" hidden aria-live="polite">
+    <span class="translation-loading-spinner" aria-hidden="true"></span>
+    <span class="translation-loading-text">{{ 'Translating...'|t }}</span>
+  </div>
+
+  {# Error message area #}
+  <div class="translation-widget__error govuk-error-message" hidden role="alert">
+  </div>
+
+  {# Status region for screen reader announcements #}
+  <div class="translation-widget__status" role="status" aria-live="polite"></div>
+</div>

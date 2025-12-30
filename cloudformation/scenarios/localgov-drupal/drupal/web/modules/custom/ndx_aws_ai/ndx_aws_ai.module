@@ -52,6 +52,7 @@ function ndx_aws_ai_help(string $route_name, RouteMatchInterface $route_match): 
  * Implements hook_theme().
  *
  * Story 4.6: Listen to Page (TTS Button)
+ * Story 4.7: Content Translation
  */
 function ndx_aws_ai_theme(): array {
   return [
@@ -63,6 +64,16 @@ function ndx_aws_ai_theme(): array {
         'attributes' => [],
       ],
       'template' => 'listen-to-page-player',
+    ],
+    'content_translation_widget' => [
+      'variables' => [
+        'show_search' => TRUE,
+        'show_priority_languages' => TRUE,
+        'priority_languages' => [],
+        'all_languages' => [],
+        'attributes' => [],
+      ],
+      'template' => 'content-translation-widget',
     ],
   ];
 }

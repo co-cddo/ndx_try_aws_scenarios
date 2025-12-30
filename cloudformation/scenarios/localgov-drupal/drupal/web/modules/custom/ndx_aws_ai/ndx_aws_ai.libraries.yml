@@ -93,3 +93,18 @@ tts-player:
     - core/drupalSettings
     - core/once
     - core/drupal.announce
+
+# Content Translation library.
+# Story 4.7: Content Translation
+content-translation:
+  version: VERSION
+  js:
+    js/content-translation.js: {}
+  css:
+    component:
+      css/content-translation.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - core/drupal.announce
