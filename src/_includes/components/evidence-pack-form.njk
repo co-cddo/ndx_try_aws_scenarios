@@ -1,0 +1,455 @@
+{#
+  Evidence Pack Form Component - Story 2.9
+
+  Provides a form to collect evaluation data and generate a PDF evidence pack.
+
+  Required variables:
+    - scenarioData: The scenario object from scenarios.yaml
+    - scenarioId: The scenario identifier (e.g., 'localgov-drupal')
+
+  Features:
+  - Pre-populated with session data where available
+  - GOV.UK form patterns and accessibility
+  - PDF generation via JavaScript
+#}
+
+<div class="ndx-evidence-pack-form" id="evidence-pack-form" role="region" aria-labelledby="evidence-pack-form-title">
+  <h2 class="govuk-heading-l" id="evidence-pack-form-title">Generate your evidence pack</h2>
+
+  <p class="govuk-body-l">
+    Create a PDF summary of your evaluation to share with stakeholders and committees.
+  </p>
+
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Tip:</strong> Fields marked with <span class="govuk-visually-hidden">required</span><span aria-hidden="true">*</span> are required.
+      Your data is processed locally and not sent to any server.
+    </p>
+  </div>
+
+  <form id="evidence-form" class="ndx-evidence-form" novalidate>
+    {# Evaluator Details #}
+    <fieldset class="govuk-fieldset govuk-!-margin-bottom-6">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+        <h3 class="govuk-fieldset__heading">Your details</h3>
+      </legend>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="evaluator-name">
+          Your name <span class="govuk-visually-hidden">(required)</span><span aria-hidden="true" class="ndx-required">*</span>
+        </label>
+        <input
+          class="govuk-input govuk-!-width-two-thirds"
+          id="evaluator-name"
+          name="evaluatorName"
+          type="text"
+          required
+          aria-required="true"
+          autocomplete="name"
+        >
+      </div>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="evaluator-role">
+          Your role <span class="govuk-visually-hidden">(required)</span><span aria-hidden="true" class="ndx-required">*</span>
+        </label>
+        <input
+          class="govuk-input govuk-!-width-two-thirds"
+          id="evaluator-role"
+          name="evaluatorRole"
+          type="text"
+          required
+          aria-required="true"
+          placeholder="e.g., IT Director, Service Manager"
+        >
+      </div>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="council-name">
+          Council name <span class="govuk-visually-hidden">(required)</span><span aria-hidden="true" class="ndx-required">*</span>
+        </label>
+        <input
+          class="govuk-input govuk-!-width-two-thirds"
+          id="council-name"
+          name="councilName"
+          type="text"
+          required
+          aria-required="true"
+          placeholder="e.g., Example District Council"
+        >
+      </div>
+    </fieldset>
+
+    {# Deployment Details (auto-populated) #}
+    <fieldset class="govuk-fieldset govuk-!-margin-bottom-6">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+        <h3 class="govuk-fieldset__heading">Deployment details</h3>
+      </legend>
+
+      <p class="govuk-body govuk-!-margin-bottom-4">
+        These fields are pre-populated from your deployment session.
+      </p>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="scenario-name">Scenario</label>
+        <input
+          class="govuk-input govuk-!-width-two-thirds"
+          id="scenario-name"
+          name="scenarioName"
+          type="text"
+          readonly
+          value="{{ scenarioData.title | default('LocalGov Drupal') }}"
+        >
+      </div>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="drupal-url">Drupal site URL</label>
+        <input
+          class="govuk-input"
+          id="drupal-url"
+          name="drupalUrl"
+          type="text"
+          value=""
+          placeholder="Will be populated from your deployment"
+        >
+        <p class="govuk-hint govuk-!-margin-top-1">
+          Copy this from your CloudFormation Outputs if not automatically populated
+        </p>
+      </div>
+
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-one-half">
+          <div class="govuk-form-group">
+            <label class="govuk-label" for="aws-region">AWS Region</label>
+            <input
+              class="govuk-input govuk-!-width-full"
+              id="aws-region"
+              name="awsRegion"
+              type="text"
+              readonly
+              value="us-east-1 (N. Virginia)"
+            >
+          </div>
+        </div>
+        <div class="govuk-grid-column-one-half">
+          <div class="govuk-form-group">
+            <label class="govuk-label" for="estimated-cost">Estimated cost</label>
+            <input
+              class="govuk-input govuk-!-width-full"
+              id="estimated-cost"
+              name="estimatedCost"
+              type="text"
+              readonly
+              value="{{ scenarioData.costBand.trialCost | default('< $0.50') }}"
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="deployment-time">Deployment time</label>
+        <input
+          class="govuk-input govuk-!-width-one-quarter"
+          id="deployment-time"
+          name="deploymentTime"
+          type="text"
+          value="{{ scenarioData.duration | default('~15 minutes') }}"
+        >
+      </div>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="evaluation-date">Evaluation date</label>
+        <input
+          class="govuk-input govuk-!-width-one-third"
+          id="evaluation-date"
+          name="evaluationDate"
+          type="text"
+          readonly
+        >
+      </div>
+    </fieldset>
+
+    {# Observations #}
+    <fieldset class="govuk-fieldset govuk-!-margin-bottom-6">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+        <h3 class="govuk-fieldset__heading">Your observations</h3>
+      </legend>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="observations">
+          Key observations and notes
+        </label>
+        <p class="govuk-hint">
+          What stood out during your evaluation? Any questions for stakeholders?
+        </p>
+        <textarea
+          class="govuk-textarea"
+          id="observations"
+          name="observations"
+          rows="6"
+          aria-describedby="observations-hint"
+        ></textarea>
+        <p id="observations-hint" class="govuk-hint govuk-!-margin-top-1">
+          This will appear in the "Observations & Notes" section of your PDF
+        </p>
+      </div>
+    </fieldset>
+
+    {# Screenshots (optional) #}
+    <fieldset class="govuk-fieldset govuk-!-margin-bottom-6">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+        <h3 class="govuk-fieldset__heading">Screenshots (optional)</h3>
+      </legend>
+
+      <p class="govuk-body">
+        Upload screenshots to include in your evidence pack. These should be captured during your walkthrough.
+      </p>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="screenshot-homepage">Homepage screenshot</label>
+        <input
+          class="govuk-file-upload"
+          id="screenshot-homepage"
+          name="screenshotHomepage"
+          type="file"
+          accept="image/png,image/jpeg"
+        >
+      </div>
+
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="screenshot-admin">Admin dashboard screenshot</label>
+        <input
+          class="govuk-file-upload"
+          id="screenshot-admin"
+          name="screenshotAdmin"
+          type="file"
+          accept="image/png,image/jpeg"
+        >
+      </div>
+    </fieldset>
+
+    {# Form Actions #}
+    <div class="ndx-form-actions">
+      <button
+        type="submit"
+        class="govuk-button govuk-button--start"
+        id="generate-pdf-btn"
+        data-module="govuk-button"
+      >
+        Generate PDF Evidence Pack
+        <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+        </svg>
+      </button>
+
+      <p class="govuk-body-s govuk-!-margin-top-2">
+        PDF will be generated locally and downloaded to your device
+      </p>
+    </div>
+
+    {# Loading State #}
+    <div id="pdf-loading" class="ndx-loading" hidden>
+      <div class="ndx-loading__spinner" aria-hidden="true"></div>
+      <p class="govuk-body-s">Generating your evidence pack...</p>
+    </div>
+
+    {# Success Message #}
+    <div id="pdf-success" class="govuk-panel govuk-panel--confirmation ndx-success-panel" hidden>
+      <h2 class="govuk-panel__title">
+        Evidence pack downloaded
+      </h2>
+      <div class="govuk-panel__body">
+        Check your downloads folder for the PDF
+      </div>
+    </div>
+
+    {# Error Message #}
+    <div id="pdf-error" class="govuk-error-summary" hidden role="alert" aria-labelledby="error-summary-title">
+      <h2 class="govuk-error-summary__title" id="error-summary-title">
+        There was a problem generating your PDF
+      </h2>
+      <div class="govuk-error-summary__body">
+        <p id="pdf-error-message"></p>
+        <p>Please try again. If the problem persists, contact support.</p>
+      </div>
+    </div>
+  </form>
+</div>
+
+<style>
+  .ndx-evidence-pack-form {
+    max-width: 720px;
+  }
+
+  .ndx-required {
+    color: #d4351c;
+    margin-left: 4px;
+  }
+
+  .ndx-form-actions {
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-loading {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background-color: #f3f2f1;
+    margin-top: 20px;
+  }
+
+  .ndx-loading__spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f2f1;
+    border-top-color: #1d70b8;
+    border-radius: 50%;
+    animation: ndx-spin 0.8s linear infinite;
+  }
+
+  @keyframes ndx-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .ndx-success-panel {
+    margin-top: 20px;
+  }
+
+  .govuk-error-summary {
+    margin-top: 20px;
+  }
+
+  /* Read-only input styling */
+  .govuk-input[readonly] {
+    background-color: #f3f2f1;
+    border-color: #b1b4b6;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  // Evidence Pack Form Handler
+  (function() {
+    'use strict';
+
+    const form = document.getElementById('evidence-form');
+    const generateBtn = document.getElementById('generate-pdf-btn');
+    const loadingEl = document.getElementById('pdf-loading');
+    const successEl = document.getElementById('pdf-success');
+    const errorEl = document.getElementById('pdf-error');
+    const errorMsgEl = document.getElementById('pdf-error-message');
+
+    // Set today's date
+    const dateInput = document.getElementById('evaluation-date');
+    if (dateInput) {
+      const today = new Date().toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      dateInput.value = today;
+    }
+
+    // Load session data if available
+    const scenarioId = '{{ scenarioId | default("localgov-drupal") }}';
+    const deploymentData = sessionStorage.getItem(`ndx-deployment-${scenarioId}`);
+
+    if (deploymentData) {
+      try {
+        const data = JSON.parse(deploymentData);
+        const drupalUrlInput = document.getElementById('drupal-url');
+        if (drupalUrlInput && data.drupalUrl) {
+          drupalUrlInput.value = data.drupalUrl;
+        }
+      } catch (e) {
+        console.warn('Could not parse deployment data:', e);
+      }
+    }
+
+    // Convert file to base64
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Form submission handler
+    if (form) {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Hide previous states
+        successEl.hidden = true;
+        errorEl.hidden = true;
+
+        // Show loading
+        loadingEl.hidden = false;
+        generateBtn.disabled = true;
+
+        try {
+          // Collect form data
+          const formData = new FormData(form);
+          const data = {
+            scenarioName: formData.get('scenarioName') || '{{ scenarioData.title | default("LocalGov Drupal") }}',
+            scenarioId: scenarioId,
+            evaluationDate: formData.get('evaluationDate') || new Date().toLocaleDateString('en-GB'),
+            evaluatorName: formData.get('evaluatorName') || 'Anonymous',
+            evaluatorRole: formData.get('evaluatorRole') || 'Evaluator',
+            councilName: formData.get('councilName') || 'Council',
+            drupalUrl: formData.get('drupalUrl') || 'Not recorded',
+            awsRegion: formData.get('awsRegion') || 'us-east-1',
+            estimatedCost: formData.get('estimatedCost') || '< $0.50',
+            deploymentTime: formData.get('deploymentTime') || '~15 minutes',
+            observations: formData.get('observations') || '',
+            screenshots: {}
+          };
+
+          // Process screenshots if provided
+          const homepageFile = document.getElementById('screenshot-homepage').files[0];
+          const adminFile = document.getElementById('screenshot-admin').files[0];
+
+          if (homepageFile) {
+            data.screenshots.homepage = await fileToBase64(homepageFile);
+          }
+
+          if (adminFile) {
+            data.screenshots.adminDashboard = await fileToBase64(adminFile);
+          }
+
+          // Import PDF generator dynamically
+          const { EvidencePackGenerator } = await import('/lib/pdf-generator.js');
+
+          // Generate and download PDF
+          const generator = new EvidencePackGenerator();
+          generator.download(data);
+
+          // Show success
+          loadingEl.hidden = true;
+          successEl.hidden = false;
+
+          // Scroll to success message
+          successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        } catch (error) {
+          console.error('Error generating PDF:', error);
+
+          // Show error
+          loadingEl.hidden = true;
+          errorMsgEl.textContent = error.message || 'An unexpected error occurred.';
+          errorEl.hidden = false;
+
+          // Scroll to error
+          errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } finally {
+          generateBtn.disabled = false;
+        }
+      });
+    }
+  })();
+</script>

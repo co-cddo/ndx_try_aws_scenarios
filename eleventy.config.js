@@ -58,6 +58,9 @@ export default function(eleventyConfig) {
   // Pass through static assets
   eleventyConfig.addPassthroughCopy('src/assets');
 
+  // Pass through lib directory for JavaScript modules (Story 2.9)
+  eleventyConfig.addPassthroughCopy({ 'src/lib': 'lib' });
+
   // Add custom filters
   eleventyConfig.addFilter('capitalize', (str) => {
     if (!str) return '';

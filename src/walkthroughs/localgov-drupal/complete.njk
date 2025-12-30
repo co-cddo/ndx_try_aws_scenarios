@@ -91,6 +91,18 @@ scenarioId: localgov-drupal
 
 <h2 class="govuk-heading-l">What's next</h2>
 
+{# Story 2.9: Evidence Pack Generation #}
+<div class="ndx-evidence-section govuk-!-margin-bottom-8">
+  <h3 class="govuk-heading-m">Share your findings</h3>
+  <p class="govuk-body">
+    Create a PDF evidence pack to share with your stakeholders, committee members,
+    or IT leadership team.
+  </p>
+  <a href="/walkthroughs/localgov-drupal/evidence-pack/" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+    Generate Evidence Pack
+  </a>
+</div>
+
 {# Story 15.3: Completion next steps with proper links #}
 {% set scenarioId = "localgov-drupal" %}
 {% set scenarioName = "LocalGov Drupal" %}
@@ -292,6 +304,16 @@ scenarioId: localgov-drupal
   .ndx-related-scenario h3 {
     margin-top: 0;
     margin-bottom: 10px;
+  }
+
+  .ndx-evidence-section {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-evidence-section h3 {
+    margin-top: 0;
   }
 
   @media (max-width: 640px) {
