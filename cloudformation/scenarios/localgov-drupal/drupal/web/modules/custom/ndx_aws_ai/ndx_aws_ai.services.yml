@@ -114,3 +114,32 @@ services:
       - '@ndx_aws_ai.client_factory'
       - '@ndx_aws_ai.error_handler'
       - '@ndx_aws_ai.textract_rate_limiter'
+
+  # Story 4.5: Alt-Text Generator Service - WCAG-compliant alt-text for media images
+  ndx_aws_ai.alt_text_generator:
+    class: Drupal\ndx_aws_ai\Service\AltTextGeneratorService
+    arguments:
+      - '@ndx_aws_ai.vision'
+      - '@entity_type.manager'
+      - '@file_system'
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.5: Alt-Text Event Subscriber - auto-generate alt-text on media upload
+  ndx_aws_ai.alt_text_event_subscriber:
+    class: Drupal\ndx_aws_ai\EventSubscriber\AltTextEventSubscriber
+    arguments:
+      - '@ndx_aws_ai.alt_text_generator'
+      - '@config.factory'
+      - '@logger.channel.ndx_aws_ai'
+    tags:
+      - { name: event_subscriber }
+
+  # Story 4.5: Drush commands for alt-text generation
+  ndx_aws_ai.commands:
+    class: Drupal\ndx_aws_ai\Commands\NdxAwsAiCommands
+    arguments:
+      - '@ndx_aws_ai.alt_text_generator'
+      - '@entity_type.manager'
+      - '@logger.channel.ndx_aws_ai'
+    tags:
+      - { name: drush.command }
