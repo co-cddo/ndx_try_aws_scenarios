@@ -1,0 +1,47 @@
+{#
+/**
+ * @file
+ * Template for the NDX Welcome Block.
+ *
+ * Displays a welcoming orientation experience with council name
+ * and quick navigation links.
+ *
+ * Available variables:
+ * - council_name: The name of the council.
+ * - quick_links: Array of quick link items with title, description, url, icon.
+ *
+ * Story 1.11: First Login Welcome Experience
+ */
+#}
+<div class="ndx-welcome" role="region" aria-labelledby="ndx-welcome-title">
+  <div class="ndx-welcome__header">
+    <h2 id="ndx-welcome-title" class="ndx-welcome__council-name">{{ council_name }}</h2>
+    <p class="ndx-welcome__subtitle">{{ 'Welcome to LocalGov Drupal'|t }}</p>
+  </div>
+
+  <div class="ndx-welcome__intro">
+    <p>{{ "This is your demonstration LocalGov Drupal site. Explore the content management system, try editing pages, and discover how AI-powered features can enhance your council's digital services."|t }}</p>
+  </div>
+
+  <div class="ndx-welcome__start-here">
+    <span class="ndx-welcome__start-badge">{{ 'Start Here'|t }}</span>
+    <p>{{ "Use the quick links below to begin exploring:"|t }}</p>
+  </div>
+
+  {% if quick_links %}
+    <div class="ndx-welcome__links">
+      {% for link in quick_links %}
+        <a href="{{ link.url }}" class="ndx-welcome__link-card"{% if link.external %} target="_blank" rel="noopener noreferrer"{% endif %}>
+          <span class="ndx-welcome__link-icon ndx-welcome__link-icon--{{ link.icon }}" aria-hidden="true"></span>
+          <span class="ndx-welcome__link-content">
+            <span class="ndx-welcome__link-title">{{ link.title }}</span>
+            <span class="ndx-welcome__link-description">{{ link.description }}</span>
+          </span>
+          {% if link.external %}
+            <span class="visually-hidden">{{ '(opens in new tab)'|t }}</span>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

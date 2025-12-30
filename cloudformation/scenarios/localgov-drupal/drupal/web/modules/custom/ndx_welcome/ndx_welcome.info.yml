@@ -1,0 +1,9 @@
+name: 'NDX Welcome'
+type: module
+description: 'Displays a welcoming orientation experience on the admin dashboard for first-time users.'
+core_version_requirement: ^10
+package: NDX
+dependencies:
+  - drupal:block
+
+# Story 1.11: First Login Welcome Experience

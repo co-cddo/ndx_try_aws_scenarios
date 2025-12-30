@@ -260,6 +260,14 @@ enable_custom_modules() {
         log "ndx_demo_banner module not found, skipping"
     fi
 
+    # Enable the NDX Welcome module (Story 1.11)
+    if [ -d "$DRUPAL_ROOT/web/modules/custom/ndx_welcome" ]; then
+        log "Enabling ndx_welcome module..."
+        ./vendor/bin/drush pm:enable ndx_welcome --yes 2>&1 | while read line; do log "  $line"; done || true
+    else
+        log "ndx_welcome module not found, skipping"
+    fi
+
     return 0
 }
 
