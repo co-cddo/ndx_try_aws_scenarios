@@ -47,3 +47,22 @@ function ndx_aws_ai_help(string $route_name, RouteMatchInterface $route_match): 
       return NULL;
   }
 }
+
+/**
+ * Implements hook_theme().
+ *
+ * Story 4.6: Listen to Page (TTS Button)
+ */
+function ndx_aws_ai_theme(): array {
+  return [
+    'listen_to_page_player' => [
+      'variables' => [
+        'languages' => [],
+        'default_language' => 'en-GB',
+        'show_speed_control' => TRUE,
+        'attributes' => [],
+      ],
+      'template' => 'listen-to-page-player',
+    ],
+  ];
+}

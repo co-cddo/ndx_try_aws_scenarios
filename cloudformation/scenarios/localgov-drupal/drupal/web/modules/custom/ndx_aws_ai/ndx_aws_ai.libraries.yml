@@ -78,3 +78,18 @@ ai_diff_highlight:
   dependencies:
     - core/drupal
     - ndx_aws_ai/ai_components
+
+# TTS Player library.
+# Story 4.6: Listen to Page (TTS Button)
+tts-player:
+  version: VERSION
+  js:
+    js/tts-player.js: {}
+  css:
+    component:
+      css/tts-player.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - core/drupal.announce

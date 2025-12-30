@@ -1,0 +1,78 @@
+{#
+/**
+ * @file
+ * Template for the Listen to Page TTS player.
+ *
+ * Available variables:
+ * - languages: Array of available language options with code, name, voice, engine.
+ * - default_language: The default language code (e.g., 'en-GB').
+ * - show_speed_control: Boolean whether to show speed control.
+ * - attributes: HTML attributes for the player container.
+ *
+ * Story 4.6: Listen to Page (TTS Button)
+ */
+#}
+<div{{ attributes.addClass('tts-player') }}>
+  <h3 class="tts-player__title">{{ 'Listen to this page'|t }}</h3>
+
+  <div class="tts-player__controls">
+    {# Language selector #}
+    <select class="tts-language govuk-select" aria-label="{{ 'Select language'|t }}">
+      {% for code, config in languages %}
+        <option value="{{ code }}"{{ code == default_language ? ' selected' : '' }}>
+          {{ config.name }}
+        </option>
+      {% endfor %}
+    </select>
+
+    {# Play/Pause/Stop buttons #}
+    <div class="tts-player__buttons">
+      <button type="button" class="tts-play govuk-button" aria-label="{{ 'Play'|t }}">
+        <span class="tts-icon tts-icon--play" aria-hidden="true"></span>
+        <span class="visually-hidden">{{ 'Play'|t }}</span>
+      </button>
+      <button type="button" class="tts-pause govuk-button govuk-button--secondary" aria-label="{{ 'Pause'|t }}" hidden>
+        <span class="tts-icon tts-icon--pause" aria-hidden="true"></span>
+        <span class="visually-hidden">{{ 'Pause'|t }}</span>
+      </button>
+      <button type="button" class="tts-stop govuk-button govuk-button--warning" aria-label="{{ 'Stop'|t }}" disabled>
+        <span class="tts-icon tts-icon--stop" aria-hidden="true"></span>
+        <span class="visually-hidden">{{ 'Stop'|t }}</span>
+      </button>
+    </div>
+
+    {# Progress bar and time display #}
+    <div class="tts-player__progress">
+      <input type="range"
+             class="tts-progress govuk-range"
+             min="0"
+             max="100"
+             value="0"
+             aria-label="{{ 'Playback progress'|t }}"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-valuenow="0">
+      <span class="tts-time" aria-live="off">0:00 / 0:00</span>
+    </div>
+
+    {# Speed control (optional) #}
+    {% if show_speed_control %}
+    <div class="tts-player__speed">
+      <label for="tts-speed-{{ random() }}">{{ 'Speed'|t }}</label>
+      <input type="range"
+             id="tts-speed-{{ random() }}"
+             class="tts-speed govuk-range"
+             min="0.5"
+             max="2"
+             step="0.25"
+             value="1"
+             aria-label="{{ 'Playback speed'|t }}"
+             aria-valuetext="1x">
+      <span class="tts-speed-display" aria-hidden="true">1x</span>
+    </div>
+    {% endif %}
+  </div>
+
+  {# Status region for screen reader announcements #}
+  <div class="tts-player__status" role="status" aria-live="polite"></div>
+</div>

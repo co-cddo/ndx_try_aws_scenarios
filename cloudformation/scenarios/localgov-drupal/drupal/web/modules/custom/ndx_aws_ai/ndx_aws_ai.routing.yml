@@ -46,3 +46,25 @@ ndx_aws_ai.simplify_dialog:
     _permission: 'use ndx aws ai'
   options:
     _admin_route: TRUE
+
+# Story 4.6: TTS synthesis endpoint for Listen to Page feature.
+ndx_aws_ai.tts.synthesize:
+  path: '/api/ndx-ai/tts/synthesize'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\TtsController::synthesize'
+    _title: 'TTS Synthesis'
+  methods: [POST]
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+
+# Story 4.6: Get available TTS languages.
+ndx_aws_ai.tts.languages:
+  path: '/api/ndx-ai/tts/languages'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\TtsController::getLanguages'
+    _title: 'TTS Languages'
+  methods: [GET]
+  requirements:
+    _permission: 'access content'

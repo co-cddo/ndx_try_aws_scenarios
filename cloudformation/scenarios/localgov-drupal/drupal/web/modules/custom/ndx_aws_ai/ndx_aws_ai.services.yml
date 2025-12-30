@@ -143,3 +143,9 @@ services:
       - '@logger.channel.ndx_aws_ai'
     tags:
       - { name: drush.command }
+
+  # Story 4.6: Content Extractor Service - extracts text for TTS
+  ndx_aws_ai.content_extractor:
+    class: Drupal\ndx_aws_ai\Service\ContentExtractorService
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
