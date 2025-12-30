@@ -33,6 +33,17 @@ services:
       - '@extension.list.module'
       - '@logger.channel.ndx_council_generator'
 
+  # Story 5.4: Content Generation Orchestrator
+  ndx_council_generator.content_orchestrator:
+    class: Drupal\ndx_council_generator\Service\ContentGenerationOrchestrator
+    arguments:
+      - '@ndx_council_generator.content_template_manager'
+      - '@ndx_aws_ai.bedrock'
+      - '@ndx_council_generator.state_manager'
+      - '@entity_type.manager'
+      - '@config.factory'
+      - '@logger.channel.ndx_council_generator'
+
   logger.channel.ndx_council_generator:
     parent: logger.channel_base
     arguments: ['ndx_council_generator']
