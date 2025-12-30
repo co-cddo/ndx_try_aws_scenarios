@@ -229,6 +229,23 @@ clear_caches() {
     return 0
 }
 
+import_sample_content() {
+    log "Importing sample content..."
+    update_status "Content" "Importing sample content..." 70
+
+    cd "$DRUPAL_ROOT"
+
+    # Check if sample content directory and import script exist
+    if [ -f "$DRUPAL_ROOT/sample-content/import.php" ]; then
+        log "Running sample content import script..."
+        ./vendor/bin/drush scr "$DRUPAL_ROOT/sample-content/import.php" 2>&1 | while read line; do log "  $line"; done || true
+    else
+        log "Sample content import script not found, skipping"
+    fi
+
+    return 0
+}
+
 # ============================================================================
 # Main Initialization Flow
 # ============================================================================
@@ -280,6 +297,9 @@ main() {
             signal_cfn_failure "Drupal config:import failed"
             exit 1
         fi
+
+        # Import sample content (Story 1.9)
+        import_sample_content
     else
         log "Existing installation detected, skipping install"
         update_status "Reconnecting" "Connecting to existing database..." 50

@@ -1,0 +1,226 @@
+# Sample UK Council Services
+# These map to LocalGov Drupal's localgov_services_page content type
+
+services:
+  - title: "Waste and Recycling"
+    summary: "Bin collections, recycling centres, bulky waste collection, and waste permits"
+    body: |
+      <p>Find out about waste and recycling services in our area including:</p>
+      <ul>
+        <li>Bin collection days and what goes in each bin</li>
+        <li>Recycling centre locations and opening times</li>
+        <li>Bulky waste collection booking</li>
+        <li>Trade waste permits and services</li>
+      </ul>
+    topic: "Environment"
+    icon: "bin"
+
+  - title: "Council Tax"
+    summary: "Pay your council tax, set up a direct debit, apply for discounts or exemptions"
+    body: |
+      <p>Your council tax pays for local services including schools, roads, and social care.</p>
+      <h2>What you can do</h2>
+      <ul>
+        <li>Pay your council tax online</li>
+        <li>Set up a direct debit</li>
+        <li>Apply for single person discount</li>
+        <li>Check your council tax band</li>
+      </ul>
+    topic: "Council Tax and Benefits"
+    icon: "money"
+
+  - title: "Planning and Building Control"
+    summary: "Submit planning applications, view planning decisions, building regulations"
+    body: |
+      <p>Planning services help you understand what you can build and how to get permission.</p>
+      <h2>Our services</h2>
+      <ul>
+        <li>Submit a planning application</li>
+        <li>Search planning applications</li>
+        <li>Building regulations approval</li>
+        <li>Pre-application advice</li>
+      </ul>
+    topic: "Planning"
+    icon: "home"
+
+  - title: "Housing"
+    summary: "Council housing, homelessness help, private renting advice, housing benefits"
+    body: |
+      <p>Find support and information about housing in our area.</p>
+      <h2>Housing services</h2>
+      <ul>
+        <li>Apply for council housing</li>
+        <li>Report a housing repair</li>
+        <li>Homelessness prevention</li>
+        <li>Advice for private renters</li>
+      </ul>
+    topic: "Housing"
+    icon: "house"
+
+  - title: "Benefits"
+    summary: "Housing benefit, council tax support, free school meals, and other financial help"
+    body: |
+      <p>We provide support to residents who need help with living costs.</p>
+      <h2>Available benefits</h2>
+      <ul>
+        <li>Housing benefit</li>
+        <li>Council tax reduction</li>
+        <li>Free school meals</li>
+        <li>Discretionary housing payments</li>
+      </ul>
+    topic: "Council Tax and Benefits"
+    icon: "money"
+
+  - title: "Parking"
+    summary: "Car parks, parking permits, pay and display, parking fines and appeals"
+    body: |
+      <p>Information about parking in the borough including permits and enforcement.</p>
+      <h2>Parking services</h2>
+      <ul>
+        <li>Find a car park</li>
+        <li>Apply for a residents parking permit</li>
+        <li>Pay a parking fine</li>
+        <li>Appeal a penalty charge notice</li>
+      </ul>
+    topic: "Roads and Transport"
+    icon: "car"
+
+  - title: "Libraries"
+    summary: "Library locations, opening hours, borrowing, events, and online resources"
+    body: |
+      <p>Our libraries offer books, computers, events, and community spaces.</p>
+      <h2>Library services</h2>
+      <ul>
+        <li>Find your local library</li>
+        <li>Join the library</li>
+        <li>Renew or reserve books</li>
+        <li>Access online resources</li>
+      </ul>
+    topic: "Leisure and Culture"
+    icon: "book"
+
+  - title: "Environmental Health"
+    summary: "Food safety, noise complaints, pest control, pollution, and licensing"
+    body: |
+      <p>Environmental health services protect public health and wellbeing.</p>
+      <h2>Report an issue</h2>
+      <ul>
+        <li>Report a noise complaint</li>
+        <li>Food hygiene concerns</li>
+        <li>Pest control requests</li>
+        <li>Air quality information</li>
+      </ul>
+    topic: "Environment"
+    icon: "health"
+
+  - title: "Licensing"
+    summary: "Alcohol, entertainment, taxi, and street trading licences"
+    body: |
+      <p>Apply for licences to operate businesses and services in the borough.</p>
+      <h2>Licence types</h2>
+      <ul>
+        <li>Premises licence (alcohol and entertainment)</li>
+        <li>Taxi and private hire licences</li>
+        <li>Street trading licence</li>
+        <li>Pavement licence</li>
+      </ul>
+    topic: "Business"
+    icon: "document"
+
+  - title: "Elections and Voting"
+    summary: "Register to vote, polling stations, election results, and becoming a councillor"
+    body: |
+      <p>Take part in local democracy and have your say on council decisions.</p>
+      <h2>Electoral services</h2>
+      <ul>
+        <li>Register to vote</li>
+        <li>Apply for a postal vote</li>
+        <li>Find your polling station</li>
+        <li>Stand for election</li>
+      </ul>
+    topic: "Council and Democracy"
+    icon: "vote"
+
+  - title: "Schools and Education"
+    summary: "School admissions, term dates, school transport, and special educational needs"
+    body: |
+      <p>Information for parents about schools and education in our area.</p>
+      <h2>Education services</h2>
+      <ul>
+        <li>Apply for a school place</li>
+        <li>School term dates</li>
+        <li>School transport</li>
+        <li>Special educational needs support</li>
+      </ul>
+    topic: "Education"
+    icon: "school"
+
+  - title: "Adult Social Care"
+    summary: "Care assessments, support at home, care homes, carers support"
+    body: |
+      <p>Support for adults who need help with daily living or caring responsibilities.</p>
+      <h2>Care services</h2>
+      <ul>
+        <li>Request a care assessment</li>
+        <li>Support for carers</li>
+        <li>Find care homes</li>
+        <li>Safeguarding adults</li>
+      </ul>
+    topic: "Health and Social Care"
+    icon: "care"
+
+  - title: "Children's Services"
+    summary: "Childcare, family support, fostering, adoption, and safeguarding"
+    body: |
+      <p>Services to support children, young people, and families in our community.</p>
+      <h2>Children's services</h2>
+      <ul>
+        <li>Find childcare</li>
+        <li>Family support services</li>
+        <li>Become a foster carer</li>
+        <li>Report a concern about a child</li>
+      </ul>
+    topic: "Children and Families"
+    icon: "children"
+
+  - title: "Roads and Highways"
+    summary: "Report potholes, street lighting, road works, and highway maintenance"
+    body: |
+      <p>Information about roads, pavements, and highway maintenance in the borough.</p>
+      <h2>Highway services</h2>
+      <ul>
+        <li>Report a pothole</li>
+        <li>Street lighting faults</li>
+        <li>Gritting and winter maintenance</li>
+        <li>Road adoption</li>
+      </ul>
+    topic: "Roads and Transport"
+    icon: "road"
+
+  - title: "Parks and Open Spaces"
+    summary: "Parks, playgrounds, sports facilities, and nature reserves"
+    body: |
+      <p>Enjoy our parks and green spaces across the borough.</p>
+      <h2>Parks services</h2>
+      <ul>
+        <li>Find a park near you</li>
+        <li>Book sports facilities</li>
+        <li>Report park issues</li>
+        <li>Friends of parks groups</li>
+      </ul>
+    topic: "Leisure and Culture"
+    icon: "park"
+
+  - title: "Business Support"
+    summary: "Start a business, business rates, commercial waste, and funding"
+    body: |
+      <p>Support for businesses operating in or moving to our borough.</p>
+      <h2>Business services</h2>
+      <ul>
+        <li>Pay business rates</li>
+        <li>Commercial waste services</li>
+        <li>Business support and advice</li>
+        <li>Grants and funding</li>
+      </ul>
+    topic: "Business"
+    icon: "business"

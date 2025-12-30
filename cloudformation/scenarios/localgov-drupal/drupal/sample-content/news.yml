@@ -1,0 +1,82 @@
+# Sample UK Council News Articles
+# These map to LocalGov Drupal's localgov_news_article content type
+
+news:
+  - title: "Council budget approved with focus on community services"
+    summary: "Councillors approve 2024-25 budget prioritising essential services and environmental initiatives"
+    date: "2024-02-15"
+    body: |
+      <p>Westbridge Council has approved its budget for 2024-25, with a strong focus on protecting essential community services while investing in environmental improvements.</p>
+      <p>The budget includes £2.5 million for road repairs, £1.8 million for children's services, and a new £500,000 fund for community climate action projects.</p>
+      <h2>Key budget highlights</h2>
+      <ul>
+        <li>Council tax increase limited to 3.5%</li>
+        <li>New electric vehicle charging points in all car parks</li>
+        <li>Extended library opening hours</li>
+        <li>Additional funding for homelessness prevention</li>
+      </ul>
+      <p>Council Leader Jane Smith said: "This budget reflects our commitment to delivering excellent services while addressing the climate emergency and keeping council tax affordable."</p>
+    category: "Council news"
+
+  - title: "New recycling service launches across the borough"
+    summary: "Food waste collection starts this month with free kitchen caddies for all households"
+    date: "2024-01-22"
+    body: |
+      <p>Westbridge Council is introducing a new food waste collection service to help residents reduce their environmental impact and save money on waste disposal.</p>
+      <p>From February 1st, all households will receive a free kitchen caddy and outdoor food waste bin. Collections will be weekly, alongside existing recycling services.</p>
+      <h2>What can go in your food waste bin</h2>
+      <ul>
+        <li>All cooked and uncooked food</li>
+        <li>Meat and fish bones</li>
+        <li>Dairy products</li>
+        <li>Teabags and coffee grounds</li>
+        <li>Fruit and vegetable peelings</li>
+      </ul>
+      <p>The collected food waste will be processed at a local anaerobic digestion facility, generating renewable energy and nutrient-rich compost for local farms.</p>
+    category: "Environment"
+
+  - title: "Summer festival returns to Victoria Park"
+    summary: "Three-day community celebration announced for August bank holiday weekend"
+    date: "2024-03-08"
+    body: |
+      <p>The popular Westbridge Summer Festival will return to Victoria Park over the August bank holiday weekend, with an exciting programme of music, food, and family entertainment.</p>
+      <p>This year's event will feature local bands on two stages, an artisan food market, children's activities, and a fireworks display on the final evening.</p>
+      <h2>Festival highlights</h2>
+      <ul>
+        <li>Friday: Opening ceremony and family picnic</li>
+        <li>Saturday: Live music and street food festival</li>
+        <li>Sunday: Community sports day and fireworks finale</li>
+      </ul>
+      <p>Entry is free for most events, with some ticketed evening concerts. The full programme will be announced in June.</p>
+    category: "Events"
+
+  - title: "Highway improvement works to begin on High Street"
+    summary: "£1.2 million investment in road resurfacing and improved pedestrian crossings"
+    date: "2024-03-01"
+    body: |
+      <p>Major improvement works will begin on High Street from April 8th, bringing better road surfaces, new pedestrian crossings, and improved lighting.</p>
+      <p>The works are expected to take 12 weeks and will be carried out in phases to minimise disruption to businesses and residents.</p>
+      <h2>What to expect</h2>
+      <ul>
+        <li>Phase 1 (April 8-May 10): Northern section resurfacing</li>
+        <li>Phase 2 (May 13-June 14): Central section and new crossings</li>
+        <li>Phase 3 (June 17-July 5): Southern section and lighting</li>
+      </ul>
+      <p>Traffic diversions will be in place during working hours (7am-6pm weekdays). Access for residents and businesses will be maintained throughout.</p>
+    category: "Roads and transport"
+
+  - title: "Council wins national award for digital services"
+    summary: "Westbridge recognised for accessible online services and customer experience"
+    date: "2024-02-28"
+    body: |
+      <p>Westbridge Council has been awarded the Gold Award for Digital Excellence at the National Local Government Awards, recognising our commitment to accessible, user-friendly online services.</p>
+      <p>The judges praised our redesigned website, which has increased online transactions by 45% while maintaining high satisfaction scores from residents.</p>
+      <h2>Award-winning improvements</h2>
+      <ul>
+        <li>New accessible website meeting WCAG 2.2 AA standards</li>
+        <li>Online booking for 30+ council services</li>
+        <li>Real-time bin collection and parking information</li>
+        <li>Integrated customer account for all services</li>
+      </ul>
+      <p>Councillor Mike Roberts, Cabinet Member for Digital Services, said: "This award recognises the hard work of our digital team in making council services easier to access for everyone in our community."</p>
+    category: "Council news"
