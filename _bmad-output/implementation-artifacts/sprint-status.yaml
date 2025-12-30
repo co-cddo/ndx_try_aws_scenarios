@@ -83,8 +83,8 @@ development_status:
   epic-3-retrospective: optional
 
   # Epic 4: AI Accessibility Enhancements
-  epic-4: backlog
-  4-1-polly-tts-service-integration: backlog
+  epic-4: in-progress
+  4-1-polly-tts-service-integration: done
   4-2-amazon-translate-service-integration: backlog
   4-3-nova-2-omni-vision-service: backlog
   4-4-textract-service-integration: backlog

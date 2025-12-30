@@ -53,3 +53,20 @@ services:
     arguments:
       - '@tempstore.private'
       - '@current_user'
+
+  # Story 4.1: Polly Rate Limiter - implements exponential backoff for Polly API calls
+  ndx_aws_ai.polly_rate_limiter:
+    class: Drupal\ndx_aws_ai\RateLimiter\PollyRateLimiter
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.1: Polly Service - text-to-speech synthesis with 7 languages
+  ndx_aws_ai.polly:
+    class: Drupal\ndx_aws_ai\Service\PollyService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@ndx_aws_ai.polly_rate_limiter'
+      - '@cache.default'
+      - '@file_system'
+      - '@logger.channel.ndx_aws_ai'
