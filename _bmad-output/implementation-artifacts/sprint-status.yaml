@@ -98,7 +98,7 @@ development_status:
   # Epic 5: Dynamic Council Generation
   epic-5: in-progress
   5-1-ndx-council-generator-module-foundation: done
-  5-2-council-identity-generator: review
+  5-2-council-identity-generator: done
   5-3-content-generation-templates: backlog
   5-4-content-generation-orchestrator: backlog
   5-5-image-specification-collector: backlog

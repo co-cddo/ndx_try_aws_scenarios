@@ -1,6 +1,6 @@
 # Story 5.2: Council Identity Generator
 
-Status: review
+Status: done
 
 ## Story
 
