@@ -74,7 +74,15 @@ services:
     parent: logger.channel_base
     arguments: ['ndx_council_generator']
 
+  # Story 5.9: Navigation Menu Configuration
+  ndx_council_generator.navigation_configurator:
+    class: Drupal\ndx_council_generator\Service\NavigationMenuConfigurator
+    arguments:
+      - '@entity_type.manager'
+      - '@logger.channel.ndx_council_generator'
+
   # Story 5.7: Drush Generation Command
+  # Note: Logger is inherited from DrushCommands parent class
   ndx_council_generator.commands:
     class: Drupal\ndx_council_generator\Commands\CouncilGeneratorCommands
     arguments:
@@ -84,6 +92,9 @@ services:
       - '@ndx_council_generator.image_collector'
       - '@ndx_council_generator.content_template_manager'
       - '@ndx_council_generator.state_manager'
-      - '@logger.channel.ndx_council_generator'
+      - '@ndx_aws_ai.image_generation'
+      - '@file_system'
+      - '@config.factory'
+      - '@ndx_council_generator.navigation_configurator'
     tags:
       - { name: drush.command }

@@ -71,40 +71,63 @@ development_status:
   epic-2-retrospective: optional
 
   # Epic 3: AI-Powered Content Editing
-  epic-3: done
-  3-1-ndx-aws-ai-module-foundation: done
-  3-2-bedrock-service-integration: done
-  3-3-ai-component-design-system: done
-  3-4-ckeditor-ai-toolbar-plugin: done
-  3-5-ai-writing-assistant: done
-  3-6-readability-simplification: done
-  3-7-ai-preview-modal: done
-  3-8-ai-content-editing-mini-guide: done
+  # VALIDATION (2025-12-30):
+  # - ndx_aws_ai module NOW ENABLED via init-drupal.sh fix
+  # - CKEditor AI toolbar JS plugin fails to load: "plugincollection-plugin-not-found"
+  # - Backend services configured (IAM permissions in compute.ts:148-189)
+  # - Frontend JS needs debugging - ESM module import issue
+  # STATUS: review - modules enabled, JS frontend issue blocking full validation
+  epic-3: in-progress
+  3-1-ndx-aws-ai-module-foundation: review  # Module enabled, needs API endpoint testing
+  3-2-bedrock-service-integration: review   # IAM permissions configured, untested
+  3-3-ai-component-design-system: review    # CSS loaded, JS components need review
+  3-4-ckeditor-ai-toolbar-plugin: review    # JS ERROR: Cannot use import statement outside a module
+  3-5-ai-writing-assistant: review          # Depends on 3-4 working
+  3-6-readability-simplification: review    # Depends on 3-4 working
+  3-7-ai-preview-modal: review              # Depends on 3-4 working
+  3-8-ai-content-editing-mini-guide: review # Documentation complete
   epic-3-retrospective: optional
 
   # Epic 4: AI Accessibility Enhancements
-  epic-4: done
-  4-1-polly-tts-service-integration: done
-  4-2-amazon-translate-service-integration: done
-  4-3-nova-2-omni-vision-service: done
-  4-4-textract-service-integration: done
-  4-5-auto-alt-text-on-media-upload: done
-  4-6-listen-to-page-tts-button: done
-  4-7-content-translation: done
-  4-8-pdf-to-web-conversion: done
-  4-9-ai-accessibility-mini-guide: done
+  # VALIDATION (2025-12-30):
+  # - ndx_aws_ai module NOW ENABLED (dependency for this epic)
+  # - Polly/Translate/Rekognition/Textract IAM permissions configured
+  # - TTS button and translation features depend on working ndx_aws_ai
+  # STATUS: review - pending Epic 3 JS fix
+  epic-4: in-progress
+  4-1-polly-tts-service-integration: review   # IAM configured, needs runtime test
+  4-2-amazon-translate-service-integration: review
+  4-3-nova-2-omni-vision-service: review      # Bedrock Nova access TBD
+  4-4-textract-service-integration: review
+  4-5-auto-alt-text-on-media-upload: review
+  4-6-listen-to-page-tts-button: review       # Depends on ndx_aws_ai working
+  4-7-content-translation: review
+  4-8-pdf-to-web-conversion: review
+  4-9-ai-accessibility-mini-guide: review
   epic-4-retrospective: optional
 
   # Epic 5: Dynamic Council Generation
-  epic-5: done
-  5-1-ndx-council-generator-module-foundation: done
-  5-2-council-identity-generator: done
-  5-3-content-generation-templates: done
-  5-4-content-generation-orchestrator: done
-  5-5-image-specification-collector: done
-  5-6-batch-image-generation: done
-  5-7-drush-generation-command: done
-  5-8-dynamic-council-mini-guide: done
+  # VALIDATION (2026-01-02):
+  # - Content generation WORKS: 42 pages, 27 images created for "Ashworth Borough Council"
+  # - CRITICAL GAP: No navigation menus, no homepage views, no block placement
+  # - Content exists but is NOT DISCOVERABLE from frontend
+  # - Benchmark: Brighton & Hove City Council has 15+ service categories, news section,
+  #   quick action tiles, service directory - all missing from generator output
+  # - See: _bmad-output/epic-5-gap-analysis.md for full analysis
+  # STATUS: partial - content generation works, site configuration missing
+  epic-5: in-progress
+  5-1-ndx-council-generator-module-foundation: done    # Module foundation works
+  5-2-council-identity-generator: done                 # Identity generation works
+  5-3-content-generation-templates: partial            # Templates work, no nav/view config
+  5-4-content-generation-orchestrator: partial         # Orchestrator misses nav/views/blocks
+  5-5-image-specification-collector: done              # Image specs collected correctly
+  5-6-batch-image-generation: done                     # 27 images generated via Nova Canvas
+  5-7-drush-generation-command: partial                # Command runs, output incomplete
+  5-8-dynamic-council-mini-guide: partial              # Guide needs scope update
+  # NEW STORIES REQUIRED:
+  5-9-navigation-menu-configuration: review             # Create/populate main menu
+  5-10-homepage-views-and-blocks: backlog              # Service directory, news views
+  5-11-service-news-landing-pages: backlog             # Configure listing pages
   epic-5-retrospective: optional
 
   # Epic 6: Polish, Integration & Enhanced Walkthrough

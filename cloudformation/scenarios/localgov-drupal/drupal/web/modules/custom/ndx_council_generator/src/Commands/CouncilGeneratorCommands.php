@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\ndx_council_generator\Commands;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\ndx_aws_ai\Service\ImageGenerationServiceInterface;
 use Drupal\ndx_council_generator\Generator\CouncilIdentityGeneratorInterface;
 use Drupal\ndx_council_generator\Service\ContentGenerationOrchestratorInterface;
 use Drupal\ndx_council_generator\Service\ContentTemplateManagerInterface;
 use Drupal\ndx_council_generator\Service\GenerationStateManagerInterface;
 use Drupal\ndx_council_generator\Service\ImageBatchProcessorInterface;
 use Drupal\ndx_council_generator\Service\ImageSpecificationCollectorInterface;
+use Drupal\ndx_council_generator\Service\NavigationMenuConfiguratorInterface;
 use Drupal\ndx_council_generator\Value\CouncilIdentity;
 use Drush\Commands\DrushCommands;
-use Psr\Log\LoggerInterface;
 
 /**
  * Drush commands for council generation.
@@ -53,8 +56,14 @@ class CouncilGeneratorCommands extends DrushCommands {
    *   The content template manager.
    * @param \Drupal\ndx_council_generator\Service\GenerationStateManagerInterface $stateManager
    *   The generation state manager.
-   * @param \Psr\Log\LoggerInterface $logger
-   *   The logger.
+   * @param \Drupal\ndx_aws_ai\Service\ImageGenerationServiceInterface|null $imageGenerationService
+   *   The image generation service.
+   * @param \Drupal\Core\File\FileSystemInterface|null $fileSystem
+   *   The file system service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface|null $configFactory
+   *   The config factory.
+   * @param \Drupal\ndx_council_generator\Service\NavigationMenuConfiguratorInterface|null $navigationConfigurator
+   *   The navigation menu configurator service.
    */
   public function __construct(
     protected CouncilIdentityGeneratorInterface $identityGenerator,
@@ -63,7 +72,10 @@ class CouncilGeneratorCommands extends DrushCommands {
     protected ImageSpecificationCollectorInterface $imageCollector,
     protected ContentTemplateManagerInterface $templateManager,
     protected GenerationStateManagerInterface $stateManager,
-    protected LoggerInterface $logger,
+    protected ?ImageGenerationServiceInterface $imageGenerationService = NULL,
+    protected ?FileSystemInterface $fileSystem = NULL,
+    protected ?ConfigFactoryInterface $configFactory = NULL,
+    protected ?NavigationMenuConfiguratorInterface $navigationConfigurator = NULL,
   ) {
     parent::__construct();
   }
@@ -77,7 +89,7 @@ class CouncilGeneratorCommands extends DrushCommands {
    * @option skip-images Skip image generation phase for faster testing
    * @option force Regenerate even if a council already exists
    * @option region Specify council region (e.g., "south_west", "wales")
-   * @option verbose Show detailed progress information
+   * @option detailed Show detailed progress information
    * @option non-interactive Run without prompts for automated use
    * @usage drush localgov:generate-council
    *   Generate a new council with full content and images.
@@ -94,7 +106,7 @@ class CouncilGeneratorCommands extends DrushCommands {
     'skip-images' => FALSE,
     'force' => FALSE,
     'region' => NULL,
-    'verbose' => FALSE,
+    'detailed' => FALSE,
     'non-interactive' => FALSE,
   ]): int {
     $startTime = microtime(TRUE);
@@ -123,6 +135,11 @@ class CouncilGeneratorCommands extends DrushCommands {
         return self::EXIT_FAILURE;
       }
 
+      // Phase 1b: Generate Council Crest/Logo.
+      if (!$options['skip-images']) {
+        $this->runCrestGenerationPhase($identity);
+      }
+
       // Phase 2: Generate Content.
       $contentResult = $this->runContentPhase($identity, $options);
       if ($contentResult === FALSE) {
@@ -138,8 +155,14 @@ class CouncilGeneratorCommands extends DrushCommands {
         }
       }
 
+      // Phase 4: Configure Navigation Menu.
+      $navigationResult = $this->runNavigationPhase($identity);
+
       // Print completion summary.
-      $this->printCompletionSummary($identity, $contentResult, $imageResult, $startTime);
+      $this->printCompletionSummary($identity, $contentResult, $imageResult, $navigationResult, $startTime);
+
+      // Configure front page to the generated homepage.
+      $this->configureFrontPage($identity);
 
       $this->stateManager->markComplete();
 
@@ -261,9 +284,9 @@ class CouncilGeneratorCommands extends DrushCommands {
       $identity = $this->identityGenerator->generate($generationOptions);
 
       $this->io()->writeln(sprintf('  <info>✓</info> Name: %s', $identity->name));
-      $this->io()->writeln(sprintf('  <info>✓</info> Region: %s', $identity->getRegionLabel()));
-      $this->io()->writeln(sprintf('  <info>✓</info> Theme: %s', $identity->getThemeLabel()));
-      $this->io()->writeln(sprintf('  <info>✓</info> Population: %s (%s)', number_format($identity->getPopulationValue()), $identity->populationRange));
+      $this->io()->writeln(sprintf('  <info>✓</info> Region: %s', $identity->getRegionName()));
+      $this->io()->writeln(sprintf('  <info>✓</info> Theme: %s', $identity->getThemeName()));
+      $this->io()->writeln(sprintf('  <info>✓</info> Population: %s (%s)', number_format($identity->populationEstimate), $identity->populationRange));
       $this->io()->writeln('');
 
       return $identity;
@@ -304,7 +327,7 @@ class CouncilGeneratorCommands extends DrushCommands {
       if ($progress && isset($progress->currentStep)) {
         $successCount = $progress->currentStep;
       }
-      if ($options['verbose'] && $processedCount % 5 === 0) {
+      if ($options['detailed'] && $processedCount % 5 === 0) {
         $this->io()->writeln(sprintf('    Progress: %d/%d', $processedCount, $totalCount));
       }
     };
@@ -353,15 +376,15 @@ class CouncilGeneratorCommands extends DrushCommands {
     $this->io()->section('[Phase 3/3] Generating Images');
 
     $queue = $this->imageCollector->getQueue();
-    $totalImages = $queue->getTotalCount();
-    $pendingImages = count($queue->getPendingIds());
+    $totalImages = $queue->getCount();
+    $pendingImages = $queue->getPendingCount();
     $duplicates = $queue->getDuplicateCount();
 
     $processedCount = 0;
 
     $progressCallback = function ($progress) use (&$processedCount, $pendingImages, $options): void {
       $processedCount++;
-      if ($options['verbose'] && $processedCount % 3 === 0) {
+      if ($options['detailed'] && $processedCount % 3 === 0) {
         $this->io()->writeln(sprintf('    Progress: %d/%d', $processedCount, $pendingImages));
       }
     };
@@ -397,6 +420,60 @@ class CouncilGeneratorCommands extends DrushCommands {
   }
 
   /**
+   * Run Phase 4: Navigation Menu Configuration.
+   *
+   * Story 5.9: Configure navigation menus after content generation.
+   *
+   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
+   *   The council identity.
+   *
+   * @return array|null
+   *   Navigation configuration stats or NULL if service unavailable.
+   */
+  protected function runNavigationPhase(CouncilIdentity $identity): ?array {
+    if ($this->navigationConfigurator === NULL) {
+      $this->logger->warning('Navigation configurator not available');
+      return NULL;
+    }
+
+    $this->io()->section('[Phase 4/4] Configuring Navigation');
+
+    try {
+      $result = $this->navigationConfigurator->configureNavigation($identity);
+
+      $this->io()->writeln(sprintf('  <info>✓</info> Main menu links: %d created', $result->mainLinksCreated));
+      $this->io()->writeln(sprintf('  <info>✓</info> Service categories: %d created', $result->categoryLinksCreated));
+
+      if ($result->linksSkipped > 0) {
+        $this->io()->writeln(sprintf('  <comment>→</comment> Existing links skipped: %d', $result->linksSkipped));
+      }
+
+      if ($result->hasErrors()) {
+        foreach ($result->errors as $error) {
+          $this->io()->writeln(sprintf('  <error>✗</error> Error: %s', $error));
+        }
+      }
+
+      $this->io()->writeln('');
+
+      return [
+        'total' => $result->getTotalCreated(),
+        'main' => $result->mainLinksCreated,
+        'categories' => $result->categoryLinksCreated,
+        'skipped' => $result->linksSkipped,
+      ];
+    }
+    catch (\Exception $e) {
+      $this->io()->error('Navigation configuration failed: ' . $e->getMessage());
+      $this->logger->error('Navigation configuration failed', [
+        'error' => $e->getMessage(),
+      ]);
+      // Return NULL but don't fail the entire generation.
+      return NULL;
+    }
+  }
+
+  /**
    * Print completion summary.
    *
    * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
@@ -405,6 +482,8 @@ class CouncilGeneratorCommands extends DrushCommands {
    *   Content generation results.
    * @param array|null $imageResult
    *   Image generation results or NULL if skipped.
+   * @param array|null $navigationResult
+   *   Navigation configuration results or NULL if skipped.
    * @param float $startTime
    *   Start time as microtime.
    */
@@ -412,6 +491,7 @@ class CouncilGeneratorCommands extends DrushCommands {
     CouncilIdentity $identity,
     array $contentResult,
     ?array $imageResult,
+    ?array $navigationResult,
     float $startTime,
   ): void {
     $duration = microtime(TRUE) - $startTime;
@@ -432,6 +512,14 @@ class CouncilGeneratorCommands extends DrushCommands {
     }
     else {
       $this->io()->writeln('  Images:       Skipped (--skip-images)');
+    }
+
+    if ($navigationResult !== NULL) {
+      $navInfo = sprintf('%d menu links', $navigationResult['total']);
+      if ($navigationResult['skipped'] > 0) {
+        $navInfo .= sprintf(' (%d existing)', $navigationResult['skipped']);
+      }
+      $this->io()->writeln(sprintf('  Navigation:   %s', $navInfo));
     }
 
     $this->io()->writeln(sprintf('  Duration:     %s', $this->formatDuration($duration)));
@@ -489,6 +577,148 @@ class CouncilGeneratorCommands extends DrushCommands {
     $remainingSeconds = (int) ($seconds % 60);
 
     return sprintf('%dm %ds', $minutes, $remainingSeconds);
+  }
+
+  /**
+   * Run crest/logo generation phase.
+   *
+   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
+   *   The council identity.
+   */
+  protected function runCrestGenerationPhase(CouncilIdentity $identity): void {
+    if ($this->imageGenerationService === NULL || $this->fileSystem === NULL || $this->configFactory === NULL) {
+      $this->logger->warning('Image generation services not available for crest generation');
+      return;
+    }
+
+    $this->io()->writeln('  Generating council crest...');
+
+    try {
+      // Generate a professional council crest/logo.
+      $prompt = sprintf(
+        'A professional local government council logo or crest for "%s" council in the UK. ' .
+        'Clean, simple, modern civic design suitable for official documents. ' .
+        'Professional shield or emblem style. Solid background, high contrast. ' .
+        'No text, no words, just the visual emblem design. Corporate blue and gold colors. ' .
+        'Minimalist heraldic style.',
+        $identity->name
+      );
+
+      $result = $this->imageGenerationService->generateImage(
+        prompt: $prompt,
+        width: 512,
+        height: 512,
+        style: 'illustration',
+      );
+
+      if (!$result->success || $result->imageData === NULL) {
+        $this->logger->warning('Crest generation failed: @error', [
+          '@error' => $result->error ?? 'Unknown error',
+        ]);
+        $this->io()->writeln('  <comment>Crest generation skipped (generation failed)</comment>');
+        return;
+      }
+
+      // Save to public files directory.
+      $directory = 'public://generated-images';
+      $this->fileSystem->prepareDirectory(
+        $directory,
+        FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS
+      );
+
+      $logoPath = $directory . '/council-logo.png';
+      $savedUri = $this->fileSystem->saveData(
+        $result->imageData,
+        $logoPath,
+        FileSystemInterface::EXISTS_REPLACE
+      );
+
+      if ($savedUri === FALSE) {
+        $this->logger->warning('Failed to save crest image');
+        return;
+      }
+
+      // Configure the site logo using theme settings.
+      $config = $this->configFactory->getEditable('system.theme.global');
+      $config->set('logo.use_default', FALSE);
+      $config->set('logo.path', $savedUri);
+      $config->save();
+
+      $this->io()->writeln(sprintf('  <info>✓</info> Council crest generated: %s', $savedUri));
+
+    }
+    catch (\Exception $e) {
+      $this->logger->warning('Crest generation error: @error', [
+        '@error' => $e->getMessage(),
+      ]);
+      $this->io()->writeln('  <comment>Crest generation skipped (error occurred)</comment>');
+    }
+  }
+
+  /**
+   * Configure the site front page to the generated homepage.
+   *
+   * Finds the homepage node (Welcome to X) and sets it as the site front page.
+   *
+   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
+   *   The council identity.
+   */
+  protected function configureFrontPage(CouncilIdentity $identity): void {
+    if ($this->configFactory === NULL) {
+      $this->logger->warning('Config factory not available for front page configuration');
+      return;
+    }
+
+    $this->io()->writeln('');
+    $this->io()->writeln('  Configuring site front page...');
+
+    try {
+      // Use Drupal's entity type manager to find the homepage.
+      $entityTypeManager = \Drupal::entityTypeManager();
+      $nodeStorage = $entityTypeManager->getStorage('node');
+
+      // Look for the homepage by title pattern.
+      $expectedTitle = 'Welcome to ' . $identity->name;
+      $nodes = $nodeStorage->loadByProperties([
+        'type' => 'localgov_services_landing',
+        'title' => $expectedTitle,
+      ]);
+
+      if (empty($nodes)) {
+        // Fallback: look for any node starting with "Welcome to".
+        $query = $nodeStorage->getQuery()
+          ->condition('type', 'localgov_services_landing')
+          ->condition('title', 'Welcome to%', 'LIKE')
+          ->accessCheck(FALSE)
+          ->range(0, 1);
+        $nids = $query->execute();
+        if (!empty($nids)) {
+          $nodes = $nodeStorage->loadMultiple($nids);
+        }
+      }
+
+      if (empty($nodes)) {
+        $this->io()->writeln('  <comment>No homepage node found to set as front page</comment>');
+        return;
+      }
+
+      $homepage = reset($nodes);
+      $nid = $homepage->id();
+
+      // Set the front page configuration.
+      $config = $this->configFactory->getEditable('system.site');
+      $config->set('page.front', '/node/' . $nid);
+      $config->save();
+
+      $this->io()->writeln(sprintf('  <info>✓</info> Front page set to node/%d (%s)', $nid, $homepage->getTitle()));
+
+    }
+    catch (\Exception $e) {
+      $this->logger->warning('Front page configuration error: @error', [
+        '@error' => $e->getMessage(),
+      ]);
+      $this->io()->writeln('  <comment>Front page configuration failed: ' . $e->getMessage() . '</comment>');
+    }
   }
 
 }
