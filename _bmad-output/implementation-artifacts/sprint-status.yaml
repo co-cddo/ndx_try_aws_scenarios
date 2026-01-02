@@ -54,7 +54,7 @@ development_status:
   1-10-demo-banner-module: done
   1-11-first-login-welcome-experience: done
   1-12-cloudformation-outputs-quick-create: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: done  # See retrospective-epics-1-5.md
 
   # Epic 2: Guided Walkthrough Experience
   epic-2: done
@@ -68,7 +68,7 @@ development_status:
   2-8-documentation-template-standards: done
   2-9-basic-evidence-pack-generation: done
   2-10-cleanup-instructions: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done  # See retrospective-epics-1-5.md
 
   # Epic 3: AI-Powered Content Editing
   # VALIDATION (2026-01-02):
@@ -88,7 +88,7 @@ development_status:
   3-6-readability-simplification: done      # AiSimplifyDialogForm + ai-simplify-handler.js
   3-7-ai-preview-modal: done                # ai-diff-highlight.js for before/after comparison
   3-8-ai-content-editing-mini-guide: done   # Documentation complete
-  epic-3-retrospective: optional
+  epic-3-retrospective: done  # See retrospective-epics-1-5.md
 
   # Epic 4: AI Accessibility Enhancements
   # VALIDATION (2026-01-02):
@@ -109,7 +109,7 @@ development_status:
   4-7-content-translation: done               # ContentTranslationController + widget
   4-8-pdf-to-web-conversion: done             # PdfConversionController + form
   4-9-ai-accessibility-mini-guide: done       # Documentation complete
-  epic-4-retrospective: optional
+  epic-4-retrospective: done  # See retrospective-epics-1-5.md
 
   # Epic 5: Dynamic Council Generation
   # VALIDATION (2026-01-02):
@@ -131,7 +131,7 @@ development_status:
   5-9-navigation-menu-configuration: done              # Create/populate main menu
   5-10-homepage-views-and-blocks: done                 # Service directory, news views, quick actions
   5-11-service-news-landing-pages: backlog             # Optional: Configure listing pages
-  epic-5-retrospective: optional
+  epic-5-retrospective: done  # See retrospective-epics-1-5.md
 
   # Epic 6: Polish, Integration & Enhanced Walkthrough
   epic-6: backlog
