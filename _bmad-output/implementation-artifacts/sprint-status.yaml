@@ -71,39 +71,44 @@ development_status:
   epic-2-retrospective: optional
 
   # Epic 3: AI-Powered Content Editing
-  # VALIDATION (2025-12-30):
-  # - ndx_aws_ai module NOW ENABLED via init-drupal.sh fix
-  # - CKEditor AI toolbar JS plugin fails to load: "plugincollection-plugin-not-found"
-  # - Backend services configured (IAM permissions in compute.ts:148-189)
-  # - Frontend JS needs debugging - ESM module import issue
-  # STATUS: review - modules enabled, JS frontend issue blocking full validation
-  epic-3: in-progress
-  3-1-ndx-aws-ai-module-foundation: review  # Module enabled, needs API endpoint testing
-  3-2-bedrock-service-integration: review   # IAM permissions configured, untested
-  3-3-ai-component-design-system: review    # CSS loaded, JS components need review
-  3-4-ckeditor-ai-toolbar-plugin: review    # JS ERROR: Cannot use import statement outside a module
-  3-5-ai-writing-assistant: review          # Depends on 3-4 working
-  3-6-readability-simplification: review    # Depends on 3-4 working
-  3-7-ai-preview-modal: review              # Depends on 3-4 working
-  3-8-ai-content-editing-mini-guide: review # Documentation complete
+  # VALIDATION (2026-01-02):
+  # - ndx_aws_ai module enabled via init-drupal.sh
+  # - CKEditor5 ES module plugin DISABLED (requires webpack)
+  # - AI toolbar implemented via form_alter hook (no webpack needed)
+  # - Backend services: BedrockService, VisionService, ImageGenerationService
+  # - Frontend: ai-toolbar-buttons.js, ai-writing-handler.js, ai-simplify-handler.js
+  # - Forms: AiWritingDialogForm, AiSimplifyDialogForm
+  # STATUS: done - form_alter approach is the working implementation
+  epic-3: done
+  3-1-ndx-aws-ai-module-foundation: done    # Module with services.yml, permissions, routes
+  3-2-bedrock-service-integration: done     # BedrockService with Nova Pro/Lite models
+  3-3-ai-component-design-system: done      # CSS libraries, component styling
+  3-4-ckeditor-ai-toolbar-plugin: done      # Implemented via form_alter (not CKEditor5 plugin)
+  3-5-ai-writing-assistant: done            # AiWritingDialogForm + ai-writing-handler.js
+  3-6-readability-simplification: done      # AiSimplifyDialogForm + ai-simplify-handler.js
+  3-7-ai-preview-modal: done                # ai-diff-highlight.js for before/after comparison
+  3-8-ai-content-editing-mini-guide: done   # Documentation complete
   epic-3-retrospective: optional
 
   # Epic 4: AI Accessibility Enhancements
-  # VALIDATION (2025-12-30):
-  # - ndx_aws_ai module NOW ENABLED (dependency for this epic)
-  # - Polly/Translate/Rekognition/Textract IAM permissions configured
-  # - TTS button and translation features depend on working ndx_aws_ai
-  # STATUS: review - pending Epic 3 JS fix
-  epic-4: in-progress
-  4-1-polly-tts-service-integration: review   # IAM configured, needs runtime test
-  4-2-amazon-translate-service-integration: review
-  4-3-nova-2-omni-vision-service: review      # Bedrock Nova access TBD
-  4-4-textract-service-integration: review
-  4-5-auto-alt-text-on-media-upload: review
-  4-6-listen-to-page-tts-button: review       # Depends on ndx_aws_ai working
-  4-7-content-translation: review
-  4-8-pdf-to-web-conversion: review
-  4-9-ai-accessibility-mini-guide: review
+  # VALIDATION (2026-01-02):
+  # - ndx_aws_ai module enabled (dependency for this epic)
+  # - Polly/Translate/Rekognition/Textract IAM permissions in compute.ts
+  # - Backend services: PollyService, TranslateService, TextractService, VisionService
+  # - Frontend: tts-player.js, content-translation.js, pdf-conversion.js
+  # - Controllers: TtsController, ContentTranslationController, PdfConversionController
+  # - AltTextGeneratorService for automatic alt text on media upload
+  # STATUS: done - all services and UI components implemented
+  epic-4: done
+  4-1-polly-tts-service-integration: done     # PollyService with neural voices
+  4-2-amazon-translate-service-integration: done  # TranslateService for 75+ languages
+  4-3-nova-2-omni-vision-service: done        # VisionService using Nova Lite
+  4-4-textract-service-integration: done      # TextractService for document extraction
+  4-5-auto-alt-text-on-media-upload: done     # AltTextGeneratorService
+  4-6-listen-to-page-tts-button: done         # TtsController + tts-player.js
+  4-7-content-translation: done               # ContentTranslationController + widget
+  4-8-pdf-to-web-conversion: done             # PdfConversionController + form
+  4-9-ai-accessibility-mini-guide: done       # Documentation complete
   epic-4-retrospective: optional
 
   # Epic 5: Dynamic Council Generation
