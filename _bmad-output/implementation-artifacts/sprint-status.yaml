@@ -125,8 +125,8 @@ development_status:
   5-7-drush-generation-command: partial                # Command runs, output incomplete
   5-8-dynamic-council-mini-guide: partial              # Guide needs scope update
   # NEW STORIES REQUIRED:
-  5-9-navigation-menu-configuration: review             # Create/populate main menu
-  5-10-homepage-views-and-blocks: backlog              # Service directory, news views
+  5-9-navigation-menu-configuration: done               # Create/populate main menu
+  5-10-homepage-views-and-blocks: review               # Service directory, news views, quick actions
   5-11-service-news-landing-pages: backlog             # Configure listing pages
   epic-5-retrospective: optional
 

@@ -81,6 +81,14 @@ services:
       - '@entity_type.manager'
       - '@logger.channel.ndx_council_generator'
 
+  # Story 5.10: Homepage Views and Blocks Configuration
+  ndx_council_generator.homepage_configurator:
+    class: Drupal\ndx_council_generator\Service\HomepageConfigurator
+    arguments:
+      - '@entity_type.manager'
+      - '@config.factory'
+      - '@logger.channel.ndx_council_generator'
+
   # Story 5.7: Drush Generation Command
   # Note: Logger is inherited from DrushCommands parent class
   ndx_council_generator.commands:
@@ -96,5 +104,6 @@ services:
       - '@file_system'
       - '@config.factory'
       - '@ndx_council_generator.navigation_configurator'
+      - '@ndx_council_generator.homepage_configurator'
     tags:
       - { name: drush.command }

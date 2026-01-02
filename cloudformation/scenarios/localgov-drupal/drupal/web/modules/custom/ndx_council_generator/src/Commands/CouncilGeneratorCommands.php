@@ -13,6 +13,7 @@ use Drupal\ndx_council_generator\Service\ContentTemplateManagerInterface;
 use Drupal\ndx_council_generator\Service\GenerationStateManagerInterface;
 use Drupal\ndx_council_generator\Service\ImageBatchProcessorInterface;
 use Drupal\ndx_council_generator\Service\ImageSpecificationCollectorInterface;
+use Drupal\ndx_council_generator\Service\HomepageConfiguratorInterface;
 use Drupal\ndx_council_generator\Service\NavigationMenuConfiguratorInterface;
 use Drupal\ndx_council_generator\Value\CouncilIdentity;
 use Drush\Commands\DrushCommands;
@@ -64,6 +65,8 @@ class CouncilGeneratorCommands extends DrushCommands {
    *   The config factory.
    * @param \Drupal\ndx_council_generator\Service\NavigationMenuConfiguratorInterface|null $navigationConfigurator
    *   The navigation menu configurator service.
+   * @param \Drupal\ndx_council_generator\Service\HomepageConfiguratorInterface|null $homepageConfigurator
+   *   The homepage configurator service.
    */
   public function __construct(
     protected CouncilIdentityGeneratorInterface $identityGenerator,
@@ -76,6 +79,7 @@ class CouncilGeneratorCommands extends DrushCommands {
     protected ?FileSystemInterface $fileSystem = NULL,
     protected ?ConfigFactoryInterface $configFactory = NULL,
     protected ?NavigationMenuConfiguratorInterface $navigationConfigurator = NULL,
+    protected ?HomepageConfiguratorInterface $homepageConfigurator = NULL,
   ) {
     parent::__construct();
   }
@@ -158,11 +162,11 @@ class CouncilGeneratorCommands extends DrushCommands {
       // Phase 4: Configure Navigation Menu.
       $navigationResult = $this->runNavigationPhase($identity);
 
-      // Print completion summary.
-      $this->printCompletionSummary($identity, $contentResult, $imageResult, $navigationResult, $startTime);
+      // Phase 5: Configure Homepage.
+      $homepageResult = $this->runHomepagePhase($identity);
 
-      // Configure front page to the generated homepage.
-      $this->configureFrontPage($identity);
+      // Print completion summary.
+      $this->printCompletionSummary($identity, $contentResult, $imageResult, $navigationResult, $homepageResult, $startTime);
 
       $this->stateManager->markComplete();
 
@@ -273,7 +277,7 @@ class CouncilGeneratorCommands extends DrushCommands {
    *   Generated identity or NULL on failure.
    */
   protected function runIdentityPhase(array $options): ?CouncilIdentity {
-    $this->io()->section('[Phase 1/3] Generating Council Identity');
+    $this->io()->section('[Phase 1/5] Generating Council Identity');
 
     $generationOptions = [];
     if (!empty($options['region'])) {
@@ -309,7 +313,7 @@ class CouncilGeneratorCommands extends DrushCommands {
    *   Content generation stats or FALSE on failure.
    */
   protected function runContentPhase(CouncilIdentity $identity, array $options): array|false {
-    $this->io()->section('[Phase 2/3] Generating Content');
+    $this->io()->section('[Phase 2/5] Generating Content');
 
     $templates = $this->templateManager->loadAllTemplates();
     $byType = [];
@@ -373,7 +377,7 @@ class CouncilGeneratorCommands extends DrushCommands {
    *   Image generation stats or FALSE on failure.
    */
   protected function runImagePhase(CouncilIdentity $identity, array $options): array|false {
-    $this->io()->section('[Phase 3/3] Generating Images');
+    $this->io()->section('[Phase 3/5] Generating Images');
 
     $queue = $this->imageCollector->getQueue();
     $totalImages = $queue->getCount();
@@ -436,7 +440,7 @@ class CouncilGeneratorCommands extends DrushCommands {
       return NULL;
     }
 
-    $this->io()->section('[Phase 4/4] Configuring Navigation');
+    $this->io()->section('[Phase 4/5] Configuring Navigation');
 
     try {
       $result = $this->navigationConfigurator->configureNavigation($identity);
@@ -474,6 +478,66 @@ class CouncilGeneratorCommands extends DrushCommands {
   }
 
   /**
+   * Run Phase 5: Homepage Configuration.
+   *
+   * Story 5.10: Configure homepage views and blocks.
+   *
+   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
+   *   The council identity.
+   *
+   * @return array|null
+   *   Homepage configuration stats or NULL if service unavailable.
+   */
+  protected function runHomepagePhase(CouncilIdentity $identity): ?array {
+    if ($this->homepageConfigurator === NULL) {
+      $this->logger->warning('Homepage configurator not available');
+      return NULL;
+    }
+
+    $this->io()->section('[Phase 5/5] Configuring Homepage');
+
+    try {
+      $result = $this->homepageConfigurator->configureHomepage($identity);
+
+      if ($result->frontPageSet) {
+        $this->io()->writeln('  <info>✓</info> Front page configured');
+      }
+      else {
+        $this->io()->writeln('  <comment>→</comment> Front page not set');
+      }
+
+      $this->io()->writeln(sprintf('  <info>✓</info> Blocks configured: %d', $result->blocksConfigured));
+
+      if ($result->blocksSkipped > 0) {
+        $this->io()->writeln(sprintf('  <comment>→</comment> Blocks skipped: %d', $result->blocksSkipped));
+      }
+
+      if (!empty($result->errors)) {
+        foreach ($result->errors as $error) {
+          $this->io()->writeln(sprintf('  <error>✗</error> Error: %s', $error));
+        }
+      }
+
+      $this->io()->writeln('');
+
+      return [
+        'frontPageSet' => $result->frontPageSet,
+        'blocksConfigured' => $result->blocksConfigured,
+        'blocksSkipped' => $result->blocksSkipped,
+        'errors' => count($result->errors),
+      ];
+    }
+    catch (\Exception $e) {
+      $this->io()->error('Homepage configuration failed: ' . $e->getMessage());
+      $this->logger->error('Homepage configuration failed', [
+        'error' => $e->getMessage(),
+      ]);
+      // Return NULL but don't fail the entire generation.
+      return NULL;
+    }
+  }
+
+  /**
    * Print completion summary.
    *
    * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
@@ -484,6 +548,8 @@ class CouncilGeneratorCommands extends DrushCommands {
    *   Image generation results or NULL if skipped.
    * @param array|null $navigationResult
    *   Navigation configuration results or NULL if skipped.
+   * @param array|null $homepageResult
+   *   Homepage configuration results or NULL if skipped.
    * @param float $startTime
    *   Start time as microtime.
    */
@@ -492,6 +558,7 @@ class CouncilGeneratorCommands extends DrushCommands {
     array $contentResult,
     ?array $imageResult,
     ?array $navigationResult,
+    ?array $homepageResult,
     float $startTime,
   ): void {
     $duration = microtime(TRUE) - $startTime;
@@ -520,6 +587,14 @@ class CouncilGeneratorCommands extends DrushCommands {
         $navInfo .= sprintf(' (%d existing)', $navigationResult['skipped']);
       }
       $this->io()->writeln(sprintf('  Navigation:   %s', $navInfo));
+    }
+
+    if ($homepageResult !== NULL) {
+      $homeInfo = sprintf('%d blocks', $homepageResult['blocksConfigured']);
+      if ($homepageResult['frontPageSet']) {
+        $homeInfo .= ', front page set';
+      }
+      $this->io()->writeln(sprintf('  Homepage:     %s', $homeInfo));
     }
 
     $this->io()->writeln(sprintf('  Duration:     %s', $this->formatDuration($duration)));
@@ -652,72 +727,6 @@ class CouncilGeneratorCommands extends DrushCommands {
         '@error' => $e->getMessage(),
       ]);
       $this->io()->writeln('  <comment>Crest generation skipped (error occurred)</comment>');
-    }
-  }
-
-  /**
-   * Configure the site front page to the generated homepage.
-   *
-   * Finds the homepage node (Welcome to X) and sets it as the site front page.
-   *
-   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
-   *   The council identity.
-   */
-  protected function configureFrontPage(CouncilIdentity $identity): void {
-    if ($this->configFactory === NULL) {
-      $this->logger->warning('Config factory not available for front page configuration');
-      return;
-    }
-
-    $this->io()->writeln('');
-    $this->io()->writeln('  Configuring site front page...');
-
-    try {
-      // Use Drupal's entity type manager to find the homepage.
-      $entityTypeManager = \Drupal::entityTypeManager();
-      $nodeStorage = $entityTypeManager->getStorage('node');
-
-      // Look for the homepage by title pattern.
-      $expectedTitle = 'Welcome to ' . $identity->name;
-      $nodes = $nodeStorage->loadByProperties([
-        'type' => 'localgov_services_landing',
-        'title' => $expectedTitle,
-      ]);
-
-      if (empty($nodes)) {
-        // Fallback: look for any node starting with "Welcome to".
-        $query = $nodeStorage->getQuery()
-          ->condition('type', 'localgov_services_landing')
-          ->condition('title', 'Welcome to%', 'LIKE')
-          ->accessCheck(FALSE)
-          ->range(0, 1);
-        $nids = $query->execute();
-        if (!empty($nids)) {
-          $nodes = $nodeStorage->loadMultiple($nids);
-        }
-      }
-
-      if (empty($nodes)) {
-        $this->io()->writeln('  <comment>No homepage node found to set as front page</comment>');
-        return;
-      }
-
-      $homepage = reset($nodes);
-      $nid = $homepage->id();
-
-      // Set the front page configuration.
-      $config = $this->configFactory->getEditable('system.site');
-      $config->set('page.front', '/node/' . $nid);
-      $config->save();
-
-      $this->io()->writeln(sprintf('  <info>✓</info> Front page set to node/%d (%s)', $nid, $homepage->getTitle()));
-
-    }
-    catch (\Exception $e) {
-      $this->logger->warning('Front page configuration error: @error', [
-        '@error' => $e->getMessage(),
-      ]);
-      $this->io()->writeln('  <comment>Front page configuration failed: ' . $e->getMessage() . '</comment>');
     }
   }
 
