@@ -149,7 +149,7 @@ development_status:
   epic-5-retrospective: done  # See retrospective-epics-1-5.md
 
   # Epic 6: Polish, Integration & Enhanced Walkthrough
-  epic-6: in-progress
+  epic-6: done
   6-1-integrated-walkthrough-overlay: done
   6-2-portal-explore-page: done
   6-3-portal-experiment-page: done
@@ -158,5 +158,5 @@ development_status:
   6-6-ai-feature-screenshot-pipeline: done
   6-7-enhanced-evidence-pack: done  # PDF generator extended, form updated
   6-8-cross-feature-ui-consistency: done  # Audit complete - no critical issues
-  6-9-integration-testing-validation: backlog
+  6-9-integration-testing-validation: done  # Validation complete, all ACs pass
   epic-6-retrospective: optional
