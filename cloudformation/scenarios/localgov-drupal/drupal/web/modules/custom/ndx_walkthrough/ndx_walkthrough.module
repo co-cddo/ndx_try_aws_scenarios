@@ -34,11 +34,14 @@ function ndx_walkthrough_page_attachments(array &$attachments) {
   if ($route && \Drupal::service('router.admin_context')->isAdminRoute($route)) {
     $attachments['#attached']['library'][] = 'ndx_walkthrough/walkthrough';
 
-    // Pass walkthrough steps to JavaScript.
+    // Pass walkthrough steps and features to JavaScript.
     $steps = ndx_walkthrough_get_steps();
+    $features = ndx_walkthrough_get_features();
     $attachments['#attached']['drupalSettings']['ndxWalkthrough'] = [
       'steps' => $steps,
+      'features' => $features,
       'storageKey' => 'ndx_walkthrough_progress',
+      'evidencePackUrl' => '/admin/ndx/evidence-pack',
     ];
   }
 }
@@ -74,17 +77,34 @@ function ndx_walkthrough_theme() {
 /**
  * Get the walkthrough tour steps.
  *
+ * Provides a comprehensive tour covering:
+ * - Admin Basics (3 steps)
+ * - AI Writing Assistant (2 steps)
+ * - Readability Simplification (2 steps)
+ * - Auto Alt-Text Generation (2 steps)
+ * - Text-to-Speech (2 steps)
+ * - Content Translation (2 steps)
+ * - PDF-to-Web Conversion (2 steps)
+ * - Dynamic Council Generation (3 steps)
+ * - Tour Complete (1 step)
+ * Total: 19 steps covering 7 AI features + admin basics
+ *
  * @return array
- *   Array of tour step configurations.
+ *   Array of tour step configurations with feature metadata.
  */
 function ndx_walkthrough_get_steps() {
   return [
+    // ========================================================================
+    // Section: Admin Basics
+    // ========================================================================
     [
       'id' => 'admin-toolbar',
       'title' => 'Welcome to the Admin Toolbar',
       'content' => 'This is your main navigation bar. From here, you can access all areas of your council website.',
       'target' => '#toolbar-bar',
       'position' => 'bottom',
+      'feature' => 'admin-basics',
+      'featureLabel' => 'Admin Basics',
     ],
     [
       'id' => 'content-menu',
@@ -92,6 +112,8 @@ function ndx_walkthrough_get_steps() {
       'content' => 'Click "Content" to view, edit, and create pages, news articles, services, and other content types.',
       'target' => '#toolbar-item-administration-tray .toolbar-icon-system-admin-content',
       'position' => 'bottom',
+      'feature' => 'admin-basics',
+      'featureLabel' => 'Admin Basics',
     ],
     [
       'id' => 'add-content',
@@ -99,41 +121,258 @@ function ndx_walkthrough_get_steps() {
       'content' => 'Use "Add content" to create new pages. LocalGov Drupal provides ready-made content types designed for councils.',
       'target' => '.toolbar-icon-node-add',
       'position' => 'bottom',
+      'feature' => 'admin-basics',
+      'featureLabel' => 'Admin Basics',
+    ],
+
+    // ========================================================================
+    // Section: AI Writing Assistant
+    // ========================================================================
+    [
+      'id' => 'ai-writing-intro',
+      'title' => 'AI Writing Assistant',
+      'content' => 'Let\'s explore the AI-powered writing tools. These help you create better content faster using Amazon Bedrock.',
+      'target' => null,
+      'position' => 'center',
+      'feature' => 'ai-writing',
+      'featureLabel' => 'AI Writing',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
     ],
     [
-      'id' => 'structure-menu',
-      'title' => 'Site Structure',
-      'content' => 'The Structure section lets you manage menus, taxonomies, and how content is organized on your site.',
-      'target' => '.toolbar-icon-system-admin-structure',
+      'id' => 'ai-writing-button',
+      'title' => 'Help Me Write...',
+      'content' => 'Click this button to get AI suggestions for titles, summaries, or entire paragraphs tailored to council communications.',
+      'target' => '.ai-writing-toolbar-button',
       'position' => 'bottom',
+      'feature' => 'ai-writing',
+      'featureLabel' => 'AI Writing',
+    ],
+
+    // ========================================================================
+    // Section: Readability Simplification
+    // ========================================================================
+    [
+      'id' => 'ai-simplify-intro',
+      'title' => 'Readability Simplification',
+      'content' => 'Make your content accessible to everyone. The AI can simplify complex text to plain English.',
+      'target' => null,
+      'position' => 'center',
+      'feature' => 'ai-simplify',
+      'featureLabel' => 'Simplify Content',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
     ],
     [
-      'id' => 'appearance',
-      'title' => 'Appearance Settings',
-      'content' => 'Customize how your site looks. LocalGov Drupal uses the GOV.UK Design System for accessible, familiar styling.',
-      'target' => '.toolbar-icon-system-themes-page',
+      'id' => 'ai-simplify-button',
+      'title' => 'Simplify to Plain English',
+      'content' => 'Select text and click this to rewrite it at a reading age appropriate for your audience. Great for accessibility.',
+      'target' => '.ai-simplify-toolbar-button',
       'position' => 'bottom',
+      'feature' => 'ai-simplify',
+      'featureLabel' => 'Simplify Content',
+    ],
+
+    // ========================================================================
+    // Section: Auto Alt-Text Generation
+    // ========================================================================
+    [
+      'id' => 'alt-text-intro',
+      'title' => 'Automatic Alt Text',
+      'content' => 'Images need descriptions for screen readers. Our AI generates alt text automatically when you upload images.',
+      'target' => null,
+      'position' => 'center',
+      'feature' => 'alt-text',
+      'featureLabel' => 'Auto Alt-Text',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
     ],
     [
-      'id' => 'configuration',
-      'title' => 'Configuration',
-      'content' => 'Site-wide settings live here, including site name, contact information, and system settings.',
+      'id' => 'alt-text-media',
+      'title' => 'Media Library Integration',
+      'content' => 'When you add images through the media library, AI suggests descriptive alt text. You can always edit it.',
+      'target' => '.toolbar-icon-entity-media-collection',
+      'position' => 'bottom',
+      'feature' => 'alt-text',
+      'featureLabel' => 'Auto Alt-Text',
+    ],
+
+    // ========================================================================
+    // Section: Text-to-Speech
+    // ========================================================================
+    [
+      'id' => 'tts-intro',
+      'title' => 'Listen to Page (Text-to-Speech)',
+      'content' => 'Amazon Polly can read your pages aloud. This helps users with visual impairments or those who prefer audio.',
+      'target' => null,
+      'position' => 'center',
+      'feature' => 'tts',
+      'featureLabel' => 'Text-to-Speech',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
+    ],
+    [
+      'id' => 'tts-button',
+      'title' => 'TTS Player Button',
+      'content' => 'The "Listen" button appears on published pages. Visitors click to hear the content read in a natural voice.',
+      'target' => '.tts-player-button',
+      'position' => 'bottom',
+      'feature' => 'tts',
+      'featureLabel' => 'Text-to-Speech',
+    ],
+
+    // ========================================================================
+    // Section: Content Translation
+    // ========================================================================
+    [
+      'id' => 'translation-intro',
+      'title' => 'Content Translation',
+      'content' => 'Serve your diverse community. Amazon Translate provides instant translation into 75+ languages.',
+      'target' => null,
+      'position' => 'center',
+      'feature' => 'translation',
+      'featureLabel' => 'Translation',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
+    ],
+    [
+      'id' => 'translation-widget',
+      'title' => 'Translation Widget',
+      'content' => 'Visitors select their language from the dropdown. The page translates instantly without leaving.',
+      'target' => '.translation-language-selector',
+      'position' => 'bottom',
+      'feature' => 'translation',
+      'featureLabel' => 'Translation',
+    ],
+
+    // ========================================================================
+    // Section: PDF-to-Web Conversion
+    // ========================================================================
+    [
+      'id' => 'pdf-convert-intro',
+      'title' => 'PDF-to-Web Conversion',
+      'content' => 'PDFs are hard to search and not accessible. Convert them to proper web pages using Amazon Textract.',
+      'target' => null,
+      'position' => 'center',
+      'feature' => 'pdf-convert',
+      'featureLabel' => 'PDF Conversion',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
+    ],
+    [
+      'id' => 'pdf-convert-nav',
+      'title' => 'PDF Conversion Tool',
+      'content' => 'Upload a PDF and the AI extracts the text, preserving structure. Review and publish as accessible web content.',
       'target' => '.toolbar-icon-system-admin-config',
       'position' => 'bottom',
+      'feature' => 'pdf-convert',
+      'featureLabel' => 'PDF Conversion',
+    ],
+
+    // ========================================================================
+    // Section: Dynamic Council Generation
+    // ========================================================================
+    [
+      'id' => 'council-gen-intro',
+      'title' => 'AI-Generated Council Content',
+      'content' => 'This entire demo site was generated by AI! Let\'s see what it created for your council.',
+      'target' => null,
+      'position' => 'center',
+      'feature' => 'council-gen',
+      'featureLabel' => 'Council Generator',
+      'learnMoreUrl' => '/admin/help/ndx_council_generator',
     ],
     [
-      'id' => 'reports',
-      'title' => 'Reports & Status',
-      'content' => 'Check site health, view logs, and access useful reports about your website performance.',
-      'target' => '.toolbar-icon-system-admin-reports',
+      'id' => 'council-gen-content',
+      'title' => 'Generated Content Showcase',
+      'content' => 'Browse the homepage, service pages, and news articles. All created by Amazon Bedrock based on your council profile.',
+      'target' => '#toolbar-item-administration-tray .toolbar-icon-system-admin-content',
       'position' => 'bottom',
+      'feature' => 'council-gen',
+      'featureLabel' => 'Council Generator',
     ],
+    [
+      'id' => 'council-gen-images',
+      'title' => 'AI-Generated Images',
+      'content' => 'The images throughout the site were created by Amazon Nova Canvas, matching your council\'s identity.',
+      'target' => '.toolbar-icon-entity-media-collection',
+      'position' => 'bottom',
+      'feature' => 'council-gen',
+      'featureLabel' => 'Council Generator',
+    ],
+
+    // ========================================================================
+    // Section: Tour Complete
+    // ========================================================================
     [
       'id' => 'tour-complete',
       'title' => 'Tour Complete!',
-      'content' => 'You\'ve completed the guided tour. Explore further, edit some content, and see how LocalGov Drupal can work for your council.',
+      'content' => 'You\'ve explored all 7 AI features. Generate your Evidence Pack to document what you\'ve learned.',
       'target' => null,
       'position' => 'center',
+      'feature' => 'complete',
+      'featureLabel' => 'Complete',
+      'showEvidencePack' => TRUE,
+    ],
+  ];
+}
+
+/**
+ * Get the list of AI features for section navigation.
+ *
+ * @return array
+ *   Array of feature definitions with metadata.
+ */
+function ndx_walkthrough_get_features() {
+  return [
+    'admin-basics' => [
+      'label' => 'Admin Basics',
+      'icon' => '🏠',
+      'description' => 'Drupal admin navigation essentials',
+      'category' => 'foundation',
+    ],
+    'ai-writing' => [
+      'label' => 'AI Writing',
+      'icon' => '✍️',
+      'description' => 'AI-powered content creation',
+      'category' => 'content',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
+    ],
+    'ai-simplify' => [
+      'label' => 'Simplify Content',
+      'icon' => '📖',
+      'description' => 'Plain English readability',
+      'category' => 'content',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
+    ],
+    'alt-text' => [
+      'label' => 'Auto Alt-Text',
+      'icon' => '🖼️',
+      'description' => 'Automatic image descriptions',
+      'category' => 'accessibility',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
+    ],
+    'tts' => [
+      'label' => 'Text-to-Speech',
+      'icon' => '🔊',
+      'description' => 'Listen to any page',
+      'category' => 'accessibility',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
+    ],
+    'translation' => [
+      'label' => 'Translation',
+      'icon' => '🌍',
+      'description' => '75+ language support',
+      'category' => 'accessibility',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
+    ],
+    'pdf-convert' => [
+      'label' => 'PDF Conversion',
+      'icon' => '📄',
+      'description' => 'PDF to accessible web content',
+      'category' => 'accessibility',
+      'learnMoreUrl' => '/admin/help/ndx_aws_ai',
+    ],
+    'council-gen' => [
+      'label' => 'Council Generator',
+      'icon' => '🏛️',
+      'description' => 'AI-generated council content',
+      'category' => 'generation',
+      'learnMoreUrl' => '/admin/help/ndx_council_generator',
     ],
   ];
 }

@@ -6,11 +6,16 @@
  * Provides the modal container for the guided tour with:
  * - Spotlight overlay backdrop
  * - Step content area
+ * - Section navigation menu for 7 AI features
+ * - Progress bar showing overall completion
  * - Navigation buttons (Previous, Next, Skip)
- * - Step counter
+ * - Step counter with feature label
+ * - Learn More links to mini-guides
+ * - Evidence Pack unlock button
  * - ARIA attributes for accessibility
  *
  * Story 2.5: Walkthrough Overlay in Drupal
+ * Story 6.1: Integrated Walkthrough Overlay
  */
 #}
 
@@ -35,6 +40,35 @@
     <span aria-hidden="true">&times;</span>
   </button>
 
+  {# Progress bar #}
+  <div class="ndx-walkthrough-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div class="ndx-walkthrough-progress__bar"></div>
+    <span class="ndx-walkthrough-progress__text" aria-live="polite"></span>
+  </div>
+
+  {# Section menu toggle #}
+  <button type="button"
+          id="ndx-walkthrough-sections-toggle"
+          class="ndx-walkthrough-sections-toggle"
+          aria-expanded="false"
+          aria-controls="ndx-walkthrough-sections-menu">
+    <span class="ndx-walkthrough-sections-toggle__icon" aria-hidden="true">☰</span>
+    <span id="ndx-walkthrough-feature-label" class="ndx-walkthrough-feature-label">
+      {# Populated by JavaScript: Current feature label #}
+    </span>
+    <span class="ndx-walkthrough-sections-toggle__arrow" aria-hidden="true">▼</span>
+  </button>
+
+  {# Section navigation menu #}
+  <nav id="ndx-walkthrough-sections-menu"
+       class="ndx-walkthrough-sections-menu"
+       aria-label="{{ 'Tour sections'|t }}"
+       hidden>
+    <ul class="ndx-walkthrough-sections-list" role="menu">
+      {# Populated by JavaScript with feature sections #}
+    </ul>
+  </nav>
+
   {# Step counter #}
   <div id="ndx-walkthrough-counter"
        class="ndx-walkthrough-counter"
@@ -52,6 +86,25 @@
   <div id="ndx-walkthrough-content" class="ndx-walkthrough-content">
     {# Populated by JavaScript #}
   </div>
+
+  {# Learn More link (shown for steps with learnMoreUrl) #}
+  <a id="ndx-walkthrough-learn-more"
+     class="ndx-walkthrough-learn-more"
+     href="#"
+     target="_blank"
+     rel="noopener noreferrer"
+     aria-describedby="ndx-walkthrough-content"
+     hidden>
+    {{ 'Learn more'|t }} <span aria-hidden="true">→</span>
+  </a>
+
+  {# Evidence Pack button (shown on final step when all features complete) #}
+  <a id="ndx-walkthrough-evidence-pack"
+     class="ndx-walkthrough-btn ndx-walkthrough-btn--evidence"
+     href="/admin/ndx/evidence-pack"
+     hidden>
+    <span aria-hidden="true">📋</span> {{ 'Generate Evidence Pack'|t }}
+  </a>
 
   {# Navigation buttons #}
   <div class="ndx-walkthrough-navigation">
