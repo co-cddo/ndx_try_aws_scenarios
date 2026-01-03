@@ -1,0 +1,282 @@
+# Architecture data for LocalGov Drupal AI scenario (Story 6.4)
+
+scenarioId: localgov-drupal
+
+# High-level architecture layers
+infrastructure:
+  title: "Infrastructure Stack"
+  description: "AWS CDK-based infrastructure deployed via CloudFormation"
+  components:
+    - id: "cdk"
+      name: "AWS CDK"
+      description: "Infrastructure as Code using TypeScript"
+      icon: "cloudformation"
+      awsLink: "https://docs.aws.amazon.com/cdk/"
+    - id: "cloudformation"
+      name: "CloudFormation"
+      description: "Stack deployment and resource management"
+      icon: "cloudformation"
+      awsLink: "https://docs.aws.amazon.com/cloudformation/"
+
+compute:
+  title: "Compute Layer"
+  description: "Containerised Drupal application on AWS Fargate"
+  components:
+    - id: "ecs"
+      name: "Amazon ECS"
+      description: "Container orchestration for Drupal"
+      icon: "ecs"
+      awsLink: "https://docs.aws.amazon.com/ecs/"
+    - id: "fargate"
+      name: "AWS Fargate"
+      description: "Serverless compute for containers"
+      icon: "fargate"
+      awsLink: "https://docs.aws.amazon.com/AmazonECS/latest/userguide/what-is-fargate.html"
+    - id: "alb"
+      name: "Application Load Balancer"
+      description: "HTTP/HTTPS traffic distribution"
+      icon: "elb"
+      awsLink: "https://docs.aws.amazon.com/elasticloadbalancing/"
+
+database:
+  title: "Database Layer"
+  description: "Serverless MySQL database for Drupal"
+  components:
+    - id: "aurora"
+      name: "Aurora MySQL Serverless v2"
+      description: "Auto-scaling relational database"
+      icon: "rds"
+      awsLink: "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/"
+
+storage:
+  title: "Storage Layer"
+  description: "File storage for Drupal sites and media"
+  components:
+    - id: "efs"
+      name: "Amazon EFS"
+      description: "Shared filesystem for Drupal files"
+      icon: "efs"
+      awsLink: "https://docs.aws.amazon.com/efs/"
+    - id: "s3"
+      name: "Amazon S3"
+      description: "Object storage for media assets"
+      icon: "s3"
+      awsLink: "https://docs.aws.amazon.com/s3/"
+
+# AI Services used
+aiServices:
+  title: "AI Services"
+  description: "AWS AI services powering LocalGov Drupal features"
+  components:
+    - id: "bedrock"
+      name: "Amazon Bedrock"
+      description: "Foundation models for content generation"
+      icon: "bedrock"
+      awsLink: "https://docs.aws.amazon.com/bedrock/"
+      models:
+        - "Nova Pro (content generation)"
+        - "Nova Lite (simplification)"
+        - "Nova Lite Vision (image analysis)"
+        - "Nova Canvas (image generation)"
+    - id: "polly"
+      name: "Amazon Polly"
+      description: "Neural text-to-speech"
+      icon: "polly"
+      awsLink: "https://docs.aws.amazon.com/polly/"
+    - id: "translate"
+      name: "Amazon Translate"
+      description: "Neural machine translation"
+      icon: "translate"
+      awsLink: "https://docs.aws.amazon.com/translate/"
+    - id: "textract"
+      name: "Amazon Textract"
+      description: "Document text extraction"
+      icon: "textract"
+      awsLink: "https://docs.aws.amazon.com/textract/"
+
+# Data flows for each AI feature
+dataFlows:
+  - id: "ai-content-editing"
+    name: "AI Content Editing"
+    description: "Get AI-powered suggestions to improve your content"
+    awsService: "Amazon Bedrock"
+    icon: "edit"
+    steps:
+      - step: 1
+        label: "User enters prompt"
+        description: "Content editor types a writing request in CKEditor"
+      - step: 2
+        label: "Request sent to Bedrock"
+        description: "Prompt sent to Amazon Bedrock Nova Pro model"
+      - step: 3
+        label: "AI generates content"
+        description: "Nova Pro generates contextual, council-appropriate text"
+      - step: 4
+        label: "Preview and apply"
+        description: "User reviews and applies the generated content"
+    costNote: "~$0.0008 per 1,000 input tokens"
+
+  - id: "readability-simplification"
+    name: "Readability Simplification"
+    description: "Transform complex text into plain English"
+    awsService: "Amazon Bedrock"
+    icon: "simplify"
+    steps:
+      - step: 1
+        label: "Select complex text"
+        description: "User selects text containing jargon or complex language"
+      - step: 2
+        label: "Request sent to Bedrock"
+        description: "Text sent to Amazon Bedrock Nova Lite with simplification prompt"
+      - step: 3
+        label: "AI simplifies"
+        description: "Nova Lite rewrites text targeting reading age 9"
+      - step: 4
+        label: "Compare and apply"
+        description: "User compares before/after and applies changes"
+    costNote: "~$0.0003 per 1,000 input tokens"
+
+  - id: "auto-alt-text"
+    name: "Auto Alt-Text"
+    description: "Automatically generate accessible image descriptions"
+    awsService: "Amazon Bedrock"
+    icon: "image"
+    steps:
+      - step: 1
+        label: "Upload image"
+        description: "User uploads an image to Drupal media library"
+      - step: 2
+        label: "Image sent to Bedrock"
+        description: "Image sent to Nova Lite Vision model"
+      - step: 3
+        label: "AI describes image"
+        description: "Vision model generates detailed alt-text"
+      - step: 4
+        label: "Review and save"
+        description: "User edits alt-text if needed and saves media"
+    costNote: "~$0.0004 per image"
+
+  - id: "text-to-speech"
+    name: "Text-to-Speech"
+    description: "Listen to page content with neural voices"
+    awsService: "Amazon Polly"
+    icon: "speaker"
+    steps:
+      - step: 1
+        label: "Click listen button"
+        description: "User clicks 'Listen to this page' button"
+      - step: 2
+        label: "Text extracted"
+        description: "Page content extracted and cleaned"
+      - step: 3
+        label: "Sent to Polly"
+        description: "Text sent to Amazon Polly Neural TTS"
+      - step: 4
+        label: "Audio plays"
+        description: "MP3 audio streams to user's browser"
+    costNote: "~$16 per 1 million characters (Neural)"
+
+  - id: "content-translation"
+    name: "Content Translation"
+    description: "Translate content to 75+ languages"
+    awsService: "Amazon Translate"
+    icon: "translate"
+    steps:
+      - step: 1
+        label: "Select content"
+        description: "User selects content to translate"
+      - step: 2
+        label: "Choose language"
+        description: "User selects target language from 75+ options"
+      - step: 3
+        label: "Sent to Translate"
+        description: "Content sent to Amazon Translate"
+      - step: 4
+        label: "Translation returned"
+        description: "Translated content displayed for review"
+    costNote: "~$15 per 1 million characters"
+
+  - id: "pdf-to-web"
+    name: "PDF-to-Web Conversion"
+    description: "Convert PDF documents to accessible web content"
+    awsService: "Amazon Textract + Bedrock"
+    icon: "document"
+    steps:
+      - step: 1
+        label: "Upload PDF"
+        description: "User uploads a PDF document"
+      - step: 2
+        label: "Textract extracts"
+        description: "Amazon Textract extracts text and structure"
+      - step: 3
+        label: "Bedrock formats"
+        description: "Nova Lite cleans and structures the content"
+      - step: 4
+        label: "Web content ready"
+        description: "Clean HTML ready to create as web page"
+    costNote: "~$1.50 per 1,000 pages + Bedrock costs"
+
+  - id: "dynamic-council"
+    name: "Dynamic Council Generation"
+    description: "AI-generated unique council identity for each deployment"
+    awsService: "Amazon Bedrock"
+    icon: "council"
+    steps:
+      - step: 1
+        label: "Deployment starts"
+        description: "CloudFormation stack deployment begins"
+      - step: 2
+        label: "Identity generated"
+        description: "Nova Pro creates unique council name, colours, tagline"
+      - step: 3
+        label: "Content generated"
+        description: "Nova Pro generates 40+ pages of council content"
+      - step: 4
+        label: "Images generated"
+        description: "Nova Canvas creates council-themed images"
+    costNote: "One-time generation at deployment"
+
+# Cost summary
+costSummary:
+  title: "Cost Overview"
+  description: "Estimated costs for demo usage (not production)"
+  disclaimer: |
+    These costs are estimates for demonstration purposes only.
+    Production costs will vary based on usage patterns, content volume,
+    and AWS pricing changes. Always refer to AWS Pricing Calculator
+    for accurate estimates.
+  categories:
+    - name: "Infrastructure"
+      items:
+        - service: "ECS Fargate"
+          estimate: "~$30-50/month"
+          note: "0.5 vCPU, 1GB RAM"
+        - service: "Aurora Serverless v2"
+          estimate: "~$50-100/month"
+          note: "0.5-2 ACU"
+        - service: "EFS"
+          estimate: "~$5-10/month"
+          note: "Standard storage class"
+    - name: "AI Services"
+      items:
+        - service: "Bedrock (Nova models)"
+          estimate: "Pay per use"
+          note: "Based on token/image volume"
+        - service: "Polly"
+          estimate: "Pay per use"
+          note: "$16/million chars (Neural)"
+        - service: "Translate"
+          estimate: "Pay per use"
+          note: "$15/million chars"
+        - service: "Textract"
+          estimate: "Pay per use"
+          note: "$1.50/1,000 pages"
+  pricingLinks:
+    - name: "AWS Bedrock Pricing"
+      url: "https://aws.amazon.com/bedrock/pricing/"
+    - name: "AWS Polly Pricing"
+      url: "https://aws.amazon.com/polly/pricing/"
+    - name: "AWS Translate Pricing"
+      url: "https://aws.amazon.com/translate/pricing/"
+    - name: "AWS Pricing Calculator"
+      url: "https://calculator.aws/"

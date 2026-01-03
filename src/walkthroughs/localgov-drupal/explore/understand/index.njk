@@ -1,0 +1,492 @@
+---
+layout: page
+title: How It Works
+description: Understand the architecture and data flows powering LocalGov Drupal AI features
+scenarioId: localgov-drupal
+eleventyNavigation:
+  key: localgov-drupal-understand
+  parent: localgov-drupal-explore
+  title: How It Works
+---
+
+{#
+  Story 6.4: Portal Understand Page
+
+  Architecture and data flow explanations showing:
+  - High-level infrastructure diagram
+  - AI service components
+  - Data flows for each AI feature
+  - Cost overview with AWS pricing links
+
+  Accessibility:
+  - SVG diagrams have text alternatives
+  - AWS links open in new tab with rel attributes
+  - Works without JavaScript (progressive enhancement)
+#}
+
+{% set scenarioId = "localgov-drupal" %}
+{% set architecture = architecture["localgov-drupal"] %}
+
+{# Phase Navigator #}
+{% include "components/phase-navigator.njk" %}
+
+{# Breadcrumb #}
+<nav class="govuk-breadcrumbs govuk-!-margin-bottom-6" aria-label="Breadcrumb">
+  <ol class="govuk-breadcrumbs__list">
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/">Home</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/scenarios/localgov-drupal/">LocalGov Drupal</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/walkthroughs/localgov-drupal/">Walkthrough</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/walkthroughs/localgov-drupal/explore/">Explore</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item" aria-current="page">
+      How It Works
+    </li>
+  </ol>
+</nav>
+
+<h1 class="govuk-heading-xl">How It Works</h1>
+
+<p class="govuk-body-l">
+  Understand the architecture behind LocalGov Drupal's AI features. See how AWS services
+  work together to power content editing, accessibility, and generation capabilities.
+</p>
+
+{# Jump Links #}
+<nav class="ndx-jump-links govuk-!-margin-bottom-8" aria-label="On this page">
+  <h2 class="govuk-heading-s ndx-jump-links__heading">On this page</h2>
+  <ul class="govuk-list ndx-jump-links__list">
+    <li><a class="govuk-link" href="#architecture">Architecture Overview</a></li>
+    <li><a class="govuk-link" href="#ai-services">AI Services</a></li>
+    <li><a class="govuk-link" href="#data-flows">Data Flows</a></li>
+    <li><a class="govuk-link" href="#costs">Cost Overview</a></li>
+  </ul>
+</nav>
+
+{# Architecture Overview Section #}
+<section id="architecture" class="ndx-architecture-section govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Architecture Overview</h2>
+
+  <p class="govuk-body">
+    LocalGov Drupal runs on AWS using modern cloud-native infrastructure. The entire stack
+    is defined as Infrastructure as Code using AWS CDK (TypeScript), deployed via CloudFormation.
+  </p>
+
+  {# High-level Architecture Diagram #}
+  <figure class="ndx-architecture-diagram govuk-!-margin-bottom-6" role="figure" aria-labelledby="arch-diagram-caption">
+    <div class="ndx-architecture-diagram__svg" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" class="ndx-architecture-svg">
+        {# Background layers #}
+        <rect x="20" y="20" width="760" height="70" fill="#f3f2f1" rx="4"/>
+        <rect x="20" y="100" width="760" height="90" fill="#e8f4e8" rx="4"/>
+        <rect x="20" y="200" width="370" height="90" fill="#e8f0f8" rx="4"/>
+        <rect x="410" y="200" width="370" height="90" fill="#f8e8f8" rx="4"/>
+        <rect x="20" y="300" width="760" height="80" fill="#fff4e8" rx="4"/>
+
+        {# Layer labels #}
+        <text x="40" y="60" class="ndx-arch-label">Infrastructure: AWS CDK → CloudFormation</text>
+
+        {# Compute Layer #}
+        <text x="40" y="125" class="ndx-arch-label">Compute Layer</text>
+        <rect x="60" y="135" width="120" height="45" fill="#fff" stroke="#1d70b8" stroke-width="2" rx="4"/>
+        <text x="120" y="163" text-anchor="middle" class="ndx-arch-box">ECS Fargate</text>
+
+        <rect x="200" y="135" width="120" height="45" fill="#fff" stroke="#1d70b8" stroke-width="2" rx="4"/>
+        <text x="260" y="163" text-anchor="middle" class="ndx-arch-box">Drupal</text>
+
+        <rect x="340" y="135" width="180" height="45" fill="#fff" stroke="#1d70b8" stroke-width="2" rx="4"/>
+        <text x="430" y="163" text-anchor="middle" class="ndx-arch-box">Application Load Balancer</text>
+
+        {# Database Layer #}
+        <text x="40" y="225" class="ndx-arch-label">Database</text>
+        <rect x="60" y="235" width="160" height="45" fill="#fff" stroke="#1d70b8" stroke-width="2" rx="4"/>
+        <text x="140" y="263" text-anchor="middle" class="ndx-arch-box">Aurora MySQL v2</text>
+
+        <rect x="240" y="235" width="130" height="45" fill="#fff" stroke="#1d70b8" stroke-width="2" rx="4"/>
+        <text x="305" y="263" text-anchor="middle" class="ndx-arch-box">Amazon EFS</text>
+
+        {# AI Services Layer #}
+        <text x="430" y="225" class="ndx-arch-label">AI Services</text>
+        <rect x="430" y="235" width="100" height="45" fill="#fff" stroke="#912b88" stroke-width="2" rx="4"/>
+        <text x="480" y="263" text-anchor="middle" class="ndx-arch-box">Bedrock</text>
+
+        <rect x="550" y="235" width="80" height="45" fill="#fff" stroke="#912b88" stroke-width="2" rx="4"/>
+        <text x="590" y="263" text-anchor="middle" class="ndx-arch-box">Polly</text>
+
+        <rect x="650" y="235" width="100" height="45" fill="#fff" stroke="#912b88" stroke-width="2" rx="4"/>
+        <text x="700" y="263" text-anchor="middle" class="ndx-arch-box">Translate</text>
+
+        {# Request Flow #}
+        <text x="40" y="325" class="ndx-arch-label">Request Flow</text>
+        <rect x="60" y="335" width="80" height="35" fill="#1d70b8" rx="4"/>
+        <text x="100" y="358" text-anchor="middle" fill="#fff" class="ndx-arch-flow">User</text>
+
+        <line x1="140" y1="352" x2="180" y2="352" stroke="#1d70b8" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+        <rect x="190" y="335" width="80" height="35" fill="#1d70b8" rx="4"/>
+        <text x="230" y="358" text-anchor="middle" fill="#fff" class="ndx-arch-flow">ALB</text>
+
+        <line x1="270" y1="352" x2="310" y2="352" stroke="#1d70b8" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+        <rect x="320" y="335" width="100" height="35" fill="#1d70b8" rx="4"/>
+        <text x="370" y="358" text-anchor="middle" fill="#fff" class="ndx-arch-flow">Drupal</text>
+
+        <line x1="420" y1="352" x2="460" y2="352" stroke="#912b88" stroke-width="2" marker-end="url(#arrowhead-purple)"/>
+
+        <rect x="470" y="335" width="120" height="35" fill="#912b88" rx="4"/>
+        <text x="530" y="358" text-anchor="middle" fill="#fff" class="ndx-arch-flow">AI Services</text>
+
+        <line x1="590" y1="352" x2="630" y2="352" stroke="#00703c" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+
+        <rect x="640" y="335" width="120" height="35" fill="#00703c" rx="4"/>
+        <text x="700" y="358" text-anchor="middle" fill="#fff" class="ndx-arch-flow">Response</text>
+
+        {# Arrow markers #}
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#1d70b8"/>
+          </marker>
+          <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#912b88"/>
+          </marker>
+          <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#00703c"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+    <figcaption id="arch-diagram-caption" class="govuk-body-s ndx-architecture-diagram__caption">
+      High-level architecture: User requests flow through ALB to Drupal on ECS Fargate,
+      which calls AWS AI services (Bedrock, Polly, Translate) as needed. Data is stored
+      in Aurora MySQL and EFS.
+    </figcaption>
+  </figure>
+
+  {# Architecture Components Table - Text Alternative #}
+  <details class="govuk-details govuk-!-margin-bottom-6">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">View architecture as text</span>
+    </summary>
+    <div class="govuk-details__text">
+      <h3 class="govuk-heading-s">Infrastructure Components</h3>
+      <table class="govuk-table">
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Layer</th>
+            <th scope="col" class="govuk-table__header">Component</th>
+            <th scope="col" class="govuk-table__header">Purpose</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for component in architecture.infrastructure.components %}
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">Infrastructure</td>
+            <td class="govuk-table__cell">
+              <a href="{{ component.awsLink }}" class="govuk-link" target="_blank" rel="noopener noreferrer">
+                {{ component.name }}<span class="govuk-visually-hidden"> (opens in new tab)</span>
+              </a>
+            </td>
+            <td class="govuk-table__cell">{{ component.description }}</td>
+          </tr>
+          {% endfor %}
+          {% for component in architecture.compute.components %}
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">Compute</td>
+            <td class="govuk-table__cell">
+              <a href="{{ component.awsLink }}" class="govuk-link" target="_blank" rel="noopener noreferrer">
+                {{ component.name }}<span class="govuk-visually-hidden"> (opens in new tab)</span>
+              </a>
+            </td>
+            <td class="govuk-table__cell">{{ component.description }}</td>
+          </tr>
+          {% endfor %}
+          {% for component in architecture.database.components %}
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">Database</td>
+            <td class="govuk-table__cell">
+              <a href="{{ component.awsLink }}" class="govuk-link" target="_blank" rel="noopener noreferrer">
+                {{ component.name }}<span class="govuk-visually-hidden"> (opens in new tab)</span>
+              </a>
+            </td>
+            <td class="govuk-table__cell">{{ component.description }}</td>
+          </tr>
+          {% endfor %}
+          {% for component in architecture.storage.components %}
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">Storage</td>
+            <td class="govuk-table__cell">
+              <a href="{{ component.awsLink }}" class="govuk-link" target="_blank" rel="noopener noreferrer">
+                {{ component.name }}<span class="govuk-visually-hidden"> (opens in new tab)</span>
+              </a>
+            </td>
+            <td class="govuk-table__cell">{{ component.description }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+{# AI Services Section #}
+<section id="ai-services" class="ndx-ai-services-section govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">{{ architecture.aiServices.title }}</h2>
+
+  <p class="govuk-body">{{ architecture.aiServices.description }}</p>
+
+  <div class="govuk-grid-row">
+    {% for service in architecture.aiServices.components %}
+    <div class="govuk-grid-column-one-half ndx-ai-service-card-wrapper">
+      <div class="ndx-ai-service-card">
+        <h3 class="govuk-heading-m ndx-ai-service-card__title">
+          <a href="{{ service.awsLink }}" class="govuk-link" target="_blank" rel="noopener noreferrer">
+            {{ service.name }}
+            <svg class="ndx-external-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            <span class="govuk-visually-hidden">(opens in new tab)</span>
+          </a>
+        </h3>
+        <p class="govuk-body">{{ service.description }}</p>
+        {% if service.models %}
+        <p class="govuk-body-s ndx-ai-service-card__models">
+          <strong>Models used:</strong><br>
+          {% for model in service.models %}
+            {{ model }}{% if not loop.last %}, {% endif %}
+          {% endfor %}
+        </p>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{# Data Flows Section #}
+<section id="data-flows" class="ndx-data-flows-section govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Data Flows</h2>
+
+  <p class="govuk-body">
+    Each AI feature follows a specific data flow. Click on any feature to see how data
+    moves from user input through AWS services and back to Drupal.
+  </p>
+
+  <div class="ndx-data-flows-grid">
+    {% for dataFlow in architecture.dataFlows %}
+      {% include "components/data-flow-card.njk" %}
+    {% endfor %}
+  </div>
+</section>
+
+{# Cost Overview Section #}
+<section id="costs" class="ndx-costs-section govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">{{ architecture.costSummary.title }}</h2>
+
+  <p class="govuk-body">{{ architecture.costSummary.description }}</p>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Warning</span>
+      {{ architecture.costSummary.disclaimer }}
+    </strong>
+  </div>
+
+  {% for category in architecture.costSummary.categories %}
+  <h3 class="govuk-heading-m">{{ category.name }}</h3>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Service</th>
+        <th scope="col" class="govuk-table__header">Estimate</th>
+        <th scope="col" class="govuk-table__header">Notes</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      {% for item in category.items %}
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">{{ item.service }}</td>
+        <td class="govuk-table__cell">{{ item.estimate }}</td>
+        <td class="govuk-table__cell">{{ item.note }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endfor %}
+
+  <h3 class="govuk-heading-s">AWS Pricing Resources</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    {% for link in architecture.costSummary.pricingLinks %}
+    <li>
+      <a href="{{ link.url }}" class="govuk-link" target="_blank" rel="noopener noreferrer">
+        {{ link.name }}
+        <span class="govuk-visually-hidden">(opens in new tab)</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+{# What's Next #}
+<section class="ndx-understand-next govuk-!-margin-top-8" aria-labelledby="next-heading">
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+  <h2 class="govuk-heading-l" id="next-heading">Continue Learning</h2>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-m">Try the Experiments</h3>
+        <p class="govuk-body">
+          Put your understanding into practice with guided hands-on experiments.
+        </p>
+        <a href="/walkthroughs/localgov-drupal/explore/experiments/" class="govuk-button govuk-button--secondary">
+          Start Experimenting
+        </a>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-m">View Source Code</h3>
+        <p class="govuk-body">
+          Explore the CDK infrastructure code and Drupal modules on GitHub.
+        </p>
+        <a href="https://github.com/your-org/ndx-localgov-drupal" class="govuk-link" target="_blank" rel="noopener noreferrer">
+          View on GitHub
+          <span class="govuk-visually-hidden">(opens in new tab)</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Jump links */
+  .ndx-jump-links {
+    background: #f3f2f1;
+    padding: 15px 20px;
+  }
+
+  .ndx-jump-links__heading {
+    margin-bottom: 10px;
+  }
+
+  .ndx-jump-links__list {
+    margin-bottom: 0;
+    columns: 2;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-jump-links__list {
+      columns: 1;
+    }
+  }
+
+  /* Architecture diagram */
+  .ndx-architecture-diagram {
+    margin: 0;
+  }
+
+  .ndx-architecture-diagram__svg {
+    background: #fff;
+    border: 1px solid #b1b4b6;
+    padding: 10px;
+    overflow-x: auto;
+  }
+
+  .ndx-architecture-svg {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    min-height: 300px;
+  }
+
+  .ndx-arch-label {
+    font-size: 14px;
+    font-weight: bold;
+    fill: #0b0c0c;
+  }
+
+  .ndx-arch-box {
+    font-size: 12px;
+    fill: #0b0c0c;
+  }
+
+  .ndx-arch-flow {
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  .ndx-architecture-diagram__caption {
+    margin-top: 10px;
+    color: #505a5f;
+  }
+
+  /* AI Service Cards */
+  .ndx-ai-service-card-wrapper {
+    margin-bottom: 20px;
+  }
+
+  .ndx-ai-service-card {
+    background: #fff;
+    border: 1px solid #b1b4b6;
+    padding: 20px;
+    height: 100%;
+  }
+
+  .ndx-ai-service-card__title {
+    margin-top: 0;
+  }
+
+  .ndx-ai-service-card__title a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ndx-ai-service-card__models {
+    color: #505a5f;
+    margin-bottom: 0;
+  }
+
+  .ndx-external-icon {
+    flex-shrink: 0;
+  }
+
+  /* Data flows grid */
+  .ndx-data-flows-grid {
+    display: grid;
+    gap: 20px;
+  }
+
+  @media (min-width: 769px) {
+    .ndx-data-flows-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Next section */
+  .ndx-next-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    height: 100%;
+  }
+
+  .ndx-next-card h3 {
+    margin-top: 0;
+  }
+
+  @media (max-width: 768px) {
+    .ndx-next-card {
+      margin-bottom: 20px;
+    }
+  }
+</style>
