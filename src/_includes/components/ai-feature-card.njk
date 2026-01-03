@@ -1,0 +1,258 @@
+{#
+  AI Feature Card Component (Story 6.2)
+
+  Displays an individual AI feature with:
+  - Icon (SVG based on feature.icon)
+  - Name and description
+  - Time estimate
+  - Status badge
+  - "Try it now" deep link button
+
+  Expects: feature object from aiFeatures array iteration
+
+  Usage:
+    {% for feature in aiFeatures %}
+      {% include "components/ai-feature-card.njk" %}
+    {% endfor %}
+
+  Accessibility:
+    - Card is a semantic article element
+    - Icon is decorative (aria-hidden)
+    - Status badge uses GOV.UK tag component
+    - Button opens in new tab with appropriate aria-label
+#}
+
+<article class="ndx-ai-feature-card" data-feature-id="{{ feature.id }}" data-category="{{ feature.category }}">
+  <div class="ndx-ai-feature-card__header">
+    {# Feature Icon #}
+    <div class="ndx-ai-feature-card__icon" aria-hidden="true">
+      {% if feature.icon == "edit" %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      {% elif feature.icon == "simplify" %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="21" y1="10" x2="3" y2="10"/>
+          <line x1="21" y1="6" x2="3" y2="6"/>
+          <line x1="21" y1="14" x2="3" y2="14"/>
+          <line x1="21" y1="18" x2="3" y2="18"/>
+        </svg>
+      {% elif feature.icon == "image" %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21,15 16,10 5,21"/>
+        </svg>
+      {% elif feature.icon == "speaker" %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+      {% elif feature.icon == "translate" %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 8l6 6"/>
+          <path d="M4 14l6-6 2-3"/>
+          <path d="M2 5h12"/>
+          <path d="M7 2h1"/>
+          <path d="M22 22l-5-10-5 10"/>
+          <path d="M14 18h6"/>
+        </svg>
+      {% elif feature.icon == "document" %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      {% elif feature.icon == "council" %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21h18"/>
+          <path d="M5 21V7l7-4 7 4v14"/>
+          <path d="M9 21v-4h6v4"/>
+          <path d="M9 10h.01"/>
+          <path d="M15 10h.01"/>
+          <path d="M9 14h.01"/>
+          <path d="M15 14h.01"/>
+        </svg>
+      {% else %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      {% endif %}
+    </div>
+
+    {# Status Badge #}
+    <span class="govuk-tag govuk-tag--{% if feature.status == 'available' %}green{% elif feature.status == 'requires-login' %}yellow{% else %}grey{% endif %} ndx-ai-feature-card__status">
+      {{ feature.statusLabel }}
+    </span>
+  </div>
+
+  <div class="ndx-ai-feature-card__content">
+    <h3 class="govuk-heading-s ndx-ai-feature-card__title">{{ feature.name }}</h3>
+    <p class="govuk-body-s ndx-ai-feature-card__description">{{ feature.description }}</p>
+  </div>
+
+  <div class="ndx-ai-feature-card__meta">
+    <span class="ndx-ai-feature-card__time">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12,6 12,12 16,14"/>
+      </svg>
+      {{ feature.timeEstimate }}
+    </span>
+    <span class="ndx-ai-feature-card__service">
+      {{ feature.awsService }}
+    </span>
+  </div>
+
+  <div class="ndx-ai-feature-card__action">
+    <a href="#"
+       class="govuk-button govuk-button--secondary ndx-ai-feature-card__button"
+       data-drupal-path="{{ feature.drupalPath }}"
+       data-feature-id="{{ feature.id }}"
+       target="_blank"
+       rel="noopener noreferrer"
+       aria-label="Try {{ feature.name }} in Drupal (opens in new tab)">
+      Try it now
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="ndx-ai-feature-card__external-icon">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+        <polyline points="15 3 21 3 21 9"/>
+        <line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+    </a>
+  </div>
+</article>
+
+<style>
+  .ndx-ai-feature-card {
+    background: #fff;
+    border: 1px solid #b1b4b6;
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .ndx-ai-feature-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .ndx-ai-feature-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+
+  .ndx-ai-feature-card__icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f8f8;
+    border-radius: 8px;
+    color: #1d70b8;
+  }
+
+  .ndx-ai-feature-card__icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .ndx-ai-feature-card__status {
+    font-size: 12px;
+  }
+
+  .ndx-ai-feature-card__content {
+    flex: 1;
+    margin-bottom: 15px;
+  }
+
+  .ndx-ai-feature-card__title {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #0b0c0c;
+  }
+
+  .ndx-ai-feature-card__description {
+    margin-bottom: 0;
+    color: #505a5f;
+  }
+
+  .ndx-ai-feature-card__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #505a5f;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ndx-ai-feature-card__time {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .ndx-ai-feature-card__time svg {
+    opacity: 0.7;
+  }
+
+  .ndx-ai-feature-card__service {
+    background: #f3f2f1;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+
+  .ndx-ai-feature-card__action {
+    margin-top: auto;
+  }
+
+  .ndx-ai-feature-card__button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 0;
+  }
+
+  .ndx-ai-feature-card__external-icon {
+    flex-shrink: 0;
+  }
+
+  /* Disabled state when no deployment */
+  .ndx-ai-feature-card--no-deployment .ndx-ai-feature-card__button {
+    opacity: 0.6;
+    background-color: #b1b4b6;
+    border-color: #b1b4b6;
+    color: #0b0c0c;
+    cursor: not-allowed;
+  }
+
+  .ndx-ai-feature-card--no-deployment .ndx-ai-feature-card__button:hover,
+  .ndx-ai-feature-card--no-deployment .ndx-ai-feature-card__button:focus {
+    background-color: #b1b4b6;
+    border-color: #b1b4b6;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-ai-feature-card {
+      padding: 15px;
+    }
+
+    .ndx-ai-feature-card__meta {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

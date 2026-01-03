@@ -151,7 +151,7 @@ development_status:
   # Epic 6: Polish, Integration & Enhanced Walkthrough
   epic-6: in-progress
   6-1-integrated-walkthrough-overlay: done
-  6-2-portal-explore-page: backlog
+  6-2-portal-explore-page: done
   6-3-portal-experiment-page: backlog
   6-4-portal-understand-page: backlog
   6-5-portal-extend-page: backlog
