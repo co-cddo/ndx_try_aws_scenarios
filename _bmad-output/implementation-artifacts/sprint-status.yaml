@@ -157,6 +157,6 @@ development_status:
   6-5-portal-extend-page: done
   6-6-ai-feature-screenshot-pipeline: done
   6-7-enhanced-evidence-pack: done  # PDF generator extended, form updated
-  6-8-cross-feature-ui-consistency: backlog
+  6-8-cross-feature-ui-consistency: done  # Audit complete - no critical issues
   6-9-integration-testing-validation: backlog
   epic-6-retrospective: optional
