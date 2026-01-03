@@ -1,0 +1,175 @@
+# Extend page data for LocalGov Drupal AI scenario (Story 6.5)
+
+scenarioId: localgov-drupal
+
+# Personas with tailored next steps
+personas:
+  - id: content-officer
+    name: "Content Officer"
+    description: "Day-to-day content editing and publishing"
+    icon: "edit"
+    nextSteps:
+      - title: "Join the LocalGov Drupal community"
+        description: "Connect with 50+ councils using LocalGov Drupal"
+        url: "https://localgovdrupal.org/community"
+        external: true
+      - title: "Explore AI content features"
+        description: "Try the AI writing assistant and simplification tools"
+        url: "/walkthroughs/localgov-drupal/explore/"
+        external: false
+      - title: "Review accessibility guidance"
+        description: "Learn how AI features support WCAG 2.2 compliance"
+        url: "/walkthroughs/localgov-drupal/explore/understand/#ai-services"
+        external: false
+      - title: "Generate your evidence pack"
+        description: "Create a committee-ready PDF documenting your experience"
+        url: "/walkthroughs/localgov-drupal/evidence-pack/"
+        external: false
+
+  - id: it-technical
+    name: "IT / Technical Lead"
+    description: "Infrastructure, security, and implementation"
+    icon: "code"
+    nextSteps:
+      - title: "Review the architecture"
+        description: "Understand CDK, Fargate, Aurora, and AI service integration"
+        url: "/walkthroughs/localgov-drupal/explore/understand/"
+        external: false
+      - title: "Explore the CDK source code"
+        description: "Fork and customise the infrastructure for your needs"
+        url: "https://github.com/your-org/ndx-localgov-drupal"
+        external: true
+      - title: "Contact an AWS Partner"
+        description: "Get expert help with production deployment"
+        url: "https://aws.amazon.com/partners/find/"
+        external: true
+      - title: "Review security considerations"
+        description: "Understand IAM, VPC, encryption configurations"
+        url: "/walkthroughs/localgov-drupal/explore/understand/#costs"
+        external: false
+
+  - id: procurement
+    name: "Procurement / Decision Maker"
+    description: "Business case, budget, and vendor selection"
+    icon: "document"
+    nextSteps:
+      - title: "Download evidence pack"
+        description: "Committee-ready PDF with screenshots and findings"
+        url: "/walkthroughs/localgov-drupal/evidence-pack/"
+        external: false
+      - title: "View on G-Cloud"
+        description: "Find AWS services on the Digital Marketplace"
+        url: "https://www.digitalmarketplace.service.gov.uk/g-cloud/search?q=AWS"
+        external: true
+      - title: "Explore cost calculator"
+        description: "Estimate production costs with AWS Pricing Calculator"
+        url: "https://calculator.aws/"
+        external: true
+      - title: "Read case studies"
+        description: "See how other councils use AWS and LocalGov Drupal"
+        url: "https://aws.amazon.com/government-education/government/uk/"
+        external: true
+
+# Community resources
+communityResources:
+  title: "LocalGov Drupal Community"
+  description: "Join a thriving community of UK councils sharing knowledge and code"
+  resources:
+    - name: "LocalGov Drupal Website"
+      description: "Official hub for the LocalGov Drupal project"
+      url: "https://localgovdrupal.org/"
+      icon: "globe"
+    - name: "GitHub Repository"
+      description: "Source code, issues, and contributions"
+      url: "https://github.com/localgovdrupal"
+      icon: "github"
+    - name: "Slack Community"
+      description: "Real-time chat with councils and developers"
+      url: "https://localgovdrupal.org/community/slack"
+      icon: "chat"
+    - name: "Monthly Community Calls"
+      description: "Regular meetups to share progress and ideas"
+      url: "https://localgovdrupal.org/community/events"
+      icon: "calendar"
+
+# AWS resources
+awsResources:
+  title: "AWS for UK Public Sector"
+  description: "AWS resources and support for UK local government"
+  resources:
+    - name: "AWS UK Public Sector"
+      description: "Dedicated resources for UK government customers"
+      url: "https://aws.amazon.com/government-education/government/uk/"
+      icon: "aws"
+    - name: "Find an AWS Partner"
+      description: "Certified partners with public sector expertise"
+      url: "https://aws.amazon.com/partners/find/?facetCountry=United%20Kingdom"
+      icon: "partner"
+    - name: "AWS Pricing Calculator"
+      description: "Estimate production infrastructure costs"
+      url: "https://calculator.aws/"
+      icon: "calculator"
+    - name: "G-Cloud Framework"
+      description: "AWS services on the Digital Marketplace"
+      url: "https://www.digitalmarketplace.service.gov.uk/g-cloud/search?q=AWS"
+      icon: "marketplace"
+
+# Production considerations
+productionConsiderations:
+  title: "Moving to Production"
+  description: "Key considerations when deploying LocalGov Drupal for real use"
+  categories:
+    - name: "Security & Compliance"
+      items:
+        - "Enable AWS WAF for web application firewall protection"
+        - "Implement Multi-AZ for Aurora database high availability"
+        - "Configure VPC with private subnets for database tier"
+        - "Enable AWS CloudTrail for audit logging"
+        - "Review IAM policies for least privilege access"
+    - name: "Scalability"
+      items:
+        - "Configure ECS auto-scaling based on CPU/memory"
+        - "Consider Aurora read replicas for high traffic"
+        - "Implement CloudFront CDN for static assets"
+        - "Configure ElastiCache for Drupal caching"
+    - name: "Backup & Recovery"
+      items:
+        - "Enable Aurora automated backups with appropriate retention"
+        - "Configure EFS backup using AWS Backup"
+        - "Document and test disaster recovery procedures"
+        - "Implement cross-region backup for critical data"
+    - name: "Monitoring"
+      items:
+        - "Set up CloudWatch alarms for key metrics"
+        - "Enable Container Insights for Fargate monitoring"
+        - "Configure X-Ray for application tracing"
+        - "Set up SNS notifications for critical alerts"
+
+# Related scenarios
+relatedScenarios:
+  title: "Explore More Scenarios"
+  description: "Discover other AWS solutions for UK councils"
+  scenarios:
+    - id: "council-chatbot"
+      name: "Council Chatbot"
+      description: "AI-powered 24/7 resident Q&A using Amazon Bedrock"
+      url: "/scenarios/council-chatbot/"
+      tag: "AI"
+    - id: "planning-ai"
+      name: "Planning Application AI"
+      description: "Automated document extraction and analysis"
+      url: "/scenarios/planning-ai/"
+      tag: "AI"
+    - id: "foi-redaction"
+      name: "FOI Redaction"
+      description: "AI-powered PII detection and redaction"
+      url: "/scenarios/foi-redaction/"
+      tag: "AI"
+
+# Feedback section
+feedback:
+  title: "Share Your Feedback"
+  description: "Help us improve NDX Try AWS Scenarios"
+  callToAction: "We'd love to hear about your experience with LocalGov Drupal on AWS"
+  email: "ndx@dsit.gov.uk"
+  buttonText: "Send Feedback"
