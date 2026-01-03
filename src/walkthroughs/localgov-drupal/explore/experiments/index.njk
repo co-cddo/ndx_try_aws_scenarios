@@ -1,0 +1,290 @@
+---
+layout: page
+title: Hands-on Experiments
+description: Guided tasks to learn each AI feature through practical exercises
+scenarioId: localgov-drupal
+eleventyNavigation:
+  key: localgov-drupal-experiments
+  parent: localgov-drupal-explore
+  title: Experiments
+---
+
+{#
+  Story 6.3: Portal Experiment Page
+
+  Hands-on experiments for each AI feature:
+  - Beginner, Intermediate, Advanced difficulty levels
+  - Step-by-step instructions
+  - Success criteria
+  - Sample content with copy functionality
+  - Completion tracking via localStorage
+#}
+
+{% set scenarioId = "localgov-drupal" %}
+{% set experimentData = experiments["localgov-drupal"] %}
+{% set allExperiments = experimentData.experiments %}
+
+{# Phase Navigator - Story 12.1 #}
+{% include "components/phase-navigator.njk" %}
+
+{# Breadcrumb #}
+<nav class="govuk-breadcrumbs govuk-!-margin-bottom-6" aria-label="Breadcrumb">
+  <ol class="govuk-breadcrumbs__list">
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/">Home</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/scenarios/localgov-drupal/">LocalGov Drupal</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/walkthroughs/localgov-drupal/">Walkthrough</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/walkthroughs/localgov-drupal/explore/">Explore</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item" aria-current="page">
+      Experiments
+    </li>
+  </ol>
+</nav>
+
+<h1 class="govuk-heading-xl">Hands-on Experiments</h1>
+
+<p class="govuk-body-l">
+  Learn by doing! Complete these guided tasks to experience each AI feature first-hand.
+  Start with beginner experiments and work your way up.
+</p>
+
+{# Progress Summary #}
+<div id="experiment-progress" class="ndx-experiment-progress govuk-!-margin-bottom-6">
+  <div class="govuk-inset-text ndx-experiment-progress__content">
+    <div class="ndx-experiment-progress__info">
+      <strong>Your progress:</strong>
+      <span id="progress-count">0 of {{ allExperiments | length }}</span> experiments completed
+    </div>
+    <div class="ndx-experiment-progress__bar">
+      <div id="progress-fill" class="ndx-experiment-progress__fill" style="width: 0%"></div>
+    </div>
+    <button id="reset-progress" class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0" type="button">
+      Reset Progress
+    </button>
+  </div>
+</div>
+
+{# Deployment Check #}
+<div id="deployment-notice" class="govuk-warning-text govuk-!-margin-bottom-6" hidden>
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Warning</span>
+    Some experiments work best with a live deployment.
+    <a href="/scenarios/localgov-drupal/" class="govuk-link">Deploy LocalGov Drupal</a> for the full experience.
+  </strong>
+</div>
+
+{# Filter by Difficulty #}
+<div class="ndx-experiment-filters govuk-!-margin-bottom-6">
+  <fieldset class="govuk-fieldset" aria-describedby="filter-hint">
+    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+      Filter by difficulty
+    </legend>
+    <div id="filter-hint" class="govuk-hint">
+      Select difficulty levels to show
+    </div>
+    <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+      <div class="govuk-checkboxes__item">
+        <input class="govuk-checkboxes__input" id="filter-beginner" name="difficulty" type="checkbox" value="beginner" checked>
+        <label class="govuk-label govuk-checkboxes__label" for="filter-beginner">
+          <span class="govuk-tag govuk-tag--green">Beginner</span>
+        </label>
+      </div>
+      <div class="govuk-checkboxes__item">
+        <input class="govuk-checkboxes__input" id="filter-intermediate" name="difficulty" type="checkbox" value="intermediate" checked>
+        <label class="govuk-label govuk-checkboxes__label" for="filter-intermediate">
+          <span class="govuk-tag govuk-tag--yellow">Intermediate</span>
+        </label>
+      </div>
+      <div class="govuk-checkboxes__item">
+        <input class="govuk-checkboxes__input" id="filter-advanced" name="difficulty" type="checkbox" value="advanced" checked>
+        <label class="govuk-label govuk-checkboxes__label" for="filter-advanced">
+          <span class="govuk-tag govuk-tag--orange">Advanced</span>
+        </label>
+      </div>
+    </div>
+  </fieldset>
+</div>
+
+{# Beginner Experiments #}
+{% set beginnerExperiments = allExperiments | selectattr("difficulty", "equalto", "beginner") %}
+<section class="ndx-experiment-section govuk-!-margin-bottom-8" data-difficulty="beginner" aria-labelledby="beginner-heading">
+  <h2 class="govuk-heading-l" id="beginner-heading">
+    <span class="govuk-tag govuk-tag--green">Beginner</span>
+    Getting Started
+  </h2>
+  <p class="govuk-body">
+    Perfect for your first exploration. These take about 5 minutes each.
+  </p>
+
+  <div class="ndx-experiment-list">
+    {% for experiment in beginnerExperiments %}
+      {% include "components/experiment-card.njk" %}
+    {% endfor %}
+  </div>
+</section>
+
+{# Intermediate Experiments #}
+{% set intermediateExperiments = allExperiments | selectattr("difficulty", "equalto", "intermediate") %}
+<section class="ndx-experiment-section govuk-!-margin-bottom-8" data-difficulty="intermediate" aria-labelledby="intermediate-heading">
+  <h2 class="govuk-heading-l" id="intermediate-heading">
+    <span class="govuk-tag govuk-tag--yellow">Intermediate</span>
+    Going Deeper
+  </h2>
+  <p class="govuk-body">
+    Ready for more? These experiments take 10-15 minutes and explore features in depth.
+  </p>
+
+  <div class="ndx-experiment-list">
+    {% for experiment in intermediateExperiments %}
+      {% include "components/experiment-card.njk" %}
+    {% endfor %}
+  </div>
+</section>
+
+{# Advanced Experiments #}
+{% set advancedExperiments = allExperiments | selectattr("difficulty", "equalto", "advanced") %}
+<section class="ndx-experiment-section govuk-!-margin-bottom-8" data-difficulty="advanced" aria-labelledby="advanced-heading">
+  <h2 class="govuk-heading-l" id="advanced-heading">
+    <span class="govuk-tag govuk-tag--orange">Advanced</span>
+    Challenge Yourself
+  </h2>
+  <p class="govuk-body">
+    Combine multiple features and tackle complex content. These take 15-20 minutes.
+  </p>
+
+  <div class="ndx-experiment-list">
+    {% for experiment in advancedExperiments %}
+      {% include "components/experiment-card.njk" %}
+    {% endfor %}
+  </div>
+</section>
+
+{# What's Next #}
+<section class="ndx-experiments-next govuk-!-margin-top-8" aria-labelledby="next-heading">
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+  <h2 class="govuk-heading-l" id="next-heading">What's next?</h2>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-m">Create Evidence Pack</h3>
+        <p class="govuk-body">
+          Document your experiments and generate a committee-ready report.
+        </p>
+        <a href="/walkthroughs/localgov-drupal/evidence-pack/" class="govuk-button">
+          Generate Report
+        </a>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-m">Explore All Features</h3>
+        <p class="govuk-body">
+          Browse the complete list of AI features with quick access links.
+        </p>
+        <a href="/walkthroughs/localgov-drupal/explore/" class="govuk-button govuk-button--secondary">
+          View Features
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Progress bar */
+  .ndx-experiment-progress__content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    border-left-color: #1d70b8;
+  }
+
+  .ndx-experiment-progress__info {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .ndx-experiment-progress__bar {
+    flex: 2;
+    min-width: 200px;
+    height: 8px;
+    background-color: #f3f2f1;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .ndx-experiment-progress__fill {
+    height: 100%;
+    background-color: #00703c;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+  }
+
+  /* Filters */
+  .ndx-experiment-filters .govuk-checkboxes {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .ndx-experiment-filters .govuk-checkboxes__item {
+    margin-bottom: 0;
+  }
+
+  /* Experiment sections */
+  .ndx-experiment-section h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .ndx-experiment-section[hidden] {
+    display: none;
+  }
+
+  .ndx-experiment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Next section */
+  .ndx-next-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    height: 100%;
+  }
+
+  .ndx-next-card h3 {
+    margin-top: 0;
+  }
+
+  @media (max-width: 768px) {
+    .ndx-experiment-progress__content {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ndx-experiment-filters .govuk-checkboxes {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ndx-next-card {
+      margin-bottom: 20px;
+    }
+  }
+</style>
+
+<script src="/assets/js/experiment-tracker.js" defer></script>

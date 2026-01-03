@@ -1,0 +1,297 @@
+{#
+  Experiment Card Component (Story 6.3)
+
+  Displays a hands-on experiment with:
+  - Title, description, difficulty badge
+  - Expandable steps and success criteria
+  - Sample content with copy button
+  - Completion checkbox with localStorage persistence
+
+  Expects: experiment object from experiments array iteration
+
+  Usage:
+    {% for experiment in experiments %}
+      {% include "components/experiment-card.njk" %}
+    {% endfor %}
+
+  Accessibility:
+    - Uses GOV.UK Details component for progressive disclosure
+    - Checkbox is properly labelled
+    - Success criteria uses list semantics
+#}
+
+<article class="ndx-experiment-card" data-experiment-id="{{ experiment.id }}" data-difficulty="{{ experiment.difficulty }}">
+  <div class="ndx-experiment-card__header">
+    <div class="ndx-experiment-card__checkbox">
+      <div class="govuk-checkboxes govuk-checkboxes--small">
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input ndx-experiment-checkbox"
+                 type="checkbox"
+                 id="complete-{{ experiment.id }}"
+                 name="complete-{{ experiment.id }}"
+                 data-experiment-id="{{ experiment.id }}"
+                 aria-describedby="label-{{ experiment.id }}">
+          <label class="govuk-label govuk-checkboxes__label" for="complete-{{ experiment.id }}">
+            <span class="govuk-visually-hidden">Mark as complete</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="ndx-experiment-card__title-area">
+      <h3 class="govuk-heading-s ndx-experiment-card__title" id="label-{{ experiment.id }}">
+        {{ experiment.title }}
+      </h3>
+      <div class="ndx-experiment-card__meta">
+        <span class="govuk-tag govuk-tag--{% if experiment.difficulty == 'beginner' %}green{% elif experiment.difficulty == 'intermediate' %}yellow{% else %}orange{% endif %} ndx-experiment-card__difficulty">
+          {{ experiment.difficultyLabel }}
+        </span>
+        <span class="govuk-tag govuk-tag--grey ndx-experiment-card__feature">
+          {{ experiment.featureLabel }}
+        </span>
+        <span class="ndx-experiment-card__time">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12,6 12,12 16,14"/>
+          </svg>
+          {{ experiment.timeEstimate }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <p class="govuk-body ndx-experiment-card__description">
+    {{ experiment.description }}
+  </p>
+
+  {# Expandable Details Section #}
+  <details class="govuk-details ndx-experiment-card__details">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        View instructions and sample content
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      {# Steps #}
+      <h4 class="govuk-heading-s">Steps to complete</h4>
+      <ol class="govuk-list govuk-list--number ndx-experiment-card__steps">
+        {% for step in experiment.steps %}
+          <li>{{ step }}</li>
+        {% endfor %}
+      </ol>
+
+      {# Sample Content #}
+      {% if experiment.sampleContent %}
+        <h4 class="govuk-heading-s">Sample content</h4>
+        <div class="ndx-experiment-card__sample">
+          <pre class="ndx-experiment-card__sample-text"><code>{{ experiment.sampleContent | trim }}</code></pre>
+          <button class="govuk-button govuk-button--secondary ndx-copy-button"
+                  type="button"
+                  data-copy-target="sample-{{ experiment.id }}"
+                  aria-label="Copy sample content to clipboard">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
+          <textarea class="govuk-visually-hidden" id="sample-{{ experiment.id }}" aria-hidden="true">{{ experiment.sampleContent | trim }}</textarea>
+        </div>
+      {% endif %}
+
+      {# Success Criteria #}
+      <h4 class="govuk-heading-s">You'll know it worked when...</h4>
+      <ul class="govuk-list ndx-experiment-card__success">
+        {% for criterion in experiment.successCriteria %}
+          <li>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00703c" stroke-width="3" aria-hidden="true" class="ndx-success-icon">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            {{ criterion }}
+          </li>
+        {% endfor %}
+      </ul>
+
+      {# Deep Link #}
+      {% if experiment.drupalPath %}
+        <a href="#"
+           class="govuk-button ndx-experiment-card__try-button"
+           data-drupal-path="{{ experiment.drupalPath }}"
+           data-experiment-id="{{ experiment.id }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Try {{ experiment.title }} in Drupal (opens in new tab)">
+          Try it in Drupal
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
+      {% endif %}
+    </div>
+  </details>
+</article>
+
+<style>
+  .ndx-experiment-card {
+    background: #fff;
+    border: 1px solid #b1b4b6;
+    padding: 20px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .ndx-experiment-card:hover {
+    border-color: #0b0c0c;
+  }
+
+  .ndx-experiment-card--completed {
+    border-color: #00703c;
+    background-color: #f0faf0;
+  }
+
+  .ndx-experiment-card__header {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .ndx-experiment-card__checkbox {
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .ndx-experiment-card__checkbox .govuk-checkboxes__item {
+    margin-bottom: 0;
+    min-height: auto;
+  }
+
+  .ndx-experiment-card__title-area {
+    flex: 1;
+  }
+
+  .ndx-experiment-card__title {
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+
+  .ndx-experiment-card__meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .ndx-experiment-card__difficulty,
+  .ndx-experiment-card__feature {
+    font-size: 12px;
+  }
+
+  .ndx-experiment-card__time {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: #505a5f;
+  }
+
+  .ndx-experiment-card__description {
+    margin-top: 12px;
+    margin-bottom: 12px;
+    color: #505a5f;
+  }
+
+  .ndx-experiment-card__details {
+    margin-bottom: 0;
+  }
+
+  .ndx-experiment-card__details .govuk-details__text {
+    border-left-color: #1d70b8;
+  }
+
+  .ndx-experiment-card__steps li {
+    margin-bottom: 8px;
+  }
+
+  .ndx-experiment-card__sample {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .ndx-experiment-card__sample-text {
+    background-color: #f3f2f1;
+    padding: 15px;
+    border-radius: 0;
+    overflow-x: auto;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0 0 10px 0;
+  }
+
+  .ndx-experiment-card__sample-text code {
+    font-family: monospace;
+  }
+
+  .ndx-copy-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0;
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .ndx-copy-button--copied {
+    background-color: #00703c;
+    border-color: #00703c;
+    color: #fff;
+  }
+
+  .ndx-experiment-card__success {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .ndx-experiment-card__success li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .ndx-success-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .ndx-experiment-card__try-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+    margin-bottom: 0;
+  }
+
+  /* Completed state styles */
+  .ndx-experiment-card--completed .ndx-experiment-card__title::after {
+    content: " ✓";
+    color: #00703c;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-experiment-card {
+      padding: 15px;
+    }
+
+    .ndx-experiment-card__header {
+      flex-direction: row;
+    }
+
+    .ndx-experiment-card__meta {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

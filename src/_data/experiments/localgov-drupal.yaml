@@ -1,0 +1,251 @@
+# Experiments for LocalGov Drupal AI Features (Story 6.3)
+# Guided hands-on tasks to help users learn each AI feature
+
+scenarioId: localgov-drupal
+
+experiments:
+  # === BEGINNER LEVEL ===
+
+  - id: "explore-council-identity"
+    title: "Explore Your Generated Council"
+    description: "Take a tour of the AI-generated council identity and content on your deployment."
+    feature: "dynamic-council"
+    featureLabel: "Dynamic Council"
+    difficulty: "beginner"
+    difficultyLabel: "Beginner"
+    timeEstimate: "5 minutes"
+    order: 1
+    steps:
+      - "Navigate to your Drupal homepage"
+      - "Notice the unique council name, logo colours, and tagline"
+      - "Browse to 2-3 different service pages"
+      - "Look at the 'About us' page to see the generated council history"
+    successCriteria:
+      - "You can identify your council's unique name"
+      - "You've seen at least 3 pages of generated content"
+      - "You understand this content was created by AI for demonstration"
+    sampleContent: |
+      Your council might be called something like "Ashworth Borough Council"
+      or "Brackenmoor District Council" - each deployment gets a unique identity!
+    drupalPath: "/"
+
+  - id: "simplify-planning-text"
+    title: "Simplify Planning Guidance"
+    description: "Use the AI Simplify feature to make complex planning text easier to read."
+    feature: "readability-simplification"
+    featureLabel: "Readability Simplification"
+    difficulty: "beginner"
+    difficultyLabel: "Beginner"
+    timeEstimate: "5 minutes"
+    order: 2
+    steps:
+      - "Create or edit any page in Drupal"
+      - "Copy the sample planning text below into the body field"
+      - "Select all the text"
+      - "Click the 'Simplify Content' button in the AI toolbar"
+      - "Review the simplified version"
+      - "Click 'Accept' to apply the changes"
+    successCriteria:
+      - "The simplified text is shorter"
+      - "Technical jargon has been replaced with plain English"
+      - "The meaning is preserved but easier to understand"
+    sampleContent: |
+      The applicant must ensure that the proposed development complies with the
+      provisions set forth in the Town and Country Planning Act 1990, specifically
+      those pertaining to permitted development rights under Schedule 2, Part 1,
+      Class A of the Town and Country Planning (General Permitted Development)
+      (England) Order 2015. Furthermore, consideration must be given to the
+      environmental impact assessment requirements as stipulated in the
+      Environmental Impact Assessment Directive 2014/52/EU, where applicable.
+    drupalPath: "/node/add/localgov_page"
+
+  - id: "generate-alt-text"
+    title: "Generate Alt-Text for an Image"
+    description: "Upload an image and let AI automatically generate accessible alt-text."
+    feature: "auto-alt-text"
+    featureLabel: "Auto Alt-Text"
+    difficulty: "beginner"
+    difficultyLabel: "Beginner"
+    timeEstimate: "5 minutes"
+    order: 3
+    steps:
+      - "Go to Content > Media > Add media"
+      - "Select 'Image' as the media type"
+      - "Upload any photo (try a local landmark or council building)"
+      - "Wait for the AI to generate alt-text automatically"
+      - "Review the suggested alt-text"
+      - "Edit if needed and save"
+    successCriteria:
+      - "Alt-text is generated automatically within a few seconds"
+      - "The description accurately describes the image content"
+      - "You can edit the alt-text before saving"
+    sampleContent: |
+      Tip: Try uploading different types of images:
+      - A photo of a building
+      - A screenshot of a form
+      - A map or diagram
+      See how the AI describes each differently!
+    drupalPath: "/admin/content/media"
+
+  # === INTERMEDIATE LEVEL ===
+
+  - id: "improve-service-page"
+    title: "Improve a Service Page"
+    description: "Use the AI Writing Assistant to enhance a council service page."
+    feature: "ai-content-editing"
+    featureLabel: "AI Content Editing"
+    difficulty: "intermediate"
+    difficultyLabel: "Intermediate"
+    timeEstimate: "10 minutes"
+    order: 4
+    steps:
+      - "Navigate to any service page (e.g., Bin collections)"
+      - "Click 'Edit' to enter edit mode"
+      - "In the body field, click 'AI Write' in the toolbar"
+      - "Ask the AI to 'Make this more engaging and add a call-to-action'"
+      - "Review the suggestions"
+      - "Accept the changes or ask for alternatives"
+    successCriteria:
+      - "The AI provides relevant suggestions"
+      - "The improved text is more engaging than the original"
+      - "A clear call-to-action has been added"
+      - "The council's voice and tone are maintained"
+    sampleContent: |
+      Original text to improve:
+
+      "Bins are collected on Tuesdays. Put your bin out by 7am.
+      Contact us if you have problems."
+
+      Try asking the AI: "Make this more friendly and add information
+      about what happens on bank holidays"
+    drupalPath: "/admin/content"
+
+  - id: "listen-multiple-voices"
+    title: "Try Different TTS Voices"
+    description: "Explore the text-to-speech feature with different voices and accents."
+    feature: "text-to-speech"
+    featureLabel: "Text-to-Speech"
+    difficulty: "intermediate"
+    difficultyLabel: "Intermediate"
+    timeEstimate: "10 minutes"
+    order: 5
+    steps:
+      - "Go to any content page on your site"
+      - "Click the 'Listen to this page' button"
+      - "Listen to the default voice"
+      - "Go to the TTS settings (/admin/ndx/tts)"
+      - "Try at least 3 different voices"
+      - "Note which voice sounds most natural for council content"
+    successCriteria:
+      - "Audio plays correctly for page content"
+      - "You've tested at least 3 different voices"
+      - "You can identify differences between neural and standard voices"
+      - "You've found a voice that suits your council's style"
+    sampleContent: |
+      Voice options to try:
+      - Amy (British English, Neural)
+      - Brian (British English, Neural)
+      - Emma (British English, Neural)
+
+      Neural voices sound more natural but may cost slightly more.
+    drupalPath: "/admin/ndx/tts"
+
+  - id: "translate-service-info"
+    title: "Translate a Service Page"
+    description: "Use the translation feature to make content available in another language."
+    feature: "content-translation"
+    featureLabel: "Content Translation"
+    difficulty: "intermediate"
+    difficultyLabel: "Intermediate"
+    timeEstimate: "10 minutes"
+    order: 6
+    steps:
+      - "Go to the Translation page (/admin/ndx/translate)"
+      - "Select a page to translate"
+      - "Choose a target language (try Welsh, Polish, or Urdu)"
+      - "Click 'Translate'"
+      - "Review the translated content"
+      - "Note: This is a preview, not a saved translation"
+    successCriteria:
+      - "Translation completes within 30 seconds"
+      - "The translated text appears correctly"
+      - "You've tested at least 2 different languages"
+      - "You understand this uses Amazon Translate"
+    sampleContent: |
+      Try translating these common council phrases:
+
+      English: "Report a problem with a pothole"
+      Welsh: "Riportiwch broblem gyda thwll yn y ffordd"
+      Polish: "Zglos problem z dziura w drodze"
+    drupalPath: "/admin/ndx/translate"
+
+  # === ADVANCED LEVEL ===
+
+  - id: "convert-pdf-document"
+    title: "Convert a PDF to Web Content"
+    description: "Take a PDF document and convert it to accessible web content using AI."
+    feature: "pdf-to-web"
+    featureLabel: "PDF-to-Web"
+    difficulty: "advanced"
+    difficultyLabel: "Advanced"
+    timeEstimate: "15 minutes"
+    order: 7
+    steps:
+      - "Go to the PDF Converter (/admin/ndx/pdf-converter)"
+      - "Upload a simple PDF (1-3 pages works best)"
+      - "Wait for Textract to extract the content"
+      - "Review the extracted text and structure"
+      - "Use the 'Improve with AI' option to clean up formatting"
+      - "Copy the result to create a new page"
+    successCriteria:
+      - "Text is extracted from the PDF correctly"
+      - "Headings and structure are preserved"
+      - "The AI has improved readability"
+      - "You could create a web page from this content"
+    sampleContent: |
+      Good PDFs to test with:
+      - A simple council leaflet
+      - Meeting minutes
+      - A policy document
+
+      Note: Complex layouts, scanned images, or handwriting
+      may not extract well. Start simple!
+    drupalPath: "/admin/ndx/pdf-converter"
+
+  - id: "chain-features"
+    title: "Chain Multiple AI Features"
+    description: "Combine multiple AI features to create polished, accessible content."
+    feature: "ai-content-editing"
+    featureLabel: "AI Content Editing"
+    difficulty: "advanced"
+    difficultyLabel: "Advanced"
+    timeEstimate: "20 minutes"
+    order: 8
+    steps:
+      - "Start with the sample text below"
+      - "First, use 'Simplify Content' to make it clearer"
+      - "Then, use 'AI Write' to add a friendly introduction"
+      - "Add an image and let AI generate alt-text"
+      - "Preview and enable 'Listen to this page'"
+      - "Finally, test translation to another language"
+    successCriteria:
+      - "You've used at least 4 different AI features"
+      - "The final content is clearer than the original"
+      - "The page is accessible (has alt-text, can be listened to)"
+      - "The page can be translated to other languages"
+    sampleContent: |
+      Starting text (complex council jargon):
+
+      "In accordance with the provisions of the Local Government Act 2003 and
+      subsequent amendments thereto, the authority hereby gives notice of its
+      intention to consider representations from interested parties regarding
+      the proposed modification to the Council Tax Reduction Scheme for the
+      fiscal year commencing 1st April. Representations must be received in
+      writing at the offices of the Chief Finance Officer no later than the
+      close of business on the fourteenth day following the publication of
+      this notice. Failure to submit representations within the prescribed
+      timeframe will result in the forfeiture of the right to make
+      representations on this matter."
+
+      Challenge: Make this understandable by anyone!
+    drupalPath: "/node/add/localgov_page"
