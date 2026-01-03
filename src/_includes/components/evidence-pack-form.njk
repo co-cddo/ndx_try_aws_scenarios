@@ -169,6 +169,71 @@
       </div>
     </fieldset>
 
+    {# AI Features Explored (Story 6.7 - Enhanced Evidence Pack) #}
+    <fieldset class="govuk-fieldset govuk-!-margin-bottom-6">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+        <h3 class="govuk-fieldset__heading">AI features explored</h3>
+      </legend>
+
+      <p class="govuk-body govuk-!-margin-bottom-4">
+        Select the AI features you tried during your evaluation.
+      </p>
+
+      <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input" id="ai-content-editing" name="aiContentEditing" type="checkbox" value="true">
+          <label class="govuk-label govuk-checkboxes__label" for="ai-content-editing">
+            <strong>AI Content Editing</strong> - Bedrock-powered writing assistance in CKEditor
+          </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input" id="ai-simplification" name="aiSimplification" type="checkbox" value="true">
+          <label class="govuk-label govuk-checkboxes__label" for="ai-simplification">
+            <strong>Readability Simplification</strong> - One-click plain English rewrite
+          </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input" id="ai-alt-text" name="aiAltText" type="checkbox" value="true">
+          <label class="govuk-label govuk-checkboxes__label" for="ai-alt-text">
+            <strong>Auto Alt-Text</strong> - WCAG-compliant image descriptions via AI vision
+          </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input" id="ai-tts" name="aiTts" type="checkbox" value="true">
+          <label class="govuk-label govuk-checkboxes__label" for="ai-tts">
+            <strong>Text-to-Speech</strong> - Amazon Polly neural voices in 7 languages
+          </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input" id="ai-translation" name="aiTranslation" type="checkbox" value="true">
+          <label class="govuk-label govuk-checkboxes__label" for="ai-translation">
+            <strong>Content Translation</strong> - Amazon Translate for 75+ languages
+          </label>
+        </div>
+        <div class="govuk-checkboxes__item">
+          <input class="govuk-checkboxes__input" id="ai-pdf-conversion" name="aiPdfConversion" type="checkbox" value="true">
+          <label class="govuk-label govuk-checkboxes__label" for="ai-pdf-conversion">
+            <strong>PDF-to-Web Conversion</strong> - Textract + Bedrock for accessible documents
+          </label>
+        </div>
+      </div>
+
+      <div class="govuk-form-group govuk-!-margin-top-4">
+        <label class="govuk-label" for="ai-observations">
+          AI feature observations
+        </label>
+        <p class="govuk-hint">
+          What did you notice about the AI capabilities? How might they help your council?
+        </p>
+        <textarea
+          class="govuk-textarea"
+          id="ai-observations"
+          name="aiObservations"
+          rows="4"
+        ></textarea>
+      </div>
+    </fieldset>
+
     {# Observations #}
     <fieldset class="govuk-fieldset govuk-!-margin-bottom-6">
       <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
@@ -395,6 +460,31 @@
         try {
           // Collect form data
           const formData = new FormData(form);
+
+          // Collect AI features (Story 6.7 - Enhanced Evidence Pack)
+          const aiFeatures = {
+            contentEditing: formData.get('aiContentEditing') === 'true',
+            simplification: formData.get('aiSimplification') === 'true',
+            altText: formData.get('aiAltText') === 'true',
+            tts: formData.get('aiTts') === 'true',
+            translation: formData.get('aiTranslation') === 'true',
+            pdfConversion: formData.get('aiPdfConversion') === 'true'
+          };
+
+          // Check if any AI features were selected
+          const hasAiFeatures = Object.values(aiFeatures).some(v => v);
+
+          // Load council identity from session if available
+          let councilIdentity = null;
+          const councilData = sessionStorage.getItem(`ndx-council-${scenarioId}`);
+          if (councilData) {
+            try {
+              councilIdentity = JSON.parse(councilData);
+            } catch (e) {
+              console.warn('Could not parse council identity:', e);
+            }
+          }
+
           const data = {
             scenarioName: formData.get('scenarioName') || '{{ scenarioData.title | default("LocalGov Drupal") }}',
             scenarioId: scenarioId,
@@ -407,7 +497,11 @@
             estimatedCost: formData.get('estimatedCost') || '< $0.50',
             deploymentTime: formData.get('deploymentTime') || '~15 minutes',
             observations: formData.get('observations') || '',
-            screenshots: {}
+            screenshots: {},
+            // Enhanced Evidence Pack fields (Story 6.7)
+            aiFeatures: hasAiFeatures ? aiFeatures : null,
+            aiObservations: formData.get('aiObservations') || '',
+            councilIdentity: councilIdentity
           };
 
           // Process screenshots if provided
