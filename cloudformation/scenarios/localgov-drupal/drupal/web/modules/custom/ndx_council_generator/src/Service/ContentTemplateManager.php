@@ -26,6 +26,8 @@ class ContentTemplateManager implements ContentTemplateManagerInterface {
     'directory-entries',
     'news-articles',
     'homepage',
+    'navigation-landing',
+    'contact',
   ];
 
   /**

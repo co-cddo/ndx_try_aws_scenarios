@@ -1,0 +1,45 @@
+# Story 5.3: Content Generation Templates - Contact Page
+# Generates the council contact page with contact information
+
+content_type: localgov_services_page
+generation_order: 3
+
+style_guide: |
+  Style Guidelines (Contact Page):
+  - Clear, scannable contact information
+  - Use plain English (GOV.UK style)
+  - Provide multiple contact methods
+  - Include opening hours
+  - Emergency contacts prominently displayed
+
+items:
+  - id: contact-page
+    title_template: "Contact {{council_name}}"
+    prompt: |
+      Write a contact page for a UK local council.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Include realistic-looking but FICTIONAL contact details:
+      - Main switchboard phone (use format 01onal 000 0000)
+      - Email address (use council@example.gov.uk)
+      - Postal address (make up a realistic UK address for the region)
+      - Opening hours (typical council hours Mon-Fri 9am-5pm)
+      - Emergency out-of-hours contact
+      - Key department contacts (housing, council tax, planning, etc.)
+      - Online forms and services link
+      - Feedback and complaints process
+      - Social media (use placeholder links)
+
+      {{style_guide}}
+
+      IMPORTANT: Output valid JSON with all strings on single lines. Do not include literal newlines inside JSON string values.
+
+      Output as JSON with this structure:
+      {"title": "Contact [council name]", "summary": "How to contact us by phone, email or post", "body": "<div class='contact-page'><h2>Contact us</h2><p><strong>Phone:</strong> 01234 000 000 (Mon-Fri 9am-5pm)</p><p><strong>Email:</strong> council@example.gov.uk</p><p><strong>Address:</strong> Council Offices, High Street, Town, County, AB1 2CD</p><h2>Emergency contacts</h2><p><strong>Out of hours:</strong> 01234 000 001 (emergencies only)</p><h2>Department contacts</h2><ul><li>Council Tax: 01234 000 002</li><li>Housing: 01234 000 003</li><li>Planning: 01234 000 004</li><li>Waste and recycling: 01234 000 005</li></ul><h2>Online services</h2><p>Many services are available online 24/7. <a href='/services'>View all online services</a>.</p><h2>Complaints and feedback</h2><p>We welcome your feedback. <a href='/complaints'>Make a complaint or give feedback</a>.</p></div>"}
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body

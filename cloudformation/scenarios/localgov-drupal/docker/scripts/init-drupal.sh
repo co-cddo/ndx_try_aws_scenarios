@@ -26,6 +26,37 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
+# Helper function to run drush commands with retry logic for deadlocks
+# Handles Aurora MySQL deadlocks (SQLSTATE 40001) that occur during cache writes
+run_drush_with_retry() {
+    local max_attempts=5
+    local attempt=1
+    local delay=2
+    local output
+
+    while [ $attempt -le $max_attempts ]; do
+        if output=$("$@" 2>&1); then
+            echo "$output"
+            return 0
+        else
+            # Check if it's a deadlock or transient error
+            if echo "$output" | grep -qiE "(deadlock|serialization failure|40001|try restarting transaction)"; then
+                log "  Deadlock detected, retrying in ${delay}s (attempt $attempt/$max_attempts)..."
+                sleep $delay
+                delay=$((delay * 2))
+                attempt=$((attempt + 1))
+            else
+                # Not a deadlock, return the error
+                echo "$output"
+                return 1
+            fi
+        fi
+    done
+    log "  Max retries exceeded for drush command"
+    echo "$output"
+    return 1
+}
+
 update_status() {
     local phase="$1"
     local message="$2"
@@ -115,6 +146,45 @@ signal_cfn_failure() {
     fi
 }
 
+# Run drush command with proper output capture (avoids SIGPIPE issues with piping)
+# Usage: run_drush "description" command args...
+# Returns: 0 on success, command's exit code on failure
+run_drush() {
+    local desc="$1"
+    shift
+    local output
+    local exit_code
+
+    log "$desc"
+    # Capture output to variable instead of piping to avoid SIGPIPE
+    output=$("$@" 2>&1) || exit_code=$?
+    exit_code=${exit_code:-0}
+
+    # Log output if any
+    if [ -n "$output" ]; then
+        echo "$output" | while IFS= read -r line; do
+            log "  $line"
+        done
+    fi
+
+    return $exit_code
+}
+
+# Run drush command silently (output only on error)
+run_drush_quiet() {
+    local output
+    local exit_code
+
+    output=$("$@" 2>&1) || exit_code=$?
+    exit_code=${exit_code:-0}
+
+    if [ $exit_code -ne 0 ] && [ -n "$output" ]; then
+        log "  Warning: $output"
+    fi
+
+    return $exit_code
+}
+
 # ============================================================================
 # Database Functions
 # ============================================================================
@@ -167,9 +237,11 @@ install_drupal() {
         log "Generated admin password"
     fi
 
-    # Run Drush site-install
+    # Run Drush site-install with output capture (avoids SIGPIPE from piping)
     log "Running drush site:install..."
-    ./vendor/bin/drush site:install localgov \
+    local install_output
+    local install_result=0
+    install_output=$(./vendor/bin/drush site:install localgov \
         --yes \
         --db-url="mysql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" \
         --account-name="$ADMIN_USER" \
@@ -177,10 +249,17 @@ install_drupal() {
         --site-name="LocalGov Drupal Demo" \
         --site-mail="noreply@example.com" \
         --locale="en" \
-        2>&1 | while read line; do log "  $line"; done
+        2>&1) || install_result=$?
 
-    if [ $? -ne 0 ]; then
-        log "ERROR: Drupal installation failed"
+    # Log the output
+    if [ -n "$install_output" ]; then
+        echo "$install_output" | while IFS= read -r line; do
+            log "  $line"
+        done
+    fi
+
+    if [ $install_result -ne 0 ]; then
+        log "ERROR: Drupal installation failed with exit code $install_result"
         return 1
     fi
 
@@ -197,11 +276,53 @@ import_config() {
     # Check if config exists
     if [ -d "config/sync" ] && [ -n "$(ls -A config/sync 2>/dev/null)" ]; then
         log "Found configuration to import"
-        ./vendor/bin/drush config:import --yes 2>&1 | while read line; do log "  $line"; done || true
+        local config_output
+        config_output=$(./vendor/bin/drush config:import --yes 2>&1) || true
+        if [ -n "$config_output" ]; then
+            echo "$config_output" | while IFS= read -r line; do
+                log "  $line"
+            done
+        fi
     else
         log "No configuration found to import, skipping"
     fi
 
+    return 0
+}
+
+install_themes() {
+    log "Installing LocalGov themes..."
+    update_status "Themes" "Installing LocalGov Drupal themes..." 65
+
+    cd "$DRUPAL_ROOT"
+
+    # Delete any conflicting theme config that may exist without the theme being installed
+    ./vendor/bin/drush cdel localgov_base.settings -y 2>/dev/null || true
+    ./vendor/bin/drush cdel localgov_scarfolk.settings -y 2>/dev/null || true
+
+    # Install themes in dependency order
+    log "Installing localgov_base theme..."
+    local base_output
+    base_output=$(./vendor/bin/drush theme:install localgov_base -y 2>&1) || true
+    if [ -n "$base_output" ]; then
+        log "  $base_output"
+    fi
+
+    log "Installing localgov_scarfolk theme..."
+    local scarfolk_output
+    scarfolk_output=$(./vendor/bin/drush theme:install localgov_scarfolk -y 2>&1) || true
+    if [ -n "$scarfolk_output" ]; then
+        log "  $scarfolk_output"
+    fi
+
+    # Set localgov_scarfolk as the default theme
+    log "Setting localgov_scarfolk as default theme..."
+    ./vendor/bin/drush config:set system.theme default localgov_scarfolk -y 2>&1 || true
+
+    # Rebuild caches to ensure theme is active
+    ./vendor/bin/drush cr 2>&1 || true
+
+    log "Theme installation complete"
     return 0
 }
 
@@ -224,7 +345,46 @@ clear_caches() {
     update_status "Caching" "Rebuilding Drupal caches..." 90
 
     cd "$DRUPAL_ROOT"
-    ./vendor/bin/drush cache:rebuild 2>&1 | while read line; do log "  $line"; done || true
+
+    # Retry cache rebuild up to 3 times with increasing delays
+    local max_attempts=3
+    local attempt=1
+    local cache_output
+    local cache_result
+
+    while [ $attempt -le $max_attempts ]; do
+        log "Cache rebuild attempt $attempt of $max_attempts..."
+        cache_result=0
+        cache_output=$(./vendor/bin/drush cache:rebuild 2>&1) || cache_result=$?
+
+        if [ -n "$cache_output" ]; then
+            echo "$cache_output" | while IFS= read -r line; do
+                log "  $line"
+            done
+        fi
+
+        if [ $cache_result -eq 0 ]; then
+            log "Cache rebuild succeeded on attempt $attempt"
+            break
+        else
+            log "Cache rebuild attempt $attempt failed (exit code: $cache_result)"
+            if [ $attempt -lt $max_attempts ]; then
+                log "Waiting 5 seconds before retry..."
+                sleep 5
+            fi
+        fi
+        attempt=$((attempt + 1))
+    done
+
+    # Explicitly rebuild the router to ensure routes are registered
+    log "Rebuilding router cache..."
+    local router_output
+    router_output=$(./vendor/bin/drush router:rebuild 2>&1) || true
+    if [ -n "$router_output" ]; then
+        echo "$router_output" | while IFS= read -r line; do
+            log "  $line"
+        done
+    fi
 
     return 0
 }
@@ -238,7 +398,13 @@ import_sample_content() {
     # Check if sample content directory and import script exist
     if [ -f "$DRUPAL_ROOT/sample-content/import.php" ]; then
         log "Running sample content import script..."
-        ./vendor/bin/drush scr "$DRUPAL_ROOT/sample-content/import.php" 2>&1 | while read line; do log "  $line"; done || true
+        local import_output
+        import_output=$(./vendor/bin/drush scr "$DRUPAL_ROOT/sample-content/import.php" 2>&1) || true
+        if [ -n "$import_output" ]; then
+            echo "$import_output" | while IFS= read -r line; do
+                log "  $line"
+            done
+        fi
     else
         log "Sample content import script not found, skipping"
     fi
@@ -246,28 +412,322 @@ import_sample_content() {
     return 0
 }
 
-enable_custom_modules() {
-    log "Enabling custom modules..."
-    update_status "Modules" "Enabling custom modules..." 75
+enable_localgov_modules() {
+    log "Enabling LocalGov modules..."
+    update_status "Modules" "Enabling LocalGov modules..." 72
 
     cd "$DRUPAL_ROOT"
 
-    # Enable the NDX Demo Banner module (Story 1.10)
-    if [ -d "$DRUPAL_ROOT/web/modules/custom/ndx_demo_banner" ]; then
-        log "Enabling ndx_demo_banner module..."
-        ./vendor/bin/drush pm:enable ndx_demo_banner --yes 2>&1 | while read line; do log "  $line"; done || true
-    else
-        log "ndx_demo_banner module not found, skipping"
+    # List of LocalGov modules to enable (excluding localgov_demo which we replace with our own content)
+    # These are commonly available in the LocalGov Drupal distribution
+    LOCALGOV_MODULES="
+        localgov_alert_banner
+        localgov_alert_banner_full_page
+        localgov_campaigns
+        localgov_char_count
+        localgov_content_lock
+        localgov_directories
+        localgov_directories_db
+        localgov_directories_location
+        localgov_directories_or
+        localgov_directories_org
+        localgov_directories_page
+        localgov_directories_venue
+        localgov_directories_venue_or
+        localgov_directories_promo_page
+        localgov_editoria11y
+        localgov_events
+        localgov_events_remove_expired
+        localgov_geo
+        localgov_geo_area
+        localgov_guides
+        localgov_media
+        localgov_menu_link_group
+        localgov_news
+        localgov_openreferral
+        localgov_page_components
+        localgov_paragraphs
+        localgov_paragraphs_layout
+        localgov_paragraphs_views
+        localgov_publications
+        localgov_review_date
+        localgov_roles
+        localgov_search
+        localgov_search_db
+        localgov_services
+        localgov_services_navigation
+        localgov_services_page
+        localgov_services_sublanding
+        localgov_services_status
+        localgov_step_by_step
+        localgov_subsites
+        localgov_subsites_paragraphs
+        localgov_workflows
+        localgov_workflows_notifications
+    "
+
+    # Enable each module if available (ignore errors for missing optional modules)
+    for module in $LOCALGOV_MODULES; do
+        log "Checking module: $module"
+        if ./vendor/bin/drush pm:list --status=disabled --type=module --field=name 2>/dev/null | grep -q "^${module}$"; then
+            log "  Enabling $module..."
+            local module_output
+            module_output=$(./vendor/bin/drush pm:enable "$module" --yes 2>&1) || true
+            if [ -n "$module_output" ]; then
+                echo "$module_output" | while IFS= read -r line; do
+                    log "    $line"
+                done
+            fi
+        else
+            log "  $module already enabled or not available, skipping"
+        fi
+    done
+
+    return 0
+}
+
+enable_custom_modules() {
+    log "Enabling custom NDX modules..."
+    update_status "Modules" "Enabling custom NDX modules..." 75
+
+    cd "$DRUPAL_ROOT"
+
+    # Helper function to enable a module without problematic piping
+    # The | while read pattern causes SIGPIPE issues with drush
+    enable_module() {
+        local module_name="$1"
+        local module_dir="$DRUPAL_ROOT/web/modules/custom/$module_name"
+
+        if [ -d "$module_dir" ]; then
+            log "Enabling $module_name module..."
+            # Use direct execution with output capture and retry for deadlocks
+            local output
+            if output=$(run_drush_with_retry ./vendor/bin/drush pm:enable "$module_name" --yes); then
+                log "  $module_name enabled successfully"
+                [ -n "$output" ] && log "  Output: $output"
+                return 0
+            else
+                log "  Warning: $module_name enable returned non-zero, but may have succeeded"
+                [ -n "$output" ] && log "  Output: $output"
+                # Check if actually enabled despite the error using pm:list (filter warning lines)
+                sleep 2  # Wait for any pending cache writes to complete
+                local enabled_list
+                enabled_list=$(./vendor/bin/drush pm:list --status=enabled --type=module --field=name 2>/dev/null | grep -v '\[warning\]' | grep -v 'Drush command' | tr '\n' ' ')
+                if echo "$enabled_list" | grep -qw "$module_name"; then
+                    log "  Verified: $module_name is enabled"
+                    return 0
+                fi
+                log "  Module $module_name not in enabled list - continuing anyway"
+                # Return 0 to avoid script exit - module may still work
+                return 0
+            fi
+        else
+            log "$module_name module not found at $module_dir, skipping"
+            return 0
+        fi
+    }
+
+    # Enable modules in dependency order
+    enable_module "ndx_demo_banner"      # Story 1.10
+    enable_module "ndx_welcome"          # Story 1.11
+    enable_module "ndx_walkthrough"      # Epic 2
+    enable_module "ndx_aws_ai"           # Epic 3-4 dependency
+    enable_module "ndx_council_generator" # Epic 5 - requires ndx_aws_ai
+
+    # Clear caches before verification to ensure module system is up to date
+    log "Rebuilding cache before module verification..."
+    run_drush_with_retry ./vendor/bin/drush cache:rebuild 2>&1 || true
+    sleep 3
+
+    # Verify critical modules are enabled using pm:info which directly queries module status
+    log "Verifying module status..."
+
+    local critical_modules="ndx_aws_ai ndx_council_generator"
+    for module in $critical_modules; do
+        # Use pm:info to get the status directly - more reliable than pm:list
+        local module_status
+        module_status=$(./vendor/bin/drush pm:info "$module" --field=status 2>/dev/null | tr -d '[:space:]' || echo "unknown")
+        log "  Module $module status: $module_status"
+
+        if [ "$module_status" = "Enabled" ] || [ "$module_status" = "enabled" ]; then
+            log "  ✓ $module is enabled"
+        else
+            log "  ✗ $module is NOT enabled (status: $module_status) - attempting force enable..."
+            run_drush_with_retry ./vendor/bin/drush pm:enable "$module" --yes 2>&1 || true
+            sleep 3
+            run_drush_with_retry ./vendor/bin/drush cache:rebuild 2>&1 || true
+            sleep 2
+            # Re-check using pm:info
+            module_status=$(./vendor/bin/drush pm:info "$module" --field=status 2>/dev/null | tr -d '[:space:]' || echo "unknown")
+            if [ "$module_status" = "Enabled" ] || [ "$module_status" = "enabled" ]; then
+                log "  ✓ $module is now enabled after retry"
+            else
+                log "  ✗ $module still NOT enabled (status: $module_status) - check module dependencies"
+            fi
+        fi
+    done
+
+    return 0
+}
+
+generate_council_content() {
+    log "Generating AI council content..."
+    update_status "AI Content" "Generating council content with AI..." 80
+
+    cd "$DRUPAL_ROOT"
+
+    # Try to check module status but don't block on it - drush pm:info can be unreliable
+    local module_status
+    module_status=$(./vendor/bin/drush pm:info ndx_council_generator --field=status 2>/dev/null | tr -d '[:space:]' || echo "unknown")
+    log "ndx_council_generator module status check returned: '$module_status'"
+
+    # Check if localgov:generate-council command exists (more reliable than module status)
+    if ! ./vendor/bin/drush help localgov:generate-council >/dev/null 2>&1; then
+        log "localgov:generate-council command not available - attempting to enable ndx_council_generator module"
+        ./vendor/bin/drush pm:enable ndx_council_generator -y 2>&1 || true
+        ./vendor/bin/drush cache:rebuild 2>&1 || true
+        sleep 2
+        # Check again
+        if ! ./vendor/bin/drush help localgov:generate-council >/dev/null 2>&1; then
+            log "localgov:generate-council command still not available, skipping AI content generation"
+            return 0
+        fi
     fi
 
-    # Enable the NDX Welcome module (Story 1.11)
-    if [ -d "$DRUPAL_ROOT/web/modules/custom/ndx_welcome" ]; then
-        log "Enabling ndx_welcome module..."
-        ./vendor/bin/drush pm:enable ndx_welcome --yes 2>&1 | while read line; do log "  $line"; done || true
-    else
-        log "ndx_welcome module not found, skipping"
+    log "localgov:generate-council command available, proceeding with generation"
+
+    # Clean up any previous content before generation
+    log "Cleaning up previous content..."
+    local cleanup_output
+    cleanup_output=$(run_drush_with_retry ./vendor/bin/drush entity:delete node --all 2>&1) || true
+    if [ -n "$cleanup_output" ]; then
+        log "  $cleanup_output"
+    fi
+    run_drush_with_retry ./vendor/bin/drush state:delete ndx_council_generator.generation_state 2>/dev/null || true
+    run_drush_with_retry ./vendor/bin/drush state:delete ndx_council_generator.image_queue 2>/dev/null || true
+    run_drush_with_retry ./vendor/bin/drush config:delete ndx_council_generator.council_identity 2>/dev/null || true
+
+    # Clear caches before generation
+    log "Clearing caches before generation..."
+    local cache_output
+    cache_output=$(run_drush_with_retry ./vendor/bin/drush cache:rebuild 2>&1) || true
+    if [ -n "$cache_output" ]; then
+        log "  $cache_output"
     fi
 
+    # Generate council content with AI
+    log "Running council generation (this may take several minutes)..."
+    update_status "AI Content" "Generating identity and content..." 82
+
+    # Run the generation command with output capture to avoid SIGPIPE
+    # Use timeout to prevent hanging, capture output properly
+    local gen_result=0
+    local gen_output
+    gen_output=$(timeout 600 ./vendor/bin/drush localgov:generate-council --force --verbose 2>&1) || gen_result=$?
+
+    # Log the output and update status based on content
+    if [ -n "$gen_output" ]; then
+        echo "$gen_output" | while IFS= read -r line; do
+            log "  $line"
+            # Update status periodically (note: this runs in subshell so status may not persist)
+            case "$line" in
+                *"Generating identity"*|*"Phase 1"*) : ;; # Status updates handled by log
+                *"Generating content"*|*"Phase 2"*) : ;;
+                *"Generating images"*|*"Phase 3"*) : ;;
+            esac
+        done
+    fi
+
+    if [ $gen_result -eq 0 ]; then
+        log "Council content generation completed successfully"
+        update_status "AI Content" "AI content generation complete!" 95
+    elif [ $gen_result -eq 124 ]; then
+        log "Warning: Council generation timed out (10 min limit), but continuing..."
+        update_status "AI Content" "Generation timed out, continuing..." 95
+    else
+        log "Warning: Council generation returned error $gen_result, but continuing..."
+        update_status "AI Content" "Generation completed with warnings" 95
+    fi
+
+    return 0
+}
+
+configure_site_navigation() {
+    log "Configuring site navigation..."
+    update_status "Navigation" "Configuring site navigation and front page..." 93
+
+    cd "$DRUPAL_ROOT"
+
+    # Find the homepage node (generated by council generator as "Welcome to X")
+    HOMEPAGE_NID=$(./vendor/bin/drush sql:query \
+        "SELECT nid FROM node_field_data WHERE title LIKE 'Welcome to%' AND type='localgov_services_landing' LIMIT 1" 2>/dev/null | tr -d '[:space:]')
+
+    if [ -n "$HOMEPAGE_NID" ] && [ "$HOMEPAGE_NID" != "" ]; then
+        log "Found homepage node: $HOMEPAGE_NID"
+
+        # Set the front page configuration
+        local config_output
+        config_output=$(./vendor/bin/drush config:set system.site page.front "/node/$HOMEPAGE_NID" -y 2>&1) || true
+        if [ -n "$config_output" ]; then
+            echo "$config_output" | while IFS= read -r line; do
+                log "  $line"
+            done
+        fi
+        log "Front page set to /node/$HOMEPAGE_NID"
+    else
+        log "Warning: No homepage node found, front page not configured"
+    fi
+
+    # Run pathauto to generate URL aliases for all content
+    log "Generating URL aliases with pathauto..."
+    local pathauto_output
+    pathauto_output=$(./vendor/bin/drush pathauto:update node 2>&1) || true
+    if [ -n "$pathauto_output" ]; then
+        echo "$pathauto_output" | while IFS= read -r line; do
+            log "  $line"
+        done
+    fi
+
+    # Rebuild router to ensure all routes are registered
+    log "Rebuilding router..."
+    local router_output
+    router_output=$(./vendor/bin/drush router:rebuild 2>&1) || true
+    if [ -n "$router_output" ]; then
+        echo "$router_output" | while IFS= read -r line; do
+            log "  $line"
+        done
+    fi
+
+    return 0
+}
+
+build_search_index() {
+    log "Building search index..."
+    update_status "Search" "Building search index..." 95
+
+    cd "$DRUPAL_ROOT"
+
+    # Run cron first to trigger any pending tasks
+    log "Running cron for search indexing..."
+    local cron_output
+    cron_output=$(./vendor/bin/drush cron 2>&1) || true
+    if [ -n "$cron_output" ]; then
+        echo "$cron_output" | while IFS= read -r line; do
+            log "  $line"
+        done
+    fi
+
+    # Index all content using search_api if available
+    log "Indexing content with Search API..."
+    local index_output
+    index_output=$(./vendor/bin/drush search-api:index 2>&1) || true
+    if [ -n "$index_output" ]; then
+        echo "$index_output" | while IFS= read -r line; do
+            log "  $line"
+        done
+    fi
+
+    log "Search index build complete"
     return 0
 }
 
@@ -289,7 +749,17 @@ main() {
 
     # Check if already initialized
     if [ -f "$INIT_MARKER" ]; then
-        log "Drupal already initialized, skipping"
+        log "Drupal already initialized"
+        # Always wait for database and run essential updates
+        if ! wait_for_database; then
+            update_status "Error" "Database connection failed" 10 "error"
+            signal_cfn_failure "Database connection timeout"
+            exit 1
+        fi
+        # Always enable modules and rebuild caches on restart
+        enable_localgov_modules
+        enable_custom_modules
+        clear_caches
         update_status "Ready" "LocalGov Drupal is ready" 100 "complete"
         return 0
     fi
@@ -323,14 +793,31 @@ main() {
             exit 1
         fi
 
-        # Import sample content (Story 1.9)
-        import_sample_content
+        # Install LocalGov themes (must be done before modules that depend on them)
+        install_themes
 
-        # Enable custom modules (Story 1.10)
-        enable_custom_modules
+        # Sample content import disabled - using AI-generated council content instead
+        # import_sample_content
     else
         log "Existing installation detected, skipping install"
         update_status "Reconnecting" "Connecting to existing database..." 50
+        # Ensure themes are installed on reconnect too
+        install_themes
+    fi
+
+    # Enable LocalGov modules (excluding localgov_demo)
+    enable_localgov_modules
+
+    # Enable custom NDX modules (Story 1.10) - always run to ensure new modules are enabled
+    enable_custom_modules
+
+    # Generate AI council content (Epic 5) - only on fresh install or when requested
+    if [ ! -f "$INIT_MARKER" ]; then
+        generate_council_content
+        # Configure site navigation after content generation
+        configure_site_navigation
+        # Build search index after all content is created
+        build_search_index
     fi
 
     # Set permissions

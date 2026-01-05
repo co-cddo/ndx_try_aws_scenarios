@@ -292,46 +292,49 @@ class NavigationMenuConfigurator implements NavigationMenuConfiguratorInterface 
     // Find key pages by title patterns.
     $nodeStorage = $this->entityTypeManager->getStorage('node');
 
-    // Services link - points to a services landing or view.
+    // Services link - find "Services" landing page.
+    $servicesUri = $this->findNodeUri(self::CONTENT_TYPE_SERVICES_LANDING, 'Services');
     $items[] = [
       'title' => 'Services',
-      'uri' => $this->findNodeUri(self::CONTENT_TYPE_SERVICES_LANDING, self::TITLE_PATTERN_WELCOME . ' ' . $identity->name) ?? 'internal:/',
+      'uri' => $servicesUri ?? 'internal:/',
       'weight' => 0,
       'expanded' => TRUE,
       'description' => 'Council services and information',
     ];
 
-    // News link - find news listing or create route.
-    $newsNode = $this->findFirstNodeOfType(self::CONTENT_TYPE_NEWS_ARTICLE);
+    // News link - find "News and updates" landing page.
+    $newsUri = $this->findNodeUri(self::CONTENT_TYPE_SERVICES_LANDING, 'News and updates');
     $items[] = [
       'title' => 'News',
-      'uri' => $newsNode ? 'internal:/news' : 'internal:/',
+      'uri' => $newsUri ?? 'internal:/',
       'weight' => 10,
       'expanded' => FALSE,
       'description' => 'Latest council news and updates',
     ];
 
-    // Contact link - find contact page.
-    $contactUri = $this->findNodeUri(self::CONTENT_TYPE_SERVICES_PAGE, self::TITLE_PATTERN_CONTACT);
+    // Contact link - find "Contact {council_name}" page.
+    $contactUri = $this->findNodeUriContaining(self::CONTENT_TYPE_SERVICES_PAGE, self::TITLE_PATTERN_CONTACT . ' ' . $identity->name);
     if (!$contactUri) {
+      // Fall back to any contact page.
       $contactUri = $this->findNodeUriContaining(self::CONTENT_TYPE_SERVICES_PAGE, self::TITLE_PATTERN_CONTACT);
     }
     $items[] = [
       'title' => self::TITLE_PATTERN_CONTACT,
-      'uri' => $contactUri ?? 'internal:/contact',
+      'uri' => $contactUri ?? 'internal:/',
       'weight' => 20,
       'expanded' => FALSE,
       'description' => 'Contact the council',
     ];
 
-    // About link - find about page.
-    $aboutUri = $this->findNodeUriContaining(self::CONTENT_TYPE_PAGE, self::TITLE_PATTERN_ABOUT);
+    // About link - find "About {council_name}" landing page.
+    $aboutUri = $this->findNodeUriContaining(self::CONTENT_TYPE_SERVICES_LANDING, self::TITLE_PATTERN_ABOUT . ' ' . $identity->name);
     if (!$aboutUri) {
+      // Fall back to any about page in services pages.
       $aboutUri = $this->findNodeUriContaining(self::CONTENT_TYPE_SERVICES_PAGE, self::TITLE_PATTERN_ABOUT);
     }
     $items[] = [
       'title' => self::TITLE_PATTERN_ABOUT,
-      'uri' => $aboutUri ?? 'internal:/about',
+      'uri' => $aboutUri ?? 'internal:/',
       'weight' => 30,
       'expanded' => FALSE,
       'description' => 'About the council',
