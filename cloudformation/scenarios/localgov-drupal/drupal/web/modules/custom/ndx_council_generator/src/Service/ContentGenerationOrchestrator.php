@@ -25,7 +25,7 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
   /**
    * Default delay between API calls in milliseconds.
    */
-  protected const DEFAULT_RATE_LIMIT_DELAY_MS = 500;
+  protected const DEFAULT_RATE_LIMIT_DELAY_MS = 0;
 
   /**
    * Maximum retry attempts for throttled requests.
@@ -138,6 +138,9 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
       $stats = $this->imageCollector->getStatistics();
       $this->logger->info('Image queue: @stats', ['@stats' => $stats->getSummaryText()]);
     }
+
+    // Link service pages to the landing page for homepage display.
+    $this->linkServicesToLanding($identity);
 
     return $summary;
   }
@@ -397,22 +400,102 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
     $bundle = $this->getNodeBundle($spec->contentType);
 
     // Build node values.
+    // Note: LocalGov Drupal uses Content Moderation module, so we must set
+    // moderation_state in addition to status for content to be published.
     $values = [
       'type' => $bundle,
       'status' => 1,
       'uid' => 1,
+      'moderation_state' => 'published',
     ];
+
+    // Log the content data received from Bedrock for debugging.
+    $this->logger->debug('Creating node @id with data keys: @keys', [
+      '@id' => $spec->id,
+      '@keys' => implode(', ', array_keys($contentData)),
+    ]);
 
     // Map drupal fields from specification.
     foreach ($spec->drupalFields as $drupalField => $contentKey) {
       if (isset($contentData[$contentKey])) {
         $values[$drupalField] = $this->prepareFieldValue($drupalField, $contentData[$contentKey]);
+        $this->logger->debug('Mapped field @drupal <- @key (length: @len)', [
+          '@drupal' => $drupalField,
+          '@key' => $contentKey,
+          '@len' => is_string($contentData[$contentKey]) ? strlen($contentData[$contentKey]) : 'array',
+        ]);
+      }
+      else {
+        $this->logger->warning('Content key @key not found in Bedrock response for @id', [
+          '@key' => $contentKey,
+          '@id' => $spec->id,
+        ]);
       }
     }
 
     // Fallback title from template if not in content.
     if (!isset($values['title']) || empty($values['title'])) {
       $values['title'] = $spec->renderTitle($identity);
+    }
+
+    // Ensure title is a non-empty string (critical for node creation).
+    if (!is_string($values['title']) || trim($values['title']) === '') {
+      $values['title'] = ucfirst(str_replace('-', ' ', $spec->id)) . ' - ' . $identity->name;
+    }
+
+    // LocalGov service pages require a summary field.
+    // Generate one from body content or title if not provided.
+    if (!isset($values['field_summary']) || empty($values['field_summary'])) {
+      $summary = '';
+      if (isset($contentData['summary'])) {
+        $summary = $contentData['summary'];
+      }
+      elseif (isset($contentData['body'])) {
+        // Extract first sentence from body as summary.
+        $bodyText = is_string($contentData['body']) ? strip_tags($contentData['body']) : '';
+        $summary = $this->extractSummary($bodyText, 200);
+      }
+      if (empty($summary)) {
+        $summary = sprintf('Information about %s from %s.', $values['title'], $identity->name);
+      }
+      $values['field_summary'] = $summary;
+    }
+
+    // Ensure body content is set - this is critical for landing pages.
+    // LocalGov landing pages have a 'body' field but it may not be mapped.
+    if (!isset($values['body']) && isset($contentData['body'])) {
+      $values['body'] = $this->prepareFieldValue('body', $contentData['body']);
+      $this->logger->info('Added body content fallback for @id', ['@id' => $spec->id]);
+    }
+
+    // Log the final values being set on the node.
+    $this->logger->debug('Node @id values: body set: @has_body, summary set: @has_summary', [
+      '@id' => $spec->id,
+      '@has_body' => isset($values['body']) ? 'yes' : 'no',
+      '@has_summary' => isset($values['field_summary']) ? 'yes' : 'no',
+    ]);
+
+    // Ensure we're using a valid node bundle.
+    if (!$this->entityTypeManager->getStorage('node_type')->load($bundle)) {
+      $this->logger->error('Node type @bundle not found. Ensure LocalGov modules are enabled.', [
+        '@bundle' => $bundle,
+      ]);
+      throw new \RuntimeException(sprintf(
+        'Node type %s not found. Ensure LocalGov modules are enabled.',
+        $bundle
+      ));
+    }
+
+    // For service pages, set parent to the homepage (services landing).
+    // LocalGov Drupal uses localgov_services_parent to establish page hierarchy.
+    if ($bundle === 'localgov_services_page' && !isset($values['localgov_services_parent'])) {
+      $parentNid = $this->findServicesLandingPage($identity);
+      if ($parentNid !== NULL) {
+        $values['localgov_services_parent'] = ['target_id' => $parentNid];
+        $this->logger->debug('Setting parent for service page: @parent', [
+          '@parent' => $parentNid,
+        ]);
+      }
     }
 
     // Create and save the node.
@@ -435,13 +518,20 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
     // Map content types to bundles.
     $mapping = [
       ContentSpecification::TYPE_SERVICE_PAGE => 'localgov_services_page',
+      ContentSpecification::TYPE_SERVICE_LANDING => 'localgov_services_landing',
       ContentSpecification::TYPE_GUIDE_PAGE => 'localgov_guides_page',
       ContentSpecification::TYPE_DIRECTORY => 'localgov_directory_venue',
       ContentSpecification::TYPE_NEWS => 'localgov_news_article',
       ContentSpecification::TYPE_PAGE => 'page',
     ];
 
-    return $mapping[$contentType] ?? 'page';
+    // If exact match not found, try the content type string directly.
+    if (isset($mapping[$contentType])) {
+      return $mapping[$contentType];
+    }
+
+    // Allow direct bundle names (for flexibility).
+    return $contentType;
   }
 
   /**
@@ -457,19 +547,242 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
    */
   protected function prepareFieldValue(string $fieldName, mixed $value): mixed {
     // Handle body field with format.
+    // LocalGov Drupal uses 'wysiwyg' format instead of 'full_html'.
     if ($fieldName === 'body') {
+      $bodyValue = $value;
+
+      // If this is an array of steps (guide pages), convert to HTML.
+      if (is_array($value) && $this->looksLikeStepsArray($value)) {
+        $bodyValue = $this->convertStepsToHtml($value);
+      }
+      elseif (!is_string($value)) {
+        // Fallback: convert other arrays/objects to readable format.
+        $bodyValue = json_encode($value, JSON_PRETTY_PRINT);
+      }
+
+      // Sanitize HTML content to remove broken image references.
+      $bodyValue = $this->sanitizeGeneratedHtml($bodyValue);
+
       return [
-        'value' => is_string($value) ? $value : json_encode($value),
-        'format' => 'full_html',
+        'value' => $bodyValue,
+        'format' => 'wysiwyg',
       ];
     }
 
-    // Handle summary field.
+    // Handle summary field - also needs format for LocalGov.
     if (str_contains($fieldName, 'summary')) {
-      return is_string($value) ? $value : json_encode($value);
+      $summaryValue = is_string($value) ? $value : json_encode($value);
+      // Summary fields in LocalGov may need format too.
+      return $summaryValue;
     }
 
     return $value;
+  }
+
+  /**
+   * Check if an array looks like a steps array from guide pages.
+   *
+   * @param array $value
+   *   The value to check.
+   *
+   * @return bool
+   *   TRUE if this looks like a steps array.
+   */
+  protected function looksLikeStepsArray(array $value): bool {
+    // Steps arrays are indexed arrays of objects with title/content keys.
+    if (empty($value)) {
+      return FALSE;
+    }
+
+    // Check if it's an indexed array (not associative).
+    if (array_keys($value) !== range(0, count($value) - 1)) {
+      return FALSE;
+    }
+
+    // Check first item has step-like structure.
+    $first = $value[0];
+    if (!is_array($first)) {
+      return FALSE;
+    }
+
+    // Look for common step keys.
+    return isset($first['title']) || isset($first['content']) ||
+           isset($first['step_number']) || isset($first['step']);
+  }
+
+  /**
+   * Convert a steps array to HTML.
+   *
+   * @param array $steps
+   *   Array of step objects.
+   *
+   * @return string
+   *   HTML representation of the steps.
+   */
+  protected function convertStepsToHtml(array $steps): string {
+    $html = '<div class="guide-steps">';
+
+    foreach ($steps as $index => $step) {
+      $stepNumber = $step['step_number'] ?? $step['number'] ?? ($index + 1);
+      $title = $step['title'] ?? $step['step'] ?? sprintf('Step %d', $stepNumber);
+      $content = $step['content'] ?? $step['description'] ?? $step['body'] ?? '';
+
+      // Ensure title is a string (Bedrock may return unexpected types).
+      $title = is_string($title) ? $title : (string) $title;
+
+      // Clean up title - remove "Step N:" prefix if already present.
+      $title = preg_replace('/^Step\s+\d+[:.]\s*/i', '', $title);
+
+      $html .= sprintf(
+        '<div class="guide-step">
+          <h3 class="guide-step__title">Step %d: %s</h3>
+          <div class="guide-step__content">%s</div>
+        </div>',
+        $stepNumber,
+        htmlspecialchars($title, ENT_QUOTES, 'UTF-8'),
+        $this->sanitizeHtmlContent($content)
+      );
+    }
+
+    $html .= '</div>';
+
+    return $html;
+  }
+
+  /**
+   * Sanitize HTML content - allow safe tags, escape dangerous ones.
+   *
+   * @param string $content
+   *   The content to sanitize.
+   *
+   * @return string
+   *   Sanitized HTML content.
+   */
+  protected function sanitizeHtmlContent(string $content): string {
+    // If content is already HTML, preserve safe tags.
+    if (str_contains($content, '<')) {
+      // Allow common safe tags.
+      return strip_tags($content, '<p><br><ul><ol><li><strong><em><a><h4><h5><span>');
+    }
+
+    // Plain text - convert newlines to paragraphs.
+    $paragraphs = array_filter(array_map('trim', explode("\n\n", $content)));
+    if (count($paragraphs) > 1) {
+      return '<p>' . implode('</p><p>', array_map(fn($p) => htmlspecialchars($p, ENT_QUOTES, 'UTF-8'), $paragraphs)) . '</p>';
+    }
+
+    return '<p>' . htmlspecialchars($content, ENT_QUOTES, 'UTF-8') . '</p>';
+  }
+
+  /**
+   * Sanitize generated HTML to remove broken image references.
+   *
+   * AI-generated content may include placeholder image URLs that don't exist.
+   * This method removes or replaces them to prevent 404 errors.
+   *
+   * @param string $html
+   *   The HTML content to sanitize.
+   *
+   * @return string
+   *   Sanitized HTML content.
+   */
+  protected function sanitizeGeneratedHtml(string $html): string {
+    // Remove img tags with placeholder/broken URLs.
+    // Common patterns from AI-generated content.
+    $patterns = [
+      // Remove img tags with placeholder URLs.
+      '/<img[^>]*src=["\'][^"\']*placeholder[^"\']*["\'][^>]*\/?>/i',
+      '/<img[^>]*src=["\'][^"\']*example\.com[^"\']*["\'][^>]*\/?>/i',
+      '/<img[^>]*src=["\'][^"\']*lorem[^"\']*["\'][^>]*\/?>/i',
+      '/<img[^>]*src=["\'][^"\']*unsplash[^"\']*["\'][^>]*\/?>/i',
+      '/<img[^>]*src=["\'][^"\']*picsum[^"\']*["\'][^>]*\/?>/i',
+      // Remove img tags with relative paths that don't exist.
+      '/<img[^>]*src=["\']\/images\/[^"\']*["\'][^>]*\/?>/i',
+      '/<img[^>]*src=["\']images\/[^"\']*["\'][^>]*\/?>/i',
+      // Remove img tags with http:// URLs (external images we can't verify).
+      '/<img[^>]*src=["\']http:\/\/[^"\']*["\'][^>]*\/?>/i',
+      // Remove img tags with generic stock photo URLs.
+      '/<img[^>]*src=["\'][^"\']*stock[^"\']*["\'][^>]*\/?>/i',
+    ];
+
+    foreach ($patterns as $pattern) {
+      $html = preg_replace($pattern, '', $html);
+    }
+
+    // Remove empty figure tags that might remain after image removal.
+    $html = preg_replace('/<figure[^>]*>\s*<\/figure>/i', '', $html);
+
+    // Remove multiple consecutive empty paragraphs.
+    $html = preg_replace('/(<p>\s*<\/p>\s*){2,}/', '<p></p>', $html);
+
+    // Clean up whitespace.
+    $html = preg_replace('/\s+/', ' ', $html);
+    $html = preg_replace('/>\s+</', '><', $html);
+
+    return trim($html);
+  }
+
+  /**
+   * Find the services landing page (homepage) for parenting service pages.
+   *
+   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
+   *   The council identity.
+   *
+   * @return int|null
+   *   The node ID of the services landing page, or NULL if not found.
+   */
+  protected function findServicesLandingPage(CouncilIdentity $identity): ?int {
+    try {
+      $nodeStorage = $this->entityTypeManager->getStorage('node');
+
+      // First, try to find the homepage by exact title.
+      $homepageTitle = 'Welcome to ' . $identity->name;
+      $nodes = $nodeStorage->loadByProperties([
+        'type' => 'localgov_services_landing',
+        'title' => $homepageTitle,
+        'status' => 1,
+      ]);
+
+      if (!empty($nodes)) {
+        $node = reset($nodes);
+        return (int) $node->id();
+      }
+
+      // Fallback: find any services_landing with "Welcome to" in title.
+      $query = $nodeStorage->getQuery()
+        ->condition('type', 'localgov_services_landing')
+        ->condition('title', '%Welcome to%', 'LIKE')
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->range(0, 1);
+
+      $nids = $query->execute();
+      if (!empty($nids)) {
+        return (int) reset($nids);
+      }
+
+      // Last resort: find first services_landing page.
+      $query = $nodeStorage->getQuery()
+        ->condition('type', 'localgov_services_landing')
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->sort('created', 'ASC')
+        ->range(0, 1);
+
+      $nids = $query->execute();
+      if (!empty($nids)) {
+        return (int) reset($nids);
+      }
+
+      $this->logger->warning('No services landing page found for parenting');
+      return NULL;
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error finding services landing page: @error', [
+        '@error' => $e->getMessage(),
+      ]);
+      return NULL;
+    }
   }
 
   /**
@@ -518,6 +831,102 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
     }
 
     $this->imageCollector->collectFromContent($spec, $nodeId, $identity);
+  }
+
+  /**
+   * Link service pages to the services landing page via localgov_destinations.
+   *
+   * This sets up the homepage to display child service pages as tiles/cards.
+   *
+   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
+   *   The council identity.
+   */
+  public function linkServicesToLanding(CouncilIdentity $identity): void {
+    $landingNid = $this->findServicesLandingPage($identity);
+    if ($landingNid === NULL) {
+      $this->logger->warning('No services landing page found - cannot link services');
+      return;
+    }
+
+    try {
+      $nodeStorage = $this->entityTypeManager->getStorage('node');
+      $landing = $nodeStorage->load($landingNid);
+      if ($landing === NULL) {
+        return;
+      }
+
+      // Find all service pages.
+      $serviceNids = $this->entityTypeManager->getStorage('node')
+        ->getQuery()
+        ->condition('type', 'localgov_services_page')
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->execute();
+
+      if (empty($serviceNids)) {
+        $this->logger->info('No service pages found to link to landing page');
+        return;
+      }
+
+      // Build references array (limit to 12 for homepage display).
+      $refs = [];
+      foreach (array_slice(array_values($serviceNids), 0, 12) as $nid) {
+        $refs[] = ['target_id' => $nid];
+      }
+
+      // Set the destinations field.
+      $landing->set('localgov_destinations', $refs);
+      $landing->save();
+
+      $this->logger->info('Linked @count services to landing page @landing', [
+        '@count' => count($refs),
+        '@landing' => $landingNid,
+      ]);
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Failed to link services to landing: @error', [
+        '@error' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  /**
+   * Extract a summary from body text.
+   *
+   * @param string $text
+   *   The body text to extract from.
+   * @param int $maxLength
+   *   Maximum length of the summary.
+   *
+   * @return string
+   *   The extracted summary.
+   */
+  protected function extractSummary(string $text, int $maxLength = 200): string {
+    // Clean up the text.
+    $text = trim($text);
+    if (empty($text)) {
+      return '';
+    }
+
+    // Try to get first sentence.
+    if (preg_match('/^([^.!?]+[.!?])/', $text, $matches)) {
+      $summary = trim($matches[1]);
+      if (strlen($summary) <= $maxLength) {
+        return $summary;
+      }
+    }
+
+    // Truncate at word boundary.
+    if (strlen($text) > $maxLength) {
+      $text = substr($text, 0, $maxLength);
+      $lastSpace = strrpos($text, ' ');
+      if ($lastSpace !== FALSE) {
+        $text = substr($text, 0, $lastSpace);
+      }
+      $text .= '...';
+    }
+
+    return $text;
   }
 
 }

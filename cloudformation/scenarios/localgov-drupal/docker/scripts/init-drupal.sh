@@ -707,7 +707,12 @@ build_search_index() {
 
     cd "$DRUPAL_ROOT"
 
-    # Run cron first to trigger any pending tasks
+    # First, rebuild caches to ensure all content is visible to search.
+    log "Rebuilding caches before indexing..."
+    run_drush_with_retry ./vendor/bin/drush cache:rebuild 2>&1 || true
+    sleep 2
+
+    # Run cron to trigger any pending tasks including search indexing.
     log "Running cron for search indexing..."
     local cron_output
     cron_output=$(./vendor/bin/drush cron 2>&1) || true
@@ -717,14 +722,34 @@ build_search_index() {
         done
     fi
 
-    # Index all content using search_api if available
-    log "Indexing content with Search API..."
-    local index_output
-    index_output=$(./vendor/bin/drush search-api:index 2>&1) || true
-    if [ -n "$index_output" ]; then
-        echo "$index_output" | while IFS= read -r line; do
-            log "  $line"
-        done
+    # Check if search_api module is enabled.
+    if ./vendor/bin/drush pm:info search_api --field=status 2>/dev/null | grep -qi enabled; then
+        # Clear and rebuild search index for all indexes.
+        log "Clearing existing search index..."
+        ./vendor/bin/drush search-api:clear 2>&1 || true
+
+        # Index all content using search_api.
+        log "Indexing content with Search API (this may take a moment)..."
+        local index_output
+        # Index with batch size for reliability.
+        index_output=$(./vendor/bin/drush search-api:index --batch-size=50 2>&1) || true
+        if [ -n "$index_output" ]; then
+            echo "$index_output" | while IFS= read -r line; do
+                log "  $line"
+            done
+        fi
+
+        # Show index status.
+        log "Search index status:"
+        local status_output
+        status_output=$(./vendor/bin/drush search-api:status 2>&1) || true
+        if [ -n "$status_output" ]; then
+            echo "$status_output" | while IFS= read -r line; do
+                log "  $line"
+            done
+        fi
+    else
+        log "Search API module not enabled, skipping search indexing"
     fi
 
     log "Search index build complete"

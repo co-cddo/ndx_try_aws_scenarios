@@ -62,8 +62,9 @@ class MediaCreator implements MediaCreatorInterface {
     $fileName = $this->generateFileName($specId, $extension);
 
     // Ensure directory exists.
+    $directory = self::IMAGE_DIRECTORY;
     $this->fileSystem->prepareDirectory(
-      self::IMAGE_DIRECTORY,
+      $directory,
       FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS
     );
 
@@ -125,24 +126,93 @@ class MediaCreator implements MediaCreatorInterface {
       return;
     }
 
-    // Check if field exists on the node.
+    // Check if specified field exists on the node, otherwise auto-detect.
+    $actualFieldName = $fieldName;
     if (!$node->hasField($fieldName)) {
-      $this->logger->warning('Field @field not found on node @id', [
+      $actualFieldName = $this->detectImageField($node);
+      if ($actualFieldName === NULL) {
+        $this->logger->warning('No image field found on node @id (tried @field and auto-detect)', [
+          '@field' => $fieldName,
+          '@id' => $nodeId,
+        ]);
+        return;
+      }
+      $this->logger->info('Auto-detected image field @actual for node @id (specified: @field)', [
+        '@actual' => $actualFieldName,
         '@field' => $fieldName,
         '@id' => $nodeId,
       ]);
-      return;
     }
 
     // Set the media reference.
-    $node->set($fieldName, ['target_id' => $mediaId]);
+    $node->set($actualFieldName, ['target_id' => $mediaId]);
     $node->save();
 
     $this->logger->debug('Updated node @node field @field with media @media', [
       '@node' => $nodeId,
-      '@field' => $fieldName,
+      '@field' => $actualFieldName,
       '@media' => $mediaId,
     ]);
+  }
+
+  /**
+   * Auto-detect an image/media field on a node.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node entity.
+   *
+   * @return string|null
+   *   The field name if found, NULL otherwise.
+   */
+  protected function detectImageField($node): ?string {
+    // Common image field names in LocalGov Drupal and standard Drupal.
+    // Order matters - most likely fields first.
+    $candidates = [
+      // LocalGov Drupal specific fields.
+      'localgov_page_components',    // LocalGov page components (paragraphs).
+      'field_page_header_image',     // LocalGov page header.
+      'field_teaser_image',          // LocalGov teaser image.
+      'field_media_image',           // Media reference.
+      'field_image',                 // LocalGov common.
+      'field_banner_image',          // Banner.
+      'field_featured_image',        // Featured.
+      'field_hero_image',            // Hero (our default).
+    ];
+
+    // Log available fields for debugging.
+    $availableFields = array_keys($node->getFieldDefinitions());
+    $this->logger->debug('Available fields on node type @type: @fields', [
+      '@type' => $node->bundle(),
+      '@fields' => implode(', ', array_filter($availableFields, fn($f) => str_starts_with($f, 'field_') || str_starts_with($f, 'localgov_'))),
+    ]);
+
+    foreach ($candidates as $fieldName) {
+      if ($node->hasField($fieldName)) {
+        $this->logger->debug('Found candidate image field: @field', ['@field' => $fieldName]);
+        return $fieldName;
+      }
+    }
+
+    // Fallback: look for any field that accepts media or image reference.
+    foreach ($node->getFieldDefinitions() as $name => $definition) {
+      $type = $definition->getType();
+      // Check for media references or image references.
+      if (in_array($type, ['entity_reference', 'entity_reference_revisions']) &&
+          (str_contains($name, 'image') || str_contains($name, 'media') || str_contains($name, 'banner'))) {
+        $this->logger->debug('Found fallback image field: @field (type: @type)', [
+          '@field' => $name,
+          '@type' => $type,
+        ]);
+        return $name;
+      }
+    }
+
+    // Log that no field was found.
+    $this->logger->warning('No image field found on node type @type', [
+      '@type' => $node->bundle(),
+    ]);
+
+    return NULL;
   }
 
   /**

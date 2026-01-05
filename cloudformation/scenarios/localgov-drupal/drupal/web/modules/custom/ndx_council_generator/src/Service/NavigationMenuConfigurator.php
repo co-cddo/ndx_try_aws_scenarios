@@ -150,6 +150,15 @@ class NavigationMenuConfigurator implements NavigationMenuConfiguratorInterface 
   }
 
   /**
+   * Landing page titles that should be top-level menu items, not Services children.
+   */
+  protected const TOP_LEVEL_LANDING_PAGES = [
+    'Services',
+    'News and updates',
+    'Directory',
+  ];
+
+  /**
    * {@inheritdoc}
    */
   public function createServiceCategoryLinks(string $servicesParentUuid, CouncilIdentity $identity): int {
@@ -181,6 +190,18 @@ class NavigationMenuConfigurator implements NavigationMenuConfiguratorInterface 
 
         // Skip the homepage landing page (starts with "Welcome to").
         if (str_starts_with($title, self::TITLE_PATTERN_WELCOME)) {
+          continue;
+        }
+
+        // Skip landing pages that should be top-level menu items.
+        if (in_array($title, self::TOP_LEVEL_LANDING_PAGES, TRUE)) {
+          $this->logger->debug('Skipping top-level landing page: @title', ['@title' => $title]);
+          continue;
+        }
+
+        // Skip "About" pages (they have dynamic council name suffix).
+        if (str_starts_with($title, self::TITLE_PATTERN_ABOUT)) {
+          $this->logger->debug('Skipping About landing page: @title', ['@title' => $title]);
           continue;
         }
 
