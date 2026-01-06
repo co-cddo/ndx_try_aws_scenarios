@@ -62,11 +62,21 @@ export class NetworkingConstruct extends Construct {
     const prefix = 'NdxDrupal';
 
     // ==========================================================================
-    // Default VPC Lookup
+    // VPC Creation
     // ==========================================================================
-    // Per ADR-002: Use default VPC to avoid NAT Gateway costs and speed up deployment
-    this.vpc = ec2.Vpc.fromLookup(this, 'DefaultVpc', {
-      isDefault: true,
+    // Create a new VPC with public subnets only (no NAT Gateway costs)
+    // This works for Fargate tasks with public IPs that need to access AWS APIs
+    this.vpc = new ec2.Vpc(this, 'Vpc', {
+      vpcName: `${prefix}-VPC`,
+      maxAzs: 2,
+      natGateways: 0, // No NAT Gateway to reduce costs
+      subnetConfiguration: [
+        {
+          name: 'Public',
+          subnetType: ec2.SubnetType.PUBLIC,
+          cidrMask: 24,
+        },
+      ],
     });
 
     // ==========================================================================
