@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { CloudFrontConstruct } from './constructs/cloudfront';
 import { ComputeConstruct } from './constructs/compute';
 import { DatabaseConstruct } from './constructs/database';
 import { NetworkingConstruct } from './constructs/networking';
@@ -76,17 +77,8 @@ export class LocalGovDrupalStack extends cdk.Stack {
       deploymentMode,
     });
 
-    // Story 1.8 - WaitCondition for Drupal initialization
-    // Creates a presigned URL that the container uses to signal completion
-    const waitHandle = new cdk.CfnWaitConditionHandle(this, 'DrupalInitHandle');
-
-    const waitCondition = new cdk.CfnWaitCondition(this, 'DrupalInitCondition', {
-      handle: waitHandle.ref,
-      timeout: '900', // 15 minutes - allows for Aurora cold start + Drupal install
-      count: 1,
-    });
-
     // Story 1.7 - Compute construct (Fargate, ALB)
+    // Note: WaitCondition removed - container image doesn't signal completion
     const compute = new ComputeConstruct(this, 'Compute', {
       vpc: networking.vpc,
       albSecurityGroup: networking.albSecurityGroup,
@@ -96,21 +88,28 @@ export class LocalGovDrupalStack extends cdk.Stack {
       fileSystem: storage.fileSystem,
       accessPoint: storage.accessPoint,
       deploymentMode,
-      waitConditionUrl: waitHandle.ref,
     });
 
-    // Ensure WaitCondition depends on the ECS service being created
-    waitCondition.node.addDependency(compute.service);
+    // CloudFront distribution for HTTPS termination
+    const cdn = new CloudFrontConstruct(this, 'CDN', {
+      loadBalancer: compute.loadBalancer,
+    });
 
     // ==========================================================================
     // Story 1.12 - CloudFormation Outputs
     // ==========================================================================
 
-    // Drupal URL - primary access point
+    // Drupal URL - primary access point (HTTPS via CloudFront)
     new cdk.CfnOutput(this, 'DrupalUrl', {
-      description: 'URL to access LocalGov Drupal',
-      value: `http://${compute.loadBalancerDnsName}`,
+      description: 'URL to access LocalGov Drupal (HTTPS)',
+      value: `https://${cdn.domainName}`,
       exportName: `${this.stackName}-DrupalUrl`,
+    });
+
+    // HTTP URL (ALB direct) - for debugging only
+    new cdk.CfnOutput(this, 'DrupalUrlHttp', {
+      description: 'Direct ALB URL (HTTP, for debugging)',
+      value: `http://${compute.loadBalancerDnsName}`,
     });
 
     // Admin credentials for first-time login
