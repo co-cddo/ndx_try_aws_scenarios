@@ -23,7 +23,7 @@ class ImageBatchProcessor implements ImageBatchProcessorInterface {
   /**
    * Default delay between API calls in milliseconds.
    */
-  protected const DEFAULT_RATE_LIMIT_DELAY_MS = 1000;
+  protected const DEFAULT_RATE_LIMIT_DELAY_MS = 0;
 
   /**
    * Current processing progress.
@@ -73,7 +73,7 @@ class ImageBatchProcessor implements ImageBatchProcessorInterface {
     $mediaIds = [];
     $failedItemIds = [];
 
-    $this->currentProgress = GenerationProgress::image(0, $totalItems, 'Starting');
+    $this->currentProgress = GenerationProgress::images(0, $totalItems, 'Starting');
 
     // Update state to image generation.
     $this->stateManager->updateStatus(GenerationState::STATUS_GENERATING_IMAGES);
@@ -94,7 +94,7 @@ class ImageBatchProcessor implements ImageBatchProcessorInterface {
       }
 
       // Update progress.
-      $this->currentProgress = GenerationProgress::image(
+      $this->currentProgress = GenerationProgress::images(
         $step,
         $totalItems,
         $item->contentSpecId
@@ -231,7 +231,7 @@ class ImageBatchProcessor implements ImageBatchProcessorInterface {
     $newFailedIds = [];
     $totalItems = count($failedIds);
 
-    $this->currentProgress = GenerationProgress::image(0, $totalItems, 'Retrying failed items');
+    $this->currentProgress = GenerationProgress::images(0, $totalItems, 'Retrying failed items');
 
     $this->logger->info('Retrying @count failed images', ['@count' => $totalItems]);
 
@@ -244,7 +244,7 @@ class ImageBatchProcessor implements ImageBatchProcessorInterface {
         continue;
       }
 
-      $this->currentProgress = GenerationProgress::image($step, $totalItems, $item->contentSpecId);
+      $this->currentProgress = GenerationProgress::images($step, $totalItems, $item->contentSpecId);
 
       // Reset the item status for retry.
       // Note: This would need a method in ImageSpecificationCollector to reset status.

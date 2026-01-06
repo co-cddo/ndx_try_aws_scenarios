@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as efs from 'aws-cdk-lib/aws-efs';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -61,6 +62,12 @@ export interface ComputeConstructProps {
    * when Drupal initialization completes.
    */
   readonly waitConditionUrl?: string;
+
+  /**
+   * Admin password for Drupal.
+   * If provided, sets ADMIN_PASSWORD environment variable.
+   */
+  readonly adminPassword?: string;
 }
 
 /**
@@ -145,12 +152,19 @@ export class ComputeConstruct extends Construct {
     });
 
     // Bedrock permissions for AI content generation
+    // Uses Amazon Nova models exclusively:
+    // - Nova Pro/Lite for text generation (via Converse API)
+    // - Nova Canvas for image generation (via InvokeModel API)
     taskRole.addToPolicy(
       new iam.PolicyStatement({
-        actions: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'],
+        actions: [
+          'bedrock:InvokeModel',
+          'bedrock:InvokeModelWithResponseStream',
+          'bedrock:Converse',
+          'bedrock:ConverseStream',
+        ],
         resources: [
           'arn:aws:bedrock:*::foundation-model/amazon.nova-*',
-          'arn:aws:bedrock:*::foundation-model/anthropic.claude-*',
         ],
       }),
     );
@@ -180,9 +194,17 @@ export class ComputeConstruct extends Construct {
     );
 
     // Textract permissions for document processing
+    // Include both synchronous and asynchronous APIs
     taskRole.addToPolicy(
       new iam.PolicyStatement({
-        actions: ['textract:AnalyzeDocument', 'textract:DetectDocumentText'],
+        actions: [
+          'textract:AnalyzeDocument',
+          'textract:DetectDocumentText',
+          'textract:StartDocumentAnalysis',
+          'textract:GetDocumentAnalysis',
+          'textract:StartDocumentTextDetection',
+          'textract:GetDocumentTextDetection',
+        ],
         resources: ['*'],
       }),
     );
@@ -197,6 +219,9 @@ export class ComputeConstruct extends Construct {
 
     // Allow reading database secret from task role too
     props.databaseSecret.grantRead(taskRole);
+
+    // EFS permissions for IAM-authenticated mounts
+    props.fileSystem.grantRootAccess(taskRole);
 
     // ==========================================================================
     // Fargate Task Definition
@@ -234,9 +259,20 @@ export class ComputeConstruct extends Construct {
       containerEnvironment.WAIT_CONDITION_URL = props.waitConditionUrl;
     }
 
+    // Add admin password if provided
+    if (props.adminPassword) {
+      containerEnvironment.ADMIN_PASSWORD = props.adminPassword;
+    }
+
+    // Look up the ECR repository for the Drupal image
+    const drupalRepository = ecr.Repository.fromRepositoryAttributes(this, 'DrupalRepo', {
+      repositoryArn: `arn:aws:ecr:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:repository/localgov-drupal`,
+      repositoryName: 'localgov-drupal',
+    });
+
     // Add container
     const container = taskDefinition.addContainer('drupal', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/localgovdrupal/localgov-drupal:latest'),
+      image: ecs.ContainerImage.fromEcrRepository(drupalRepository, 'latest'),
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: 'drupal',
         logGroup: this.logGroup,
@@ -253,11 +289,13 @@ export class ComputeConstruct extends Construct {
         },
       ],
       healthCheck: {
-        command: ['CMD-SHELL', 'curl -f http://localhost/ || exit 1'],
+        // Use /health endpoint which returns OK even during initialization
+        command: ['CMD-SHELL', 'curl -f http://localhost/health || exit 1'],
         interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
-        retries: 3,
-        startPeriod: cdk.Duration.seconds(120),
+        timeout: cdk.Duration.seconds(10),
+        retries: 5,
+        // Maximum allowed by ECS is 300 seconds (5 minutes)
+        startPeriod: cdk.Duration.seconds(300),
       },
     });
 
@@ -300,11 +338,14 @@ export class ComputeConstruct extends Construct {
         subnetType: ec2.SubnetType.PUBLIC,
       },
       assignPublicIp: true, // Required for public subnet
-      enableExecuteCommand: deploymentMode === 'development', // ECS Exec for debugging
+      enableExecuteCommand: true, // Enable ECS Exec for all modes
       circuitBreaker: {
         rollback: true,
       },
       serviceName: `NdxDrupal-Service-${deploymentMode}`,
+      // Allow 10 minutes for container initialization (Drupal install, AI content generation)
+      // before ALB health checks can fail the deployment
+      healthCheckGracePeriod: cdk.Duration.minutes(10),
     });
 
     // Register service with ALB
@@ -312,13 +353,15 @@ export class ComputeConstruct extends Construct {
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
       targets: [this.service],
+      // Allow 10 minutes for container initialization (Drupal install, AI content generation)
+      deregistrationDelay: cdk.Duration.seconds(30),
       healthCheck: {
-        path: '/',
+        path: '/health',
         interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
+        timeout: cdk.Duration.seconds(10),
         healthyThresholdCount: 2,
-        unhealthyThresholdCount: 3,
-        healthyHttpCodes: '200,301,302',
+        unhealthyThresholdCount: 5,
+        healthyHttpCodes: '200',
       },
     });
 

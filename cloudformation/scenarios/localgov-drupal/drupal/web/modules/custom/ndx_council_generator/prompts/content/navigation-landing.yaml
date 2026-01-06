@@ -1,0 +1,158 @@
+# Story 5.3: Content Generation Templates - Navigation Landing Pages
+# Generates landing pages for main navigation sections
+# These provide /services, /news, /about, /directory URLs
+
+content_type: localgov_services_landing
+generation_order: 2
+
+style_guide: |
+  Style Guidelines (Landing Pages):
+  - Clear, scannable content
+  - Signpost to relevant sections
+  - Use plain English (GOV.UK style)
+  - Mobile-first design
+  - Accessible to all users
+
+items:
+  - id: services-landing
+    title_template: "Services"
+    prompt: |
+      Write a services landing page for a UK local council.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      This page lists all council services with brief descriptions.
+      Group services into logical categories:
+
+      MONEY AND BENEFITS
+      - Council Tax
+      - Benefits and financial support
+      - Business rates
+
+      HOUSING AND PLANNING
+      - Housing and homelessness
+      - Planning applications
+
+      ENVIRONMENT AND TRANSPORT
+      - Waste and recycling
+      - Roads and transport
+      - Parking
+      - Parks and leisure
+      - Environmental services
+
+      PEOPLE AND COMMUNITIES
+      - Schools and education
+      - Adult social care
+      - Children and families
+
+      COUNCIL SERVICES
+      - Births, deaths and marriages
+      - Libraries
+      - Elections and voting
+      - Licensing
+      - Complaints and feedback
+
+      {{style_guide}}
+
+      IMPORTANT: Output valid JSON with all strings on single lines. Do not include literal newlines inside JSON string values.
+
+      Output as JSON with this structure:
+      {"title": "Services", "summary": "Find the council service you need", "body": "<div class='services-landing'><p>Find the service you need.</p><h2>Money and benefits</h2><ul><li><a href='/services/council-tax'>Council Tax</a> - Pay, discounts</li><li><a href='/services/benefits'>Benefits</a> - Apply for help</li></ul><h2>Housing and planning</h2><ul><li><a href='/services/housing'>Housing</a> - Apply, repairs</li><li><a href='/services/planning'>Planning</a> - Applications</li></ul><h2>Environment and transport</h2><ul><li><a href='/services/waste'>Waste and recycling</a></li><li><a href='/services/parking'>Parking</a></li></ul><h2>People and communities</h2><ul><li><a href='/services/schools'>Schools</a></li><li><a href='/services/social-care'>Social care</a></li></ul><h2>Council services</h2><ul><li><a href='/services/registrations'>Births, deaths, marriages</a></li><li><a href='/services/libraries'>Libraries</a></li></ul></div>"}
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: news-landing
+    title_template: "News and updates"
+    # Use localgov_newsroom content type so news articles can be linked via localgov_newsroom field
+    content_type: localgov_newsroom
+    prompt: |
+      Write a news landing page introduction for a UK local council.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      This page introduces the news section and links to latest articles.
+      Include:
+      - Welcome text explaining this is the news hub
+      - Categories of news (service updates, community events, consultations)
+      - How to subscribe to updates
+      - Link to press office contact
+
+      {{style_guide}}
+
+      IMPORTANT: Output valid JSON with all strings on single lines. Do not include literal newlines inside JSON string values.
+
+      Output as JSON with this structure:
+      {"title": "News and updates", "body": "<div class='news-landing'><p>Keep up to date with the latest news and announcements from {{council_name}}.</p><h2>What you'll find here</h2><ul><li>Service updates and changes</li><li>Community events and activities</li><li>Consultations and have your say</li><li>Council decisions and meetings</li></ul><h2>Stay informed</h2><p>Sign up for email updates to receive news directly to your inbox.</p><h2>Press enquiries</h2><p>For media enquiries, contact our communications team.</p></div>"}
+    drupal_fields:
+      title: title
+      body: body
+
+  - id: about-landing
+    title_template: "About {{council_name}}"
+    prompt: |
+      Write an About page for a UK local council.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+      Population: {{population}}
+      Motto: {{motto}}
+      Flavour: {{flavour_keywords}}
+
+      Include:
+      - Overview of the council and area served
+      - Population and key statistics
+      - Council structure (elected members, executive)
+      - Our priorities and vision
+      - History of the area (brief)
+      - How to get involved (councillors, consultations)
+      - Council motto if provided
+
+      {{style_guide}}
+
+      IMPORTANT: Output valid JSON with all strings on single lines. Do not include literal newlines inside JSON string values.
+
+      Output as JSON with this structure:
+      {"title": "About [council name]", "summary": "Learn about your local council and the area we serve", "body": "<div class='about-landing'><h2>About us</h2><p>Overview paragraph about the council serving the community.</p><h2>Our area</h2><p>Description of the region, population, key characteristics.</p><h2>How the council works</h2><p>Brief explanation of elected members, cabinet, committees.</p><h2>Our priorities</h2><ul><li>Priority 1</li><li>Priority 2</li><li>Priority 3</li></ul><h2>Get involved</h2><p>Contact your local councillor or take part in consultations.</p><p class='motto'><em>Council motto</em></p></div>"}
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: directory-landing
+    title_template: "Directory"
+    prompt: |
+      Write a directory landing page for a UK local council.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      This page introduces the council directory which lists:
+      - Local services and organisations
+      - Community groups and charities
+      - Sports clubs and leisure facilities
+      - Schools and education providers
+      - Health services
+      - Places to visit
+
+      Include:
+      - Introduction to the directory
+      - How to search and browse
+      - Categories available
+      - How organisations can be listed
+
+      {{style_guide}}
+
+      IMPORTANT: Output valid JSON with all strings on single lines. Do not include literal newlines inside JSON string values.
+
+      Output as JSON with this structure:
+      {"title": "Directory", "summary": "Find local services, organisations and places in your area", "body": "<div class='directory-landing'><p>Search our directory to find local services, community groups and organisations.</p><h2>Browse by category</h2><ul><li><a href='/directory/community'>Community groups and charities</a></li><li><a href='/directory/sports'>Sports clubs and leisure</a></li><li><a href='/directory/education'>Schools and education</a></li><li><a href='/directory/health'>Health services</a></li><li><a href='/directory/places'>Places to visit</a></li></ul><h2>Add your organisation</h2><p>If you run a local service or organisation, you can request to be added to the directory.</p></div>"}
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body

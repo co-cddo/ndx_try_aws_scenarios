@@ -64,7 +64,7 @@ class CouncilIdentityGenerator implements CouncilIdentityGeneratorInterface {
     $prompt = $this->buildPrompt($options);
 
     try {
-      $response = $this->bedrock->generateContent($prompt, 'nova-2-pro');
+      $response = $this->bedrock->generateContent($prompt, BedrockServiceInterface::MODEL_NOVA_PRO);
 
       // Log token usage for cost tracking (Task 8.4).
       $this->logTokenUsage($prompt, $response);
@@ -315,7 +315,7 @@ class CouncilIdentityGenerator implements CouncilIdentityGeneratorInterface {
       'input_tokens_approx' => $inputTokens,
       'output_tokens_approx' => $outputTokens,
       'total_tokens_approx' => $inputTokens + $outputTokens,
-      'model' => 'nova-2-pro',
+      'model' => BedrockServiceInterface::MODEL_NOVA_PRO,
     ]);
   }
 

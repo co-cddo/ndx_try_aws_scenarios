@@ -77,3 +77,69 @@ function ndx_aws_ai_theme(): array {
     ],
   ];
 }
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ *
+ * Story 3.4: CKEditor AI Toolbar Plugin (Alternative Implementation)
+ *
+ * Adds AI assistant buttons above content editor fields.
+ * This approach replaces the CKEditor5 plugin which requires webpack build.
+ */
+function ndx_aws_ai_form_node_form_alter(array &$form, \Drupal\Core\Form\FormStateInterface $form_state, string $form_id): void {
+  // Check if user has permission to use AI features.
+  $user = \Drupal::currentUser();
+  if (!$user->hasPermission('use ndx aws ai')) {
+    return;
+  }
+
+  // Add the AI toolbar buttons container.
+  $form['ai_toolbar'] = [
+    '#type' => 'container',
+    '#attributes' => [
+      'class' => ['ai-toolbar-buttons', 'clearfix'],
+    ],
+    '#weight' => -100,
+    'title' => [
+      '#type' => 'html_tag',
+      '#tag' => 'span',
+      '#value' => t('AI Assistant'),
+      '#attributes' => [
+        'class' => ['ai-toolbar-title'],
+      ],
+    ],
+    'write_button' => [
+      '#type' => 'button',
+      '#value' => t('✨ Generate Content'),
+      '#attributes' => [
+        'class' => ['ai-toolbar-button', 'ai-write-button', 'button', 'button--small'],
+        'type' => 'button',
+        'data-ai-action' => 'write',
+      ],
+      '#limit_validation_errors' => [],
+    ],
+    'simplify_button' => [
+      '#type' => 'button',
+      '#value' => t('📖 Simplify'),
+      '#attributes' => [
+        'class' => ['ai-toolbar-button', 'ai-simplify-button', 'button', 'button--small'],
+        'type' => 'button',
+        'data-ai-action' => 'simplify',
+      ],
+      '#limit_validation_errors' => [],
+    ],
+    'help_text' => [
+      '#type' => 'html_tag',
+      '#tag' => 'span',
+      '#value' => t('Powered by Amazon Bedrock'),
+      '#attributes' => [
+        'class' => ['ai-toolbar-help'],
+      ],
+    ],
+  ];
+
+  // Attach the AI toolbar library.
+  $form['#attached']['library'][] = 'ndx_aws_ai/ai_toolbar_buttons';
+  $form['#attached']['library'][] = 'ndx_aws_ai/ai_writing_dialog';
+  $form['#attached']['library'][] = 'ndx_aws_ai/ai_simplify_dialog';
+}

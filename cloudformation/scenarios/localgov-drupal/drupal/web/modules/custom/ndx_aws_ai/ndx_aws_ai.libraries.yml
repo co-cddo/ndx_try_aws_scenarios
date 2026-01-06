@@ -17,16 +17,17 @@ ai_components:
 
 # CKEditor 5 AI Toolbar plugin library.
 # Story 3.4: CKEditor AI Toolbar Plugin
-ckeditor5.aiToolbar:
-  version: VERSION
-  js:
-    js/ckeditor5_plugins/aiToolbar/src/index.js: { preprocess: false, minified: false }
-  css:
-    component:
-      css/ckeditor5-ai-toolbar.css: {}
-  dependencies:
-    - core/ckeditor5
-    - ndx_aws_ai/ai_components
+# NOTE: DISABLED - requires webpack build. Using ai_toolbar_buttons instead.
+# ckeditor5.aiToolbar:
+#   version: VERSION
+#   js:
+#     js/ckeditor5_plugins/aiToolbar/src/index.js: { preprocess: false, minified: false }
+#   css:
+#     component:
+#       css/ckeditor5-ai-toolbar.css: {}
+#   dependencies:
+#     - core/ckeditor5
+#     - ndx_aws_ai/ai_components
 
 # Admin library for CKEditor 5 AI Toolbar configuration.
 ckeditor5.aiToolbar.admin:
@@ -34,6 +35,22 @@ ckeditor5.aiToolbar.admin:
   css:
     theme:
       css/ckeditor5-ai-toolbar-admin.css: {}
+
+# AI Toolbar Buttons library (form-based, no webpack required).
+# Story 3.4: CKEditor AI Toolbar Plugin (Alternative Implementation)
+ai_toolbar_buttons:
+  version: VERSION
+  js:
+    js/ai-toolbar-buttons.js: {}
+  css:
+    component:
+      css/ai-toolbar-buttons.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupal.ajax
+    - core/drupal.dialog.ajax
+    - ndx_aws_ai/ai_components
 
 # AI Writing Dialog library.
 # Story 3.5: AI Writing Assistant

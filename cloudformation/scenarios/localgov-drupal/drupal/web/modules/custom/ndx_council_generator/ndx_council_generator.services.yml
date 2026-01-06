@@ -74,6 +74,16 @@ services:
     parent: logger.channel_base
     arguments: ['ndx_council_generator']
 
+  # Content Cleanup Service (for --force regeneration)
+  ndx_council_generator.content_cleanup:
+    class: Drupal\ndx_council_generator\Service\ContentCleanupService
+    arguments:
+      - '@entity_type.manager'
+      - '@ndx_council_generator.navigation_configurator'
+      - '@ndx_council_generator.state_manager'
+      - '@file_system'
+      - '@logger.channel.ndx_council_generator'
+
   # Story 5.9: Navigation Menu Configuration
   ndx_council_generator.navigation_configurator:
     class: Drupal\ndx_council_generator\Service\NavigationMenuConfigurator

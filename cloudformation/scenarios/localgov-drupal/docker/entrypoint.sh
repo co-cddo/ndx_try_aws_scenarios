@@ -22,13 +22,21 @@ if [ -d "/var/www/drupal/private" ]; then
     chmod 755 /var/www/drupal/private
 fi
 
-# Health check endpoint
+# Health check endpoint - returns OK even during installation
 cat > /var/www/drupal/web/health << 'EOF'
 OK
 EOF
 
+# Start PHP-FPM and Nginx first for health checks
+echo "=== Starting Services for Health Checks ==="
+php-fpm -D
+nginx
+
+# Wait for services to be ready
+sleep 2
+echo "Web services started, health checks will now pass"
+
 # Check if this is first boot (database initialization needed)
-# This will be expanded in Story 1.8
 if [ "${SKIP_INIT:-false}" != "true" ]; then
     echo "Checking initialization status..."
 
@@ -39,7 +47,12 @@ if [ "${SKIP_INIT:-false}" != "true" ]; then
     fi
 fi
 
-echo "=== Starting Services ==="
+echo "=== Switching to Supervisord ==="
+
+# Stop the initial nginx/php-fpm (supervisord will restart them)
+nginx -s quit 2>/dev/null || true
+pkill php-fpm 2>/dev/null || true
+sleep 1
 
 # Execute the main command (supervisord)
 exec "$@"

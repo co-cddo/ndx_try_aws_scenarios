@@ -45,9 +45,9 @@ class PollyService implements PollyServiceInterface {
   protected const CACHE_DIRECTORY = 'public://polly-cache';
 
   /**
-   * The Polly client.
+   * The Polly client (lazy initialized).
    */
-  protected PollyClient $client;
+  protected ?PollyClient $client = NULL;
 
   /**
    * Constructs a PollyService.
@@ -73,7 +73,21 @@ class PollyService implements PollyServiceInterface {
     protected FileSystemInterface $fileSystem,
     protected LoggerInterface $logger,
   ) {
-    $this->client = $this->clientFactory->getPollyClient();
+    // Client is lazy initialized in getClient() to avoid issues during
+    // service container initialization and module discovery.
+  }
+
+  /**
+   * Get the Polly client, creating it lazily if needed.
+   *
+   * @return \Aws\Polly\PollyClient
+   *   The Polly client.
+   */
+  protected function getClient(): PollyClient {
+    if ($this->client === NULL) {
+      $this->client = $this->clientFactory->getPollyClient();
+    }
+    return $this->client;
   }
 
   /**
@@ -129,7 +143,7 @@ class PollyService implements PollyServiceInterface {
     $this->rateLimiter->waitIfNeeded();
 
     try {
-      $result = $this->client->describeVoices([
+      $result = $this->getClient()->describeVoices([
         'LanguageCode' => $languageCode,
       ]);
 
@@ -215,7 +229,7 @@ class PollyService implements PollyServiceInterface {
       try {
         $this->rateLimiter->waitIfNeeded();
 
-        $result = $this->client->synthesizeSpeech([
+        $result = $this->getClient()->synthesizeSpeech([
           'Engine' => $engine,
           'OutputFormat' => 'mp3',
           'Text' => $text,
@@ -489,8 +503,10 @@ class PollyService implements PollyServiceInterface {
    */
   public function isAvailable(): bool {
     try {
-      $config = $this->client->getConfig();
-      return !empty($config['region']);
+      // Use getRegion() method - the SDK stores region as 'signing_region'
+      // in getConfig() which doesn't include a 'region' key.
+      $region = $this->getClient()->getRegion();
+      return !empty($region);
     }
     catch (\Exception $e) {
       return FALSE;

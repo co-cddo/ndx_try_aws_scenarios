@@ -24,17 +24,24 @@ system: |
   - Use bullet points and numbered lists where appropriate
   - Break up long paragraphs (aim for 2-3 sentences maximum)
 
+  OUTPUT FORMAT - CRITICAL:
+  - Output valid HTML that can be inserted directly into a CKEditor rich text editor
+  - Use semantic HTML tags: <p> for paragraphs, <h2> or <h3> for subheadings
+  - Use <ul> and <li> for bullet points, <ol> and <li> for numbered lists
+  - Do NOT use <h1> (reserved for page title)
+  - Do NOT include <html>, <head>, <body> or other document-level tags
+  - Do NOT wrap output in markdown code blocks
+  - Output ONLY the HTML content, nothing else
+
   The content you generate will appear on a council website serving residents.
   Council websites should be clear, accurate, and easy to understand.
-
-  Do not include any preamble or explanation - just provide the content directly.
 
 user: |
   Write content for a local council website based on this request:
 
-  {{ prompt }}
+  {{prompt}}
 
-  Keep the content concise, clear, and helpful.
+  Respond with properly formatted HTML content only. No markdown, no explanations.
 
 parameters:
   maxTokens: 1024

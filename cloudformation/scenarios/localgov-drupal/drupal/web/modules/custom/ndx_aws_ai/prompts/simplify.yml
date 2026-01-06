@@ -55,7 +55,7 @@ system: |
 user: |
   Simplify the following text to plain English:
 
-  {{ text }}
+  {{text}}
 
   Remember:
   - Target reading age 9

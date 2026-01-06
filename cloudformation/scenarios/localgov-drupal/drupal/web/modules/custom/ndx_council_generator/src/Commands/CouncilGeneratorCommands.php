@@ -8,6 +8,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\ndx_aws_ai\Service\ImageGenerationServiceInterface;
 use Drupal\ndx_council_generator\Generator\CouncilIdentityGeneratorInterface;
+use Drupal\ndx_council_generator\Service\ContentCleanupServiceInterface;
 use Drupal\ndx_council_generator\Service\ContentGenerationOrchestratorInterface;
 use Drupal\ndx_council_generator\Service\ContentTemplateManagerInterface;
 use Drupal\ndx_council_generator\Service\GenerationStateManagerInterface;
@@ -67,6 +68,8 @@ class CouncilGeneratorCommands extends DrushCommands {
    *   The navigation menu configurator service.
    * @param \Drupal\ndx_council_generator\Service\HomepageConfiguratorInterface|null $homepageConfigurator
    *   The homepage configurator service.
+   * @param \Drupal\ndx_council_generator\Service\ContentCleanupServiceInterface|null $contentCleanupService
+   *   The content cleanup service.
    */
   public function __construct(
     protected CouncilIdentityGeneratorInterface $identityGenerator,
@@ -80,6 +83,7 @@ class CouncilGeneratorCommands extends DrushCommands {
     protected ?ConfigFactoryInterface $configFactory = NULL,
     protected ?NavigationMenuConfiguratorInterface $navigationConfigurator = NULL,
     protected ?HomepageConfiguratorInterface $homepageConfigurator = NULL,
+    protected ?ContentCleanupServiceInterface $contentCleanupService = NULL,
   ) {
     parent::__construct();
   }
@@ -133,6 +137,11 @@ class CouncilGeneratorCommands extends DrushCommands {
     }
 
     try {
+      // Phase 0: Cleanup existing content (if --force).
+      if ($options['force']) {
+        $this->runCleanupPhase();
+      }
+
       // Phase 1: Generate Identity.
       $identity = $this->runIdentityPhase($options);
       if ($identity === NULL) {
@@ -196,6 +205,41 @@ class CouncilGeneratorCommands extends DrushCommands {
     $suffix = $dryRun ? ' (DRY RUN)' : '';
     $this->io()->writeln('  LocalGov Drupal - Council Generation' . $suffix);
     $this->io()->writeln(str_repeat('=', 80));
+    $this->io()->writeln('');
+  }
+
+  /**
+   * Run Phase 0: Cleanup existing content.
+   *
+   * Deletes all previously generated content to ensure a clean slate.
+   */
+  protected function runCleanupPhase(): void {
+    if ($this->contentCleanupService === NULL) {
+      $this->logger->warning('Content cleanup service not available');
+      return;
+    }
+
+    $this->io()->section('[Phase 0] Cleaning Up Existing Content');
+
+    $result = $this->contentCleanupService->cleanupAll();
+
+    $this->io()->writeln(sprintf('  <info>✓</info> Nodes deleted: %d', $result->nodesDeleted));
+    $this->io()->writeln(sprintf('  <info>✓</info> Media deleted: %d', $result->mediaDeleted));
+    $this->io()->writeln(sprintf('  <info>✓</info> Menu links deleted: %d', $result->menuLinksDeleted));
+    $this->io()->writeln(sprintf('  <info>✓</info> Files deleted: %d', $result->filesDeleted));
+
+    if ($result->stateCleared) {
+      $this->io()->writeln('  <info>✓</info> State cleared');
+    }
+
+    if ($result->hasErrors()) {
+      foreach ($result->errors as $error) {
+        $this->io()->writeln(sprintf('  <comment>!</comment> Warning: %s', $error));
+      }
+    }
+
+    $this->io()->writeln('');
+    $this->io()->writeln(sprintf('  Total items removed: %d', $result->getTotalDeleted()));
     $this->io()->writeln('');
   }
 
@@ -652,6 +696,263 @@ class CouncilGeneratorCommands extends DrushCommands {
     $remainingSeconds = (int) ($seconds % 60);
 
     return sprintf('%dm %ds', $minutes, $remainingSeconds);
+  }
+
+  /**
+   * Repair existing council content by fixing JSON bodies and parenting.
+   *
+   * @command localgov:repair-council
+   * @aliases localgov:repair
+   * @option dry-run Preview changes without saving
+   * @usage drush localgov:repair-council
+   *   Repair existing content (fix JSON bodies, set parent fields).
+   * @usage drush localgov:repair --dry-run
+   *   Preview what would be fixed.
+   *
+   * @return int
+   *   Exit code: 0 on success, 1 on failure.
+   */
+  public function repairCouncil(array $options = [
+    'dry-run' => FALSE,
+  ]): int {
+    $this->io()->writeln('');
+    $this->io()->writeln(str_repeat('=', 80));
+    $suffix = $options['dry-run'] ? ' (DRY RUN)' : '';
+    $this->io()->writeln('  LocalGov Drupal - Council Content Repair' . $suffix);
+    $this->io()->writeln(str_repeat('=', 80));
+    $this->io()->writeln('');
+
+    if (!$this->identityGenerator->hasIdentity()) {
+      $this->io()->error('No council identity found. Run localgov:generate-council first.');
+      return self::EXIT_FAILURE;
+    }
+
+    $identity = $this->identityGenerator->loadIdentity();
+    $this->io()->writeln(sprintf('  Council: %s', $identity->name));
+    $this->io()->writeln('');
+
+    try {
+      $nodeStorage = \Drupal::entityTypeManager()->getStorage('node');
+
+      // Step 1: Fix guide pages with JSON bodies.
+      $this->io()->section('Step 1: Fix Guide Page JSON Bodies');
+      $guideFixed = $this->repairGuidePages($nodeStorage, $options['dry-run']);
+      $this->io()->writeln(sprintf('  Fixed: %d guide pages', $guideFixed));
+
+      // Step 2: Find and set parent for orphan service pages.
+      $this->io()->section('Step 2: Fix Service Page Parents');
+      $servicesFixed = $this->repairServiceParents($nodeStorage, $identity, $options['dry-run']);
+      $this->io()->writeln(sprintf('  Fixed: %d service pages', $servicesFixed));
+
+      // Step 3: Re-run navigation configuration.
+      if (!$options['dry-run'] && $this->navigationConfigurator !== NULL) {
+        $this->io()->section('Step 3: Refresh Navigation');
+        $navResult = $this->navigationConfigurator->configureNavigation($identity);
+        $this->io()->writeln(sprintf('  Menu links created: %d', $navResult->getTotalCreated()));
+      }
+
+      // Step 4: Re-run homepage configuration.
+      if (!$options['dry-run'] && $this->homepageConfigurator !== NULL) {
+        $this->io()->section('Step 4: Refresh Homepage');
+        $homeResult = $this->homepageConfigurator->configureHomepage($identity);
+        $this->io()->writeln(sprintf('  Blocks configured: %d', $homeResult->blocksConfigured));
+        $this->io()->writeln(sprintf('  Front page set: %s', $homeResult->frontPageSet ? 'Yes' : 'No'));
+      }
+
+      $this->io()->writeln('');
+      if ($options['dry-run']) {
+        $this->io()->success('Dry run complete. No changes made.');
+      }
+      else {
+        $this->io()->success('Council content repair complete!');
+        $this->io()->writeln('Run "drush cr" to clear caches.');
+      }
+
+      return self::EXIT_SUCCESS;
+
+    }
+    catch (\Exception $e) {
+      $this->io()->error('Repair failed: ' . $e->getMessage());
+      return self::EXIT_FAILURE;
+    }
+  }
+
+  /**
+   * Repair guide pages that have JSON in body field.
+   *
+   * @param object $nodeStorage
+   *   The node storage.
+   * @param bool $dryRun
+   *   Whether this is a dry run.
+   *
+   * @return int
+   *   Number of pages fixed.
+   */
+  protected function repairGuidePages($nodeStorage, bool $dryRun): int {
+    $fixed = 0;
+
+    // Query all guide pages.
+    $query = $nodeStorage->getQuery()
+      ->condition('type', 'localgov_guides_page')
+      ->accessCheck(FALSE);
+
+    $nids = $query->execute();
+    if (empty($nids)) {
+      $this->io()->writeln('  No guide pages found.');
+      return 0;
+    }
+
+    $nodes = $nodeStorage->loadMultiple($nids);
+
+    foreach ($nodes as $node) {
+      $body = $node->get('body')->value ?? '';
+
+      // Check if body looks like JSON (starts with [ or {).
+      if (empty($body) || (!str_starts_with(trim($body), '[') && !str_starts_with(trim($body), '{'))) {
+        continue;
+      }
+
+      // Try to parse as JSON.
+      $data = json_decode($body, TRUE);
+      if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+        continue;
+      }
+
+      // Convert JSON to HTML.
+      $html = $this->convertJsonToGuideHtml($data);
+
+      if ($dryRun) {
+        $this->io()->writeln(sprintf('  Would fix: %s (node/%d)', $node->getTitle(), $node->id()));
+      }
+      else {
+        $node->set('body', [
+          'value' => $html,
+          'format' => 'wysiwyg',
+        ]);
+        $node->save();
+        $this->io()->writeln(sprintf('  <info>✓</info> Fixed: %s', $node->getTitle()));
+      }
+
+      $fixed++;
+    }
+
+    return $fixed;
+  }
+
+  /**
+   * Convert JSON steps array to HTML.
+   *
+   * @param array $data
+   *   The JSON data (steps array).
+   *
+   * @return string
+   *   HTML representation.
+   */
+  protected function convertJsonToGuideHtml(array $data): string {
+    $html = '<div class="guide-steps">';
+
+    foreach ($data as $index => $step) {
+      $stepNumber = $step['step_number'] ?? $step['number'] ?? ($index + 1);
+      $title = $step['title'] ?? $step['step'] ?? sprintf('Step %d', $stepNumber);
+      $content = $step['content'] ?? $step['description'] ?? $step['body'] ?? '';
+
+      // Clean up title.
+      $title = preg_replace('/^Step\s+\d+[:.]\s*/i', '', $title);
+
+      $html .= sprintf(
+        '<div class="guide-step">
+          <h3 class="guide-step__title">Step %d: %s</h3>
+          <div class="guide-step__content"><p>%s</p></div>
+        </div>',
+        $stepNumber,
+        htmlspecialchars($title, ENT_QUOTES, 'UTF-8'),
+        htmlspecialchars($content, ENT_QUOTES, 'UTF-8')
+      );
+    }
+
+    $html .= '</div>';
+    return $html;
+  }
+
+  /**
+   * Repair service pages without parent fields.
+   *
+   * @param object $nodeStorage
+   *   The node storage.
+   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
+   *   The council identity.
+   * @param bool $dryRun
+   *   Whether this is a dry run.
+   *
+   * @return int
+   *   Number of pages fixed.
+   */
+  protected function repairServiceParents($nodeStorage, CouncilIdentity $identity, bool $dryRun): int {
+    $fixed = 0;
+
+    // Find the homepage (services landing page).
+    $homepageTitle = 'Welcome to ' . $identity->name;
+    $homepages = $nodeStorage->loadByProperties([
+      'type' => 'localgov_services_landing',
+      'title' => $homepageTitle,
+    ]);
+
+    if (empty($homepages)) {
+      // Try partial match.
+      $query = $nodeStorage->getQuery()
+        ->condition('type', 'localgov_services_landing')
+        ->condition('title', '%Welcome to%', 'LIKE')
+        ->accessCheck(FALSE)
+        ->range(0, 1);
+
+      $nids = $query->execute();
+      if (!empty($nids)) {
+        $homepages = $nodeStorage->loadMultiple($nids);
+      }
+    }
+
+    if (empty($homepages)) {
+      $this->io()->writeln('  <comment>No services landing page found to use as parent.</comment>');
+      return 0;
+    }
+
+    $homepage = reset($homepages);
+    $parentNid = $homepage->id();
+    $this->io()->writeln(sprintf('  Parent page: %s (node/%d)', $homepage->getTitle(), $parentNid));
+
+    // Find service pages without a parent.
+    $query = $nodeStorage->getQuery()
+      ->condition('type', 'localgov_services_page')
+      ->accessCheck(FALSE);
+
+    $nids = $query->execute();
+    if (empty($nids)) {
+      $this->io()->writeln('  No service pages found.');
+      return 0;
+    }
+
+    $nodes = $nodeStorage->loadMultiple($nids);
+
+    foreach ($nodes as $node) {
+      // Check if already has parent (LocalGov uses localgov_services_parent).
+      $parent = $node->get('localgov_services_parent')->target_id ?? NULL;
+      if ($parent !== NULL) {
+        continue;
+      }
+
+      if ($dryRun) {
+        $this->io()->writeln(sprintf('  Would fix: %s (node/%d)', $node->getTitle(), $node->id()));
+      }
+      else {
+        $node->set('localgov_services_parent', ['target_id' => $parentNid]);
+        $node->save();
+        $this->io()->writeln(sprintf('  <info>✓</info> Fixed: %s', $node->getTitle()));
+      }
+
+      $fixed++;
+    }
+
+    return $fixed;
   }
 
   /**

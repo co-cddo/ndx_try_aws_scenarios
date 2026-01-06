@@ -1,0 +1,24 @@
+# Composer dependencies
+/vendor/
+
+# Drupal core and contrib (installed via composer)
+/web/core/
+/web/modules/contrib/
+/web/themes/contrib/
+/web/profiles/contrib/
+/web/libraries/
+
+# Drupal generated files
+/web/sites/*/files/
+/web/sites/*/private/
+/web/sites/*/settings.local.php
+
+# Composer lock (optional - some projects keep this)
+# /composer.lock
+
+# SQLite database
+*.sqlite
+
+# OS files
+.DS_Store
+Thumbs.db

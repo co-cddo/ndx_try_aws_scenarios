@@ -258,7 +258,7 @@ items:
       }
     images:
       - type: hero
-        prompt: "British primary school entrance, children in uniform, parents at gates, welcoming atmosphere, modern accessible building"
+        prompt: "Modern British primary school building exterior, welcoming architecture, accessible entrance with ramp, landscaped grounds, clear signage"
         dimensions: "1200x630"
         style: photo
         field_name: field_hero_image
@@ -328,7 +328,7 @@ items:
       }
     images:
       - type: hero
-        prompt: "Family at children's centre, toddler play area, diverse families, bright welcoming space, modern British community facility"
+        prompt: "Modern British community centre building exterior, bright welcoming entrance, accessible design, family services signage, landscaped gardens"
         dimensions: "1200x630"
         style: photo
         field_name: field_hero_image

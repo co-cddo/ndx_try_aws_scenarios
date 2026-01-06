@@ -10,9 +10,9 @@ use Drupal\ndx_aws_ai\Result\ImageGenerationResult;
 use Psr\Log\LoggerInterface;
 
 /**
- * Image generation service using Amazon Titan Image Generator.
+ * Image generation service using Amazon Nova Canvas.
  *
- * Generates images from text prompts using the Titan Image Generator v2 model.
+ * Generates images from text prompts using the Nova Canvas model.
  *
  * Story 5.6: Batch Image Generation
  */
@@ -29,9 +29,9 @@ class ImageGenerationService implements ImageGenerationServiceInterface {
   protected const BASE_BACKOFF_MS = 1000;
 
   /**
-   * The Bedrock Runtime client.
+   * The Bedrock Runtime client (lazy initialized).
    */
-  protected BedrockRuntimeClient $client;
+  protected ?BedrockRuntimeClient $client = NULL;
 
   /**
    * Constructs an ImageGenerationService.
@@ -48,7 +48,21 @@ class ImageGenerationService implements ImageGenerationServiceInterface {
     protected AwsErrorHandler $errorHandler,
     protected LoggerInterface $logger,
   ) {
-    $this->client = $this->clientFactory->getBedrockClient();
+    // Client is lazy initialized in getClient() to avoid issues during
+    // service container initialization and module discovery.
+  }
+
+  /**
+   * Get the Bedrock client, creating it lazily if needed.
+   *
+   * @return \Aws\BedrockRuntime\BedrockRuntimeClient
+   *   The Bedrock Runtime client.
+   */
+  protected function getClient(): BedrockRuntimeClient {
+    if ($this->client === NULL) {
+      $this->client = $this->clientFactory->getBedrockClient();
+    }
+    return $this->client;
   }
 
   /**
@@ -145,8 +159,10 @@ class ImageGenerationService implements ImageGenerationServiceInterface {
    */
   public function isAvailable(): bool {
     try {
-      $config = $this->client->getConfig();
-      return !empty($config['region']);
+      // Use getRegion() method - the SDK stores region as 'signing_region'
+      // in getConfig() which doesn't include a 'region' key.
+      $region = $this->getClient()->getRegion();
+      return !empty($region);
     }
     catch (\Exception $e) {
       return FALSE;
@@ -184,7 +200,7 @@ class ImageGenerationService implements ImageGenerationServiceInterface {
   }
 
   /**
-   * Invoke the Titan Image Generator model.
+   * Invoke the Nova Canvas model.
    *
    * @param string $prompt
    *   The full prompt with style prefix.
@@ -212,21 +228,25 @@ class ImageGenerationService implements ImageGenerationServiceInterface {
         'height' => $height,
         'width' => $width,
         'cfgScale' => self::DEFAULT_CFG_SCALE,
+        'quality' => self::DEFAULT_QUALITY,
       ],
     ];
 
     $request = [
-      'modelId' => self::MODEL_TITAN_IMAGE,
+      'modelId' => self::MODEL_NOVA_CANVAS,
       'contentType' => 'application/json',
       'accept' => 'application/json',
       'body' => json_encode($body),
     ];
 
-    $response = $this->client->invokeModel($request);
+    $response = $this->getClient()->invokeModel($request);
 
-    // Parse response.
+    // Parse response - handle PSR-7 StreamInterface from Guzzle.
     $responseBody = $response['body'] ?? '';
-    if (is_resource($responseBody)) {
+    if ($responseBody instanceof \Psr\Http\Message\StreamInterface) {
+      $responseBody = (string) $responseBody;
+    }
+    elseif (is_resource($responseBody)) {
       $responseBody = stream_get_contents($responseBody);
     }
 

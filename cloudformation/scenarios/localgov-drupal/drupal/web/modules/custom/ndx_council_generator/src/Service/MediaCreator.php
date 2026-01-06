@@ -144,7 +144,17 @@ class MediaCreator implements MediaCreatorInterface {
       ]);
     }
 
-    // Set the media reference.
+    // Check if this is a paragraphs field (localgov_page_components).
+    $fieldDefinition = $node->getFieldDefinition($actualFieldName);
+    $fieldType = $fieldDefinition?->getType();
+
+    if ($fieldType === 'entity_reference_revisions' || $actualFieldName === 'localgov_page_components') {
+      // This is a paragraphs field - create a localgov_image paragraph.
+      $this->addImageParagraph($node, $actualFieldName, $mediaId);
+      return;
+    }
+
+    // Standard media reference field.
     $node->set($actualFieldName, ['target_id' => $mediaId]);
     $node->save();
 
@@ -153,6 +163,58 @@ class MediaCreator implements MediaCreatorInterface {
       '@field' => $actualFieldName,
       '@media' => $mediaId,
     ]);
+  }
+
+  /**
+   * Add an image paragraph to a node's paragraphs field.
+   *
+   * LocalGov Drupal uses paragraph fields for page content, so we create
+   * a localgov_image paragraph with the media reference.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node entity.
+   * @param string $fieldName
+   *   The paragraphs field name.
+   * @param int $mediaId
+   *   The media entity ID.
+   */
+  protected function addImageParagraph($node, string $fieldName, int $mediaId): void {
+    try {
+      $paragraphStorage = $this->entityTypeManager->getStorage('paragraph');
+
+      // Create a localgov_image paragraph.
+      $paragraph = $paragraphStorage->create([
+        'type' => 'localgov_image',
+        'localgov_image' => [
+          'target_id' => $mediaId,
+        ],
+      ]);
+      $paragraph->save();
+
+      // Get existing paragraphs and prepend the image (so it shows at top).
+      $existingValues = $node->get($fieldName)->getValue();
+      $newValue = [
+        'target_id' => $paragraph->id(),
+        'target_revision_id' => $paragraph->getRevisionId(),
+      ];
+
+      // Prepend image paragraph to show at beginning of content.
+      array_unshift($existingValues, $newValue);
+      $node->set($fieldName, $existingValues);
+      $node->save();
+
+      $this->logger->info('Added image paragraph to node @node field @field with media @media', [
+        '@node' => $node->id(),
+        '@field' => $fieldName,
+        '@media' => $mediaId,
+      ]);
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Failed to create image paragraph for node @node: @error', [
+        '@node' => $node->id(),
+        '@error' => $e->getMessage(),
+      ]);
+    }
   }
 
   /**
@@ -166,17 +228,20 @@ class MediaCreator implements MediaCreatorInterface {
    */
   protected function detectImageField($node): ?string {
     // Common image field names in LocalGov Drupal and standard Drupal.
-    // Order matters - most likely fields first.
+    // Order matters - direct image fields first, then paragraphs as fallback.
     $candidates = [
-      // LocalGov Drupal specific fields.
-      'localgov_page_components',    // LocalGov page components (paragraphs).
-      'field_page_header_image',     // LocalGov page header.
-      'field_teaser_image',          // LocalGov teaser image.
-      'field_media_image',           // Media reference.
-      'field_image',                 // LocalGov common.
+      // Direct media/image reference fields (preferred).
+      'field_media_image',           // LocalGov news, standard media reference.
+      'localgov_event_image',        // LocalGov events image.
+      'localgov_subsites_banner',    // LocalGov subsites banner.
+      'field_hero_image',            // Hero (our default).
+      'field_image',                 // Standard image field.
       'field_banner_image',          // Banner.
       'field_featured_image',        // Featured.
-      'field_hero_image',            // Hero (our default).
+      'field_page_header_image',     // LocalGov page header.
+      'field_teaser_image',          // LocalGov teaser image.
+      // Paragraphs field as fallback (for services pages, guides, etc).
+      'localgov_page_components',    // LocalGov page components (paragraphs).
     ];
 
     // Log available fields for debugging.

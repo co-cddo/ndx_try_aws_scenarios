@@ -180,7 +180,7 @@ items:
       }
     images:
       - type: hero
-        prompt: "Parents and child at school open day, touring classroom, British primary school, welcoming teacher"
+        prompt: "Modern British school building reception area, welcoming entrance hall, information displays, visitor sign-in desk, natural lighting"
         dimensions: "1200x630"
         style: photo
         field_name: field_hero_image

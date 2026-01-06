@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\ndx_aws_ai\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Url;
 use Drupal\ndx_aws_ai\Service\PdfConversionServiceInterface;
@@ -31,16 +30,16 @@ class PdfConversionController extends ControllerBase {
   /**
    * Constructs a PdfConversionController.
    *
+   * Note: Uses parent's $this->entityTypeManager() instead of injecting
+   * EntityTypeManagerInterface to avoid PHP 8.2 readonly property conflict.
+   *
    * @param \Drupal\ndx_aws_ai\Service\PdfConversionServiceInterface $conversionService
    *   The PDF conversion service.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The entity type manager.
    * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
    *   The logger.
    */
   public function __construct(
     private readonly PdfConversionServiceInterface $conversionService,
-    private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly LoggerChannelInterface $logger,
   ) {}
 
@@ -50,7 +49,6 @@ class PdfConversionController extends ControllerBase {
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('ndx_aws_ai.pdf_conversion'),
-      $container->get('entity_type.manager'),
       $container->get('logger.channel.ndx_aws_ai'),
     );
   }
@@ -94,7 +92,7 @@ class PdfConversionController extends ControllerBase {
     }
 
     // Load and validate file.
-    $file = $this->entityTypeManager->getStorage('file')->load($fileId);
+    $file = $this->entityTypeManager()->getStorage('file')->load($fileId);
     if (!$file) {
       return new JsonResponse([
         'success' => FALSE,
@@ -241,7 +239,7 @@ class PdfConversionController extends ControllerBase {
 
     try {
       // Create the page node.
-      $nodeStorage = $this->entityTypeManager->getStorage('node');
+      $nodeStorage = $this->entityTypeManager()->getStorage('node');
 
       $node = $nodeStorage->create([
         'type' => 'page',
@@ -257,7 +255,7 @@ class PdfConversionController extends ControllerBase {
       // Attach original PDF if we have the file ID.
       if (preg_match('/^pdf_(\d+)_/', $jobId, $matches)) {
         $fileId = (int) $matches[1];
-        $file = $this->entityTypeManager->getStorage('file')->load($fileId);
+        $file = $this->entityTypeManager()->getStorage('file')->load($fileId);
         if ($file) {
           // If the node type has a file field, attach it.
           if ($node->hasField('field_attachments')) {

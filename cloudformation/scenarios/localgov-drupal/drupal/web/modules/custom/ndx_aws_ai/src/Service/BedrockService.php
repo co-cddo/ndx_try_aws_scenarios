@@ -22,9 +22,9 @@ use Drupal\ndx_aws_ai\Response\BedrockResponseParser;
 class BedrockService implements BedrockServiceInterface {
 
   /**
-   * The Bedrock Runtime client.
+   * The Bedrock Runtime client (lazy initialized).
    */
-  protected BedrockRuntimeClient $client;
+  protected ?BedrockRuntimeClient $client = NULL;
 
   /**
    * Constructs a BedrockService.
@@ -47,7 +47,21 @@ class BedrockService implements BedrockServiceInterface {
     protected BedrockRateLimiter $rateLimiter,
     protected BedrockResponseParser $responseParser,
   ) {
-    $this->client = $this->clientFactory->getBedrockClient();
+    // Client is lazy initialized in getClient() to avoid issues during
+    // service container initialization and module discovery.
+  }
+
+  /**
+   * Get the Bedrock client, creating it lazily if needed.
+   *
+   * @return \Aws\BedrockRuntime\BedrockRuntimeClient
+   *   The Bedrock Runtime client.
+   */
+  protected function getClient(): BedrockRuntimeClient {
+    if ($this->client === NULL) {
+      $this->client = $this->clientFactory->getBedrockClient();
+    }
+    return $this->client;
   }
 
   /**
@@ -258,13 +272,32 @@ class BedrockService implements BedrockServiceInterface {
     $attempt = 0;
     $lastException = NULL;
 
+    // Debug logging to trace API call flow
+    $this->errorHandler->logOperation('Bedrock', 'executeWithRetry:start', [
+      'model' => $modelId,
+      'attempt' => $attempt,
+      'timestamp' => date('Y-m-d H:i:s'),
+    ]);
+
     while ($attempt < $this->rateLimiter->getMaxRetries()) {
       try {
         // Apply rate limiting delay if needed.
         $this->rateLimiter->waitIfNeeded();
 
+        $this->errorHandler->logOperation('Bedrock', 'API_CALL:before', [
+          'model' => $modelId,
+          'attempt' => $attempt,
+          'timestamp' => date('Y-m-d H:i:s'),
+        ]);
+
         // Execute the API call.
-        $result = $this->client->converse($request);
+        $result = $this->getClient()->converse($request);
+
+        $this->errorHandler->logOperation('Bedrock', 'API_CALL:after', [
+          'model' => $modelId,
+          'attempt' => $attempt,
+          'timestamp' => date('Y-m-d H:i:s'),
+        ]);
 
         // Parse and log the response.
         $content = $this->responseParser->extractContent($result);
@@ -287,6 +320,14 @@ class BedrockService implements BedrockServiceInterface {
         $lastException = $e;
         $errorCode = $e->getAwsErrorCode() ?? 'UnknownError';
 
+        $this->errorHandler->logOperation('Bedrock', 'API_CALL:error', [
+          'model' => $modelId,
+          'attempt' => $attempt,
+          'errorCode' => $errorCode,
+          'errorMessage' => $e->getMessage(),
+          'timestamp' => date('Y-m-d H:i:s'),
+        ]);
+
         if ($this->rateLimiter->isRetryable($errorCode) && $attempt < $this->rateLimiter->getMaxRetries() - 1) {
           $this->errorHandler->logRetry('Bedrock', $operation, $attempt + 1, $errorCode);
           $this->rateLimiter->recordFailure();
@@ -297,6 +338,24 @@ class BedrockService implements BedrockServiceInterface {
 
         // Non-retryable error or max retries exceeded.
         throw $this->errorHandler->handleException($e, 'Bedrock', $operation);
+      }
+      catch (\Exception $e) {
+        // Catch any non-AWS exceptions (e.g., HTTP timeouts, network errors)
+        $this->errorHandler->logOperation('Bedrock', 'API_CALL:exception', [
+          'model' => $modelId,
+          'attempt' => $attempt,
+          'exceptionType' => get_class($e),
+          'errorMessage' => $e->getMessage(),
+          'timestamp' => date('Y-m-d H:i:s'),
+        ]);
+
+        throw new AwsServiceException(
+          message: 'API call failed: ' . $e->getMessage(),
+          awsErrorCode: 'NetworkError',
+          awsService: 'Bedrock',
+          userMessage: 'Unable to connect to AI service. Please try again.',
+          previous: $e,
+        );
       }
     }
 
@@ -321,10 +380,12 @@ class BedrockService implements BedrockServiceInterface {
       // Check if we have a valid client configured.
       // We don't make an actual API call to avoid unnecessary costs,
       // but we verify the client is properly configured.
-      $config = $this->client->getConfig();
+      // Use getRegion() method - the SDK stores region as 'signing_region'
+      // in getConfig() which doesn't include a 'region' key.
+      $region = $this->getClient()->getRegion();
 
       // Verify we have a region configured.
-      if (empty($config['region'])) {
+      if (empty($region)) {
         return FALSE;
       }
 

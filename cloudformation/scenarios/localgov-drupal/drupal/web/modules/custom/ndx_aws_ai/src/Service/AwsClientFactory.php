@@ -71,6 +71,11 @@ class AwsClientFactory {
       'region' => $this->region,
       'version' => 'latest',
       // No credentials specified - SDK uses IAM role from ECS task
+      // HTTP timeout configuration to prevent indefinite hangs
+      'http' => [
+        'timeout' => 60,         // 60 second timeout for API calls
+        'connect_timeout' => 10, // 10 second connection timeout
+      ],
     ];
   }
 

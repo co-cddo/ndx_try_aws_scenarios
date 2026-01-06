@@ -207,12 +207,12 @@ class ImageGenerationServiceTest extends TestCase {
   /**
    * Tests model constant.
    *
-   * @covers ::MODEL_TITAN_IMAGE
+   * @covers ::MODEL_NOVA_CANVAS
    */
   public function testModelConstant(): void {
     $this->assertEquals(
-      'amazon.titan-image-generator-v2:0',
-      ImageGenerationServiceInterface::MODEL_TITAN_IMAGE
+      'amazon.nova-canvas-v1:0',
+      ImageGenerationServiceInterface::MODEL_NOVA_CANVAS
     );
   }
 

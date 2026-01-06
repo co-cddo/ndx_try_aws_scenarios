@@ -43,9 +43,9 @@ class TranslateService implements TranslateServiceInterface {
   protected const CACHE_PREFIX = 'translate';
 
   /**
-   * The Translate client.
+   * The Translate client (lazy initialized).
    */
-  protected TranslateClient $client;
+  protected ?TranslateClient $client = NULL;
 
   /**
    * Constructs a TranslateService.
@@ -68,7 +68,21 @@ class TranslateService implements TranslateServiceInterface {
     protected CacheBackendInterface $cache,
     protected LoggerInterface $logger,
   ) {
-    $this->client = $this->clientFactory->getTranslateClient();
+    // Client is lazy initialized in getClient() to avoid issues during
+    // service container initialization and module discovery.
+  }
+
+  /**
+   * Get the Translate client, creating it lazily if needed.
+   *
+   * @return \Aws\Translate\TranslateClient
+   *   The Translate client.
+   */
+  protected function getClient(): TranslateClient {
+    if ($this->client === NULL) {
+      $this->client = $this->clientFactory->getTranslateClient();
+    }
+    return $this->client;
   }
 
   /**
@@ -250,7 +264,7 @@ class TranslateService implements TranslateServiceInterface {
 
     try {
       // Use TranslateText with auto-detection to get language.
-      $result = $this->client->translateText([
+      $result = $this->getClient()->translateText([
         'Text' => substr($text, 0, 100), // Only need a small sample.
         'SourceLanguageCode' => 'auto',
         'TargetLanguageCode' => 'en',
@@ -346,7 +360,7 @@ class TranslateService implements TranslateServiceInterface {
       try {
         $this->rateLimiter->waitIfNeeded();
 
-        $result = $this->client->translateText([
+        $result = $this->getClient()->translateText([
           'Text' => $text,
           'SourceLanguageCode' => $sourceLanguage,
           'TargetLanguageCode' => $targetLanguage,
@@ -549,8 +563,10 @@ class TranslateService implements TranslateServiceInterface {
    */
   public function isAvailable(): bool {
     try {
-      $config = $this->client->getConfig();
-      return !empty($config['region']);
+      // Use getRegion() method - the SDK stores region as 'signing_region'
+      // in getConfig() which doesn't include a 'region' key.
+      $region = $this->getClient()->getRegion();
+      return !empty($region);
     }
     catch (\Exception $e) {
       return FALSE;

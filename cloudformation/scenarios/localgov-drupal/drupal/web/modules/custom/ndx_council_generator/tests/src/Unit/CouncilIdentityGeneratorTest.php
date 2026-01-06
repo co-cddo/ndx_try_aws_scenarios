@@ -119,7 +119,7 @@ class CouncilIdentityGeneratorTest extends TestCase {
 
     $this->bedrock->expects($this->once())
       ->method('generateContent')
-      ->with($this->stringContains('Generate a realistic but entirely fictional council'), 'nova-2-pro')
+      ->with($this->stringContains('Generate a realistic but entirely fictional council'), BedrockServiceInterface::MODEL_NOVA_PRO)
       ->willReturn($aiResponse);
 
     // Mock config for saving.
@@ -170,7 +170,7 @@ class CouncilIdentityGeneratorTest extends TestCase {
 
     $this->bedrock->expects($this->once())
       ->method('generateContent')
-      ->with($this->stringContains('Preferred region: scotland'), 'nova-2-pro')
+      ->with($this->stringContains('Preferred region: scotland'), BedrockServiceInterface::MODEL_NOVA_PRO)
       ->willReturn($aiResponse);
 
     $config = $this->createMock(Config::class);
@@ -201,7 +201,7 @@ class CouncilIdentityGeneratorTest extends TestCase {
 
     $this->bedrock->expects($this->once())
       ->method('generateContent')
-      ->with($this->stringContains('Preferred theme: coastal_tourism'), 'nova-2-pro')
+      ->with($this->stringContains('Preferred theme: coastal_tourism'), BedrockServiceInterface::MODEL_NOVA_PRO)
       ->willReturn($aiResponse);
 
     $config = $this->createMock(Config::class);

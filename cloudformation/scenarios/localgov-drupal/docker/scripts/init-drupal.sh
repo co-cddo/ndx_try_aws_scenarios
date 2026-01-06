@@ -319,6 +319,10 @@ install_themes() {
     log "Setting localgov_scarfolk as default theme..."
     ./vendor/bin/drush config:set system.theme default localgov_scarfolk -y 2>&1 || true
 
+    # Set admin theme to Claro (Drupal core theme - Gin is not installed)
+    log "Setting admin theme to Claro..."
+    ./vendor/bin/drush config:set system.theme admin claro -y 2>&1 || true
+
     # Rebuild caches to ensure theme is active
     ./vendor/bin/drush cr 2>&1 || true
 

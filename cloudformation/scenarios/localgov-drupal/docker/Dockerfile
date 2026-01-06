@@ -42,13 +42,14 @@ WORKDIR /var/www/drupal
 COPY drupal/composer.json ./
 
 # Install dependencies (no dev dependencies for production)
-RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts || true
+# First install without scripts to get the vendor directory
+RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts
 
 # Copy the rest of the Drupal codebase
 COPY drupal/ .
 
-# Run composer scripts that need the full codebase
-RUN composer run-script drupal-scaffold || true
+# Now run composer install again with scripts to scaffold Drupal
+RUN composer install --no-dev --no-interaction --optimize-autoloader
 
 # =============================================================================
 # Stage 2: Runtime - Minimal production image
@@ -129,8 +130,11 @@ RUN mkdir -p \
     /var/log/supervisor \
     && adduser -D -S -H -u 82 -G www-data www-data 2>/dev/null || true
 
-# Set ownership
+# Set ownership and permissions
+# IMPORTANT: Files copied from host may have restrictive permissions (600)
+# We need world-readable files for drush to work when running as different user
 RUN chown -R www-data:www-data /var/www/drupal \
+    && chmod -R a+rX /var/www/drupal \
     && chown -R www-data:www-data /var/run/nginx \
     && chown -R www-data:www-data /var/log/nginx
 

@@ -57,11 +57,5 @@ export class CloudFrontConstruct extends Construct {
     });
 
     this.domainName = this.distribution.distributionDomainName;
-
-    // Output the HTTPS URL
-    new cdk.CfnOutput(this, 'HttpsUrl', {
-      value: `https://${this.domainName}`,
-      description: 'HTTPS URL (CloudFront)',
-    });
   }
 }

@@ -190,25 +190,10 @@ class AiWritingDialogForm extends FormBase {
       ],
     ];
 
-    $form['actions']['regenerate'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Regenerate'),
-      '#attributes' => [
-        'class' => ['ai-action-button', 'ai-hidden'],
-        'id' => 'ai-regenerate-button',
-      ],
-      '#ajax' => [
-        'callback' => '::generateContent',
-        'wrapper' => 'ai-writing-dialog-wrapper',
-        'progress' => [
-          'type' => 'none',
-        ],
-      ],
-    ];
-
     $form['actions']['apply'] = [
       '#type' => 'button',
       '#value' => $this->t('Apply'),
+      '#weight' => -10,
       '#attributes' => [
         'class' => ['ai-action-button', 'ai-action-button--primary', 'ai-hidden'],
         'id' => 'ai-apply-button',
@@ -219,6 +204,7 @@ class AiWritingDialogForm extends FormBase {
     $form['actions']['cancel'] = [
       '#type' => 'button',
       '#value' => $this->t('Cancel'),
+      '#weight' => 10,
       '#attributes' => [
         'class' => ['ai-action-button'],
         'data-action' => 'cancel',
@@ -276,8 +262,9 @@ class AiWritingDialogForm extends FormBase {
       $response->addCommand(new InvokeCommand('#ai-preview-container', 'removeClass', ['ai-hidden']));
       $response->addCommand(new InvokeCommand('.ai-generated-content', 'val', [$generatedContent]));
       $response->addCommand(new InvokeCommand('#ai-apply-button', 'removeClass', ['ai-hidden']));
-      $response->addCommand(new InvokeCommand('#ai-regenerate-button', 'removeClass', ['ai-hidden']));
-      $response->addCommand(new InvokeCommand('#edit-generate', 'addClass', ['ai-hidden']));
+      // Change Generate button to Regenerate after first generation.
+      $response->addCommand(new InvokeCommand('#edit-generate', 'val', [$this->t('Regenerate')]));
+      $response->addCommand(new InvokeCommand('#edit-generate', 'removeClass', ['ai-action-button--primary']));
 
       // Focus on generated content.
       $response->addCommand(new InvokeCommand('.ai-generated-content', 'focus', []));

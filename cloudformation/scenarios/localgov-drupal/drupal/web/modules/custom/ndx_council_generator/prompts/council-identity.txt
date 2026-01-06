@@ -12,7 +12,8 @@ Requirements:
    - Plausible sounding for the UK
    - NOT a real UK place name
    - 1-2 words maximum
-   - Examples of good fictional names: Thornbridge, Millhaven, Ashworth, Kingsford, Brackenmoor
+   - IMPORTANT: Generate a COMPLETELY NEW name - do NOT use these banned names: Thornbridge, Millhaven, Ashworth, Kingsford, Brackenmoor, Westdale, Northfield, Riverside
+   - Be creative! Combine elements like: stone/wood/ford/bridge/moor/dale/haven/worth/field/ton/bury/ham/leigh + Old English prefixes
 
 3. Region must be one of: {{REGION_OPTIONS}}
 

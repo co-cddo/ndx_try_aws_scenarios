@@ -12,5 +12,7 @@ services:
       - '@file_system'
       - '@config.factory'
       - '@ndx_council_generator.navigation_configurator'
+      - '@ndx_council_generator.homepage_configurator'
+      - '@ndx_council_generator.content_cleanup'
     tags:
       - { name: drush.command }

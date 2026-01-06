@@ -142,6 +142,9 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
     // Link service pages to the landing page for homepage display.
     $this->linkServicesToLanding($identity);
 
+    // Link news articles to the newsroom landing page.
+    $this->linkNewsToNewsroom($identity);
+
     return $summary;
   }
 
@@ -723,7 +726,10 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
   }
 
   /**
-   * Find the services landing page (homepage) for parenting service pages.
+   * Find the "Services" landing page for parenting service pages.
+   *
+   * Service pages should be parented to the "Services" landing page
+   * (not the homepage) for proper LocalGov hierarchy.
    *
    * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
    *   The council identity.
@@ -735,7 +741,20 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
     try {
       $nodeStorage = $this->entityTypeManager->getStorage('node');
 
-      // First, try to find the homepage by exact title.
+      // First, try to find the "Services" landing page by exact title.
+      $nodes = $nodeStorage->loadByProperties([
+        'type' => 'localgov_services_landing',
+        'title' => 'Services',
+        'status' => 1,
+      ]);
+
+      if (!empty($nodes)) {
+        $node = reset($nodes);
+        $this->logger->debug('Found Services landing page: @nid', ['@nid' => $node->id()]);
+        return (int) $node->id();
+      }
+
+      // Fallback: find the homepage (Welcome to...) as last resort.
       $homepageTitle = 'Welcome to ' . $identity->name;
       $nodes = $nodeStorage->loadByProperties([
         'type' => 'localgov_services_landing',
@@ -745,20 +764,8 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
 
       if (!empty($nodes)) {
         $node = reset($nodes);
+        $this->logger->debug('Using homepage as parent: @nid', ['@nid' => $node->id()]);
         return (int) $node->id();
-      }
-
-      // Fallback: find any services_landing with "Welcome to" in title.
-      $query = $nodeStorage->getQuery()
-        ->condition('type', 'localgov_services_landing')
-        ->condition('title', '%Welcome to%', 'LIKE')
-        ->condition('status', 1)
-        ->accessCheck(FALSE)
-        ->range(0, 1);
-
-      $nids = $query->execute();
-      if (!empty($nids)) {
-        return (int) reset($nids);
       }
 
       // Last resort: find first services_landing page.
@@ -834,26 +841,17 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
   }
 
   /**
-   * Link service pages to the services landing page via localgov_destinations.
+   * Link service pages to landing pages via localgov_destinations.
    *
-   * This sets up the homepage to display child service pages as tiles/cards.
+   * This sets up both the homepage and Services landing page to display
+   * child service pages as tiles/cards.
    *
    * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
    *   The council identity.
    */
   public function linkServicesToLanding(CouncilIdentity $identity): void {
-    $landingNid = $this->findServicesLandingPage($identity);
-    if ($landingNid === NULL) {
-      $this->logger->warning('No services landing page found - cannot link services');
-      return;
-    }
-
     try {
       $nodeStorage = $this->entityTypeManager->getStorage('node');
-      $landing = $nodeStorage->load($landingNid);
-      if ($landing === NULL) {
-        return;
-      }
 
       // Find all service pages.
       $serviceNids = $this->entityTypeManager->getStorage('node')
@@ -864,29 +862,210 @@ class ContentGenerationOrchestrator implements ContentGenerationOrchestratorInte
         ->execute();
 
       if (empty($serviceNids)) {
-        $this->logger->info('No service pages found to link to landing page');
+        $this->logger->info('No service pages found to link');
         return;
       }
 
-      // Build references array (limit to 12 for homepage display).
-      $refs = [];
-      foreach (array_slice(array_values($serviceNids), 0, 12) as $nid) {
-        $refs[] = ['target_id' => $nid];
+      // Build full references array for all services.
+      $allRefs = [];
+      foreach (array_values($serviceNids) as $nid) {
+        $allRefs[] = ['target_id' => $nid];
       }
 
-      // Set the destinations field.
-      $landing->set('localgov_destinations', $refs);
-      $landing->save();
+      // Link to homepage (limit to 12 for display).
+      $homepageNid = $this->findHomepage($identity);
+      if ($homepageNid !== NULL) {
+        $homepage = $nodeStorage->load($homepageNid);
+        if ($homepage !== NULL) {
+          $homepageRefs = array_slice($allRefs, 0, 12);
+          $homepage->set('localgov_destinations', $homepageRefs);
+          $homepage->save();
+          $this->logger->info('Linked @count services to homepage @nid', [
+            '@count' => count($homepageRefs),
+            '@nid' => $homepageNid,
+          ]);
+        }
+      }
+      else {
+        $this->logger->warning('No homepage found - cannot link services to homepage');
+      }
 
-      $this->logger->info('Linked @count services to landing page @landing', [
-        '@count' => count($refs),
-        '@landing' => $landingNid,
+      // Link to Services landing page (show all services).
+      $servicesNid = $this->findServicesLandingPage($identity);
+      if ($servicesNid !== NULL) {
+        $servicesPage = $nodeStorage->load($servicesNid);
+        if ($servicesPage !== NULL) {
+          $servicesPage->set('localgov_destinations', $allRefs);
+          $servicesPage->save();
+          $this->logger->info('Linked @count services to Services landing page @nid', [
+            '@count' => count($allRefs),
+            '@nid' => $servicesNid,
+          ]);
+        }
+      }
+      else {
+        $this->logger->warning('No Services landing page found');
+      }
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Failed to link services to landing pages: @error', [
+        '@error' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  /**
+   * Link news articles to the newsroom landing page.
+   *
+   * LocalGov News module requires news articles to have a reference to their
+   * parent newsroom via the localgov_newsroom field for proper display.
+   *
+   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
+   *   The council identity.
+   */
+  public function linkNewsToNewsroom(CouncilIdentity $identity): void {
+    try {
+      $nodeStorage = $this->entityTypeManager->getStorage('node');
+
+      // Find the newsroom landing page.
+      $newsroomNid = $this->findNewsroomLandingPage();
+      if ($newsroomNid === NULL) {
+        $this->logger->warning('No newsroom landing page found - news articles will not display');
+        return;
+      }
+
+      // Find all news articles.
+      $articleNids = $nodeStorage->getQuery()
+        ->condition('type', 'localgov_news_article')
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->execute();
+
+      if (empty($articleNids)) {
+        $this->logger->info('No news articles found to link');
+        return;
+      }
+
+      // Link each article to the newsroom.
+      $linked = 0;
+      foreach ($articleNids as $nid) {
+        $article = $nodeStorage->load($nid);
+        if ($article !== NULL && $article->hasField('localgov_newsroom')) {
+          // Check if already linked.
+          $currentValue = $article->get('localgov_newsroom')->target_id;
+          if ($currentValue !== $newsroomNid) {
+            $article->set('localgov_newsroom', ['target_id' => $newsroomNid]);
+            $article->save();
+            $linked++;
+          }
+        }
+      }
+
+      $this->logger->info('Linked @count news articles to newsroom @nid', [
+        '@count' => $linked,
+        '@nid' => $newsroomNid,
       ]);
     }
     catch (\Exception $e) {
-      $this->logger->error('Failed to link services to landing: @error', [
+      $this->logger->error('Failed to link news articles to newsroom: @error', [
         '@error' => $e->getMessage(),
       ]);
+    }
+  }
+
+  /**
+   * Find the newsroom landing page.
+   *
+   * @return int|null
+   *   The node ID of the newsroom, or NULL if not found.
+   */
+  protected function findNewsroomLandingPage(): ?int {
+    try {
+      $nodeStorage = $this->entityTypeManager->getStorage('node');
+
+      // Find the newsroom by exact title.
+      $nodes = $nodeStorage->loadByProperties([
+        'type' => 'localgov_newsroom',
+        'title' => 'News and updates',
+        'status' => 1,
+      ]);
+
+      if (!empty($nodes)) {
+        $node = reset($nodes);
+        $this->logger->debug('Found newsroom: @nid', ['@nid' => $node->id()]);
+        return (int) $node->id();
+      }
+
+      // Fallback: find any newsroom.
+      $query = $nodeStorage->getQuery()
+        ->condition('type', 'localgov_newsroom')
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->range(0, 1);
+
+      $nids = $query->execute();
+      if (!empty($nids)) {
+        return (int) reset($nids);
+      }
+
+      $this->logger->warning('No newsroom landing page found');
+      return NULL;
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error finding newsroom: @error', [
+        '@error' => $e->getMessage(),
+      ]);
+      return NULL;
+    }
+  }
+
+  /**
+   * Find the homepage ("Welcome to...") landing page.
+   *
+   * @param \Drupal\ndx_council_generator\Value\CouncilIdentity $identity
+   *   The council identity.
+   *
+   * @return int|null
+   *   The node ID of the homepage, or NULL if not found.
+   */
+  protected function findHomepage(CouncilIdentity $identity): ?int {
+    try {
+      $nodeStorage = $this->entityTypeManager->getStorage('node');
+
+      // Find the homepage by exact title.
+      $homepageTitle = 'Welcome to ' . $identity->name;
+      $nodes = $nodeStorage->loadByProperties([
+        'type' => 'localgov_services_landing',
+        'title' => $homepageTitle,
+        'status' => 1,
+      ]);
+
+      if (!empty($nodes)) {
+        $node = reset($nodes);
+        return (int) $node->id();
+      }
+
+      // Fallback: find any services_landing with "Welcome to" in title.
+      $query = $nodeStorage->getQuery()
+        ->condition('type', 'localgov_services_landing')
+        ->condition('title', '%Welcome to%', 'LIKE')
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->range(0, 1);
+
+      $nids = $query->execute();
+      if (!empty($nids)) {
+        return (int) reset($nids);
+      }
+
+      $this->logger->warning('No homepage found');
+      return NULL;
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error finding homepage: @error', [
+        '@error' => $e->getMessage(),
+      ]);
+      return NULL;
     }
   }
 

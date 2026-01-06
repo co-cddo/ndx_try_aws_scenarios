@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ndx_council_generator\Service;
 
 use Drupal\ndx_council_generator\Value\CouncilIdentity;
+use Drupal\ndx_council_generator\Value\MenuConfigurationResult;
 
 /**
  * Interface for navigation menu configuration service.

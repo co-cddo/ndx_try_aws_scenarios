@@ -15,6 +15,7 @@ final class ContentSpecification {
    * LocalGov Drupal content types.
    */
   public const TYPE_SERVICE_PAGE = 'localgov_services_page';
+  public const TYPE_SERVICE_LANDING = 'localgov_services_landing';
   public const TYPE_GUIDE_PAGE = 'localgov_guides_page';
   public const TYPE_DIRECTORY = 'localgov_directory';
   public const TYPE_NEWS = 'localgov_news_article';
@@ -77,7 +78,12 @@ final class ContentSpecification {
    *   The rendered title.
    */
   public function renderTitle(CouncilIdentity $identity): string {
-    return $this->replaceVariables($this->titleTemplate, $identity);
+    $title = $this->replaceVariables($this->titleTemplate, $identity);
+    // Ensure we never return an empty title.
+    if (empty(trim($title))) {
+      return ucfirst(str_replace('-', ' ', $this->id)) . ' - ' . $identity->name;
+    }
+    return $title;
   }
 
   /**

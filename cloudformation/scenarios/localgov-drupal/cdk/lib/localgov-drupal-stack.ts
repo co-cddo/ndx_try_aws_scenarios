@@ -52,6 +52,9 @@ export class LocalGovDrupalStack extends cdk.Stack {
     // Storing in SSM parameter for future use
     const councilTheme = props?.councilTheme ?? 'random';
 
+    // Generate random admin password (changes each synth/deploy)
+    const adminPassword = `Demo${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 6)}!`;
+
     // Tag all resources
     cdk.Tags.of(this).add('Project', 'ndx-try-aws-scenarios');
     cdk.Tags.of(this).add('Scenario', 'localgov-drupal');
@@ -88,6 +91,7 @@ export class LocalGovDrupalStack extends cdk.Stack {
       fileSystem: storage.fileSystem,
       accessPoint: storage.accessPoint,
       deploymentMode,
+      adminPassword,
     });
 
     // CloudFront distribution for HTTPS termination
@@ -106,28 +110,23 @@ export class LocalGovDrupalStack extends cdk.Stack {
       exportName: `${this.stackName}-DrupalUrl`,
     });
 
-    // HTTP URL (ALB direct) - for debugging only
-    new cdk.CfnOutput(this, 'DrupalUrlHttp', {
-      description: 'Direct ALB URL (HTTP, for debugging)',
-      value: `http://${compute.loadBalancerDnsName}`,
-    });
-
     // Admin credentials for first-time login
     new cdk.CfnOutput(this, 'AdminUsername', {
       description: 'Drupal admin username',
       value: 'admin',
     });
 
-    // Admin password from Secrets Manager (dynamic reference)
+    // Admin password (generated randomly per deploy)
     new cdk.CfnOutput(this, 'AdminPassword', {
-      description: 'Drupal admin password (from Secrets Manager)',
-      value: database.secret.secretValueFromJson('password').unsafeUnwrap(),
+      description: 'Drupal admin password',
+      value: adminPassword,
     });
 
     // CloudWatch Logs URL for monitoring initialization
+    const logGroupName = `/ndx-drupal/${deploymentMode}`;
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs for initialization monitoring',
-      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent(compute.logGroup.logGroupName)}`,
+      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent(logGroupName)}`,
     });
 
     // Quick Create URL template (for documentation)

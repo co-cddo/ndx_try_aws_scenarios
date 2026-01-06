@@ -36,6 +36,7 @@ class NavigationMenuConfigurator implements NavigationMenuConfiguratorInterface 
   protected const CONTENT_TYPE_SERVICES_LANDING = 'localgov_services_landing';
   protected const CONTENT_TYPE_SERVICES_PAGE = 'localgov_services_page';
   protected const CONTENT_TYPE_NEWS_ARTICLE = 'localgov_news_article';
+  protected const CONTENT_TYPE_NEWSROOM = 'localgov_newsroom';
   protected const CONTENT_TYPE_PAGE = 'page';
 
   /**
@@ -323,8 +324,12 @@ class NavigationMenuConfigurator implements NavigationMenuConfiguratorInterface 
       'description' => 'Council services and information',
     ];
 
-    // News link - find "News and updates" landing page.
-    $newsUri = $this->findNodeUri(self::CONTENT_TYPE_SERVICES_LANDING, 'News and updates');
+    // News link - find "News and updates" newsroom page.
+    $newsUri = $this->findNodeUri(self::CONTENT_TYPE_NEWSROOM, 'News and updates');
+    if (!$newsUri) {
+      // Fallback to services landing (legacy).
+      $newsUri = $this->findNodeUri(self::CONTENT_TYPE_SERVICES_LANDING, 'News and updates');
+    }
     $items[] = [
       'title' => 'News',
       'uri' => $newsUri ?? 'internal:/',

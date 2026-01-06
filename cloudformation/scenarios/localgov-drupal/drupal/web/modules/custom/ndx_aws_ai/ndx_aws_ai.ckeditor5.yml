@@ -2,18 +2,31 @@
 #
 # Story 3.4: CKEditor AI Toolbar Plugin
 #
-# This file registers the AI toolbar plugin with Drupal's CKEditor 5 module.
+# NOTE: The custom CKEditor5 plugin requires webpack compilation which isn't
+# available in this container build. Instead, we use standalone AI buttons
+# added via form_alter (see ndx_aws_ai.module).
+#
+# The AI functionality is provided through:
+# - AI buttons in the content form (above CKEditor)
+# - Modal dialogs for AI interactions
+# - Direct integration with AWS Bedrock via API endpoints
+#
+# To enable the CKEditor5 toolbar plugin in future:
+# 1. Set up webpack build for js/ckeditor5_plugins/
+# 2. Uncomment the configuration below
+# 3. Rebuild the module assets
 
-ndx_aws_ai_toolbar:
-  ckeditor5:
-    plugins:
-      - aiToolbar.AiToolbar
-  drupal:
-    label: "AI Toolbar"
-    library: ndx_aws_ai/ckeditor5.aiToolbar
-    toolbar_items:
-      aiToolbar:
-        label: "AI Assistant"
-    elements: false
-    admin_library: ndx_aws_ai/ckeditor5.aiToolbar.admin
-    conditions: []
+# DISABLED - requires webpack build:
+# ndx_aws_ai_toolbar:
+#   ckeditor5:
+#     plugins:
+#       - aiToolbar.AiToolbar
+#   drupal:
+#     label: "AI Toolbar"
+#     library: ndx_aws_ai/ckeditor5.aiToolbar
+#     toolbar_items:
+#       aiToolbar:
+#         label: "AI Assistant"
+#     elements: false
+#     admin_library: ndx_aws_ai/ckeditor5.aiToolbar.admin
+#     conditions: []

@@ -75,27 +75,87 @@
   }
 
   /**
+   * Find the first CKEditor 5 instance on the page.
+   *
+   * @returns {Object|null}
+   *   The CKEditor 5 editor instance, or null if not found.
+   */
+  function findCKEditor() {
+    // Method 1: Check Drupal.CKEditor5Instances (Map in Drupal 10)
+    if (typeof Drupal.CKEditor5Instances !== 'undefined') {
+      var instances = Drupal.CKEditor5Instances;
+
+      // Handle Map object (Drupal 10)
+      if (instances instanceof Map && instances.size > 0) {
+        var firstEntry = instances.values().next();
+        if (!firstEntry.done) {
+          return firstEntry.value;
+        }
+      }
+
+      // Handle plain object (fallback for older versions)
+      if (typeof instances === 'object' && !(instances instanceof Map)) {
+        for (var id in instances) {
+          if (instances.hasOwnProperty(id)) {
+            return instances[id];
+          }
+        }
+      }
+    }
+
+    // Method 2: Find via DOM element (reliable fallback)
+    var editable = document.querySelector('.ck-editor__editable');
+    if (editable && editable.ckeditorInstance) {
+      return editable.ckeditorInstance;
+    }
+
+    return null;
+  }
+
+  /**
    * Insert content into the active CKEditor.
    *
    * @param {string} content
-   *   The content to insert.
+   *   The content to insert (can be HTML or plain text).
    */
   Drupal.ndxAwsAi.insertContent = function (content) {
-    var editor = Drupal.ndxAwsAi.activeEditor;
+    // Try to get stored editor reference, or find one on the page.
+    var editor = Drupal.ndxAwsAi.activeEditor || findCKEditor();
 
     if (!editor) {
-      console.warn('No active editor for content insertion');
-      return;
+      // Show user-friendly error instead of silent fail.
+      var errorContainer = document.querySelector('#ai-error-container');
+      if (errorContainer) {
+        errorContainer.innerHTML = '<div class="ai-error-message">' +
+          Drupal.t('No editor found. Please open this dialog from within a content editor.') +
+          '</div>';
+        errorContainer.classList.remove('ai-hidden');
+      }
+      Drupal.ndxAwsAi.announce(
+        Drupal.t('Cannot insert content - no editor available'),
+        'assertive'
+      );
+      return false;
     }
 
     try {
-      editor.model.change(function (writer) {
-        var selection = editor.model.document.selection;
-        var insertPosition = selection.getFirstPosition();
+      // Check if content looks like HTML.
+      var isHtml = /<[a-z][\s\S]*>/i.test(content);
 
-        // Insert the content at cursor position.
-        writer.insertText(content, insertPosition);
-      });
+      if (isHtml) {
+        // Use the clipboard pipeline to insert HTML content.
+        var viewFragment = editor.data.processor.toView(content);
+        var modelFragment = editor.data.toModel(viewFragment);
+
+        editor.model.insertContent(modelFragment);
+      } else {
+        // For plain text, insert as text.
+        editor.model.change(function (writer) {
+          var selection = editor.model.document.selection;
+          var insertPosition = selection.getFirstPosition();
+          writer.insertText(content, insertPosition);
+        });
+      }
 
       // Focus the editor after insertion.
       editor.editing.view.focus();
@@ -106,6 +166,7 @@
         'polite'
       );
 
+      return true;
     }
     catch (error) {
       console.error('Failed to insert content:', error);
@@ -113,6 +174,7 @@
         Drupal.t('Failed to insert content. Please try again.'),
         'assertive'
       );
+      return false;
     }
   };
 
@@ -120,17 +182,37 @@
    * Close the active dialog.
    */
   Drupal.ndxAwsAi.closeDialog = function () {
+    // Clear editor reference first.
+    Drupal.ndxAwsAi.activeEditor = null;
+
+    // Try to close the native dialog first.
     if (Drupal.ndxAwsAi.activeDialog) {
       Drupal.ndxAwsAi.activeDialog.close();
     }
-    // Also try to close any jQuery UI dialog.
-    var dialogElement = document.querySelector('.ai-writing-dialog-wrapper');
-    if (dialogElement) {
-      var $dialog = jQuery(dialogElement).closest('.ui-dialog-content');
-      if ($dialog.length) {
-        $dialog.dialog('close');
+
+    // Find and close jQuery UI dialog properly.
+    // The dialog content is inside .ui-dialog-content, which is the element
+    // that has the dialog widget attached.
+    var $dialogContent = jQuery('.ui-dialog-content');
+    if ($dialogContent.length && $dialogContent.dialog('instance')) {
+      try {
+        $dialogContent.dialog('close');
+        $dialogContent.dialog('destroy');
+        $dialogContent.remove();
+      }
+      catch (e) {
+        // Dialog may already be destroyed.
       }
     }
+
+    // Remove any lingering overlay.
+    jQuery('.ui-widget-overlay').remove();
+
+    // Restore body scroll.
+    jQuery('body').css('overflow', '');
+    jQuery('html').css('overflow', '');
+
+    Drupal.ndxAwsAi.activeDialog = null;
   };
 
   /**
@@ -196,7 +278,7 @@
       });
 
       // Show loading state before AJAX.
-      once('ai-loading-trigger', '#edit-generate, #ai-regenerate-button', context).forEach(function (button) {
+      once('ai-loading-trigger', '#edit-generate', context).forEach(function (button) {
         button.addEventListener('click', function () {
           var loading = document.querySelector('#ai-loading-indicator');
           var error = document.querySelector('#ai-error-container');

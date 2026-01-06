@@ -21,9 +21,9 @@ use Drupal\ndx_aws_ai\Result\TextractResult;
 class TextractService implements TextractServiceInterface {
 
   /**
-   * The Textract client.
+   * The Textract client (lazy initialized).
    */
-  protected TextractClient $client;
+  protected ?TextractClient $client = NULL;
 
   /**
    * Constructs a TextractService.
@@ -40,7 +40,21 @@ class TextractService implements TextractServiceInterface {
     protected AwsErrorHandler $errorHandler,
     protected TextractRateLimiter $rateLimiter,
   ) {
-    $this->client = $this->clientFactory->getTextractClient();
+    // Client is lazy initialized in getClient() to avoid issues during
+    // service container initialization and module discovery.
+  }
+
+  /**
+   * Get the Textract client, creating it lazily if needed.
+   *
+   * @return \Aws\Textract\TextractClient
+   *   The Textract client.
+   */
+  protected function getClient(): TextractClient {
+    if ($this->client === NULL) {
+      $this->client = $this->clientFactory->getTextractClient();
+    }
+    return $this->client;
   }
 
   /**
@@ -127,7 +141,7 @@ class TextractService implements TextractServiceInterface {
     while ($attempt < $this->rateLimiter->getMaxRetries()) {
       try {
         $this->rateLimiter->waitIfNeeded();
-        $result = $this->client->startDocumentAnalysis($request);
+        $result = $this->getClient()->startDocumentAnalysis($request);
         $this->rateLimiter->recordSuccess();
 
         $jobId = $result['JobId'] ?? '';
@@ -188,7 +202,7 @@ class TextractService implements TextractServiceInterface {
     while ($attempt < $this->rateLimiter->getMaxRetries()) {
       try {
         $this->rateLimiter->waitIfNeeded();
-        $result = $this->client->getDocumentAnalysis($request);
+        $result = $this->getClient()->getDocumentAnalysis($request);
         $this->rateLimiter->recordSuccess();
 
         $processingTimeMs = (microtime(TRUE) - $startTime) * 1000;
@@ -286,8 +300,10 @@ class TextractService implements TextractServiceInterface {
    */
   public function isAvailable(): bool {
     try {
-      $config = $this->client->getConfig();
-      return !empty($config['region']);
+      // Use getRegion() method - the SDK stores region as 'signing_region'
+      // in getConfig() which doesn't include a 'region' key.
+      $region = $this->getClient()->getRegion();
+      return !empty($region);
     }
     catch (\Exception $e) {
       return FALSE;
@@ -321,7 +337,7 @@ class TextractService implements TextractServiceInterface {
     while ($attempt < $this->rateLimiter->getMaxRetries()) {
       try {
         $this->rateLimiter->waitIfNeeded();
-        $result = $this->client->detectDocumentText($request);
+        $result = $this->getClient()->detectDocumentText($request);
         $this->rateLimiter->recordSuccess();
 
         $processingTimeMs = (microtime(TRUE) - $startTime) * 1000;
@@ -396,7 +412,7 @@ class TextractService implements TextractServiceInterface {
     while ($attempt < $this->rateLimiter->getMaxRetries()) {
       try {
         $this->rateLimiter->waitIfNeeded();
-        $result = $this->client->analyzeDocument($request);
+        $result = $this->getClient()->analyzeDocument($request);
         $this->rateLimiter->recordSuccess();
 
         $processingTimeMs = (microtime(TRUE) - $startTime) * 1000;

@@ -220,9 +220,58 @@
         });
       });
 
-      // Show loading state before AJAX.
-      once('ai-simplify-loading', '#ai-regenerate-button', context).forEach(function (button) {
-        button.addEventListener('click', function () {
+      // Handle Regenerate button - Drupal's AJAX behaviors don't auto-bind in
+      // modal dialogs, so we manually create the AJAX binding.
+      once('ai-simplify-regenerate-ajax', '#ai-regenerate-button', context).forEach(function (button) {
+        var form = button.closest('form');
+        if (!form) {
+          console.warn('[AI Simplify] No form found for regenerate button');
+          return;
+        }
+
+        // Get the AJAX URL from data attribute (set by PHP) or form action.
+        // The data-ajax-url is the clean URL without modal wrapper parameters.
+        var ajaxUrl = button.getAttribute('data-ajax-url');
+        if (!ajaxUrl) {
+          // Fallback to form action, cleaned up.
+          var formAction = form.getAttribute('action') || '';
+          ajaxUrl = formAction.split('?')[0];
+        }
+        if (!ajaxUrl) {
+          // Final fallback to Drupal.url if available.
+          ajaxUrl = Drupal.url ? Drupal.url('ndx-aws-ai/simplify-dialog') : '/ndx-aws-ai/simplify-dialog';
+        }
+
+        console.log('[AI Simplify] Setting up AJAX for regenerate button', {
+          ajaxUrl: ajaxUrl,
+          buttonName: button.getAttribute('name')
+        });
+
+        // Create Drupal AJAX instance for the button with form serialization.
+        var elementSettings = {
+          url: ajaxUrl,
+          event: 'click',
+          progress: { type: 'none' },
+          base: button.id,
+          element: button,
+          // Setting form enables Drupal to serialize all form data including CSRF tokens.
+          form: form,
+          submit: {
+            _triggering_element_name: button.getAttribute('name') || 'regenerate',
+            _triggering_element_value: button.value || 'Regenerate'
+          }
+        };
+
+        // Create the AJAX instance using Drupal's standard method.
+        var ajaxInstance = Drupal.ajax(elementSettings);
+        // Explicitly set the form for serialization.
+        ajaxInstance.form = jQuery(form);
+
+        console.log('[AI Simplify] AJAX instance created successfully');
+
+        // Also add a click handler to show loading state immediately.
+        button.addEventListener('click', function (e) {
+          console.log('[AI Simplify] Regenerate button clicked');
           var loading = document.querySelector('#ai-simplify-loading');
           var error = document.querySelector('#ai-simplify-error');
           if (loading) {

@@ -12,7 +12,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\ndx_aws_ai\PromptTemplate\PromptTemplateManager;
 use Drupal\ndx_aws_ai\Service\BedrockServiceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * AI Simplify Dialog form for plain English simplification.
@@ -36,13 +35,10 @@ class AiSimplifyDialogForm extends FormBase {
    *   The Bedrock service.
    * @param \Drupal\ndx_aws_ai\PromptTemplate\PromptTemplateManager $promptManager
    *   The prompt template manager.
-   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
-   *   The request stack.
    */
   public function __construct(
     protected BedrockServiceInterface $bedrockService,
     protected PromptTemplateManager $promptManager,
-    protected RequestStack $requestStack,
   ) {}
 
   /**
@@ -52,7 +48,6 @@ class AiSimplifyDialogForm extends FormBase {
     return new static(
       $container->get('ndx_aws_ai.bedrock'),
       $container->get('ndx_aws_ai.prompt_template_manager'),
-      $container->get('request_stack'),
     );
   }
 
@@ -68,7 +63,9 @@ class AiSimplifyDialogForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     // Get original text from query parameter or form state.
-    $request = $this->requestStack->getCurrentRequest();
+    // Note: Uses getRequest() inherited from FormBase instead of $this->requestStack
+    // to avoid PHP 8.2 type conflict with parent class property.
+    $request = $this->getRequest();
     $this->originalText = $form_state->get('original_text')
       ?? $request?->query->get('text', '')
       ?? '';
@@ -251,20 +248,19 @@ class AiSimplifyDialogForm extends FormBase {
       '#type' => 'actions',
     ];
 
+    // Note: AJAX handling is done via JavaScript (ai-simplify-handler.js)
+    // because Drupal's #ajax doesn't work reliably in modal dialogs.
+    // The data-ajax-url provides the URL for the JavaScript AJAX binding.
     $form['actions']['regenerate'] = [
       '#type' => 'submit',
       '#value' => $this->t('Regenerate'),
+      '#name' => 'regenerate',
       '#attributes' => [
-        'class' => ['ai-action-button'],
+        'class' => ['ai-action-button', 'js-form-submit'],
         'id' => 'ai-regenerate-button',
+        'data-ajax-url' => '/ndx-aws-ai/simplify-dialog',
       ],
-      '#ajax' => [
-        'callback' => '::simplifyContent',
-        'wrapper' => 'ai-simplify-dialog-wrapper',
-        'progress' => [
-          'type' => 'none',
-        ],
-      ],
+      // No #ajax - JavaScript handles it to avoid conflicts in modals.
     ];
 
     $form['actions']['apply'] = [
@@ -374,7 +370,16 @@ class AiSimplifyDialogForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    // Form submission is handled via AJAX.
+    // Check if this is an AJAX request.
+    $request = $this->getRequest();
+    $isAjax = $request->isXmlHttpRequest() || $request->query->has('_drupal_ajax');
+
+    if ($isAjax) {
+      // Process and return AJAX response.
+      $response = $this->simplifyContent($form, $form_state);
+      $form_state->setResponse($response);
+    }
+    // Non-AJAX submissions just rebuild the form.
   }
 
 }

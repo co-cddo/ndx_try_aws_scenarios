@@ -79,9 +79,9 @@ Provide a comprehensive but clear description suitable for someone who cannot se
 PROMPT;
 
   /**
-   * The Bedrock Runtime client.
+   * The Bedrock Runtime client (lazy initialized).
    */
-  protected BedrockRuntimeClient $client;
+  protected ?BedrockRuntimeClient $client = NULL;
 
   /**
    * Constructs a VisionService.
@@ -98,7 +98,21 @@ PROMPT;
     protected AwsErrorHandler $errorHandler,
     protected VisionRateLimiter $rateLimiter,
   ) {
-    $this->client = $this->clientFactory->getBedrockClient();
+    // Client is lazy initialized in getClient() to avoid issues during
+    // service container initialization and module discovery.
+  }
+
+  /**
+   * Get the Bedrock client, creating it lazily if needed.
+   *
+   * @return \Aws\BedrockRuntime\BedrockRuntimeClient
+   *   The Bedrock Runtime client.
+   */
+  protected function getClient(): BedrockRuntimeClient {
+    if ($this->client === NULL) {
+      $this->client = $this->clientFactory->getBedrockClient();
+    }
+    return $this->client;
   }
 
   /**
@@ -201,8 +215,10 @@ PROMPT;
    */
   public function isAvailable(): bool {
     try {
-      $config = $this->client->getConfig();
-      return !empty($config['region']);
+      // Use getRegion() method - the SDK stores region as 'signing_region'
+      // in getConfig() which doesn't include a 'region' key.
+      $region = $this->getClient()->getRegion();
+      return !empty($region);
     }
     catch (\Exception $e) {
       return FALSE;
@@ -282,7 +298,7 @@ PROMPT;
     while ($attempt < $this->rateLimiter->getMaxRetries()) {
       try {
         $this->rateLimiter->waitIfNeeded();
-        $result = $this->client->converse($request);
+        $result = $this->getClient()->converse($request);
         $this->rateLimiter->recordSuccess();
 
         $processingTimeMs = (microtime(TRUE) - $startTime) * 1000;
