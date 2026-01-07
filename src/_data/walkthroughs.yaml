@@ -5,10 +5,10 @@
 
 walkthroughs:
   localgov-drupal:
-    totalSteps: 9
+    totalSteps: 10
     url: "/walkthroughs/localgov-drupal/"
     title: "LocalGov Drupal Walkthrough"
-    duration: "30 minutes"
+    duration: "33 minutes"
     hasWalkthrough: true
     category: "cms"
     steps:
@@ -35,6 +35,9 @@ walkthroughs:
         time: "2 minutes"
       - title: "Listen to Page explored"
         description: "Try the text-to-speech accessibility feature"
+        time: "3 minutes"
+      - title: "Translate this Page explored"
+        description: "Try the content translation accessibility feature"
         time: "3 minutes"
       - title: "Cleanup prepared"
         description: "Know how to delete your stack when finished"

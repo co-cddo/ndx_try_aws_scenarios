@@ -1,0 +1,248 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 10: Prepare for Cleanup - LocalGov Drupal Walkthrough"
+description: Know how to delete your stack when you're finished
+currentStep: 10
+totalSteps: 10
+timeEstimate: "3 minutes"
+scenarioId: localgov-drupal
+---
+
+{#
+  Step 10: Prepare for Cleanup (Story 2.4)
+  - Understanding auto-cleanup
+  - Manual deletion steps
+  - Cost awareness
+#}
+
+{% set stepNumber = 10 %}
+{% set stepTitle = "Prepare for Cleanup" %}
+{% set stepDescription = "Learn how to delete your CloudFormation stack and understand the costs involved." %}
+{% set timeEstimate = "3 minutes" %}
+{% set expectedOutcomes = [
+  "You understand the auto-cleanup behaviour",
+  "You know how to manually delete the stack",
+  "You understand the costs involved"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Automatic cleanup</h3>
+
+<p class="govuk-body">
+  Good news: your deployment is configured to <strong>auto-delete after 2 hours</strong>.
+  This means:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>You don't need to remember to clean up</li>
+  <li>No surprise AWS bills if you forget about it</li>
+  <li>Resources are automatically removed after the demo period</li>
+</ul>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>When does the 2 hours start?</strong> The timer begins when the
+    CloudFormation stack reaches CREATE_COMPLETE status. So if deployment
+    took 15 minutes, you have roughly 1 hour 45 minutes from when you
+    first logged in.
+  </p>
+</div>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Using NDX:Try?</strong> If you accessed this scenario through NDX:Try,
+    your stack will be <strong>automatically deleted at the end of your session</strong>.
+    You don't need to do anything - just close the browser when you're finished.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Manual cleanup</h3>
+
+<p class="govuk-body">
+  If you want to delete the stack early (to stop costs immediately),
+  follow these steps:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open CloudFormation console</strong>
+    <p class="govuk-body">
+      Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console in us-east-1<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+    </p>
+  </li>
+
+  <li>
+    <strong>Find your stack</strong>
+    <p class="govuk-body">
+      Look for <code>LocalGovDrupalStack</code>
+    </p>
+  </li>
+
+  <li>
+    <strong>Select the stack</strong>
+    <p class="govuk-body">
+      Click the checkbox next to your stack name
+    </p>
+  </li>
+
+  <li>
+    <strong>Click "Delete"</strong>
+    <p class="govuk-body">
+      Click the "Delete" button in the top right
+    </p>
+  </li>
+
+  <li>
+    <strong>Confirm deletion</strong>
+    <p class="govuk-body">
+      Click "Delete" in the confirmation dialog
+    </p>
+  </li>
+
+  <li>
+    <strong>Wait for deletion to complete</strong>
+    <p class="govuk-body">
+      This typically takes 5-10 minutes. The status will change to DELETE_IN_PROGRESS,
+      then the stack will disappear from the list.
+    </p>
+  </li>
+</ol>
+
+{# Screenshot: CloudFormation console showing stack selected with Delete button #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/cloudformation-stack-selected-desktop.png"
+       alt="AWS CloudFormation console showing the LocalGovDrupalStack selected with radio button, and the Delete button enabled in the toolbar"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    Select your stack using the radio button to enable the Delete button
+  </figcaption>
+</figure>
+
+{# Screenshot: Delete confirmation dialog #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-6">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/cloudformation-delete-confirmation-desktop.png"
+       alt="CloudFormation delete confirmation dialog asking 'Delete stack LocalGovDrupalStack permanently?' with Cancel and Delete buttons"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The confirmation dialog warns that deletion is permanent - click Delete to confirm
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">What gets deleted?</h3>
+
+<p class="govuk-body">
+  When the stack is deleted, <strong>all resources are removed</strong>:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Resource</th>
+      <th scope="col" class="govuk-table__header">What happens</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Aurora database</td>
+      <td class="govuk-table__cell">Deleted - all data lost</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">EFS file storage</td>
+      <td class="govuk-table__cell">Deleted - all uploads lost</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Fargate service</td>
+      <td class="govuk-table__cell">Stopped and removed</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Load balancer</td>
+      <td class="govuk-table__cell">Deleted - URL no longer works</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Security groups</td>
+      <td class="govuk-table__cell">Deleted</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-warning-text">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Warning</span>
+    Deletion is permanent. Any content you created or edited will be lost.
+    Take screenshots or notes before deleting if you want to remember
+    anything from your session.
+  </strong>
+</div>
+
+<h3 class="govuk-heading-m">Understanding costs</h3>
+
+<p class="govuk-body">
+  This deployment runs on the <strong>AWS Innovation Sandbox</strong>, which
+  means costs are covered by your organisation's agreement with NDX.
+</p>
+
+<div class="ndx-cost-breakdown">
+  <h4 class="govuk-heading-s">Typical cost breakdown (for reference)</h4>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Service</th>
+        <th scope="col" class="govuk-table__header">Approximate cost</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">Aurora Serverless (2 hours)</td>
+        <td class="govuk-table__cell">~$0.50</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">Fargate (2 hours)</td>
+        <td class="govuk-table__cell">~$0.30</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">EFS storage</td>
+        <td class="govuk-table__cell">~$0.10</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">Load Balancer (2 hours)</td>
+        <td class="govuk-table__cell">~$0.05</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell"><strong>Total (2 hour demo)</strong></td>
+        <td class="govuk-table__cell"><strong>~$1.00</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="govuk-body">
+  This is significantly less than the cost of traditional software demos
+  or vendor presentations, and you get hands-on experience with the actual platform.
+</p>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-cost-breakdown {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-cost-breakdown h4 {
+    margin-top: 0;
+  }
+
+  .ndx-cost-breakdown table {
+    margin-bottom: 0;
+  }
+</style>
