@@ -51,6 +51,13 @@ COPY drupal/ .
 # Now run composer install again with scripts to scaffold Drupal
 RUN composer install --no-dev --no-interaction --optimize-autoloader
 
+# Download Dropzone.js library (required for AJAX file uploads)
+RUN mkdir -p /var/www/drupal/web/libraries/dropzone \
+    && curl -sL https://github.com/dropzone/dropzone/releases/download/v5.9.3/dist.zip -o /tmp/dropzone.zip \
+    && unzip -q /tmp/dropzone.zip -d /tmp/dropzone \
+    && mv /tmp/dropzone/dist/* /var/www/drupal/web/libraries/dropzone/ \
+    && rm -rf /tmp/dropzone /tmp/dropzone.zip
+
 # =============================================================================
 # Stage 2: Runtime - Minimal production image
 # =============================================================================
