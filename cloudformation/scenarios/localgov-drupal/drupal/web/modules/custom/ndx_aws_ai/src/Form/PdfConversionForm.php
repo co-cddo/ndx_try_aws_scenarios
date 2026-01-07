@@ -85,7 +85,7 @@ class PdfConversionForm extends FormBase {
       '#description' => $this->t('Upload a PDF file (maximum @size MB).', [
         '@size' => self::MAX_UPLOAD_SIZE_MB,
       ]),
-      '#upload_location' => 'private://pdf_conversion/',
+      '#upload_location' => 'public://pdf_conversion/',
       '#upload_validators' => [
         'file_validate_extensions' => ['pdf'],
         'file_validate_size' => [self::MAX_UPLOAD_SIZE_MB * 1024 * 1024],
