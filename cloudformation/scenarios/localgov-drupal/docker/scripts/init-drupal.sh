@@ -610,6 +610,65 @@ configure_tts_block() {
     return 0
 }
 
+configure_translation_block() {
+    log "Configuring Translation block..."
+    update_status "Translation Block" "Configuring Translate this Page block..." 76
+
+    cd "$DRUPAL_ROOT"
+
+    # Check if the block already exists
+    local block_exists
+    block_exists=$(./vendor/bin/drush config:get block.block.ndx_translate_this_page_scarfolk id 2>/dev/null || echo "")
+
+    if [ -z "$block_exists" ]; then
+        log "  Translation block not found, creating..."
+
+        # Create the block with proper settings using drush php:eval
+        ./vendor/bin/drush php:eval "
+            \$block_config = [
+                'id' => 'ndx_translate_this_page_scarfolk',
+                'theme' => 'localgov_scarfolk',
+                'region' => 'content_top',
+                'weight' => 1,
+                'plugin' => 'ndx_content_translation',
+                'settings' => [
+                    'id' => 'ndx_content_translation',
+                    'label' => 'Translate this Page',
+                    'provider' => 'ndx_aws_ai',
+                    'label_display' => 'visible',
+                    'show_search' => FALSE,
+                    'show_priority_languages' => TRUE,
+                    'remember_preference' => TRUE,
+                    'auto_translate' => FALSE,
+                ],
+                'visibility' => [
+                    'entity_bundle:node' => [
+                        'id' => 'entity_bundle:node',
+                        'bundles' => [
+                            'localgov_guides_overview' => 'localgov_guides_overview',
+                            'localgov_guides_page' => 'localgov_guides_page',
+                            'localgov_news_article' => 'localgov_news_article',
+                            'localgov_services_landing' => 'localgov_services_landing',
+                            'localgov_services_page' => 'localgov_services_page',
+                        ],
+                        'negate' => FALSE,
+                        'context_mapping' => ['node' => '@node.node_route_context:node'],
+                    ],
+                ],
+            ];
+            \$block = \Drupal\block\Entity\Block::create(\$block_config);
+            \$block->save();
+            echo 'Translation block created successfully';
+        " 2>&1 || log "  Warning: Could not create Translation block programmatically"
+
+        log "  Translation block configuration complete"
+    else
+        log "  Translation block already exists, skipping"
+    fi
+
+    return 0
+}
+
 generate_council_content() {
     log "Generating AI council content..."
     update_status "AI Content" "Generating council content with AI..." 80
@@ -868,6 +927,9 @@ main() {
 
     # Configure TTS block (must be after ndx_aws_ai module is enabled)
     configure_tts_block
+
+    # Configure Translation block (must be after ndx_aws_ai module is enabled)
+    configure_translation_block
 
     # Generate AI council content (Epic 5) - only on fresh install or when requested
     if [ ! -f "$INIT_MARKER" ]; then
