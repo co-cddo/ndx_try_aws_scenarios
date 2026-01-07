@@ -36,7 +36,19 @@ ndx_aws_ai.write_dialog:
   options:
     _admin_route: TRUE
 
-# Story 3.6: AI Simplify Dialog for plain English conversion.
+# Story 3.6: Direct Simplify API endpoint (no modal).
+ndx_aws_ai.simplify_api:
+  path: '/ndx-aws-ai/api/simplify'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\SimplifyController::simplify'
+    _title: 'Simplify Content API'
+  methods: [POST]
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    no_cache: TRUE
+
+# Story 3.6: AI Simplify Dialog for plain English conversion (legacy modal).
 ndx_aws_ai.simplify_dialog:
   path: '/ndx-aws-ai/simplify-dialog'
   defaults:
