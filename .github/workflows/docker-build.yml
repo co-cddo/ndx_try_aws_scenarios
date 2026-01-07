@@ -12,11 +12,12 @@ name: Build LocalGov Drupal Container
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix/menu-links-search-index]
     paths:
       - 'cloudformation/scenarios/localgov-drupal/docker/**'
       - 'cloudformation/scenarios/localgov-drupal/drupal/**'
       - 'cloudformation/scenarios/localgov-drupal/.dockerignore'
+      - '.github/workflows/docker-build.yml'
   workflow_dispatch:
     inputs:
       push_image:
@@ -27,7 +28,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/localgov-drupal
+  IMAGE_NAME: co-cddo/ndx_try_aws_scenarios-localgov_drupal
 
 jobs:
   build:
