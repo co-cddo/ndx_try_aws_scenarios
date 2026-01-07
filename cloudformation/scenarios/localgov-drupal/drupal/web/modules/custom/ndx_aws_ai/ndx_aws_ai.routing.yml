@@ -142,3 +142,35 @@ ndx_aws_ai.pdf.availability:
   methods: [GET]
   requirements:
     _permission: 'administer content'
+
+# Story 4.5: Alt-Text Generation endpoints.
+ndx_aws_ai.alt_text.generate_from_file:
+  path: '/api/ndx-ai/alt-text/generate'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\AltTextController::generateFromFile'
+    _title: 'Generate Alt Text'
+  methods: [POST]
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    no_cache: TRUE
+
+ndx_aws_ai.alt_text.generate_from_base64:
+  path: '/api/ndx-ai/alt-text/generate-base64'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\AltTextController::generateFromBase64'
+    _title: 'Generate Alt Text from Base64'
+  methods: [POST]
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    no_cache: TRUE
+
+ndx_aws_ai.alt_text.availability:
+  path: '/api/ndx-ai/alt-text/availability'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\AltTextController::checkAvailability'
+    _title: 'Alt Text Service Availability'
+  methods: [GET]
+  requirements:
+    _permission: 'use ndx aws ai'

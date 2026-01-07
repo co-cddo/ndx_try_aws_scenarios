@@ -143,3 +143,85 @@ function ndx_aws_ai_form_node_form_alter(array &$form, \Drupal\Core\Form\FormSta
   $form['#attached']['library'][] = 'ndx_aws_ai/ai_writing_dialog';
   $form['#attached']['library'][] = 'ndx_aws_ai/ai_simplify_dialog';
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter() for media_image_add_form.
+ *
+ * Story 4.5: Auto Alt-Text on Media Upload
+ *
+ * Attaches the alt-text generator library and adds generate button.
+ */
+function ndx_aws_ai_form_media_image_add_form_alter(array &$form, \Drupal\Core\Form\FormStateInterface $form_state, string $form_id): void {
+  _ndx_aws_ai_attach_alt_text_generator($form);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for media_image_edit_form.
+ *
+ * Story 4.5: Auto Alt-Text on Media Upload
+ */
+function ndx_aws_ai_form_media_image_edit_form_alter(array &$form, \Drupal\Core\Form\FormStateInterface $form_state, string $form_id): void {
+  _ndx_aws_ai_attach_alt_text_generator($form, $form_state);
+}
+
+/**
+ * Implements hook_form_alter() for media library forms.
+ *
+ * Story 4.5: Auto Alt-Text on Media Upload
+ *
+ * Attaches alt-text generator to media library add forms.
+ */
+function ndx_aws_ai_form_alter(array &$form, \Drupal\Core\Form\FormStateInterface $form_state, string $form_id): void {
+  // Match media library upload forms.
+  if (strpos($form_id, 'media_library_add_form') === 0) {
+    _ndx_aws_ai_attach_alt_text_generator($form);
+  }
+}
+
+/**
+ * Attach the alt-text generator library and controls to a form.
+ *
+ * @param array $form
+ *   The form array.
+ * @param \Drupal\Core\Form\FormStateInterface|null $form_state
+ *   Optional form state for edit forms.
+ */
+function _ndx_aws_ai_attach_alt_text_generator(array &$form, ?\Drupal\Core\Form\FormStateInterface $form_state = NULL): void {
+  // Check if user has permission to use AI features.
+  $user = \Drupal::currentUser();
+  if (!$user->hasPermission('use ndx aws ai')) {
+    return;
+  }
+
+  // Check if service is available.
+  /** @var \Drupal\ndx_aws_ai\Service\AltTextGeneratorInterface $altTextGenerator */
+  $altTextGenerator = \Drupal::service('ndx_aws_ai.alt_text_generator');
+  if (!$altTextGenerator->isAvailable()) {
+    return;
+  }
+
+  // Attach the library.
+  $form['#attached']['library'][] = 'ndx_aws_ai/alt-text-generator';
+
+  // For edit forms, add a regenerate button.
+  if ($form_state !== NULL) {
+    $entity = $form_state->getFormObject()->getEntity();
+    if ($entity instanceof \Drupal\media\MediaInterface && $entity->hasField('field_media_image')) {
+      $imageField = $entity->get('field_media_image');
+      if (!$imageField->isEmpty()) {
+        $fileId = $imageField->target_id;
+
+        // Find the alt field and add button after it.
+        if (isset($form['field_media_image']['widget'][0]['alt'])) {
+          $form['field_media_image']['widget'][0]['alt']['#suffix'] = '
+            <div class="alt-text-ai-controls">
+              <button type="button" class="alt-text-generate-btn" data-file-id="' . $fileId . '" data-alt-field="#edit-field-media-image-0-alt">
+                ' . t('Generate with AI') . '
+              </button>
+              <span class="ai-indicator" title="' . t('AI can generate accessible alt-text for this image') . '">' . t('AI Available') . '</span>
+            </div>';
+        }
+      }
+    }
+  }
+}

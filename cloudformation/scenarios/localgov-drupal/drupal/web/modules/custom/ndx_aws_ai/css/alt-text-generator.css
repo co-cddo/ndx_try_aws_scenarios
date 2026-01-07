@@ -1,0 +1,105 @@
+/**
+ * @file
+ * Styles for alt-text auto-generation.
+ *
+ * Story 4.5: Auto Alt-Text on Media Upload
+ */
+
+/* Loading state */
+.alt-text-generating {
+  position: relative;
+}
+
+.alt-text-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Spinner */
+.alt-text-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  vertical-align: middle;
+  border: 2px solid #e0e0e0;
+  border-top-color: #0074bd;
+  border-radius: 50%;
+  animation: alt-text-spin 0.8s linear infinite;
+}
+
+@keyframes alt-text-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Messages */
+.alt-text-message {
+  margin-top: 0.5em;
+  padding: 0.5em 0.75em;
+  font-size: 0.875em;
+  border-radius: 4px;
+}
+
+.alt-text-message--status {
+  color: #2e7d32;
+  background-color: #e8f5e9;
+  border: 1px solid #c8e6c9;
+}
+
+.alt-text-message--error {
+  color: #c62828;
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+}
+
+/* AI indicator badge */
+.ai-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25em 0.5em;
+  margin-left: 0.5em;
+  font-size: 0.75em;
+  font-weight: 500;
+  color: #1976d2;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  cursor: help;
+}
+
+.ai-indicator::before {
+  content: "✨";
+  margin-right: 0.25em;
+}
+
+/* Generate button styling */
+.alt-text-generate-btn {
+  margin-top: 0.5em;
+  padding: 0.375em 0.75em;
+  font-size: 0.875em;
+  color: #fff;
+  background-color: #0074bd;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.alt-text-generate-btn:hover {
+  background-color: #005a94;
+}
+
+.alt-text-generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Alt text field container enhancements */
+.alt-text-ai-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  align-items: center;
+  margin-top: 0.5em;
+}

@@ -123,3 +123,18 @@ pdf-conversion:
     - core/drupalSettings
     - core/once
     - core/drupal.announce
+
+# Alt-Text Auto Generation library.
+# Story 4.5: Auto Alt-Text on Media Upload
+alt-text-generator:
+  version: VERSION
+  js:
+    js/alt-text-generator.js: {}
+  css:
+    component:
+      css/alt-text-generator.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - core/drupal.announce
