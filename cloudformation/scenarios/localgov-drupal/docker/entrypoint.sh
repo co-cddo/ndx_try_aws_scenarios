@@ -12,6 +12,12 @@ echo "AWS Region: ${AWS_REGION:-us-east-1}"
 mkdir -p /var/log/nginx /var/log/supervisor
 touch /var/log/nginx/access.log /var/log/nginx/error.log
 
+# Ensure nginx temp directories exist with correct permissions
+# Required for buffering file uploads larger than client_body_buffer_size
+mkdir -p /var/lib/nginx/tmp/client_body
+chown -R www-data:www-data /var/lib/nginx
+chmod -R 755 /var/lib/nginx
+
 # Set correct permissions on Drupal files
 chown -R www-data:www-data /var/www/drupal/web/sites/default/files || true
 chmod 755 /var/www/drupal/web/sites/default/files || true
