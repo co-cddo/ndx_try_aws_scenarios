@@ -37,12 +37,15 @@ system: |
        * "in respect of" → "about" or "for"
        * "prior to" → "before"
 
-  4. PRESERVE FORMATTING
-     - Keep lists as lists (bullet points, numbered lists)
-     - Keep headings as headings
-     - Keep paragraphs as paragraphs
-     - Do not add new formatting that wasn't there
-     - Do not remove formatting that was there
+  4. OUTPUT FORMAT - HTML
+     - Output valid HTML, NOT markdown
+     - Use <p> tags for paragraphs
+     - Use <ul><li> for bullet lists
+     - Use <ol><li> for numbered lists
+     - Use <h3> for headings (or match the original heading level)
+     - Use <strong> for bold, <em> for italic
+     - Do NOT use markdown syntax like ** or * or #
+     - Keep the same structure as the input (if input had headings, keep headings)
 
   5. KEEP THE MEANING
      - The simplified text must mean exactly the same thing
@@ -59,9 +62,10 @@ user: |
 
   Remember:
   - Target reading age 9
-  - Keep any lists, bullet points, or headings in the same format
+  - Output as HTML (use <p>, <ul>, <ol>, <h3>, <strong> tags)
+  - Do NOT use markdown formatting like ** or #
   - Explain essential technical terms briefly in parentheses
-  - Output only the simplified text, nothing else
+  - Output only the simplified HTML, nothing else
 
 parameters:
   maxTokens: 1024

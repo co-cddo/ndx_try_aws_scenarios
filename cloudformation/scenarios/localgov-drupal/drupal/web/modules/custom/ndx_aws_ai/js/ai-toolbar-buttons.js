@@ -130,7 +130,7 @@
    * @param {Object} editor
    *   The CKEditor 5 instance.
    * @param {string} newContent
-   *   The new content to insert.
+   *   The new HTML content to insert.
    * @param {boolean} hasSelection
    *   Whether to replace selection only or full content.
    */
@@ -139,30 +139,19 @@
       return;
     }
 
-    editor.model.change(function (writer) {
-      if (hasSelection) {
-        // Replace selected text only.
+    if (hasSelection) {
+      // For selected text, strip HTML and insert as plain text.
+      var plainText = newContent.replace(/<[^>]*>/g, '');
+      editor.model.change(function (writer) {
         var selection = editor.model.document.selection;
         var range = selection.getFirstRange();
         writer.remove(range);
-        writer.insertText(newContent, range.start);
-      } else {
-        // Replace full body content.
-        var root = editor.model.document.getRoot();
-        var rootRange = writer.createRangeIn(root);
-        writer.remove(rootRange);
-
-        // Insert new content as paragraphs.
-        var paragraphs = newContent.split('\n\n');
-        paragraphs.forEach(function (para) {
-          if (para.trim()) {
-            var paragraph = writer.createElement('paragraph');
-            writer.insertText(para.trim(), paragraph);
-            writer.insert(paragraph, root, 'end');
-          }
-        });
-      }
-    });
+        writer.insertText(plainText, range.start);
+      });
+    } else {
+      // For full content replacement, use setData to handle HTML properly.
+      editor.setData(newContent);
+    }
 
     editor.editing.view.focus();
   }
