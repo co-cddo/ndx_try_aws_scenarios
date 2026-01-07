@@ -26,14 +26,24 @@ class PdfConversionForm extends FormBase {
   private const MAX_UPLOAD_SIZE_MB = 5;
 
   /**
+   * The PDF conversion service.
+   *
+   * Note: Not using readonly constructor promotion to avoid PHP 8.2
+   * serialization issues during Drupal AJAX form rebuilds.
+   *
+   * @var \Drupal\ndx_aws_ai\Service\PdfConversionServiceInterface|null
+   */
+  protected ?PdfConversionServiceInterface $conversionService = NULL;
+
+  /**
    * Constructs a PdfConversionForm.
    *
-   * @param \Drupal\ndx_aws_ai\Service\PdfConversionServiceInterface $conversionService
+   * @param \Drupal\ndx_aws_ai\Service\PdfConversionServiceInterface|null $conversionService
    *   The PDF conversion service.
    */
-  public function __construct(
-    private readonly PdfConversionServiceInterface $conversionService,
-  ) {}
+  public function __construct(?PdfConversionServiceInterface $conversionService = NULL) {
+    $this->conversionService = $conversionService;
+  }
 
   /**
    * {@inheritdoc}
@@ -42,6 +52,21 @@ class PdfConversionForm extends FormBase {
     return new static(
       $container->get('ndx_aws_ai.pdf_conversion'),
     );
+  }
+
+  /**
+   * Gets the PDF conversion service.
+   *
+   * Handles re-initialization after form unserialization during AJAX rebuilds.
+   *
+   * @return \Drupal\ndx_aws_ai\Service\PdfConversionServiceInterface
+   *   The conversion service.
+   */
+  protected function getConversionService(): PdfConversionServiceInterface {
+    if ($this->conversionService === NULL) {
+      $this->conversionService = \Drupal::service('ndx_aws_ai.pdf_conversion');
+    }
+    return $this->conversionService;
   }
 
   /**
@@ -56,7 +81,7 @@ class PdfConversionForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     // Check service availability.
-    if (!$this->conversionService->isAvailable()) {
+    if (!$this->getConversionService()->isAvailable()) {
       $form['warning'] = [
         '#type' => 'container',
         '#attributes' => ['class' => ['messages', 'messages--warning']],
@@ -229,7 +254,7 @@ class PdfConversionForm extends FormBase {
       $fileId = reset($fileIds);
 
       try {
-        $jobId = $this->conversionService->startConversion((int) $fileId);
+        $jobId = $this->getConversionService()->startConversion((int) $fileId);
 
         // Store job ID in session for status checking.
         $this->messenger()->addStatus(
