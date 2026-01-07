@@ -5,7 +5,7 @@
 
 walkthroughs:
   localgov-drupal:
-    totalSteps: 8
+    totalSteps: 9
     url: "/walkthroughs/localgov-drupal/"
     title: "LocalGov Drupal Walkthrough"
     duration: "30 minutes"
@@ -33,6 +33,9 @@ walkthroughs:
       - title: "DEMO banner understood"
         description: "Learn why it's there and what it means"
         time: "2 minutes"
+      - title: "Listen to Page explored"
+        description: "Try the text-to-speech accessibility feature"
+        time: "3 minutes"
       - title: "Cleanup prepared"
         description: "Know how to delete your stack when finished"
         time: "3 minutes"

@@ -417,18 +417,19 @@ test.describe('LocalGov Drupal AI Features Screenshots', () => {
   });
 
   test.describe('Text-to-Speech (TTS)', () => {
-    test('Capture TTS button and language options', async ({ page }, testInfo) => {
+    test('Capture TTS player on content page', async ({ page }, testInfo) => {
       const viewport = testInfo.project.name === 'mobile' ? 'mobile' : 'desktop';
 
       // Go to public content page (doesn't require login)
       await page.goto(CONFIG.drupalUrl);
       await waitForAjaxComplete(page);
 
-      // Navigate to a content page
+      // Navigate to a services or guides page where TTS block appears
       const contentLink = await findElementWithFallbacks(page, [
         'a[href*="/services/"]',
         'a[href*="/guides/"]',
-        '.localgov-page a'
+        '.localgov-page a',
+        'a:has-text("Services")'
       ], 5000);
 
       if (contentLink) {
@@ -436,46 +437,107 @@ test.describe('LocalGov Drupal AI Features Screenshots', () => {
         await waitForAjaxComplete(page);
       }
 
-      await saveScreenshot(page, 'tts-page-overview', viewport, false);
-
-      // Look for TTS button
-      const ttsButton = await findElementWithFallbacks(page, [
-        '.tts-button',
-        'button:has-text("Listen")',
-        '[aria-label*="Listen"]',
-        '.listen-page-button'
+      // Look for the TTS player block (appears in content_top region)
+      const ttsPlayer = await findElementWithFallbacks(page, [
+        '.tts-player',
+        '.block-ndx-listen-to-page',
+        '[class*="listen-to-page"]',
+        '.region-content-top .block'
       ], 5000);
 
-      if (ttsButton) {
-        await ttsButton.scrollIntoViewIfNeeded();
-        await saveScreenshot(page, 'tts-button-location', viewport, false);
+      if (ttsPlayer) {
+        // Scroll TTS player into view and capture it
+        await ttsPlayer.scrollIntoViewIfNeeded();
 
-        // Click to open TTS player/options
-        await ttsButton.click();
+        // Capture just the TTS player block
+        await ttsPlayer.screenshot({
+          path: `${CONFIG.screenshotDir}/tts-player-${viewport}.png`,
+          animations: 'disabled'
+        });
+        console.log(`Captured: tts-player-${viewport}.png`);
 
-        // Wait for TTS player to appear
-        const ttsPlayer = page.locator('.tts-player, .audio-player, [role="region"][aria-label*="audio"]');
-        try {
-          await ttsPlayer.waitFor({ state: 'visible', timeout: 3000 });
-          await saveScreenshot(page, 'tts-player-open', viewport, false);
-        } catch {
-          // Player may be inline
-        }
+        // Capture the page with TTS player visible
+        await saveScreenshot(page, 'tts-page-with-player', viewport, false);
 
-        // Look for language dropdown
+        // Find and interact with the language dropdown
         const languageSelect = await findElementWithFallbacks(page, [
-          '.tts-language-select',
-          'select[name*="language"]',
-          '[aria-label*="language"]'
+          '.tts-language',
+          '.tts-player select',
+          'select[aria-label*="language"]',
+          '.govuk-select'
         ], 3000);
 
         if (languageSelect) {
-          await languageSelect.click();
-          // Wait for dropdown to expand
-          await page.locator('option, li[role="option"]').first()
-            .waitFor({ state: 'visible', timeout: 2000 })
-            .catch(() => {});
-          await saveScreenshot(page, 'tts-language-dropdown-expanded', viewport, false);
+          // Focus on the language dropdown
+          await languageSelect.focus();
+          await saveScreenshot(page, 'tts-language-focused', viewport, false);
+        }
+
+        // Find the play button
+        const playButton = await findElementWithFallbacks(page, [
+          '.tts-play',
+          '.tts-player button:has-text("Play")',
+          'button[aria-label*="Play"]'
+        ], 3000);
+
+        if (playButton) {
+          await playButton.scrollIntoViewIfNeeded();
+          await saveScreenshot(page, 'tts-play-button', viewport, false);
+        }
+
+        // Find speed control if present
+        const speedControl = await findElementWithFallbacks(page, [
+          '.tts-speed',
+          '.tts-player__speed',
+          'input[aria-label*="speed"]'
+        ], 3000);
+
+        if (speedControl) {
+          await speedControl.scrollIntoViewIfNeeded();
+          await saveScreenshot(page, 'tts-speed-control', viewport, false);
+        }
+      } else {
+        // TTS player not found, capture the page overview anyway
+        await saveScreenshot(page, 'tts-page-overview', viewport, false);
+        console.log('TTS player not found on page - may not be deployed or on wrong content type');
+      }
+    });
+
+    test('Capture TTS player on guides page', async ({ page }, testInfo) => {
+      const viewport = testInfo.project.name === 'mobile' ? 'mobile' : 'desktop';
+
+      // Try to navigate directly to guides
+      await page.goto(`${CONFIG.drupalUrl}/guides`);
+      await waitForAjaxComplete(page);
+
+      // Click on first guide if available
+      const guideLink = await findElementWithFallbacks(page, [
+        '.view-localgov-guides a',
+        'a[href*="/guides/"]',
+        '.field--name-title a'
+      ], 5000);
+
+      if (guideLink) {
+        await guideLink.click();
+        await waitForAjaxComplete(page);
+
+        // Look for TTS player on the guide page
+        const ttsPlayer = await findElementWithFallbacks(page, [
+          '.tts-player',
+          '.block-ndx-listen-to-page',
+          '[class*="listen-to-page"]'
+        ], 5000);
+
+        if (ttsPlayer) {
+          await ttsPlayer.scrollIntoViewIfNeeded();
+          await saveScreenshot(page, 'tts-guide-page', viewport, false);
+
+          // Capture just the player
+          await ttsPlayer.screenshot({
+            path: `${CONFIG.screenshotDir}/tts-player-guide-${viewport}.png`,
+            animations: 'disabled'
+          });
+          console.log(`Captured: tts-player-guide-${viewport}.png`);
         }
       }
     });
