@@ -5,10 +5,10 @@
 
 walkthroughs:
   localgov-drupal:
-    totalSteps: 10
+    totalSteps: 11
     url: "/walkthroughs/localgov-drupal/"
     title: "LocalGov Drupal Walkthrough"
-    duration: "33 minutes"
+    duration: "37 minutes"
     hasWalkthrough: true
     category: "cms"
     steps:
@@ -29,6 +29,9 @@ walkthroughs:
         time: "5 minutes"
       - title: "Content simplified"
         description: "Simplify text to plain English with one click"
+        time: "4 minutes"
+      - title: "PDF converted to web"
+        description: "Convert legacy PDFs to accessible web content"
         time: "4 minutes"
       - title: "DEMO banner understood"
         description: "Learn why it's there and what it means"

@@ -1,261 +1,200 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 8: Listen to Page - LocalGov Drupal Walkthrough"
-description: Discover the text-to-speech accessibility feature powered by AWS Polly
+title: "Step 8: The DEMO Banner - LocalGov Drupal Walkthrough"
+description: Understand the demonstration banner and what it means
 currentStep: 8
-totalSteps: 10
-timeEstimate: "3 minutes"
+totalSteps: 11
+timeEstimate: "2 minutes"
 scenarioId: localgov-drupal
 ---
 
 {#
-  Step 8: Listen to Page TTS Feature (Story 4.6)
-  - Accessibility feature powered by AWS Polly
-  - Available on service pages, guides, and news
-  - Language selection and playback controls
+  Step 8: Understanding the DEMO Banner (Story 2.4)
+  - Why the banner exists
+  - What it communicates to visitors
+  - Why it cannot be dismissed
 #}
 
 {% set stepNumber = 8 %}
-{% set stepTitle = "Listen to Page" %}
-{% set stepDescription = "Explore the text-to-speech feature that makes content accessible to all visitors." %}
-{% set timeEstimate = "3 minutes" %}
+{% set stepTitle = "The DEMO Banner" %}
+{% set stepDescription = "Learn about the demonstration banner and why it's an important part of the demo experience." %}
+{% set timeEstimate = "2 minutes" %}
 {% set expectedOutcomes = [
-  "You understand what Listen to Page does",
-  "You know which pages have this feature",
-  "You've seen the playback controls"
+  "You understand why the DEMO banner exists",
+  "You know what message it communicates",
+  "You understand it's part of the demo design"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<h3 class="govuk-heading-m">What is Listen to Page?</h3>
+<h3 class="govuk-heading-m">What is the DEMO banner?</h3>
 
 <p class="govuk-body">
-  LocalGov Drupal includes a <strong>text-to-speech feature</strong> that reads page content
-  aloud to visitors. This accessibility feature is powered by <strong>AWS Polly</strong>,
-  Amazon's neural text-to-speech service.
+  At the top of every page, you'll notice a distinctive yellow and black striped banner:
 </p>
 
-<div class="govuk-inset-text">
-  <p class="govuk-body govuk-!-margin-bottom-0">
-    <strong>Accessibility matters:</strong> Text-to-speech helps users with visual impairments,
-    reading difficulties, or those who prefer audio content. It's part of making council
-    services accessible to everyone.
-  </p>
+<div class="ndx-demo-banner-example">
+  <div class="ndx-demo-banner-preview">
+    <span class="ndx-demo-banner-text">DEMONSTRATION SITE - [Council Name] is a fictional council</span>
+  </div>
 </div>
 
-<h3 class="govuk-heading-m">Where to find it</h3>
-
 <p class="govuk-body">
-  The "Listen to this page" player appears at the top of content pages, including:
+  This banner appears on <strong>every page</strong> of the site, including:
 </p>
 
 <ul class="govuk-list govuk-list--bullet">
-  <li><strong>Service pages</strong> - waste collection, planning, council tax, etc.</li>
-  <li><strong>Guide pages</strong> - step-by-step instructions and how-to content</li>
-  <li><strong>News articles</strong> - council announcements and updates</li>
+  <li>The public homepage and all content pages</li>
+  <li>The Drupal admin dashboard and editing screens</li>
+  <li>Any custom pages or sections you create</li>
+</ul>
+
+<h3 class="govuk-heading-m">Why does it exist?</h3>
+
+<p class="govuk-body">
+  The DEMO banner serves several important purposes:
+</p>
+
+<div class="ndx-reasons-grid">
+  <div class="ndx-reason-card">
+    <h4 class="govuk-heading-s">Prevents confusion</h4>
+    <p class="govuk-body-s">
+      Visitors immediately understand this is a demonstration site,
+      not a real council website. This prevents any confusion about
+      the validity of information or services shown.
+    </p>
+  </div>
+
+  <div class="ndx-reason-card">
+    <h4 class="govuk-heading-s">Enables safe exploration</h4>
+    <p class="govuk-body-s">
+      Knowing the site is a demo, stakeholders feel comfortable
+      clicking around, editing content, and experimenting without
+      fear of breaking anything "real".
+    </p>
+  </div>
+
+  <div class="ndx-reason-card">
+    <h4 class="govuk-heading-s">Supports screenshots</h4>
+    <p class="govuk-body-s">
+      If you share screenshots in reports or presentations,
+      the banner clearly indicates this is a demonstration,
+      maintaining transparency with stakeholders.
+    </p>
+  </div>
+
+  <div class="ndx-reason-card">
+    <h4 class="govuk-heading-s">GOV.UK compliance</h4>
+    <p class="govuk-body-s">
+      Using government design patterns without clear demo labelling
+      could be misleading. The banner ensures compliance with
+      transparency guidelines.
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Why can't it be dismissed?</h3>
+
+<p class="govuk-body">
+  The DEMO banner is intentionally <strong>non-dismissable</strong>:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>There is no close button or "X" to remove it</li>
+  <li>It cannot be turned off in Drupal settings (by regular users)</li>
+  <li>It persists across all pages and sessions</li>
 </ul>
 
 <p class="govuk-body">
-  Navigate to any service or guide page to see the TTS player in action.
+  This is by design. It ensures that anyone viewing the site - whether
+  in a meeting, presentation, or casual browse - always knows they're
+  looking at a demonstration.
 </p>
 
-{# Screenshot: TTS player on a page #}
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>For production use:</strong> If your council decides to use
+    LocalGov Drupal in production, the DEMO banner module would simply
+    not be installed. It's only included in the NDX:Try demo environment.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">The council name</h3>
+
+<p class="govuk-body">
+  The banner displays your demonstration council's name. This council
+  is entirely fictional - no real council data is used.
+</p>
+
+<p class="govuk-body">
+  Each deployment creates a unique fictional council with its own name, region,
+  and local character using AI-powered council generation. Learn more in
+  <a href="/walkthroughs/localgov-drupal/step-3/" class="govuk-link">Step 3: Dynamic Council Generation</a>.
+</p>
+
+{# Screenshot: Homepage showing DEMO banner #}
 <figure class="ndx-screenshot govuk-!-margin-top-6">
-  <img src="/assets/images/walkthroughs/localgov-drupal/ai-features/tts-player-desktop.png"
-       alt="Listen to this page player showing language dropdown, play button, progress bar and speed controls"
-       class="ndx-screenshot__image"
-       onerror="this.parentElement.style.display='none'">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/drupal-homepage-admin-desktop.png"
+       alt="LocalGov Drupal homepage showing the distinctive yellow and black DEMO banner at the top of the page"
+       class="ndx-screenshot__image">
   <figcaption class="ndx-screenshot__caption govuk-body-s">
-    The TTS player appears at the top of content pages with full playback controls
+    The DEMO banner is visible at the top of every page, displaying the council name and a notice that this is a fictional council
   </figcaption>
 </figure>
 
-<h3 class="govuk-heading-m">Player controls</h3>
-
-<p class="govuk-body">
-  The TTS player includes intuitive controls:
-</p>
-
-<div class="ndx-tts-controls-grid">
-  <div class="ndx-tts-control-card">
-    <h4 class="govuk-heading-s">Language selection</h4>
-    <p class="govuk-body-s">
-      Choose from multiple languages including British English, Welsh, and other
-      languages. The voice changes to match native pronunciation.
-    </p>
-  </div>
-
-  <div class="ndx-tts-control-card">
-    <h4 class="govuk-heading-s">Play / Pause / Stop</h4>
-    <p class="govuk-body-s">
-      Standard audio controls let visitors start, pause, and stop playback
-      at any time. The player remembers position when paused.
-    </p>
-  </div>
-
-  <div class="ndx-tts-control-card">
-    <h4 class="govuk-heading-s">Progress bar</h4>
-    <p class="govuk-body-s">
-      Visual progress indicator shows how far through the content the reader
-      has progressed. Click to jump to any position.
-    </p>
-  </div>
-
-  <div class="ndx-tts-control-card">
-    <h4 class="govuk-heading-s">Speed control</h4>
-    <p class="govuk-body-s">
-      Adjust playback speed from 0.5x to 2x to match listening preference.
-      Slower speeds help comprehension; faster speeds save time.
-    </p>
-  </div>
-</div>
-
-<h3 class="govuk-heading-m">Try it yourself</h3>
-
-<ol class="govuk-list govuk-list--number govuk-list--spaced">
-  <li>
-    <strong>Navigate to a service page</strong>
-    <p class="govuk-body">
-      From your Drupal homepage, click on any service link (e.g., "Waste and Recycling"
-      or "Planning Applications").
-    </p>
-  </li>
-
-  <li>
-    <strong>Find the Listen to Page player</strong>
-    <p class="govuk-body">
-      Look for the "Listen to this page" section at the top of the main content area,
-      below the page title.
-    </p>
-  </li>
-
-  <li>
-    <strong>Select a language</strong>
-    <p class="govuk-body">
-      Use the dropdown to choose your preferred language. British English (en-GB)
-      is selected by default.
-    </p>
-  </li>
-
-  <li>
-    <strong>Click Play</strong>
-    <p class="govuk-body">
-      Press the green Play button to start the text-to-speech. The page content
-      will be read aloud using AWS Polly's neural voice.
-    </p>
-  </li>
-
-  <li>
-    <strong>Adjust speed (optional)</strong>
-    <p class="govuk-body">
-      Use the speed slider to adjust playback speed. Try 1.25x or 1.5x for
-      faster listening without losing clarity.
-    </p>
-  </li>
-</ol>
-
-<h3 class="govuk-heading-m">How it works</h3>
-
-<p class="govuk-body">
-  Behind the scenes, the Listen to Page feature:
-</p>
-
-<ol class="govuk-list govuk-list--number">
-  <li>Extracts the main content from the page (excluding navigation and footers)</li>
-  <li>Sends the text to AWS Polly via a secure API</li>
-  <li>Receives synthesized audio in real-time chunks</li>
-  <li>Streams the audio to the browser for playback</li>
-</ol>
-
-<div class="ndx-aws-service-card">
-  <h4 class="govuk-heading-s">AWS Polly</h4>
-  <p class="govuk-body-s">
-    AWS Polly is a cloud service that turns text into lifelike speech. It uses
-    deep learning technologies to synthesize natural-sounding human speech.
-    Neural voices provide the most human-like, conversational output.
-  </p>
-  <p class="govuk-body-s govuk-!-margin-bottom-0">
-    <a href="https://aws.amazon.com/polly/" target="_blank" rel="noopener noreferrer" class="govuk-link">
-      Learn more about AWS Polly<span class="govuk-visually-hidden"> (opens in new tab)</span>
-    </a>
-  </p>
-</div>
-
-<h3 class="govuk-heading-m">Accessibility benefits</h3>
-
-<p class="govuk-body">
-  Text-to-speech supports multiple user needs:
-</p>
-
-<table class="govuk-table">
-  <thead class="govuk-table__head">
-    <tr class="govuk-table__row">
-      <th scope="col" class="govuk-table__header">User group</th>
-      <th scope="col" class="govuk-table__header">How TTS helps</th>
-    </tr>
-  </thead>
-  <tbody class="govuk-table__body">
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Visually impaired</td>
-      <td class="govuk-table__cell">Audio alternative to reading text on screen</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Dyslexia</td>
-      <td class="govuk-table__cell">Hearing content can aid comprehension</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Low literacy</td>
-      <td class="govuk-table__cell">Access information without reading</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Multitasking</td>
-      <td class="govuk-table__cell">Listen while doing other tasks</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Non-native speakers</td>
-      <td class="govuk-table__cell">Hear pronunciation while reading</td>
-    </tr>
-  </tbody>
-</table>
-
 <style>
-  .ndx-tts-controls-grid {
+  .ndx-demo-banner-example {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border: 1px solid #b1b4b6;
+  }
+
+  .ndx-demo-banner-preview {
+    background: repeating-linear-gradient(
+      45deg,
+      #ffdd00,
+      #ffdd00 10px,
+      #0b0c0c 10px,
+      #0b0c0c 20px
+    );
+    padding: 12px 20px;
+    text-align: center;
+  }
+
+  .ndx-demo-banner-text {
+    display: inline-block;
+    background-color: #0b0c0c;
+    color: #ffffff;
+    padding: 4px 12px;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .ndx-reasons-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
     margin: 30px 0;
   }
 
-  .ndx-tts-control-card {
+  .ndx-reason-card {
     padding: 20px;
     background-color: #f8f8f8;
-    border-left: 4px solid #00703c;
-  }
-
-  .ndx-tts-control-card h4 {
-    margin-top: 0;
-    margin-bottom: 10px;
-  }
-
-  .ndx-tts-control-card p {
-    margin-bottom: 0;
-  }
-
-  .ndx-aws-service-card {
-    margin: 30px 0;
-    padding: 20px;
-    background-color: #f3f2f1;
     border-left: 4px solid #1d70b8;
   }
 
-  .ndx-aws-service-card h4 {
+  .ndx-reason-card h4 {
     margin-top: 0;
     margin-bottom: 10px;
-    color: #1d70b8;
+  }
+
+  .ndx-reason-card p {
+    margin-bottom: 0;
   }
 
   @media (max-width: 640px) {
-    .ndx-tts-controls-grid {
+    .ndx-reasons-grid {
       grid-template-columns: 1fr;
     }
   }

@@ -1,248 +1,286 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 10: Prepare for Cleanup - LocalGov Drupal Walkthrough"
-description: Know how to delete your stack when you're finished
+title: "Step 10: Translate this Page - LocalGov Drupal Walkthrough"
+description: Discover the content translation feature powered by AWS Translate
 currentStep: 10
-totalSteps: 10
+totalSteps: 11
 timeEstimate: "3 minutes"
 scenarioId: localgov-drupal
 ---
 
 {#
-  Step 10: Prepare for Cleanup (Story 2.4)
-  - Understanding auto-cleanup
-  - Manual deletion steps
-  - Cost awareness
+  Step 10: Translate this Page Feature (Story 4.7)
+  - Accessibility feature powered by AWS Translate
+  - Available on service pages, guides, and news
+  - 76+ supported languages
 #}
 
 {% set stepNumber = 10 %}
-{% set stepTitle = "Prepare for Cleanup" %}
-{% set stepDescription = "Learn how to delete your CloudFormation stack and understand the costs involved." %}
+{% set stepTitle = "Translate this Page" %}
+{% set stepDescription = "Explore the content translation feature that makes pages accessible in 76+ languages." %}
 {% set timeEstimate = "3 minutes" %}
 {% set expectedOutcomes = [
-  "You understand the auto-cleanup behaviour",
-  "You know how to manually delete the stack",
-  "You understand the costs involved"
+  "You understand what Translate this Page does",
+  "You know which pages have this feature",
+  "You've tried translating content to another language"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<h3 class="govuk-heading-m">Automatic cleanup</h3>
+<h3 class="govuk-heading-m">What is Translate this Page?</h3>
 
 <p class="govuk-body">
-  Good news: your deployment is configured to <strong>auto-delete after 2 hours</strong>.
-  This means:
+  LocalGov Drupal includes a <strong>real-time translation feature</strong> that converts page
+  content into the visitor's preferred language. This accessibility feature is powered by
+  <a href="https://aws.amazon.com/translate/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS Translate<span class="govuk-visually-hidden"> (opens in new tab)</span></a>,
+  Amazon's neural machine translation service.
 </p>
-
-<ul class="govuk-list govuk-list--bullet">
-  <li>You don't need to remember to clean up</li>
-  <li>No surprise AWS bills if you forget about it</li>
-  <li>Resources are automatically removed after the demo period</li>
-</ul>
-
-<div class="govuk-inset-text">
-  <p class="govuk-body">
-    <strong>When does the 2 hours start?</strong> The timer begins when the
-    CloudFormation stack reaches CREATE_COMPLETE status. So if deployment
-    took 15 minutes, you have roughly 1 hour 45 minutes from when you
-    first logged in.
-  </p>
-</div>
 
 <div class="govuk-inset-text">
   <p class="govuk-body govuk-!-margin-bottom-0">
-    <strong>Using NDX:Try?</strong> If you accessed this scenario through NDX:Try,
-    your stack will be <strong>automatically deleted at the end of your session</strong>.
-    You don't need to do anything - just close the browser when you're finished.
+    <strong>Language accessibility matters:</strong> Translation helps residents who speak
+    English as a second language access council services. It supports community engagement
+    across diverse populations.
   </p>
 </div>
 
-<h3 class="govuk-heading-m">Manual cleanup</h3>
+<h3 class="govuk-heading-m">Where to find it</h3>
 
 <p class="govuk-body">
-  If you want to delete the stack early (to stop costs immediately),
-  follow these steps:
+  The "Translate this Page" widget appears at the top of content pages, including:
 </p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Service pages</strong> - waste collection, planning, council tax, etc.</li>
+  <li><strong>Guide pages</strong> - step-by-step instructions and how-to content</li>
+  <li><strong>News articles</strong> - council announcements and updates</li>
+</ul>
+
+<p class="govuk-body">
+  Navigate to any service, guide, or news page to see the translation widget in action.
+</p>
+
+{# Screenshot: Translation widget on a page #}
+<figure class="ndx-screenshot govuk-!-margin-top-6">
+  <img src="/assets/images/walkthroughs/localgov-drupal/ai-features/translation-widget-desktop.png"
+       alt="Translate this Page widget showing a language dropdown with common languages like Welsh, Spanish, and Polish, plus a Translate button"
+       class="ndx-screenshot__image"
+       onerror="this.parentElement.style.display='none'">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The translation widget appears at the top of content pages with a language selector
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">Supported languages</h3>
+
+<p class="govuk-body">
+  The translation feature supports <strong>76+ languages</strong>, including:
+</p>
+
+<div class="ndx-language-grid">
+  <div class="ndx-language-card">
+    <h4 class="govuk-heading-s">UK Priority Languages</h4>
+    <ul class="govuk-list govuk-body-s">
+      <li>Welsh (Cymraeg)</li>
+      <li>Scottish Gaelic (Gàidhlig)</li>
+      <li>Irish (Gaeilge)</li>
+    </ul>
+  </div>
+
+  <div class="ndx-language-card">
+    <h4 class="govuk-heading-s">European Languages</h4>
+    <ul class="govuk-list govuk-body-s">
+      <li>Polish, Romanian</li>
+      <li>French, German, Spanish</li>
+      <li>Portuguese, Italian</li>
+    </ul>
+  </div>
+
+  <div class="ndx-language-card">
+    <h4 class="govuk-heading-s">South Asian Languages</h4>
+    <ul class="govuk-list govuk-body-s">
+      <li>Urdu, Punjabi, Bengali</li>
+      <li>Gujarati, Hindi, Tamil</li>
+    </ul>
+  </div>
+
+  <div class="ndx-language-card">
+    <h4 class="govuk-heading-s">Other Languages</h4>
+    <ul class="govuk-list govuk-body-s">
+      <li>Arabic, Chinese (Simplified)</li>
+      <li>Japanese, Korean</li>
+      <li>And 60+ more...</li>
+    </ul>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Try it yourself</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>
-    <strong>Open CloudFormation console</strong>
+    <strong>Navigate to a content page</strong>
     <p class="govuk-body">
-      Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console in us-east-1<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+      From your Drupal site, go to any news article, service page, or guide.
     </p>
   </li>
 
   <li>
-    <strong>Find your stack</strong>
+    <strong>Find the Translate this Page widget</strong>
     <p class="govuk-body">
-      Look for <code>LocalGovDrupalStack</code>
+      Look for the "Translate this Page" section at the top of the main content area,
+      near the page title.
     </p>
   </li>
 
   <li>
-    <strong>Select the stack</strong>
+    <strong>Select a language</strong>
     <p class="govuk-body">
-      Click the checkbox next to your stack name
+      Use the dropdown to choose your target language. Common UK languages appear
+      first, followed by all available languages.
     </p>
   </li>
 
   <li>
-    <strong>Click "Delete"</strong>
+    <strong>Click Translate</strong>
     <p class="govuk-body">
-      Click the "Delete" button in the top right
+      Press the "Translate" button. The page content will be replaced with the
+      translated version within a few seconds.
     </p>
   </li>
 
   <li>
-    <strong>Confirm deletion</strong>
+    <strong>View the translated page</strong>
     <p class="govuk-body">
-      Click "Delete" in the confirmation dialog
-    </p>
-  </li>
-
-  <li>
-    <strong>Wait for deletion to complete</strong>
-    <p class="govuk-body">
-      This typically takes 5-10 minutes. The status will change to DELETE_IN_PROGRESS,
-      then the stack will disappear from the list.
+      A banner appears confirming the language. You can click "Show original"
+      at any time to revert to English.
     </p>
   </li>
 </ol>
 
-{# Screenshot: CloudFormation console showing stack selected with Delete button #}
-<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
-  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/cloudformation-stack-selected-desktop.png"
-       alt="AWS CloudFormation console showing the LocalGovDrupalStack selected with radio button, and the Delete button enabled in the toolbar"
-       class="ndx-screenshot__image">
+{# Screenshot: Translated page with banner #}
+<figure class="ndx-screenshot govuk-!-margin-top-6">
+  <img src="/assets/images/walkthroughs/localgov-drupal/ai-features/translation-page-desktop.png"
+       alt="Page showing translated content in Spanish with a notification banner indicating the page has been translated, and a Show original button to revert"
+       class="ndx-screenshot__image"
+       onerror="this.parentElement.style.display='none'">
   <figcaption class="ndx-screenshot__caption govuk-body-s">
-    Select your stack using the radio button to enable the Delete button
+    After translation, a banner shows the language and provides a button to revert to English
   </figcaption>
 </figure>
 
-{# Screenshot: Delete confirmation dialog #}
-<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-6">
-  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/cloudformation-delete-confirmation-desktop.png"
-       alt="CloudFormation delete confirmation dialog asking 'Delete stack LocalGovDrupalStack permanently?' with Cancel and Delete buttons"
-       class="ndx-screenshot__image">
-  <figcaption class="ndx-screenshot__caption govuk-body-s">
-    The confirmation dialog warns that deletion is permanent - click Delete to confirm
-  </figcaption>
-</figure>
-
-<h3 class="govuk-heading-m">What gets deleted?</h3>
+<h3 class="govuk-heading-m">How it works</h3>
 
 <p class="govuk-body">
-  When the stack is deleted, <strong>all resources are removed</strong>:
+  Behind the scenes, the Translate this Page feature:
+</p>
+
+<ol class="govuk-list govuk-list--number">
+  <li>Extracts the main content from the page (preserving HTML structure)</li>
+  <li>Automatically detects the source language (usually English)</li>
+  <li>Sends the content to AWS Translate via a secure API</li>
+  <li>Receives the translated content and replaces the page text</li>
+  <li>Caches translations for faster repeat visits</li>
+</ol>
+
+<div class="ndx-aws-service-card">
+  <h4 class="govuk-heading-s">AWS Translate</h4>
+  <p class="govuk-body-s">
+    AWS Translate is a neural machine translation service that delivers fast,
+    high-quality, affordable language translation. It uses deep learning models
+    to continuously improve translation quality.
+  </p>
+  <p class="govuk-body-s govuk-!-margin-bottom-0">
+    <a href="https://aws.amazon.com/translate/" target="_blank" rel="noopener noreferrer" class="govuk-link">
+      Learn more about AWS Translate<span class="govuk-visually-hidden"> (opens in new tab)</span>
+    </a>
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Accessibility benefits</h3>
+
+<p class="govuk-body">
+  Translation supports multiple user needs:
 </p>
 
 <table class="govuk-table">
   <thead class="govuk-table__head">
     <tr class="govuk-table__row">
-      <th scope="col" class="govuk-table__header">Resource</th>
-      <th scope="col" class="govuk-table__header">What happens</th>
+      <th scope="col" class="govuk-table__header">User group</th>
+      <th scope="col" class="govuk-table__header">How translation helps</th>
     </tr>
   </thead>
   <tbody class="govuk-table__body">
     <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Aurora database</td>
-      <td class="govuk-table__cell">Deleted - all data lost</td>
+      <td class="govuk-table__cell">Non-English speakers</td>
+      <td class="govuk-table__cell">Access council services in their native language</td>
     </tr>
     <tr class="govuk-table__row">
-      <td class="govuk-table__cell">EFS file storage</td>
-      <td class="govuk-table__cell">Deleted - all uploads lost</td>
+      <td class="govuk-table__cell">Welsh speakers</td>
+      <td class="govuk-table__cell">Read content in Welsh as required by Welsh Language Act</td>
     </tr>
     <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Fargate service</td>
-      <td class="govuk-table__cell">Stopped and removed</td>
+      <td class="govuk-table__cell">New residents</td>
+      <td class="govuk-table__cell">Understand local services while learning English</td>
     </tr>
     <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Load balancer</td>
-      <td class="govuk-table__cell">Deleted - URL no longer works</td>
+      <td class="govuk-table__cell">Family helpers</td>
+      <td class="govuk-table__cell">Assist relatives who prefer another language</td>
     </tr>
     <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Security groups</td>
-      <td class="govuk-table__cell">Deleted</td>
+      <td class="govuk-table__cell">Tourists/visitors</td>
+      <td class="govuk-table__cell">Access local information in familiar language</td>
     </tr>
   </tbody>
 </table>
 
-<div class="govuk-warning-text">
-  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-  <strong class="govuk-warning-text__text">
-    <span class="govuk-visually-hidden">Warning</span>
-    Deletion is permanent. Any content you created or edited will be lost.
-    Take screenshots or notes before deleting if you want to remember
-    anything from your session.
-  </strong>
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Remember your choice:</strong> Users can tick "Remember my choice" to have
+    pages automatically translate to their preferred language on future visits.
+  </p>
 </div>
-
-<h3 class="govuk-heading-m">Understanding costs</h3>
-
-<p class="govuk-body">
-  This deployment runs on the <strong>AWS Innovation Sandbox</strong>, which
-  means costs are covered by your organisation's agreement with NDX.
-</p>
-
-<div class="ndx-cost-breakdown">
-  <h4 class="govuk-heading-s">Typical cost breakdown (for reference)</h4>
-  <table class="govuk-table">
-    <thead class="govuk-table__head">
-      <tr class="govuk-table__row">
-        <th scope="col" class="govuk-table__header">Service</th>
-        <th scope="col" class="govuk-table__header">Approximate cost</th>
-      </tr>
-    </thead>
-    <tbody class="govuk-table__body">
-      <tr class="govuk-table__row">
-        <td class="govuk-table__cell">Aurora Serverless (2 hours)</td>
-        <td class="govuk-table__cell">~$0.50</td>
-      </tr>
-      <tr class="govuk-table__row">
-        <td class="govuk-table__cell">Fargate (2 hours)</td>
-        <td class="govuk-table__cell">~$0.30</td>
-      </tr>
-      <tr class="govuk-table__row">
-        <td class="govuk-table__cell">EFS storage</td>
-        <td class="govuk-table__cell">~$0.10</td>
-      </tr>
-      <tr class="govuk-table__row">
-        <td class="govuk-table__cell">Load Balancer (2 hours)</td>
-        <td class="govuk-table__cell">~$0.05</td>
-      </tr>
-      <tr class="govuk-table__row">
-        <td class="govuk-table__cell"><strong>Total (2 hour demo)</strong></td>
-        <td class="govuk-table__cell"><strong>~$1.00</strong></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<p class="govuk-body">
-  This is significantly less than the cost of traditional software demos
-  or vendor presentations, and you get hands-on experience with the actual platform.
-</p>
 
 <style>
-  code {
-    background-color: #f3f2f1;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: monospace;
-    font-size: 16px;
+  .ndx-language-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
   }
 
-  .ndx-cost-breakdown {
+  .ndx-language-card {
+    padding: 15px 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-language-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-language-card ul {
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style-position: inside;
+  }
+
+  .ndx-aws-service-card {
     margin: 30px 0;
     padding: 20px;
-    background-color: #f8f8f8;
+    background-color: #f3f2f1;
     border-left: 4px solid #1d70b8;
   }
 
-  .ndx-cost-breakdown h4 {
+  .ndx-aws-service-card h4 {
     margin-top: 0;
+    margin-bottom: 10px;
+    color: #1d70b8;
   }
 
-  .ndx-cost-breakdown table {
-    margin-bottom: 0;
+  @media (max-width: 640px) {
+    .ndx-language-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
