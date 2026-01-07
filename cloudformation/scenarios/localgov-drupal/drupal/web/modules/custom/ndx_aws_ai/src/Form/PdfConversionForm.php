@@ -112,8 +112,8 @@ class PdfConversionForm extends FormBase {
       ]),
       '#upload_location' => 'public://pdf_conversion/',
       '#upload_validators' => [
-        'file_validate_extensions' => ['pdf'],
-        'file_validate_size' => [self::MAX_UPLOAD_SIZE_MB * 1024 * 1024],
+        'FileExtension' => ['extensions' => 'pdf'],
+        'FileSizeLimit' => ['fileLimit' => self::MAX_UPLOAD_SIZE_MB * 1024 * 1024],
       ],
       '#required' => TRUE,
     ];
