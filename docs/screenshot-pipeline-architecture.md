@@ -1,5 +1,7 @@
 # Screenshot Capture Pipeline Architecture
 
+> **⚠️ DEPRECATED**: This document describes an architecture that was never fully implemented. The referenced modules (`src/lib/visual-regression.ts`, `src/lib/aws-federation.ts`, `src/lib/diff-report.ts`) have been deleted. Screenshots are now captured using local Playwright tests. See `tests/` for current implementation.
+
 ## Overview
 
 The Screenshot Capture Pipeline automates the process of capturing AWS Console screenshots for all 6 reference implementation scenarios.

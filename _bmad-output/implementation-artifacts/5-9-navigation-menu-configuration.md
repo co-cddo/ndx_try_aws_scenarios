@@ -1,6 +1,6 @@
 # Story 5.9: Navigation Menu Configuration
 
-Status: review
+Status: done
 
 ## Story
 
