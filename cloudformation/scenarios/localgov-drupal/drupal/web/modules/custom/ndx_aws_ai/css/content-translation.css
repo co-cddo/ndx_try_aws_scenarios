@@ -60,13 +60,17 @@
 }
 
 .translation-widget__loading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   margin-top: 15px;
   padding: 10px;
   background: #fff;
   border: 1px solid #b1b4b6;
+}
+
+/* Only show as flex when not hidden - display: flex would override [hidden] attribute */
+.translation-widget__loading:not([hidden]) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .translation-loading-spinner {
