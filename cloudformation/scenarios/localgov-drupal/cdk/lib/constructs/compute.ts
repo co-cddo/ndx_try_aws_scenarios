@@ -181,9 +181,15 @@ export class ComputeConstruct extends Construct {
     );
 
     // Translate permissions for content translation
+    // Note: comprehend:DetectDominantLanguage is required when using
+    // SourceLanguageCode='auto' with TranslateText API
     taskRole.addToPolicy(
       new iam.PolicyStatement({
-        actions: ['translate:TranslateText', 'translate:ListLanguages'],
+        actions: [
+          'translate:TranslateText',
+          'translate:ListLanguages',
+          'comprehend:DetectDominantLanguage',
+        ],
         resources: ['*'],
       }),
     );
