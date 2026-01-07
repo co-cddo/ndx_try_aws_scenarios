@@ -50,6 +50,36 @@ final class TranslationResult {
   }
 
   /**
+   * Get the translated text (alias for controller compatibility).
+   *
+   * @return string
+   *   The translated text.
+   */
+  public function getTranslatedText(): string {
+    return $this->translatedText;
+  }
+
+  /**
+   * Get the source language code.
+   *
+   * @return string
+   *   The source language code.
+   */
+  public function getSourceLanguage(): string {
+    return $this->sourceLanguage;
+  }
+
+  /**
+   * Get the target language code.
+   *
+   * @return string
+   *   The target language code.
+   */
+  public function getTargetLanguage(): string {
+    return $this->targetLanguage;
+  }
+
+  /**
    * Check if language was auto-detected.
    *
    * @return bool
