@@ -1,8 +1,0 @@
-# LocalGov Drupal Screenshots
-# Captured by tests/drupal-screenshots.spec.ts (Story 2.7)
-#
-# To capture screenshots from a deployed Drupal instance:
-#   DRUPAL_URL=https://your-alb-url.amazonaws.com \
-#   DRUPAL_USER=admin \
-#   DRUPAL_PASS=your-password \
-#   npm run test:drupal-screenshots
