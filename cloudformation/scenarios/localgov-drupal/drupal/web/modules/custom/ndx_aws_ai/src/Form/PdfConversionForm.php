@@ -103,6 +103,25 @@ class PdfConversionForm extends FormBase {
       ],
     ];
 
+    // Constraints notice.
+    $form['constraints'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Requirements and limitations'),
+      '#open' => TRUE,
+      '#attributes' => ['class' => ['form-constraints']],
+      'list' => [
+        '#theme' => 'item_list',
+        '#items' => [
+          $this->t('<strong>Single-page PDFs only</strong> - Multi-page PDFs are not currently supported. Please split multi-page documents before uploading.'),
+          $this->t('<strong>Maximum file size: @size MB</strong> - Larger files will be rejected.', [
+            '@size' => self::MAX_UPLOAD_SIZE_MB,
+          ]),
+          $this->t('<strong>Text-based PDFs work best</strong> - Scanned documents or image-heavy PDFs may have reduced accuracy.'),
+          $this->t('<strong>Tables are extracted separately</strong> - Complex table layouts may require manual adjustment after conversion.'),
+        ],
+      ],
+    ];
+
     // File upload.
     $form['pdf_file'] = [
       '#type' => 'managed_file',
