@@ -435,6 +435,16 @@ class TextractService implements TextractServiceInterface {
       catch (AwsException $e) {
         $lastException = $e;
         $errorCode = $e->getAwsErrorCode() ?? 'UnknownError';
+        $errorMessage = $e->getAwsErrorMessage() ?? '';
+
+        // Check for multi-page PDF error (sync API only supports single-page).
+        if ($errorCode === 'UnsupportedDocumentException' &&
+            stripos($errorMessage, 'unsupported document format') !== FALSE) {
+          throw new \InvalidArgumentException(
+            'This PDF has multiple pages. The synchronous API only supports single-page PDFs. ' .
+            'Please upload a single-page PDF or use a shorter document.'
+          );
+        }
 
         if ($this->rateLimiter->isRetryable($errorCode) && $attempt < $this->rateLimiter->getMaxRetries() - 1) {
           $this->errorHandler->logRetry('Textract', 'analyzeDocument', $attempt + 1, $errorCode);
