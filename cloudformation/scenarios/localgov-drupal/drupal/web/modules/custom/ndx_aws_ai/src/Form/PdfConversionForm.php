@@ -111,9 +111,10 @@ class PdfConversionForm extends FormBase {
         '@size' => self::MAX_UPLOAD_SIZE_MB,
       ]),
       '#upload_location' => 'public://pdf_conversion/',
+      // Temporarily using minimal validators for debugging.
+      // Note: Drupal 10 uses constraint-based validators.
       '#upload_validators' => [
         'FileExtension' => ['extensions' => 'pdf'],
-        'FileSizeLimit' => ['fileLimit' => self::MAX_UPLOAD_SIZE_MB * 1024 * 1024],
       ],
       '#required' => TRUE,
     ];
