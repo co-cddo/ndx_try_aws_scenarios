@@ -241,31 +241,16 @@ class PdfConversionController extends ControllerBase {
       // Create the page node.
       $nodeStorage = $this->entityTypeManager()->getStorage('node');
 
+      // Use localgov_services_page content type (LocalGov Drupal doesn't have 'page').
       $node = $nodeStorage->create([
-        'type' => 'page',
+        'type' => 'localgov_services_page',
         'title' => $title,
         'body' => [
           'value' => $result['html'],
           'format' => 'full_html',
         ],
         'status' => 0, // Unpublished (draft).
-        'field_pdf_converted' => TRUE,
       ]);
-
-      // Attach original PDF if we have the file ID.
-      if (preg_match('/^pdf_(\d+)_/', $jobId, $matches)) {
-        $fileId = (int) $matches[1];
-        $file = $this->entityTypeManager()->getStorage('file')->load($fileId);
-        if ($file) {
-          // If the node type has a file field, attach it.
-          if ($node->hasField('field_attachments')) {
-            $node->set('field_attachments', [
-              'target_id' => $fileId,
-              'description' => 'Original PDF document',
-            ]);
-          }
-        }
-      }
 
       $node->save();
 
