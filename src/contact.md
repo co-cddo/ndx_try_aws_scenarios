@@ -58,6 +58,12 @@ Want to learn more about how NDX:Try can help your council?
 
 Visit the [LGA AI Hub](https://www.local.gov.uk/our-support/efficiency-and-productivity/artificial-intelligence) or email: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 
+## Community
+
+Join the conversation on the cross-government Slack:
+
+- <a href="https://ukgovernmentdigital.slack.com/archives/C075C8GTP7D" class="govuk-link" target="_blank" rel="noopener noreferrer">#ndx-try-aws-scenarios<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+
 ## Follow our progress
 
 This is an open source project. You can:

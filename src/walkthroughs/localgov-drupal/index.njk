@@ -3,7 +3,7 @@ layout: layouts/walkthrough.njk
 title: LocalGov Drupal Walkthrough
 description: Step-by-step guide to exploring your deployed LocalGov Drupal CMS with AI features
 currentStep: 0
-totalSteps: 5
+totalSteps: 8
 scenarioId: localgov-drupal
 ---
 
@@ -16,10 +16,13 @@ scenarioId: localgov-drupal
 
 <h1 class="govuk-heading-xl">Explore LocalGov Drupal with AI</h1>
 
-{# Value proposition - 15 minutes to understand the platform #}
+{# Get walkthrough data for dynamic content #}
+{% set walkthroughData = walkthroughs.walkthroughs[scenarioId] %}
+
+{# Value proposition - using duration from YAML #}
 <div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
   <h2 class="govuk-panel__title">
-    15 minutes to explore a modern council CMS
+    {{ walkthroughData.duration }} to explore a modern council CMS
   </h2>
   <div class="govuk-panel__body">
     No deployment needed. Follow along with your deployed Drupal site or view the screenshots.
@@ -39,25 +42,15 @@ scenarioId: localgov-drupal
 <h2 class="govuk-heading-l">What you'll do</h2>
 
 <p class="govuk-body-l">
-  In this 15-minute walkthrough, you'll:
+  In this {{ walkthroughData.duration }} walkthrough, you'll:
 </p>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
+  {% for step in walkthroughData.steps %}
   <li>
-    <strong>Log in to Drupal</strong> - Get your credentials and access the admin dashboard (3 minutes)
+    <strong>{{ step.title }}</strong>{% if step.description %} - {{ step.description }}{% endif %}{% if step.time %} ({{ step.time }}){% endif %}
   </li>
-  <li>
-    <strong>Explore the homepage</strong> - Understand LocalGov Drupal's structure and navigation (3 minutes)
-  </li>
-  <li>
-    <strong>Edit some content</strong> - Make changes to a sample service page (4 minutes)
-  </li>
-  <li>
-    <strong>Understand the DEMO banner</strong> - Learn why it's there and what it means (2 minutes)
-  </li>
-  <li>
-    <strong>Prepare for cleanup</strong> - Know how to delete your stack when finished (3 minutes)
-  </li>
+  {% endfor %}
 </ol>
 
 {# Prerequisites #}
@@ -74,7 +67,7 @@ scenarioId: localgov-drupal
 
   <p class="govuk-body">
     <a href="/scenarios/localgov-drupal/" class="govuk-link">Deploy the LocalGov Drupal scenario</a> if you haven't already.
-    Deployment takes 10-15 minutes.
+    Deployment takes 35-40 minutes.
   </p>
 
   <h3 class="govuk-heading-s">You'll need</h3>
@@ -142,34 +135,6 @@ scenarioId: localgov-drupal
   </div>
 </div>
 
-{# AI Features Guides (Stories 3.8, 5.8) #}
-<div class="ndx-ai-guide-promo govuk-!-margin-top-6">
-  <h2 class="govuk-heading-m">Learn about AI features</h2>
-  <p class="govuk-body">
-    This scenario includes AI-powered features. Learn how to use them effectively:
-  </p>
-  <ul class="govuk-list govuk-!-margin-bottom-0">
-    <li>
-      <a href="/walkthroughs/localgov-drupal/ai-content-editing/" class="govuk-link govuk-link--no-visited-state">
-        AI Content Editing Guide
-      </a>
-      <span class="govuk-body-s govuk-!-margin-left-2">(10 minutes)</span>
-      <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">
-        Use AI to write content and simplify text to plain English
-      </p>
-    </li>
-    <li class="govuk-!-margin-top-3">
-      <a href="/walkthroughs/localgov-drupal/dynamic-council/" class="govuk-link govuk-link--no-visited-state">
-        Dynamic Council Generation Guide
-      </a>
-      <span class="govuk-body-s govuk-!-margin-left-2">(8 minutes)</span>
-      <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">
-        Understand how each deployment creates a unique fictional council
-      </p>
-    </li>
-  </ul>
-</div>
-
 <div class="govuk-!-margin-top-8">
   <a href="/walkthroughs/localgov-drupal/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
     Start walkthrough
@@ -179,7 +144,7 @@ scenarioId: localgov-drupal
   </a>
 
   <p class="govuk-body-s govuk-!-margin-top-2">
-    Takes approximately 15 minutes
+    Takes approximately {{ walkthroughData.duration }}
   </p>
 </div>
 
@@ -217,16 +182,6 @@ scenarioId: localgov-drupal
 
   .ndx-content-type-card p {
     margin-bottom: 0;
-  }
-
-  .ndx-ai-guide-promo {
-    padding: 20px;
-    background-color: #f0f4f9;
-    border-left: 4px solid #1d70b8;
-  }
-
-  .ndx-ai-guide-promo h2 {
-    margin-top: 0;
   }
 
   @media (max-width: 640px) {

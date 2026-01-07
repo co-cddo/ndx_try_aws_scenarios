@@ -24,8 +24,10 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* Ensure all body text also never appears italic unless explicitly set */
+/* Also set font-family explicitly as GOV.UK plugin setting may not apply */
 body {
   font-synthesis: none;
+  font-family: "GDS Transport", arial, sans-serif;
 }
 
 /* ==========================================================================
@@ -3926,5 +3928,38 @@ body.ndx-mobile-nav-open {
   .ndx-open-btn {
     flex: 1;
     justify-content: center;
+  }
+}
+
+/* ==========================================================================
+   Screenshot Styles
+   Styles for walkthrough documentation screenshots
+   ========================================================================== */
+
+.ndx-screenshot {
+  margin: 20px 0;
+  padding: 0;
+  border: 1px solid #b1b4b6;
+  background-color: #f8f8f8;
+}
+
+.ndx-screenshot__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-bottom: 1px solid #b1b4b6;
+}
+
+.ndx-screenshot__caption {
+  padding: 10px 15px;
+  margin: 0;
+  color: #505a5f;
+  background-color: #f3f2f1;
+}
+
+/* Responsive screenshot sizing */
+@media (min-width: 641px) {
+  .ndx-screenshot {
+    max-width: 800px;
   }
 }

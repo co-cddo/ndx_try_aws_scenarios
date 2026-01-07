@@ -1,0 +1,218 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 6: Simplify to Plain English - LocalGov Drupal Walkthrough"
+description: Make content more accessible using AI-powered text simplification
+currentStep: 6
+totalSteps: 8
+timeEstimate: "4 minutes"
+scenarioId: localgov-drupal
+---
+
+{#
+  Step 6: Simplify to Plain English
+  - Overview of simplification feature
+  - Step-by-step instructions (one-click simplify)
+  - Before/after examples
+  - Accessibility benefits
+#}
+
+{% set stepNumber = 6 %}
+{% set stepTitle = "Simplify to Plain English" %}
+{% set stepDescription = "Make content more accessible by simplifying text to plain English with one click." %}
+{% set timeEstimate = "4 minutes" %}
+{% set expectedOutcomes = [
+  "You've simplified content using the Simplify button",
+  "You understand how one-click simplification works",
+  "You know the accessibility benefits of plain English"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">What is the Simplify feature?</h3>
+
+<p class="govuk-body">
+  The Simplify feature uses <strong><a href="https://aws.amazon.com/ai/generative-ai/nova/" class="govuk-link" target="_blank" rel="noopener noreferrer">Amazon Nova Lite<span class="govuk-visually-hidden"> (opens in new tab)</span></a></strong> to rewrite content in plain English. It helps make council communications accessible to all residents, regardless of reading ability.
+</p>
+
+<div class="ndx-feature-highlight">
+  <h4 class="govuk-heading-s">One-click simplification</h4>
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    Simply click the <strong>Simplify</strong> button and the entire content body is automatically rewritten to plain English. No need to select text first.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">How to simplify content</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open a content page for editing</strong>
+    <p class="govuk-body">
+      Navigate to Content &gt; find a page with complex text &gt; click Edit
+    </p>
+  </li>
+  <li>
+    <strong>Click "Simplify" in the AI Assistant bar</strong>
+    <p class="govuk-body">
+      The Simplify button appears above the content editor, next to Generate Content
+    </p>
+  </li>
+  <li>
+    <strong>Wait for the AI to process</strong>
+    <p class="govuk-body">
+      <a href="https://aws.amazon.com/ai/generative-ai/nova/" class="govuk-link" target="_blank" rel="noopener noreferrer">Amazon Nova Lite<span class="govuk-visually-hidden"> (opens in new tab)</span></a> analyses the entire body content and rewrites it in plain English
+    </p>
+  </li>
+  <li>
+    <strong>Review the simplified content</strong>
+    <p class="govuk-body">
+      The content is automatically replaced with the simplified version. Check that the meaning is preserved.
+    </p>
+  </li>
+  <li>
+    <strong>Save or undo</strong>
+    <p class="govuk-body">
+      If you're happy, save the page. If not, use Ctrl+Z (or Cmd+Z on Mac) to undo.
+    </p>
+  </li>
+</ol>
+
+{# Screenshot: AI Assistant bar with Simplify button #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/drupal-ai-assistant-bar-desktop.png"
+       alt="Drupal content editor showing the AI Assistant bar with Generate Content and Simplify buttons"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    Click the Simplify button to automatically rewrite the entire content body in plain English
+  </figcaption>
+</figure>
+
+{# Screenshot: Simplify success #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/drupal-ai-simplify-success-desktop.png"
+       alt="Drupal editor showing content that has been simplified to plain English"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The content is automatically replaced with the simplified version
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">Why plain English matters</h3>
+
+<p class="govuk-body">
+  GOV.UK recommends writing at a reading age of 9 to ensure content is accessible to everyone. Plain English:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Reaches more people</strong> - 1 in 6 adults in the UK have poor literacy skills</li>
+  <li><strong>Saves time</strong> - Clear content means fewer phone calls and emails</li>
+  <li><strong>Builds trust</strong> - Residents appreciate straightforward communication</li>
+  <li><strong>Improves accessibility</strong> - Helps people with cognitive disabilities, non-native speakers, and those reading on mobile</li>
+</ul>
+
+<h3 class="govuk-heading-m">Before and after example</h3>
+
+<div class="ndx-comparison-grid">
+  <div class="ndx-comparison-card ndx-comparison-card--before">
+    <h4 class="govuk-heading-s">Before simplification</h4>
+    <p class="govuk-body-s">
+      "Pursuant to the regulations set forth in the Town and Country Planning Act,
+      applications for planning permission must be submitted in accordance with
+      the prescribed procedures. Failure to comply with the aforementioned
+      requirements may result in the invalidation of your submission."
+    </p>
+  </div>
+  <div class="ndx-comparison-card ndx-comparison-card--after">
+    <h4 class="govuk-heading-s">After simplification</h4>
+    <p class="govuk-body-s">
+      "You need to follow the rules when you apply for planning permission.
+      If you don't follow these rules, we may not be able to process your application."
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Common use cases</h3>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Content type</th>
+      <th scope="col" class="govuk-table__header">Why simplify?</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Legal notices</td>
+      <td class="govuk-table__cell">Make legal requirements understandable to all residents</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Technical guidance</td>
+      <td class="govuk-table__cell">Explain complex processes in plain terms</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Policy documents</td>
+      <td class="govuk-table__cell">Help residents understand their rights and responsibilities</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Service descriptions</td>
+      <td class="govuk-table__cell">Ensure everyone knows what services are available</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Tip:</strong> Always review simplified content to ensure accuracy is maintained.
+    The AI aims to preserve meaning, but technical terms or specific requirements
+    should be checked before publishing.
+  </p>
+</div>
+
+<style>
+  .ndx-feature-highlight {
+    padding: 20px;
+    background-color: #f0f9f5;
+    border-left: 4px solid #00703c;
+    margin: 20px 0;
+  }
+
+  .ndx-feature-highlight h4 {
+    margin-top: 0;
+  }
+
+  .ndx-comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-comparison-card {
+    padding: 20px;
+    border: 2px solid;
+  }
+
+  .ndx-comparison-card h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-comparison-card p {
+    margin-bottom: 0;
+  }
+
+  .ndx-comparison-card--before {
+    border-color: #b1b4b6;
+    background-color: #f3f2f1;
+  }
+
+  .ndx-comparison-card--after {
+    border-color: #00703c;
+    background-color: #f0f9f5;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-comparison-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

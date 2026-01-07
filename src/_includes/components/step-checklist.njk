@@ -34,7 +34,11 @@
       </a>
       {% elif isCurrent %}
       <span class="ndx-step-checklist__icon ndx-step-checklist__icon--current" aria-hidden="true">
-        <span class="ndx-step-checklist__number">Start</span>
+        <span class="ndx-step-checklist__number">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M2 1L10 6L2 11V1Z" fill="currentColor"/>
+          </svg>
+        </span>
       </span>
       <span class="ndx-step-checklist__link ndx-step-checklist__link--current" aria-current="step">
         Introduction
@@ -42,7 +46,11 @@
       </span>
       {% else %}
       <span class="ndx-step-checklist__icon ndx-step-checklist__icon--upcoming" aria-hidden="true">
-        <span class="ndx-step-checklist__number">Start</span>
+        <span class="ndx-step-checklist__number">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M2 1L10 6L2 11V1Z" fill="currentColor"/>
+          </svg>
+        </span>
       </span>
       <a href="/walkthroughs/{{ currentScenarioId }}/" class="ndx-step-checklist__link ndx-step-checklist__link--upcoming">
         Introduction
@@ -55,7 +63,8 @@
     {% set isCompleted = currentStep > stepNum %}
     {% set isCurrent = currentStep == stepNum %}
     {% set stepTitle = stepTitles[stepNum - 1].title if stepTitles[stepNum - 1] else "Step " ~ stepNum %}
-    <li class="ndx-step-checklist__item{% if isCompleted %} ndx-step-checklist__item--completed{% endif %}{% if isCurrent %} ndx-step-checklist__item--current{% endif %}"
+    {% set isOptional = stepTitles[stepNum - 1].optional if stepTitles[stepNum - 1] else false %}
+    <li class="ndx-step-checklist__item{% if isCompleted %} ndx-step-checklist__item--completed{% endif %}{% if isCurrent %} ndx-step-checklist__item--current{% endif %}{% if isOptional %} ndx-step-checklist__item--optional{% endif %}"
         data-section-id="step-{{ stepNum }}">
       {% if isCompleted %}
       <span class="ndx-step-checklist__icon ndx-step-checklist__icon--completed" aria-hidden="true">
@@ -66,6 +75,7 @@
       </span>
       <a href="/walkthroughs/{{ currentScenarioId }}/step-{{ stepNum }}/" class="ndx-step-checklist__link ndx-step-checklist__link--completed">
         {{ stepTitle }}
+        {% if isOptional %}<span class="ndx-step-checklist__optional-badge">Optional</span>{% endif %}
         <span class="govuk-visually-hidden">(completed)</span>
       </a>
       {% elif isCurrent %}
@@ -74,6 +84,7 @@
       </span>
       <span class="ndx-step-checklist__link ndx-step-checklist__link--current" aria-current="step">
         {{ stepTitle }}
+        {% if isOptional %}<span class="ndx-step-checklist__optional-badge">Optional</span>{% endif %}
         <span class="govuk-visually-hidden">(current step)</span>
       </span>
       {% else %}
@@ -82,6 +93,7 @@
       </span>
       <a href="/walkthroughs/{{ currentScenarioId }}/step-{{ stepNum }}/" class="ndx-step-checklist__link ndx-step-checklist__link--upcoming">
         {{ stepTitle }}
+        {% if isOptional %}<span class="ndx-step-checklist__optional-badge">Optional</span>{% endif %}
       </a>
       {% endif %}
     </li>

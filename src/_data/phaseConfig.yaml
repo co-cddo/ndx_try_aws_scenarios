@@ -85,6 +85,13 @@ scenarios:
     walkthroughUrl: "/walkthroughs/quicksight-dashboard/"
     exploreUrl: "/walkthroughs/quicksight-dashboard/explore/"
 
+  localgov-drupal:
+    phases: [try, walkthrough, explore]
+    evidencePackPhase: walkthrough
+    tryUrl: "/scenarios/localgov-drupal/"
+    walkthroughUrl: "/walkthroughs/localgov-drupal/"
+    exploreUrl: "/walkthroughs/localgov-drupal/explore/"
+
 # Branching configuration (AC-7)
 branching:
   postWalkthroughOptions:

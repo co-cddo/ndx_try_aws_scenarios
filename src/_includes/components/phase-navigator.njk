@@ -25,6 +25,7 @@
 {% set scenarioId = scenarioId if scenarioId is defined else "council-chatbot" %}
 {% set phases = phaseConfig.phases %}
 {% set costMessage = phaseConfig.costReassurance %}
+{% set scenarioConfig = phaseConfig.scenarios[scenarioId] if phaseConfig.scenarios[scenarioId] else phaseConfig.scenarios["council-chatbot"] %}
 
 {# Skeleton loading state - prevents layout shift (AC-16) #}
 <div class="ndx-phase-navigator__skeleton" data-skeleton hidden aria-hidden="true">
@@ -64,12 +65,14 @@
             {% if loop.index === 1 %}data-phase-initial{% endif %}>
 
           {# Phase link - AC13: Keyboard navigable #}
-          <a href="#{{ phase.id }}"
+          {% set phaseUrl = scenarioConfig.tryUrl if phase.id == "try" else (scenarioConfig.walkthroughUrl if phase.id == "walkthrough" else scenarioConfig.exploreUrl) %}
+          <a href="{{ phaseUrl }}"
              class="ndx-phase-navigator__link"
              tabindex="0"
              aria-label="{{ phase.label }}: {{ phase.sublabel }} ({{ phase.time }})"
              data-base-label="{{ phase.label }}: {{ phase.sublabel }} ({{ phase.time }})"
-             data-phase-link="{{ phase.id }}">
+             data-phase-link="{{ phase.id }}"
+             data-phase-url="{{ phaseUrl }}">
 
             {# Phase indicator circle - AC14: Not color-only (icons + text) #}
             <span class="ndx-phase-navigator__indicator" aria-hidden="true">
@@ -246,22 +249,22 @@
     }
 
     // Handle phase link clicks (AC-13: Keyboard activation)
+    // Now navigates to actual URLs instead of just updating state
     navigator.querySelectorAll('[data-phase-link]').forEach(function(link) {
       link.addEventListener('click', function(e) {
-        e.preventDefault();
         const phaseId = this.dataset.phaseLink;
         const scenarioId = sanitizeScenarioId(navigator.dataset.scenarioId);
 
+        // Update phase state before navigation
         if (window.PhaseState) {
           window.PhaseState.setPhaseState({
             currentPhase: phaseId,
             scenario: scenarioId
           });
-          window.updatePhaseIndicators();
-
-          // Update hash navigation for keyboard users (AC-7)
-          window.history.pushState(null, '', '#' + phaseId);
         }
+
+        // Allow default navigation to the href URL
+        // No e.preventDefault() - let the link navigate naturally
       });
 
       // Keyboard support (Enter/Space)

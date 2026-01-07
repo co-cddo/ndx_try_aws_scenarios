@@ -73,7 +73,7 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
-      deploymentTime: "10-15 minutes"
+      deploymentTime: "35-40 minutes"
       deploymentPhases:
         - "Creating VPC and networking (~30 seconds)"
         - "Creating Aurora Serverless database (~180 seconds)"

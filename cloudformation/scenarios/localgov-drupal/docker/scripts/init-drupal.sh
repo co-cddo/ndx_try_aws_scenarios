@@ -393,29 +393,6 @@ clear_caches() {
     return 0
 }
 
-import_sample_content() {
-    log "Importing sample content..."
-    update_status "Content" "Importing sample content..." 70
-
-    cd "$DRUPAL_ROOT"
-
-    # Check if sample content directory and import script exist
-    if [ -f "$DRUPAL_ROOT/sample-content/import.php" ]; then
-        log "Running sample content import script..."
-        local import_output
-        import_output=$(./vendor/bin/drush scr "$DRUPAL_ROOT/sample-content/import.php" 2>&1) || true
-        if [ -n "$import_output" ]; then
-            echo "$import_output" | while IFS= read -r line; do
-                log "  $line"
-            done
-        fi
-    else
-        log "Sample content import script not found, skipping"
-    fi
-
-    return 0
-}
-
 enable_localgov_modules() {
     log "Enabling LocalGov modules..."
     update_status "Modules" "Enabling LocalGov modules..." 72
@@ -570,6 +547,65 @@ enable_custom_modules() {
             fi
         fi
     done
+
+    return 0
+}
+
+configure_tts_block() {
+    log "Configuring Text-to-Speech block..."
+    update_status "TTS Block" "Configuring Listen to Page block..." 75
+
+    cd "$DRUPAL_ROOT"
+
+    # Check if the block already exists
+    local block_exists
+    block_exists=$(./vendor/bin/drush config:get block.block.ndx_listen_to_page_scarfolk id 2>/dev/null || echo "")
+
+    if [ -z "$block_exists" ]; then
+        log "  TTS block not found, creating..."
+
+        # Import the optional config from the module
+        # This uses drush to create the block with proper settings
+        ./vendor/bin/drush php:eval "
+            \$block_config = [
+                'id' => 'ndx_listen_to_page_scarfolk',
+                'theme' => 'localgov_scarfolk',
+                'region' => 'content_top',
+                'weight' => 0,
+                'plugin' => 'ndx_listen_to_page',
+                'settings' => [
+                    'id' => 'ndx_listen_to_page',
+                    'label' => 'Listen to this Page',
+                    'provider' => 'ndx_aws_ai',
+                    'label_display' => 'visible',
+                    'default_language' => 'en-GB',
+                    'show_speed_control' => TRUE,
+                    'sticky_position' => TRUE,
+                ],
+                'visibility' => [
+                    'entity_bundle:node' => [
+                        'id' => 'entity_bundle:node',
+                        'bundles' => [
+                            'localgov_guides_overview' => 'localgov_guides_overview',
+                            'localgov_guides_page' => 'localgov_guides_page',
+                            'localgov_news_article' => 'localgov_news_article',
+                            'localgov_services_landing' => 'localgov_services_landing',
+                            'localgov_services_page' => 'localgov_services_page',
+                        ],
+                        'negate' => FALSE,
+                        'context_mapping' => ['node' => '@node.node_route_context:node'],
+                    ],
+                ],
+            ];
+            \$block = \Drupal\block\Entity\Block::create(\$block_config);
+            \$block->save();
+            echo 'TTS block created successfully';
+        " 2>&1 || log "  Warning: Could not create TTS block programmatically"
+
+        log "  TTS block configuration complete"
+    else
+        log "  TTS block already exists, skipping"
+    fi
 
     return 0
 }
@@ -817,9 +853,6 @@ main() {
 
         # Install LocalGov themes (must be done before modules that depend on them)
         install_themes
-
-        # Sample content import disabled - using AI-generated council content instead
-        # import_sample_content
     else
         log "Existing installation detected, skipping install"
         update_status "Reconnecting" "Connecting to existing database..." 50
@@ -832,6 +865,9 @@ main() {
 
     # Enable custom NDX modules (Story 1.10) - always run to ensure new modules are enabled
     enable_custom_modules
+
+    # Configure TTS block (must be after ndx_aws_ai module is enabled)
+    configure_tts_block
 
     # Generate AI council content (Epic 5) - only on fresh install or when requested
     if [ ! -f "$INIT_MARKER" ]; then

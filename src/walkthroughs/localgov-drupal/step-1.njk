@@ -3,7 +3,7 @@ layout: layouts/walkthrough.njk
 title: "Step 1: Log in to Drupal - LocalGov Drupal Walkthrough"
 description: Get your credentials and access the Drupal admin dashboard
 currentStep: 1
-totalSteps: 5
+totalSteps: 8
 timeEstimate: "3 minutes"
 scenarioId: localgov-drupal
 ---
@@ -27,6 +27,23 @@ scenarioId: localgov-drupal
 
 {% include "components/walkthrough-step.njk" %}
 
+<h3 class="govuk-heading-m">Navigating to CloudFormation</h3>
+
+<p class="govuk-body">
+  From the AWS Console homepage, you can find CloudFormation in the "Recently visited" section
+  or by searching for "CloudFormation" in the search bar.
+</p>
+
+{# Screenshot: AWS Console homepage #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/aws-console-homepage-desktop.png"
+       alt="AWS Console homepage showing the search bar and Recently visited section with CloudFormation"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The AWS Console homepage - find CloudFormation in "Recently visited" or use the search bar
+  </figcaption>
+</figure>
+
 <h3 class="govuk-heading-m">Finding your credentials</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
@@ -40,11 +57,29 @@ scenarioId: localgov-drupal
   <li>
     <strong>Find your stack</strong>
     <p class="govuk-body">
-      Look for a stack named <code>ndx-try-localgov-drupal-[timestamp]</code>
+      Look for a stack named <code>LocalGovDrupalStack</code>
     </p>
     <p class="govuk-body">
       The status should be <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span>
     </p>
+    <div class="govuk-warning-text govuk-!-margin-top-2">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-visually-hidden">Warning</span>
+        If the status shows CREATE_IN_PROGRESS, wait a few minutes for the deployment to complete
+        before continuing. The stack takes approximately 15 minutes to deploy.
+      </strong>
+    </div>
+
+    {# Screenshot: CloudFormation stacks list #}
+    <figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-2">
+      <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/cloudformation-stacks-list-desktop.png"
+           alt="CloudFormation console showing the Stacks list with LocalGovDrupalStack and CREATE_COMPLETE status"
+           class="ndx-screenshot__image">
+      <figcaption class="ndx-screenshot__caption govuk-body-s">
+        The CloudFormation Stacks list showing LocalGovDrupalStack with CREATE_COMPLETE status
+      </figcaption>
+    </figure>
   </li>
 
   <li>
@@ -59,7 +94,7 @@ scenarioId: localgov-drupal
     <div class="ndx-credentials-list">
       <p class="govuk-body">
         <strong>DrupalUrl:</strong> The URL to access your Drupal site<br>
-        <code>https://[your-alb-dns].elb.amazonaws.com</code>
+        <code>https://[random-id].cloudfront.net</code>
       </p>
       <p class="govuk-body">
         <strong>AdminUsername:</strong> Usually <code>admin</code>
@@ -70,6 +105,16 @@ scenarioId: localgov-drupal
     </div>
   </li>
 </ol>
+
+{# Screenshot: CloudFormation Outputs tab #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/cloudformation-outputs-desktop.png"
+       alt="AWS CloudFormation console showing the Outputs tab with DrupalUrl, AdminUsername, and AdminPassword values"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The CloudFormation Outputs tab shows your Drupal URL and admin credentials
+  </figcaption>
+</figure>
 
 <div class="govuk-inset-text">
   <p class="govuk-body">
@@ -162,14 +207,15 @@ scenarioId: localgov-drupal
   </div>
 </details>
 
-{# Screenshot placeholder #}
-<div class="govuk-warning-text govuk-!-margin-top-6">
-  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-  <strong class="govuk-warning-text__text">
-    <span class="govuk-visually-hidden">Note</span>
-    Screenshot placeholder: In production, this page would include annotated screenshots showing the CloudFormation Outputs and Drupal login screen.
-  </strong>
-</div>
+{# Screenshot: Drupal login page #}
+<figure class="ndx-screenshot govuk-!-margin-top-6">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/drupal-login-page-desktop.png"
+       alt="Drupal login page showing username and password fields with a Log in button"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The Drupal login page where you'll enter your admin credentials from the CloudFormation Outputs
+  </figcaption>
+</figure>
 
 <style>
   code {

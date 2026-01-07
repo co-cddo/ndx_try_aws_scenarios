@@ -42,9 +42,6 @@ export default function(eleventyConfig) {
       },
       contentLicence: {
         html: 'All content is available under the <a class="govuk-footer__link" href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" rel="license">Open Government Licence v3.0</a>, except where otherwise stated'
-      },
-      meta: {
-        html: '<p class="govuk-body-s govuk-!-margin-top-4">Part of the <a href="https://www.local.gov.uk/our-support/cyber-digital-and-technology/artificial-intelligence" class="govuk-footer__link" target="_blank" rel="noopener noreferrer">LGA AI Hub<span class="govuk-visually-hidden"> (opens in new tab)</span></a> ecosystem</p>'
       }
     },
     // Include both GOV.UK compiled styles AND custom NDX styles

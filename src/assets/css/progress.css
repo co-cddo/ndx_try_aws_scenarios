@@ -164,6 +164,24 @@
   margin-left: -16px;
 }
 
+/* Optional step styling */
+.ndx-step-checklist__optional-badge {
+  display: inline-block;
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ndx-progress-grey);
+  background-color: var(--ndx-progress-light-grey);
+  padding: 2px 6px;
+  margin-left: 8px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.ndx-step-checklist__item--optional .ndx-step-checklist__link--upcoming {
+  color: var(--ndx-progress-grey);
+}
+
 /* ==========================================================================
    Walkthrough Progress Sidebar
    ========================================================================== */

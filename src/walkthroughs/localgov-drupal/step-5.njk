@@ -1,229 +1,268 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 5: Prepare for Cleanup - LocalGov Drupal Walkthrough"
-description: Know how to delete your stack when you're finished
+title: "Step 5: AI Content Generator - LocalGov Drupal Walkthrough"
+description: Generate draft content from prompts using Amazon Nova Pro
 currentStep: 5
-totalSteps: 5
-timeEstimate: "3 minutes"
+totalSteps: 8
+timeEstimate: "5 minutes"
 scenarioId: localgov-drupal
 ---
 
 {#
-  Step 5: Prepare for Cleanup (Story 2.4)
-  - Understanding auto-cleanup
-  - Manual deletion steps
-  - Cost awareness
+  Step 5: AI Content Generator
+  - Overview of content generation feature
+  - Step-by-step instructions with screenshots
+  - Example prompts for council content
+  - Tips for better results
 #}
 
 {% set stepNumber = 5 %}
-{% set stepTitle = "Prepare for Cleanup" %}
-{% set stepDescription = "Learn how to delete your CloudFormation stack and understand the costs involved." %}
-{% set timeEstimate = "3 minutes" %}
+{% set stepTitle = "AI Content Generator" %}
+{% set stepDescription = "Generate draft content from prompts using AI, powered by Amazon Nova Pro." %}
+{% set timeEstimate = "5 minutes" %}
 {% set expectedOutcomes = [
-  "You understand the auto-cleanup behaviour",
-  "You know how to manually delete the stack",
-  "You understand the costs involved"
+  "You've opened the AI Writing Assistant",
+  "You've generated content from a prompt",
+  "You understand tips for effective prompts"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<h3 class="govuk-heading-m">Automatic cleanup</h3>
+<h3 class="govuk-heading-m">What is the AI Content Generator?</h3>
 
 <p class="govuk-body">
-  Good news: your deployment is configured to <strong>auto-delete after 2 hours</strong>.
-  This means:
+  The Generate Content feature uses <strong><a href="https://aws.amazon.com/ai/generative-ai/nova/" class="govuk-link" target="_blank" rel="noopener noreferrer">Amazon Nova Pro<span class="govuk-visually-hidden"> (opens in new tab)</span></a></strong> to create draft content based on your prompts. It helps content editors:
 </p>
 
 <ul class="govuk-list govuk-list--bullet">
-  <li>You don't need to remember to clean up</li>
-  <li>No surprise AWS bills if you forget about it</li>
-  <li>Resources are automatically removed after the demo period</li>
+  <li><strong>Draft service pages</strong> quickly from a brief description</li>
+  <li><strong>Generate news articles</strong> and announcements</li>
+  <li><strong>Create how-to guides</strong> for residents</li>
+  <li><strong>Save time</strong> on routine content tasks</li>
 </ul>
-
-<div class="govuk-inset-text">
-  <p class="govuk-body">
-    <strong>When does the 2 hours start?</strong> The timer begins when the
-    CloudFormation stack reaches CREATE_COMPLETE status. So if deployment
-    took 15 minutes, you have roughly 1 hour 45 minutes from when you
-    first logged in.
-  </p>
-</div>
-
-<h3 class="govuk-heading-m">Manual cleanup</h3>
-
-<p class="govuk-body">
-  If you want to delete the stack early (to stop costs immediately),
-  follow these steps:
-</p>
-
-<ol class="govuk-list govuk-list--number govuk-list--spaced">
-  <li>
-    <strong>Open CloudFormation console</strong>
-    <p class="govuk-body">
-      Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console in us-east-1<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
-    </p>
-  </li>
-
-  <li>
-    <strong>Find your stack</strong>
-    <p class="govuk-body">
-      Look for <code>ndx-try-localgov-drupal-[timestamp]</code>
-    </p>
-  </li>
-
-  <li>
-    <strong>Select the stack</strong>
-    <p class="govuk-body">
-      Click the checkbox next to your stack name
-    </p>
-  </li>
-
-  <li>
-    <strong>Click "Delete"</strong>
-    <p class="govuk-body">
-      Click the "Delete" button in the top right
-    </p>
-  </li>
-
-  <li>
-    <strong>Confirm deletion</strong>
-    <p class="govuk-body">
-      Click "Delete" in the confirmation dialog
-    </p>
-  </li>
-
-  <li>
-    <strong>Wait for deletion to complete</strong>
-    <p class="govuk-body">
-      This typically takes 5-10 minutes. The status will change to DELETE_IN_PROGRESS,
-      then the stack will disappear from the list.
-    </p>
-  </li>
-</ol>
-
-<h3 class="govuk-heading-m">What gets deleted?</h3>
-
-<p class="govuk-body">
-  When the stack is deleted, <strong>all resources are removed</strong>:
-</p>
-
-<table class="govuk-table">
-  <thead class="govuk-table__head">
-    <tr class="govuk-table__row">
-      <th scope="col" class="govuk-table__header">Resource</th>
-      <th scope="col" class="govuk-table__header">What happens</th>
-    </tr>
-  </thead>
-  <tbody class="govuk-table__body">
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Aurora database</td>
-      <td class="govuk-table__cell">Deleted - all data lost</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">EFS file storage</td>
-      <td class="govuk-table__cell">Deleted - all uploads lost</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Fargate service</td>
-      <td class="govuk-table__cell">Stopped and removed</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Load balancer</td>
-      <td class="govuk-table__cell">Deleted - URL no longer works</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Security groups</td>
-      <td class="govuk-table__cell">Deleted</td>
-    </tr>
-  </tbody>
-</table>
 
 <div class="govuk-warning-text">
   <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
   <strong class="govuk-warning-text__text">
-    <span class="govuk-visually-hidden">Warning</span>
-    Deletion is permanent. Any content you created or edited will be lost.
-    Take screenshots or notes before deleting if you want to remember
-    anything from your session.
+    <span class="govuk-visually-hidden">Important</span>
+    AI-generated content should always be reviewed and edited before publishing.
+    The AI is a writing assistant, not a replacement for human judgement.
   </strong>
 </div>
 
-<h3 class="govuk-heading-m">Understanding costs</h3>
+<h3 class="govuk-heading-m">How to generate content</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open any content page for editing</strong>
+    <p class="govuk-body">
+      Navigate to Content &gt; find a page &gt; click Edit
+    </p>
+  </li>
+  <li>
+    <strong>Look for the AI Assistant bar</strong>
+    <p class="govuk-body">
+      Above the content editor, you'll see buttons for "Generate Content" and "Simplify"
+    </p>
+  </li>
+  <li>
+    <strong>Click "Generate Content"</strong>
+    <p class="govuk-body">
+      This opens the AI Writing Assistant dialog
+    </p>
+  </li>
+  <li>
+    <strong>Enter your prompt</strong>
+    <p class="govuk-body">
+      Describe what content you want. Be specific about topic, audience, and key points.
+    </p>
+  </li>
+  <li>
+    <strong>Click Generate</strong>
+    <p class="govuk-body">
+      Wait a few seconds while <a href="https://aws.amazon.com/ai/generative-ai/nova/" class="govuk-link" target="_blank" rel="noopener noreferrer">Amazon Nova Pro<span class="govuk-visually-hidden"> (opens in new tab)</span></a> generates your content
+    </p>
+  </li>
+  <li>
+    <strong>Review and insert</strong>
+    <p class="govuk-body">
+      Read through the result, then click "Insert" to add it to your page, or "Regenerate" to try again
+    </p>
+  </li>
+</ol>
+
+{# Screenshot: AI Assistant bar #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/drupal-ai-assistant-bar-desktop.png"
+       alt="Drupal content editor showing the AI Assistant bar with Generate Content and Simplify buttons, powered by Amazon Bedrock"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The AI Assistant bar appears above the content editor with buttons for Generate Content and Simplify
+  </figcaption>
+</figure>
+
+{# Screenshot: AI Writing Assistant dialog #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/drupal-ai-write-dialog-desktop.png"
+       alt="AI Writing Assistant dialog showing a text field for entering your prompt, with options to select recent prompts and Generate or Cancel buttons"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The AI Writing Assistant dialog where you enter what you want the AI to write
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">Try this: example prompts</h3>
 
 <p class="govuk-body">
-  This deployment runs on the <strong>AWS Innovation Sandbox</strong>, which
-  means costs are covered by your organisation's agreement with NDX.
+  Here are some prompts you can try:
 </p>
 
-<div class="ndx-cost-breakdown">
-  <h4 class="govuk-heading-s">Typical cost breakdown (for reference)</h4>
-  <table class="govuk-table">
-    <thead class="govuk-table__head">
-      <tr class="govuk-table__row">
-        <th scope="col" class="govuk-table__header">Service</th>
-        <th scope="col" class="govuk-table__header">Approximate cost</th>
-      </tr>
-    </thead>
-    <tbody class="govuk-table__body">
-      <tr class="govuk-table__row">
-        <td class="govuk-table__cell">Aurora Serverless (2 hours)</td>
-        <td class="govuk-table__cell">~$0.50</td>
-      </tr>
-      <tr class="govuk-table__row">
-        <td class="govuk-table__cell">Fargate (2 hours)</td>
-        <td class="govuk-table__cell">~$0.30</td>
-      </tr>
-      <tr class="govuk-table__row">
-        <td class="govuk-table__cell">EFS storage</td>
-        <td class="govuk-table__cell">~$0.10</td>
-      </tr>
-      <tr class="govuk-table__row">
-        <td class="govuk-table__cell">Load Balancer (2 hours)</td>
-        <td class="govuk-table__cell">~$0.05</td>
-      </tr>
-      <tr class="govuk-table__row">
-        <td class="govuk-table__cell"><strong>Total (2 hour demo)</strong></td>
-        <td class="govuk-table__cell"><strong>~$1.00</strong></td>
-      </tr>
-    </tbody>
-  </table>
+<div class="ndx-prompt-card">
+  <div class="ndx-prompt-card__header">
+    <h4 class="govuk-heading-s govuk-!-margin-bottom-0">Service Page: Parking Permits</h4>
+    <span class="govuk-tag govuk-tag--blue">Beginner</span>
+  </div>
+  <div class="ndx-prompt-card__body">
+    <p class="govuk-body govuk-!-font-weight-bold">Prompt:</p>
+    <p class="ndx-prompt-text">
+      Write a service page for residents explaining how to apply for a parking permit.
+      Include eligibility criteria, required documents, and processing time.
+    </p>
+  </div>
 </div>
+
+<div class="ndx-prompt-card">
+  <div class="ndx-prompt-card__header">
+    <h4 class="govuk-heading-s govuk-!-margin-bottom-0">How-to Guide: Report a Pothole</h4>
+    <span class="govuk-tag govuk-tag--blue">Beginner</span>
+  </div>
+  <div class="ndx-prompt-card__body">
+    <p class="govuk-body govuk-!-font-weight-bold">Prompt:</p>
+    <p class="ndx-prompt-text">
+      Write a step-by-step guide for reporting potholes. Include what information
+      residents need to provide, expected response time, and how to track their report.
+    </p>
+  </div>
+</div>
+
+<div class="ndx-prompt-card">
+  <div class="ndx-prompt-card__header">
+    <h4 class="govuk-heading-s govuk-!-margin-bottom-0">News Article: New Recycling Service</h4>
+    <span class="govuk-tag govuk-tag--green">Intermediate</span>
+  </div>
+  <div class="ndx-prompt-card__body">
+    <p class="govuk-body govuk-!-font-weight-bold">Prompt:</p>
+    <p class="ndx-prompt-text">
+      Write a news article announcing a new food waste collection service starting
+      next month. Include collection days, what can be recycled, and how to request a bin.
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Tips for better results</h3>
+
+<h4 class="govuk-heading-s">Be specific in your prompts</h4>
 
 <p class="govuk-body">
-  This is significantly less than the cost of traditional software demos
-  or vendor presentations, and you get hands-on experience with the actual platform.
+  The more detail you provide, the better the result:
 </p>
 
-{# Screenshot placeholder #}
-<div class="govuk-warning-text govuk-!-margin-top-6">
-  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-  <strong class="govuk-warning-text__text">
-    <span class="govuk-visually-hidden">Note</span>
-    Screenshot placeholder: In production, this page would include screenshots of the CloudFormation delete process.
-  </strong>
+<div class="ndx-example-grid">
+  <div class="ndx-example-card ndx-example-card--bad">
+    <p class="govuk-body govuk-!-font-weight-bold">Less effective:</p>
+    <p class="govuk-body govuk-!-margin-bottom-0">"Write about bins"</p>
+  </div>
+  <div class="ndx-example-card ndx-example-card--good">
+    <p class="govuk-body govuk-!-font-weight-bold">More effective:</p>
+    <p class="govuk-body govuk-!-margin-bottom-0">"Write a guide explaining what can go in the blue recycling bin, including common mistakes residents make"</p>
+  </div>
 </div>
+
+<h4 class="govuk-heading-s">Include context and audience</h4>
+
+<p class="govuk-body">
+  Tell the AI who the content is for:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>"Write for residents who have never used this service before"</li>
+  <li>"Write for business owners applying for a licence"</li>
+  <li>"Write in a friendly, helpful tone suitable for elderly residents"</li>
+</ul>
+
+<h4 class="govuk-heading-s">Always review AI output</h4>
+
+<p class="govuk-body">
+  Check AI-generated content before publishing:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Accuracy</strong> - Are the facts correct? Are dates and prices right?</li>
+  <li><strong>Tone</strong> - Does it match your council's voice?</li>
+  <li><strong>Completeness</strong> - Is anything missing?</li>
+  <li><strong>Links</strong> - The AI cannot create links, so you'll need to add these</li>
+</ul>
 
 <style>
-  code {
+  .ndx-prompt-card {
+    margin-bottom: 20px;
+    border: 1px solid #b1b4b6;
+    background-color: #ffffff;
+  }
+
+  .ndx-prompt-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
     background-color: #f3f2f1;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: monospace;
-    font-size: 16px;
+    border-bottom: 1px solid #b1b4b6;
   }
 
-  .ndx-cost-breakdown {
-    margin: 30px 0;
+  .ndx-prompt-card__body {
     padding: 20px;
+  }
+
+  .ndx-prompt-text {
     background-color: #f8f8f8;
+    padding: 15px;
     border-left: 4px solid #1d70b8;
-  }
-
-  .ndx-cost-breakdown h4 {
-    margin-top: 0;
-  }
-
-  .ndx-cost-breakdown table {
+    font-family: monospace;
+    font-size: 14px;
     margin-bottom: 0;
+  }
+
+  .ndx-example-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  .ndx-example-card {
+    padding: 15px;
+    border: 2px solid;
+  }
+
+  .ndx-example-card--bad {
+    border-color: #d4351c;
+    background-color: #fef7f6;
+  }
+
+  .ndx-example-card--good {
+    border-color: #00703c;
+    background-color: #f0f9f5;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-example-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-prompt-card__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
   }
 </style>

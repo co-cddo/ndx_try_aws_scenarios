@@ -104,9 +104,6 @@ RUN apk add --no-cache \
 # Copy Drupal from builder
 COPY --from=builder /var/www/drupal /var/www/drupal
 
-# Copy sample content for initial import
-COPY drupal/sample-content /var/www/drupal/sample-content
-
 # Copy Drush from builder (if exists)
 RUN if [ -f /var/www/drupal/vendor/bin/drush ]; then \
         ln -s /var/www/drupal/vendor/bin/drush /usr/local/bin/drush; \

@@ -5,18 +5,37 @@
 
 walkthroughs:
   localgov-drupal:
-    totalSteps: 5
+    totalSteps: 8
     url: "/walkthroughs/localgov-drupal/"
     title: "LocalGov Drupal Walkthrough"
-    duration: "15 minutes"
+    duration: "30 minutes"
     hasWalkthrough: true
     category: "cms"
     steps:
       - title: "Logged in to Drupal"
+        description: "Get your credentials and access the admin dashboard"
+        time: "3 minutes"
       - title: "Homepage explored"
+        description: "Understand LocalGov Drupal's structure and navigation"
+        time: "3 minutes"
+      - title: "Council generation understood"
+        description: "Learn how AI creates unique fictional councils"
+        time: "6 minutes"
       - title: "Content edited"
+        description: "Make changes to a sample service page"
+        time: "4 minutes"
+      - title: "AI content generated"
+        description: "Generate draft content from prompts"
+        time: "5 minutes"
+      - title: "Content simplified"
+        description: "Simplify text to plain English with one click"
+        time: "4 minutes"
       - title: "DEMO banner understood"
+        description: "Learn why it's there and what it means"
+        time: "2 minutes"
       - title: "Cleanup prepared"
+        description: "Know how to delete your stack when finished"
+        time: "3 minutes"
 
   council-chatbot:
     totalSteps: 4

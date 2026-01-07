@@ -9,6 +9,9 @@ dist/
 # CDK output
 cdk.out/
 
+# CDK context cache (account-specific, regenerated on deploy)
+cdk.context.json
+
 # IDE
 .idea/
 *.swp
