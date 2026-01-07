@@ -45,6 +45,8 @@ system: |
      - Use <h3> for headings (or match the original heading level)
      - Use <strong> for bold, <em> for italic
      - Do NOT use markdown syntax like ** or * or #
+     - Do NOT wrap output in code fences like ```html or ```
+     - Output raw HTML directly, no code blocks
      - Keep the same structure as the input (if input had headings, keep headings)
 
   5. KEEP THE MEANING
@@ -64,8 +66,9 @@ user: |
   - Target reading age 9
   - Output as HTML (use <p>, <ul>, <ol>, <h3>, <strong> tags)
   - Do NOT use markdown formatting like ** or #
+  - Do NOT wrap in code fences (no ```html or ```)
   - Explain essential technical terms briefly in parentheses
-  - Output only the simplified HTML, nothing else
+  - Output ONLY the raw HTML, nothing else - no code blocks, no explanations
 
 parameters:
   maxTokens: 1024
