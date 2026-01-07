@@ -89,6 +89,9 @@ class SimplifyController extends ControllerBase {
         ],
       );
 
+      // Strip markdown code fences if the AI wrapped output in them.
+      $simplifiedContent = $this->stripCodeFences($simplifiedContent);
+
       return new JsonResponse([
         'success' => TRUE,
         'simplified' => $simplifiedContent,
@@ -108,6 +111,28 @@ class SimplifyController extends ControllerBase {
         'error' => $this->t('Unable to simplify text. Please try again.')->render(),
       ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
+  }
+
+  /**
+   * Strip markdown code fences from AI output.
+   *
+   * The AI sometimes wraps HTML output in ```html ... ``` code fences
+   * despite prompt instructions. This removes them.
+   *
+   * @param string $content
+   *   The content to clean.
+   *
+   * @return string
+   *   Content with code fences removed.
+   */
+  protected function stripCodeFences(string $content): string {
+    // Remove opening code fence (```html, ```HTML, or just ```)
+    $content = preg_replace('/^```(?:html|HTML)?\s*\n?/i', '', $content);
+
+    // Remove closing code fence.
+    $content = preg_replace('/\n?```\s*$/i', '', $content);
+
+    return trim($content);
   }
 
 }

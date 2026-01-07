@@ -36,7 +36,7 @@ ndx_aws_ai.write_dialog:
   options:
     _admin_route: TRUE
 
-# Story 3.6: Direct Simplify API endpoint (no modal).
+# Story 3.6: Direct Simplify API endpoint.
 ndx_aws_ai.simplify_api:
   path: '/ndx-aws-ai/api/simplify'
   defaults:
@@ -47,17 +47,6 @@ ndx_aws_ai.simplify_api:
     _permission: 'use ndx aws ai'
   options:
     no_cache: TRUE
-
-# Story 3.6: AI Simplify Dialog for plain English conversion (legacy modal).
-ndx_aws_ai.simplify_dialog:
-  path: '/ndx-aws-ai/simplify-dialog'
-  defaults:
-    _form: '\Drupal\ndx_aws_ai\Form\AiSimplifyDialogForm'
-    _title: 'Simplify to Plain English'
-  requirements:
-    _permission: 'use ndx aws ai'
-  options:
-    _admin_route: TRUE
 
 # Story 4.6: TTS synthesis endpoint for Listen to Page feature.
 ndx_aws_ai.tts.synthesize:
