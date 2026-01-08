@@ -275,7 +275,7 @@ export class ComputeConstruct extends Construct {
 
     // Add container - pull from GitHub Container Registry
     const container = taskDefinition.addContainer('drupal', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-localgov_drupal:fix-menu-links-search-index'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-localgov_drupal:latest'),
       logging: ecs.LogDrivers.awsLogs({
         logGroup: this.logGroup,
         streamPrefix: 'drupal',

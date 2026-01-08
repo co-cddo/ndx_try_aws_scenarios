@@ -70,7 +70,7 @@ jobs:
         with:
           context: cloudformation/scenarios/localgov-drupal
           file: cloudformation/scenarios/localgov-drupal/docker/Dockerfile
-          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_image != 'false') }}
+          push: ${{ github.ref == 'refs/heads/main' && github.event.inputs.push_image != 'false' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
