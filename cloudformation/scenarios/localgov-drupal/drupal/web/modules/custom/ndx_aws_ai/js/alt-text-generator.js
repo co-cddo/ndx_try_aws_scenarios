@@ -115,8 +115,10 @@
       let lastFidValue = null;
       let processingTriggered = false;
 
-      const observer = new MutationObserver(function (mutations) {
-        // Check if a file was uploaded (fid hidden field appears or changes).
+      /**
+       * Check for file and trigger alt-text generation if needed.
+       */
+      function checkAndGenerate() {
         const fidInput = wrapper.querySelector('input[name*="[fids]"]');
         if (!fidInput || !fidInput.value) {
           lastFidValue = null;
@@ -151,6 +153,14 @@
             });
           }
         }, 500);
+      }
+
+      // Check immediately in case behavior is attached after file upload.
+      checkAndGenerate();
+
+      // Also watch for future changes.
+      const observer = new MutationObserver(function (mutations) {
+        checkAndGenerate();
       });
 
       observer.observe(wrapper, {
