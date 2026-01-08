@@ -111,24 +111,53 @@
      *   The managed file wrapper element.
      */
     watchManagedFile: function (wrapper) {
+      const self = this;
+      let lastFidValue = null;
+      let processingTriggered = false;
+
       const observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-          if (mutation.type === 'childList') {
-            // Check if a file was uploaded (fid hidden field appears).
-            const fidInput = wrapper.querySelector('input[name*="[fids]"]');
-            if (fidInput && fidInput.value) {
-              const altField = Drupal.ndxAltText.findAltTextField(wrapper);
-              if (altField && altField.value.trim() === '') {
-                Drupal.ndxAltText.generateFromFileId(fidInput.value, altField);
-              }
+        // Check if a file was uploaded (fid hidden field appears or changes).
+        const fidInput = wrapper.querySelector('input[name*="[fids]"]');
+        if (!fidInput || !fidInput.value) {
+          lastFidValue = null;
+          processingTriggered = false;
+          return;
+        }
+
+        // Only trigger once per file upload.
+        if (fidInput.value === lastFidValue && processingTriggered) {
+          return;
+        }
+
+        lastFidValue = fidInput.value;
+
+        // Use setTimeout to ensure DOM is fully updated after AJAX.
+        setTimeout(function () {
+          // Look for alt field in wrapper first, then in the form.
+          let altField = wrapper.querySelector('input[name*="[alt]"]');
+          if (!altField) {
+            const form = wrapper.closest('form');
+            if (form) {
+              altField = form.querySelector('input[name*="[alt]"]');
             }
           }
-        });
+
+          if (altField && altField.value.trim() === '' && !processingTriggered) {
+            processingTriggered = true;
+            console.log('Auto-generating alt-text for file ID:', fidInput.value);
+            self.generateFromFileId(fidInput.value, altField, function () {
+              // Reset after completion to allow regeneration.
+              processingTriggered = false;
+            });
+          }
+        }, 500);
       });
 
       observer.observe(wrapper, {
         childList: true,
-        subtree: true
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['value']
       });
     },
 
