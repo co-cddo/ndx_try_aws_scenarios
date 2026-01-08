@@ -16,13 +16,14 @@ RUN apk add --no-cache \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
+    libwebp-dev \
     libzip-dev \
     icu-dev \
     oniguruma-dev \
     $PHPIZE_DEPS
 
-# Configure and install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+# Configure and install PHP extensions (with WebP support for image styles)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         gd \
@@ -70,21 +71,23 @@ RUN apk add --no-cache \
     libpng \
     libjpeg-turbo \
     freetype \
+    libwebp \
     libzip \
     icu \
     oniguruma \
     mysql-client \
     curl
 
-# Install PHP extensions
+# Install PHP extensions (with WebP support for image styles)
 RUN apk add --no-cache \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
+    libwebp-dev \
     libzip-dev \
     icu-dev \
     oniguruma-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         gd \
@@ -97,6 +100,7 @@ RUN apk add --no-cache \
         libpng-dev \
         libjpeg-turbo-dev \
         freetype-dev \
+        libwebp-dev \
         libzip-dev \
         icu-dev \
         oniguruma-dev
