@@ -232,11 +232,17 @@ layout: page
   </div>
 </dialog>
 
+{# Deployment Progress - Real-time tracking (Story 2.2) #}
+{% include "components/deployment-progress.njk" %}
+
 {# Deployment Guide - What happens next (Story 2.2) #}
 {% include "components/deployment-guide.njk" %}
 
 {# Deployment Success - After deployment completes (Story 2.2) #}
 {% include "components/deployment-success.njk" %}
+
+{# Credentials Card - Easy access to credentials (Story 2.3) #}
+{% include "components/credentials-card.njk" %}
 
 {# Error Messages Reference #}
 <div class="govuk-!-margin-top-8">
@@ -289,3 +295,5 @@ layout: page
 
 <script src="/assets/js/phase-state.js" defer></script>
 <script src="/assets/js/deploy-url.js" defer></script>
+<script src="/assets/js/deployment-progress.js" defer></script>
+<script src="/assets/js/credentials-card.js" defer></script>

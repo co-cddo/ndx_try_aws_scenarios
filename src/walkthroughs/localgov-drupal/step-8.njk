@@ -1,0 +1,355 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 8: PDF to Web Converter - LocalGov Drupal Walkthrough"
+description: Convert legacy PDF documents to accessible web content using AI
+currentStep: 8
+totalSteps: 12
+timeEstimate: "4 minutes"
+scenarioId: localgov-drupal
+---
+
+{#
+  Step 8: PDF to Web Converter (Story 4.8)
+  - Convert PDFs to accessible HTML
+  - Powered by AWS Textract and Bedrock
+  - Creates draft pages from converted content
+#}
+
+{% set stepNumber = 8 %}
+{% set stepTitle = "PDF to Web Converter" %}
+{% set stepDescription = "Convert legacy PDF documents into accessible web pages using AI-powered document analysis." %}
+{% set timeEstimate = "4 minutes" %}
+{% set expectedOutcomes = [
+  "You understand what PDF to Web Converter does",
+  "You know how to access it from the admin menu",
+  "You've seen how PDFs become accessible web content"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">What is PDF to Web Converter?</h3>
+
+<p class="govuk-body">
+  LocalGov Drupal includes a <strong>PDF to Web conversion tool</strong> that transforms
+  legacy PDF documents into accessible, standards-compliant web pages. This feature uses
+  AI to extract text, tables, and structure from PDFs and convert them to semantic HTML.
+</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Why convert PDFs?</strong> Many councils have important information locked
+    in PDF documents that aren't accessible to screen readers, don't work well on mobile,
+    and can't be found by search engines. Converting to web content solves all these problems.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Where to find it</h3>
+
+<p class="govuk-body">
+  The PDF to Web Converter is available in the Drupal admin menu:
+</p>
+
+<ol class="govuk-list govuk-list--number">
+  <li>Click <strong>Content</strong> in the admin toolbar</li>
+  <li>Select <strong>PDF to Web</strong> from the dropdown</li>
+</ol>
+
+<p class="govuk-body">
+  Or navigate directly to: <code>/admin/content/pdf-to-web</code>
+</p>
+
+{# Screenshot: PDF conversion form #}
+<figure class="ndx-screenshot govuk-!-margin-top-6">
+  <img src="/assets/images/walkthroughs/localgov-drupal/ai-features/pdf-converter-form-desktop.png"
+       alt="PDF to Web conversion form showing a drag-and-drop upload area, page title field, and Convert PDF button"
+       class="ndx-screenshot__image"
+       onerror="this.parentElement.style.display='none'">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The PDF conversion form with drag-and-drop upload and title field
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">How to convert a PDF</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Upload your PDF</strong>
+    <p class="govuk-body">
+      Drag and drop a PDF file onto the upload area, or click to browse
+      and select a file. The converter works best with text-based PDFs
+      (not scanned images).
+    </p>
+  </li>
+
+  <li>
+    <strong>Enter a page title</strong>
+    <p class="govuk-body">
+      Give your new web page a descriptive title. This will become
+      the page heading and appear in search results.
+    </p>
+  </li>
+
+  <li>
+    <strong>Click Convert PDF</strong>
+    <p class="govuk-body">
+      The conversion process begins. You'll see real-time progress
+      as the AI analyses your document.
+    </p>
+  </li>
+
+  <li>
+    <strong>Review the preview</strong>
+    <p class="govuk-body">
+      Once complete, you'll see a preview of the converted HTML
+      along with statistics about what was extracted.
+    </p>
+  </li>
+
+  <li>
+    <strong>Create a draft page</strong>
+    <p class="govuk-body">
+      Click "Create Draft Page" to save the content as an unpublished
+      Drupal page. You can then edit and publish it when ready.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">What happens during conversion</h3>
+
+<p class="govuk-body">
+  The conversion process has four stages:
+</p>
+
+<div class="ndx-progress-stages">
+  <div class="ndx-progress-stage">
+    <div class="ndx-progress-stage__number">1</div>
+    <div class="ndx-progress-stage__content">
+      <h4 class="govuk-heading-s">Extracting text</h4>
+      <p class="govuk-body-s">AWS Textract reads all text and tables from your PDF</p>
+    </div>
+  </div>
+
+  <div class="ndx-progress-stage">
+    <div class="ndx-progress-stage__number">2</div>
+    <div class="ndx-progress-stage__content">
+      <h4 class="govuk-heading-s">Analysing structure</h4>
+      <p class="govuk-body-s">AI identifies headings, paragraphs, lists, and tables</p>
+    </div>
+  </div>
+
+  <div class="ndx-progress-stage">
+    <div class="ndx-progress-stage__number">3</div>
+    <div class="ndx-progress-stage__content">
+      <h4 class="govuk-heading-s">Structuring content</h4>
+      <p class="govuk-body-s">Amazon Bedrock organises content into semantic HTML</p>
+    </div>
+  </div>
+
+  <div class="ndx-progress-stage">
+    <div class="ndx-progress-stage__number">4</div>
+    <div class="ndx-progress-stage__content">
+      <h4 class="govuk-heading-s">Complete</h4>
+      <p class="govuk-body-s">Preview ready with conversion statistics</p>
+    </div>
+  </div>
+</div>
+
+{# Screenshot: Conversion result #}
+<figure class="ndx-screenshot govuk-!-margin-top-6">
+  <img src="/assets/images/walkthroughs/localgov-drupal/ai-features/pdf-converter-result-desktop.png"
+       alt="PDF conversion complete showing HTML preview with statistics including pages extracted, tables found, word count, and confidence score"
+       class="ndx-screenshot__image"
+       onerror="this.parentElement.style.display='none'">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    Conversion complete with preview and statistics showing pages, tables, words, and confidence
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">Conversion statistics</h3>
+
+<p class="govuk-body">
+  After conversion, you'll see helpful statistics:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Statistic</th>
+      <th scope="col" class="govuk-table__header">What it means</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Pages extracted</td>
+      <td class="govuk-table__cell">Number of PDF pages processed</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Tables found</td>
+      <td class="govuk-table__cell">Tables detected and converted to HTML</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Word count</td>
+      <td class="govuk-table__cell">Total words in the extracted content</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Confidence score</td>
+      <td class="govuk-table__cell">AI's confidence in extraction accuracy (higher is better)</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Processing time</td>
+      <td class="govuk-table__cell">How long the conversion took</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="ndx-aws-services-card">
+  <h4 class="govuk-heading-s">AWS Services Used</h4>
+  <div class="ndx-aws-services-grid">
+    <div class="ndx-aws-service">
+      <strong>Amazon Textract</strong>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        Extracts text, tables, and layout information from documents using machine learning.
+        <a href="https://aws.amazon.com/textract/" target="_blank" rel="noopener noreferrer" class="govuk-link">
+          Learn more<span class="govuk-visually-hidden"> about Amazon Textract (opens in new tab)</span>
+        </a>
+      </p>
+    </div>
+    <div class="ndx-aws-service">
+      <strong>Amazon Bedrock</strong>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        Uses foundation models to structure content into semantic HTML with proper headings.
+        <a href="https://aws.amazon.com/bedrock/" target="_blank" rel="noopener noreferrer" class="govuk-link">
+          Learn more<span class="govuk-visually-hidden"> about Amazon Bedrock (opens in new tab)</span>
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Common use cases</h3>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Document type</th>
+      <th scope="col" class="govuk-table__header">Why convert</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Council reports</td>
+      <td class="govuk-table__cell">Make committee reports searchable and accessible</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Policy documents</td>
+      <td class="govuk-table__cell">Improve discoverability of policies and procedures</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Guidance leaflets</td>
+      <td class="govuk-table__cell">Replace outdated PDFs with modern web content</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Forms information</td>
+      <td class="govuk-table__cell">Convert form instructions to accessible pages</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Historical archives</td>
+      <td class="govuk-table__cell">Digitise legacy documents for preservation</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Tip:</strong> Always review converted content before publishing. The AI does
+    excellent work but may need minor adjustments, especially for complex tables or
+    unusual formatting.
+  </p>
+</div>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-progress-stages {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 30px 0;
+  }
+
+  .ndx-progress-stage {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-progress-stage__number {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    background-color: #00703c;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .ndx-progress-stage__content h4 {
+    margin: 0 0 5px 0;
+  }
+
+  .ndx-progress-stage__content p {
+    margin: 0;
+  }
+
+  .ndx-aws-services-card {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-aws-services-card h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #1d70b8;
+  }
+
+  .ndx-aws-services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .ndx-aws-service {
+    padding: 15px;
+    background-color: #fff;
+  }
+
+  .ndx-aws-service strong {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-progress-stages {
+      gap: 10px;
+    }
+
+    .ndx-aws-services-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,50 @@
+{#
+/**
+ * @file
+ * AI Success State component.
+ *
+ * Displays a success confirmation for completed AI operations.
+ * Uses GOV.UK Design System success pattern with green (#00703c).
+ *
+ * Available variables:
+ * - message: Success message to display (required)
+ * - show_dismiss: Whether to show dismiss button (optional, default: false)
+ * - dismiss_label: Custom dismiss button label (optional, default: 'Dismiss')
+ * - auto_dismiss: Time in milliseconds to auto-dismiss (optional, default: 0 = no auto-dismiss)
+ * - id: Unique ID for the component (optional)
+ * - attributes: Additional HTML attributes (optional)
+ *
+ * Story 3.3: AI Component Design System
+ * WCAG 2.2 AA Compliance:
+ * - aria-live="polite" for screen reader announcement
+ * - Auto-dismiss respects user preferences
+ * - Success styling follows GOV.UK success pattern
+ */
+#}
+{% set success_id = id|default('ai-success-' ~ random()) %}
+{% set dismiss_button_label = dismiss_label|default('Dismiss') %}
+{% set auto_dismiss_time = auto_dismiss|default(0) %}
+
+<div
+  id="{{ success_id }}"
+  class="ai-success-state"
+  role="status"
+  aria-live="polite"
+  {% if auto_dismiss_time > 0 %}data-auto-dismiss="{{ auto_dismiss_time }}"{% endif %}
+  {{ attributes ? attributes : '' }}
+>
+  <div class="ai-success-state__content">
+    <span class="ai-success-state__icon" aria-hidden="true">&#10004;</span>
+    <p class="ai-success-state__message">{{ message }}</p>
+  </div>
+  {% if show_dismiss %}
+    <button
+      type="button"
+      class="ai-success-state__dismiss"
+      aria-label="{{ dismiss_button_label }}"
+      data-ai-action="dismiss"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  {% endif %}
+</div>

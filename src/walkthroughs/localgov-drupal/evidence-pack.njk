@@ -1,0 +1,147 @@
+---
+layout: layouts/walkthrough.njk
+title: "Evidence Pack - LocalGov Drupal"
+description: Generate a PDF summary of your LocalGov Drupal evaluation for stakeholders
+currentStep: 10
+totalSteps: 8
+scenarioId: localgov-drupal
+---
+
+{# Load jsPDF library from CDN for PDF generation #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+{#
+  Evidence Pack Page (Story 2.9)
+  - Form to collect evaluation details
+  - PDF generation with GOV.UK styling
+  - Session data pre-population
+#}
+
+{% set scenarioId = "localgov-drupal" %}
+{% set scenarioData = scenarios["localgov-drupal"] %}
+
+<nav class="govuk-breadcrumbs govuk-!-margin-bottom-6" aria-label="Breadcrumb">
+  <ol class="govuk-breadcrumbs__list">
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/">Home</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/scenarios/">Scenarios</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/scenarios/localgov-drupal/">LocalGov Drupal</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/walkthroughs/localgov-drupal/">Walkthrough</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item" aria-current="page">
+      Evidence Pack
+    </li>
+  </ol>
+</nav>
+
+<h1 class="govuk-heading-xl">
+  Create your evidence pack
+</h1>
+
+<p class="govuk-body-l">
+  Generate a professional PDF summary of your LocalGov Drupal evaluation.
+  Share with colleagues, committees, and stakeholders to support your
+  technology decisions.
+</p>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <div class="govuk-inset-text">
+      <h2 class="govuk-heading-s">What's included in the evidence pack</h2>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Scenario overview and deployment details</li>
+        <li>AWS region and estimated cost information</li>
+        <li><strong>AI features explored</strong> with outcomes achieved</li>
+        <li><strong>Generated council identity</strong> (name, region, theme)</li>
+        <li><strong>ROI talking points</strong> for each AI feature</li>
+        <li>Your observations and key takeaways</li>
+        <li>Screenshots of the deployed system (if uploaded)</li>
+        <li>Recommended next steps for your council</li>
+      </ul>
+    </div>
+
+    {% include "components/evidence-pack-form.njk" %}
+
+  </div>
+
+  <div class="govuk-grid-column-one-third">
+    <aside class="ndx-sidebar" role="complementary" aria-labelledby="sidebar-title">
+      <h2 class="govuk-heading-m" id="sidebar-title">Quick links</h2>
+
+      <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Walkthrough</h3>
+      <ul class="govuk-list govuk-list--spaced">
+        <li>
+          <a href="/walkthroughs/localgov-drupal/step-1/" class="govuk-link">
+            Step 1: Log in to Drupal
+          </a>
+        </li>
+        <li>
+          <a href="/walkthroughs/localgov-drupal/step-2/" class="govuk-link">
+            Step 2: Explore content
+          </a>
+        </li>
+        <li>
+          <a href="/walkthroughs/localgov-drupal/complete/" class="govuk-link">
+            Walkthrough complete
+          </a>
+        </li>
+      </ul>
+
+      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+      <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Resources</h3>
+      <ul class="govuk-list govuk-list--spaced">
+        <li>
+          <a href="/scenarios/localgov-drupal/" class="govuk-link">
+            Scenario overview
+          </a>
+        </li>
+        <li>
+          <a href="https://us-east-1.console.aws.amazon.com/cloudformation/" class="govuk-link" target="_blank" rel="noopener noreferrer">
+            CloudFormation console<span class="govuk-visually-hidden"> (opens in new tab)</span>
+          </a>
+        </li>
+        <li>
+          <a href="/contact/" class="govuk-link">
+            Contact NDX team
+          </a>
+        </li>
+      </ul>
+
+      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+      <h3 class="govuk-heading-s govuk-!-margin-bottom-2">Don't forget</h3>
+      <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <strong class="govuk-warning-text__text">
+          <span class="govuk-visually-hidden">Warning</span>
+          Delete your CloudFormation stack when finished to stop charges
+        </strong>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<style>
+  .ndx-sidebar {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-sidebar h3 {
+    margin-top: 0;
+  }
+
+  @media (max-width: 768px) {
+    .ndx-sidebar {
+      margin-top: 30px;
+    }
+  }
+</style>

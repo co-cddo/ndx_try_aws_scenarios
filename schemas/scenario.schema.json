@@ -586,6 +586,73 @@
                 }
               }
             }
+          },
+          "aiFeatures": {
+            "type": "array",
+            "description": "AI features available in this scenario for explore page (Story 6.2)",
+            "items": {
+              "type": "object",
+              "required": ["id", "name", "description", "category", "drupalPath", "status"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]+$",
+                  "description": "Unique identifier for the feature"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 50,
+                  "description": "Display name for the feature"
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 20,
+                  "maxLength": 200,
+                  "description": "Brief description of what the feature does"
+                },
+                "icon": {
+                  "type": "string",
+                  "enum": ["edit", "simplify", "image", "speaker", "translate", "document", "council"],
+                  "description": "Icon identifier for the feature card"
+                },
+                "category": {
+                  "type": "string",
+                  "enum": ["content", "accessibility", "generation"],
+                  "description": "Feature category for grouping"
+                },
+                "categoryLabel": {
+                  "type": "string",
+                  "description": "Display label for the category"
+                },
+                "timeEstimate": {
+                  "type": "string",
+                  "description": "Estimated time to try this feature (e.g., '5 minutes')"
+                },
+                "drupalPath": {
+                  "type": "string",
+                  "description": "Drupal admin path for deep linking (e.g., '/admin/content')"
+                },
+                "awsService": {
+                  "type": "string",
+                  "description": "Primary AWS service powering this feature"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["available", "requires-login", "coming-soon"],
+                  "description": "Current availability status"
+                },
+                "statusLabel": {
+                  "type": "string",
+                  "description": "Display label for the status badge"
+                },
+                "order": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Display order within category"
+                }
+              }
+            }
           }
         },
         "additionalProperties": false

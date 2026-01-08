@@ -1,0 +1,4 @@
+administer ndx aws ai:
+  title: 'Administer NDX AWS AI settings'
+  description: 'Configure AWS region and test connectivity for AI features.'
+  restrict access: true

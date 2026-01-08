@@ -1,0 +1,47 @@
+# Story 5.2: Council Identity Generator - Config Schema
+
+ndx_council_generator.council_identity:
+  type: config_object
+  label: 'Council Identity'
+  mapping:
+    name:
+      type: string
+      label: 'Council name'
+    regionKey:
+      type: string
+      label: 'Region key'
+    themeKey:
+      type: string
+      label: 'Theme key'
+    populationRange:
+      type: string
+      label: 'Population range'
+    populationEstimate:
+      type: integer
+      label: 'Population estimate'
+    flavourKeywords:
+      type: sequence
+      label: 'Flavour keywords'
+      sequence:
+        type: string
+        label: 'Keyword'
+    motto:
+      type: string
+      label: 'Council motto'
+    generatedAt:
+      type: integer
+      label: 'Generation timestamp'
+
+ndx_council_generator.settings:
+  type: config_object
+  label: 'Council Generator Settings'
+  mapping:
+    default_region:
+      type: string
+      label: 'Default region preference'
+    default_theme:
+      type: string
+      label: 'Default theme preference'
+    default_population:
+      type: string
+      label: 'Default population preference'

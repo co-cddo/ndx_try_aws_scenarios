@@ -1,0 +1,662 @@
+/**
+ * @file
+ * NDX Walkthrough overlay styles.
+ *
+ * Implements GOV.UK Design System patterns for the guided tour overlay.
+ * Follows WCAG 2.2 AA requirements:
+ * - 3px yellow focus rings (#ffdd00)
+ * - 44x44px minimum touch targets
+ * - High contrast text
+ *
+ * Story 2.5: Walkthrough Overlay in Drupal
+ */
+
+/* ==========================================================================
+   CSS Custom Properties
+   ========================================================================== */
+
+:root {
+  /* Z-index scale for walkthrough components */
+  --ndx-walkthrough-z-trigger: 9990;
+  --ndx-walkthrough-z-overlay: 9998;
+  --ndx-walkthrough-z-spotlight: 9999;
+  --ndx-walkthrough-z-modal: 10000;
+  --ndx-walkthrough-z-menu: 10001;
+
+  /* GOV.UK colors */
+  --ndx-walkthrough-focus-color: #ffdd00;
+  --ndx-walkthrough-text-color: #0b0c0c;
+  --ndx-walkthrough-secondary-text: #505a5f;
+  --ndx-walkthrough-link-color: #1d70b8;
+  --ndx-walkthrough-primary-btn: #00703c;
+  --ndx-walkthrough-primary-btn-hover: #005a30;
+  --ndx-walkthrough-success-color: #00703c;
+  --ndx-walkthrough-progress-bg: #f3f2f1;
+}
+
+/* ==========================================================================
+   Overlay Backdrop (Spotlight Effect)
+   ========================================================================== */
+
+.ndx-walkthrough-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: var(--ndx-walkthrough-z-overlay);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.ndx-walkthrough-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Spotlight cutout - positioned dynamically via JavaScript */
+.ndx-walkthrough-spotlight {
+  position: fixed;
+  box-shadow:
+    0 0 0 9999px rgba(0, 0, 0, 0.7),
+    0 0 0 4px var(--ndx-walkthrough-focus-color);
+  border-radius: 4px;
+  z-index: var(--ndx-walkthrough-z-spotlight);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+/* ==========================================================================
+   Modal Dialog
+   ========================================================================== */
+
+.ndx-walkthrough-modal {
+  position: fixed;
+  z-index: var(--ndx-walkthrough-z-modal);
+  background-color: #ffffff;
+  border: 3px solid var(--ndx-walkthrough-text-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 20px 25px 25px;
+  max-width: 400px;
+  width: calc(100% - 40px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.ndx-walkthrough-modal.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Centered modal (for final step) */
+.ndx-walkthrough-modal.is-centered {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ==========================================================================
+   Close Button
+   ========================================================================== */
+
+.ndx-walkthrough-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: #0b0c0c;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ndx-walkthrough-close:hover {
+  background-color: #f3f2f1;
+}
+
+.ndx-walkthrough-close:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+}
+
+/* ==========================================================================
+   Step Counter
+   ========================================================================== */
+
+.ndx-walkthrough-counter {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #505a5f;
+  margin-bottom: 10px;
+}
+
+/* ==========================================================================
+   Step Title and Content
+   ========================================================================== */
+
+.ndx-walkthrough-title {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #0b0c0c;
+  margin: 0 0 15px 0;
+  padding-right: 40px; /* Space for close button */
+}
+
+.ndx-walkthrough-content {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #0b0c0c;
+  margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   Navigation Buttons
+   ========================================================================== */
+
+.ndx-walkthrough-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.ndx-walkthrough-btn {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+  padding: 12px 16px;
+  min-width: 44px;
+  min-height: 44px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Primary button (Next) */
+.ndx-walkthrough-btn--primary {
+  background-color: #00703c;
+  color: #ffffff;
+  border-color: #00703c;
+}
+
+.ndx-walkthrough-btn--primary:hover {
+  background-color: #005a30;
+  border-color: #005a30;
+}
+
+.ndx-walkthrough-btn--primary:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+  border-color: #0b0c0c;
+}
+
+/* Secondary button (Previous) */
+.ndx-walkthrough-btn--secondary {
+  background-color: #f3f2f1;
+  color: #0b0c0c;
+  border-color: #0b0c0c;
+}
+
+.ndx-walkthrough-btn--secondary:hover {
+  background-color: #dbdad9;
+}
+
+.ndx-walkthrough-btn--secondary:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  border-color: #0b0c0c;
+}
+
+/* Link button (Skip) */
+.ndx-walkthrough-btn--link {
+  background: transparent;
+  color: #1d70b8;
+  border: none;
+  text-decoration: underline;
+  padding: 12px 8px;
+  margin-left: auto;
+}
+
+.ndx-walkthrough-btn--link:hover {
+  color: #003078;
+}
+
+.ndx-walkthrough-btn--link:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+  text-decoration: none;
+}
+
+/* Hidden state for Previous on first step */
+.ndx-walkthrough-btn[hidden] {
+  display: none;
+}
+
+/* ==========================================================================
+   Floating Trigger Button
+   ========================================================================== */
+
+.ndx-walkthrough-trigger {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: var(--ndx-walkthrough-z-trigger);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--ndx-walkthrough-link-color);
+  color: #ffffff;
+  border: none;
+  padding: 12px 16px;
+  min-width: 44px;
+  min-height: 44px;
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s ease;
+}
+
+.ndx-walkthrough-trigger:hover {
+  background-color: #003078;
+}
+
+.ndx-walkthrough-trigger:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background-color: #ffdd00;
+  color: #0b0c0c;
+}
+
+.ndx-walkthrough-trigger__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.ndx-walkthrough-trigger:focus .ndx-walkthrough-trigger__icon {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Hide trigger when tour is active */
+.ndx-walkthrough-trigger[aria-expanded="true"] {
+  display: none;
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ndx-walkthrough-overlay,
+  .ndx-walkthrough-modal,
+  .ndx-walkthrough-spotlight,
+  .ndx-walkthrough-trigger {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   Responsive Adjustments
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .ndx-walkthrough-modal {
+    max-width: none;
+    width: calc(100% - 20px);
+    left: 10px !important;
+    right: 10px;
+    bottom: 10px !important;
+    top: auto !important;
+    transform: none !important;
+  }
+
+  .ndx-walkthrough-modal.is-centered {
+    transform: none;
+    top: auto;
+    left: 10px;
+    bottom: 10px;
+  }
+
+  .ndx-walkthrough-navigation {
+    flex-direction: column;
+  }
+
+  .ndx-walkthrough-btn {
+    width: 100%;
+  }
+
+  .ndx-walkthrough-btn--link {
+    margin-left: 0;
+  }
+}
+
+/* ==========================================================================
+   Progress Bar (Story 6.1)
+   ========================================================================== */
+
+.ndx-walkthrough-progress {
+  height: 8px;
+  background-color: var(--ndx-walkthrough-progress-bg);
+  border-radius: 4px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ndx-walkthrough-progress__bar {
+  height: 100%;
+  background-color: var(--ndx-walkthrough-success-color);
+  border-radius: 4px;
+  width: 0;
+  transition: width 0.3s ease;
+}
+
+.ndx-walkthrough-progress__text {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ndx-walkthrough-secondary-text);
+}
+
+/* ==========================================================================
+   Section Navigation Toggle (Story 6.1)
+   ========================================================================== */
+
+.ndx-walkthrough-sections-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background-color: var(--ndx-walkthrough-progress-bg);
+  border: 1px solid #b1b4b6;
+  border-radius: 4px;
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ndx-walkthrough-text-color);
+  cursor: pointer;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.ndx-walkthrough-sections-toggle:hover {
+  background-color: #e8e8e8;
+}
+
+.ndx-walkthrough-sections-toggle:focus {
+  outline: 3px solid var(--ndx-walkthrough-focus-color);
+  outline-offset: 0;
+  background-color: var(--ndx-walkthrough-focus-color);
+}
+
+.ndx-walkthrough-sections-toggle__icon {
+  font-size: 16px;
+}
+
+.ndx-walkthrough-feature-label {
+  flex: 1;
+}
+
+.ndx-walkthrough-sections-toggle__arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.ndx-walkthrough-sections-toggle[aria-expanded="true"] .ndx-walkthrough-sections-toggle__arrow {
+  transform: rotate(180deg);
+}
+
+/* ==========================================================================
+   Section Navigation Menu (Story 6.1)
+   ========================================================================== */
+
+.ndx-walkthrough-sections-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 2px solid var(--ndx-walkthrough-text-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: var(--ndx-walkthrough-z-menu);
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: -10px;
+}
+
+.ndx-walkthrough-sections-menu[hidden] {
+  display: none;
+}
+
+.ndx-walkthrough-sections-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ndx-walkthrough-sections-item {
+  border-bottom: 1px solid #b1b4b6;
+}
+
+.ndx-walkthrough-sections-item:last-child {
+  border-bottom: none;
+}
+
+.ndx-walkthrough-sections-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 15px;
+  background: transparent;
+  border: none;
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 14px;
+  color: var(--ndx-walkthrough-text-color);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ndx-walkthrough-sections-btn:hover {
+  background-color: var(--ndx-walkthrough-progress-bg);
+}
+
+.ndx-walkthrough-sections-btn:focus {
+  outline: 3px solid var(--ndx-walkthrough-focus-color);
+  outline-offset: -3px;
+  background-color: var(--ndx-walkthrough-focus-color);
+}
+
+.ndx-walkthrough-sections-btn--active {
+  background-color: #e8f4ea;
+  font-weight: 700;
+}
+
+.ndx-walkthrough-sections-btn--completed {
+  color: var(--ndx-walkthrough-success-color);
+}
+
+.ndx-walkthrough-sections-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.ndx-walkthrough-sections-label {
+  flex: 1;
+}
+
+.ndx-walkthrough-sections-status {
+  font-size: 16px;
+}
+
+.ndx-walkthrough-sections-status--complete::after {
+  content: "✓";
+  color: var(--ndx-walkthrough-success-color);
+}
+
+/* ==========================================================================
+   Learn More Link (Story 6.1)
+   ========================================================================== */
+
+.ndx-walkthrough-learn-more {
+  display: inline-block;
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 14px;
+  color: var(--ndx-walkthrough-link-color);
+  text-decoration: underline;
+  margin-bottom: 15px;
+}
+
+.ndx-walkthrough-learn-more:hover {
+  color: #003078;
+}
+
+.ndx-walkthrough-learn-more:focus {
+  outline: 3px solid var(--ndx-walkthrough-focus-color);
+  outline-offset: 0;
+  background-color: var(--ndx-walkthrough-focus-color);
+  color: var(--ndx-walkthrough-text-color);
+  text-decoration: none;
+}
+
+.ndx-walkthrough-learn-more[hidden] {
+  display: none;
+}
+
+/* ==========================================================================
+   Evidence Pack Button (Story 6.1)
+   ========================================================================== */
+
+.ndx-walkthrough-btn--evidence {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background-color: #1d70b8;
+  color: #ffffff;
+  border-color: #1d70b8;
+  margin-bottom: 15px;
+  text-decoration: none;
+}
+
+.ndx-walkthrough-btn--evidence:hover {
+  background-color: #003078;
+  border-color: #003078;
+}
+
+.ndx-walkthrough-btn--evidence:focus {
+  outline: 3px solid var(--ndx-walkthrough-focus-color);
+  outline-offset: 0;
+  background-color: var(--ndx-walkthrough-focus-color);
+  color: var(--ndx-walkthrough-text-color);
+  border-color: var(--ndx-walkthrough-text-color);
+}
+
+.ndx-walkthrough-btn--evidence[hidden] {
+  display: none;
+}
+
+/* ==========================================================================
+   Feature Completed States (Story 6.1)
+   ========================================================================== */
+
+.ndx-walkthrough-feature-complete-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background-color: #e8f4ea;
+  color: var(--ndx-walkthrough-success-color);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 3px;
+  margin-left: 8px;
+}
+
+/* ==========================================================================
+   Replay Badge (Story 6.1 - AC5)
+   ========================================================================== */
+
+.ndx-walkthrough-replay-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-left: 10px;
+  background-color: #f47738;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 400;
+  border-radius: 3px;
+  vertical-align: middle;
+  animation: ndx-walkthrough-badge-fade 3s ease-out forwards;
+}
+
+@keyframes ndx-walkthrough-badge-fade {
+  0%, 70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   Responsive Adjustments for New Components (Story 6.1)
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .ndx-walkthrough-sections-menu {
+    position: fixed;
+    top: auto;
+    bottom: 80px;
+    left: 10px;
+    right: 10px;
+    max-height: 50vh;
+    margin-top: 0;
+  }
+
+  .ndx-walkthrough-progress__text {
+    position: static;
+    display: block;
+    text-align: right;
+    margin-top: 5px;
+  }
+}

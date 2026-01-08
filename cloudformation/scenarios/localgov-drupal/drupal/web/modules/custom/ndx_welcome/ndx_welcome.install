@@ -1,0 +1,71 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for NDX Welcome module.
+ *
+ * Story 1.11: First Login Welcome Experience
+ */
+
+use Drupal\block\Entity\Block;
+
+/**
+ * Implements hook_install().
+ *
+ * Places the welcome block on the admin dashboard.
+ */
+function ndx_welcome_install() {
+  // Get the default admin theme.
+  $admin_theme = \Drupal::config('system.theme')->get('admin');
+
+  // If no admin theme, use the default theme.
+  if (empty($admin_theme)) {
+    $admin_theme = \Drupal::config('system.theme')->get('default');
+  }
+
+  // Create the block instance if block module is available.
+  if (\Drupal::moduleHandler()->moduleExists('block')) {
+    $block_id = 'ndx_welcome_block';
+
+    // Check if block already exists.
+    $block = Block::load($block_id);
+    if (!$block) {
+      $block = Block::create([
+        'id' => $block_id,
+        'theme' => $admin_theme,
+        'region' => 'content',
+        'weight' => -100,
+        'plugin' => 'ndx_welcome_block',
+        'settings' => [
+          'id' => 'ndx_welcome_block',
+          'label' => 'Welcome to LocalGov Drupal',
+          'label_display' => '0',
+          'provider' => 'ndx_welcome',
+        ],
+        'visibility' => [
+          'request_path' => [
+            'id' => 'request_path',
+            'negate' => FALSE,
+            'pages' => '/admin/content',
+          ],
+        ],
+      ]);
+      $block->save();
+
+      \Drupal::messenger()->addMessage(t('NDX Welcome block has been placed on the admin content page.'));
+    }
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Removes the welcome block when the module is uninstalled.
+ */
+function ndx_welcome_uninstall() {
+  // Delete the block instance.
+  $block = Block::load('ndx_welcome_block');
+  if ($block) {
+    $block->delete();
+  }
+}

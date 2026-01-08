@@ -1,0 +1,277 @@
+# Story 5.3: Content Generation Templates - Guide Pages
+# Generates 6 step-by-step guide pages for LocalGov Drupal
+
+content_type: localgov_guides_page
+generation_order: 20
+
+style_guide: |
+  Style Guidelines (GOV.UK Step-by-Step):
+  - Number each step clearly
+  - Keep steps short and actionable
+  - Use "you" for the reader
+  - Start each step with a verb
+  - Include time estimates where helpful
+  - Link to relevant service pages
+  - Explain what happens next
+
+items:
+  - id: guide-apply-housing
+    title_template: "Apply for council housing - {{council_name}}"
+    prompt: |
+      Write a step-by-step guide for applying for council housing.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Structure as 6-8 numbered steps including:
+      1. Check if you're eligible
+      2. Gather your documents
+      3. Fill in the application
+      4. Submit your application
+      5. Wait for assessment
+      6. View available properties
+      7. Accept an offer
+
+      Include:
+      - Eligibility criteria
+      - Required documents list
+      - Expected waiting times
+      - How bidding works
+      - What to do if refused
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief overview of the process",
+        "steps": [
+          {"title": "Step 1: ...", "content": "..."},
+          {"title": "Step 2: ...", "content": "..."}
+        ]
+      }
+    images:
+      - type: hero
+        prompt: "Family viewing a council flat, estate agent showing property, hopeful expression, British social housing"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: steps
+
+  - id: guide-report-issue
+    title_template: "Report a problem in your area - {{council_name}}"
+    prompt: |
+      Write a step-by-step guide for reporting local issues.
+
+      Council: {{council_name}}
+      Theme: {{theme_description}}
+
+      Cover common issues:
+      - Fly-tipping
+      - Potholes
+      - Broken street lights
+      - Graffiti
+      - Abandoned vehicles
+      - Overflowing bins
+
+      Structure as steps:
+      1. Identify the problem
+      2. Note the location
+      3. Take a photo if safe
+      4. Report online or by phone
+      5. Receive reference number
+      6. Track progress
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief overview",
+        "steps": [...]
+      }
+    images:
+      - type: hero
+        prompt: "Person using smartphone to photograph pothole on British street, reporting issue, community action"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: steps
+
+  - id: guide-apply-benefit
+    title_template: "Apply for Housing Benefit - {{council_name}}"
+    prompt: |
+      Write a step-by-step guide for applying for Housing Benefit.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Structure as steps:
+      1. Check eligibility
+      2. Gather proof of income
+      3. Gather rent agreement
+      4. Complete application form
+      5. Submit with documents
+      6. Await decision
+      7. Receive payments
+
+      Include:
+      - Who can claim
+      - What counts as income
+      - Processing times
+      - How payments work
+      - Changes in circumstances
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief overview",
+        "steps": [...]
+      }
+    images:
+      - type: hero
+        prompt: "Person reviewing financial documents at kitchen table, calculator and paperwork, British home setting"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: steps
+
+  - id: guide-school-place
+    title_template: "Apply for a school place - {{council_name}}"
+    prompt: |
+      Write a step-by-step guide for applying for school places.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Cover primary and secondary applications:
+      1. Check key dates
+      2. Research schools
+      3. Visit open days
+      4. Complete application online
+      5. Submit by deadline
+      6. Receive offer on national offer day
+      7. Accept or appeal
+
+      Include:
+      - Admission criteria explained
+      - Catchment areas
+      - Sibling priority
+      - Appeal process
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief overview",
+        "steps": [...]
+      }
+    images:
+      - type: hero
+        prompt: "Modern British school building reception area, welcoming entrance hall, information displays, visitor sign-in desk, natural lighting"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: steps
+
+  - id: guide-wedding
+    title_template: "Plan your wedding at {{council_name}}"
+    prompt: |
+      Write a step-by-step guide for getting married through the council.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Structure as steps:
+      1. Give notice of marriage
+      2. Choose your venue
+      3. Book your date
+      4. Plan your ceremony
+      5. Prepare your documents
+      6. The big day
+      7. Get your certificate
+
+      Include:
+      - Legal requirements
+      - Venue options
+      - Ceremony types
+      - Costs involved
+      - Required documents
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief overview",
+        "steps": [...]
+      }
+    images:
+      - type: hero
+        prompt: "Wedding ceremony in elegant register office, happy couple exchanging rings, flowers and decorations, British civil ceremony"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: steps
+
+  - id: guide-planning-permission
+    title_template: "Get planning permission - {{council_name}}"
+    prompt: |
+      Write a step-by-step guide for obtaining planning permission.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Structure as steps:
+      1. Check if you need permission
+      2. Pre-application advice
+      3. Prepare your application
+      4. Submit and pay fees
+      5. Consultation period
+      6. Planning committee
+      7. Decision
+
+      Include:
+      - Common projects needing permission
+      - Permitted development rights
+      - Application fees
+      - Typical timescales
+      - What to do if refused
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief overview",
+        "steps": [...]
+      }
+    images:
+      - type: hero
+        prompt: "Architect discussing home extension plans with homeowners, blueprints on table, British residential property in background"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: steps

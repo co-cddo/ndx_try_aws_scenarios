@@ -1,0 +1,10 @@
+# Story 5.1: ndx_council_generator Module Foundation
+
+administer council generator:
+  title: 'Administer council generator'
+  description: 'Start, monitor, and manage council generation process.'
+  restrict access: true
+
+view generation status:
+  title: 'View generation status'
+  description: 'View the current council generation progress and status.'

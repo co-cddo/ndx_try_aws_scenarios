@@ -1,0 +1,86 @@
+{
+  "workflow_version": "1.2.0",
+  "timestamps": {
+    "started": "2025-12-23T17:35:00Z",
+    "last_updated": "2025-12-23T17:55:00Z",
+    "completed": "2025-12-23T17:55:00Z"
+  },
+  "mode": "initial_scan",
+  "scan_level": "exhaustive",
+  "status": "completed",
+  "project_root": "/Users/cns/httpdocs/cddo/ndx_try_aws_scenarios",
+  "output_folder": "/Users/cns/httpdocs/cddo/ndx_try_aws_scenarios/_bmad-output",
+  "repository_type": "multi-part",
+  "project_types": [
+    {
+      "part_id": "portal",
+      "project_type_id": "web",
+      "display_name": "Documentation Portal",
+      "root_path": "src/",
+      "description": "Eleventy static site with GOV.UK Frontend documenting AWS scenarios",
+      "tech_stack": ["Eleventy 3.x", "GOV.UK Frontend 5.13", "Nunjucks", "TypeScript"],
+      "entry_point": "eleventy.config.js"
+    },
+    {
+      "part_id": "aws-scenarios",
+      "project_type_id": "infra",
+      "display_name": "AWS Scenario Templates",
+      "root_path": "cloudformation/",
+      "description": "6 deployable CloudFormation mini-applications",
+      "tech_stack": ["CloudFormation/SAM", "Python 3.12", "Lambda", "Bedrock", "Comprehend", "Polly"],
+      "entry_point": "cloudformation/scenarios/*/template.yaml"
+    }
+  ],
+  "completed_steps": [
+    {
+      "step": "step_1",
+      "status": "completed",
+      "timestamp": "2025-12-23T17:35:00Z",
+      "summary": "Classified as multi-part with 2 parts: portal (web) + aws-scenarios (infra)"
+    },
+    {
+      "step": "step_2",
+      "status": "completed",
+      "timestamp": "2025-12-23T17:40:00Z",
+      "summary": "Discovered 9 existing documentation files"
+    },
+    {
+      "step": "step_3",
+      "status": "completed",
+      "timestamp": "2025-12-23T17:45:00Z",
+      "summary": "Analyzed technology stacks for both parts"
+    },
+    {
+      "step": "step_4",
+      "status": "completed",
+      "timestamp": "2025-12-23T17:50:00Z",
+      "summary": "Generated core documentation files"
+    },
+    {
+      "step": "deep_dive",
+      "status": "completed",
+      "timestamp": "2025-12-23T19:30:00Z",
+      "summary": "Generated 4 deep-dive documents (portal components, data layer, CloudFormation, TypeScript utilities)"
+    }
+  ],
+  "findings": {
+    "project_classification": "Multi-part: Documentation Portal (Eleventy/GOV.UK) + AWS Scenarios (CloudFormation)",
+    "primary_languages": ["JavaScript", "TypeScript", "Python"],
+    "frameworks": ["Eleventy 3.x", "GOV.UK Frontend 5.13", "CloudFormation/SAM"],
+    "aws_services": ["Bedrock (Nova Pro)", "Comprehend", "Textract", "Polly", "IoT Core", "Timestream", "QuickSight", "Lambda", "S3"],
+    "scenarios_count": 6,
+    "existing_docs_count": 9,
+    "testing_frameworks": ["Vitest", "Playwright", "Pa11y", "Lighthouse CI"]
+  },
+  "outputs_generated": [
+    "project-scan-report.json",
+    "index.md",
+    "project-overview.md",
+    "source-tree-analysis.md",
+    "deep-dive-portal-components.md",
+    "deep-dive-portal-data-layer.md",
+    "deep-dive-cloudformation.md",
+    "deep-dive-typescript-utilities.md"
+  ],
+  "resume_instructions": "Documentation complete with deep-dives. All major areas documented."
+}

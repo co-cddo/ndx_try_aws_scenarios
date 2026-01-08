@@ -1,0 +1,119 @@
+services:
+  # Story 5.1: ndx_council_generator Module Foundation
+
+  ndx_council_generator.state_manager:
+    class: Drupal\ndx_council_generator\Service\GenerationStateManager
+    arguments:
+      - '@state'
+      - '@logger.channel.ndx_council_generator'
+
+  ndx_council_generator.generator:
+    class: Drupal\ndx_council_generator\Service\CouncilGeneratorService
+    arguments:
+      - '@ndx_council_generator.state_manager'
+      - '@ndx_aws_ai.bedrock'
+      - '@entity_type.manager'
+      - '@logger.channel.ndx_council_generator'
+      - '@config.factory'
+
+  # Story 5.2: Council Identity Generator
+  ndx_council_generator.identity_generator:
+    class: Drupal\ndx_council_generator\Generator\CouncilIdentityGenerator
+    arguments:
+      - '@ndx_aws_ai.bedrock'
+      - '@ndx_council_generator.state_manager'
+      - '@config.factory'
+      - '@extension.list.module'
+      - '@logger.channel.ndx_council_generator'
+
+  # Story 5.3: Content Generation Templates
+  ndx_council_generator.content_template_manager:
+    class: Drupal\ndx_council_generator\Service\ContentTemplateManager
+    arguments:
+      - '@extension.list.module'
+      - '@logger.channel.ndx_council_generator'
+
+  # Story 5.4: Content Generation Orchestrator
+  ndx_council_generator.content_orchestrator:
+    class: Drupal\ndx_council_generator\Service\ContentGenerationOrchestrator
+    arguments:
+      - '@ndx_council_generator.content_template_manager'
+      - '@ndx_aws_ai.bedrock'
+      - '@ndx_council_generator.state_manager'
+      - '@entity_type.manager'
+      - '@config.factory'
+      - '@logger.channel.ndx_council_generator'
+      - '@ndx_council_generator.image_collector'
+
+  # Story 5.5: Image Specification Collector
+  ndx_council_generator.image_collector:
+    class: Drupal\ndx_council_generator\Service\ImageSpecificationCollector
+    arguments:
+      - '@state'
+      - '@logger.channel.ndx_council_generator'
+
+  # Story 5.6: Batch Image Generation
+  ndx_council_generator.media_creator:
+    class: Drupal\ndx_council_generator\Service\MediaCreator
+    arguments:
+      - '@entity_type.manager'
+      - '@file_system'
+      - '@logger.channel.ndx_council_generator'
+
+  ndx_council_generator.image_batch_processor:
+    class: Drupal\ndx_council_generator\Service\ImageBatchProcessor
+    arguments:
+      - '@ndx_aws_ai.image_generation'
+      - '@ndx_council_generator.image_collector'
+      - '@ndx_council_generator.media_creator'
+      - '@ndx_council_generator.state_manager'
+      - '@config.factory'
+      - '@logger.channel.ndx_council_generator'
+
+  logger.channel.ndx_council_generator:
+    parent: logger.channel_base
+    arguments: ['ndx_council_generator']
+
+  # Content Cleanup Service (for --force regeneration)
+  ndx_council_generator.content_cleanup:
+    class: Drupal\ndx_council_generator\Service\ContentCleanupService
+    arguments:
+      - '@entity_type.manager'
+      - '@ndx_council_generator.navigation_configurator'
+      - '@ndx_council_generator.state_manager'
+      - '@file_system'
+      - '@logger.channel.ndx_council_generator'
+
+  # Story 5.9: Navigation Menu Configuration
+  ndx_council_generator.navigation_configurator:
+    class: Drupal\ndx_council_generator\Service\NavigationMenuConfigurator
+    arguments:
+      - '@entity_type.manager'
+      - '@logger.channel.ndx_council_generator'
+
+  # Story 5.10: Homepage Views and Blocks Configuration
+  ndx_council_generator.homepage_configurator:
+    class: Drupal\ndx_council_generator\Service\HomepageConfigurator
+    arguments:
+      - '@entity_type.manager'
+      - '@config.factory'
+      - '@logger.channel.ndx_council_generator'
+
+  # Story 5.7: Drush Generation Command
+  # Note: Logger is inherited from DrushCommands parent class
+  ndx_council_generator.commands:
+    class: Drupal\ndx_council_generator\Commands\CouncilGeneratorCommands
+    arguments:
+      - '@ndx_council_generator.identity_generator'
+      - '@ndx_council_generator.content_orchestrator'
+      - '@ndx_council_generator.image_batch_processor'
+      - '@ndx_council_generator.image_collector'
+      - '@ndx_council_generator.content_template_manager'
+      - '@ndx_council_generator.state_manager'
+      - '@ndx_aws_ai.image_generation'
+      - '@file_system'
+      - '@config.factory'
+      - '@ndx_council_generator.navigation_configurator'
+      - '@ndx_council_generator.homepage_configurator'
+    tags:
+      - { name: drush.command }

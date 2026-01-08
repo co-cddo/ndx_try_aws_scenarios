@@ -1,0 +1,517 @@
+# Story 5.3: Content Generation Templates - Directory Entries
+# Generates 12 local directory entries for LocalGov Drupal
+
+content_type: localgov_directory
+generation_order: 30
+
+style_guide: |
+  Style Guidelines (Directory Entries):
+  - Include full contact details
+  - List opening hours clearly
+  - Note accessibility features
+  - Include transport/parking info
+  - Keep descriptions factual
+  - Use consistent formatting
+
+items:
+  - id: directory-main-library
+    title_template: "{{council_name}} Central Library"
+    prompt: |
+      Write a directory entry for the main public library.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Include:
+      - Description of facilities
+      - Opening hours (Mon-Sat plus Sunday if applicable)
+      - Contact details (phone, email)
+      - Address with postcode
+      - Accessibility features
+      - Parking and transport links
+      - Services offered (computers, printing, events)
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full facility description",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "phone": "...",
+        "email": "...",
+        "opening_hours": "...",
+        "accessibility": ["..."],
+        "facilities": ["..."]
+      }
+    images:
+      - type: location
+        prompt: "Modern British public library exterior, glass frontage, accessible entrance, signage visible, {{region_name}} town centre"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-leisure-centre
+    title_template: "{{council_name}} Leisure Centre"
+    prompt: |
+      Write a directory entry for the main leisure centre.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Include:
+      - Sports facilities (pool, gym, courts)
+      - Opening hours
+      - Membership options
+      - Pay-as-you-go prices
+      - Accessibility features
+      - Classes and activities
+      - Parking information
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full facility description",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "phone": "...",
+        "opening_hours": "...",
+        "accessibility": ["..."],
+        "facilities": ["..."]
+      }
+    images:
+      - type: location
+        prompt: "Modern British leisure centre, swimming pool visible through windows, families entering, accessible entrance"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-town-hall
+    title_template: "{{council_name}} Town Hall"
+    prompt: |
+      Write a directory entry for the council's main building.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+      Flavour: {{flavour_keywords}}
+
+      Include:
+      - Services available (reception, payments, registrars)
+      - Opening hours
+      - Contact details
+      - Building history/significance
+      - Meeting rooms for hire
+      - Accessibility information
+      - Nearby parking
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full description including historical context",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "phone": "...",
+        "opening_hours": "...",
+        "accessibility": ["..."]
+      }
+    images:
+      - type: location
+        prompt: "Traditional British town hall building, civic architecture, union jack flag, {{region_name}} style, cloudy sky"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-recycling-centre
+    title_template: "Household Waste Recycling Centre"
+    prompt: |
+      Write a directory entry for the local recycling centre.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include:
+      - What can be recycled/disposed
+      - Opening hours (including weekends)
+      - Any booking requirements
+      - Vehicle restrictions
+      - Proof of residency needed
+      - Tips for visiting
+      - Location and access
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full facility description",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "phone": "...",
+        "opening_hours": "...",
+        "notes": "Important visitor information"
+      }
+    images:
+      - type: location
+        prompt: "British household waste recycling centre, clearly labeled containers for different materials, helpful staff, well organized"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-main-park
+    title_template: "{{council_name}} Central Park"
+    prompt: |
+      Write a directory entry for the main town park.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+      Flavour: {{flavour_keywords}}
+
+      Include:
+      - Park features and history
+      - Play areas
+      - Sports facilities
+      - Cafe/refreshments
+      - Events and activities
+      - Accessibility
+      - Opening hours (if gated)
+      - Parking
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full park description",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "facilities": ["..."],
+        "accessibility": ["..."]
+      }
+    images:
+      - type: location
+        prompt: "Beautiful British park, families enjoying sunny day, playground, mature trees, flower beds, {{region_name}} landscape"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-customer-service
+    title_template: "Customer Service Centre"
+    prompt: |
+      Write a directory entry for the customer service centre.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include:
+      - Services available in person
+      - Opening hours
+      - Appointment booking
+      - Drop-in availability
+      - Accessibility features
+      - Interpreter services
+      - What to bring
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full service description",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "phone": "...",
+        "email": "...",
+        "opening_hours": "...",
+        "accessibility": ["..."]
+      }
+    images:
+      - type: location
+        prompt: "Modern council customer service centre, reception desk, waiting area, digital displays, accessible design, friendly staff"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-register-office
+    title_template: "Register Office"
+    prompt: |
+      Write a directory entry for the register office.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Include:
+      - Services (births, deaths, marriages, civil partnerships)
+      - Ceremony room details
+      - Appointment booking
+      - Opening hours
+      - Certificate collection
+      - Accessibility
+      - Parking
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full service description",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "phone": "...",
+        "email": "...",
+        "opening_hours": "...",
+        "accessibility": ["..."]
+      }
+    images:
+      - type: location
+        prompt: "Elegant register office ceremony room, decorated for wedding, flowers, natural light, British civic building"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-community-centre
+    title_template: "Community Centre"
+    prompt: |
+      Write a directory entry for a community centre.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Include:
+      - Rooms available for hire
+      - Regular activities and groups
+      - Opening hours
+      - Hire rates
+      - Kitchen facilities
+      - Accessibility
+      - Parking
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full facility description",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "phone": "...",
+        "email": "...",
+        "opening_hours": "...",
+        "facilities": ["..."],
+        "accessibility": ["..."]
+      }
+    images:
+      - type: location
+        prompt: "British community centre, modern single-storey building, community notice board, people entering, accessible entrance"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-museum
+    title_template: "{{council_name}} Museum"
+    prompt: |
+      Write a directory entry for the local museum.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+      Flavour: {{flavour_keywords}}
+
+      Include:
+      - Collections and exhibitions
+      - Local history focus
+      - Opening hours
+      - Admission (free or priced)
+      - Accessibility
+      - Shop and cafe
+      - School visits
+      - Events programme
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full museum description highlighting local heritage",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "phone": "...",
+        "opening_hours": "...",
+        "admission": "...",
+        "accessibility": ["..."]
+      }
+    images:
+      - type: location
+        prompt: "British local history museum, Victorian building, exhibition entrance, visitors, heritage displays visible"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-car-park
+    title_template: "Town Centre Car Park"
+    prompt: |
+      Write a directory entry for the main town centre car park.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include:
+      - Number of spaces
+      - Disabled parking
+      - Height restrictions
+      - Payment methods
+      - Tariffs
+      - Opening hours
+      - Electric vehicle charging
+      - Security features
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full parking information",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "opening_hours": "...",
+        "tariffs": "...",
+        "facilities": ["..."]
+      }
+    images:
+      - type: location
+        prompt: "British town centre car park, payment machine, disabled spaces, EV chargers, multi-storey or surface level"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-sports-ground
+    title_template: "Recreation Ground"
+    prompt: |
+      Write a directory entry for the local recreation ground.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Include:
+      - Sports pitches available
+      - Booking information
+      - Changing facilities
+      - Pavilion
+      - Events
+      - Parking
+      - Accessibility
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full facility description",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "phone": "...",
+        "facilities": ["..."],
+        "booking": "..."
+      }
+    images:
+      - type: location
+        prompt: "British recreation ground, football pitch, cricket pavilion, grass sports fields, {{region_name}} setting"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description
+
+  - id: directory-allotments
+    title_template: "Community Allotments"
+    prompt: |
+      Write a directory entry for council allotments.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include:
+      - Number of plots
+      - Plot sizes available
+      - Annual rent
+      - Waiting list information
+      - Water supply
+      - Communal facilities
+      - Rules and regulations
+      - How to apply
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "One sentence description",
+        "description": "Full allotment information",
+        "address": {"street": "...", "town": "...", "postcode": "..."},
+        "contact": "...",
+        "rental": "...",
+        "facilities": ["..."]
+      }
+    images:
+      - type: location
+        prompt: "British allotment gardens, vegetable plots, garden sheds, community gardening, {{region_name}} setting"
+        dimensions: "800x600"
+        style: photo
+        field_name: field_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: description

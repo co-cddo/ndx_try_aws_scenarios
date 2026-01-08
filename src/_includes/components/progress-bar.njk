@@ -1,0 +1,29 @@
+{#
+  Progress Bar Component - Story 2.6
+
+  Displays overall walkthrough completion percentage.
+  Follows GOV.UK Design System patterns.
+
+  Parameters:
+  - percentage: Number 0-100 (completion percentage)
+  - label: String (optional, screen reader label)
+
+  Usage:
+  {% include "components/progress-bar.njk" %}
+#}
+
+{% set progressPercentage = percentage | default(0) %}
+{% set progressLabel = label | default("Walkthrough progress") %}
+
+<div class="ndx-progress-bar" role="progressbar"
+     aria-valuenow="{{ progressPercentage }}"
+     aria-valuemin="0"
+     aria-valuemax="100"
+     aria-label="{{ progressLabel }}">
+  <div class="ndx-progress-bar__track">
+    <div class="ndx-progress-bar__fill" style="width: {{ progressPercentage }}%"></div>
+  </div>
+  <span class="ndx-progress-bar__label" aria-hidden="true">
+    {{ progressPercentage }}% complete
+  </span>
+</div>

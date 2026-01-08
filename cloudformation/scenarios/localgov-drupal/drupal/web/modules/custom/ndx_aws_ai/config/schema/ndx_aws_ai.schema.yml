@@ -1,0 +1,7 @@
+ndx_aws_ai.settings:
+  type: config_object
+  label: 'NDX AWS AI settings'
+  mapping:
+    aws_region:
+      type: string
+      label: 'AWS Region'

@@ -1,0 +1,58 @@
+{
+  "generated": "2026-01-03T20:06:17.884Z",
+  "project": "LocalGov Drupal AI Features",
+  "drupalUrl": "http://NdxDrupal-ALB-production-1636052025.us-east-1.elb.amazonaws.com",
+  "hasAdminCredentials": false,
+  "count": 7,
+  "screenshots": [
+    {
+      "filename": "demo-banner-desktop.png",
+      "feature": "demo",
+      "viewport": "desktop",
+      "size": "73.4KB",
+      "bytes": 75178
+    },
+    {
+      "filename": "demo-banner-visible-desktop.png",
+      "feature": "demo",
+      "viewport": "desktop",
+      "size": "70.8KB",
+      "bytes": 72500
+    },
+    {
+      "filename": "homepage-overview-default-desktop.png",
+      "feature": "homepage",
+      "viewport": "desktop",
+      "size": "74.7KB",
+      "bytes": 76482
+    },
+    {
+      "filename": "homepage-overview-desktop.png",
+      "feature": "homepage",
+      "viewport": "desktop",
+      "size": "73.8KB",
+      "bytes": 75595
+    },
+    {
+      "filename": "services-landing-default-desktop.png",
+      "feature": "services",
+      "viewport": "desktop",
+      "size": "74.9KB",
+      "bytes": 76731
+    },
+    {
+      "filename": "services-landing-desktop.png",
+      "feature": "services",
+      "viewport": "desktop",
+      "size": "74.9KB",
+      "bytes": 76731
+    },
+    {
+      "filename": "tts-page-overview-desktop.png",
+      "feature": "tts",
+      "viewport": "desktop",
+      "size": "73.4KB",
+      "bytes": 75178
+    }
+  ]
+}

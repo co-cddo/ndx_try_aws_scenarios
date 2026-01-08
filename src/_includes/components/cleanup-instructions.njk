@@ -1,0 +1,261 @@
+{#
+  Cleanup Instructions Component - Story 2.10
+
+  Provides comprehensive AWS resource cleanup guidance for council officers.
+
+  Required variables:
+    - scenarioId: The scenario identifier (e.g., 'localgov-drupal')
+    - stackNamePrefix: Optional stack name prefix (defaults to 'ndx-try-{scenarioId}')
+
+  Features:
+  - Step-by-step CloudFormation deletion instructions
+  - Direct link to CloudFormation console (us-east-1)
+  - Data loss warnings
+  - Common errors and troubleshooting
+  - Estimated cleanup time
+#}
+
+{% set stackPrefix = stackNamePrefix | default('ndx-try-' + scenarioId) %}
+
+<div class="ndx-cleanup-section" id="cleanup-instructions" role="region" aria-labelledby="cleanup-title">
+  <h2 class="govuk-heading-l" id="cleanup-title">Clean up your resources</h2>
+
+  {# Auto-delete reassurance #}
+  <div class="govuk-inset-text">
+    <p class="govuk-body">
+      <strong>Good news:</strong> Your resources will <strong>automatically delete after 2 hours</strong> from deployment.
+      However, you can delete them now to stop any further charges immediately.
+    </p>
+  </div>
+
+  {# Data loss warning #}
+  <div class="govuk-warning-text govuk-!-margin-bottom-6">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Warning</span>
+      Deleting your stack will permanently remove all data including:
+      <ul class="govuk-list govuk-list--bullet govuk-!-margin-top-2 govuk-!-margin-bottom-0">
+        <li>Database content (RDS Aurora)</li>
+        <li>Uploaded files (EFS storage)</li>
+        <li>Any configuration changes you made</li>
+      </ul>
+    </strong>
+  </div>
+
+  {# Step-by-step instructions #}
+  <h3 class="govuk-heading-m">Step-by-step deletion</h3>
+
+  <ol class="govuk-list govuk-list--number ndx-cleanup-steps">
+    <li>
+      <strong>Open the CloudFormation console</strong>
+      <p class="govuk-body govuk-!-margin-top-1">
+        Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console (US East 1)<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+      </p>
+      {# Screenshot placeholder #}
+      <div class="ndx-screenshot-placeholder" aria-hidden="true">
+        <span class="ndx-screenshot-placeholder__text">Screenshot: CloudFormation console</span>
+      </div>
+    </li>
+    <li>
+      <strong>Find your stack</strong>
+      <p class="govuk-body govuk-!-margin-top-1">
+        Look for a stack named: <code class="ndx-code">{{ stackPrefix }}-[timestamp]</code>
+      </p>
+      <p class="govuk-hint">
+        The timestamp is when you deployed. You can sort by "Created time" to find recent stacks.
+      </p>
+    </li>
+    <li>
+      <strong>Select and delete</strong>
+      <p class="govuk-body govuk-!-margin-top-1">
+        Select the checkbox next to your stack, then click the <strong>Delete</strong> button.
+      </p>
+      {# Screenshot placeholder #}
+      <div class="ndx-screenshot-placeholder" aria-hidden="true">
+        <span class="ndx-screenshot-placeholder__text">Screenshot: Delete stack button</span>
+      </div>
+    </li>
+    <li>
+      <strong>Confirm deletion</strong>
+      <p class="govuk-body govuk-!-margin-top-1">
+        Click <strong>Delete</strong> in the confirmation dialog. The stack status will change to <code class="ndx-code">DELETE_IN_PROGRESS</code>.
+      </p>
+    </li>
+    <li>
+      <strong>Wait for completion</strong>
+      <p class="govuk-body govuk-!-margin-top-1">
+        Deletion typically takes <strong>5-10 minutes</strong>. The stack will disappear from the list when complete.
+      </p>
+    </li>
+  </ol>
+
+  {# Cost confirmation #}
+  <div class="govuk-panel govuk-panel--confirmation ndx-cost-confirmation govuk-!-margin-top-6">
+    <h3 class="govuk-panel__title govuk-!-font-size-27">
+      Costs stop after deletion
+    </h3>
+    <div class="govuk-panel__body">
+      Once your stack is deleted, you will not incur any further charges for this scenario.
+      <br>
+      <span class="govuk-body-s">Estimated evaluation cost: Less than $0.50 for a 15-minute trial</span>
+    </div>
+  </div>
+
+  {# Troubleshooting section #}
+  <h3 class="govuk-heading-m govuk-!-margin-top-8">Troubleshooting</h3>
+
+  <details class="govuk-details govuk-!-margin-bottom-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        Stack shows DELETE_FAILED status
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        This usually happens when resources can't be automatically cleaned up. Common causes:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>
+          <strong>S3 bucket not empty:</strong> The bucket may contain files. Go to S3, empty the bucket manually, then retry deletion.
+        </li>
+        <li>
+          <strong>Lambda functions in use:</strong> Wait a few minutes and retry. Sometimes functions take time to fully stop.
+        </li>
+        <li>
+          <strong>Network interfaces still attached:</strong> These usually clear within 5-10 minutes. Retry the deletion.
+        </li>
+      </ul>
+      <p class="govuk-body">
+        To retry deletion: Select the failed stack and click <strong>Delete</strong> again.
+      </p>
+    </div>
+  </details>
+
+  <details class="govuk-details govuk-!-margin-bottom-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        I can't find my stack in the list
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        If your stack isn't visible:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>
+          <strong>Check the region:</strong> Make sure you're viewing <strong>US East (N. Virginia)</strong> in the console header.
+        </li>
+        <li>
+          <strong>Stack already deleted:</strong> It may have auto-deleted after 2 hours. No action needed!
+        </li>
+        <li>
+          <strong>View deleted stacks:</strong> Click "View nested" dropdown and select "Deleted" to see recently deleted stacks.
+        </li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="govuk-details govuk-!-margin-bottom-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">
+        What if I want to keep exploring longer?
+      </span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">
+        If you want to continue testing beyond the 2-hour limit:
+      </p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Resources will auto-delete after 2 hours total (from deployment)</li>
+        <li>Cost: approximately $1-2 per hour of active testing</li>
+        <li>Maximum cost is capped by template configuration</li>
+      </ul>
+      <p class="govuk-body">
+        You can redeploy the scenario anytime to start fresh with a new 2-hour window.
+      </p>
+    </div>
+  </details>
+
+  {# Help link #}
+  <p class="govuk-body govuk-!-margin-top-6">
+    <strong>Still having trouble?</strong>
+    <a href="/contact/" class="govuk-link">Contact the NDX:Try team</a> or
+    <a href="https://github.com/co-cddo/ndx-try-feedback/issues" target="_blank" rel="noopener noreferrer" class="govuk-link">report an issue on GitHub<span class="govuk-visually-hidden"> (opens in new tab)</span></a>.
+  </p>
+</div>
+
+<style>
+  .ndx-cleanup-section {
+    padding: 30px;
+    background-color: #fff7e6;
+    border-left: 4px solid #f47738;
+    margin-top: 30px;
+  }
+
+  .ndx-cleanup-section h2 {
+    margin-top: 0;
+  }
+
+  .ndx-cleanup-steps li {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #b1b4b6;
+  }
+
+  .ndx-cleanup-steps li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .ndx-code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+    word-break: break-all;
+  }
+
+  .ndx-screenshot-placeholder {
+    background-color: #f3f2f1;
+    border: 2px dashed #b1b4b6;
+    padding: 40px 20px;
+    text-align: center;
+    margin: 15px 0;
+    border-radius: 4px;
+  }
+
+  .ndx-screenshot-placeholder__text {
+    color: #505a5f;
+    font-style: italic;
+    font-size: 14px;
+  }
+
+  .ndx-cost-confirmation {
+    background-color: #00703c;
+  }
+
+  .ndx-cost-confirmation .govuk-panel__body {
+    font-size: 16px;
+  }
+
+  /* Warning text with list inside */
+  .govuk-warning-text__text ul {
+    margin-left: 0;
+    padding-left: 20px;
+  }
+
+  .govuk-warning-text__text li {
+    font-weight: normal;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-cleanup-section {
+      padding: 20px;
+    }
+
+    .ndx-screenshot-placeholder {
+      padding: 30px 15px;
+    }
+  }
+</style>

@@ -1,0 +1,192 @@
+---
+layout: layouts/walkthrough.njk
+title: LocalGov Drupal Walkthrough
+description: Step-by-step guide to exploring your deployed LocalGov Drupal CMS with AI features
+currentStep: 0
+totalSteps: 12
+scenarioId: localgov-drupal
+---
+
+{#
+  Walkthrough Landing Page (Story 2.4)
+  - Value proposition for council officers
+  - Prerequisites and deployment check
+  - Overview of what users will learn
+#}
+
+<h1 class="govuk-heading-xl">Explore LocalGov Drupal with AI</h1>
+
+{# Get walkthrough data for dynamic content #}
+{% set walkthroughData = walkthroughs.walkthroughs[scenarioId] %}
+
+{# Value proposition - using duration from YAML #}
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    {{ walkthroughData.duration }} to explore a modern council CMS
+  </h2>
+  <div class="govuk-panel__body">
+    No deployment needed. Follow along with your deployed Drupal site or view the screenshots.
+  </div>
+</div>
+
+{# Technical reassurance - no technical knowledge required #}
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you step-by-step through logging in, exploring content, and
+    editing pages. Perfect for service managers, content editors, and anyone evaluating
+    LocalGov Drupal for their council.
+  </p>
+</div>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this {{ walkthroughData.duration }} walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  {% for step in walkthroughData.steps %}
+  <li>
+    <strong>{{ step.title }}</strong>{% if step.description %} - {{ step.description }}{% endif %}{% if step.time %} ({{ step.time }}){% endif %}
+  </li>
+  {% endfor %}
+</ol>
+
+{# Prerequisites #}
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already deployed the LocalGov Drupal scenario to your Innovation Sandbox account.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/localgov-drupal/" class="govuk-link">Deploy the LocalGov Drupal scenario</a> if you haven't already.
+    Deployment takes 35-40 minutes.
+  </p>
+
+  <h3 class="govuk-heading-s">You'll need</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Your CloudFormation stack to show <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span></li>
+    <li>The <strong>DrupalUrl</strong> from your stack's Outputs tab</li>
+    <li>The <strong>AdminUsername</strong> and <strong>AdminPassword</strong> from Outputs</li>
+  </ul>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For content editors</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How to navigate the Drupal admin interface</li>
+      <li>How to find and edit existing content</li>
+      <li>How the WYSIWYG editor works</li>
+      <li>How LocalGov Drupal organises council content</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For service managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>LocalGov Drupal's content structure</li>
+      <li>How service pages are organised</li>
+      <li>The admin dashboard overview</li>
+      <li>How to prepare reports for stakeholders</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">Content types you'll see</h2>
+
+<p class="govuk-body">
+  LocalGov Drupal includes pre-built content types for UK councils:
+</p>
+
+<div class="govuk-grid-row ndx-content-types-preview">
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-content-type-card">
+      <h3 class="govuk-heading-s">Service Pages</h3>
+      <p class="govuk-body-s">
+        Waste & Recycling, Planning, Council Tax, Housing and more
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-content-type-card">
+      <h3 class="govuk-heading-s">Guide Pages</h3>
+      <p class="govuk-body-s">
+        Step-by-step guides like "How to apply for planning permission"
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-content-type-card">
+      <h3 class="govuk-heading-s">News Articles</h3>
+      <p class="govuk-body-s">
+        Council announcements and updates
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/localgov-drupal/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately {{ walkthroughData.duration }}
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-content-types-preview {
+    margin-top: 20px;
+  }
+
+  .ndx-content-type-card {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-content-type-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-content-type-card p {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-content-type-card {
+      margin-bottom: 15px;
+    }
+  }
+</style>

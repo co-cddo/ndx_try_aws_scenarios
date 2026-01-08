@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * NDX Welcome module.
+ *
+ * Displays a welcoming orientation experience on the admin dashboard
+ * for first-time users.
+ *
+ * Story 1.11: First Login Welcome Experience
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ndx_welcome_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.ndx_welcome':
+      return '<p>' . t('Displays a welcoming orientation experience on the admin dashboard.') . '</p>';
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function ndx_welcome_theme() {
+  return [
+    'ndx_welcome_block' => [
+      'variables' => [
+        'council_name' => 'Westbridge Council',
+        'quick_links' => [],
+      ],
+      'template' => 'welcome-block',
+    ],
+  ];
+}

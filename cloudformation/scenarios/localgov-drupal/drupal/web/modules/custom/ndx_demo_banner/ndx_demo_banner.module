@@ -1,0 +1,97 @@
+<?php
+
+/**
+ * @file
+ * NDX Demo Banner module.
+ *
+ * Displays a prominent demonstration site banner on all pages to clearly
+ * indicate this is not a real council website.
+ *
+ * Story 1.10: DEMO Banner Module
+ * Story 5.2: Council Identity Generator - Integration for dynamic council name
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function ndx_demo_banner_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.ndx_demo_banner':
+      return '<p>' . t('Displays a demonstration site banner on all pages.') . '</p>';
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * Attaches the demo banner library to all pages.
+ */
+function ndx_demo_banner_page_attachments(array &$attachments) {
+  $attachments['#attached']['library'][] = 'ndx_demo_banner/demo-banner';
+}
+
+/**
+ * Implements hook_page_top().
+ *
+ * Adds the demo banner markup at the top of every page.
+ */
+function ndx_demo_banner_page_top(array &$page_top) {
+  $council_name = _ndx_demo_banner_get_council_name();
+
+  $page_top['ndx_demo_banner'] = [
+    '#theme' => 'ndx_demo_banner',
+    '#council_name' => $council_name,
+    '#weight' => -1000,
+    '#cache' => [
+      'tags' => ['config:ndx_council_generator.council_identity'],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_theme().
+ */
+function ndx_demo_banner_theme() {
+  return [
+    'ndx_demo_banner' => [
+      'variables' => [
+        'council_name' => 'Westbridge Council',
+      ],
+      'template' => 'demo-banner',
+    ],
+  ];
+}
+
+/**
+ * Gets the council name for the demo banner.
+ *
+ * Story 5.2: Council Identity Generator - Integration
+ *
+ * Priority order:
+ * 1. Generated council identity from ndx_council_generator config
+ * 2. Environment variable COUNCIL_NAME
+ * 3. Default fallback name
+ *
+ * @return string
+ *   The council name to display.
+ */
+function _ndx_demo_banner_get_council_name(): string {
+  // First try to get from council generator config (Story 5.2).
+  $identity_config = \Drupal::config('ndx_council_generator.council_identity');
+  $identity_name = $identity_config->get('name');
+
+  if (!empty($identity_name)) {
+    return $identity_name;
+  }
+
+  // Fall back to environment variable.
+  $env_name = getenv('COUNCIL_NAME');
+  if (!empty($env_name)) {
+    return $env_name;
+  }
+
+  // Default fallback.
+  return 'Westbridge Council';
+}

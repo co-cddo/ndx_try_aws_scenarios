@@ -41,3 +41,6 @@ playwright-report
 playwright-screenshots
 test-results
 *.pyc
+# CDK build outputs
+cdk.out/
+outputs.json

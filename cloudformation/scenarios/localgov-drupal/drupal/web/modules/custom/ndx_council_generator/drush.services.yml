@@ -1,0 +1,18 @@
+services:
+  ndx_council_generator.commands:
+    class: Drupal\ndx_council_generator\Commands\CouncilGeneratorCommands
+    arguments:
+      - '@ndx_council_generator.identity_generator'
+      - '@ndx_council_generator.content_orchestrator'
+      - '@ndx_council_generator.image_batch_processor'
+      - '@ndx_council_generator.image_collector'
+      - '@ndx_council_generator.content_template_manager'
+      - '@ndx_council_generator.state_manager'
+      - '@ndx_aws_ai.image_generation'
+      - '@file_system'
+      - '@config.factory'
+      - '@ndx_council_generator.navigation_configurator'
+      - '@ndx_council_generator.homepage_configurator'
+      - '@ndx_council_generator.content_cleanup'
+    tags:
+      - { name: drush.command }

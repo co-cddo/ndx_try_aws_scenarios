@@ -1,0 +1,277 @@
+/**
+ * @file
+ * Styles for the NDX Welcome Block.
+ *
+ * Provides a welcoming orientation experience using GOV.UK Design
+ * System patterns and colors.
+ *
+ * Story 1.11: First Login Welcome Experience
+ */
+
+/* Welcome block container */
+.ndx-welcome {
+  background: #ffffff;
+  border: 1px solid #b1b4b6;
+  border-radius: 4px;
+  padding: 24px;
+  margin-bottom: 24px;
+  font-family: "GDS Transport", Arial, sans-serif;
+}
+
+/* Header section */
+.ndx-welcome__header {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 4px solid #1d70b8;
+}
+
+/* Council name - prominent display */
+.ndx-welcome__council-name {
+  color: #0b0c0c;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 8px 0;
+}
+
+/* Subtitle */
+.ndx-welcome__subtitle {
+  color: #505a5f;
+  font-size: 19px;
+  margin: 0;
+}
+
+/* Introduction paragraph */
+.ndx-welcome__intro {
+  margin-bottom: 20px;
+}
+
+.ndx-welcome__intro p {
+  color: #0b0c0c;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Guided Tour CTA - Story 2.5 */
+.ndx-welcome__tour-cta {
+  margin-bottom: 20px;
+}
+
+.ndx-welcome__tour-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #1d70b8 0%, #003078 100%);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.ndx-welcome__tour-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ndx-welcome__tour-button:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background: #ffdd00;
+}
+
+.ndx-welcome__tour-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.ndx-welcome__tour-button:focus .ndx-welcome__tour-icon {
+  background: rgba(0, 0, 0, 0.1);
+  color: #0b0c0c;
+}
+
+.ndx-welcome__tour-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ndx-welcome__tour-text strong {
+  color: #ffffff;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.ndx-welcome__tour-text span {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
+.ndx-welcome__tour-button:focus .ndx-welcome__tour-text strong,
+.ndx-welcome__tour-button:focus .ndx-welcome__tour-text span {
+  color: #0b0c0c;
+}
+
+/* Start Here section */
+.ndx-welcome__start-here {
+  margin-bottom: 16px;
+}
+
+.ndx-welcome__start-badge {
+  display: inline-block;
+  background: #00703c;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+
+.ndx-welcome__start-here p {
+  color: #0b0c0c;
+  font-size: 16px;
+  margin: 8px 0 0 0;
+}
+
+/* Quick links grid */
+.ndx-welcome__links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* Link card */
+.ndx-welcome__link-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #f3f2f1;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.ndx-welcome__link-card:hover {
+  background: #e8f1f8;
+  border-color: #1d70b8;
+}
+
+.ndx-welcome__link-card:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 0;
+  background: #ffdd00;
+}
+
+/* Link icon */
+.ndx-welcome__link-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #1d70b8;
+  border-radius: 50%;
+  flex-shrink: 0;
+  color: #ffffff;
+  font-size: 20px;
+}
+
+/* Icon variants using Unicode symbols */
+.ndx-welcome__link-icon--edit::before {
+  content: "\270E"; /* Pencil */
+}
+
+.ndx-welcome__link-icon--image::before {
+  content: "\1F5BC"; /* Picture frame */
+}
+
+.ndx-welcome__link-icon--external::before {
+  content: "\2197"; /* Arrow upper right */
+}
+
+.ndx-welcome__link-icon--help::before {
+  content: "?";
+  font-weight: 700;
+}
+
+/* Link content */
+.ndx-welcome__link-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ndx-welcome__link-title {
+  color: #1d70b8;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.ndx-welcome__link-card:hover .ndx-welcome__link-title {
+  text-decoration: underline;
+}
+
+.ndx-welcome__link-card:focus .ndx-welcome__link-title {
+  color: #0b0c0c;
+}
+
+.ndx-welcome__link-description {
+  color: #505a5f;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.ndx-welcome__link-card:focus .ndx-welcome__link-description {
+  color: #0b0c0c;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 640px) {
+  .ndx-welcome {
+    padding: 16px;
+  }
+
+  .ndx-welcome__council-name {
+    font-size: 24px;
+  }
+
+  .ndx-welcome__subtitle {
+    font-size: 16px;
+  }
+
+  .ndx-welcome__links {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print styles */
+@media print {
+  .ndx-welcome {
+    border: 1px solid #000;
+    page-break-inside: avoid;
+  }
+
+  .ndx-welcome__link-card {
+    background: none;
+    border: 1px solid #ccc;
+  }
+}

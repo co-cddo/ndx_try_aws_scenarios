@@ -1,0 +1,231 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 7: Auto Alt-Text Generation - LocalGov Drupal Walkthrough"
+description: Automatically generate accessible image descriptions using AI
+currentStep: 7
+totalSteps: 12
+timeEstimate: "3 minutes"
+scenarioId: localgov-drupal
+---
+
+{#
+  Step 7: Auto Alt-Text Generation
+  - Overview of auto alt-text feature
+  - How it works (upload triggers AI)
+  - Accessibility benefits
+  - Screenshots of the feature in action
+#}
+
+{% set stepNumber = 7 %}
+{% set stepTitle = "Auto Alt-Text Generation" %}
+{% set stepDescription = "Automatically generate accessible image descriptions using AI when you upload images." %}
+{% set timeEstimate = "3 minutes" %}
+{% set expectedOutcomes = [
+  "You understand how auto alt-text generation works",
+  "You've seen AI generate a description for an uploaded image",
+  "You know the accessibility benefits of proper alt-text"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">What is Auto Alt-Text Generation?</h3>
+
+<p class="govuk-body">
+  When you upload an image to the Media Library, <strong><a href="https://aws.amazon.com/ai/generative-ai/nova/" class="govuk-link" target="_blank" rel="noopener noreferrer">Amazon Nova<span class="govuk-visually-hidden"> (opens in new tab)</span></a></strong>'s vision capabilities automatically analyse the image and generate a descriptive alt-text.
+</p>
+
+<div class="ndx-feature-highlight">
+  <h4 class="govuk-heading-s">Automatic and instant</h4>
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    No extra clicks required. Simply upload an image and the alt-text field is automatically populated with an AI-generated description within seconds.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Why alt-text matters</h3>
+
+<p class="govuk-body">
+  Alt-text (alternative text) is essential for web accessibility:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Screen readers</strong> read alt-text aloud to visually impaired users</li>
+  <li><strong>Search engines</strong> use alt-text to understand image content</li>
+  <li><strong>Broken images</strong> display alt-text when images fail to load</li>
+  <li><strong>WCAG compliance</strong> requires meaningful alt-text for all informative images</li>
+</ul>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>WCAG guideline:</strong> Alt-text should be concise (under 125 characters) and describe the image's content or purpose, not just "image of..." or "photo of...".
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">How to use Auto Alt-Text</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Go to the Media Library</strong>
+    <p class="govuk-body">
+      Click Content &gt; Media &gt; Add media &gt; Image
+    </p>
+  </li>
+  <li>
+    <strong>Upload an image</strong>
+    <p class="govuk-body">
+      Click "Add a new file" and select an image from your computer
+    </p>
+  </li>
+  <li>
+    <strong>Wait for AI analysis</strong>
+    <p class="govuk-body">
+      <a href="https://aws.amazon.com/ai/generative-ai/nova/" class="govuk-link" target="_blank" rel="noopener noreferrer">Amazon Nova<span class="govuk-visually-hidden"> (opens in new tab)</span></a> analyses the image and generates alt-text automatically
+    </p>
+  </li>
+  <li>
+    <strong>Review and edit if needed</strong>
+    <p class="govuk-body">
+      The alt-text field is populated automatically. You can edit it if needed before saving.
+    </p>
+  </li>
+</ol>
+
+{# Screenshot: Image upload form with generated alt-text #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/localgov-drupal/ai-features/alt-text-generated-desktop.png"
+       alt="Drupal media library showing an uploaded image with AI-generated alt-text: Group of people sitting around a table in a church hall with papers"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The alt-text field is automatically populated when you upload an image
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">Example: What the AI sees</h3>
+
+<p class="govuk-body">
+  Here's an example of how the AI describes an image of a council meeting:
+</p>
+
+<div class="ndx-alt-text-example">
+  <div class="ndx-alt-text-example__image">
+    <img src="/assets/images/walkthroughs/localgov-drupal/ai-features/alt-text-generated-desktop.png"
+         alt="Council meeting image showing the AI-generated description"
+         class="ndx-alt-text-example__img">
+  </div>
+  <div class="ndx-alt-text-example__text">
+    <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-2">AI-generated alt-text:</p>
+    <p class="ndx-alt-text-generated">
+      "Group of people sitting around a table in a church hall with papers"
+    </p>
+    <p class="govuk-body-s govuk-!-margin-bottom-0">
+      <span class="govuk-tag govuk-tag--green">78 characters</span>
+      Well under the 125 character WCAG recommendation
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Best practices</h3>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Do</th>
+      <th scope="col" class="govuk-table__header">Don't</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Review AI-generated alt-text for accuracy</td>
+      <td class="govuk-table__cell">Accept alt-text without checking</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Add context the AI might miss (names, locations)</td>
+      <td class="govuk-table__cell">Leave generic descriptions when specific ones help</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Keep alt-text concise and meaningful</td>
+      <td class="govuk-table__cell">Start with "Image of..." or "Photo of..."</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Use empty alt="" for purely decorative images</td>
+      <td class="govuk-table__cell">Add alt-text to decorative images</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-warning-text">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Important</span>
+    Always review AI-generated alt-text. The AI describes what it sees, but you may need to add context about who or what is in the image.
+  </strong>
+</div>
+
+<h3 class="govuk-heading-m">For technical readers</h3>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">AWS Service</th>
+      <th scope="col" class="govuk-table__header">Purpose</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a href="https://aws.amazon.com/bedrock/" class="govuk-link" target="_blank" rel="noopener noreferrer">Amazon Bedrock<span class="govuk-visually-hidden"> (opens in new tab)</span></a></td>
+      <td class="govuk-table__cell">Hosts the foundation model for image analysis</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><a href="https://aws.amazon.com/ai/generative-ai/nova/" class="govuk-link" target="_blank" rel="noopener noreferrer">Amazon Nova<span class="govuk-visually-hidden"> (opens in new tab)</span></a></td>
+      <td class="govuk-table__cell">Vision model that analyses images and generates descriptions</td>
+    </tr>
+  </tbody>
+</table>
+
+<style>
+  .ndx-feature-highlight {
+    padding: 20px;
+    background-color: #f0f9f5;
+    border-left: 4px solid #00703c;
+    margin: 20px 0;
+  }
+
+  .ndx-feature-highlight h4 {
+    margin-top: 0;
+  }
+
+  .ndx-alt-text-example {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border: 1px solid #b1b4b6;
+    margin: 20px 0;
+    align-items: start;
+  }
+
+  .ndx-alt-text-example__img {
+    width: 100%;
+    height: auto;
+    border: 1px solid #b1b4b6;
+  }
+
+  .ndx-alt-text-generated {
+    background-color: #ffffff;
+    padding: 15px;
+    border-left: 4px solid #1d70b8;
+    font-family: monospace;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-alt-text-example {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-alt-text-example__img {
+      max-width: 150px;
+    }
+  }
+</style>

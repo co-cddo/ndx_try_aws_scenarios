@@ -1,0 +1,36 @@
+# Story 5.1: ndx_council_generator Module Foundation
+
+ndx_council_generator.status:
+  path: '/admin/config/ndx/council-generator'
+  defaults:
+    _form: '\Drupal\ndx_council_generator\Form\GenerationStatusForm'
+    _title: 'Council Generator'
+  requirements:
+    _permission: 'view generation status'
+
+ndx_council_generator.api.status:
+  path: '/api/ndx-council/status'
+  defaults:
+    _controller: '\Drupal\ndx_council_generator\Controller\GenerationApiController::status'
+    _title: 'Generation Status'
+  methods: [GET]
+  requirements:
+    _permission: 'view generation status'
+
+ndx_council_generator.api.start:
+  path: '/api/ndx-council/start'
+  defaults:
+    _controller: '\Drupal\ndx_council_generator\Controller\GenerationApiController::start'
+    _title: 'Start Generation'
+  methods: [POST]
+  requirements:
+    _permission: 'administer council generator'
+
+ndx_council_generator.api.cancel:
+  path: '/api/ndx-council/cancel'
+  defaults:
+    _controller: '\Drupal\ndx_council_generator\Controller\GenerationApiController::cancel'
+    _title: 'Cancel Generation'
+  methods: [POST]
+  requirements:
+    _permission: 'administer council generator'

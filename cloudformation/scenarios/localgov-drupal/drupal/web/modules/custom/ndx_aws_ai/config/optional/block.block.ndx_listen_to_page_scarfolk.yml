@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - ndx_aws_ai
+  theme:
+    - localgov_scarfolk
+id: ndx_listen_to_page_scarfolk
+theme: localgov_scarfolk
+region: content_top
+weight: 0
+provider: null
+plugin: ndx_listen_to_page
+settings:
+  id: ndx_listen_to_page
+  label: 'Listen to this Page'
+  provider: ndx_aws_ai
+  label_display: visible
+  default_language: en-GB
+  show_speed_control: true
+  sticky_position: true
+visibility:
+  entity_bundle:node:
+    id: entity_bundle:node
+    bundles:
+      localgov_guides_overview: localgov_guides_overview
+      localgov_guides_page: localgov_guides_page
+      localgov_news_article: localgov_news_article
+      localgov_services_landing: localgov_services_landing
+      localgov_services_page: localgov_services_page
+    negate: false
+    context_mapping:
+      node: '@node.node_route_context:node'

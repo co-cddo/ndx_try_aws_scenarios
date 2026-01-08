@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+README*
+CHANGELOG*
+LICENSE*
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CDK (not needed in container)
+cdk/
+cdk.out/
+template.yaml
+
+# Tests (not needed in production container)
+tests/
+
+# Development files
+docker-compose*.yml
+Makefile
+
+# Drupal dev files
+drupal/web/sites/*/settings.local.php
+drupal/web/sites/*/files
+drupal/web/sites/*/private
+
+# Node (if any frontend build)
+node_modules/
+
+# Composer cache
+vendor/.cache

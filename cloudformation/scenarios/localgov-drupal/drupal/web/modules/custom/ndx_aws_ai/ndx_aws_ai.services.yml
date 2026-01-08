@@ -1,0 +1,169 @@
+services:
+  # AWS Client Factory - creates AWS service clients with IAM role credentials
+  ndx_aws_ai.client_factory:
+    class: Drupal\ndx_aws_ai\Service\AwsClientFactory
+    arguments:
+      - '@config.factory'
+      - '@logger.factory'
+
+  # AWS Error Handler - standardized error processing for AWS API failures
+  ndx_aws_ai.error_handler:
+    class: Drupal\ndx_aws_ai\Service\AwsErrorHandler
+    arguments:
+      - '@logger.factory'
+      - '@string_translation'
+
+  # Prompt Template Manager - loads and renders YAML prompt templates
+  ndx_aws_ai.prompt_template_manager:
+    class: Drupal\ndx_aws_ai\PromptTemplate\PromptTemplateManager
+    arguments:
+      - '@module_handler'
+      - '@logger.channel.ndx_aws_ai'
+
+  # Bedrock Rate Limiter - implements exponential backoff for API calls
+  ndx_aws_ai.bedrock_rate_limiter:
+    class: Drupal\ndx_aws_ai\RateLimiter\BedrockRateLimiter
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Bedrock Response Parser - extracts content and usage from API responses
+  ndx_aws_ai.bedrock_response_parser:
+    class: Drupal\ndx_aws_ai\Response\BedrockResponseParser
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Bedrock Service - AI content generation using Amazon Nova models
+  ndx_aws_ai.bedrock:
+    class: Drupal\ndx_aws_ai\Service\BedrockService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@ndx_aws_ai.prompt_template_manager'
+      - '@ndx_aws_ai.bedrock_rate_limiter'
+      - '@ndx_aws_ai.bedrock_response_parser'
+
+  # Logger channel for ndx_aws_ai module
+  logger.channel.ndx_aws_ai:
+    parent: logger.channel_base
+    arguments: ['ndx_aws_ai']
+
+  # Story 3.5: Prompt History Service - stores recent prompts per user
+  ndx_aws_ai.prompt_history:
+    class: Drupal\ndx_aws_ai\Service\PromptHistoryService
+    arguments:
+      - '@tempstore.private'
+      - '@current_user'
+
+  # Story 4.1: Polly Rate Limiter - implements exponential backoff for Polly API calls
+  ndx_aws_ai.polly_rate_limiter:
+    class: Drupal\ndx_aws_ai\RateLimiter\PollyRateLimiter
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.1: Polly Service - text-to-speech synthesis with 7 languages
+  ndx_aws_ai.polly:
+    class: Drupal\ndx_aws_ai\Service\PollyService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@ndx_aws_ai.polly_rate_limiter'
+      - '@cache.default'
+      - '@file_system'
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.2: Translate Rate Limiter - implements exponential backoff for Translate API calls
+  ndx_aws_ai.translate_rate_limiter:
+    class: Drupal\ndx_aws_ai\RateLimiter\TranslateRateLimiter
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.2: Translate Service - multi-language translation with 75+ languages
+  ndx_aws_ai.translate:
+    class: Drupal\ndx_aws_ai\Service\TranslateService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@ndx_aws_ai.translate_rate_limiter'
+      - '@cache.default'
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.3: Vision Rate Limiter - implements exponential backoff for Vision API calls
+  ndx_aws_ai.vision_rate_limiter:
+    class: Drupal\ndx_aws_ai\RateLimiter\VisionRateLimiter
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.3: Vision Service - image analysis and WCAG alt-text generation
+  ndx_aws_ai.vision:
+    class: Drupal\ndx_aws_ai\Service\VisionService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@ndx_aws_ai.vision_rate_limiter'
+
+  # Story 4.4: Textract Rate Limiter - implements exponential backoff for Textract API calls
+  ndx_aws_ai.textract_rate_limiter:
+    class: Drupal\ndx_aws_ai\RateLimiter\TextractRateLimiter
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.4: Textract Service - document text extraction with tables and forms
+  ndx_aws_ai.textract:
+    class: Drupal\ndx_aws_ai\Service\TextractService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@ndx_aws_ai.textract_rate_limiter'
+
+  # Story 4.5: Alt-Text Generator Service - WCAG-compliant alt-text for media images
+  ndx_aws_ai.alt_text_generator:
+    class: Drupal\ndx_aws_ai\Service\AltTextGeneratorService
+    arguments:
+      - '@ndx_aws_ai.vision'
+      - '@entity_type.manager'
+      - '@file_system'
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.5: Alt-Text Event Subscriber - auto-generate alt-text on media upload
+  ndx_aws_ai.alt_text_event_subscriber:
+    class: Drupal\ndx_aws_ai\EventSubscriber\AltTextEventSubscriber
+    arguments:
+      - '@ndx_aws_ai.alt_text_generator'
+      - '@config.factory'
+      - '@logger.channel.ndx_aws_ai'
+    tags:
+      - { name: event_subscriber }
+
+  # Story 4.5: Drush commands for alt-text generation
+  ndx_aws_ai.commands:
+    class: Drupal\ndx_aws_ai\Commands\NdxAwsAiCommands
+    arguments:
+      - '@ndx_aws_ai.alt_text_generator'
+      - '@entity_type.manager'
+      - '@logger.channel.ndx_aws_ai'
+    tags:
+      - { name: drush.command }
+
+  # Story 4.6: Content Extractor Service - extracts text for TTS
+  ndx_aws_ai.content_extractor:
+    class: Drupal\ndx_aws_ai\Service\ContentExtractorService
+    arguments:
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 4.8: PDF Conversion Service - PDF-to-Web content conversion
+  ndx_aws_ai.pdf_conversion:
+    class: Drupal\ndx_aws_ai\Service\PdfConversionService
+    arguments:
+      - '@ndx_aws_ai.textract'
+      - '@ndx_aws_ai.bedrock'
+      - '@entity_type.manager'
+      - '@state'
+      - '@logger.channel.ndx_aws_ai'
+
+  # Story 5.6: Image Generation Service - AI image generation using Titan
+  ndx_aws_ai.image_generation:
+    class: Drupal\ndx_aws_ai\Service\ImageGenerationService
+    arguments:
+      - '@ndx_aws_ai.client_factory'
+      - '@ndx_aws_ai.error_handler'
+      - '@logger.channel.ndx_aws_ai'

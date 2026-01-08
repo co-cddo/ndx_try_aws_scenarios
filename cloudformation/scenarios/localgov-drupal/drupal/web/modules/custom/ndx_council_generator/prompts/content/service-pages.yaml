@@ -1,0 +1,659 @@
+# Story 5.3: Content Generation Templates - Service Pages
+# Generates 18 core council service pages for LocalGov Drupal
+
+content_type: localgov_services_page
+generation_order: 10
+
+style_guide: |
+  Style Guidelines (GOV.UK Service Standard):
+  - Use plain English (aim for reading age 9)
+  - Use short sentences and paragraphs
+  - Use active voice ("Apply for a permit" not "A permit can be applied for")
+  - Use "you" for the reader, "we" for the council
+  - Front-load important information
+  - Use bullet points for lists
+  - Avoid jargon and acronyms
+  - Be direct and action-oriented
+
+items:
+  - id: service-waste-recycling
+    title_template: "Waste and recycling - {{council_name}}"
+    prompt: |
+      Write a council service page about waste collection and recycling services.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Local character: {{theme_description}}
+      Population: {{population}}
+
+      Include sections for:
+      - Weekly bin collection schedule
+      - What can be recycled (paper, plastic, glass, metal)
+      - Garden waste subscription service
+      - Bulky waste collection
+      - Recycling centre locations
+      - How to report missed collections
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content with h2/h3 headings and lists",
+        "related_services": ["council-tax", "environment"]
+      }
+    images:
+      - type: hero
+        prompt: "Row of wheelie bins (green, blue, brown) outside British terraced houses in {{region_name}}, morning light, residential street"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-council-tax
+    title_template: "Council Tax - {{council_name}}"
+    prompt: |
+      Write a council service page about Council Tax.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include sections for:
+      - What Council Tax pays for
+      - Council Tax bands explained
+      - How to pay (direct debit, online, phone)
+      - Discounts and exemptions (single person, students, disabled)
+      - Moving home - telling us your address
+      - Council Tax support for low incomes
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content with h2/h3 headings and lists"
+      }
+    images:
+      - type: hero
+        prompt: "British council office reception desk, modern interior, friendly staff member, accessible design"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-housing
+    title_template: "Housing and homelessness - {{council_name}}"
+    prompt: |
+      Write a council service page about housing services.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Include sections for:
+      - Council housing - applying for a home
+      - Homelessness help and support
+      - Housing repairs (for council tenants)
+      - Private rented housing standards
+      - Housing benefit
+      - Affordable housing information
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Modern British social housing development, red brick, green spaces, community feel, {{region_name}} architectural style"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-planning
+    title_template: "Planning applications - {{council_name}}"
+    prompt: |
+      Write a council service page about planning applications.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include sections for:
+      - Do I need planning permission?
+      - How to apply for planning permission
+      - View and comment on applications
+      - Planning application fees
+      - Building regulations
+      - Permitted development rights
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Architect reviewing building plans and blueprints, modern office, natural light, professional setting"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-benefits
+    title_template: "Benefits and financial support - {{council_name}}"
+    prompt: |
+      Write a council service page about benefits and financial support.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Population: {{population}}
+
+      Include sections for:
+      - Housing Benefit
+      - Council Tax Support
+      - Free school meals
+      - Crisis support and emergency payments
+      - Cost of living support
+      - Benefit calculator
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Supportive advice meeting, two people at desk, council office, warm professional atmosphere, diverse representation"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-parking
+    title_template: "Parking permits and fines - {{council_name}}"
+    prompt: |
+      Write a council service page about parking services.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Include sections for:
+      - Resident parking permits
+      - Visitor parking permits
+      - Blue Badge disabled parking
+      - Pay and display parking
+      - Parking fines (PCNs) - how to pay or appeal
+      - Car park locations
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "British town centre car park, parking machines, accessible spaces marked, urban setting in {{region_name}}"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-schools
+    title_template: "School admissions - {{council_name}}"
+    prompt: |
+      Write a council service page about school admissions.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include sections for:
+      - Apply for a school place
+      - School catchment areas
+      - Appeal a school place decision
+      - In-year admissions (moving to the area)
+      - School transport
+      - Find schools in your area
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Modern British primary school building exterior, welcoming architecture, accessible entrance with ramp, landscaped grounds, clear signage"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-adult-care
+    title_template: "Adult social care - {{council_name}}"
+    prompt: |
+      Write a council service page about adult social care.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include sections for:
+      - Request a care needs assessment
+      - Help to stay independent at home
+      - Care homes and supported living
+      - Paying for care
+      - Carers support
+      - Safeguarding vulnerable adults
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Care worker helping elderly person at home, warm supportive interaction, British living room, natural light"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-childrens
+    title_template: "Children and families - {{council_name}}"
+    prompt: |
+      Write a council service page about children and family services.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include sections for:
+      - Early years and childcare
+      - Fostering and adoption
+      - Children with special educational needs (SEND)
+      - Youth services
+      - Family support services
+      - Safeguarding children
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Modern British community centre building exterior, bright welcoming entrance, accessible design, family services signage, landscaped gardens"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-environment
+    title_template: "Environmental services - {{council_name}}"
+    prompt: |
+      Write a council service page about environmental services.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+      Flavour: {{flavour_keywords}}
+
+      Include sections for:
+      - Report fly-tipping
+      - Pest control
+      - Air quality monitoring
+      - Noise complaints
+      - Tree maintenance
+      - Environmental health inspections
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Council worker in high-vis vest maintaining public green space, trees and gardens, {{region_name}} landscape"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-business-rates
+    title_template: "Business rates - {{council_name}}"
+    prompt: |
+      Write a council service page about business rates.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Include sections for:
+      - What are business rates
+      - How to pay business rates
+      - Small business rate relief
+      - Empty property relief
+      - Rateable value appeals
+      - Business support services
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "British high street with local businesses, shop fronts, market town feel, {{region_name}} architectural character"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-licensing
+    title_template: "Licensing - {{council_name}}"
+    prompt: |
+      Write a council service page about licensing.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include sections for:
+      - Alcohol and entertainment licences
+      - Taxi and private hire licences
+      - Street trading licences
+      - Animal licences
+      - Gambling licences
+      - Licence application fees
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "British pub exterior with outdoor seating, customers enjoying drinks, warm summer evening, traditional setting"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-elections
+    title_template: "Elections and voting - {{council_name}}"
+    prompt: |
+      Write a council service page about elections and voting.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include sections for:
+      - Register to vote
+      - How to vote (polling station, postal, proxy)
+      - Voter ID requirements
+      - Find your polling station
+      - Upcoming elections
+      - Stand for election
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "British polling station entrance, ballot box, voters arriving, community hall, democratic process"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-complaints
+    title_template: "Complaints and feedback - {{council_name}}"
+    prompt: |
+      Write a council service page about complaints and feedback.
+
+      Council: {{council_name}}
+      Motto: {{motto}}
+
+      Include sections for:
+      - Make a complaint
+      - How we handle complaints
+      - Complaint timescales
+      - Escalating your complaint
+      - Local Government Ombudsman
+      - Give us feedback
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Customer service desk, staff member listening attentively to resident, modern council office, professional setting"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-registrars
+    title_template: "Births, deaths and marriages - {{council_name}}"
+    prompt: |
+      Write a council service page about registration services.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include sections for:
+      - Register a birth
+      - Register a death
+      - Getting married or forming a civil partnership
+      - Ceremony venues
+      - Order certificates
+      - Citizenship ceremonies
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "British wedding ceremony in council register office, elegant room, flowers, happy couple, formal celebrant"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-libraries
+    title_template: "Libraries - {{council_name}}"
+    prompt: |
+      Write a council service page about library services.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+
+      Include sections for:
+      - Join the library
+      - Find your local library
+      - Library opening hours
+      - Borrow and renew books
+      - Online resources and e-books
+      - Events and activities
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Modern British public library interior, bookshelves, reading area, diverse visitors, community space"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-parks
+    title_template: "Parks and leisure - {{council_name}}"
+    prompt: |
+      Write a council service page about parks and leisure.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+      Theme: {{theme_description}}
+      Flavour: {{flavour_keywords}}
+
+      Include sections for:
+      - Parks and open spaces
+      - Sports and leisure facilities
+      - Play areas
+      - Allotments
+      - Events in parks
+      - Report a problem
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Beautiful British park with families enjoying outdoors, playground, mature trees, {{region_name}} landscape"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body
+
+  - id: service-roads
+    title_template: "Roads and transport - {{council_name}}"
+    prompt: |
+      Write a council service page about roads and transport.
+
+      Council: {{council_name}}
+      Region: {{region_name}}
+
+      Include sections for:
+      - Report a pothole
+      - Road closures and roadworks
+      - Street lighting
+      - Public transport information
+      - Cycling and walking
+      - Gritting and winter maintenance
+
+      {{style_guide}}
+
+      Output as JSON:
+      {
+        "title": "...",
+        "summary": "Brief 1-2 sentence summary",
+        "body": "Full HTML content"
+      }
+    images:
+      - type: hero
+        prompt: "Council road maintenance crew filling pothole, high-vis jackets, roadworks equipment, British street scene"
+        dimensions: "1200x630"
+        style: photo
+        field_name: field_hero_image
+    drupal_fields:
+      title: title
+      field_summary: summary
+      body: body

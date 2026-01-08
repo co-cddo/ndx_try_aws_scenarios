@@ -1,0 +1,176 @@
+ndx_aws_ai.settings:
+  path: '/admin/config/system/ndx-aws-ai'
+  defaults:
+    _form: '\Drupal\ndx_aws_ai\Form\AwsSettingsForm'
+    _title: 'AWS AI Settings'
+  requirements:
+    _permission: 'administer ndx aws ai'
+
+ndx_aws_ai.connection_test:
+  path: '/admin/config/system/ndx-aws-ai/test'
+  defaults:
+    _form: '\Drupal\ndx_aws_ai\Form\AwsConnectionTestForm'
+    _title: 'Test AWS Connection'
+  requirements:
+    _permission: 'administer ndx aws ai'
+
+# Story 3.4: AI service status endpoint for CKEditor toolbar.
+ndx_aws_ai.status:
+  path: '/ndx-aws-ai/status'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\AiStatusController::status'
+    _title: 'AI Service Status'
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    no_cache: TRUE
+
+# Story 3.5: AI Writing Dialog for content generation.
+ndx_aws_ai.write_dialog:
+  path: '/ndx-aws-ai/write-dialog'
+  defaults:
+    _form: '\Drupal\ndx_aws_ai\Form\AiWritingDialogForm'
+    _title: 'AI Writing Assistant'
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    _admin_route: TRUE
+
+# Story 3.6: Direct Simplify API endpoint.
+ndx_aws_ai.simplify_api:
+  path: '/ndx-aws-ai/api/simplify'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\SimplifyController::simplify'
+    _title: 'Simplify Content API'
+  methods: [POST]
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    no_cache: TRUE
+
+# Story 4.6: TTS synthesis endpoint for Listen to Page feature.
+ndx_aws_ai.tts.synthesize:
+  path: '/api/ndx-ai/tts/synthesize'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\TtsController::synthesize'
+    _title: 'TTS Synthesis'
+  methods: [POST]
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+
+# Story 4.6: Get available TTS languages.
+ndx_aws_ai.tts.languages:
+  path: '/api/ndx-ai/tts/languages'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\TtsController::getLanguages'
+    _title: 'TTS Languages'
+  methods: [GET]
+  requirements:
+    _permission: 'access content'
+
+# Story 4.7: Content Translation endpoints.
+ndx_aws_ai.translation.translate:
+  path: '/api/ndx-ai/translation/translate'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\ContentTranslationController::translate'
+    _title: 'Translate Content'
+  methods: [POST]
+  requirements:
+    _permission: 'access content'
+  options:
+    no_cache: TRUE
+
+ndx_aws_ai.translation.languages:
+  path: '/api/ndx-ai/translation/languages'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\ContentTranslationController::getLanguages'
+    _title: 'Translation Languages'
+  methods: [GET]
+  requirements:
+    _permission: 'access content'
+
+# Story 4.8: PDF-to-Web Conversion endpoints.
+ndx_aws_ai.pdf.form:
+  path: '/admin/content/pdf-to-web'
+  defaults:
+    _form: '\Drupal\ndx_aws_ai\Form\PdfConversionForm'
+    _title: 'Convert PDF to Web Content'
+  requirements:
+    _permission: 'administer content'
+  options:
+    _admin_route: TRUE
+
+ndx_aws_ai.pdf.convert:
+  path: '/api/ndx-ai/pdf/convert'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\PdfConversionController::convert'
+    _title: 'Convert PDF'
+  methods: [POST]
+  requirements:
+    _permission: 'administer content'
+  options:
+    no_cache: TRUE
+
+ndx_aws_ai.pdf.status:
+  path: '/api/ndx-ai/pdf/status/{jobId}'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\PdfConversionController::status'
+    _title: 'Conversion Status'
+  methods: [GET]
+  requirements:
+    _permission: 'administer content'
+    jobId: '[a-zA-Z0-9_-]+'
+
+ndx_aws_ai.pdf.create_node:
+  path: '/api/ndx-ai/pdf/create-node'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\PdfConversionController::createNode'
+    _title: 'Create Node from PDF'
+  methods: [POST]
+  requirements:
+    _permission: 'administer content'
+  options:
+    no_cache: TRUE
+
+ndx_aws_ai.pdf.availability:
+  path: '/api/ndx-ai/pdf/availability'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\PdfConversionController::checkAvailability'
+    _title: 'PDF Conversion Availability'
+  methods: [GET]
+  requirements:
+    _permission: 'administer content'
+
+# Story 4.5: Alt-Text Generation endpoints.
+ndx_aws_ai.alt_text.generate_from_file:
+  path: '/api/ndx-ai/alt-text/generate'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\AltTextController::generateFromFile'
+    _title: 'Generate Alt Text'
+  methods: [POST]
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    no_cache: TRUE
+
+ndx_aws_ai.alt_text.generate_from_base64:
+  path: '/api/ndx-ai/alt-text/generate-base64'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\AltTextController::generateFromBase64'
+    _title: 'Generate Alt Text from Base64'
+  methods: [POST]
+  requirements:
+    _permission: 'use ndx aws ai'
+  options:
+    no_cache: TRUE
+
+ndx_aws_ai.alt_text.availability:
+  path: '/api/ndx-ai/alt-text/availability'
+  defaults:
+    _controller: '\Drupal\ndx_aws_ai\Controller\AltTextController::checkAvailability'
+    _title: 'Alt Text Service Availability'
+  methods: [GET]
+  requirements:
+    _permission: 'use ndx aws ai'

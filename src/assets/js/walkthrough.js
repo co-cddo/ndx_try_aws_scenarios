@@ -1,5 +1,5 @@
 /**
- * Walkthrough Progress Tracking (Story 3.2 - AC-3.2.4, AC-3.2.9)
+ * Walkthrough Progress Tracking (Story 3.2, Story 2.6)
  *
  * Features:
  * - Copy-to-clipboard functionality with visual confirmation
@@ -7,6 +7,9 @@
  * - Resume from last completed step on page load
  * - Keyboard accessible interactions
  * - Progressive enhancement (works without JS)
+ * - Dynamic progress bar and step checklist updates (Story 2.6)
+ * - Section-based completion tracking (Story 2.6)
+ * - Reset confirmation modal with focus trap (Story 2.6)
  *
  * ADR-4 (Vanilla JavaScript): No frameworks, plain JS only
  */
@@ -375,6 +378,269 @@
 
     // Track completion
     trackCompletion();
+
+    // Story 2.6: Initialize progress sidebar features
+    initializeProgressSidebar();
+  }
+
+  // =========================================================================
+  // Story 2.6: Progress Sidebar & Reset Modal
+  // =========================================================================
+
+  /**
+   * Initialize progress sidebar features
+   */
+  function initializeProgressSidebar() {
+    initializeMobileToggle();
+    initializeResetModal();
+    updateProgressUI();
+  }
+
+  /**
+   * Initialize mobile collapse toggle for progress sidebar
+   */
+  function initializeMobileToggle() {
+    var toggle = document.querySelector('.ndx-walkthrough-progress__toggle');
+    if (!toggle) return;
+
+    toggle.addEventListener('click', function() {
+      var expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+    });
+  }
+
+  /**
+   * Update progress UI based on current state
+   */
+  function updateProgressUI() {
+    var scenarioId = getScenarioId();
+    var progress = getProgress(scenarioId);
+    var totalSteps = getTotalSteps();
+
+    // Update progress bar
+    updateProgressBar(progress, totalSteps);
+
+    // Update step checklist
+    updateStepChecklist(progress);
+  }
+
+  /**
+   * Get total steps from page data attribute
+   */
+  function getTotalSteps() {
+    var pageElement = document.querySelector('[data-total-steps]');
+    return pageElement ? parseInt(pageElement.dataset.totalSteps, 10) : 4;
+  }
+
+  /**
+   * Update progress bar display
+   */
+  function updateProgressBar(progress, totalSteps) {
+    var progressWrapper = document.querySelector('[data-progress-display]');
+    if (!progressWrapper) return;
+
+    var completedCount = progress.stepsCompleted ? progress.stepsCompleted.length : 0;
+    var percentage = totalSteps > 0 ? Math.round((completedCount / totalSteps) * 100) : 0;
+
+    var progressBar = progressWrapper.querySelector('.ndx-progress-bar');
+    var fill = progressWrapper.querySelector('.ndx-progress-bar__fill');
+    var label = progressWrapper.querySelector('.ndx-progress-bar__label');
+
+    if (progressBar) {
+      progressBar.setAttribute('aria-valuenow', String(percentage));
+    }
+
+    if (fill) {
+      fill.style.width = percentage + '%';
+    }
+
+    if (label) {
+      label.textContent = percentage + '% complete';
+    }
+  }
+
+  /**
+   * Update step checklist with completed states
+   */
+  function updateStepChecklist(progress) {
+    var items = document.querySelectorAll('.ndx-step-checklist__item');
+
+    items.forEach(function(item) {
+      var sectionId = item.getAttribute('data-section-id');
+      if (!sectionId) return;
+
+      // Check if this section's step is completed
+      var stepNumber = parseInt(sectionId.replace('step-', ''), 10);
+      var isCompleted = progress.stepsCompleted && progress.stepsCompleted.includes(stepNumber);
+      var isCurrent = item.classList.contains('ndx-step-checklist__item--current');
+
+      if (isCompleted && !isCurrent) {
+        item.classList.add('ndx-step-checklist__item--completed');
+
+        // Update icon to checkmark
+        var iconContainer = item.querySelector('.ndx-step-checklist__icon');
+        if (iconContainer && !iconContainer.classList.contains('ndx-step-checklist__icon--completed')) {
+          iconContainer.classList.remove('ndx-step-checklist__icon--upcoming');
+          iconContainer.classList.add('ndx-step-checklist__icon--completed');
+          iconContainer.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<circle cx="10" cy="10" r="10" fill="#00703c"/>' +
+            '<path d="M6 10L9 13L14 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</svg>';
+        }
+
+        // Update link styling
+        var link = item.querySelector('.ndx-step-checklist__link');
+        if (link) {
+          link.classList.remove('ndx-step-checklist__link--upcoming');
+          link.classList.add('ndx-step-checklist__link--completed');
+        }
+      }
+    });
+  }
+
+  // =========================================================================
+  // Reset Modal Controller
+  // =========================================================================
+
+  var resetModal = {
+    modal: null,
+    previousFocus: null,
+    focusableElements: []
+  };
+
+  /**
+   * Initialize reset confirmation modal
+   */
+  function initializeResetModal() {
+    resetModal.modal = document.querySelector('[data-reset-modal]');
+    if (!resetModal.modal) return;
+
+    // Reset button trigger
+    var resetBtn = document.querySelector('[data-reset-progress]');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', openResetModal);
+    }
+
+    // Confirm button
+    var confirmBtn = document.querySelector('[data-reset-confirm]');
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', confirmReset);
+    }
+
+    // Cancel button
+    var cancelBtn = document.querySelector('[data-reset-cancel]');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', closeResetModal);
+    }
+
+    // Backdrop click
+    var backdrop = resetModal.modal.querySelector('.ndx-reset-modal__backdrop');
+    if (backdrop) {
+      backdrop.addEventListener('click', closeResetModal);
+    }
+
+    // Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && isResetModalOpen()) {
+        closeResetModal();
+      }
+    });
+  }
+
+  /**
+   * Check if reset modal is open
+   */
+  function isResetModalOpen() {
+    return resetModal.modal && !resetModal.modal.hasAttribute('hidden');
+  }
+
+  /**
+   * Open reset confirmation modal
+   */
+  function openResetModal() {
+    if (!resetModal.modal) return;
+
+    // Store previous focus
+    resetModal.previousFocus = document.activeElement;
+
+    // Show modal
+    resetModal.modal.removeAttribute('hidden');
+
+    // Get focusable elements
+    resetModal.focusableElements = Array.from(
+      resetModal.modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    );
+
+    // Focus cancel button (safer default)
+    var cancelBtn = document.querySelector('[data-reset-cancel]');
+    if (cancelBtn) {
+      cancelBtn.focus();
+    }
+
+    // Set up focus trap
+    document.addEventListener('keydown', handleResetModalTab);
+  }
+
+  /**
+   * Close reset confirmation modal
+   */
+  function closeResetModal() {
+    if (!resetModal.modal) return;
+
+    // Hide modal
+    resetModal.modal.setAttribute('hidden', '');
+
+    // Remove focus trap
+    document.removeEventListener('keydown', handleResetModalTab);
+
+    // Restore focus
+    if (resetModal.previousFocus) {
+      resetModal.previousFocus.focus();
+    }
+  }
+
+  /**
+   * Handle tab key for focus trap
+   */
+  function handleResetModalTab(e) {
+    if (e.key !== 'Tab' || resetModal.focusableElements.length === 0) return;
+
+    var firstElement = resetModal.focusableElements[0];
+    var lastElement = resetModal.focusableElements[resetModal.focusableElements.length - 1];
+
+    if (e.shiftKey) {
+      // Shift + Tab
+      if (document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      }
+    } else {
+      // Tab
+      if (document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    }
+  }
+
+  /**
+   * Confirm reset and clear progress
+   */
+  function confirmReset() {
+    var scenarioId = getScenarioId();
+
+    // Clear progress
+    localStorage.removeItem(STORAGE_KEY_PREFIX + scenarioId);
+
+    // Also clear from NDXProgress if available
+    if (window.NDXProgress && typeof window.NDXProgress.clearScenarioProgress === 'function') {
+      window.NDXProgress.clearScenarioProgress(scenarioId);
+    }
+
+    closeResetModal();
+
+    // Reload page to reset all visual states
+    window.location.reload();
   }
 
   // Initialize when DOM is ready

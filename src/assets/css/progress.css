@@ -1,0 +1,440 @@
+/**
+ * Progress Tracking Styles - Story 2.6
+ *
+ * GOV.UK Design System patterns for walkthrough progress tracking.
+ * Follows WCAG 2.2 AA requirements:
+ * - 3px yellow focus rings (#ffdd00)
+ * - 44x44px minimum touch targets
+ * - High contrast text
+ * - prefers-reduced-motion support
+ */
+
+/* ==========================================================================
+   CSS Custom Properties
+   ========================================================================== */
+
+:root {
+  /* GOV.UK colors for progress */
+  --ndx-progress-green: #00703c;
+  --ndx-progress-blue: #1d70b8;
+  --ndx-progress-grey: #505a5f;
+  --ndx-progress-light-grey: #f3f2f1;
+  --ndx-progress-text: #0b0c0c;
+  --ndx-progress-focus: #ffdd00;
+  --ndx-progress-white: #ffffff;
+  --ndx-progress-border: #b1b4b6;
+}
+
+/* ==========================================================================
+   Progress Bar Component
+   ========================================================================== */
+
+.ndx-progress-bar {
+  margin-bottom: 20px;
+}
+
+.ndx-progress-bar__track {
+  height: 8px;
+  background-color: var(--ndx-progress-light-grey);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ndx-progress-bar__fill {
+  height: 100%;
+  background-color: var(--ndx-progress-green);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.ndx-progress-bar__label {
+  display: block;
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ndx-progress-text);
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   Step Checklist Component
+   ========================================================================== */
+
+.ndx-step-checklist {
+  margin-bottom: 20px;
+}
+
+.ndx-step-checklist__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ndx-step-checklist__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ndx-progress-border);
+}
+
+.ndx-step-checklist__item:last-child {
+  border-bottom: none;
+}
+
+/* Icon container */
+.ndx-step-checklist__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.ndx-step-checklist__icon--completed svg {
+  display: block;
+}
+
+.ndx-step-checklist__number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ndx-step-checklist__icon--current .ndx-step-checklist__number {
+  background-color: var(--ndx-progress-blue);
+  color: var(--ndx-progress-white);
+}
+
+.ndx-step-checklist__icon--upcoming .ndx-step-checklist__number {
+  background-color: var(--ndx-progress-light-grey);
+  color: var(--ndx-progress-grey);
+}
+
+/* Links */
+.ndx-step-checklist__link {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.ndx-step-checklist__link--completed {
+  color: var(--ndx-progress-grey);
+}
+
+.ndx-step-checklist__link--completed:hover {
+  color: var(--ndx-progress-text);
+  text-decoration: underline;
+}
+
+.ndx-step-checklist__link--current {
+  font-weight: 700;
+  color: var(--ndx-progress-text);
+}
+
+.ndx-step-checklist__link--upcoming {
+  color: var(--ndx-progress-blue);
+}
+
+.ndx-step-checklist__link--upcoming:hover {
+  text-decoration: underline;
+}
+
+/* Focus states */
+.ndx-step-checklist__link:focus {
+  outline: 3px solid var(--ndx-progress-focus);
+  outline-offset: 0;
+  background-color: var(--ndx-progress-focus);
+  color: var(--ndx-progress-text);
+  text-decoration: none;
+}
+
+/* Current step indicator - blue left border */
+.ndx-step-checklist__item--current {
+  border-left: 4px solid var(--ndx-progress-blue);
+  padding-left: 12px;
+  margin-left: -16px;
+}
+
+/* Optional step styling */
+.ndx-step-checklist__optional-badge {
+  display: inline-block;
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ndx-progress-grey);
+  background-color: var(--ndx-progress-light-grey);
+  padding: 2px 6px;
+  margin-left: 8px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.ndx-step-checklist__item--optional .ndx-step-checklist__link--upcoming {
+  color: var(--ndx-progress-grey);
+}
+
+/* ==========================================================================
+   Walkthrough Progress Sidebar
+   ========================================================================== */
+
+.ndx-walkthrough-progress {
+  background-color: var(--ndx-progress-white);
+  border: 1px solid var(--ndx-progress-border);
+  padding: 20px;
+}
+
+/* Desktop: sticky sidebar */
+@media (min-width: 769px) {
+  .ndx-walkthrough-progress {
+    position: sticky;
+    top: 20px;
+  }
+}
+
+.ndx-walkthrough-progress__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ndx-walkthrough-progress__toggle:focus {
+  outline: 3px solid var(--ndx-progress-focus);
+  outline-offset: 0;
+}
+
+/* Hide toggle on desktop */
+@media (min-width: 769px) {
+  .ndx-walkthrough-progress__toggle {
+    cursor: default;
+  }
+
+  .ndx-walkthrough-progress__toggle-icon {
+    display: none;
+  }
+}
+
+.ndx-walkthrough-progress__heading {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ndx-progress-text);
+  margin: 0 0 5px 0;
+}
+
+.ndx-walkthrough-progress__toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.ndx-walkthrough-progress__toggle[aria-expanded="false"] .ndx-walkthrough-progress__toggle-icon {
+  transform: rotate(-90deg);
+}
+
+.ndx-walkthrough-progress__content {
+  margin-top: 15px;
+}
+
+/* Collapsed state for mobile */
+.ndx-walkthrough-progress__toggle[aria-expanded="false"] + .ndx-walkthrough-progress__content {
+  display: none;
+}
+
+.ndx-walkthrough-progress__scenario {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 14px;
+  color: var(--ndx-progress-grey);
+  margin: 0 0 15px 0;
+}
+
+.ndx-walkthrough-progress__bar-wrapper {
+  margin-bottom: 20px;
+}
+
+.ndx-walkthrough-progress__steps {
+  margin-bottom: 20px;
+}
+
+.ndx-walkthrough-progress__actions {
+  padding-top: 15px;
+  border-top: 1px solid var(--ndx-progress-border);
+}
+
+/* Reset button */
+.ndx-walkthrough-progress__reset {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 14px;
+  color: var(--ndx-progress-blue);
+  background: none;
+  border: none;
+  padding: 10px 0;
+  min-height: 44px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.ndx-walkthrough-progress__reset:hover {
+  color: #003078;
+}
+
+.ndx-walkthrough-progress__reset:focus {
+  outline: 3px solid var(--ndx-progress-focus);
+  outline-offset: 0;
+  background-color: var(--ndx-progress-focus);
+  color: var(--ndx-progress-text);
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   Reset Confirmation Modal
+   ========================================================================== */
+
+.ndx-reset-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ndx-reset-modal[hidden] {
+  display: none;
+}
+
+.ndx-reset-modal__backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.ndx-reset-modal__dialog {
+  position: relative;
+  background-color: var(--ndx-progress-white);
+  border: 3px solid var(--ndx-progress-text);
+  padding: 25px;
+  max-width: 400px;
+  width: calc(100% - 40px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.ndx-reset-modal__title {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ndx-progress-text);
+  margin: 0 0 15px 0;
+}
+
+.ndx-reset-modal__description {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ndx-progress-text);
+  margin: 0 0 20px 0;
+}
+
+.ndx-reset-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ndx-reset-modal__confirm,
+.ndx-reset-modal__cancel {
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+  padding: 12px 16px;
+  min-width: 44px;
+  min-height: 44px;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.ndx-reset-modal__confirm {
+  background-color: #d4351c;
+  color: var(--ndx-progress-white);
+  border-color: #d4351c;
+}
+
+.ndx-reset-modal__confirm:hover {
+  background-color: #aa2a16;
+  border-color: #aa2a16;
+}
+
+.ndx-reset-modal__confirm:focus {
+  outline: 3px solid var(--ndx-progress-focus);
+  outline-offset: 0;
+  background-color: var(--ndx-progress-focus);
+  color: var(--ndx-progress-text);
+  border-color: var(--ndx-progress-text);
+}
+
+.ndx-reset-modal__cancel {
+  background-color: var(--ndx-progress-light-grey);
+  color: var(--ndx-progress-text);
+  border-color: var(--ndx-progress-text);
+}
+
+.ndx-reset-modal__cancel:hover {
+  background-color: #dbdad9;
+}
+
+.ndx-reset-modal__cancel:focus {
+  outline: 3px solid var(--ndx-progress-focus);
+  outline-offset: 0;
+  background-color: var(--ndx-progress-focus);
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ndx-progress-bar__fill,
+  .ndx-walkthrough-progress__toggle-icon {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   Responsive Adjustments
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .ndx-walkthrough-progress {
+    margin-bottom: 20px;
+  }
+
+  .ndx-reset-modal__actions {
+    flex-direction: column;
+  }
+
+  .ndx-reset-modal__confirm,
+  .ndx-reset-modal__cancel {
+    width: 100%;
+  }
+}

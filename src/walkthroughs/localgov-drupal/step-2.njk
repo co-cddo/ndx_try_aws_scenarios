@@ -1,0 +1,208 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Explore the Homepage - LocalGov Drupal Walkthrough"
+description: Understand LocalGov Drupal's structure and navigation
+currentStep: 2
+totalSteps: 12
+timeEstimate: "3 minutes"
+scenarioId: localgov-drupal
+---
+
+{#
+  Step 2: Explore the Homepage (Story 2.4)
+  - Understanding LocalGov Drupal structure
+  - Navigation and content organisation
+  - Pre-populated sample content
+#}
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Explore the Homepage" %}
+{% set stepDescription = "Take a tour of LocalGov Drupal's homepage and understand how council content is organised." %}
+{% set timeEstimate = "3 minutes" %}
+{% set expectedOutcomes = [
+  "You can identify the main navigation areas",
+  "You understand how services are organised",
+  "You've seen the pre-populated sample content"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">The LocalGov Drupal homepage</h3>
+
+<p class="govuk-body">
+  LocalGov Drupal is designed specifically for UK councils. The homepage follows
+  GOV.UK design patterns that residents expect from government services.
+</p>
+
+<p class="govuk-body">
+  <strong>To view the homepage:</strong> Click on your site name in the admin toolbar,
+  or visit the DrupalUrl without any path.
+</p>
+
+<h3 class="govuk-heading-m">Key areas to explore</h3>
+
+<div class="ndx-explore-grid">
+  <div class="ndx-explore-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-explore-card__number">1</span>
+      Main navigation
+    </h4>
+    <p class="govuk-body-s">
+      The top menu provides access to key service areas: Waste & Recycling,
+      Planning, Council Tax, Housing, and more. This matches how residents
+      typically look for council services.
+    </p>
+  </div>
+
+  <div class="ndx-explore-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-explore-card__number">2</span>
+      Service cards
+    </h4>
+    <p class="govuk-body-s">
+      The homepage displays prominent service cards for frequently accessed
+      services. Each card links to a service landing page with detailed information.
+    </p>
+  </div>
+
+  <div class="ndx-explore-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-explore-card__number">3</span>
+      News section
+    </h4>
+    <p class="govuk-body-s">
+      Recent news articles appear on the homepage. These are sample articles
+      showing council announcements and updates.
+    </p>
+  </div>
+
+  <div class="ndx-explore-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-explore-card__number">4</span>
+      Footer links
+    </h4>
+    <p class="govuk-body-s">
+      The footer contains links to Contact, Accessibility, Privacy, and other
+      statutory pages that councils are required to provide.
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Pre-populated sample content</h3>
+
+<p class="govuk-body">
+  Your deployed site includes realistic UK council content so you can see how
+  LocalGov Drupal works in practice:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Content type</th>
+      <th scope="col" class="govuk-table__header">Examples</th>
+      <th scope="col" class="govuk-table__header">Quantity</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Service pages</td>
+      <td class="govuk-table__cell">Waste & Recycling, Planning, Council Tax</td>
+      <td class="govuk-table__cell">15-20</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Guide pages</td>
+      <td class="govuk-table__cell">How to apply for planning permission</td>
+      <td class="govuk-table__cell">5-8</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">Directory entries</td>
+      <td class="govuk-table__cell">Council offices, recycling centres</td>
+      <td class="govuk-table__cell">10-15</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">News articles</td>
+      <td class="govuk-table__cell">Council announcements</td>
+      <td class="govuk-table__cell">5</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 class="govuk-heading-m">Try this</h3>
+
+<div class="ndx-try-this">
+  <p class="govuk-body">
+    <strong>Navigate to a service page:</strong>
+  </p>
+  <ol class="govuk-list govuk-list--number">
+    <li>Click on "Waste & Recycling" in the main navigation</li>
+    <li>Notice the service landing page layout</li>
+    <li>Click on a sub-page like "Bin collection days"</li>
+    <li>See how the content is structured with headings, lists, and call-to-actions</li>
+  </ol>
+</div>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Tip:</strong> All this content is editable. In the next step, you'll
+    learn how to edit existing pages.
+  </p>
+</div>
+
+{# Screenshot: Drupal homepage with admin toolbar #}
+<figure class="ndx-screenshot govuk-!-margin-top-6">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/drupal-homepage-admin-desktop.png"
+       alt="LocalGov Drupal homepage showing the DEMO banner, admin toolbar, main navigation, and service cards for a fictional council"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The homepage showing the DEMO banner, admin toolbar at the top, main navigation (Services, News, Contact, About), and service cards
+  </figcaption>
+</figure>
+
+<style>
+  .ndx-explore-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-explore-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-explore-card h4 {
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ndx-explore-card__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background-color: #1d70b8;
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .ndx-try-this {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #00703c;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-explore-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

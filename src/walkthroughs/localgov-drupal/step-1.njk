@@ -1,0 +1,243 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 1: Log in to Drupal - LocalGov Drupal Walkthrough"
+description: Get your credentials and access the Drupal admin dashboard
+currentStep: 1
+totalSteps: 12
+timeEstimate: "3 minutes"
+scenarioId: localgov-drupal
+---
+
+{#
+  Step 1: Log in to Drupal (Story 2.4)
+  - Finding credentials in CloudFormation Outputs
+  - Accessing the Drupal login page
+  - First login experience
+#}
+
+{% set stepNumber = 1 %}
+{% set stepTitle = "Log in to Drupal" %}
+{% set stepDescription = "Get your admin credentials from CloudFormation and access the Drupal admin dashboard." %}
+{% set timeEstimate = "3 minutes" %}
+{% set expectedOutcomes = [
+  "CloudFormation stack shows CREATE_COMPLETE status",
+  "You have copied the DrupalUrl, AdminUsername, and AdminPassword",
+  "You are logged into the Drupal admin dashboard"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Navigating to CloudFormation</h3>
+
+<p class="govuk-body">
+  From the AWS Console homepage, you can find CloudFormation in the "Recently visited" section
+  or by searching for "CloudFormation" in the search bar.
+</p>
+
+{# Screenshot: AWS Console homepage #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/aws-console-homepage-desktop.png"
+       alt="AWS Console homepage showing the search bar and Recently visited section with CloudFormation"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The AWS Console homepage - find CloudFormation in "Recently visited" or use the search bar
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">Finding your credentials</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the CloudFormation console</strong>
+    <p class="govuk-body">
+      Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console in us-east-1 (N. Virginia)<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+    </p>
+  </li>
+
+  <li>
+    <strong>Find your stack</strong>
+    <p class="govuk-body">
+      Look for a stack named <code>LocalGovDrupalStack</code>
+    </p>
+    <p class="govuk-body">
+      The status should be <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span>
+    </p>
+    <div class="govuk-warning-text govuk-!-margin-top-2">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-visually-hidden">Warning</span>
+        If the status shows CREATE_IN_PROGRESS, wait a few minutes for the deployment to complete
+        before continuing. The stack takes approximately 15 minutes to deploy.
+      </strong>
+    </div>
+
+    {# Screenshot: CloudFormation stacks list #}
+    <figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-2">
+      <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/cloudformation-stacks-list-desktop.png"
+           alt="CloudFormation console showing the Stacks list with LocalGovDrupalStack and CREATE_COMPLETE status"
+           class="ndx-screenshot__image">
+      <figcaption class="ndx-screenshot__caption govuk-body-s">
+        The CloudFormation Stacks list showing LocalGovDrupalStack with CREATE_COMPLETE status
+      </figcaption>
+    </figure>
+  </li>
+
+  <li>
+    <strong>Go to the "Outputs" tab</strong>
+    <p class="govuk-body">
+      Click on your stack name, then select the "Outputs" tab
+    </p>
+  </li>
+
+  <li>
+    <strong>Copy these three values</strong>
+    <div class="ndx-credentials-list">
+      <p class="govuk-body">
+        <strong>DrupalUrl:</strong> The URL to access your Drupal site<br>
+        <code>https://[random-id].cloudfront.net</code>
+      </p>
+      <p class="govuk-body">
+        <strong>AdminUsername:</strong> Usually <code>admin</code>
+      </p>
+      <p class="govuk-body">
+        <strong>AdminPassword:</strong> Auto-generated secure password
+      </p>
+    </div>
+  </li>
+</ol>
+
+{# Screenshot: CloudFormation Outputs tab #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/cloudformation-outputs-desktop.png"
+       alt="AWS CloudFormation console showing the Outputs tab with DrupalUrl, AdminUsername, and AdminPassword values"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The CloudFormation Outputs tab shows your Drupal URL and admin credentials
+  </figcaption>
+</figure>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Tip:</strong> If you're viewing this after deploying from the scenario page,
+    your credentials are also shown in the Credentials Card on that page.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Logging in to Drupal</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open your Drupal site</strong>
+    <p class="govuk-body">
+      Click the <strong>DrupalUrl</strong> link or paste it into a new browser tab
+    </p>
+  </li>
+
+  <li>
+    <strong>Go to the login page</strong>
+    <p class="govuk-body">
+      Add <code>/user/login</code> to the URL, or click "Log in" in the header
+    </p>
+  </li>
+
+  <li>
+    <strong>Enter your credentials</strong>
+    <p class="govuk-body">
+      Enter the <strong>AdminUsername</strong> and <strong>AdminPassword</strong> from the Outputs tab
+    </p>
+  </li>
+
+  <li>
+    <strong>Click "Log in"</strong>
+    <p class="govuk-body">
+      You'll be redirected to the Drupal admin dashboard
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">What you should see</h3>
+
+<p class="govuk-body">
+  After logging in, you should see:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>The Drupal admin toolbar at the top of the page</li>
+  <li>A "Welcome to [Council Name]" message</li>
+  <li>Quick links to Content, Structure, and other admin sections</li>
+  <li>The DEMO banner indicating this is a demonstration site</li>
+</ul>
+
+{# Troubleshooting section #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Site not loading
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the Drupal site doesn't load:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Wait 2-3 minutes after stack completion - Drupal needs time to initialize</li>
+      <li>Check the CloudFormation "Events" tab for any errors</li>
+      <li>Try refreshing the page - the first load may be slow</li>
+      <li>Check you're using the correct URL from the Outputs tab</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Login not working
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you can't log in:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Double-check you copied the entire password (no trailing spaces)</li>
+      <li>Passwords are case-sensitive</li>
+      <li>Make sure you're on the <code>/user/login</code> page, not the homepage</li>
+      <li>Try using the password copy button in CloudFormation Outputs</li>
+    </ul>
+  </div>
+</details>
+
+{# Screenshot: Drupal login page #}
+<figure class="ndx-screenshot govuk-!-margin-top-6">
+  <img src="/assets/images/walkthroughs/localgov-drupal/screenshots/drupal-login-page-desktop.png"
+       alt="Drupal login page showing username and password fields with a Log in button"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The Drupal login page where you'll enter your admin credentials from the CloudFormation Outputs
+  </figcaption>
+</figure>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-credentials-list {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-credentials-list p {
+    margin-bottom: 10px;
+  }
+
+  .ndx-credentials-list p:last-child {
+    margin-bottom: 0;
+  }
+</style>

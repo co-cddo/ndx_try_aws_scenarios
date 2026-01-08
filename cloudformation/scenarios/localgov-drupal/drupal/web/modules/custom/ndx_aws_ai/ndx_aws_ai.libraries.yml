@@ -1,0 +1,140 @@
+# Libraries for NDX AWS AI module.
+#
+# Story 3.3: AI Component Design System
+# Story 3.4: CKEditor AI Toolbar Plugin
+
+ai_components:
+  version: VERSION
+  css:
+    component:
+      css/ai-components.css: {}
+  js:
+    js/ai-components.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupal.announce
+
+# CKEditor 5 AI Toolbar plugin library.
+# Story 3.4: CKEditor AI Toolbar Plugin
+# NOTE: DISABLED - requires webpack build. Using ai_toolbar_buttons instead.
+# ckeditor5.aiToolbar:
+#   version: VERSION
+#   js:
+#     js/ckeditor5_plugins/aiToolbar/src/index.js: { preprocess: false, minified: false }
+#   css:
+#     component:
+#       css/ckeditor5-ai-toolbar.css: {}
+#   dependencies:
+#     - core/ckeditor5
+#     - ndx_aws_ai/ai_components
+
+# Admin library for CKEditor 5 AI Toolbar configuration.
+ckeditor5.aiToolbar.admin:
+  version: VERSION
+  css:
+    theme:
+      css/ckeditor5-ai-toolbar-admin.css: {}
+
+# AI Toolbar Buttons library (form-based, no webpack required).
+# Story 3.4: CKEditor AI Toolbar Plugin (Alternative Implementation)
+ai_toolbar_buttons:
+  version: VERSION
+  js:
+    js/ai-toolbar-buttons.js: {}
+  css:
+    component:
+      css/ai-toolbar-buttons.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupal.ajax
+    - core/drupal.dialog.ajax
+    - ndx_aws_ai/ai_components
+
+# AI Writing Dialog library.
+# Story 3.5: AI Writing Assistant
+ai_writing_dialog:
+  version: VERSION
+  js:
+    js/ai-writing-handler.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupal.ajax
+    - core/drupal.dialog.ajax
+    - core/jquery
+    - ndx_aws_ai/ai_components
+
+# AI Diff Highlighting library.
+# Story 3.7: AI Preview Modal
+ai_diff_highlight:
+  version: VERSION
+  js:
+    js/ai-diff-highlight.js: {}
+  css:
+    component:
+      css/ai-diff-highlight.css: {}
+  dependencies:
+    - core/drupal
+    - ndx_aws_ai/ai_components
+
+# TTS Player library.
+# Story 4.6: Listen to Page (TTS Button)
+tts-player:
+  version: VERSION
+  js:
+    js/tts-player.js: {}
+  css:
+    component:
+      css/tts-player.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - core/drupal.announce
+
+# Content Translation library.
+# Story 4.7: Content Translation
+content-translation:
+  version: VERSION
+  js:
+    js/content-translation.js: {}
+  css:
+    component:
+      css/content-translation.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - core/drupal.announce
+
+# PDF-to-Web Conversion library.
+# Story 4.8: PDF-to-Web Conversion
+pdf-conversion:
+  version: VERSION
+  js:
+    js/pdf-conversion.js: {}
+  css:
+    component:
+      css/pdf-conversion.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - core/drupal.announce
+
+# Alt-Text Auto Generation library.
+# Story 4.5: Auto Alt-Text on Media Upload
+alt-text-generator:
+  version: VERSION
+  js:
+    js/alt-text-generator.js: {}
+  css:
+    component:
+      css/alt-text-generator.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - core/drupal.announce

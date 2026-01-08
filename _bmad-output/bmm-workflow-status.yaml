@@ -1,0 +1,138 @@
+# BMM Workflow Status
+# This tracks progress through BMM methodology phases.
+# Implementation phase is tracked separately in sprint-status.yaml
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#   - selected: User chose to include this optional workflow
+#
+# Completion Status:
+#   - {file-path}: File created/found (e.g., "docs/prd.md")
+#   - skipped: Optional/conditional workflow that was skipped
+
+generated: "2025-12-23"
+project: "ndx_try_aws_scenarios"
+project_type: "software"
+selected_track: "bmad-method"
+field_type: "brownfield"
+workflow_path: "method-brownfield.yaml"
+
+# User selections from workflow-init
+discovery_selections:
+  brainstorm: true
+  research: true
+  product_brief: false
+
+workflow_status:
+  # Prerequisite: Documentation (Brownfield)
+  - phase: "prereq"
+    name: "Documentation"
+    note: "Required for brownfield - understand existing codebase"
+    workflows:
+      - id: "document-project"
+        name: "Document Project"
+        status: "_bmad-output/index.md"
+        completed: "2025-12-23"
+        agent: "analyst"
+        command: "/bmad:bmm:workflows:document-project"
+        purpose: "Analyze and document existing codebase before planning"
+        outputs:
+          - "_bmad-output/index.md"
+          - "_bmad-output/project-overview.md"
+          - "_bmad-output/source-tree-analysis.md"
+          - "_bmad-output/project-scan-report.json"
+
+  # Phase 0: Discovery (Optional)
+  - phase: 0
+    name: "Discovery"
+    workflows:
+      - id: "brainstorm-project"
+        name: "Brainstorm Project"
+        status: "_bmad-output/brainstorming-session-results-2025-12-23.md"
+        completed: "2025-12-23"
+        agent: "analyst"
+        command: "/bmad:bmm:workflows:brainstorm-project"
+
+      - id: "research"
+        name: "Research"
+        status: "_bmad-output/project-planning-artifacts/research/technical-ndx-try-aws-scenarios-research-2025-12-23.md"
+        completed: "2025-12-23"
+        agent: "analyst"
+        command: "/bmad:bmm:workflows:research"
+
+  # Phase 1: Planning
+  - phase: 1
+    name: "Planning"
+    workflows:
+      - id: "prd"
+        name: "Product Requirements Document"
+        status: "_bmad-output/prd.md"
+        completed: "2025-12-23"
+        agent: "pm"
+        command: "/bmad:bmm:workflows:prd"
+        note: "AI-Enhanced LocalGov Drupal on AWS scenario"
+
+      - id: "validate-prd"
+        name: "Validate PRD"
+        status: "optional"
+        agent: "pm"
+        command: "/bmad:bmm:workflows:validate-prd"
+
+      - id: "create-ux-design"
+        name: "UX Design"
+        status: "_bmad-output/project-planning-artifacts/ux-design-specification.md"
+        completed: "2025-12-29"
+        agent: "ux-designer"
+        command: "/bmad:bmm:workflows:create-ux-design"
+        note: "Enhanced with Advanced Elicitation (5 methods applied to accessibility)"
+
+  # Phase 2: Solutioning
+  - phase: 2
+    name: "Solutioning"
+    workflows:
+      - id: "architecture"
+        name: "Architecture"
+        status: "_bmad-output/project-planning-artifacts/architecture.md"
+        completed: "2025-12-29"
+        agent: "architect"
+        command: "/bmad:bmm:workflows:architecture"
+        note: "CDK→CFn, Nova 2 models, Drupal modules, 15 architecture decisions, 5 ADRs"
+
+      - id: "create-epics-and-stories"
+        name: "Epics & Stories"
+        status: "required"
+        agent: "pm"
+        command: "/bmad:bmm:workflows:create-epics-and-stories"
+
+      - id: "test-design"
+        name: "Test Design"
+        status: "recommended"
+        agent: "tea"
+        command: "/bmad:bmm:workflows:testarch-test-design"
+
+      - id: "validate-architecture"
+        name: "Validate Architecture"
+        status: "optional"
+        agent: "architect"
+        command: "/bmad:bmm:workflows:validate-architecture"
+
+      - id: "implementation-readiness"
+        name: "Implementation Readiness"
+        status: "required"
+        agent: "architect"
+        command: "/bmad:bmm:workflows:check-implementation-readiness"
+
+  # Phase 3: Implementation
+  - phase: 3
+    name: "Implementation"
+    workflows:
+      - id: "sprint-planning"
+        name: "Sprint Planning"
+        status: "required"
+        agent: "sm"
+        command: "/bmad:bmm:workflows:sprint-planning"

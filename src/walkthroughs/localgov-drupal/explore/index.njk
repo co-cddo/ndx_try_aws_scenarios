@@ -1,0 +1,235 @@
+---
+layout: page
+title: Explore AI Features
+description: Discover and try all 7 AI-powered features in LocalGov Drupal
+scenarioId: localgov-drupal
+eleventyNavigation:
+  key: localgov-drupal-explore
+  parent: localgov-drupal-walkthrough
+  title: Explore Features
+---
+
+{#
+  Story 6.2: Portal Explore Page
+
+  Feature discovery page showing all 7 AI features with:
+  - Grid layout grouped by category
+  - Dynamic Drupal URL from deployment
+  - Deep links to Drupal admin pages
+  - Status indicators
+#}
+
+{% set scenarioId = "localgov-drupal" %}
+{% set scenarioData = scenarios.scenarios | selectattr("id", "equalto", scenarioId) | first %}
+{% set aiFeatures = scenarioData.aiFeatures %}
+
+{# Phase Navigator - Story 12.1 #}
+{% include "components/phase-navigator.njk" %}
+
+{# Breadcrumb #}
+<nav class="govuk-breadcrumbs govuk-!-margin-bottom-6" aria-label="Breadcrumb">
+  <ol class="govuk-breadcrumbs__list">
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/">Home</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/scenarios/localgov-drupal/">LocalGov Drupal</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/walkthroughs/localgov-drupal/">Walkthrough</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item" aria-current="page">
+      Explore Features
+    </li>
+  </ol>
+</nav>
+
+<h1 class="govuk-heading-xl">Explore AI Features</h1>
+
+<p class="govuk-body-l">
+  Discover all 7 AI-powered features available in your LocalGov Drupal deployment.
+  Click "Try it now" to jump directly to each feature in your Drupal admin.
+</p>
+
+{# Deployment URL Banner #}
+<div id="deployment-banner" class="ndx-deployment-banner govuk-!-margin-bottom-6" hidden>
+  <div class="govuk-inset-text ndx-deployment-banner__content">
+    <strong class="ndx-deployment-banner__label">Your deployment:</strong>
+    <a id="deployment-url" href="#" class="govuk-link ndx-deployment-banner__url" target="_blank" rel="noopener noreferrer"></a>
+    <span class="govuk-body-s ndx-deployment-banner__hint">(opens in new tab)</span>
+  </div>
+</div>
+
+{# No Deployment Warning #}
+<div id="no-deployment-banner" class="govuk-warning-text govuk-!-margin-bottom-6">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Warning</span>
+    No deployment detected. <a href="/scenarios/localgov-drupal/" class="govuk-link">Deploy LocalGov Drupal first</a> to try these features live.
+  </strong>
+</div>
+
+{# Category: Content #}
+<section class="ndx-feature-section govuk-!-margin-bottom-8" aria-labelledby="content-heading">
+  <h2 class="govuk-heading-l ndx-feature-section__heading" id="content-heading">
+    <span class="govuk-tag govuk-tag--blue ndx-feature-section__tag">Content</span>
+    AI-Powered Content Editing
+  </h2>
+  <p class="govuk-body">
+    Write better content faster with AI assistance. Get suggestions, improve clarity, and simplify complex text.
+  </p>
+
+  <div class="govuk-grid-row ndx-feature-grid">
+    {% for feature in aiFeatures %}
+      {% if feature.category == "content" %}
+        <div class="govuk-grid-column-one-half ndx-feature-grid__item">
+          {% include "components/ai-feature-card.njk" %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+{# Category: Accessibility #}
+<section class="ndx-feature-section govuk-!-margin-bottom-8" aria-labelledby="accessibility-heading">
+  <h2 class="govuk-heading-l ndx-feature-section__heading" id="accessibility-heading">
+    <span class="govuk-tag govuk-tag--green ndx-feature-section__tag">Accessibility</span>
+    Accessibility Enhancements
+  </h2>
+  <p class="govuk-body">
+    Make your content accessible to everyone. Auto-generate alt-text, add text-to-speech, and translate to 75+ languages.
+  </p>
+
+  <div class="govuk-grid-row ndx-feature-grid">
+    {% for feature in aiFeatures %}
+      {% if feature.category == "accessibility" %}
+        <div class="govuk-grid-column-one-third ndx-feature-grid__item">
+          {% include "components/ai-feature-card.njk" %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+{# Category: Generation #}
+<section class="ndx-feature-section govuk-!-margin-bottom-8" aria-labelledby="generation-heading">
+  <h2 class="govuk-heading-l ndx-feature-section__heading" id="generation-heading">
+    <span class="govuk-tag govuk-tag--purple ndx-feature-section__tag">Generation</span>
+    Content Generation
+  </h2>
+  <p class="govuk-body">
+    Convert documents and generate unique council identities automatically using AI.
+  </p>
+
+  <div class="govuk-grid-row ndx-feature-grid">
+    {% for feature in aiFeatures %}
+      {% if feature.category == "generation" %}
+        <div class="govuk-grid-column-one-half ndx-feature-grid__item">
+          {% include "components/ai-feature-card.njk" %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+{# What's Next #}
+<section class="ndx-explore-next govuk-!-margin-top-8" aria-labelledby="next-heading">
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+  <h2 class="govuk-heading-l" id="next-heading">Ready to go deeper?</h2>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-m">Detailed Guides</h3>
+        <p class="govuk-body">
+          Learn how to use each AI feature with step-by-step guides.
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li><a href="/walkthroughs/localgov-drupal/ai-content-editing/" class="govuk-link">AI Content Editing Guide</a></li>
+          <li><a href="/walkthroughs/localgov-drupal/dynamic-council/" class="govuk-link">Dynamic Council Guide</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <div class="ndx-next-card">
+        <h3 class="govuk-heading-m">Generate Evidence Pack</h3>
+        <p class="govuk-body">
+          Create a committee-ready PDF documenting what you learned and experienced.
+        </p>
+        <a href="/walkthroughs/localgov-drupal/evidence-pack/" class="govuk-button govuk-button--secondary">
+          Create Evidence Pack
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Deployment banner */
+  .ndx-deployment-banner__content {
+    border-left-color: #00703c;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .ndx-deployment-banner__label {
+    color: #0b0c0c;
+  }
+
+  .ndx-deployment-banner__url {
+    font-family: monospace;
+    word-break: break-all;
+  }
+
+  .ndx-deployment-banner__hint {
+    color: #505a5f;
+  }
+
+  /* Feature section */
+  .ndx-feature-section__heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .ndx-feature-section__tag {
+    text-transform: uppercase;
+    font-size: 14px;
+  }
+
+  /* Feature grid */
+  .ndx-feature-grid {
+    margin-top: 20px;
+  }
+
+  .ndx-feature-grid__item {
+    margin-bottom: 20px;
+  }
+
+  /* Next section */
+  .ndx-next-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    height: 100%;
+  }
+
+  .ndx-next-card h3 {
+    margin-top: 0;
+  }
+
+  @media (max-width: 768px) {
+    .ndx-feature-grid__item {
+      margin-bottom: 15px;
+    }
+
+    .ndx-next-card {
+      margin-bottom: 20px;
+    }
+  }
+</style>
+
+<script src="/assets/js/explore-page.js" defer></script>

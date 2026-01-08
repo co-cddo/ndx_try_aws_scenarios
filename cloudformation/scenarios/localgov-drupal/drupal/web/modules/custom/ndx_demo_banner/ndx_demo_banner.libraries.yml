@@ -1,0 +1,5 @@
+demo-banner:
+  version: 1.x
+  css:
+    theme:
+      css/demo-banner.css: {}

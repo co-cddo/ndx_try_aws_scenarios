@@ -1,0 +1,143 @@
+/**
+ * @file
+ * Styles for the NDX Demo Banner.
+ *
+ * Displays a prominent warning banner at the top of all pages using
+ * GOV.UK Design System colors to indicate this is a demonstration site.
+ *
+ * Story 1.10: DEMO Banner Module
+ */
+
+/* Banner container - fixed at top of viewport */
+.demo-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 499; /* Below Drupal admin toolbar (500) but above page content */
+  height: 44px;
+  background-color: #0b0c0c; /* GOV.UK black */
+  color: #ffdd00; /* GOV.UK yellow */
+  font-family: "GDS Transport", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 44px;
+  text-align: center;
+  /* Yellow/black diagonal stripes for visibility */
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #0b0c0c,
+    #0b0c0c 10px,
+    #1d1d1d 10px,
+    #1d1d1d 20px
+  );
+}
+
+/* Inner container for content centering */
+.demo-banner__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+}
+
+/* Warning icon */
+.demo-banner__icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* Banner text */
+.demo-banner__text {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Push page content down to account for fixed banner */
+html {
+  margin-top: 44px !important;
+}
+
+/* Adjust for Drupal admin toolbar when present */
+.toolbar-fixed html,
+html.toolbar-fixed {
+  margin-top: 44px !important;
+}
+
+/* When admin toolbar is open, adjust body padding */
+body.toolbar-fixed {
+  padding-top: 44px;
+}
+
+/* Ensure admin toolbar appears above banner and is positioned below it */
+#toolbar-administration {
+  top: 44px !important;
+  z-index: 501 !important;
+}
+
+/* Mobile responsive adjustments */
+@media screen and (max-width: 640px) {
+  .demo-banner {
+    font-size: 14px;
+    height: 40px;
+    line-height: 40px;
+  }
+
+  html {
+    margin-top: 40px !important;
+  }
+
+  .toolbar-fixed html,
+  html.toolbar-fixed {
+    margin-top: 40px !important;
+  }
+
+  body.toolbar-fixed {
+    padding-top: 40px;
+  }
+
+  #toolbar-administration {
+    top: 40px !important;
+    z-index: 501 !important;
+  }
+
+  .demo-banner__icon {
+    font-size: 16px;
+  }
+
+  .demo-banner__container {
+    padding: 0 8px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .demo-banner {
+    background-image: none;
+    background-color: #000;
+    border-bottom: 3px solid #ffdd00;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .demo-banner {
+    background-image: none;
+    background-color: #0b0c0c;
+  }
+}
+
+/* Print styles - hide banner */
+@media print {
+  .demo-banner {
+    display: none;
+  }
+
+  html {
+    margin-top: 0 !important;
+  }
+}
