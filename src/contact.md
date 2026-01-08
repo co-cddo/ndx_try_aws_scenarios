@@ -62,7 +62,7 @@ Visit the [LGA AI Hub](https://www.local.gov.uk/our-support/efficiency-and-produ
 
 Join the conversation on the cross-government Slack:
 
-- <a href="https://ukgovernmentdigital.slack.com/archives/C075C8GTP7D" class="govuk-link" target="_blank" rel="noopener noreferrer">#ndx-try-aws-scenarios<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+- <a href="https://ukgovernmentdigital.slack.com/archives/C075C8GTP7D" class="govuk-link" target="_blank" rel="noopener noreferrer">#national-digital-exchange<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
 
 ## Follow our progress
 
