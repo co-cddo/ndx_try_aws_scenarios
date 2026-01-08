@@ -1,53 +1,52 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 10: Translate this Page - LocalGov Drupal Walkthrough"
-description: Discover the content translation feature powered by AWS Translate
+title: "Step 10: Listen to Page - LocalGov Drupal Walkthrough"
+description: Discover the text-to-speech accessibility feature powered by AWS Polly
 currentStep: 10
-totalSteps: 11
+totalSteps: 12
 timeEstimate: "3 minutes"
 scenarioId: localgov-drupal
 ---
 
 {#
-  Step 10: Translate this Page Feature (Story 4.7)
-  - Accessibility feature powered by AWS Translate
+  Step 10: Listen to Page TTS Feature (Story 4.6)
+  - Accessibility feature powered by AWS Polly
   - Available on service pages, guides, and news
-  - 76+ supported languages
+  - Language selection and playback controls
 #}
 
 {% set stepNumber = 10 %}
-{% set stepTitle = "Translate this Page" %}
-{% set stepDescription = "Explore the content translation feature that makes pages accessible in 76+ languages." %}
+{% set stepTitle = "Listen to Page" %}
+{% set stepDescription = "Explore the text-to-speech feature that makes content accessible to all visitors." %}
 {% set timeEstimate = "3 minutes" %}
 {% set expectedOutcomes = [
-  "You understand what Translate this Page does",
+  "You understand what Listen to Page does",
   "You know which pages have this feature",
-  "You've tried translating content to another language"
+  "You've seen the playback controls"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<h3 class="govuk-heading-m">What is Translate this Page?</h3>
+<h3 class="govuk-heading-m">What is Listen to Page?</h3>
 
 <p class="govuk-body">
-  LocalGov Drupal includes a <strong>real-time translation feature</strong> that converts page
-  content into the visitor's preferred language. This accessibility feature is powered by
-  <a href="https://aws.amazon.com/translate/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS Translate<span class="govuk-visually-hidden"> (opens in new tab)</span></a>,
-  Amazon's neural machine translation service.
+  LocalGov Drupal includes a <strong>text-to-speech feature</strong> that reads page content
+  aloud to visitors. This accessibility feature is powered by <strong>AWS Polly</strong>,
+  Amazon's neural text-to-speech service.
 </p>
 
 <div class="govuk-inset-text">
   <p class="govuk-body govuk-!-margin-bottom-0">
-    <strong>Language accessibility matters:</strong> Translation helps residents who speak
-    English as a second language access council services. It supports community engagement
-    across diverse populations.
+    <strong>Accessibility matters:</strong> Text-to-speech helps users with visual impairments,
+    reading difficulties, or those who prefer audio content. It's part of making council
+    services accessible to everyone.
   </p>
 </div>
 
 <h3 class="govuk-heading-m">Where to find it</h3>
 
 <p class="govuk-body">
-  The "Translate this Page" widget appears at the top of content pages, including:
+  The "Listen to this page" player appears at the top of content pages, including:
 </p>
 
 <ul class="govuk-list govuk-list--bullet">
@@ -57,60 +56,57 @@ scenarioId: localgov-drupal
 </ul>
 
 <p class="govuk-body">
-  Navigate to any service, guide, or news page to see the translation widget in action.
+  Navigate to any service or guide page to see the TTS player in action.
 </p>
 
-{# Screenshot: Translation widget on a page #}
+{# Screenshot: TTS player on a page #}
 <figure class="ndx-screenshot govuk-!-margin-top-6">
-  <img src="/assets/images/walkthroughs/localgov-drupal/ai-features/translation-widget-desktop.png"
-       alt="Translate this Page widget showing a language dropdown with common languages like Welsh, Spanish, and Polish, plus a Translate button"
+  <img src="/assets/images/walkthroughs/localgov-drupal/ai-features/tts-player-desktop.png"
+       alt="Listen to this page player showing language dropdown, play button, progress bar and speed controls"
        class="ndx-screenshot__image"
        onerror="this.parentElement.style.display='none'">
   <figcaption class="ndx-screenshot__caption govuk-body-s">
-    The translation widget appears at the top of content pages with a language selector
+    The TTS player appears at the top of content pages with full playback controls
   </figcaption>
 </figure>
 
-<h3 class="govuk-heading-m">Supported languages</h3>
+<h3 class="govuk-heading-m">Player controls</h3>
 
 <p class="govuk-body">
-  The translation feature supports <strong>76+ languages</strong>, including:
+  The TTS player includes intuitive controls:
 </p>
 
-<div class="ndx-language-grid">
-  <div class="ndx-language-card">
-    <h4 class="govuk-heading-s">UK Priority Languages</h4>
-    <ul class="govuk-list govuk-body-s">
-      <li>Welsh (Cymraeg)</li>
-      <li>Scottish Gaelic (Gàidhlig)</li>
-      <li>Irish (Gaeilge)</li>
-    </ul>
+<div class="ndx-tts-controls-grid">
+  <div class="ndx-tts-control-card">
+    <h4 class="govuk-heading-s">Language selection</h4>
+    <p class="govuk-body-s">
+      Choose from multiple languages including British English, Welsh, and other
+      languages. The voice changes to match native pronunciation.
+    </p>
   </div>
 
-  <div class="ndx-language-card">
-    <h4 class="govuk-heading-s">European Languages</h4>
-    <ul class="govuk-list govuk-body-s">
-      <li>Polish, Romanian</li>
-      <li>French, German, Spanish</li>
-      <li>Portuguese, Italian</li>
-    </ul>
+  <div class="ndx-tts-control-card">
+    <h4 class="govuk-heading-s">Play / Pause / Stop</h4>
+    <p class="govuk-body-s">
+      Standard audio controls let visitors start, pause, and stop playback
+      at any time. The player remembers position when paused.
+    </p>
   </div>
 
-  <div class="ndx-language-card">
-    <h4 class="govuk-heading-s">South Asian Languages</h4>
-    <ul class="govuk-list govuk-body-s">
-      <li>Urdu, Punjabi, Bengali</li>
-      <li>Gujarati, Hindi, Tamil</li>
-    </ul>
+  <div class="ndx-tts-control-card">
+    <h4 class="govuk-heading-s">Progress bar</h4>
+    <p class="govuk-body-s">
+      Visual progress indicator shows how far through the content the reader
+      has progressed. Click to jump to any position.
+    </p>
   </div>
 
-  <div class="ndx-language-card">
-    <h4 class="govuk-heading-s">Other Languages</h4>
-    <ul class="govuk-list govuk-body-s">
-      <li>Arabic, Chinese (Simplified)</li>
-      <li>Japanese, Korean</li>
-      <li>And 60+ more...</li>
-    </ul>
+  <div class="ndx-tts-control-card">
+    <h4 class="govuk-heading-s">Speed control</h4>
+    <p class="govuk-body-s">
+      Adjust playback speed from 0.5x to 2x to match listening preference.
+      Slower speeds help comprehension; faster speeds save time.
+    </p>
   </div>
 </div>
 
@@ -118,80 +114,69 @@ scenarioId: localgov-drupal
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>
-    <strong>Navigate to a content page</strong>
+    <strong>Navigate to a service page</strong>
     <p class="govuk-body">
-      From your Drupal site, go to any news article, service page, or guide.
+      From your Drupal homepage, click on any service link (e.g., "Waste and Recycling"
+      or "Planning Applications").
     </p>
   </li>
 
   <li>
-    <strong>Find the Translate this Page widget</strong>
+    <strong>Find the Listen to Page player</strong>
     <p class="govuk-body">
-      Look for the "Translate this Page" section at the top of the main content area,
-      near the page title.
+      Look for the "Listen to this page" section at the top of the main content area,
+      below the page title.
     </p>
   </li>
 
   <li>
     <strong>Select a language</strong>
     <p class="govuk-body">
-      Use the dropdown to choose your target language. Common UK languages appear
-      first, followed by all available languages.
+      Use the dropdown to choose your preferred language. British English (en-GB)
+      is selected by default.
     </p>
   </li>
 
   <li>
-    <strong>Click Translate</strong>
+    <strong>Click Play</strong>
     <p class="govuk-body">
-      Press the "Translate" button. The page content will be replaced with the
-      translated version within a few seconds.
+      Press the green Play button to start the text-to-speech. The page content
+      will be read aloud using AWS Polly's neural voice.
     </p>
   </li>
 
   <li>
-    <strong>View the translated page</strong>
+    <strong>Adjust speed (optional)</strong>
     <p class="govuk-body">
-      A banner appears confirming the language. You can click "Show original"
-      at any time to revert to English.
+      Use the speed slider to adjust playback speed. Try 1.25x or 1.5x for
+      faster listening without losing clarity.
     </p>
   </li>
 </ol>
-
-{# Screenshot: Translated page with banner #}
-<figure class="ndx-screenshot govuk-!-margin-top-6">
-  <img src="/assets/images/walkthroughs/localgov-drupal/ai-features/translation-page-desktop.png"
-       alt="Page showing translated content in Spanish with a notification banner indicating the page has been translated, and a Show original button to revert"
-       class="ndx-screenshot__image"
-       onerror="this.parentElement.style.display='none'">
-  <figcaption class="ndx-screenshot__caption govuk-body-s">
-    After translation, a banner shows the language and provides a button to revert to English
-  </figcaption>
-</figure>
 
 <h3 class="govuk-heading-m">How it works</h3>
 
 <p class="govuk-body">
-  Behind the scenes, the Translate this Page feature:
+  Behind the scenes, the Listen to Page feature:
 </p>
 
 <ol class="govuk-list govuk-list--number">
-  <li>Extracts the main content from the page (preserving HTML structure)</li>
-  <li>Automatically detects the source language (usually English)</li>
-  <li>Sends the content to AWS Translate via a secure API</li>
-  <li>Receives the translated content and replaces the page text</li>
-  <li>Caches translations for faster repeat visits</li>
+  <li>Extracts the main content from the page (excluding navigation and footers)</li>
+  <li>Sends the text to AWS Polly via a secure API</li>
+  <li>Receives synthesized audio in real-time chunks</li>
+  <li>Streams the audio to the browser for playback</li>
 </ol>
 
 <div class="ndx-aws-service-card">
-  <h4 class="govuk-heading-s">AWS Translate</h4>
+  <h4 class="govuk-heading-s">AWS Polly</h4>
   <p class="govuk-body-s">
-    AWS Translate is a neural machine translation service that delivers fast,
-    high-quality, affordable language translation. It uses deep learning models
-    to continuously improve translation quality.
+    AWS Polly is a cloud service that turns text into lifelike speech. It uses
+    deep learning technologies to synthesize natural-sounding human speech.
+    Neural voices provide the most human-like, conversational output.
   </p>
   <p class="govuk-body-s govuk-!-margin-bottom-0">
-    <a href="https://aws.amazon.com/translate/" target="_blank" rel="noopener noreferrer" class="govuk-link">
-      Learn more about AWS Translate<span class="govuk-visually-hidden"> (opens in new tab)</span>
+    <a href="https://aws.amazon.com/polly/" target="_blank" rel="noopener noreferrer" class="govuk-link">
+      Learn more about AWS Polly<span class="govuk-visually-hidden"> (opens in new tab)</span>
     </a>
   </p>
 </div>
@@ -199,70 +184,61 @@ scenarioId: localgov-drupal
 <h3 class="govuk-heading-m">Accessibility benefits</h3>
 
 <p class="govuk-body">
-  Translation supports multiple user needs:
+  Text-to-speech supports multiple user needs:
 </p>
 
 <table class="govuk-table">
   <thead class="govuk-table__head">
     <tr class="govuk-table__row">
       <th scope="col" class="govuk-table__header">User group</th>
-      <th scope="col" class="govuk-table__header">How translation helps</th>
+      <th scope="col" class="govuk-table__header">How TTS helps</th>
     </tr>
   </thead>
   <tbody class="govuk-table__body">
     <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Non-English speakers</td>
-      <td class="govuk-table__cell">Access council services in their native language</td>
+      <td class="govuk-table__cell">Visually impaired</td>
+      <td class="govuk-table__cell">Audio alternative to reading text on screen</td>
     </tr>
     <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Welsh speakers</td>
-      <td class="govuk-table__cell">Read content in Welsh as required by Welsh Language Act</td>
+      <td class="govuk-table__cell">Dyslexia</td>
+      <td class="govuk-table__cell">Hearing content can aid comprehension</td>
     </tr>
     <tr class="govuk-table__row">
-      <td class="govuk-table__cell">New residents</td>
-      <td class="govuk-table__cell">Understand local services while learning English</td>
+      <td class="govuk-table__cell">Low literacy</td>
+      <td class="govuk-table__cell">Access information without reading</td>
     </tr>
     <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Family helpers</td>
-      <td class="govuk-table__cell">Assist relatives who prefer another language</td>
+      <td class="govuk-table__cell">Multitasking</td>
+      <td class="govuk-table__cell">Listen while doing other tasks</td>
     </tr>
     <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Tourists/visitors</td>
-      <td class="govuk-table__cell">Access local information in familiar language</td>
+      <td class="govuk-table__cell">Non-native speakers</td>
+      <td class="govuk-table__cell">Hear pronunciation while reading</td>
     </tr>
   </tbody>
 </table>
 
-<div class="govuk-inset-text">
-  <p class="govuk-body govuk-!-margin-bottom-0">
-    <strong>Remember your choice:</strong> Users can tick "Remember my choice" to have
-    pages automatically translate to their preferred language on future visits.
-  </p>
-</div>
-
 <style>
-  .ndx-language-grid {
+  .ndx-tts-controls-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
     margin: 30px 0;
   }
 
-  .ndx-language-card {
-    padding: 15px 20px;
+  .ndx-tts-control-card {
+    padding: 20px;
     background-color: #f8f8f8;
     border-left: 4px solid #00703c;
   }
 
-  .ndx-language-card h4 {
+  .ndx-tts-control-card h4 {
     margin-top: 0;
     margin-bottom: 10px;
   }
 
-  .ndx-language-card ul {
+  .ndx-tts-control-card p {
     margin-bottom: 0;
-    padding-left: 0;
-    list-style-position: inside;
   }
 
   .ndx-aws-service-card {
@@ -279,7 +255,7 @@ scenarioId: localgov-drupal
   }
 
   @media (max-width: 640px) {
-    .ndx-language-grid {
+    .ndx-tts-controls-grid {
       grid-template-columns: 1fr;
     }
   }

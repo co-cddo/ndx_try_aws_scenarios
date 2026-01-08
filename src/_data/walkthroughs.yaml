@@ -5,10 +5,10 @@
 
 walkthroughs:
   localgov-drupal:
-    totalSteps: 11
+    totalSteps: 12
     url: "/walkthroughs/localgov-drupal/"
     title: "LocalGov Drupal Walkthrough"
-    duration: "37 minutes"
+    duration: "40 minutes"
     hasWalkthrough: true
     category: "cms"
     steps:
@@ -30,6 +30,9 @@ walkthroughs:
       - title: "Content simplified"
         description: "Simplify text to plain English with one click"
         time: "4 minutes"
+      - title: "Auto alt-text generated"
+        description: "See AI generate accessible image descriptions automatically"
+        time: "3 minutes"
       - title: "PDF converted to web"
         description: "Convert legacy PDFs to accessible web content"
         time: "4 minutes"
