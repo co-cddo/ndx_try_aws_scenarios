@@ -27,13 +27,14 @@ export default function(eleventyConfig) {
     },
     url: process.env.GITHUB_PAGES_URL || 'http://localhost:8080',
     header: {
-      organisationLogo: false,
-      organisationName: 'NDX:Try AWS',
-      productName: 'AWS Scenarios for UK Councils',
-      search: false,
-      logotype: {
-        text: " ",
+      productName: 'NDX:Try AWS Scenarios',
+      phaseBanner: {
+        tag: {
+          text: "Alpha",
+        },
+        html: 'This is a new service. Help us improve it and <a class="govuk-link" href="mailto:ndx@dsit.gov.uk">give your feedback by email</a>.',
       },
+      search: false
     },
     
     footer: {

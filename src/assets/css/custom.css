@@ -31,44 +31,6 @@ body {
 }
 
 /* ==========================================================================
-   Experimental Prototype Banner
-   Yellow banner matching NDX main site style
-   ========================================================================== */
-
-.ndx-experimental-banner {
-  background: yellow;
-  padding: 5px 15px;
-  margin-bottom: 0;
-}
-
-.ndx-experimental-banner p {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 10px 0;
-  text-align: center;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1.4;
-}
-
-.ndx-experimental-banner a {
-  color: #0b0c0c;
-  text-decoration: underline;
-}
-
-.ndx-experimental-banner a:hover {
-  text-decoration-thickness: max(3px, .1875rem, .12em);
-}
-
-.ndx-experimental-banner a:focus {
-  outline: 3px solid transparent;
-  color: #0b0c0c;
-  background-color: #fd0;
-  box-shadow: 0 -2px #fd0, 0 4px #0b0c0c;
-  text-decoration: none;
-}
-
-/* ==========================================================================
    Trust Indicators Section
    ========================================================================== */
 
