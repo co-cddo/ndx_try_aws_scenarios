@@ -134,4 +134,3 @@ Required information:
 
 - [Google Analytics 4 Documentation](https://support.google.com/analytics/answer/10089681)
 - [GOV.UK Analytics Guidance](https://www.gov.uk/service-manual/measuring-success)
-- [LGA Digital Maturity Index](https://www.local.gov.uk/our-support/efficiency-and-productivity/digital-councils)
