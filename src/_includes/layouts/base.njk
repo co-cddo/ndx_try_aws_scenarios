@@ -25,6 +25,7 @@
 {# Components #}
 {% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
 {% from "govuk/components/pagination/macro.njk" import govukPagination %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
 
 {% from "x-govuk/components/masthead/macro.njk" import xGovukMasthead %}
 {% from "x-govuk/components/related-navigation/macro.njk" import xGovukRelatedNavigation %}
@@ -73,12 +74,11 @@
 
 {% block header %}
   {{ appHeader(options.header) }}
-  {# Experimental prototype banner - matching NDX main site #}
-  <div class="ndx-experimental-banner">
-    <p>
-      This is a prototype vision of how a future government service could work. It's not a real service yet, but we're exploring what it could look like. Your <a href="mailto:ndx@dsit.gov.uk">feedback</a> will help shape the real service.
-    </p>
+  {% if options.header.phaseBanner %}
+  <div class="govuk-width-container">
+    {{ govukPhaseBanner(options.header.phaseBanner) }}
   </div>
+  {% endif %}
   {{ appServiceNavigation(options.serviceNavigation) if options.serviceNavigation }}
   {# Custom navigation dropdowns (Story 14.4) and mobile nav (Story 14.5) #}
   <div class="ndx-header-nav">
