@@ -146,8 +146,7 @@ Choose from 6 AWS scenarios designed for UK local government:
   <div class="govuk-grid-column-two-thirds">
     <h2 class="govuk-heading-m">Built for UK local government</h2>
     <p class="govuk-body">
-      This platform is developed by the NDX Partnership with support from the
-      <a href="https://www.local.gov.uk/our-support/efficiency-and-productivity/artificial-intelligence" class="govuk-link">Local Government Association AI Hub</a>.
+      This platform is developed by the NDX Partnership to help local government evaluate AWS cloud solutions.
     </p>
     <p class="govuk-body">
       <span class="govuk-tag govuk-tag--green">Open Source (MIT)</span>
