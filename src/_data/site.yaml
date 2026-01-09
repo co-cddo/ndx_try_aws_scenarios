@@ -3,7 +3,7 @@
 
 name: "NDX:Try AWS"
 description: "Try AWS Before You Buy - Zero-cost evaluation platform for UK local government"
-tagline: "AWS Scenarios for UK Councils"
+tagline: "AWS Scenarios for UK Local Government"
 url: "https://aws.try.ndx.digital.cabinet-office.gov.uk"
 
 # Organisation details
@@ -21,7 +21,7 @@ trustIndicators:
 
 # Key messages
 messaging:
-  headline: "Try AWS Before You Buy for UK Councils"
+  headline: "Try AWS Before You Buy for UK Local Government"
   subheadline: "Evaluate AWS AI and cloud services with real local government scenarios"
   valueProposition:
     - "No cloud expertise required"
