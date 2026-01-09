@@ -48,7 +48,7 @@ footer:
 quickLinks:
   - text: "Take the Quiz"
     href: "/quiz/"
-    description: "Find the best scenario for your council in under 2 minutes"
+    description: "Find the best scenario for your organisation in under 2 minutes"
   - text: "Browse All Scenarios"
     href: "/scenarios/"
     description: "Explore all 6 AWS scenarios with filtering options"

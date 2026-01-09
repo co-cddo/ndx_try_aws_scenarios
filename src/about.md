@@ -1,33 +1,33 @@
 ---
 title: About NDX:Try
 layout: page
-description: Learn about the NDX:Try AWS Scenarios platform and how it helps UK councils evaluate cloud solutions
+description: Learn about the NDX:Try AWS Scenarios platform and how it helps UK local government evaluate cloud solutions
 ---
 
 ## What is NDX:Try?
 
-NDX:Try is a free platform helping UK councils explore AWS cloud scenarios through hands-on evaluation. Deploy real AI and cloud solutions in 15 minutes, test with realistic council data, and generate committee-ready evidence packs.
+NDX:Try is a free platform helping UK local government explore AWS cloud scenarios through hands-on evaluation. Deploy real AI and cloud solutions in 15 minutes, test with realistic local government data, and generate committee-ready evidence packs.
 
-Our mission is simple: **Let councils try before they buy**. As part of the NDX:Try programme, **AWS is providing all scenarios completely FREE** - zero cost to your council, zero commitment, and zero cloud expertise required.
+Our mission is simple: **Let local government try before they buy**. As part of the NDX:Try programme, **AWS is providing all scenarios completely FREE** - zero cost to your organisation, zero commitment, and zero cloud expertise required.
 
 ## Part of the LGA AI Ecosystem
 
-NDX:Try is part of the broader AI innovation landscape for local government, working alongside the [LGA AI Hub](https://www.local.gov.uk/our-support/cyber-digital-and-technology/artificial-intelligence) to help councils adopt AI responsibly.
+NDX:Try is part of the broader AI innovation landscape for local government, working alongside the [LGA AI Hub](https://www.local.gov.uk/our-support/cyber-digital-and-technology/artificial-intelligence) to help local government adopt AI responsibly.
 
 The Local Government Association (LGA) AI Hub provides:
 
 - **Policy guidance** on AI adoption in local government
-- **Case studies** from councils implementing AI solutions
+- **Case studies** from organisations implementing AI solutions
 - **Research** on AI opportunities and risks
 - **Networking** with peers exploring similar challenges
 
-NDX:Try complements this by providing **practical, hands-on evaluation** of specific AWS scenarios councils can deploy and test themselves.
+NDX:Try complements this by providing **practical, hands-on evaluation** of specific AWS scenarios that organisations can deploy and test themselves.
 
 ## How It Works
 
 ### 1. Discover
 
-Take our [2-minute quiz](/quiz/) or [browse scenarios](/scenarios/) to find solutions matching your council's needs. Each scenario addresses a real local government challenge:
+Take our [2-minute quiz](/quiz/) or [browse scenarios](/scenarios/) to find solutions matching your organisation's needs. Each scenario addresses a real local government challenge:
 
 - Citizen engagement (chatbots, text-to-speech)
 - Service efficiency (planning AI, FOI redaction)
@@ -41,14 +41,14 @@ Your deployment runs in an **isolated Innovation Sandbox**, completely separate 
 
 ### 3. Experience
 
-Walk through guided demos with realistic UK council data. See exactly how the solution works, test edge cases, and understand operational implications.
+Walk through guided demos with realistic UK local government data. See exactly how the solution works, test edge cases, and understand operational implications.
 
 Each scenario includes:
 
 - Step-by-step walkthroughs (5-15 minutes)
 - Screenshot galleries showing the user experience
 - Video demonstrations (optional)
-- Sample data reflecting real council use cases
+- Sample data reflecting real local government use cases
 
 ### 4. Evaluate
 
@@ -100,9 +100,9 @@ Our design is guided by these core principles:
 
 ### 1. Grant Permission to Try
 
-"You're not the first council to explore cloud AI, and you won't be the last."
+"You're not the first to explore cloud AI, and you won't be the last."
 
-We normalize exploration and reduce imposter syndrome. Councils shouldn't feel behind for investigating new technology.
+We normalise exploration and reduce imposter syndrome. Organisations shouldn't feel behind for investigating new technology.
 
 ### 2. Promise Safety
 
@@ -139,7 +139,7 @@ All code is open source under the MIT License: [View on GitHub](https://github.c
 
 ## Get Involved
 
-### For Councils
+### For Local Government
 
 - **Start exploring**: [Browse scenarios](/scenarios/) or [take the quiz](/quiz/)
 - **Share feedback**: Help us improve via the [contact form](/contact/)
@@ -171,7 +171,7 @@ Upcoming enhancements:
 
 - **More scenarios**: Azure and Google Cloud Platform in addition to AWS
 - **Interactive demos**: Live sandboxes without AWS account requirements
-- **Success stories**: Case studies from councils who deployed scenarios
+- **Success stories**: Case studies from organisations who deployed scenarios
 - **Partner marketplace**: Curated list of implementation partners
 - **Community forum**: Peer-to-peer knowledge sharing
 
@@ -188,6 +188,6 @@ For technical support: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 <div class="govuk-inset-text">
   <p class="govuk-body">
     <strong>Part of the LGA AI ecosystem</strong><br>
-    This platform works alongside the <a href="https://www.local.gov.uk/our-support/cyber-digital-and-technology/artificial-intelligence" class="govuk-link">LGA AI Hub</a> to help councils adopt AI responsibly.
+    This platform works alongside the <a href="https://www.local.gov.uk/our-support/cyber-digital-and-technology/artificial-intelligence" class="govuk-link">LGA AI Hub</a> to help local government adopt AI responsibly.
   </p>
 </div>

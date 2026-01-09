@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Find Your Scenario
-description: Answer 3 quick questions to discover the AWS scenario that best matches your council's needs.
+description: Answer 3 quick questions to discover the AWS scenario that best matches your organisation's needs.
 ---
 
 <div class="ndx-quiz" id="quiz-container">
@@ -15,7 +15,7 @@ description: Answer 3 quick questions to discover the AWS scenario that best mat
     </div>
     <h2 class="govuk-heading-m">Browse All Scenarios</h2>
     <p class="govuk-body">
-      <a href="/scenarios/" class="govuk-link">View all 6 AWS scenarios for UK councils &rarr;</a>
+      <a href="/scenarios/" class="govuk-link">View all 6 AWS scenarios for UK local government &rarr;</a>
     </p>
     <div class="ndx-scenario-grid">
       {% for scenario in scenarios.scenarios %}
@@ -37,7 +37,7 @@ description: Answer 3 quick questions to discover the AWS scenario that best mat
 
   <div class="ndx-quiz__intro js-quiz-intro">
     <p class="govuk-body-l">
-      Answer 3 quick questions to find the AWS scenario that best matches your council's needs.
+      Answer 3 quick questions to find the AWS scenario that best matches your organisation's needs.
     </p>
     <p class="govuk-body">
       This takes less than 30 seconds. Not sure? You can always <a href="/scenarios/" class="govuk-link">browse all scenarios</a> instead.

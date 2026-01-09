@@ -34,13 +34,13 @@ We aim to respond within 5 working days.
 
 ### Share your evaluation experience
 
-We'd love to hear about your experience with NDX:Try. Your feedback helps us improve the platform for all councils.
+We'd love to hear about your experience with NDX:Try. Your feedback helps us improve the platform for everyone.
 
 Email us at: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 
 ### Suggest a new scenario
 
-Have an idea for a scenario that would help your council? Let us know:
+Have an idea for a scenario that would help your organisation? Let us know:
 
 Email us at: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 
@@ -54,7 +54,7 @@ Email: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 
 ### For local authorities
 
-Want to learn more about how NDX:Try can help your council?
+Want to learn more about how NDX:Try can help your organisation?
 
 Visit the [LGA AI Hub](https://www.local.gov.uk/our-support/efficiency-and-productivity/artificial-intelligence) or email: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 

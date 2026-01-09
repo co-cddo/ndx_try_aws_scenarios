@@ -1,6 +1,6 @@
 ---
 layout: page
-title: NDX:Try AWS for UK Councils
+title: NDX:Try AWS for UK Local Government
 description: Try AWS Before You Buy - Zero-cost evaluation platform for UK local government. Deploy real AWS scenarios in 15 minutes with no cloud expertise required.
 ---
 
@@ -8,7 +8,7 @@ description: Try AWS Before You Buy - Zero-cost evaluation platform for UK local
   <div class="govuk-width-container">
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-two-thirds">
-        <h1 class="govuk-heading-xl ndx-hero__title">Try AWS Before You Buy for UK Councils</h1>
+        <h1 class="govuk-heading-xl ndx-hero__title">Try AWS Before You Buy for UK Local Government</h1>
         <p class="govuk-body-l ndx-hero__description">
           Evaluate AWS AI and cloud services with real local government scenarios. No cloud expertise required. Deploy in 15 minutes. <strong>Completely FREE as part of NDX:Try.</strong>
         </p>
@@ -34,13 +34,13 @@ description: Try AWS Before You Buy - Zero-cost evaluation platform for UK local
   </div>
 </div>
 
-## Why councils trust NDX:Try
+## Why local government trusts NDX:Try
 
 <div class="ndx-trust-indicators">
   <ul class="ndx-trust-indicators__list">
     <li class="ndx-trust-indicators__item">
       <span class="ndx-trust-indicators__value">50+</span>
-      <span class="ndx-trust-indicators__label">councils evaluating AWS</span>
+      <span class="ndx-trust-indicators__label">organisations evaluating AWS</span>
     </li>
     <li class="ndx-trust-indicators__item">
       <span class="ndx-trust-indicators__value">15 min</span>
@@ -56,10 +56,10 @@ description: Try AWS Before You Buy - Zero-cost evaluation platform for UK local
 <div class="ndx-explainer" id="what-is-ndx-try">
   <h2 class="govuk-heading-m ndx-explainer__title">What is NDX:Try?</h2>
   <p class="govuk-body">
-    NDX:Try is a free evaluation platform that lets UK councils experience AWS cloud services before committing to procurement. Each scenario is designed specifically for local government use cases, with realistic sample data and guided walkthroughs.
+    NDX:Try is a free evaluation platform that lets UK local government organisations experience AWS cloud services before committing to procurement. Each scenario is designed specifically for local government use cases, with realistic sample data and guided walkthroughs.
   </p>
   <p class="govuk-body">
-    You're not the first council to explore cloud AI, and you won't be the last. Our scenarios help you understand what's possible in 15 minutes, not 15 hours.
+    You're not the first to explore cloud AI, and you won't be the last. Our scenarios help you understand what's possible in 15 minutes, not 15 hours.
   </p>
   <p class="govuk-body govuk-!-margin-bottom-0">
     <a href="/get-started/" class="govuk-link">Learn how it works &rarr;</a>
@@ -130,7 +130,7 @@ Choose from 6 AWS scenarios designed for UK local government:
 <div class="ndx-cta-section">
   <h2 class="govuk-heading-m ndx-cta-section__title">Not sure where to start?</h2>
   <p class="govuk-body">
-    Take our 2-minute quiz to find the best scenario for your council's needs.
+    Take our 2-minute quiz to find the best scenario for your organisation's needs.
   </p>
   <a href="/quiz/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
     Find Your Scenario
@@ -144,7 +144,7 @@ Choose from 6 AWS scenarios designed for UK local government:
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <h2 class="govuk-heading-m">Built for UK councils</h2>
+    <h2 class="govuk-heading-m">Built for UK local government</h2>
     <p class="govuk-body">
       This platform is developed by the NDX Partnership with support from the
       <a href="https://www.local.gov.uk/our-support/efficiency-and-productivity/artificial-intelligence" class="govuk-link">Local Government Association AI Hub</a>.
