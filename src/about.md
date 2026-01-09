@@ -10,19 +10,6 @@ NDX:Try is a free platform helping UK local government explore AWS cloud scenari
 
 Our mission is simple: **Let local government try before they buy**. As part of the NDX:Try programme, **AWS is providing all scenarios completely FREE** - zero cost to your organisation, zero commitment, and zero cloud expertise required.
 
-## Part of the LGA AI Ecosystem
-
-NDX:Try is part of the broader AI innovation landscape for local government, working alongside the [LGA AI Hub](https://www.local.gov.uk/our-support/cyber-digital-and-technology/artificial-intelligence) to help local government adopt AI responsibly.
-
-The Local Government Association (LGA) AI Hub provides:
-
-- **Policy guidance** on AI adoption in local government
-- **Case studies** from organisations implementing AI solutions
-- **Research** on AI opportunities and risks
-- **Networking** with peers exploring similar challenges
-
-NDX:Try complements this by providing **practical, hands-on evaluation** of specific AWS scenarios that organisations can deploy and test themselves.
-
 ## How It Works
 
 ### 1. Discover
@@ -161,7 +148,6 @@ All code is open source under the MIT License: [View on GitHub](https://github.c
 
 NDX:Try is governed by the NDX Partnership, with oversight from:
 
-- **Local Government Association** - Policy alignment and outreach
 - **Central Digital and Data Office** - Technical standards and security
 - **NHS Digital** - Healthcare data standards (for relevant scenarios)
 
@@ -183,11 +169,3 @@ For partnership enquiries, email: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 
 For technical support: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 
----
-
-<div class="govuk-inset-text">
-  <p class="govuk-body">
-    <strong>Part of the LGA AI ecosystem</strong><br>
-    This platform works alongside the <a href="https://www.local.gov.uk/our-support/cyber-digital-and-technology/artificial-intelligence" class="govuk-link">LGA AI Hub</a> to help local government adopt AI responsibly.
-  </p>
-</div>

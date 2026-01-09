@@ -40,9 +40,6 @@ footer:
     - text: "GitHub"
       href: "https://github.com/co-cddo/ndx-try-aws-scenarios"
       external: true
-    - text: "LGA AI Hub"
-      href: "https://www.local.gov.uk/our-support/efficiency-and-productivity/artificial-intelligence"
-      external: true
 
 # Quick links (for homepage or sidebars)
 quickLinks:

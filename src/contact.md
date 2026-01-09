@@ -56,7 +56,7 @@ Email: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 
 Want to learn more about how NDX:Try can help your organisation?
 
-Visit the [LGA AI Hub](https://www.local.gov.uk/our-support/efficiency-and-productivity/artificial-intelligence) or email: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
+Email: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 
 ## Community
 
