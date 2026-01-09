@@ -33,8 +33,6 @@ messaging:
 # External links
 links:
   github: "https://github.com/co-cddo/ndx-try-aws-scenarios"
-  lga: "https://www.local.gov.uk/"
-  lgaAiHub: "https://www.local.gov.uk/our-support/efficiency-and-productivity/artificial-intelligence"
   govukFrontend: "https://design-system.service.gov.uk/"
 
 # License
