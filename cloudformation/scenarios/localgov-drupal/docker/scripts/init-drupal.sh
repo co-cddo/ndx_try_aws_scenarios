@@ -26,6 +26,20 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
+# Log file location (written by entrypoint.sh via tee)
+INIT_LOG_FILE="/var/www/drupal/web/init-log.txt"
+
+# Get the last N lines of the log file, HTML-escaped for embedding in status page
+get_log_tail() {
+    local lines="${1:-50}"
+    if [ -f "$INIT_LOG_FILE" ] && [ -s "$INIT_LOG_FILE" ]; then
+        tail -n "$lines" "$INIT_LOG_FILE" 2>/dev/null | \
+            sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g'
+    else
+        echo "Waiting for initialization to start..."
+    fi
+}
+
 # Helper function to run drush commands with retry logic for deadlocks
 # Handles Aurora MySQL deadlocks (SQLSTATE 40001) that occur during cache writes
 run_drush_with_retry() {
@@ -65,19 +79,23 @@ update_status() {
 
     log "Status: $phase - $message"
 
-    # Create HTML status page
+    # Get log content for embedding in status page
+    local LOG_CONTENT
+    LOG_CONTENT=$(get_log_tail 50)
+
+    # Create HTML status page with embedded log viewer
     cat > "$STATUS_FILE" << EOF
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="5">
+    <meta http-equiv="refresh" content="3">
     <title>LocalGov Drupal - Initialization</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-               max-width: 600px; margin: 50px auto; padding: 20px; background: #f3f2f1; }
-        .card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+               max-width: 900px; margin: 30px auto; padding: 20px; background: #f3f2f1; }
+        .card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
         h1 { color: #0b0c0c; margin-bottom: 10px; }
         .phase { font-size: 1.2em; color: #1d70b8; margin-bottom: 20px; }
         .message { color: #505a5f; margin-bottom: 20px; }
@@ -89,7 +107,37 @@ update_status() {
         @keyframes spin { to { transform: rotate(360deg); } }
         .error { color: #d4351c; }
         .success { color: #00703c; }
+
+        /* Log viewer styles */
+        .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .log-title { font-size: 1em; font-weight: bold; color: #0b0c0c; margin: 0; }
+        .log-info { font-size: 0.8em; color: #505a5f; }
+        .log-viewer {
+            background: #1d1d1d;
+            color: #00ff00;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            padding: 15px;
+            border-radius: 6px;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .log-viewer::-webkit-scrollbar { width: 8px; }
+        .log-viewer::-webkit-scrollbar-track { background: #2d2d2d; }
+        .log-viewer::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
     </style>
+    <script>
+        // Auto-scroll log to bottom on load
+        window.onload = function() {
+            var logViewer = document.getElementById('log-viewer');
+            if (logViewer) {
+                logViewer.scrollTop = logViewer.scrollHeight;
+            }
+        };
+    </script>
 </head>
 <body>
     <div class="card">
@@ -101,13 +149,21 @@ update_status() {
         </div>
         <div class="status">
             $(if [ "$status" = "error" ]; then
-                echo '<span class="error">❌ Error occurred</span>'
+                echo '<span class="error">Error occurred</span>'
             elif [ "$status" = "complete" ]; then
-                echo '<span class="success">✓ Complete - Redirecting...</span><script>setTimeout(function(){window.location.href="/"},3000);</script>'
+                echo '<span class="success">Complete - Redirecting...</span><script>setTimeout(function(){window.location.href="/"},3000);</script>'
             else
                 echo '<span class="spinner"></span> Please wait...'
             fi)
         </div>
+    </div>
+
+    <div class="card">
+        <div class="log-header">
+            <h2 class="log-title">Initialization Log</h2>
+            <span class="log-info">Last 50 lines - Auto-refreshes every 3 seconds</span>
+        </div>
+        <pre class="log-viewer" id="log-viewer">$LOG_CONTENT</pre>
     </div>
 </body>
 </html>

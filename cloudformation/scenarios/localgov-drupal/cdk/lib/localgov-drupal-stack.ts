@@ -104,9 +104,10 @@ export class LocalGovDrupalStack extends cdk.Stack {
     // ==========================================================================
 
     // Drupal URL - primary access point (HTTPS via CloudFront)
+    // Points to init-status page which redirects to home when initialization is complete
     new cdk.CfnOutput(this, 'DrupalUrl', {
       description: 'URL to access LocalGov Drupal (HTTPS)',
-      value: `https://${cdn.domainName}`,
+      value: `https://${cdn.domainName}/init-status`,
       exportName: `${this.stackName}-DrupalUrl`,
     });
 
