@@ -49,7 +49,11 @@ if [ "${SKIP_INIT:-false}" != "true" ]; then
     # Run initialization script if it exists
     if [ -f /scripts/init-drupal.sh ]; then
         echo "Running Drupal initialization..."
-        /scripts/init-drupal.sh
+        # Capture logs to file for web-based status viewer while preserving stdout for Docker logs
+        INIT_LOG_FILE="/var/www/drupal/web/init-log.txt"
+        touch "$INIT_LOG_FILE"
+        chmod 644 "$INIT_LOG_FILE"
+        /scripts/init-drupal.sh 2>&1 | tee "$INIT_LOG_FILE"
     fi
 fi
 
