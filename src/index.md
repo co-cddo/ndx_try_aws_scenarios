@@ -59,7 +59,7 @@ description: Try AWS Before You Buy - Zero-cost evaluation platform for UK local
     NDX:Try is a free evaluation platform that lets UK local government organisations experience AWS cloud services before committing to procurement. Each scenario is designed specifically for local government use cases, with realistic sample data and guided walkthroughs.
   </p>
   <p class="govuk-body">
-    You're not the first to explore cloud AI, and you won't be the last. Our scenarios help you understand what's possible in 15 minutes, not 15 hours.
+    You're not the first to explore cloud AI, and you will not be the last. Our scenarios help you understand what's possible in 15 minutes, not 15 hours.
   </p>
   <p class="govuk-body govuk-!-margin-bottom-0">
     <a href="/get-started/" class="govuk-link">Learn how it works &rarr;</a>

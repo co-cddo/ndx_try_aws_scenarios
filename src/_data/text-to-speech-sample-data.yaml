@@ -9,7 +9,7 @@ sampleAnnouncements:
     title: "Bin Collection Changes - Bank Holiday"
     category: "Service Disruption"
     priority: "Standard"
-    text: "Due to the upcoming bank holiday on Monday 27th May, bin collections will be delayed by one day across all areas. If your usual collection day is Monday, your bins will be collected on Tuesday. Tuesday collections move to Wednesday, and so on. Please leave your bins out by 7am on your revised collection day. Normal service resumes the following week. For more information, visit our website or call 01234 567890."
+    text: "Due to the upcoming bank holiday on Monday 27 May, bin collections will be delayed by one day across all areas. If your usual collection day is Monday, your bins will be collected on Tuesday. Tuesday collections move to Wednesday, and so on. Please leave your bins out by 7am on your revised collection day. Normal service resumes the following week. For more information, visit our website or call 01234 567890."
     characterCount: 427
     estimatedCost: "£0.007"
     estimatedDuration: "25 seconds"
@@ -39,7 +39,7 @@ sampleAnnouncements:
     title: "Planning Committee Meeting - Public Attendance"
     category: "Committee Announcement"
     priority: "Standard"
-    text: "The Planning Committee will meet on Wednesday 15th June at 7pm in the Council Chamber, Town Hall. The agenda includes applications for 45 new homes on the former industrial site at Riverside Road, and a change of use application for the old Post Office building on High Street. Members of the public are welcome to attend and may speak during the public participation session. To register to speak, contact Democratic Services by 5pm on Tuesday 14th June on 01234 567890 or email planning@council.gov.uk. The full agenda and supporting documents are available on our website."
+    text: "The Planning Committee will meet on Wednesday 15 June at 7pm in the Council Chamber, Town Hall. The agenda includes applications for 45 new homes on the former industrial site at Riverside Road, and a change of use application for the old Post Office building on High Street. Members of the public are welcome to attend and may speak during the public participation session. To register to speak, contact Democratic Services by 5pm on Tuesday 14 June on 01234 567890 or email planning@council.gov.uk. The full agenda and supporting documents are available on our website."
     characterCount: 608
     estimatedCost: "£0.010"
     estimatedDuration: "36 seconds"
@@ -75,7 +75,7 @@ pollyVoices:
     bestFor: "General announcements, service updates, community information"
     description: "Amy's warm, conversational tone is perfect for routine council communications. She sounds natural and approachable, making announcements feel personal rather than bureaucratic."
     useCase: "Bin collection changes, library hours, park events, general service updates"
-    sampleText: "The library will be closed for refurbishment from Monday 10th July through Friday 4th August. During this time, you can still access online resources and use the mobile library service."
+    sampleText: "The library will be closed for refurbishment from Monday 10 July through Friday 4 August. During this time, you can still access online resources and use the mobile library service."
 
   - id: "Brian"
     engine: "neural"
@@ -97,7 +97,7 @@ pollyVoices:
     bestFor: "Committee announcements, legal notices, formal statements"
     description: "Emma's formal, professional tone is ideal for official council business. Her precise delivery ensures accuracy and conveys the seriousness of statutory notices and committee proceedings."
     useCase: "Planning committee notices, council meeting agendas, legal announcements, formal consultations"
-    sampleText: "Notice is hereby given that the Council's Cabinet will meet on Thursday 20th July at 2pm to consider the annual budget. The public may attend and ask questions during the designated participation period."
+    sampleText: "Notice is hereby given that the Council's Cabinet will meet on Thursday 20 July at 2pm to consider the annual budget. The public may attend and ask questions during the designated participation period."
 
 accessibilityUseCases:
   title: "Who Benefits from Text-to-Speech?"

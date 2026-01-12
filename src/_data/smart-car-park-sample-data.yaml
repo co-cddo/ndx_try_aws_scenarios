@@ -407,7 +407,7 @@ committeeLanguage:
       revenue:
         - "Increase occupancy from 60% to 85% through real-time guidance = £16,250 additional annual revenue per 50-space car park"
         - "Multiply across all council car parks for total revenue impact"
-        - "Enable dynamic pricing during peak hours to optimize revenue"
+        - "Enable dynamic pricing during peak hours to optimise revenue"
 
       operationalSavings:
         - "Eliminate manual counting: Save £9,750 annually per car park"
@@ -465,7 +465,7 @@ additionalUseCases:
   title: "Beyond Car Parks - Other IoT Applications"
   examples:
     - name: "Waste Management"
-      description: "Sensors in bins detect fill levels, optimize collection routes"
+      description: "Sensors in bins detect fill levels, optimise collection routes"
       benefit: "Reduce fuel costs by 30%, fewer missed collections"
 
     - name: "Street Lighting"

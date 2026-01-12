@@ -44,7 +44,7 @@ activities:
     learning: "Handwriting recognition is improving but not perfect"
     safe_badge: true
     input_text: "Upload a document with handwritten annotations in the margins"
-    expected_output: "Some handwriting recognized accurately, some missed or misinterpreted"
+    expected_output: "Some handwriting recognised accurately, some missed or misinterpreted"
     screenshot: "experiments/exp2-handwriting.png"
 
   - id: exp3

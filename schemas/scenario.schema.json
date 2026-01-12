@@ -61,8 +61,8 @@
           },
           "timeEstimate": {
             "type": "string",
-            "pattern": "^\\d+-?\\d*\\s*(minutes?|hours?|mins?)$",
-            "description": "Estimated time to complete (e.g., '15 minutes', '1-2 hours')"
+            "pattern": "^\\d+(\\s+to\\s+\\d+|-\\d+)?\\s*(minutes?|hours?|mins?)$",
+            "description": "Estimated time to complete (e.g., '15 minutes', '1 to 2 hours')"
           },
           "primaryPersona": {
             "type": "string",
@@ -259,8 +259,8 @@
               },
               "deploymentTime": {
                 "type": "string",
-                "pattern": "^\\d+-?\\d*\\s*(minutes?|mins?)$",
-                "description": "Estimated deployment time (e.g., '3-5 minutes')"
+                "pattern": "^\\d+(\\s+to\\s+\\d+|-\\d+)?\\s*(minutes?|mins?)$",
+                "description": "Estimated deployment time (e.g., '3 to 5 minutes')"
               },
               "deploymentPhases": {
                 "type": "array",

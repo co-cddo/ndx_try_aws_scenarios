@@ -67,7 +67,7 @@ steps:
 
       - id: pii-categories
         filename: step-3-pii-categories.png
-        alt: "List of detected PII organized by category with confidence scores"
+        alt: "List of detected PII organised by category with confidence scores"
         caption: "Review detected items by category: names, addresses, dates, etc."
         width: 1920
         height: 1080

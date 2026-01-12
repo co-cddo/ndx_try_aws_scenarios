@@ -4,13 +4,13 @@ layout: page
 description: Learn about the NDX:Try AWS Scenarios platform and how it helps UK local government evaluate cloud solutions
 ---
 
-## What is NDX:Try?
+## About NDX:Try
 
 NDX:Try is a free platform helping UK local government explore AWS cloud scenarios through hands-on evaluation. Deploy real AI and cloud solutions in 15 minutes, test with realistic local government data, and generate committee-ready evidence packs.
 
 Our mission is simple: **Let local government try before they buy**. As part of the NDX:Try programme, **AWS is providing all scenarios completely FREE** - zero cost to your organisation, zero commitment, and zero cloud expertise required.
 
-## How It Works
+## How it works
 
 ### 1. Discover
 
@@ -32,7 +32,7 @@ Walk through guided demos with realistic UK local government data. See exactly h
 
 Each scenario includes:
 
-- Step-by-step walkthroughs (5-15 minutes)
+- Step-by-step walkthroughs (5 to 15 minutes)
 - Screenshot galleries showing the user experience
 - Video demonstrations (optional)
 - Sample data reflecting real local government use cases
@@ -51,7 +51,7 @@ Generate evidence packs for committee presentations. Download PDFs containing:
 
 Connect with approved G-Cloud suppliers for implementation. Each scenario links directly to relevant G-Cloud services, with search terms pre-filled for your convenience.
 
-## Who It's For
+## Who this is for
 
 ### CTOs and IT Leads
 
@@ -87,9 +87,9 @@ Our design is guided by these core principles:
 
 ### 1. Grant Permission to Try
 
-"You're not the first to explore cloud AI, and you won't be the last."
+"You're not the first to explore cloud AI, and you will not be the last."
 
-We normalise exploration and reduce imposter syndrome. Organisations shouldn't feel behind for investigating new technology.
+We normalise exploration and reduce imposter syndrome. Organisations should not feel behind for investigating new technology.
 
 ### 2. Promise Safety
 

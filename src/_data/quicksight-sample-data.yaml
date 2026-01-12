@@ -509,7 +509,7 @@ selfServiceUseCases:
     - question: "What time of day do we receive the most customer service calls?"
       currentProcess: "Request ad-hoc report from IT, 5-day turnaround"
       withQuickSight: "Drill down into hourly call volume chart - 2 clicks, 10 seconds"
-      businessValue: "Optimize staffing rota to match demand peaks"
+      businessValue: "Optimise staffing rota to match demand peaks"
 
     - question: "How does our council tax collection rate compare to last year?"
       currentProcess: "Wait for annual finance report, 1-year lag"
@@ -695,7 +695,7 @@ productionConsiderations:
 
       - strategy: "Partition S3 data by date"
         savings: "Reduce Athena scan costs by 90% (only scan relevant date partitions)"
-        implementation: "Organize S3 as s3://bucket/year=2024/month=05/day=15/data.csv"
+        implementation: "Organise S3 as s3://bucket/year=2024/month=05/day=15/data.csv"
 
       - strategy: "Use SPICE for frequently accessed data"
         savings: "10x faster queries, no per-query Athena cost, 10 GB free tier"

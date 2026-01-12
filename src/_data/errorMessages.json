@@ -127,7 +127,7 @@
       "userMessage": "Your network may be blocking access to AWS services.",
       "troubleshootingSteps": [
         "Check if your council firewall allows *.amazonaws.com",
-        "Contact your IT team to whitelist AWS endpoints",
+        "Contact your IT team to add AWS endpoints to the allow list",
         "Try from a different network if possible"
       ],
       "supportLink": "/help/network-requirements"
@@ -138,7 +138,7 @@
       "userMessage": "There's an issue with the CloudFormation template.",
       "troubleshootingSteps": [
         "This is likely a template issue on our side",
-        "Please report this using the contact form",
+        "Report this using the contact form",
         "Include the scenario name and error message"
       ],
       "supportLink": "/contact/"
@@ -149,7 +149,7 @@
       "userMessage": "There's a configuration issue with the template.",
       "troubleshootingSteps": [
         "This is a template issue on our side",
-        "Please report this using the contact form",
+        "Report this using the contact form",
         "Include the scenario name in your report"
       ],
       "supportLink": "/contact/"
@@ -183,7 +183,7 @@
       "userMessage": "Lambda function code could not be found.",
       "troubleshootingSteps": [
         "This is a deployment configuration issue",
-        "Please report this using the contact form",
+        "Report this using the contact form",
         "We'll investigate and fix the template"
       ],
       "supportLink": "/contact/"
