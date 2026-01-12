@@ -6,7 +6,7 @@ description: Get in touch with the NDX:Try team for support, feedback, or questi
 
 # Contact the NDX:Try team
 
-We're here to help you get the most out of your AWS evaluation experience.
+Get help with your AWS evaluation.
 
 ## Get support
 
@@ -34,7 +34,7 @@ We aim to respond within 5 working days.
 
 ### Share your evaluation experience
 
-We'd love to hear about your experience with NDX:Try. Your feedback helps us improve the platform for everyone.
+Tell us about your experience with NDX:Try. Your feedback helps us improve the platform.
 
 Email us at: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 
@@ -83,6 +83,6 @@ This is an open source project. You can:
 
 <div class="govuk-inset-text">
   <p class="govuk-body">
-    <strong>Note:</strong> For urgent technical issues during an active evaluation, please include "URGENT" in your email subject line.
+    <strong>Note:</strong> For urgent technical issues during an active evaluation, include 'Urgent' in your email subject line.
   </p>
 </div>

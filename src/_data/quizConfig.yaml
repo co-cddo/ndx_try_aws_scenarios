@@ -7,7 +7,7 @@ questions:
     hint: "Select the area where your council needs the most help"
     options:
       - id: ai-automation
-        label: "AI & Automation"
+        label: "AI and Automation"
         description: "Chatbots, document processing, intelligent workflows"
         weights:
           council-chatbot: 5
@@ -17,7 +17,7 @@ questions:
           quicksight-dashboard: 1
           smart-car-park: 0
       - id: iot-smart-city
-        label: "IoT & Smart City"
+        label: "IoT and Smart City"
         description: "Sensors, real-time monitoring, connected infrastructure"
         weights:
           smart-car-park: 5
@@ -27,7 +27,7 @@ questions:
           foi-redaction: 0
           text-to-speech: 0
       - id: analytics-data
-        label: "Analytics & Data"
+        label: "Analytics and Data"
         description: "Dashboards, reporting, data-driven decisions"
         weights:
           quicksight-dashboard: 5
@@ -37,7 +37,7 @@ questions:
           smart-car-park: 1
           text-to-speech: 0
       - id: compliance-governance
-        label: "Compliance & Governance"
+        label: "Compliance and Governance"
         description: "FOI requests, data protection, regulatory compliance"
         weights:
           foi-redaction: 5
@@ -47,7 +47,7 @@ questions:
           text-to-speech: 1
           smart-car-park: 0
       - id: customer-service
-        label: "Contact Center & Customer Service"
+        label: "Contact centre and customer service"
         description: "Resident queries, accessibility, communication"
         weights:
           council-chatbot: 5
@@ -75,7 +75,7 @@ questions:
           quicksight-dashboard: 1
           smart-car-park: 0
       - id: medium
-        label: "15-30 minutes"
+        label: "15 to 30 minutes"
         description: "Standard evaluation - intermediate scenarios"
         weights:
           foi-redaction: 5
@@ -85,7 +85,7 @@ questions:
           text-to-speech: 3
           smart-car-park: 2
       - id: extended
-        label: "30+ minutes"
+        label: "More than 30 minutes"
         description: "Deep dive - advanced scenarios"
         weights:
           smart-car-park: 5
@@ -162,8 +162,8 @@ labels:
     customer-service: "customer service improvements"
   time:
     quick: "under 15 minutes"
-    medium: "15-30 minutes"
-    extended: "30+ minutes"
+    medium: "15 to 30 minutes"
+    extended: "more than 30 minutes"
   role:
     cto: "a CTO or Technical Lead"
     service-manager: "a Service Manager"

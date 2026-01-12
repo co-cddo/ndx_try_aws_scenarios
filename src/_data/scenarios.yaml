@@ -6,7 +6,7 @@ scenarios:
     name: "LocalGov Drupal with AI"
     headline: "AI-enhanced content management system for UK councils"
     bestFor: "Councils exploring AI integration with LocalGov Drupal CMS"
-    description: "Deploy a fully functional LocalGov Drupal CMS with 7 AI-powered features: content editing assistance, readability simplification, auto alt-text generation, text-to-speech in 7 languages, content translation to 75+ languages, PDF-to-web conversion, and dynamic council identity generation."
+    description: "Deploy LocalGov Drupal CMS with 7 AI-powered features. Includes content editing, readability simplification, auto alt-text, text-to-speech in 7 languages, translation to 75+ languages, PDF-to-web conversion, and dynamic council identity generation."
     difficulty: "beginner"
     timeEstimate: "15 minutes"
     primaryPersona: "service-manager"
@@ -73,7 +73,7 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
-      deploymentTime: "35-40 minutes"
+      deploymentTime: "35 to 40 minutes"
       deploymentPhases:
         - "Creating VPC and networking (~30 seconds)"
         - "Creating Aurora Serverless database (~180 seconds)"
@@ -300,7 +300,7 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
-      deploymentTime: "3-5 minutes"
+      deploymentTime: "3 to 5 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
         - "Creating S3 bucket for knowledge base (~10 seconds)"
@@ -327,13 +327,13 @@ scenarios:
 
     # Success Metrics (Story 4-4)
     success_metrics:
-      service_area: "Contact Center"
+      service_area: "Contact centre"
       primary_metric: "Call volume reduction"
       baseline:
         description: "5,000 calls/month, 30% routine inquiries (1,500 calls/month)"
         value: 1500
         unit: "routine calls handled per month"
-        source: "LGA Contact Center Survey 2023"
+        source: "LGA Contact centre Survey 2023"
       projection:
         description: "AI chatbot handles 80% of routine inquiries"
         value: 1200
@@ -342,7 +342,7 @@ scenarios:
         annual_savings: 72000
         calculation: "1,200 calls × £5/call × 12 months = £72,000 annual savings"
         payback_months: 1
-        disclaimer: "Illustrative projection based on typical UK council contact center operations. Actual savings depend on call volume, handling costs, and adoption rates."
+        disclaimer: "Illustrative projection based on typical UK council contact centre operations. Actual savings depend on call volume, handling costs, and adoption rates."
       committee_language: "AI chatbot reduces inquiry handling costs by £72,000 annually while improving 24/7 citizen access and freeing staff for complex casework"
 
     # Security Posture (Story 4-4 - CTO Evidence Pack)
@@ -445,7 +445,7 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
-      deploymentTime: "5-8 minutes"
+      deploymentTime: "5 to 8 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
         - "Creating S3 buckets for input/output (~20 seconds)"
@@ -588,7 +588,7 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
-      deploymentTime: "4-6 minutes"
+      deploymentTime: "4 to 6 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
         - "Creating S3 buckets for input/output (~15 seconds)"
@@ -734,7 +734,7 @@ scenarios:
       capabilities:
         - "CAPABILITY_IAM"
         - "CAPABILITY_AUTO_EXPAND"
-      deploymentTime: "8-12 minutes"
+      deploymentTime: "8 to 12 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
         - "Creating VPC and networking (~120 seconds)"
@@ -776,7 +776,7 @@ scenarios:
         calculation: "£330,000 × 15% utilization improvement = £50,000 additional revenue"
         payback_months: 6
         disclaimer: "Illustrative projection based on typical UK council car park operations. Actual revenue depends on parking capacity, pricing, demand patterns, and resident adoption."
-      committee_language: "IoT-powered parking management generates £50,000 additional annual revenue through optimized space utilization while reducing traffic congestion and improving resident experience"
+      committee_language: "IoT-powered parking management generates £50,000 additional annual revenue through optimised space utilization while reducing traffic congestion and improving resident experience"
 
     # Security Posture (Story 4-4 - CTO Evidence Pack)
     security_posture:
@@ -879,7 +879,7 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
-      deploymentTime: "2-4 minutes"
+      deploymentTime: "2 to 4 minutes"
       deploymentPhases:
         - "Creating IAM roles (~20 seconds)"
         - "Creating S3 bucket for audio files (~10 seconds)"
@@ -972,7 +972,7 @@ scenarios:
     securitySummary: "Innovation Sandbox isolated - sample council metrics only"
     skillsLearned:
       - "Amazon QuickSight"
-      - "Data visualization"
+      - "Data visualisation"
       - "AWS Glue ETL"
       - "Business intelligence"
     isMostPopular: false
@@ -1021,7 +1021,7 @@ scenarios:
       capabilities:
         - "CAPABILITY_IAM"
         - "CAPABILITY_NAMED_IAM"
-      deploymentTime: "5-8 minutes"
+      deploymentTime: "5 to 8 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
         - "Creating S3 bucket for data (~15 seconds)"

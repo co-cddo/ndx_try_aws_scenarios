@@ -256,7 +256,7 @@ developer_evaluation:
 
       maintenance:
         - "Update S3 knowledge base content monthly"
-        - "Review and optimize Lambda function performance quarterly"
+        - "Review and optimise Lambda function performance quarterly"
         - "Update Lex intents based on conversation analytics"
         - "Apply AWS service updates and patches automatically"
 
