@@ -10,8 +10,6 @@
 
 NDX:Try AWS Scenarios is a free platform helping UK councils explore AWS cloud solutions through hands-on evaluation. Deploy real AI and cloud scenarios in 15 minutes, test with realistic council data, and generate committee-ready evidence packs.
 
-**Part of the [LGA AI Hub](https://www.local.gov.uk/our-support/cyber-digital-and-technology/artificial-intelligence) ecosystem.**
-
 ## Features
 
 - **6 Pre-built Scenarios**: Council Chatbot, Planning AI, FOI Redaction, Smart Car Park, Text to Speech, QuickSight Dashboard
@@ -124,9 +122,7 @@ The site is automatically deployed to GitHub Pages when changes are merged to `m
 
 ## Governance
 
-NDX:Try is governed by the NDX Partnership, with oversight from:
-- Local Government Association (LGA)
-- Central Digital and Data Office (CDDO)
+NDX:Try is part of the National Digital Exchange (NDX), which sits within the Government Digital Service (GDS).
 
 ## License
 
