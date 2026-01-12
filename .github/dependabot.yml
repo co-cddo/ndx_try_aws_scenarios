@@ -1,0 +1,70 @@
+version: 2
+updates:
+  # Root npm dependencies (Eleventy site)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+      production-dependencies:
+        dependency-type: "production"
+
+  # CDK npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/cloudformation/scenarios/localgov-drupal/cdk"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      aws-cdk:
+        patterns:
+          - "aws-cdk*"
+          - "@aws-cdk/*"
+          - "constructs"
+
+  # Drupal composer dependencies
+  - package-ecosystem: "composer"
+    directory: "/cloudformation/scenarios/localgov-drupal/drupal"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      drupal-core:
+        patterns:
+          - "drupal/core*"
+      drupal-contrib:
+        patterns:
+          - "drupal/*"
+        exclude-patterns:
+          - "drupal/core*"
+      localgov:
+        patterns:
+          - "localgovdrupal/*"
+
+  # Python dependencies (Lambda layers)
+  - package-ecosystem: "pip"
+    directory: "/cloudformation/layers/uk-data-generator"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/cloudformation/scenarios/localgov-drupal/docker"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
