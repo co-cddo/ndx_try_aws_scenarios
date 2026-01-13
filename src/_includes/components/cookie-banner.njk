@@ -1,0 +1,75 @@
+{% from "govuk/components/cookie-banner/macro.njk" import govukCookieBanner %}
+
+{{ govukCookieBanner({
+  ariaLabel: "Cookies on NDX:Try AWS",
+  hidden: true,
+  attributes: {
+    "data-module": "govuk-cookie-banner"
+  },
+  messages: [
+    {
+      headingText: "Cookies on NDX:Try AWS",
+      html: '<p class="govuk-body">We use some essential cookies to make this service work.</p><p class="govuk-body">We\'d also like to use analytics cookies so we can understand how you use the service and make improvements.</p>',
+      attributes: {
+        "data-cookie-banner": "question"
+      },
+      actions: [
+        {
+          text: "Accept analytics cookies",
+          type: "button",
+          attributes: {
+            "data-accept-cookies": ""
+          }
+        },
+        {
+          text: "Reject analytics cookies",
+          type: "button",
+          classes: "govuk-button--secondary",
+          attributes: {
+            "data-reject-cookies": ""
+          }
+        },
+        {
+          text: "View cookies",
+          href: "/cookies/"
+        }
+      ]
+    },
+    {
+      html: '<p class="govuk-body">You\'ve accepted analytics cookies. You can <a class="govuk-link" href="/cookies/">change your cookie settings</a> at any time.</p>',
+      role: "alert",
+      hidden: true,
+      attributes: {
+        "data-cookie-banner": "accepted"
+      },
+      actions: [
+        {
+          text: "Hide cookie message",
+          type: "button",
+          classes: "govuk-button--secondary",
+          attributes: {
+            "data-hide-banner": ""
+          }
+        }
+      ]
+    },
+    {
+      html: '<p class="govuk-body">You\'ve rejected analytics cookies. You can <a class="govuk-link" href="/cookies/">change your cookie settings</a> at any time.</p>',
+      role: "alert",
+      hidden: true,
+      attributes: {
+        "data-cookie-banner": "rejected"
+      },
+      actions: [
+        {
+          text: "Hide cookie message",
+          type: "button",
+          classes: "govuk-button--secondary",
+          attributes: {
+            "data-hide-banner": ""
+          }
+        }
+      ]
+    }
+  ]
+}) }}

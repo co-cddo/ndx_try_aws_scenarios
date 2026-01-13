@@ -64,12 +64,37 @@
   {% if opengraphImage.src %}<meta name="og:image" content="{{ opengraphImage.src | canonicalUrl }}">
   {% endif %}
   {% if opengraphImage.alt %}<meta property="og:image:alt" content="{{ opengraphImage.alt }}">{% endif %}
+
+  <!-- Google Analytics 4 with Consent Mode v2 -->
+  <script>
+    // Default consent to denied (GDPR compliant)
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      'analytics_storage': 'denied',
+      'ad_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied'
+    });
+    gtag('js', new Date());
+    // Config without sending page_view - will be sent after consent check
+    gtag('config', 'G-S4542PPYLS', {
+      'anonymize_ip': true,
+      'cookie_flags': 'SameSite=Lax;Secure',
+      'send_page_view': false
+    });
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-S4542PPYLS"></script>
 {% endblock %}
 
 {% block pageTitle %}
   {{- title if title -}}
   {{- " (page " + pageNumber + " of " + pageCount + ")" if pageCount > 1 -}}
   {{- " - " + options.titleSuffix if options.titleSuffix -}}
+{% endblock %}
+
+{% block bodyStart %}
+  {% include "components/cookie-banner.njk" %}
 {% endblock %}
 
 {% block header %}
@@ -94,7 +119,9 @@
 {% endblock %}
 
 {% block bodyEnd %}
-  {# Load analytics module first so it's available to all other scripts #}
+  {# Cookie consent must load before analytics #}
+  <script src="/assets/js/cookie-consent.js" defer></script>
+  {# Load analytics module so it's available to all other scripts #}
   <script src="/assets/js/analytics.js" defer></script>
   {# Navigation scripts (Stories 14.4, 14.5, 14.7) #}
   <script src="/assets/js/nav-dropdown.js" defer></script>
