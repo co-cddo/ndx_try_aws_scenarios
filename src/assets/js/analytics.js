@@ -34,6 +34,20 @@ const NDXAnalytics = {
   },
 
   /**
+   * Check if analytics consent has been granted
+   */
+  hasConsent() {
+    try {
+      var cookie = document.cookie.match(/ndx_cookies_policy=([^;]+)/);
+      if (!cookie) return false;
+      var prefs = JSON.parse(decodeURIComponent(cookie[1]));
+      return prefs.analytics === true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  /**
    * Get or create session ID
    */
   getSessionId() {
@@ -57,6 +71,11 @@ const NDXAnalytics = {
 
     if (!this.isAvailable()) {
       console.warn('[NDX Analytics] gtag unavailable:', eventName, enrichedParams);
+      return false;
+    }
+
+    if (!this.hasConsent()) {
+      console.debug('[NDX Analytics] No consent, event queued:', eventName);
       return false;
     }
 

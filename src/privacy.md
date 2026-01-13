@@ -33,7 +33,33 @@ We collect standard web server logs including:
 - Browser type and version
 - Date and time of your visit
 
-We do not use tracking cookies or analytics that identify individual users.
+## Cookies and analytics
+
+We use cookies to make this service work and to collect information about how you use it.
+
+### Essential cookies
+
+We use essential cookies to remember your cookie preferences. These are strictly necessary for the service to function.
+
+### Analytics cookies
+
+With your permission, we use Google Analytics 4 to understand how people use this service. This helps us improve it.
+
+Google Analytics sets the following cookies:
+
+| Cookie | Purpose | Duration |
+|--------|---------|----------|
+| `_ga` | Distinguishes unique users | 2 years |
+| `_ga_S4542PPYLS` | Maintains session state | 2 years |
+
+We have configured Google Analytics to:
+- anonymise your IP address
+- not share data with third parties
+- retain data for 14 months
+
+You can [change your cookie settings](/cookies/) at any time.
+
+For more details, see our [cookies page](/cookies/).
 
 ## How we use your data
 
