@@ -3,7 +3,8 @@
   $govuk-assets-path: "/assets/",
   $govuk-global-styles: true,
   $govuk-new-organisation-colours: true,
-  $govuk-new-typography-scale: true
+  $govuk-new-typography-scale: true,
+  $govuk-font-family: (arial, sans-serif)
 );
 
 // Import GOV.UK Eleventy Plugin components

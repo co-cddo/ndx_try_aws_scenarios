@@ -27,7 +27,7 @@ h1, h2, h3, h4, h5, h6,
 /* Also set font-family explicitly as GOV.UK plugin setting may not apply */
 body {
   font-synthesis: none;
-  font-family: "GDS Transport", arial, sans-serif;
+  font-family: arial, sans-serif;
 }
 
 /* ==========================================================================
