@@ -8,7 +8,7 @@
   var COOKIE_NAME = 'ndx_cookies_policy';
   var COOKIE_VERSION = 1;
   var COOKIE_DAYS = 365;
-  var GA_MEASUREMENT_ID = 'G-S4542PPYLS';
+  var GA_MEASUREMENT_ID = 'G-8DT4K6GRSF';
 
   var CookieConsent = {
     /**
