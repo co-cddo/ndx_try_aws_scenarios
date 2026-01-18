@@ -7,7 +7,7 @@
 # =============================================================================
 # Stage 1: Builder - Install Composer dependencies
 # =============================================================================
-FROM php:8.3-fpm-alpine AS builder
+FROM php:8.5.2-fpm-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache \
@@ -62,7 +62,7 @@ RUN mkdir -p /var/www/drupal/web/libraries/dropzone \
 # =============================================================================
 # Stage 2: Runtime - Minimal production image
 # =============================================================================
-FROM php:8.3-fpm-alpine AS runtime
+FROM php:8.5.2-fpm-alpine AS runtime
 
 # Install runtime dependencies
 RUN apk add --no-cache \
