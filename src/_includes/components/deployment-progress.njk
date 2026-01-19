@@ -1,131 +1,94 @@
 {#
-  Deployment Progress Component - Story 2.2
+  Deployment Status Component
 
-  Real-time deployment progress tracking with:
-  - Stack status display (CREATE_IN_PROGRESS, CREATE_COMPLETE, etc.)
-  - Resource task list with checkmarks
-  - Progress bar with estimated time remaining
-  - Accessibility via aria-live regions
+  Static educational content explaining:
+  - How to check session status on NDX portal
+  - How to view CloudFormation stack status in AWS Console
+  - What deployment phases mean
 
   Required variables:
     - scenarioData: The scenario object from scenarios.yaml
-
-  Note: This is a static site - actual CloudFormation polling requires
-  user to be logged into AWS Console. This component provides:
-  1. Demo mode showing expected progress flow
-  2. Instructions for monitoring in CloudFormation Console
-  3. Manual refresh button with deep link to AWS Console
 #}
 
 {% if scenarioData and scenarioData.deployment %}
-<div class="ndx-deployment-progress" id="deployment-progress" role="region" aria-labelledby="deployment-progress-title">
-  <h2 class="govuk-heading-m" id="deployment-progress-title">Track your deployment</h2>
+<div class="ndx-deployment-status" id="deployment-status" role="region" aria-labelledby="deployment-status-title">
+  <h2 class="govuk-heading-m" id="deployment-status-title">Check your deployment status</h2>
 
-  <p class="govuk-body">Monitor your CloudFormation stack deployment in real-time.</p>
+  <p class="govuk-body">After requesting a session via the NDX:Try portal, you can monitor your deployment in two ways:</p>
 
-  {# Stack Status Display #}
-  <div class="ndx-deployment-progress__status" aria-live="polite" aria-atomic="true">
-    <div class="ndx-deployment-progress__status-row">
-      <span class="govuk-body govuk-!-font-weight-bold">Stack Status:</span>
-      <span id="stack-status-badge" class="ndx-status-badge ndx-status-badge--pending">
-        <span class="ndx-status-badge__icon" aria-hidden="true">⏳</span>
-        <span class="ndx-status-badge__text">Waiting to start</span>
-      </span>
-    </div>
-    <p class="govuk-body-s govuk-!-margin-top-2" id="stack-status-description">
-      Click "Deploy to Innovation Sandbox" above to begin deployment.
+  {# NDX Portal Status #}
+  <div class="govuk-!-margin-bottom-6">
+    <h3 class="govuk-heading-s">1. NDX:Try Portal</h3>
+    <p class="govuk-body">View your active sessions and their status on the NDX portal:</p>
+    <p class="govuk-body">
+      <a href="https://ndx.digital.cabinet-office.gov.uk/try" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+        View your NDX:Try sessions
+      </a>
     </p>
+    <p class="govuk-body-s">Your session will show as <strong>Active</strong> when deployment is complete.</p>
   </div>
 
-  {# Progress Bar #}
-  <div class="ndx-deployment-progress__bar-container">
-    <div class="govuk-!-margin-bottom-2">
-      <span class="govuk-body-s">Progress: <span id="progress-percentage" aria-live="polite">0%</span></span>
-      <span class="govuk-body-s govuk-!-margin-left-4">Est. remaining: <span id="time-remaining" aria-live="polite">--</span></span>
-    </div>
-    <div class="ndx-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Deployment progress">
-      <div class="ndx-progress-bar__fill" id="progress-bar-fill" style="width: 0%"></div>
-    </div>
-  </div>
-
-  {# Resource Task List #}
-  <details class="govuk-details govuk-!-margin-top-4" open>
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">Deployment resources (<span id="resources-completed">0</span>/{{ scenarioData.deployment.deploymentPhases | length }})</span>
-    </summary>
-    <div class="govuk-details__text">
-      <ol class="ndx-resource-list" id="resource-list" aria-label="Deployment resources">
-        {% for phase in scenarioData.deployment.deploymentPhases %}
-        <li class="ndx-resource-list__item" data-resource-index="{{ loop.index0 }}">
-          <span class="ndx-resource-list__icon" aria-hidden="true">○</span>
-          <span class="ndx-resource-list__text">{{ phase }}</span>
-          <span class="ndx-resource-list__status govuk-visually-hidden">Pending</span>
-        </li>
-        {% endfor %}
-      </ol>
-    </div>
-  </details>
-
-  {# Error State (hidden by default) #}
-  <div class="ndx-deployment-progress__error govuk-error-summary" id="deployment-error" role="alert" hidden>
-    <h3 class="govuk-error-summary__title">Deployment failed</h3>
-    <div class="govuk-error-summary__body">
-      <p id="error-reason">An error occurred during deployment.</p>
-      <ul class="govuk-list govuk-list--bullet">
-        <li>Check the CloudFormation Events tab for details</li>
-        <li>Look for resources in <code>FAILED</code> status</li>
-        <li>Delete the failed stack and try again</li>
-      </ul>
-      <p class="govuk-!-margin-top-2">
-        <a href="https://console.aws.amazon.com/cloudformation/home?region={{ scenarioData.deployment.region | default('us-east-1') }}#/stacks?filteringStatus=active" class="govuk-link" target="_blank" rel="noopener noreferrer">
-          View stack in CloudFormation Console<span class="govuk-visually-hidden"> (opens in new tab)</span>
-        </a>
-      </p>
-    </div>
-  </div>
-
-  {# Success State (hidden by default) #}
-  <div class="ndx-deployment-progress__success govuk-notification-banner govuk-notification-banner--success" id="deployment-success" role="alert" hidden>
-    <div class="govuk-notification-banner__header">
-      <h3 class="govuk-notification-banner__title" id="success-title">Deployment complete!</h3>
-    </div>
-    <div class="govuk-notification-banner__content">
-      <p class="govuk-body">Your LocalGov Drupal instance is ready. View the CloudFormation Outputs tab for credentials.</p>
-    </div>
-  </div>
-
-  {# Manual Monitoring Instructions #}
-  <div class="govuk-inset-text govuk-!-margin-top-4">
-    <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-2">Monitor in AWS Console</p>
-    <p class="govuk-body-s govuk-!-margin-bottom-2">
-      For real-time updates, monitor your deployment in the CloudFormation Console:
-    </p>
-    <ol class="govuk-list govuk-list--number govuk-body-s">
-      <li>Open the <strong>Events</strong> tab to see resource creation</li>
-      <li>Wait for status <code>CREATE_COMPLETE</code> (green)</li>
-      <li>Check the <strong>Outputs</strong> tab for your credentials</li>
+  {# CloudFormation Console Status #}
+  <div class="govuk-!-margin-bottom-6">
+    <h3 class="govuk-heading-s">2. AWS CloudFormation Console</h3>
+    <p class="govuk-body">For detailed deployment progress, access your AWS account via IAM Identity Center:</p>
+    <ol class="govuk-list govuk-list--number">
+      <li>Sign in via <a href="https://d-9c6780eac5.awsapps.com/start" class="govuk-link" target="_blank" rel="noopener noreferrer">IAM Identity Center<span class="govuk-visually-hidden"> (opens in new tab)</span></a></li>
+      <li>Select your NDX:Try account and <code>ndx_IsbUsersPS</code> role</li>
+      <li>Navigate to CloudFormation to view your stack</li>
     </ol>
-    <p class="govuk-!-margin-top-2">
-      <a href="https://console.aws.amazon.com/cloudformation/home?region={{ scenarioData.deployment.region | default('us-east-1') }}#/stacks?filteringStatus=active&filteringText={{ scenarioData.deployment.stackNamePrefix | default('ndx-try') }}" class="govuk-link" target="_blank" rel="noopener noreferrer" id="cfn-console-link">
+    <p class="govuk-body">
+      <a href="https://console.aws.amazon.com/cloudformation/home?region={{ scenarioData.deployment.region | default('eu-west-2') }}#/stacks?filteringStatus=active" class="govuk-link" target="_blank" rel="noopener noreferrer">
         Open CloudFormation Console<span class="govuk-visually-hidden"> (opens in new tab)</span>
       </a>
     </p>
   </div>
 
-  {# Demo Mode Toggle (for demonstration purposes) #}
-  <details class="govuk-details govuk-!-margin-top-4">
+  {# Stack Status Meanings #}
+  <details class="govuk-details">
     <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">Preview deployment flow (demo mode)</span>
+      <span class="govuk-details__summary-text">Understanding CloudFormation stack status</span>
     </summary>
     <div class="govuk-details__text">
-      <p class="govuk-body-s">See how the progress component works during an actual deployment:</p>
-      <button type="button" class="govuk-button govuk-button--secondary" id="demo-start-btn" data-module="govuk-button">
-        Start demo
-      </button>
-      <button type="button" class="govuk-button govuk-button--warning govuk-!-margin-left-2" id="demo-reset-btn" data-module="govuk-button" hidden>
-        Reset
-      </button>
+      <dl class="govuk-summary-list govuk-summary-list--no-border">
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key"><code>CREATE_IN_PROGRESS</code></dt>
+          <dd class="govuk-summary-list__value">Resources are being created. Wait for completion.</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key"><code>CREATE_COMPLETE</code></dt>
+          <dd class="govuk-summary-list__value">Deployment successful. Check the Outputs tab for access details.</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key"><code>ROLLBACK_IN_PROGRESS</code></dt>
+          <dd class="govuk-summary-list__value">Deployment failed. Resources are being cleaned up.</dd>
+        </div>
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key"><code>DELETE_COMPLETE</code></dt>
+          <dd class="govuk-summary-list__value">Session has ended and resources have been removed.</dd>
+        </div>
+      </dl>
     </div>
   </details>
+
+  {# Deployment Phases Educational Content #}
+  {% if scenarioData.deployment.deploymentPhases and scenarioData.deployment.deploymentPhases | length > 0 %}
+  <details class="govuk-details govuk-!-margin-top-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">What happens during deployment</span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body-s">When your session is provisioned, CloudFormation creates these resources:</p>
+      <ol class="govuk-list govuk-list--number govuk-body-s">
+        {% for phase in scenarioData.deployment.deploymentPhases %}
+        <li>{{ phase }}</li>
+        {% endfor %}
+      </ol>
+      <p class="govuk-body-s govuk-!-margin-top-2">
+        <strong>Estimated time:</strong> {{ scenarioData.deployment.deploymentTime | default('5-15 minutes') }}
+      </p>
+    </div>
+  </details>
+  {% endif %}
 </div>
 {% endif %}

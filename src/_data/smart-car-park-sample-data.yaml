@@ -450,12 +450,12 @@ committeeLanguage:
 
     riskMitigation:
       - "Pilot with 1 car park before scaling to all locations"
-      - "AWS Innovation Sandbox trial period validates technology before procurement"
+      - "NDX:Try trial period validates technology before procurement"
       - "No vendor lock-in - sensor data owned by council, transferable"
       - "Phased rollout limits financial exposure"
 
     nextSteps:
-      - "Complete AWS Innovation Sandbox walkthrough (this demonstration)"
+      - "Complete NDX:Try walkthrough (this demonstration)"
       - "Present business case to finance and IT committees"
       - "Procure sensors and gateway for pilot car park"
       - "Deploy pilot, measure results for 3 months"

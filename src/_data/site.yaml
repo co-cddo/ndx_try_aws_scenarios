@@ -28,7 +28,7 @@ messaging:
     - "Deploy in 15 minutes"
     - "Zero cost to try"
     - "Automatic cleanup when you're done"
-  safetyMessage: "Isolated Innovation Sandbox - Your evaluation is completely separate from production systems"
+  safetyMessage: "Isolated NDX:Try session - Your evaluation is completely separate from production systems"
 
 # External links
 links:

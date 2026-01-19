@@ -20,7 +20,7 @@ eleventyNavigation:
 #}
 
 {% set scenarioId = "localgov-drupal" %}
-{% set scenarioData = scenarios.scenarios | selectattr("id", "equalto", scenarioId) | first %}
+{% set scenarioData = scenarios.scenarios | findScenarioById(scenarioId) %}
 {% set aiFeatures = scenarioData.aiFeatures %}
 
 {# Phase Navigator - Story 12.1 #}

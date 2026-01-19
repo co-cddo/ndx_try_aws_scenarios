@@ -51,7 +51,7 @@
       "userMessage": "Your AWS account doesn't have permission to create these resources.",
       "troubleshootingSteps": [
         "Check you're logged into the correct AWS account",
-        "Verify your Innovation Sandbox has CloudFormation permissions",
+        "Verify your NDX:Try session has CloudFormation permissions",
         "Contact your AWS administrator if permissions are restricted"
       ],
       "supportLink": "/help/permissions-error"
@@ -83,7 +83,7 @@
       "userMessage": "You're not logged into AWS Console.",
       "troubleshootingSteps": [
         "Click the 'Check AWS Login' link on the deploy page",
-        "Sign into your Innovation Sandbox account",
+        "Sign into your NDX:Try session account",
         "Return to NDX:Try and try deploying again"
       ],
       "supportLink": "/help/aws-login"
@@ -194,7 +194,7 @@
       "userMessage": "Your AWS session has expired.",
       "troubleshootingSteps": [
         "Sign out of AWS Console",
-        "Sign back in with your Innovation Sandbox credentials",
+        "Sign back in with your NDX:Try session credentials",
         "Return to NDX:Try and try deploying again"
       ],
       "supportLink": "/help/aws-login"

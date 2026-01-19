@@ -24,7 +24,7 @@
 #}
 
 {# Load scenario data #}
-{% set scenarioData = scenarios.scenarios | selectattr("id", "equalto", scenarioId) | first %}
+{% set scenarioData = scenarios.scenarios | findScenarioById(scenarioId) %}
 
 {# Include print styles #}
 {% include "evidence-pack/partials/print-styles.njk" %}

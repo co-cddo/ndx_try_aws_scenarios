@@ -18,7 +18,7 @@ layout: page
     scenario: string (scenario ID from scenarios.yaml)
 #}
 
-{% set scenarioData = scenarios.scenarios | selectattr("id", "equalto", scenario) | first %}
+{% set scenarioData = scenarios.scenarios | findScenarioById(scenario) %}
 
 {% if not scenarioData %}
   <div class="govuk-error-summary" data-module="govuk-error-summary">

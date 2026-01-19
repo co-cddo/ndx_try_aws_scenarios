@@ -60,6 +60,14 @@ export default function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ 'src/lib': 'lib' });
 
   // Add custom filters
+
+  // Lookup scenario by ID from scenarios array
+  // This replaces the broken selectattr filter
+  eleventyConfig.addFilter('findScenarioById', (scenarios, id) => {
+    if (!scenarios || !id) return null;
+    return scenarios.find(s => s.id === id) || null;
+  });
+
   eleventyConfig.addFilter('capitalize', (str) => {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);

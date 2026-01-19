@@ -11,7 +11,7 @@ phases:
     optional: false
     fork: false
     icon: "rocket"
-    description: "Deploy the demo to your Innovation Sandbox and experience it working"
+    description: "Request a session via NDX:Try and experience it working"
 
   - id: walkthrough
     label: "WALK THROUGH"
@@ -129,7 +129,7 @@ transitionMessages:
 parallelEntry:
   missingTryPhase:
     title: "Start from the beginning"
-    message: "To get the full experience, start by deploying the demo to your Innovation Sandbox."
+    message: "To get the full experience, start by requesting a session via NDX:Try."
     cta: "Go to Deploy"
     allowBypass: true
     bypassText: "Continue without deployment (screenshots only)"

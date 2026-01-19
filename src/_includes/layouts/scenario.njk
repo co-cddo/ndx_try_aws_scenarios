@@ -6,8 +6,8 @@ layout: page
 
   This layout displays a single scenario with:
   - Full scenario metadata
-  - Deploy to Innovation Sandbox button with confirmation modal
-  - Pre-deployment checklist
+  - Request session via NDX:Try guidance
+  - Deployment status checking guidance
   - Cost transparency information
   - Error message guidance
 
@@ -17,7 +17,7 @@ layout: page
     scenario: string (scenario ID from scenarios.yaml)
 #}
 
-{% set scenarioData = scenarios.scenarios | selectattr("id", "equalto", scenario) | first %}
+{% set scenarioData = scenarios.scenarios | findScenarioById(scenario) %}
 
 {% if not scenarioData %}
   <div class="govuk-error-summary" data-module="govuk-error-summary">
@@ -129,120 +129,70 @@ layout: page
   </div>
 </div>
 
-{# Demo Video Section - Zero-Deployment Path (Story 2.4 - AC-2.4.5) #}
-{# Positioned before deployment section so non-deploying users see it first #}
-{% include "components/demo-video-section.njk" %}
-
 {# Screenshot Walkthrough Section - Zero-Deployment Path (Story 2.5 - AC-2.5.1) #}
 {# Positioned after video section, before deployment section #}
 {% include "components/screenshot-walkthrough.njk" %}
 
-{# Partner Tour Section - Alternative path for guided evaluation (Story 2.6 - AC-2.6.1) #}
-{# Positioned after screenshot walkthrough, before deployment section #}
-{% include "components/partner-tour-section.njk" %}
-
-{# Deploy Section #}
+{# Request Session via NDX:Try Section #}
 <div class="govuk-!-margin-top-8">
   <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
 
-  <h2 class="govuk-heading-l">Deploy to Innovation Sandbox</h2>
+  <h2 class="govuk-heading-l">Request a session via NDX:Try</h2>
 
   {% if scenarioData.deployment %}
     {# Free Trial Banner - NDX:Try AWS Partnership #}
     {% include "components/free-trial-banner.njk" %}
 
-    {# Pre-deployment Acknowledgment Checklist #}
-    <div class="ndx-prereq-checklist govuk-!-margin-bottom-6">
-      <h3 class="govuk-heading-s">Before you deploy</h3>
-      <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
-        <div class="govuk-checkboxes__item">
-          <input class="govuk-checkboxes__input js-prereq-check" id="prereq-account" name="prereq-account" type="checkbox" value="account">
-          <label class="govuk-label govuk-checkboxes__label" for="prereq-account">
-            I have an AWS Innovation Sandbox account
-          </label>
-        </div>
-        <div class="govuk-checkboxes__item">
-          <input class="govuk-checkboxes__input js-prereq-check" id="prereq-logged-in" name="prereq-logged-in" type="checkbox" value="logged-in">
-          <label class="govuk-label govuk-checkboxes__label" for="prereq-logged-in">
-            I am logged into AWS Console
-            <a href="https://console.aws.amazon.com/console/home" target="_blank" rel="noopener noreferrer" class="govuk-link govuk-!-margin-left-1">(Check now<span class="govuk-visually-hidden"> opens in new tab</span>)</a>
-          </label>
-        </div>
-        <div class="govuk-checkboxes__item">
-          <input class="govuk-checkboxes__input js-prereq-check" id="prereq-cleanup" name="prereq-cleanup" type="checkbox" value="cleanup">
-          <label class="govuk-label govuk-checkboxes__label" for="prereq-cleanup">
-            I understand resources will auto-delete after 2 hours
-          </label>
-        </div>
-      </div>
+    <p class="govuk-body">To try this scenario, request a session through the NDX:Try portal. Sessions are free for UK public sector organisations.</p>
+
+    {# How it works #}
+    <div class="govuk-!-margin-bottom-6">
+      <h3 class="govuk-heading-s">How it works</h3>
+      <ol class="govuk-list govuk-list--number">
+        <li><strong>Request a session</strong> - Visit the NDX:Try catalogue and request this scenario</li>
+        <li><strong>Accept the terms</strong> - Review and accept the Acceptable Use Policy</li>
+        <li><strong>Wait for deployment</strong> - Your session will be provisioned automatically ({{ scenarioData.deployment.deploymentTime | default('5-15 minutes') }})</li>
+        <li><strong>Access your AWS account</strong> - Sign in via IAM Identity Center when your session is active</li>
+      </ol>
     </div>
 
-    {# Deploy Button - works as link without JS #}
-    {% set deployUrl = scenarioData | deployUrl %}
-    <div class="ndx-deploy-action">
-      <a href="{{ deployUrl }}"
-         id="deploy-button"
+    {# Request Session Button #}
+    <div class="ndx-request-action">
+      <a href="https://ndx.digital.cabinet-office.gov.uk/catalogue/tags/try-before-you-buy/"
          role="button"
          draggable="false"
          class="govuk-button govuk-button--start"
-         data-module="govuk-button"
-         data-scenario-id="{{ scenarioData.id }}"
-         data-deploy-url="{{ deployUrl }}">
-        Deploy to Innovation Sandbox
+         data-module="govuk-button">
+        Request session on NDX:Try
         <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
           <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
         </svg>
       </a>
       <p class="govuk-body-s govuk-!-margin-top-2">
-        Opens AWS CloudFormation Console in a new tab
+        Opens the NDX:Try catalogue (requires login)
       </p>
     </div>
 
   {% else %}
     {# No deployment configured - show placeholder #}
     <div class="govuk-inset-text">
-      <p>Deployment configuration is being prepared for this scenario.</p>
+      <p>This scenario is being prepared for NDX:Try.</p>
       <p><a href="/contact/" class="govuk-link">Contact us</a> if you'd like to be notified when it's ready.</p>
     </div>
   {% endif %}
 </div>
 
-{# Confirmation Modal - hidden by default, shown via JS #}
-<dialog id="deploy-modal" class="ndx-modal" role="dialog" aria-labelledby="modal-title" aria-describedby="modal-description" aria-modal="true">
-  <div class="ndx-modal__content">
-    <h2 id="modal-title" class="govuk-heading-l">You're leaving NDX:Try</h2>
-    <p id="modal-description" class="govuk-body">You'll be redirected to the AWS CloudFormation Console to complete deployment in your Innovation Sandbox account.</p>
-    <p class="govuk-body">
-      <strong>What happens next:</strong>
-    </p>
-    <ol class="govuk-list govuk-list--number">
-      <li>Review the pre-filled parameters (no changes needed)</li>
-      <li>Acknowledge the IAM capabilities checkbox</li>
-      <li>Click "Create stack" to start deployment</li>
-      <li>Wait {% if scenarioData.deployment.deploymentTime %}{{ scenarioData.deployment.deploymentTime }}{% else %}2-5 minutes{% endif %} for resources to deploy</li>
-    </ol>
-    <div class="govuk-button-group">
-      <a href="#" id="modal-continue" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
-        Continue to AWS Console
-      </a>
-      <button type="button" id="modal-cancel" class="govuk-button govuk-button--secondary">
-        Go back
-      </button>
-    </div>
-  </div>
-</dialog>
-
-{# Deployment Progress - Real-time tracking (Story 2.2) #}
+{# Deployment Status - Check your session status #}
 {% include "components/deployment-progress.njk" %}
 
-{# Deployment Guide - What happens next (Story 2.2) #}
-{% include "components/deployment-guide.njk" %}
-
-{# Deployment Success - After deployment completes (Story 2.2) #}
+{# After Session Starts - What to do when active #}
 {% include "components/deployment-success.njk" %}
 
 {# Credentials Card - Easy access to credentials (Story 2.3) #}
+{# Only show for LocalGov Drupal as it has Drupal-specific credential fields #}
+{% if scenarioData.id == 'localgov-drupal' %}
 {% include "components/credentials-card.njk" %}
+{% endif %}
 
 {# Error Messages Reference #}
 <div class="govuk-!-margin-top-8">
@@ -294,6 +244,4 @@ layout: page
 {% endif %}
 
 <script src="/assets/js/phase-state.js" defer></script>
-<script src="/assets/js/deploy-url.js" defer></script>
-<script src="/assets/js/deployment-progress.js" defer></script>
 <script src="/assets/js/credentials-card.js" defer></script>

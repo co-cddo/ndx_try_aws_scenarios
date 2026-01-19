@@ -478,7 +478,7 @@ committeeLanguage:
     phase1:
       title: "Pilot (Month 1-2)"
       activities:
-        - "Deploy Polly via AWS Innovation Sandbox (this walkthrough)"
+        - "Deploy Polly via NDX:Try (this walkthrough)"
         - "Generate audio for 10 announcements (mix of routine and urgent)"
         - "Embed audio players on 10 website pages"
         - "Survey residents and staff for feedback"
@@ -506,7 +506,7 @@ committeeLanguage:
       cost: "£0.50 (50 backfill announcements)"
 
   nextSteps:
-    - "Complete this AWS Innovation Sandbox walkthrough (10 minutes)"
+    - "Complete this NDX:Try walkthrough (10 minutes)"
     - "Present findings to IT and Communications teams"
     - "Prepare business case for Finance committee (template available)"
     - "Secure approval for 2-month pilot (£0.20 budget)"
