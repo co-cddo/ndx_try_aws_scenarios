@@ -1,20 +1,20 @@
 {#
-  Deployment Success Component
+  After Session Starts Component
 
-  Displays post-deployment information including:
+  Displays information about what to do once your NDX:Try session is active:
   - How to access your deployed scenario
   - Expected outputs and endpoints
-  - Cleanup reminder
+  - Session duration reminder
 
   Required variables:
     - scenarioData: The scenario object from scenarios.yaml
 #}
 
 {% if scenarioData and scenarioData.deployment %}
-<div class="ndx-deployment-success" id="deployment-success">
-  <h2 class="govuk-heading-m">After deployment completes</h2>
+<div class="ndx-after-session" id="after-session">
+  <h2 class="govuk-heading-m">Once your session is active</h2>
 
-  <p class="govuk-body">Once your stack shows <code>CREATE_COMPLETE</code>, you can access your deployed scenario.</p>
+  <p class="govuk-body">When your NDX:Try session shows as <strong>Active</strong>, your resources are ready to use.</p>
 
   {# Access Your Scenario Section #}
   {% if scenarioData.deployment.outputs and scenarioData.deployment.outputs | length > 0 %}
@@ -25,7 +25,7 @@
       </h3>
     </div>
     <div class="govuk-notification-banner__content">
-      <p class="govuk-body">When deployment completes, find these outputs in the CloudFormation <strong>Outputs</strong> tab:</p>
+      <p class="govuk-body">Find these details in the CloudFormation <strong>Outputs</strong> tab:</p>
 
       <dl class="govuk-summary-list govuk-summary-list--no-border">
         {% for output in scenarioData.deployment.outputs %}
@@ -52,77 +52,37 @@
   {# Try It Out Quick Action #}
   <h3 class="govuk-heading-s">Try it out</h3>
   <p class="govuk-body">
-    Once deployed, follow the walkthrough guide to explore your scenario:
+    Follow the walkthrough guide to explore your scenario:
   </p>
   {% if scenarioData.id == 'council-chatbot' %}
   <p class="govuk-body">
     <a href="/walkthroughs/council-chatbot/" class="govuk-button govuk-button--start" data-module="govuk-button">
-      Start 10-minute walkthrough
+      Start walkthrough
       <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
         <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
       </svg>
     </a>
   </p>
-  <p class="govuk-body-s">
-    Step-by-step guide showing how to ask questions to your chatbot with realistic council queries
-  </p>
   {% else %}
   <p class="govuk-body">
-    <a href="/get-started/#step-3" class="govuk-link">
-      View the 15-minute walkthrough guide
+    <a href="/walkthroughs/{{ scenarioData.id }}/" class="govuk-button govuk-button--start" data-module="govuk-button">
+      Start walkthrough
+      <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+      </svg>
     </a>
   </p>
   {% endif %}
 
-  {# Auto-Cleanup Reminder #}
-  <div class="ndx-deployment-success__cleanup">
-    <h3 class="govuk-heading-s">Automatic cleanup</h3>
-    {% if scenarioData.deployment.costBreakdown and scenarioData.deployment.costBreakdown.autoCleanup %}
+  {# Session Duration Reminder #}
+  <div class="ndx-after-session__duration">
+    <h3 class="govuk-heading-s">Session duration</h3>
     <p class="govuk-body">
-      <span class="ndx-deployment-success__cleanup-icon" aria-hidden="true">&#128339;</span>
-      {{ scenarioData.deployment.costBreakdown.autoCleanup }}
+      <span aria-hidden="true">⏱️</span>
+      NDX:Try sessions typically last <strong>24 hours</strong>. After this time, resources are automatically removed.
     </p>
-    {% else %}
-    <p class="govuk-body">
-      <span class="ndx-deployment-success__cleanup-icon" aria-hidden="true">&#128339;</span>
-      Resources automatically deleted after 2 hours to minimise costs.
-    </p>
-    {% endif %}
     <p class="govuk-body-s">
-      You can manually delete the stack earlier from the CloudFormation Console if needed.
-    </p>
-  </div>
-
-  {# View in CloudFormation Console #}
-  <p class="govuk-body govuk-!-margin-top-4">
-    <a href="https://console.aws.amazon.com/cloudformation/home?region={{ scenarioData.deployment.region | default('us-east-1') }}#/stacks?filteringStatus=active&filteringText=ndx-try" class="govuk-link" target="_blank" rel="noopener noreferrer">
-      View your NDX:Try stacks in CloudFormation Console<span class="govuk-visually-hidden"> (opens in new tab)</span>
-    </a>
-  </p>
-
-  {# Post-Deployment Cost Comparison Guidance (AC-2.3.7) #}
-  <div class="ndx-deployment-success__cost-comparison">
-    <h3 class="govuk-heading-s">View your actual costs</h3>
-    <p class="govuk-body">
-      After your evaluation, compare actual costs against our estimate of {{ scenarioData.estimatedCost }}:
-    </p>
-    <ol class="govuk-list govuk-list--number">
-      <li>
-        <a href="https://console.aws.amazon.com/cost-management/home?region={{ scenarioData.deployment.region | default('us-east-1') }}#/cost-explorer?chartStyle=STACK&costAggregate=unBlendedCost&endDate={{ "now" | date: "%Y-%m-%d" }}&excludeForecasting=false&filter=%5B%7B%22dimension%22%3A%7B%22id%22%3A%22TagKey%22%2C%22displayValue%22%3A%22Tag%22%7D%2C%22operator%22%3A%22INCLUDES%22%2C%22values%22%3A%5B%7B%22value%22%3A%22Project%24ndx-try%22%7D%5D%7D%5D&futureRelativeRange=CUSTOM&granularity=Daily&groupBy=%5B%22Service%22%5D&historicalRelativeRange=LAST_7_DAYS&isDefault=true&reportName=NDX:Try%20Costs&showOnlyUncategorized=false&showOnlyUntagged=false&startDate={{ "now" | date: "%Y-%m-%d" }}&usageAggregate=undefined" class="govuk-link" target="_blank" rel="noopener noreferrer">
-          Open AWS Cost Explorer<span class="govuk-visually-hidden"> (opens in new tab)</span>
-        </a>
-        - Filter by tag "Project: ndx-try"
-      </li>
-      <li>
-        Select the date range covering your evaluation
-      </li>
-      <li>
-        Group by "Service" to see per-service breakdown
-      </li>
-    </ol>
-    <p class="govuk-body-s">
-      <strong>Note:</strong> Cost data may take up to 24 hours to appear in Cost Explorer.
-      The portal cannot access your AWS billing data directly.
+      Check your session expiry time on the <a href="https://ndx.digital.cabinet-office.gov.uk/try" class="govuk-link">NDX:Try portal</a>.
     </p>
   </div>
 </div>

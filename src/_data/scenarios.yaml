@@ -18,7 +18,7 @@ scenarios:
       - "council-chatbot"
       - "text-to-speech"
       - "foi-redaction"
-    securitySummary: "Innovation Sandbox isolated - safe to experiment with full data protection"
+    securitySummary: "NDX:Try session isolated - safe to experiment with full data protection"
     skillsLearned:
       - "Amazon Bedrock"
       - "Amazon Polly"
@@ -50,7 +50,7 @@ scenarios:
       - "Simplify content to plain English with one click"
       - "Generate unique council identities for engaging demos"
     prerequisites:
-      - "AWS account (sandbox provided)"
+      - "AWS account (provided via NDX:Try)"
       - "No technical expertise required"
     url: "/scenarios/localgov-drupal/"
     order: 1
@@ -90,10 +90,6 @@ scenarios:
           description: "Drupal admin password"
         - name: "CloudWatchLogsUrl"
           description: "CloudWatch Logs for monitoring"
-    video:
-      title: "LocalGov Drupal AI Demo Walkthrough"
-      duration: "12:00"
-      recordedDate: "2025-01-15"
     screenshots:
       steps: []
     success_metrics:
@@ -248,7 +244,7 @@ scenarios:
     relatedScenarios:
       - "text-to-speech"
       - "quicksight-dashboard"
-    securitySummary: "Innovation Sandbox isolated - safe to experiment with full data protection"
+    securitySummary: "NDX:Try session isolated - safe to experiment with full data protection"
     skillsLearned:
       - "Amazon Bedrock"
       - "Conversational AI"
@@ -270,7 +266,7 @@ scenarios:
       - "Provide 24/7 resident support without additional staffing"
       - "Improve resident satisfaction with instant responses"
     prerequisites:
-      - "AWS account (sandbox provided)"
+      - "AWS account (provided via NDX:Try)"
       - "No technical expertise required"
     url: "/scenarios/council-chatbot/"
     order: 2
@@ -284,7 +280,7 @@ scenarios:
       parameters:
         - name: "Environment"
           value: "sandbox"
-          description: "Deployment environment (sandbox for Innovation Sandbox)"
+          description: "Deployment environment (NDX:Try session)"
         - name: "AutoCleanupHours"
           value: "2"
           description: "Hours until automatic resource cleanup"
@@ -312,13 +308,6 @@ scenarios:
           description: "Web interface URL to interact with the chatbot"
         - name: "LexBotId"
           description: "Amazon Lex bot identifier for API integration"
-    # Demo Video (Story 2.4 - Zero-Deployment Path)
-    video:
-      title: "Council Chatbot Demo Walkthrough"
-      duration: "7:30"
-      recordedDate: "2025-01-15"
-      # youtubeId will be added when video is recorded
-      # Placeholder shows "Coming Soon" message
     # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
     screenshots:
       # steps array will be populated when screenshots are captured
@@ -392,7 +381,7 @@ scenarios:
     relatedScenarios:
       - "foi-redaction"
       - "quicksight-dashboard"
-    securitySummary: "Innovation Sandbox isolated - sample data only, no live documents"
+    securitySummary: "NDX:Try session isolated - sample data only, no live documents"
     skillsLearned:
       - "Amazon Textract"
       - "Amazon Comprehend"
@@ -415,7 +404,7 @@ scenarios:
       - "Improve consistency in policy application"
       - "Free up planning officers for complex cases"
     prerequisites:
-      - "AWS account (sandbox provided)"
+      - "AWS account (provided via NDX:Try)"
       - "Sample planning documents provided"
     url: "/scenarios/planning-ai/"
     order: 3
@@ -429,7 +418,7 @@ scenarios:
       parameters:
         - name: "Environment"
           value: "sandbox"
-          description: "Deployment environment (sandbox for Innovation Sandbox)"
+          description: "Deployment environment (NDX:Try session)"
         - name: "AutoCleanupHours"
           value: "2"
           description: "Hours until automatic resource cleanup"
@@ -458,12 +447,6 @@ scenarios:
           description: "S3 presigned URL endpoint for document upload"
         - name: "ResultsURL"
           description: "API endpoint to retrieve analysis results"
-    # Demo Video (Story 2.4 - Zero-Deployment Path)
-    video:
-      title: "Planning Application AI Demo Walkthrough"
-      duration: "9:45"
-      recordedDate: "2025-01-15"
-      # youtubeId will be added when video is recorded
     # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
     screenshots:
       steps: []
@@ -536,7 +519,7 @@ scenarios:
     relatedScenarios:
       - "planning-ai"
       - "council-chatbot"
-    securitySummary: "Innovation Sandbox isolated - uses synthetic sample data only"
+    securitySummary: "NDX:Try session isolated - uses synthetic sample data only"
     skillsLearned:
       - "Amazon Comprehend"
       - "Entity Recognition"
@@ -558,7 +541,7 @@ scenarios:
       - "Ensure consistent redaction standards"
       - "Reduce risk of accidental data disclosure"
     prerequisites:
-      - "AWS account (sandbox provided)"
+      - "AWS account (provided via NDX:Try)"
       - "Sample documents provided"
     url: "/scenarios/foi-redaction/"
     order: 4
@@ -572,7 +555,7 @@ scenarios:
       parameters:
         - name: "Environment"
           value: "sandbox"
-          description: "Deployment environment (sandbox for Innovation Sandbox)"
+          description: "Deployment environment (NDX:Try session)"
         - name: "AutoCleanupHours"
           value: "2"
           description: "Hours until automatic resource cleanup"
@@ -600,12 +583,6 @@ scenarios:
           description: "Document upload endpoint"
         - name: "RedactedURL"
           description: "Redacted document download location"
-    # Demo Video (Story 2.4 - Zero-Deployment Path)
-    video:
-      title: "FOI Redaction Demo Walkthrough"
-      duration: "8:15"
-      recordedDate: "2025-01-15"
-      # youtubeId will be added when video is recorded
     # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
     screenshots:
       steps: []
@@ -677,7 +654,7 @@ scenarios:
     relatedScenarios:
       - "quicksight-dashboard"
       - "council-chatbot"
-    securitySummary: "Innovation Sandbox isolated - simulated IoT data, no real sensors"
+    securitySummary: "NDX:Try session isolated - simulated IoT data, no real sensors"
     skillsLearned:
       - "AWS IoT Core"
       - "Amazon Timestream"
@@ -700,7 +677,7 @@ scenarios:
       - "Optimise parking revenue with usage insights"
       - "Improve resident satisfaction with availability data"
     prerequisites:
-      - "AWS account (sandbox provided)"
+      - "AWS account (provided via NDX:Try)"
       - "Simulated sensor data provided"
     url: "/scenarios/smart-car-park/"
     order: 5
@@ -714,7 +691,7 @@ scenarios:
       parameters:
         - name: "Environment"
           value: "sandbox"
-          description: "Deployment environment (sandbox for Innovation Sandbox)"
+          description: "Deployment environment (NDX:Try session)"
         - name: "AutoCleanupHours"
           value: "2"
           description: "Hours until automatic resource cleanup"
@@ -748,12 +725,6 @@ scenarios:
           description: "QuickSight dashboard URL for parking visualisation"
         - name: "AvailabilityAPI"
           description: "Public API for real-time parking availability"
-    # Demo Video (Story 2.4 - Zero-Deployment Path)
-    video:
-      title: "Smart Car Park IoT Demo Walkthrough"
-      duration: "10:30"
-      recordedDate: "2025-01-15"
-      # youtubeId will be added when video is recorded
     # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
     screenshots:
       steps: []
@@ -825,7 +796,7 @@ scenarios:
     relatedScenarios:
       - "council-chatbot"
       - "foi-redaction"
-    securitySummary: "Innovation Sandbox isolated - sample content only, no live data"
+    securitySummary: "NDX:Try session isolated - sample content only, no live data"
     skillsLearned:
       - "Amazon Polly"
       - "Text-to-speech AI"
@@ -846,7 +817,7 @@ scenarios:
       - "Reach residents who prefer audio content"
       - "Reduce accessibility accommodation requests"
     prerequisites:
-      - "AWS account (sandbox provided)"
+      - "AWS account (provided via NDX:Try)"
       - "Sample text content provided"
     url: "/scenarios/text-to-speech/"
     order: 6
@@ -860,7 +831,7 @@ scenarios:
       parameters:
         - name: "Environment"
           value: "sandbox"
-          description: "Deployment environment (sandbox for Innovation Sandbox)"
+          description: "Deployment environment (NDX:Try session)"
         - name: "AutoCleanupHours"
           value: "2"
           description: "Hours until automatic resource cleanup"
@@ -891,12 +862,6 @@ scenarios:
           description: "Text-to-speech conversion API endpoint"
         - name: "AudioBucket"
           description: "S3 bucket URL for generated audio files"
-    # Demo Video (Story 2.4 - Zero-Deployment Path)
-    video:
-      title: "Text to Speech Accessibility Demo Walkthrough"
-      duration: "5:45"
-      recordedDate: "2025-01-15"
-      # youtubeId will be added when video is recorded
     # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
     screenshots:
       steps: []
@@ -969,7 +934,7 @@ scenarios:
     relatedScenarios:
       - "smart-car-park"
       - "planning-ai"
-    securitySummary: "Innovation Sandbox isolated - sample council metrics only"
+    securitySummary: "NDX:Try session isolated - sample council metrics only"
     skillsLearned:
       - "Amazon QuickSight"
       - "Data visualisation"
@@ -990,7 +955,7 @@ scenarios:
       - "Reduce time to generate performance reports"
       - "Provide leadership with real-time insights"
     prerequisites:
-      - "AWS account (sandbox provided)"
+      - "AWS account (provided via NDX:Try)"
       - "Sample council data provided"
     url: "/scenarios/quicksight-dashboard/"
     order: 7
@@ -1004,7 +969,7 @@ scenarios:
       parameters:
         - name: "Environment"
           value: "sandbox"
-          description: "Deployment environment (sandbox for Innovation Sandbox)"
+          description: "Deployment environment (NDX:Try session)"
         - name: "AutoCleanupHours"
           value: "2"
           description: "Hours until automatic resource cleanup"
@@ -1034,12 +999,6 @@ scenarios:
           description: "QuickSight dashboard URL for council metrics"
         - name: "DatasetId"
           description: "QuickSight dataset identifier"
-    # Demo Video (Story 2.4 - Zero-Deployment Path)
-    video:
-      title: "QuickSight Dashboard Analytics Demo Walkthrough"
-      duration: "8:00"
-      recordedDate: "2025-01-15"
-      # youtubeId will be added when video is recorded
     # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
     screenshots:
       steps: []

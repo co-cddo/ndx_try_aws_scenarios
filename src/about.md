@@ -24,7 +24,7 @@ Take our [2-minute quiz](/quiz/) or [browse scenarios](/scenarios/) to find solu
 
 Launch AWS scenarios with one click using pre-configured CloudFormation templates. No cloud expertise required - we handle the infrastructure setup automatically.
 
-Your deployment runs in an **isolated Innovation Sandbox**, completely separate from your production systems.
+Your session runs in an **isolated NDX:Try environment**, completely separate from your production systems.
 
 ### 3. Experience
 
@@ -93,7 +93,7 @@ We normalise exploration and reduce imposter syndrome. Organisations should not 
 
 ### 2. Promise Safety
 
-- **Isolated Innovation Sandbox**: Your evaluation is completely separate from production systems
+- **Isolated NDX:Try environment**: Your evaluation is completely separate from production systems
 - **Automatic cleanup**: Resources are deleted when you're done
 - **Completely FREE**: AWS provides all scenarios at no cost as part of NDX:Try
 - **No data leakage**: Sample data only, no connection to real citizen records

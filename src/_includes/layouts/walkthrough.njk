@@ -61,12 +61,21 @@ layout: page
     {% set currentScenarioId = scenarioId %}
     {% set currentScenarioTitle = walkthroughData.title if walkthroughData and walkthroughData.title else scenarioId | replace("-", " ") | title %}
 
-    {# Calculate progress percentage based on current step #}
-    {% set totalSections = totalSteps + 2 %}
-    {% set percentage = ((currentStep / totalSections) * 100) | round %}
-
-    {# Include progress sidebar component with inline sections #}
-    {% include "components/walkthrough-progress.njk" %}
+    {# Step navigation #}
+    <nav class="ndx-walkthrough-nav" aria-label="Walkthrough steps">
+      <h3 class="govuk-heading-s govuk-!-margin-bottom-3">Steps</h3>
+      <ol class="ndx-walkthrough-nav__list">
+        {% for step in stepTitles %}
+          {% set stepNum = loop.index %}
+          <li class="ndx-walkthrough-nav__item{% if stepNum == currentStep %} ndx-walkthrough-nav__item--current{% endif %}">
+            <a href="/walkthroughs/{{ scenarioId }}/step-{{ stepNum }}/" class="ndx-walkthrough-nav__link"{% if stepNum == currentStep %} aria-current="step"{% endif %}>
+              <span class="ndx-walkthrough-nav__number">{{ stepNum }}</span>
+              <span class="ndx-walkthrough-nav__title">{{ step.title }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ol>
+    </nav>
 
     {# Quick help #}
     <div class="ndx-walkthrough-help govuk-!-margin-top-6">

@@ -1,8 +1,7 @@
 {#
-  Walkthrough CTA Component (Story 15.1)
+  Walkthrough CTA Component
 
-  Displays a "Start Walkthrough" or "Continue Walkthrough" button on scenario pages.
-  Shows progress indicator when walkthrough is in progress.
+  Displays a "Start Walkthrough" button on scenario pages.
 
   Usage:
     {% include "components/walkthrough-cta.njk" %}
@@ -15,118 +14,19 @@
 {% set sid = scenarioId if scenarioId else scenarioData.id %}
 {% set steps = scenarioData.walkthroughSteps if scenarioData.walkthroughSteps else 4 %}
 
-<div class="ndx-walkthrough-cta" data-walkthrough-cta data-scenario="{{ sid }}" data-total-steps="{{ steps }}">
-  {# Progress indicator - shown when in progress, hidden by default #}
-  <div class="ndx-walkthrough-cta__progress" data-progress-display hidden>
-    <div class="govuk-!-margin-bottom-2">
-      <strong class="govuk-tag govuk-tag--blue">In Progress</strong>
-    </div>
-    <div class="ndx-progress-bar">
-      <div class="ndx-progress-bar__fill" data-progress-fill style="width: 0%"></div>
-    </div>
-    <p class="govuk-body-s govuk-!-margin-top-1" data-progress-text>
-      Step <span data-current-step>0</span> of <span data-total-steps>{{ steps }}</span>
-    </p>
-  </div>
+<div class="ndx-walkthrough-cta">
+  <a href="/walkthroughs/{{ sid }}/"
+     role="button"
+     draggable="false"
+     class="govuk-button govuk-button--start"
+     data-module="govuk-button">
+    Start walkthrough ({{ steps }} steps)
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
 
-  {# Completed state - hidden by default #}
-  <div class="ndx-walkthrough-cta__completed" data-completed-display hidden>
-    <div class="govuk-!-margin-bottom-2">
-      <strong class="govuk-tag govuk-tag--green">Completed</strong>
-    </div>
-    <p class="govuk-body-s">You've completed this walkthrough.</p>
-  </div>
-
-  {# CTA Buttons #}
-  <div class="govuk-button-group">
-    {# Primary CTA - changes based on progress state #}
-    <a href="/walkthroughs/{{ sid }}/"
-       role="button"
-       draggable="false"
-       class="govuk-button govuk-button--start"
-       data-module="govuk-button"
-       data-walkthrough-start
-       data-analytics-event="start_walkthrough"
-       data-analytics-scenario="{{ sid }}">
-      <span data-cta-text>Start walkthrough ({{ steps }} steps)</span>
-      <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
-        <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
-      </svg>
-    </a>
-
-    {# Restart button - shown only when in progress or completed #}
-    <button type="button"
-            class="govuk-button govuk-button--secondary"
-            data-restart-walkthrough
-            hidden>
-      Restart from beginning
-    </button>
-  </div>
-
-  {# Time estimate #}
-  <p class="govuk-body-s govuk-!-margin-top-2 ndx-walkthrough-cta__time">
+  <p class="govuk-body-s govuk-!-margin-top-2">
     Takes approximately {{ scenarioData.timeEstimate if scenarioData.timeEstimate else '10-15 minutes' }}
   </p>
 </div>
-
-<script>
-  // Initialize CTA component
-  (function() {
-    'use strict';
-
-    function initWalkthroughCTA() {
-      var container = document.querySelector('[data-walkthrough-cta]');
-      if (!container || !window.NDXProgress) return;
-
-      var scenarioId = container.dataset.scenario;
-      var totalSteps = parseInt(container.dataset.totalSteps, 10) || 4;
-      var progress = window.NDXProgress.getScenarioProgress(scenarioId);
-
-      var progressDisplay = container.querySelector('[data-progress-display]');
-      var completedDisplay = container.querySelector('[data-completed-display]');
-      var ctaText = container.querySelector('[data-cta-text]');
-      var startLink = container.querySelector('[data-walkthrough-start]');
-      var restartBtn = container.querySelector('[data-restart-walkthrough]');
-      var progressFill = container.querySelector('[data-progress-fill]');
-      var currentStepEl = container.querySelector('[data-current-step]');
-
-      if (!progress) {
-        // Not started - default state is already correct
-        return;
-      }
-
-      if (progress.completed) {
-        // Completed state
-        if (progressDisplay) progressDisplay.hidden = true;
-        if (completedDisplay) completedDisplay.hidden = false;
-        if (ctaText) ctaText.textContent = 'Review walkthrough (' + totalSteps + ' steps)';
-        if (restartBtn) restartBtn.hidden = false;
-      } else if (progress.currentStep > 0) {
-        // In progress state
-        var percent = Math.round((progress.completedSteps.length / totalSteps) * 100);
-        if (progressDisplay) progressDisplay.hidden = false;
-        if (progressFill) progressFill.style.width = percent + '%';
-        if (currentStepEl) currentStepEl.textContent = progress.currentStep;
-        if (ctaText) ctaText.textContent = 'Continue walkthrough (Step ' + (progress.currentStep + 1) + ')';
-        if (startLink) startLink.href = '/walkthroughs/' + scenarioId + '/step-' + progress.currentStep + '/';
-        if (restartBtn) restartBtn.hidden = false;
-      }
-
-      // Restart button handler
-      if (restartBtn) {
-        restartBtn.addEventListener('click', function() {
-          if (confirm('Are you sure you want to restart this walkthrough? Your progress will be cleared.')) {
-            window.NDXProgress.clearScenarioProgress(scenarioId);
-            window.location.href = '/walkthroughs/' + scenarioId + '/';
-          }
-        });
-      }
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initWalkthroughCTA);
-    } else {
-      initWalkthroughCTA();
-    }
-  })();
-</script>

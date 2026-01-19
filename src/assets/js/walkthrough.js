@@ -632,11 +632,6 @@
     // Clear progress
     localStorage.removeItem(STORAGE_KEY_PREFIX + scenarioId);
 
-    // Also clear from NDXProgress if available
-    if (window.NDXProgress && typeof window.NDXProgress.clearScenarioProgress === 'function') {
-      window.NDXProgress.clearScenarioProgress(scenarioId);
-    }
-
     closeResetModal();
 
     // Reload page to reset all visual states

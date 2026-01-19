@@ -58,9 +58,9 @@ cto_evaluation:
 
   technical_runbook:
     deployment_steps:
-      - step: "Login to AWS Console with Innovation Sandbox credentials"
+      - step: "Login to AWS Console with NDX:Try session credentials"
         time: "1 minute"
-      - step: "Click 'Deploy to Innovation Sandbox' button from NDX:Try portal"
+      - step: "Click 'Deploy to NDX:Try session' button from NDX:Try portal"
         time: "30 seconds"
       - step: "Review CloudFormation parameters (pre-configured)"
         time: "1 minute"
@@ -238,7 +238,7 @@ developer_evaluation:
     technical_runbook_summary:
       deployment:
         - "One-click CloudFormation deployment"
-        - "Pre-configured parameters for Innovation Sandbox"
+        - "Pre-configured parameters for NDX:Try session"
         - "Automatic IAM role creation with least privilege"
         - "3-5 minute deployment time"
 
@@ -267,7 +267,7 @@ evaluation_summary:
     - "Impressive natural language understanding"
     - "Cost-effective compared to current call center operations"
     - "Scalable architecture that can grow with demand"
-    - "Innovation Sandbox made evaluation safe and low-risk"
+    - "NDX:Try session made evaluation safe and low-risk"
 
   weaknesses:
     - "Initial setup requires AWS account and basic understanding"

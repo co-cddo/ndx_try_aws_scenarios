@@ -793,7 +793,7 @@ committeeLanguage:
     phase1:
       title: "Pilot (Month 1-2)"
       activities:
-        - "Deploy QuickSight via AWS Innovation Sandbox (this walkthrough)"
+        - "Deploy QuickSight via NDX:Try (this walkthrough)"
         - "Create dashboard for 2 services (Waste Collection, Housing Requests)"
         - "Onboard 5 pilot users (2 service managers, 2 officers, 1 analyst)"
         - "Gather feedback on usability, accuracy, and usefulness"
@@ -821,7 +821,7 @@ committeeLanguage:
       cost: "£360 (10 users × £18/month × 2 months)"
 
   nextSteps:
-    - "Complete this AWS Innovation Sandbox walkthrough (10 minutes)"
+    - "Complete this NDX:Try walkthrough (10 minutes)"
     - "Present findings to IT and Service Delivery teams"
     - "Prepare business case for Finance committee (template available)"
     - "Secure approval for 2-month pilot (£450 budget)"
