@@ -25,7 +25,7 @@ scenarioId: localgov-drupal
     {{ walkthroughData.duration }} to explore a modern council CMS
   </h2>
   <div class="govuk-panel__body">
-    No deployment needed. Follow along with your deployed Drupal site or view the screenshots.
+    Deploy once via NDX:Try (35 to 40 minutes), then explore at your own pace with this step-by-step guide.
   </div>
 </div>
 
@@ -67,8 +67,40 @@ scenarioId: localgov-drupal
 
   <p class="govuk-body">
     <a href="/scenarios/localgov-drupal/" class="govuk-link">Deploy the LocalGov Drupal scenario</a> if you haven't already.
-    Deployment takes 35 to 40 minutes.
   </p>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      Deployment takes 35 to 40 minutes. This is longer than other scenarios because it provisions a full Aurora Serverless database.
+    </strong>
+  </div>
+
+  <details class="govuk-details govuk-!-margin-bottom-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">Why does deployment take this long?</span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">LocalGov Drupal provisions enterprise-grade infrastructure:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Aurora Serverless database</strong> – created on-demand for your session</li>
+        <li><strong>EFS file system</strong> – shared storage for Drupal files</li>
+        <li><strong>Fargate containers</strong> – serverless compute for PHP</li>
+        <li><strong>Drupal installation</strong> – modules, themes, and sample content</li>
+      </ul>
+      <p class="govuk-body govuk-!-margin-bottom-0">
+        The wait is worth it – you get a fully functional, production-quality CMS to evaluate.
+      </p>
+    </div>
+  </details>
+
+  <div class="govuk-inset-text">
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      <strong>While you wait:</strong> Explore the CloudFormation Events tab to watch resources being created.
+      You can also browse other areas of the AWS Console – deployment continues in the background.
+    </p>
+  </div>
 
   <h3 class="govuk-heading-s">You'll need</h3>
   <ul class="govuk-list govuk-list--bullet">
