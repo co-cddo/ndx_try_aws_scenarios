@@ -8,7 +8,7 @@ scenarios:
     bestFor: "Councils exploring AI integration with LocalGov Drupal CMS"
     description: "Deploy LocalGov Drupal CMS with 7 AI-powered features. Includes content editing, readability simplification, auto alt-text, text-to-speech in 7 languages, translation to 75+ languages, PDF-to-web conversion, and dynamic council identity generation."
     difficulty: "beginner"
-    timeEstimate: "15 minutes"
+    timeEstimate: "40 minutes"
     primaryPersona: "service-manager"
     gcloud_search_term: "LocalGov Drupal AI CMS local government"
     secondaryPersonas:

@@ -66,9 +66,16 @@ scenarioId: localgov-drupal
       <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
       <strong class="govuk-warning-text__text">
         <span class="govuk-visually-hidden">Warning</span>
-        If the status shows CREATE_IN_PROGRESS, wait a few minutes for the deployment to complete
-        before continuing. The stack takes approximately 15 minutes to deploy.
+        If the status shows CREATE_IN_PROGRESS, the deployment is still running.
+        This scenario takes 35 to 40 minutes to deploy fully.
       </strong>
+    </div>
+
+    <div class="govuk-inset-text">
+      <p class="govuk-body govuk-!-margin-bottom-0">
+        <strong>This is normal.</strong> LocalGov Drupal provisions enterprise-grade infrastructure including an Aurora Serverless database, which takes time to create on-demand.
+        While you wait, watch the <strong>Events</strong> tab in CloudFormation to see resources being created in real-time.
+      </p>
     </div>
 
     {# Screenshot: CloudFormation stacks list #}
