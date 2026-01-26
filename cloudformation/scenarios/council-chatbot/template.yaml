@@ -399,6 +399,15 @@ Resources:
       Principal: '*'
       FunctionUrlAuthType: NONE
 
+  # Permission for public invocation (required since Oct 2025)
+  ChatbotFunctionInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ChatbotFunction
+      Action: lambda:InvokeFunction
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+
   # CloudWatch Log Group
   ChatbotLogGroup:
     Type: AWS::Logs::LogGroup
