@@ -604,7 +604,7 @@ Resources:
       FunctionName: !Ref TextToSpeechFunction
       Action: lambda:InvokeFunction
       Principal: '*'
-      FunctionUrlAuthType: NONE
+      InvokedViaFunctionUrl: true
 
   # CloudWatch Log Group
   TextToSpeechLogGroup:

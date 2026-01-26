@@ -784,7 +784,7 @@ Resources:
       FunctionName: !Ref RedactionFunction
       Action: lambda:InvokeFunction
       Principal: '*'
-      FunctionUrlAuthType: NONE
+      InvokedViaFunctionUrl: true
 
   # CloudWatch Log Group
   RedactionLogGroup:

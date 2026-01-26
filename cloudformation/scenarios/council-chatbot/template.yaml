@@ -406,7 +406,7 @@ Resources:
       FunctionName: !Ref ChatbotFunction
       Action: lambda:InvokeFunction
       Principal: '*'
-      FunctionUrlAuthType: NONE
+      InvokedViaFunctionUrl: true
 
   # CloudWatch Log Group
   ChatbotLogGroup:
