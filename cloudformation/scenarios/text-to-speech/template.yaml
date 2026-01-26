@@ -597,6 +597,15 @@ Resources:
       Principal: '*'
       FunctionUrlAuthType: NONE
 
+  # Permission for public invocation (required since Oct 2025)
+  TextToSpeechFunctionInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref TextToSpeechFunction
+      Action: lambda:InvokeFunction
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+
   # CloudWatch Log Group
   TextToSpeechLogGroup:
     Type: AWS::Logs::LogGroup
