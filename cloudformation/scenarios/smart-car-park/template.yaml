@@ -662,7 +662,7 @@ Resources:
       FunctionName: !Ref ParkingSimulatorFunction
       Action: lambda:InvokeFunction
       Principal: '*'
-      FunctionUrlAuthType: NONE
+      InvokedViaFunctionUrl: true
 
   # CloudWatch Log Group
   ParkingSimulatorLogGroup:
