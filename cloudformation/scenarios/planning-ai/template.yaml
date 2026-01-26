@@ -1239,7 +1239,7 @@ Resources:
       FunctionName: !Ref PlanningAnalyzerFunction
       Action: lambda:InvokeFunction
       Principal: '*'
-      FunctionUrlAuthType: NONE
+      InvokedViaFunctionUrl: true
 
   # CloudWatch Log Group
   PlanningAnalyzerLogGroup:
