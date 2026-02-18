@@ -35,7 +35,7 @@
     "@x-govuk/govuk-eleventy-plugin": "^8.3.0",
     "govuk-frontend": "5.14.0",
     "jspdf": "^4.1.0",
-    "markdown-it": "^14.1.0"
+    "markdown-it": "^14.1.1"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0",
