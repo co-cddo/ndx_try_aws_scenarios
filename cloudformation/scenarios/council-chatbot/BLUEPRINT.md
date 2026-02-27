@@ -21,7 +21,7 @@ aws s3 cp template.yaml \
 
 ## Step 2 — Create StackSet
 
-Create a self-managed CloudFormation StackSet using ISB's roles:
+Create a self-managed CloudFormation StackSet using ISB's roles. The StackSet must be created in the same region as your ISB deployment (e.g. `us-west-2`):
 
 ```bash
 aws cloudformation create-stack-set \
@@ -30,11 +30,12 @@ aws cloudformation create-stack-set \
   --administration-role-arn arn:aws:iam::{HUB_ACCOUNT_ID}:role/InnovationSandbox-{NAMESPACE}-IntermediateRole \
   --execution-role-name InnovationSandbox-{NAMESPACE}-SandboxAccountRole \
   --managed-execution Active=true \
-  --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
+  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
   --description "NDX:Try Council Chatbot - AI-powered resident Q&A assistant"
 ```
 
 Notes:
+- `CAPABILITY_NAMED_IAM` is required because the template uses explicit IAM role names
 - `CAPABILITY_AUTO_EXPAND` is required because the template uses the SAM transform (`AWS::Serverless-2016-10-31`)
 - `--managed-execution Active=true` is recommended for concurrent lease handling
 - Blueprint name must match pattern `^[a-zA-Z][a-zA-Z0-9-]{0,49}$`

@@ -292,6 +292,7 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
         - "CAPABILITY_AUTO_EXPAND"
       deploymentTime: "3 to 5 minutes"
       deploymentPhases:
