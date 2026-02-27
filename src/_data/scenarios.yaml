@@ -253,7 +253,6 @@ scenarios:
     isMostPopular: true
     awsServices:
       - "Amazon Bedrock"
-      - "Amazon Lex"
       - "AWS Lambda"
       - "Amazon S3"
     tags:
@@ -281,9 +280,6 @@ scenarios:
         - name: "Environment"
           value: "sandbox"
           description: "Deployment environment (NDX:Try session)"
-        - name: "AutoCleanupHours"
-          value: "2"
-          description: "Hours until automatic resource cleanup"
         - name: "KnowledgeBaseSource"
           value: "council-sample-data"
           description: "Sample council knowledge base for the chatbot"
@@ -296,18 +292,16 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
+        - "CAPABILITY_AUTO_EXPAND"
       deploymentTime: "3 to 5 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
         - "Creating S3 bucket for knowledge base (~10 seconds)"
         - "Creating Lambda functions (~60 seconds)"
-        - "Configuring Amazon Lex bot (~120 seconds)"
         - "Setting up Bedrock integration (~30 seconds)"
       outputs:
         - name: "ChatbotURL"
           description: "Web interface URL to interact with the chatbot"
-        - name: "LexBotId"
-          description: "Amazon Lex bot identifier for API integration"
     # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
     screenshots:
       # steps array will be populated when screenshots are captured

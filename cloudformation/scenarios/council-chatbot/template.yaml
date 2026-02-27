@@ -14,10 +14,6 @@ Metadata:
         Parameters:
           - Environment
           - KnowledgeBaseSource
-      - Label:
-          default: Auto-Cleanup
-        Parameters:
-          - AutoCleanupHours
 
 Parameters:
   Environment:
@@ -34,13 +30,6 @@ Parameters:
     Default: council-sample-data
     Description: Knowledge base source for chatbot
 
-  AutoCleanupHours:
-    Type: Number
-    Default: 2
-    MinValue: 1
-    MaxValue: 24
-    Description: Hours until automatic resource cleanup
-
 Resources:
   # S3 Bucket for Knowledge Base
   KnowledgeBaseBucket:
@@ -56,11 +45,6 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: AutoCleanup
-            Status: Enabled
-            ExpirationInDays: 1
       Tags:
         - Key: Project
           Value: ndx-try
@@ -103,7 +87,7 @@ Resources:
                 Action:
                   - bedrock:InvokeModel
                 Resource:
-                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-pro-v1:0'
+                  - 'arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-pro-v1:0'
       Tags:
         - Key: Project
           Value: ndx-try
@@ -439,7 +423,6 @@ Outputs:
       {
         "scenario": "council-chatbot",
         "environment": "${Environment}",
-        "autoCleanup": "${AutoCleanupHours} hours",
         "mode": "Amazon Nova Pro",
         "note": "Real AI-powered responses using Amazon Bedrock"
       }
