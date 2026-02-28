@@ -503,34 +503,38 @@ enable_localgov_modules() {
         localgov_workflows_notifications
     "
 
-    # Count total modules for progress reporting
-    local total_modules=0
+    # Filter to only modules that are available and not yet enabled
+    local modules_to_enable=""
+    local skipped=0
     for module in $LOCALGOV_MODULES; do
-        total_modules=$((total_modules + 1))
-    done
-
-    # Enable each module if available (ignore errors for missing optional modules)
-    # Progress spans 72% to 75% across modules
-    local module_index=0
-    for module in $LOCALGOV_MODULES; do
-        module_index=$((module_index + 1))
-        local module_progress=$((72 + (3 * module_index / total_modules)))
-        update_status "Modules" "Enabling module ${module_index}/${total_modules}: ${module}" "$module_progress"
-        log "Checking module: $module"
         if ./vendor/bin/drush pm:list --status=disabled --type=module --field=name 2>/dev/null | grep -q "^${module}$"; then
-            log "  Enabling $module..."
-            local module_output
-            module_output=$(./vendor/bin/drush pm:enable "$module" --yes 2>&1) || true
-            if [ -n "$module_output" ]; then
-                echo "$module_output" | while IFS= read -r line; do
-                    log "    $line"
-                done
-            fi
+            modules_to_enable="$modules_to_enable $module"
         else
+            skipped=$((skipped + 1))
             log "  $module already enabled or not available, skipping"
         fi
     done
 
+    if [ -z "$modules_to_enable" ]; then
+        log "All LocalGov modules already enabled"
+        return 0
+    fi
+
+    local count
+    count=$(echo $modules_to_enable | wc -w | tr -d ' ')
+    log "Enabling $count LocalGov modules in a single batch (skipped $skipped)..."
+    update_status "Modules" "Enabling $count LocalGov modules in batch..." 73
+
+    # Single drush call: one PHP bootstrap, one dependency resolution, one final hook_modules_installed
+    local batch_output
+    batch_output=$(./vendor/bin/drush pm:install $modules_to_enable --yes 2>&1) || true
+    if [ -n "$batch_output" ]; then
+        echo "$batch_output" | while IFS= read -r line; do
+            log "    $line"
+        done
+    fi
+
+    update_status "Modules" "LocalGov modules enabled" 75
     return 0
 }
 
@@ -540,47 +544,26 @@ enable_custom_modules() {
 
     cd "$DRUPAL_ROOT"
 
-    # Helper function to enable a module without problematic piping
-    # The | while read pattern causes SIGPIPE issues with drush
-    enable_module() {
-        local module_name="$1"
-        local module_dir="$DRUPAL_ROOT/web/modules/custom/$module_name"
-
-        if [ -d "$module_dir" ]; then
-            log "Enabling $module_name module..."
-            # Use direct execution with output capture and retry for deadlocks
-            local output
-            if output=$(run_drush_with_retry ./vendor/bin/drush pm:enable "$module_name" --yes); then
-                log "  $module_name enabled successfully"
-                [ -n "$output" ] && log "  Output: $output"
-                return 0
-            else
-                log "  Warning: $module_name enable returned non-zero, but may have succeeded"
-                [ -n "$output" ] && log "  Output: $output"
-                # Check if actually enabled despite the error using pm:list (filter warning lines)
-                sleep 2  # Wait for any pending cache writes to complete
-                local enabled_list
-                enabled_list=$(./vendor/bin/drush pm:list --status=enabled --type=module --field=name 2>/dev/null | grep -v '\[warning\]' | grep -v 'Drush command' | tr '\n' ' ')
-                if echo "$enabled_list" | grep -qw "$module_name"; then
-                    log "  Verified: $module_name is enabled"
-                    return 0
-                fi
-                log "  Module $module_name not in enabled list - continuing anyway"
-                # Return 0 to avoid script exit - module may still work
-                return 0
-            fi
+    # Collect custom modules that exist on disk
+    local NDX_MODULES="ndx_demo_banner ndx_welcome ndx_walkthrough ndx_aws_ai ndx_council_generator"
+    local custom_to_enable=""
+    for module in $NDX_MODULES; do
+        if [ -d "$DRUPAL_ROOT/web/modules/custom/$module" ]; then
+            custom_to_enable="$custom_to_enable $module"
         else
-            log "$module_name module not found at $module_dir, skipping"
-            return 0
+            log "$module module not found, skipping"
         fi
-    }
+    done
 
-    # Enable modules in dependency order
-    enable_module "ndx_demo_banner"      # Story 1.10
-    enable_module "ndx_welcome"          # Story 1.11
-    enable_module "ndx_walkthrough"      # Epic 2
-    enable_module "ndx_aws_ai"           # Epic 3-4 dependency
-    enable_module "ndx_council_generator" # Epic 5 - requires ndx_aws_ai
+    if [ -n "$custom_to_enable" ]; then
+        local count
+        count=$(echo $custom_to_enable | wc -w | tr -d ' ')
+        log "Enabling $count custom NDX modules in batch..."
+        update_status "Modules" "Enabling $count custom NDX modules..." 76
+        local output
+        output=$(run_drush_with_retry ./vendor/bin/drush pm:install $custom_to_enable --yes) || true
+        [ -n "$output" ] && log "  $output"
+    fi
 
     # Clear caches before verification to ensure module system is up to date
     log "Rebuilding cache before module verification..."
