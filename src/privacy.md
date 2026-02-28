@@ -6,7 +6,7 @@ description: How we handle your personal information when using NDX:Try
 
 # Privacy Policy
 
-Last updated: 28 November 2025
+Last updated: 28 February 2026
 
 ## Who we are
 
@@ -104,7 +104,7 @@ To exercise any of these rights, contact us at [ndx@dsit.gov.uk](mailto:ndx@dsit
 |-----------|-----------------|
 | Partner tour requests | 12 months |
 | Website server logs | 90 days |
-| Sandbox session data | Deleted after 90 minutes |
+| Sandbox session data | Deleted after 24 hours |
 
 ## Data security
 
@@ -125,11 +125,18 @@ When you request a partner tour, we share your contact details with a vetted AWS
 
 ### AWS
 
-Sandbox environments run on AWS infrastructure. AWS processes data in accordance with their [Data Privacy FAQ](https://aws.amazon.com/compliance/data-privacy-faq/).
+Sandbox evaluation environments run on AWS infrastructure in the US (us-east-1 N. Virginia region). We use US regions for sandbox evaluations because they offer the widest AWS service availability and lower carbon intensity. Sandbox environments use only sample and synthetic data, contain no real citizen data, and auto-delete after 24 hours.
+
+AWS processes data in accordance with their [Data Privacy FAQ](https://aws.amazon.com/compliance/data-privacy-faq/) and holds UK G-Cloud 14 framework approval.
 
 ## International transfers
 
-Your data is processed within the UK and European Economic Area. If data is transferred internationally, appropriate safeguards are in place.
+We process two categories of data differently:
+
+- **Partner tour requests** (your name, email, council name): processed within the UK and European Economic Area only
+- **Sandbox evaluation data** (sample and synthetic data only): processed in the US (us-east-1 N. Virginia) AWS region. No real personal or citizen data is used in sandbox evaluations
+
+For sandbox data processed in the US, appropriate safeguards are in place including AWS's GDPR-compliant Data Processing Addendum, Standard Contractual Clauses (SCCs), and AWS certifications including ISO 27001, ISO 27018, and SOC 2. AWS is approved on the UK Government G-Cloud 14 framework.
 
 ## Changes to this policy
 

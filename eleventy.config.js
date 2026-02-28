@@ -131,6 +131,27 @@ export default function(eleventyConfig) {
       .replace(/^-+|-+$/g, '');       // Remove leading/trailing hyphens
   });
 
+  // Region name filter - maps AWS region codes to friendly names
+  eleventyConfig.addFilter('regionName', (regionCode) => {
+    const regionNames = {
+      'us-east-1': 'N. Virginia',
+      'us-east-2': 'Ohio',
+      'us-west-1': 'N. California',
+      'us-west-2': 'Oregon',
+      'eu-west-1': 'Ireland',
+      'eu-west-2': 'London',
+      'eu-west-3': 'Paris',
+      'eu-central-1': 'Frankfurt',
+      'eu-north-1': 'Stockholm',
+      'ap-southeast-1': 'Singapore',
+      'ap-southeast-2': 'Sydney',
+      'ap-northeast-1': 'Tokyo',
+      'ap-south-1': 'Mumbai',
+      'ca-central-1': 'Canada',
+      'sa-east-1': 'São Paulo'
+    };
+    return regionNames[regionCode] || regionCode;
+  });
 
   // CloudFormation Deploy URL Generator (AC-2.1.1, AC-2.1.2, AC-2.1.3, AC-2.1.8)
   eleventyConfig.addFilter('deployUrl', (scenario) => {
@@ -139,7 +160,7 @@ export default function(eleventyConfig) {
     }
 
     const deployment = scenario.deployment;
-    const region = deployment.region || 'eu-west-2';
+    const region = deployment.region || 'us-east-1';
     const templateUrl = deployment.templateUrl || deployment.templateS3Url;
 
     if (!templateUrl) {

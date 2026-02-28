@@ -224,7 +224,7 @@ production_guidance:
       - "SPICE capacity: plan for 10GB per author, 1GB per reader"
       - "Dataset refresh: large datasets may need off-peak scheduling"
       - "Concurrent users: Enterprise edition supports more concurrent viewers"
-      - "Cross-region: consider regions for data residency compliance"
+      - "Cross-region: NDX:Try sandboxes run in us-east-1 or us-west-2 US regions"
 
   - id: customization
     title: "Customization Options"

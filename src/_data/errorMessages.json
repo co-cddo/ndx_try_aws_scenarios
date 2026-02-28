@@ -106,7 +106,7 @@
       "troubleshootingSteps": [
         "You may have deployed this scenario before",
         "Delete the existing stack from CloudFormation console",
-        "Or wait for auto-cleanup (resources delete after 2 hours)"
+        "Or wait for auto-cleanup (resources delete after 24 hours)"
       ],
       "supportLink": "/help/resource-conflict"
     },
