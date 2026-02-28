@@ -104,7 +104,7 @@ To exercise any of these rights, contact us at [ndx@dsit.gov.uk](mailto:ndx@dsit
 |-----------|-----------------|
 | Partner tour requests | 12 months |
 | Website server logs | 90 days |
-| Sandbox session data | Deleted after 90 minutes |
+| Sandbox session data | Deleted after 24 hours |
 
 ## Data security
 
@@ -125,7 +125,7 @@ When you request a partner tour, we share your contact details with a vetted AWS
 
 ### AWS
 
-Sandbox evaluation environments run on AWS infrastructure in the US (us-east-1 N. Virginia region). We use US regions for sandbox evaluations because they offer the widest AWS service availability and lower carbon intensity. Sandbox environments use only sample and synthetic data, contain no real citizen data, and auto-delete after 2 hours.
+Sandbox evaluation environments run on AWS infrastructure in the US (us-east-1 N. Virginia region). We use US regions for sandbox evaluations because they offer the widest AWS service availability and lower carbon intensity. Sandbox environments use only sample and synthetic data, contain no real citizen data, and auto-delete after 24 hours.
 
 AWS processes data in accordance with their [Data Privacy FAQ](https://aws.amazon.com/compliance/data-privacy-faq/) and holds UK G-Cloud 14 framework approval.
 

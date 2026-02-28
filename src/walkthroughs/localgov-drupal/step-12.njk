@@ -30,7 +30,7 @@ scenarioId: localgov-drupal
 <h3 class="govuk-heading-m">Automatic cleanup</h3>
 
 <p class="govuk-body">
-  Good news: your deployment is configured to <strong>auto-delete after 2 hours</strong>.
+  Good news: your deployment is configured to <strong>auto-delete after 24 hours</strong>.
   This means:
 </p>
 
@@ -42,9 +42,9 @@ scenarioId: localgov-drupal
 
 <div class="govuk-inset-text">
   <p class="govuk-body">
-    <strong>When does the 2 hours start?</strong> The timer begins when the
+    <strong>When does the 24 hours start?</strong> The timer begins when the
     CloudFormation stack reaches CREATE_COMPLETE status. So if deployment
-    took 15 minutes, you have roughly 1 hour 45 minutes from when you
+    took 15 minutes, you have roughly 23 hours 45 minutes from when you
     first logged in.
   </p>
 </div>
@@ -194,24 +194,24 @@ scenarioId: localgov-drupal
     </thead>
     <tbody class="govuk-table__body">
       <tr class="govuk-table__row">
-        <td class="govuk-table__cell">Aurora Serverless (2 hours)</td>
-        <td class="govuk-table__cell">~$0.50</td>
+        <td class="govuk-table__cell">Aurora Serverless (24 hours)</td>
+        <td class="govuk-table__cell">~$6.00</td>
       </tr>
       <tr class="govuk-table__row">
-        <td class="govuk-table__cell">Fargate (2 hours)</td>
-        <td class="govuk-table__cell">~$0.30</td>
+        <td class="govuk-table__cell">Fargate (24 hours)</td>
+        <td class="govuk-table__cell">~$3.60</td>
       </tr>
       <tr class="govuk-table__row">
         <td class="govuk-table__cell">EFS storage</td>
         <td class="govuk-table__cell">~$0.10</td>
       </tr>
       <tr class="govuk-table__row">
-        <td class="govuk-table__cell">Load Balancer (2 hours)</td>
-        <td class="govuk-table__cell">~$0.05</td>
+        <td class="govuk-table__cell">Load Balancer (24 hours)</td>
+        <td class="govuk-table__cell">~$0.60</td>
       </tr>
       <tr class="govuk-table__row">
-        <td class="govuk-table__cell"><strong>Total (2 hour demo)</strong></td>
-        <td class="govuk-table__cell"><strong>~$1.00</strong></td>
+        <td class="govuk-table__cell"><strong>Total (24 hour demo)</strong></td>
+        <td class="govuk-table__cell"><strong>~$10.30</strong></td>
       </tr>
     </tbody>
   </table>

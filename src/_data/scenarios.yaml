@@ -335,7 +335,7 @@ scenarios:
         - "UK G-Cloud 14"
       data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
-      data_handling: "Sample data only in sandbox (US us-east-1 region); auto-deletes after 2 hours; no real citizen data processed; AWS shared responsibility model applies"
+      data_handling: "Sample data only in sandbox (US us-east-1 region); auto-deletes after 24 hours; no real citizen data processed; AWS shared responsibility model applies"
 
     # TCO Projection (Story 4-4 - Finance Evidence Pack)
     tco_projection:
@@ -463,7 +463,7 @@ scenarios:
         - "UK G-Cloud 14"
       data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
-      data_handling: "Sample data only in sandbox (US us-east-1 region); auto-deletes after 2 hours; no real citizen data processed; AWS shared responsibility model"
+      data_handling: "Sample data only in sandbox (US us-east-1 region); auto-deletes after 24 hours; no real citizen data processed; AWS shared responsibility model"
 
     # TCO Projection (Story 4-4 - Finance Evidence Pack)
     tco_projection:
@@ -596,7 +596,7 @@ scenarios:
         - "UK G-Cloud 14"
       data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
-      data_handling: "Synthetic data only in sandbox (US us-east-1 region); auto-deletes after 2 hours; no real citizen data processed; AWS shared responsibility model"
+      data_handling: "Synthetic data only in sandbox (US us-east-1 region); auto-deletes after 24 hours; no real citizen data processed; AWS shared responsibility model"
 
     # TCO Projection (Story 4-4 - Finance Evidence Pack)
     tco_projection:
