@@ -12,8 +12,6 @@ const BLUEPRINTS_BUCKET_NAME = `ndx-try-isb-blueprints-${HUB_ACCOUNT}`;
 const BLUEPRINTS_BUCKET_REGION = 'us-east-1';
 const GITHUB_REPO = 'co-cddo/ndx_try_aws_scenarios';
 const DEPLOY_ROLE_NAME = 'isb-hub-github-actions-deploy';
-const ORG_ID = 'o-4g8nrlnr9s';
-
 const SCENARIOS = [
   { name: 'council-chatbot', description: 'NDX:Try Council Chatbot - AI-powered resident Q&A assistant' },
   { name: 'foi-redaction', description: 'NDX:Try FOI Redaction - Automated sensitive data redaction for FOI requests' },
@@ -35,29 +33,9 @@ export class IsbHubStack extends cdk.Stack {
     const bucket = s3.Bucket.fromBucketName(this, 'BlueprintsBucket', BLUEPRINTS_BUCKET_NAME);
 
     // ========================================================================
-    // BUCKET POLICY — allow sandbox accounts (within the org) to fetch
-    // nested stack templates via CloudFormation TemplateURL
+    // NOTE: Bucket policy (AllowOrgAccountsReadTemplates) is managed
+    // directly in us-east-1 — not via this stack (us-west-2).
     // ========================================================================
-    new s3.CfnBucketPolicy(this, 'BlueprintsBucketPolicy', {
-      bucket: BLUEPRINTS_BUCKET_NAME,
-      policyDocument: {
-        Version: '2012-10-17',
-        Statement: [
-          {
-            Sid: 'AllowOrgAccountsReadTemplates',
-            Effect: 'Allow',
-            Principal: '*',
-            Action: 's3:GetObject',
-            Resource: `arn:aws:s3:::${BLUEPRINTS_BUCKET_NAME}/scenarios/*`,
-            Condition: {
-              StringEquals: {
-                'aws:PrincipalOrgID': ORG_ID,
-              },
-            },
-          },
-        ],
-      },
-    });
 
     // ========================================================================
     // TEMPLATE UPLOADS — one BucketDeployment per scenario
