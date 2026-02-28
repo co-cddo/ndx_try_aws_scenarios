@@ -45,7 +45,7 @@ cto_evaluation:
       - "Integration complexity with existing on-premises systems"
 
   security_compliance:
-    data_residency: "EU West 2 (London) - meets UK data sovereignty requirements"
+    data_residency: "US (us-east-1 N. Virginia region) - sandbox evaluation uses sample data only"
     encryption: "Data encrypted at rest (S3) and in transit (TLS 1.3)"
     access_control: "IAM roles with least privilege principle applied"
     compliance_frameworks:

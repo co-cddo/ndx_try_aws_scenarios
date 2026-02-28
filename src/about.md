@@ -96,7 +96,7 @@ We normalise exploration and reduce imposter syndrome. Organisations should not 
 - **Isolated NDX:Try environment**: Your evaluation is completely separate from production systems
 - **Automatic cleanup**: Resources are deleted when you're done
 - **Completely FREE**: AWS provides all scenarios at no cost as part of NDX:Try
-- **No data leakage**: Sample data only, no connection to real citizen records
+- **Sample data only**: Sandbox evaluations use synthetic data in US AWS regions (us-east-1) that auto-deletes after 2 hours. No real citizen data is used or stored
 
 ### 3. Respect Time
 
