@@ -15,10 +15,6 @@ Metadata:
           - Environment
           - VoiceId
           - OutputFormat
-      - Label:
-          default: Auto-Cleanup
-        Parameters:
-          - AutoCleanupHours
 
 Parameters:
   Environment:
@@ -49,12 +45,6 @@ Parameters:
       - pcm
     Description: Audio output format
 
-  AutoCleanupHours:
-    Type: Number
-    Default: 2
-    MinValue: 1
-    MaxValue: 24
-    Description: Hours until automatic resource cleanup
 
 Resources:
   # S3 Bucket for Audio Files
@@ -71,11 +61,6 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: AutoCleanup
-            Status: Enabled
-            ExpirationInDays: 1
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders:
@@ -649,7 +634,6 @@ Outputs:
       {
         "scenario": "text-to-speech",
         "environment": "${Environment}",
-        "autoCleanup": "${AutoCleanupHours} hours",
         "voice": "${VoiceId}",
         "format": "${OutputFormat}"
       }
