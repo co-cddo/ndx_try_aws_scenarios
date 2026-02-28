@@ -128,10 +128,10 @@ export class LocalGovDrupalStack extends cdk.Stack {
       value: 'admin',
     });
 
-    // Admin password (resolved at deploy time via Secrets Manager dynamic reference)
+    // Admin password — link to Secrets Manager console to retrieve the value
     new cdk.CfnOutput(this, 'AdminPassword', {
-      description: 'Drupal admin password',
-      value: adminSecret.secretValueFromJson('password').unsafeUnwrap(),
+      description: 'Drupal admin password (retrieve from Secrets Manager)',
+      value: `https://console.aws.amazon.com/secretsmanager/secret?name=${adminSecret.secretName}&region=${cdk.Aws.REGION}`,
     });
 
     // CloudWatch Logs URL for monitoring initialization

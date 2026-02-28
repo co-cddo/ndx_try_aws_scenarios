@@ -330,9 +330,9 @@ describe('LocalGovDrupalStack', () => {
 
     const template = Template.fromStack(stack);
 
-    // Verify AdminPassword output exists
+    // Verify AdminPassword output exists with Secrets Manager console link
     template.hasOutput('AdminPassword', {
-      Description: 'Drupal admin password',
+      Description: 'Drupal admin password (retrieve from Secrets Manager)',
     });
   });
 
