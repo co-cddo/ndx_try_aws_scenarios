@@ -25,7 +25,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: ndx-reference-stack-health-check
-      Runtime: nodejs20.x
+      Runtime: nodejs22.x
       Handler: index.handler
       Timeout: 30
       MemorySize: 256

@@ -34,7 +34,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: ndx-reference-council-chatbot
-      Runtime: nodejs20.x
+      Runtime: nodejs22.x
       Handler: index.handler
       Role: !GetAtt CouncilChatbotRole.Arn
       Code:
