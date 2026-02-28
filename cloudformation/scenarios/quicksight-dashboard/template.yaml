@@ -1,10 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
 Description: |
   NDX:Try - QuickSight Dashboard Scenario
   Real Amazon QuickSight analytics and reporting with council performance data.
   Uses Amazon QuickSight for business intelligence dashboards.
-  Version: 2.4.0 (Story 25.5 - Dashboard Filters and Embedding)
+  Version: 3.0.0 (Auto-subscribe QuickSight, fix ISB sandbox deployment)
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -14,10 +13,6 @@ Metadata:
         Parameters:
           - Environment
           - SampleDataset
-      - Label:
-          default: Auto-Cleanup
-        Parameters:
-          - AutoCleanupHours
 
 Parameters:
   Environment:
@@ -33,18 +28,6 @@ Parameters:
     Type: String
     Default: council-metrics
     Description: Sample dataset identifier for council performance metrics
-
-  AutoCleanupHours:
-    Type: Number
-    Default: 2
-    MinValue: 1
-    MaxValue: 24
-    Description: Hours until automatic resource cleanup in sandbox environment
-
-  QuickSightUsername:
-    Type: String
-    Default: 'AWSReservedSSO_ndx_IsbAdminsPS_53e05916f706247a/ndx@dsit.gov.uk'
-    Description: QuickSight username for resource permissions (found via aws quicksight list-users)
 
 Resources:
   # ============================================================================
@@ -63,12 +46,6 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: AutoCleanupSandbox
-            Status: Enabled
-            ExpirationInDays: 7
-            NoncurrentVersionExpirationInDays: 1
       VersioningConfiguration:
         Status: Enabled
       Tags:
@@ -131,7 +108,9 @@ Resources:
                   - s3:PutObject
                   - s3:GetObject
                   - s3:DeleteObject
+                  - s3:DeleteObjectVersion
                   - s3:ListBucket
+                  - s3:ListBucketVersions
                   - s3:GetBucketLocation
                 Resource:
                   - !GetAtt DataBucket.Arn
@@ -343,19 +322,26 @@ Resources:
                           )
 
                       elif request_type == 'Delete':
-                          print("Cleaning up data files...")
+                          print("Emptying versioned bucket...")
 
-                          # Delete data files
                           try:
-                              s3.delete_object(Bucket=bucket, Key=data_key)
-                              s3.delete_object(Bucket=bucket, Key=manifest_key)
+                              paginator = s3.get_paginator('list_object_versions')
+                              for page in paginator.paginate(Bucket=bucket):
+                                  objects = []
+                                  for v in page.get('Versions', []):
+                                      objects.append({'Key': v['Key'], 'VersionId': v['VersionId']})
+                                  for dm in page.get('DeleteMarkers', []):
+                                      objects.append({'Key': dm['Key'], 'VersionId': dm['VersionId']})
+                                  if objects:
+                                      s3.delete_objects(Bucket=bucket, Delete={'Objects': objects, 'Quiet': True})
+                                      print(f"Deleted {len(objects)} object versions/markers")
                           except Exception as e:
-                              print(f"Error deleting files: {str(e)}")
+                              print(f"Error emptying bucket: {str(e)}")
 
                           send_cfn_response(
                               event, context, 'SUCCESS',
                               physical_id=f'{bucket}-data-generator',
-                              reason='Data files cleaned up'
+                              reason='Bucket emptied'
                           )
 
                   except Exception as e:
@@ -432,6 +418,451 @@ Resources:
       Timestamp: !Sub '${AWS::StackName}-${AWS::StackId}'
 
   # ============================================================================
+  # QUICKSIGHT ACCOUNT SETUP - AUTO-SUBSCRIBE AND REGISTER ADMIN USER
+  # ============================================================================
+  QuickSightSetupRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'ndx-quicksight-setup-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: QuickSightSetup
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - quicksight:CreateAccountSubscription
+                  - quicksight:Subscribe
+                  - quicksight:DescribeAccountSubscription
+                  - quicksight:RegisterUser
+                  - quicksight:ListUsers
+                  - quicksight:DeleteUser
+                  - quicksight:CreateGroup
+                  - quicksight:DeleteGroup
+                  - quicksight:CreateGroupMembership
+                  - quicksight:DeleteGroupMembership
+                  - quicksight:DeleteAccountSubscription
+                  - quicksight:UpdateAccountSettings
+                  - quicksight:UpdateSPICECapacityConfiguration
+                  - quicksight:DescribeAccountSettings
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ds:AuthorizeApplication
+                  - ds:CheckAlias
+                  - ds:CreateAlias
+                  - ds:CreateIdentityPoolDirectory
+                  - ds:DeleteDirectory
+                  - ds:DescribeDirectories
+                  - ds:DescribeTrusts
+                  - ds:UnauthorizeApplication
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    iam:AWSServiceName: quicksight.amazonaws.com
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+  QuickSightSetupFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ndx-quicksight-setup-${AWS::Region}'
+      Description: Auto-subscribes QuickSight and registers an IAM admin user
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt QuickSightSetupRole.Arn
+      Timeout: 600
+      MemorySize: 128
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import time
+          import urllib3
+
+          qs = boto3.client('quicksight')
+          sts = boto3.client('sts')
+          http = urllib3.PoolManager()
+
+          def send_cfn_response(event, context, status, data=None, physical_id=None, reason=None):
+              body = json.dumps({
+                  'Status': status,
+                  'Reason': reason or f'See CloudWatch Log Stream: {context.log_stream_name}',
+                  'PhysicalResourceId': physical_id or context.log_stream_name,
+                  'StackId': event['StackId'],
+                  'RequestId': event['RequestId'],
+                  'LogicalResourceId': event['LogicalResourceId'],
+                  'Data': data or {}
+              }).encode('utf-8')
+              try:
+                  http.request('PUT', event['ResponseURL'], body=body,
+                               headers={'Content-Type': 'application/json', 'Content-Length': str(len(body))})
+              except Exception as e:
+                  print(f"Failed to send response: {e}")
+
+          def wait_for_active(account_id, timeout=480):
+              """Poll until QuickSight subscription is ACCOUNT_CREATED."""
+              deadline = time.time() + timeout
+              while time.time() < deadline:
+                  try:
+                      resp = qs.describe_account_subscription(AwsAccountId=account_id)
+                      status = resp['AccountInfo']['AccountSubscriptionStatus']
+                      print(f"QuickSight status: {status}")
+                      if status == 'ACCOUNT_CREATED':
+                          return True
+                      if status == 'SIGNING_UP_FAILED':
+                          raise RuntimeError(f"QuickSight subscription failed: {status}")
+                  except qs.exceptions.ResourceNotFoundException:
+                      print("Subscription not found yet, retrying...")
+                  time.sleep(15)
+              raise TimeoutError("QuickSight did not become active in time")
+
+          def wait_for_unsubscribed(account_id, timeout=480):
+              """Poll until QuickSight subscription is gone."""
+              deadline = time.time() + timeout
+              while time.time() < deadline:
+                  try:
+                      resp = qs.describe_account_subscription(AwsAccountId=account_id)
+                      status = resp['AccountInfo']['AccountSubscriptionStatus']
+                      print(f"Waiting for unsubscribe, status: {status}")
+                  except qs.exceptions.ResourceNotFoundException:
+                      print("QuickSight subscription removed")
+                      return True
+                  time.sleep(15)
+              raise TimeoutError("QuickSight did not unsubscribe in time")
+
+          def ensure_admin_user(account_id):
+              """Register an IAM admin user, return (user_arn, user_name)."""
+              namespace = 'default'
+              caller = sts.get_caller_identity()
+              iam_arn = caller['Arn']
+              # Use the role ARN (strip assumed-role session to get the role)
+              # arn:aws:sts::ACCT:assumed-role/ROLE/session -> arn:aws:iam::ACCT:role/ROLE
+              if ':assumed-role/' in iam_arn:
+                  parts = iam_arn.split(':assumed-role/')
+                  role_name = parts[1].split('/')[0]
+                  acct = parts[0].split(':')[4]
+                  iam_arn = f'arn:aws:iam::{acct}:role/{role_name}'
+
+              session_name = 'ndx-admin'
+              expected_user_name = f'{iam_arn}/ndx-admin'
+
+              # Retry with backoff — QuickSight IAM integration can take time after subscription
+              for attempt in range(6):
+                  try:
+                      resp = qs.register_user(
+                          AwsAccountId=account_id,
+                          Namespace=namespace,
+                          IdentityType='IAM',
+                          IamArn=iam_arn,
+                          UserRole='ADMIN',
+                          SessionName=session_name,
+                          Email='ndx-quicksight@example.com'
+                      )
+                      user = resp['User']
+                      print(f"Registered QuickSight user: {user['Arn']}")
+                      return user['Arn'], user['UserName']
+                  except qs.exceptions.ResourceExistsException:
+                      print("User already exists, constructing ARN...")
+                      region = qs.meta.region_name
+                      arn = f'arn:aws:quicksight:{region}:{account_id}:user/{namespace}/{expected_user_name}'
+                      print(f"User ARN: {arn}")
+                      return arn, expected_user_name
+                  except qs.exceptions.PreconditionNotMetException as e:
+                      wait = 15 * (attempt + 1)
+                      print(f"RegisterUser not ready (attempt {attempt+1}/6): {e}. Retrying in {wait}s...")
+                      time.sleep(wait)
+              raise RuntimeError("RegisterUser failed after retries — QuickSight IAM integration not ready")
+
+          def ensure_group(account_id, admin_user_name, namespace='default'):
+              """Create a group and add the admin user to it."""
+              group_name = 'ndx-all-users'
+              try:
+                  qs.create_group(
+                      AwsAccountId=account_id,
+                      Namespace=namespace,
+                      GroupName=group_name)
+                  print(f"Created group: {group_name}")
+              except qs.exceptions.ResourceExistsException:
+                  print(f"Group {group_name} already exists")
+
+              try:
+                  qs.create_group_membership(
+                      AwsAccountId=account_id,
+                      Namespace=namespace,
+                      GroupName=group_name,
+                      MemberName=admin_user_name)
+                  print(f"Added {admin_user_name} to group")
+              except Exception as e:
+                  print(f"Add admin to group: {e}")
+
+              region = qs.meta.region_name
+              return f'arn:aws:quicksight:{region}:{account_id}:group/{namespace}/{group_name}'
+
+          def handler(event, context):
+              print(f"Event: {json.dumps(event)}")
+              account_id = event['ResourceProperties']['AccountId']
+              request_type = event['RequestType']
+
+              try:
+                  if request_type in ['Create', 'Update']:
+                      # Step 1: Ensure QuickSight is subscribed and active
+                      need_subscribe = False
+                      try:
+                          sub = qs.describe_account_subscription(AwsAccountId=account_id)
+                          status = sub['AccountInfo']['AccountSubscriptionStatus']
+                          print(f"QuickSight already present, status: {status}")
+                          if status == 'ACCOUNT_CREATED':
+                              pass  # Already active
+                          elif status == 'UNSUBSCRIBED':
+                              # Fully unsubscribed — just resubscribe
+                              need_subscribe = True
+                          elif status == 'UNSUBSCRIBE_IN_PROGRESS':
+                              print("Waiting for in-progress unsubscribe to finish...")
+                              wait_for_unsubscribed(account_id)
+                              need_subscribe = True
+                          elif status == 'UNSUBSCRIBE_FAILED':
+                              print("Cleaning up failed unsubscribe...")
+                              try:
+                                  qs.update_account_settings(
+                                      AwsAccountId=account_id,
+                                      DefaultNamespace='default',
+                                      TerminationProtectionEnabled=False)
+                              except Exception as e:
+                                  print(f"disable termination protection: {e}")
+                              try:
+                                  qs.delete_account_subscription(AwsAccountId=account_id)
+                              except Exception as e:
+                                  print(f"delete_account_subscription: {e}")
+                              wait_for_unsubscribed(account_id)
+                              need_subscribe = True
+                          else:
+                              print("Waiting for existing subscription to become active...")
+                              wait_for_active(account_id)
+                      except qs.exceptions.ResourceNotFoundException:
+                          need_subscribe = True
+
+                      if need_subscribe:
+                          print("Subscribing to QuickSight Enterprise (IAM_ONLY)...")
+                          qs.create_account_subscription(
+                              AwsAccountId=account_id,
+                              Edition='ENTERPRISE',
+                              AuthenticationMethod='IAM_ONLY',
+                              AccountName=f'ndx-sandbox-{account_id}',
+                              NotificationEmail='ndx-quicksight@example.com'
+                          )
+                          wait_for_active(account_id)
+
+                      # Allow a brief settle after subscription becomes active
+                      time.sleep(10)
+
+                      # Step 2: Register admin user
+                      user_arn, user_name = ensure_admin_user(account_id)
+
+                      # Step 3: Enable SPICE auto-purchase
+                      try:
+                          qs.update_spice_capacity_configuration(
+                              AwsAccountId=account_id,
+                              PurchaseMode='AUTO_PURCHASE')
+                          print("SPICE auto-purchase enabled")
+                      except Exception as e:
+                          print(f"SPICE config: {e}")
+
+                      # Step 4: Create group and add admin user
+                      group_arn = ensure_group(account_id, user_name)
+
+                      send_cfn_response(event, context, 'SUCCESS',
+                          data={'GroupArn': group_arn},
+                          physical_id=f'qs-setup-{account_id}')
+
+                  elif request_type == 'Delete':
+                      # Only delete the admin user; leave the QuickSight
+                      # subscription intact — AWS Nuke handles full cleanup.
+                      print("Deleting QuickSight admin user...")
+                      try:
+                          qs.delete_user(
+                              AwsAccountId=account_id,
+                              Namespace='default',
+                              UserName=f'ndx-qs-admin'
+                          )
+                      except Exception as e:
+                          print(f"User cleanup (OK to ignore): {e}")
+
+                      send_cfn_response(event, context, 'SUCCESS',
+                          physical_id=f'qs-setup-{account_id}')
+
+              except Exception as e:
+                  print(f"Error: {e}")
+                  send_cfn_response(event, context, 'FAILED', reason=str(e)[:200])
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+  QuickSightSetupLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/ndx-quicksight-setup-${AWS::Region}'
+      RetentionInDays: 7
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+  QuickSightSetupTrigger:
+    Type: AWS::CloudFormation::CustomResource
+    DependsOn:
+      - QuickSightSetupLogGroup
+    Properties:
+      ServiceToken: !GetAtt QuickSightSetupFunction.Arn
+      AccountId: !Ref AWS::AccountId
+
+  # ============================================================================
+  # AUTO-ADD QUICKSIGHT USERS TO ndx-all-users GROUP (EventBridge + Lambda)
+  # ============================================================================
+  QuickSightGroupSyncFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ndx-quicksight-group-sync-${AWS::Region}'
+      Runtime: python3.12
+      Handler: index.handler
+      Timeout: 30
+      MemorySize: 128
+      Role: !GetAtt QuickSightSetupRole.Arn
+      Environment:
+        Variables:
+          AWS_ACCOUNT_ID_PARAM: !Ref AWS::AccountId
+          QUICKSIGHT_GROUP: ndx-all-users
+          QUICKSIGHT_NAMESPACE: default
+      Code:
+        ZipFile: |
+          import json
+          import os
+          import logging
+          import boto3
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          qs = boto3.client('quicksight')
+          ACCOUNT_ID = os.environ['AWS_ACCOUNT_ID_PARAM']
+          GROUP = os.environ['QUICKSIGHT_GROUP']
+          NAMESPACE = os.environ['QUICKSIGHT_NAMESPACE']
+
+
+          def extract_username(event):
+              """Extract the QuickSight username from a CloudTrail event."""
+              detail = event.get('detail', {})
+
+              # 1. Response contains the created user object (RegisterUser API)
+              resp_user = (detail.get('responseElements') or {}).get('user', {})
+              if resp_user.get('userName'):
+                  return resp_user['userName']
+
+              # 2. Request parameters contain the target username (RegisterUser API)
+              req_user = (detail.get('requestParameters') or {}).get('userName')
+              if req_user:
+                  return req_user
+
+              # 3. Console self-provisioning (CreateUser service event)
+              # Event uses "Role:Session" but QuickSight usernames use "Role/Session"
+              svc = (detail.get('serviceEventDetails') or {})
+              svc_user = (svc.get('eventRequestDetails') or {}).get('userName')
+              if svc_user:
+                  return svc_user.replace(':', '/', 1)
+
+              # 4. Fallback: derive from IAM/SSO caller identity ARN
+              arn = (detail.get('userIdentity') or {}).get('arn', '')
+              if '/assumed-role/' in arn:
+                  # arn:aws:sts::ACCT:assumed-role/RoleName/SessionName
+                  return arn.split('/')[-1]
+
+              return None
+
+
+          def handler(event, context):
+              logger.info('Event: %s', json.dumps(event))
+
+              username = extract_username(event)
+              if not username:
+                  logger.warning('Could not extract username from event')
+                  return {'status': 'skipped', 'reason': 'no username'}
+
+              logger.info('Adding user %s to group %s', username, GROUP)
+              try:
+                  qs.create_group_membership(
+                      MemberName=username,
+                      GroupName=GROUP,
+                      AwsAccountId=ACCOUNT_ID,
+                      Namespace=NAMESPACE,
+                  )
+                  logger.info('Successfully added %s to %s', username, GROUP)
+                  return {'status': 'added', 'username': username}
+              except qs.exceptions.ResourceExistsException:
+                  logger.info('User %s already in group %s', username, GROUP)
+                  return {'status': 'already_member', 'username': username}
+              except Exception:
+                  logger.exception('Failed to add %s to group %s', username, GROUP)
+                  return {'status': 'error', 'username': username}
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+
+  QuickSightGroupSyncLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${QuickSightGroupSyncFunction}'
+      RetentionInDays: 7
+
+  QuickSightGroupSyncRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub 'ndx-quicksight-user-sync-${AWS::Region}'
+      Description: Auto-add new QuickSight users to ndx-all-users group
+      State: ENABLED
+      EventPattern:
+        source:
+          - aws.quicksight
+        detail:
+          eventSource:
+            - quicksight.amazonaws.com
+          eventName:
+            - RegisterUser
+            - BatchCreateUser
+            - CreateUser
+      Targets:
+        - Id: QuickSightGroupSyncTarget
+          Arn: !GetAtt QuickSightGroupSyncFunction.Arn
+
+  QuickSightGroupSyncPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref QuickSightGroupSyncFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt QuickSightGroupSyncRule.Arn
+
+  # ============================================================================
   # IAM ROLE FOR QUICKSIGHT S3 ACCESS (Story 25.2)
   # ============================================================================
   QuickSightS3AccessRole:
@@ -473,6 +904,7 @@ Resources:
     DependsOn:
       - DataGeneratorTrigger
       - QuickSightS3AccessRole
+      - QuickSightSetupTrigger
     Properties:
       AwsAccountId: !Ref AWS::AccountId
       DataSourceId: !Sub 'ndx-council-data-source-${AWS::Region}'
@@ -485,7 +917,7 @@ Resources:
             Key: manifests/council-data-manifest.json
           RoleArn: !GetAtt QuickSightS3AccessRole.Arn
       Permissions:
-        - Principal: !Sub 'arn:aws:quicksight:${AWS::Region}:${AWS::AccountId}:user/default/${QuickSightUsername}'
+        - Principal: !Sub 'arn:aws:quicksight:${AWS::Region}:${AWS::AccountId}:group/default/ndx-all-users'
           Actions:
             - quicksight:DescribeDataSource
             - quicksight:DescribeDataSourcePermissions
@@ -564,7 +996,7 @@ Resources:
                     ColumnName: resolution_rate
                     Expression: '{cases_resolved} / {cases_received}'
       Permissions:
-        - Principal: !Sub 'arn:aws:quicksight:${AWS::Region}:${AWS::AccountId}:user/default/${QuickSightUsername}'
+        - Principal: !Sub 'arn:aws:quicksight:${AWS::Region}:${AWS::AccountId}:group/default/ndx-all-users'
           Actions:
             - quicksight:DescribeDataSet
             - quicksight:DescribeDataSetPermissions
@@ -800,7 +1232,7 @@ Resources:
                               AggregationFunction:
                                 SimpleNumericalAggregation: AVERAGE
       Permissions:
-        - Principal: !Sub 'arn:aws:quicksight:${AWS::Region}:${AWS::AccountId}:user/default/${QuickSightUsername}'
+        - Principal: !Sub 'arn:aws:quicksight:${AWS::Region}:${AWS::AccountId}:group/default/ndx-all-users'
           Actions:
             - quicksight:DescribeDashboard
             - quicksight:ListDashboardVersions
@@ -915,8 +1347,8 @@ Outputs:
     Value: !Sub |
       {
         "scenario": "quicksight-dashboard",
-        "version": "2.4.0",
-        "story": "25.5 - Dashboard Filters and Embedding",
+        "version": "3.0.0",
+        "story": "Auto-subscribe QuickSight, fix ISB sandbox deployment",
         "environment": "${Environment}",
         "dataset": "${SampleDataset}",
         "services": ["S3", "Lambda", "QuickSight", "CloudFormation"],

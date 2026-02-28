@@ -60,10 +60,6 @@ scenarios:
       templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/localgov-drupal/template.yaml"
       region: "us-east-1"
       stackNamePrefix: "ndx-try-localgov-drupal"
-      parameters:
-        - name: "DeploymentMode"
-          value: "production"
-          description: "Deployment mode (development for debugging, production for demos)"
       tags:
         - key: "Project"
           value: "ndx-try"
@@ -73,6 +69,7 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
       deploymentTime: "35 to 40 minutes"
       deploymentPhases:
         - "Creating VPC and networking (~30 seconds)"
@@ -253,7 +250,6 @@ scenarios:
     isMostPopular: true
     awsServices:
       - "Amazon Bedrock"
-      - "Amazon Lex"
       - "AWS Lambda"
       - "Amazon S3"
     tags:
@@ -281,9 +277,6 @@ scenarios:
         - name: "Environment"
           value: "sandbox"
           description: "Deployment environment (NDX:Try session)"
-        - name: "AutoCleanupHours"
-          value: "2"
-          description: "Hours until automatic resource cleanup"
         - name: "KnowledgeBaseSource"
           value: "council-sample-data"
           description: "Sample council knowledge base for the chatbot"
@@ -296,18 +289,17 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+        - "CAPABILITY_AUTO_EXPAND"
       deploymentTime: "3 to 5 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
         - "Creating S3 bucket for knowledge base (~10 seconds)"
         - "Creating Lambda functions (~60 seconds)"
-        - "Configuring Amazon Lex bot (~120 seconds)"
         - "Setting up Bedrock integration (~30 seconds)"
       outputs:
         - name: "ChatbotURL"
           description: "Web interface URL to interact with the chatbot"
-        - name: "LexBotId"
-          description: "Amazon Lex bot identifier for API integration"
     # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
     screenshots:
       # steps array will be populated when screenshots are captured
@@ -384,14 +376,11 @@ scenarios:
     securitySummary: "NDX:Try session isolated - sample data only, no live documents"
     skillsLearned:
       - "Amazon Textract"
-      - "Amazon Comprehend"
       - "Document AI"
       - "CloudFormation"
     isMostPopular: false
     awsServices:
       - "Amazon Textract"
-      - "Amazon Comprehend"
-      - "Amazon Bedrock"
       - "AWS Lambda"
       - "Amazon S3"
     tags:
@@ -419,12 +408,6 @@ scenarios:
         - name: "Environment"
           value: "sandbox"
           description: "Deployment environment (NDX:Try session)"
-        - name: "AutoCleanupHours"
-          value: "2"
-          description: "Hours until automatic resource cleanup"
-        - name: "SampleDataBucket"
-          value: "ndx-try-sample-planning-docs"
-          description: "S3 bucket with sample planning documents"
       tags:
         - key: "Project"
           value: "ndx-try"
@@ -434,14 +417,14 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+        - "CAPABILITY_AUTO_EXPAND"
       deploymentTime: "5 to 8 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
         - "Creating S3 buckets for input/output (~20 seconds)"
         - "Creating Lambda functions (~90 seconds)"
         - "Configuring Amazon Textract (~60 seconds)"
-        - "Setting up Amazon Comprehend (~60 seconds)"
-        - "Configuring Bedrock integration (~60 seconds)"
       outputs:
         - name: "UploadURL"
           description: "S3 presigned URL endpoint for document upload"
@@ -528,7 +511,6 @@ scenarios:
     isMostPopular: false
     awsServices:
       - "Amazon Comprehend"
-      - "Amazon Textract"
       - "AWS Lambda"
       - "Amazon S3"
     tags:
@@ -556,9 +538,6 @@ scenarios:
         - name: "Environment"
           value: "sandbox"
           description: "Deployment environment (NDX:Try session)"
-        - name: "AutoCleanupHours"
-          value: "2"
-          description: "Hours until automatic resource cleanup"
         - name: "RedactionConfidenceThreshold"
           value: "0.85"
           description: "Minimum confidence score for automatic redaction"
@@ -571,13 +550,14 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+        - "CAPABILITY_AUTO_EXPAND"
       deploymentTime: "4 to 6 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
         - "Creating S3 buckets for input/output (~15 seconds)"
         - "Creating Lambda functions (~60 seconds)"
         - "Configuring Amazon Comprehend PII detection (~90 seconds)"
-        - "Setting up Amazon Textract (~45 seconds)"
       outputs:
         - name: "UploadURL"
           description: "Document upload endpoint"
@@ -656,17 +636,15 @@ scenarios:
       - "council-chatbot"
     securitySummary: "NDX:Try session isolated - simulated IoT data, no real sensors"
     skillsLearned:
-      - "AWS IoT Core"
-      - "Amazon Timestream"
+      - "Amazon DynamoDB"
+      - "AWS Lambda"
       - "Real-time dashboards"
-      - "API Gateway"
+      - "CloudFormation"
     isMostPopular: false
     awsServices:
-      - "AWS IoT Core"
-      - "Amazon Timestream"
-      - "Amazon QuickSight"
       - "AWS Lambda"
-      - "Amazon API Gateway"
+      - "Amazon DynamoDB"
+      - "Amazon S3"
     tags:
       - "IoT"
       - "Real-time"
@@ -692,15 +670,9 @@ scenarios:
         - name: "Environment"
           value: "sandbox"
           description: "Deployment environment (NDX:Try session)"
-        - name: "AutoCleanupHours"
-          value: "2"
-          description: "Hours until automatic resource cleanup"
         - name: "SimulatedSensors"
           value: "20"
           description: "Number of simulated parking sensors"
-        - name: "DataGenerationInterval"
-          value: "30"
-          description: "Seconds between simulated data points"
       tags:
         - key: "Project"
           value: "ndx-try"
@@ -710,21 +682,19 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
         - "CAPABILITY_AUTO_EXPAND"
       deploymentTime: "8 to 12 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
-        - "Creating VPC and networking (~120 seconds)"
-        - "Setting up AWS IoT Core (~90 seconds)"
-        - "Creating Amazon Timestream database (~60 seconds)"
+        - "Creating DynamoDB table (~30 seconds)"
+        - "Creating S3 bucket (~10 seconds)"
         - "Creating Lambda functions (~90 seconds)"
-        - "Configuring API Gateway (~45 seconds)"
-        - "Setting up QuickSight dashboard (~120 seconds)"
       outputs:
         - name: "DashboardURL"
-          description: "QuickSight dashboard URL for parking visualisation"
-        - name: "AvailabilityAPI"
-          description: "Public API for real-time parking availability"
+          description: "Smart car park dashboard URL"
+        - name: "DataTable"
+          description: "DynamoDB table for parking data"
     # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
     screenshots:
       steps: []
@@ -832,9 +802,6 @@ scenarios:
         - name: "Environment"
           value: "sandbox"
           description: "Deployment environment (NDX:Try session)"
-        - name: "AutoCleanupHours"
-          value: "2"
-          description: "Hours until automatic resource cleanup"
         - name: "VoiceId"
           value: "Amy"
           description: "Amazon Polly voice (British English)"
@@ -850,13 +817,15 @@ scenarios:
           value: "true"
       capabilities:
         - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+        - "CAPABILITY_AUTO_EXPAND"
       deploymentTime: "2 to 4 minutes"
       deploymentPhases:
         - "Creating IAM roles (~20 seconds)"
         - "Creating S3 bucket for audio files (~10 seconds)"
         - "Creating Lambda functions (~45 seconds)"
         - "Configuring Amazon Polly (~30 seconds)"
-        - "Setting up API Gateway (~30 seconds)"
+        - "Setting up Lambda Function URL (~30 seconds)"
       outputs:
         - name: "ConvertURL"
           description: "Text-to-speech conversion API endpoint"
@@ -938,13 +907,12 @@ scenarios:
     skillsLearned:
       - "Amazon QuickSight"
       - "Data visualisation"
-      - "AWS Glue ETL"
       - "Business intelligence"
     isMostPopular: false
     awsServices:
       - "Amazon QuickSight"
       - "Amazon S3"
-      - "AWS Glue"
+      - "AWS Lambda"
     tags:
       - "Analytics"
       - "Dashboard"
@@ -970,9 +938,6 @@ scenarios:
         - name: "Environment"
           value: "sandbox"
           description: "Deployment environment (NDX:Try session)"
-        - name: "AutoCleanupHours"
-          value: "2"
-          description: "Hours until automatic resource cleanup"
         - name: "SampleDataset"
           value: "council-metrics"
           description: "Sample council performance metrics dataset"
@@ -986,14 +951,12 @@ scenarios:
       capabilities:
         - "CAPABILITY_IAM"
         - "CAPABILITY_NAMED_IAM"
-      deploymentTime: "5 to 8 minutes"
+      deploymentTime: "8 to 15 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
-        - "Creating S3 bucket for data (~15 seconds)"
-        - "Setting up AWS Glue catalogue (~60 seconds)"
-        - "Creating Glue ETL job (~90 seconds)"
-        - "Configuring QuickSight namespace (~45 seconds)"
-        - "Creating QuickSight dashboard (~120 seconds)"
+        - "Creating S3 bucket and generating sample data (~60 seconds)"
+        - "Subscribing to QuickSight and registering admin user (~5-8 minutes)"
+        - "Creating QuickSight data source, dataset and dashboard (~120 seconds)"
       outputs:
         - name: "DashboardURL"
           description: "QuickSight dashboard URL for council metrics"

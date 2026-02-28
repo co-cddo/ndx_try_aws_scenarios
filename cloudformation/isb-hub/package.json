@@ -1,0 +1,22 @@
+{
+  "name": "isb-hub",
+  "version": "1.0.0",
+  "description": "ISB Hub Account Infrastructure - OIDC, IAM, S3 template uploads, StackSets",
+  "main": "dist/lib/isb-hub-stack.js",
+  "types": "dist/lib/isb-hub-stack.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.3",
+    "aws-cdk": "^2.1106.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.238.0",
+    "constructs": "^10.5.0"
+  }
+}
