@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { CloudFrontConstruct } from './constructs/cloudfront';
 import { ComputeConstruct } from './constructs/compute';
@@ -52,8 +53,18 @@ export class LocalGovDrupalStack extends cdk.Stack {
     // Storing in SSM parameter for future use
     const councilTheme = props?.councilTheme ?? 'random';
 
-    // Generate random admin password (changes each synth/deploy)
-    const adminPassword = `Demo${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 6)}!`;
+    // Admin credentials via Secrets Manager — resolved at CloudFormation deploy time
+    // No secretName so CloudFormation generates a unique physical name, avoiding
+    // collision on rollback (Secrets Manager 7-30 day recovery window)
+    const adminSecret = new secretsmanager.Secret(this, 'AdminSecret', {
+      description: 'Admin credentials for LocalGov Drupal',
+      generateSecretString: {
+        secretStringTemplate: JSON.stringify({ username: 'admin' }),
+        generateStringKey: 'password',
+        excludePunctuation: true,
+        passwordLength: 32,
+      },
+    });
 
     // Tag all resources
     cdk.Tags.of(this).add('Project', 'ndx-try-aws-scenarios');
@@ -91,7 +102,7 @@ export class LocalGovDrupalStack extends cdk.Stack {
       fileSystem: storage.fileSystem,
       accessPoint: storage.accessPoint,
       deploymentMode,
-      adminPassword,
+      adminSecret,
     });
 
     // CloudFront distribution for HTTPS termination
@@ -117,10 +128,10 @@ export class LocalGovDrupalStack extends cdk.Stack {
       value: 'admin',
     });
 
-    // Admin password (generated randomly per deploy)
+    // Admin password (resolved at deploy time via Secrets Manager dynamic reference)
     new cdk.CfnOutput(this, 'AdminPassword', {
       description: 'Drupal admin password',
-      value: adminPassword,
+      value: adminSecret.secretValueFromJson('password').unsafeUnwrap(),
     });
 
     // CloudWatch Logs URL for monitoring initialization

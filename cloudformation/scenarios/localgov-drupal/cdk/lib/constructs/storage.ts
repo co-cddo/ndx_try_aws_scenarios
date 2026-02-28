@@ -74,10 +74,7 @@ export class StorageConstruct extends Construct {
       performanceMode: efs.PerformanceMode.GENERAL_PURPOSE,
       throughputMode: efs.ThroughputMode.BURSTING,
       lifecyclePolicy: efs.LifecyclePolicy.AFTER_30_DAYS,
-      removalPolicy:
-        deploymentMode === 'development'
-          ? cdk.RemovalPolicy.DESTROY
-          : cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
       fileSystemName: `NdxDrupal-Files-${deploymentMode}`,
     });
 

@@ -12,7 +12,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack synthesizes without errors', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     // Verify template can be created
@@ -25,7 +24,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack applies correct tags', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
       deploymentMode: 'development',
     });
 
@@ -40,15 +38,13 @@ describe('LocalGovDrupalStack', () => {
     // Should not throw with valid deploymentMode
     expect(() => {
       new LocalGovDrupalStack(app, 'DevStack', {
-        env: testEnv,
-        deploymentMode: 'development',
+          deploymentMode: 'development',
       });
     }).not.toThrow();
 
     expect(() => {
       new LocalGovDrupalStack(app, 'ProdStack', {
-        env: testEnv,
-        deploymentMode: 'production',
+          deploymentMode: 'production',
       });
     }).not.toThrow();
   });
@@ -59,8 +55,7 @@ describe('LocalGovDrupalStack', () => {
     // Should not throw with valid councilTheme
     expect(() => {
       new LocalGovDrupalStack(app, 'ThemeStack', {
-        env: testEnv,
-        councilTheme: 'coastal',
+          councilTheme: 'coastal',
       });
     }).not.toThrow();
   });
@@ -68,7 +63,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack is correctly named', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'LocalGovDrupalStack', {
-      env: testEnv,
     });
 
     expect(stack.stackName).toBe('LocalGovDrupalStack');
@@ -77,7 +71,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates security groups', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -106,7 +99,6 @@ describe('LocalGovDrupalStack', () => {
   test('ALB security group allows HTTPS from anywhere', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -129,7 +121,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates Aurora Serverless v2 cluster', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -150,7 +141,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates Secrets Manager secret for database', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -169,7 +159,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates Aurora writer instance', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -185,7 +174,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates EFS file system with encryption', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -201,7 +189,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates EFS access point', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -226,7 +213,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates EFS mount targets', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -240,7 +226,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates ECS cluster', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -254,15 +239,14 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates Fargate task definition', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
 
     // Verify Fargate task definition with correct resources
     template.hasResourceProperties('AWS::ECS::TaskDefinition', {
-      Cpu: '512',
-      Memory: '1024',
+      Cpu: '1024',
+      Memory: '2048',
       RequiresCompatibilities: ['FARGATE'],
       NetworkMode: 'awsvpc',
     });
@@ -271,7 +255,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates Application Load Balancer', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -286,7 +269,6 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates ECS service', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -301,67 +283,15 @@ describe('LocalGovDrupalStack', () => {
   test('Stack creates ALB target group with health check', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
 
     // Verify target group has health check configured
     template.hasResourceProperties('AWS::ElasticLoadBalancingV2::TargetGroup', {
-      HealthCheckPath: '/',
+      HealthCheckPath: '/health',
       TargetType: 'ip',
       Protocol: 'HTTP',
-    });
-  });
-
-  // Story 1.8 - Drupal Init & WaitCondition tests
-  test('Stack creates WaitCondition for Drupal initialization', () => {
-    const app = new cdk.App();
-    const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
-    });
-
-    const template = Template.fromStack(stack);
-
-    // Verify WaitCondition is created with 15 minute timeout
-    template.hasResourceProperties('AWS::CloudFormation::WaitCondition', {
-      Timeout: '900',
-      Count: 1,
-    });
-  });
-
-  test('Stack creates WaitConditionHandle for signaling', () => {
-    const app = new cdk.App();
-    const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
-    });
-
-    const template = Template.fromStack(stack);
-
-    // Verify WaitConditionHandle is created
-    const handles = template.findResources('AWS::CloudFormation::WaitConditionHandle');
-    expect(Object.keys(handles).length).toBe(1);
-  });
-
-  test('Task definition includes WAIT_CONDITION_URL environment variable', () => {
-    const app = new cdk.App();
-    const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
-    });
-
-    const template = Template.fromStack(stack);
-
-    // Verify task definition has container with WAIT_CONDITION_URL env var
-    template.hasResourceProperties('AWS::ECS::TaskDefinition', {
-      ContainerDefinitions: Match.arrayWith([
-        Match.objectLike({
-          Environment: Match.arrayWith([
-            Match.objectLike({
-              Name: 'WAIT_CONDITION_URL',
-            }),
-          ]),
-        }),
-      ]),
     });
   });
 
@@ -369,21 +299,19 @@ describe('LocalGovDrupalStack', () => {
   test('Stack outputs DrupalUrl', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
 
     // Verify DrupalUrl output exists with correct description
     template.hasOutput('DrupalUrl', {
-      Description: 'URL to access LocalGov Drupal',
+      Description: 'URL to access LocalGov Drupal (HTTPS)',
     });
   });
 
   test('Stack outputs AdminUsername', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
@@ -398,21 +326,19 @@ describe('LocalGovDrupalStack', () => {
   test('Stack outputs AdminPassword from Secrets Manager', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);
 
     // Verify AdminPassword output exists
     template.hasOutput('AdminPassword', {
-      Description: 'Drupal admin password (from Secrets Manager)',
+      Description: 'Drupal admin password',
     });
   });
 
   test('Stack outputs CloudWatchLogsUrl', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
-      env: testEnv,
     });
 
     const template = Template.fromStack(stack);

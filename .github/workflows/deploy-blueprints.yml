@@ -1,0 +1,107 @@
+name: Deploy ISB Blueprints
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudformation/scenarios/*/template.yaml'
+      - 'cloudformation/scenarios/localgov-drupal/cdk/**'
+      - 'cloudformation/isb-hub/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-blueprints
+  cancel-in-progress: false
+
+jobs:
+  synth-localgov-drupal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cloudformation/scenarios/localgov-drupal/cdk/package-lock.json
+
+      - name: Build and test localgov-drupal CDK
+        working-directory: cloudformation/scenarios/localgov-drupal/cdk
+        run: |
+          npm ci
+          npm run build
+          npm test
+          npx cdk synth
+
+      - name: Strip bootstrap cruft and validate template
+        working-directory: cloudformation/scenarios/localgov-drupal/cdk
+        run: |
+          node -e "
+            const fs = require('fs');
+            const t = JSON.parse(fs.readFileSync('../cdk.out/LocalGovDrupalStack.template.json', 'utf8'));
+            delete t.Parameters?.BootstrapVersion;
+            delete t.Resources?.CDKMetadata;
+            delete t.Rules?.CheckBootstrapVersion;
+            const str = JSON.stringify(t);
+            const errors = [];
+            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
+              errors.push('Template contains CDK bootstrap/asset dependencies');
+            }
+            if (!str.includes('secretsmanager')) {
+              errors.push('Template missing Secrets Manager resources (admin password not migrated)');
+            }
+            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
+            if (deletionPolicies) {
+              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
+            }
+            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
+            if (size > 400000) {
+              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
+            }
+            if (errors.length > 0) {
+              errors.forEach(e => console.error('ERROR: ' + e));
+              process.exit(1);
+            }
+            // Write JSON content to .yaml — CloudFormation accepts both formats regardless of extension
+            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
+            fs.writeFileSync('../template.yaml', content);
+            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
+          "
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: localgov-drupal-template
+          path: cloudformation/scenarios/localgov-drupal/template.yaml
+          retention-days: 1
+
+  deploy:
+    needs: synth-localgov-drupal
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: localgov-drupal-template
+          path: cloudformation/scenarios/localgov-drupal
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cloudformation/isb-hub/package-lock.json
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-deploy
+          aws-region: us-west-2
+
+      - run: npm ci
+        working-directory: cloudformation/isb-hub
+
+      - run: npx cdk deploy --require-approval never
+        working-directory: cloudformation/isb-hub

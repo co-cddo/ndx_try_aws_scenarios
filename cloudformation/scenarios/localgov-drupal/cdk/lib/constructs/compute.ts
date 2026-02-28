@@ -63,10 +63,11 @@ export interface ComputeConstructProps {
   readonly waitConditionUrl?: string;
 
   /**
-   * Admin password for Drupal.
-   * If provided, sets ADMIN_PASSWORD environment variable.
+   * Secrets Manager secret containing admin credentials.
+   * Must contain JSON keys 'username' and 'password'.
+   * Resolved at CloudFormation deploy time via dynamic reference.
    */
-  readonly adminPassword?: string;
+  readonly adminSecret: secretsmanager.ISecret;
 }
 
 /**
@@ -142,8 +143,9 @@ export class ComputeConstruct extends Construct {
       ],
     });
 
-    // Allow reading database secret
+    // Allow reading database and admin secrets
     props.databaseSecret.grantRead(executionRole);
+    props.adminSecret.grantRead(executionRole);
 
     // ==========================================================================
     // Task Role (for AWS AI services)
@@ -236,8 +238,8 @@ export class ComputeConstruct extends Construct {
     // Fargate Task Definition
     // ==========================================================================
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'TaskDef', {
-      cpu: 512, // 0.5 vCPU
-      memoryLimitMiB: 1024, // 1 GB
+      cpu: 1024, // 1 vCPU
+      memoryLimitMiB: 2048, // 2 GB
       executionRole,
       taskRole,
     });
@@ -268,11 +270,6 @@ export class ComputeConstruct extends Construct {
       containerEnvironment.WAIT_CONDITION_URL = props.waitConditionUrl;
     }
 
-    // Add admin password if provided
-    if (props.adminPassword) {
-      containerEnvironment.ADMIN_PASSWORD = props.adminPassword;
-    }
-
     // Add container - pull from GitHub Container Registry
     const container = taskDefinition.addContainer('drupal', {
       image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-localgov_drupal:latest'),
@@ -287,6 +284,7 @@ export class ComputeConstruct extends Construct {
         // (workaround for sandbox SCP restrictions on secretsmanager:GetSecretValue)
         DB_USER: props.databaseSecret.secretValueFromJson('username').unsafeUnwrap(),
         DB_PASSWORD: props.databaseSecret.secretValueFromJson('password').unsafeUnwrap(),
+        ADMIN_PASSWORD: props.adminSecret.secretValueFromJson('password').unsafeUnwrap(),
       },
       portMappings: [
         {

@@ -101,14 +101,10 @@ export class DatabaseConstruct extends Construct {
       readers: [],
       // Backup configuration
       backup: {
-        retention: deploymentMode === 'production' ? cdk.Duration.days(7) : cdk.Duration.days(1),
+        retention: cdk.Duration.days(7),
       },
-      // Enable deletion protection in production mode
-      deletionProtection: false, // Disabled for demo cleanup
-      removalPolicy:
-        deploymentMode === 'development'
-          ? cdk.RemovalPolicy.DESTROY
-          : cdk.RemovalPolicy.SNAPSHOT,
+      deletionProtection: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     // Expose cluster endpoint for other constructs

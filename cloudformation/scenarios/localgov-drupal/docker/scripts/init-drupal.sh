@@ -503,8 +503,19 @@ enable_localgov_modules() {
         localgov_workflows_notifications
     "
 
-    # Enable each module if available (ignore errors for missing optional modules)
+    # Count total modules for progress reporting
+    local total_modules=0
     for module in $LOCALGOV_MODULES; do
+        total_modules=$((total_modules + 1))
+    done
+
+    # Enable each module if available (ignore errors for missing optional modules)
+    # Progress spans 72% to 75% across modules
+    local module_index=0
+    for module in $LOCALGOV_MODULES; do
+        module_index=$((module_index + 1))
+        local module_progress=$((72 + (3 * module_index / total_modules)))
+        update_status "Modules" "Enabling module ${module_index}/${total_modules}: ${module}" "$module_progress"
         log "Checking module: $module"
         if ./vendor/bin/drush pm:list --status=disabled --type=module --field=name 2>/dev/null | grep -q "^${module}$"; then
             log "  Enabling $module..."
