@@ -14,10 +14,6 @@ Metadata:
         Parameters:
           - Environment
           - SimulatedSensors
-      - Label:
-          default: Auto-Cleanup
-        Parameters:
-          - AutoCleanupHours
 
 Parameters:
   Environment:
@@ -36,12 +32,6 @@ Parameters:
     MaxValue: 100
     Description: Number of simulated parking sensors
 
-  AutoCleanupHours:
-    Type: Number
-    Default: 2
-    MinValue: 1
-    MaxValue: 24
-    Description: Hours until automatic resource cleanup
 
 Resources:
   # DynamoDB Table for parking data (persistent storage)
@@ -78,11 +68,6 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: AutoCleanup
-            Status: Enabled
-            ExpirationInDays: 1
       Tags:
         - Key: Project
           Value: ndx-try
@@ -701,7 +686,6 @@ Outputs:
       {
         "scenario": "smart-car-park",
         "environment": "${Environment}",
-        "autoCleanup": "${AutoCleanupHours} hours",
         "sensors": "${SimulatedSensors}",
         "storage": "Amazon DynamoDB",
         "note": "Sandbox uses Lambda+DynamoDB; production uses IoT Core+Timestream"

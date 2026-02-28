@@ -14,10 +14,6 @@ Metadata:
         Parameters:
           - Environment
           - RedactionConfidenceThreshold
-      - Label:
-          default: Auto-Cleanup
-        Parameters:
-          - AutoCleanupHours
 
 Parameters:
   Environment:
@@ -36,12 +32,6 @@ Parameters:
     MaxValue: 0.99
     Description: Minimum confidence score for automatic redaction
 
-  AutoCleanupHours:
-    Type: Number
-    Default: 2
-    MinValue: 1
-    MaxValue: 24
-    Description: Hours until automatic resource cleanup
 
 Resources:
   # S3 Bucket for Documents
@@ -58,11 +48,6 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: AutoCleanup
-            Status: Enabled
-            ExpirationInDays: 1
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders:
@@ -823,6 +808,5 @@ Outputs:
       {
         "scenario": "foi-redaction",
         "environment": "${Environment}",
-        "autoCleanup": "${AutoCleanupHours} hours",
         "confidenceThreshold": "${RedactionConfidenceThreshold}"
       }
