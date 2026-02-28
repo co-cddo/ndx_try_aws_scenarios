@@ -1017,3 +1017,171 @@ scenarios:
         training: 1000
         support: 1500
         total: 7300
+
+  - id: "all-demo"
+    name: "All Demo"
+    headline: "Deploy all 7 NDX:Try scenarios in a single stack for showcases"
+    bestFor: "Demonstrations and showcases deploying all scenarios at once"
+    description: "Deploy all 7 NDX:Try scenarios as nested CloudFormation stacks in a single operation. Includes Council Chatbot, FOI Redaction, Planning AI, QuickSight Dashboard, Smart Car Park, Text to Speech, and LocalGov Drupal with AI. Ideal for demonstrations and showcases."
+    difficulty: "advanced"
+    timeEstimate: "90 minutes"
+    primaryPersona: "technical"
+    secondaryPersonas:
+      - "leadership"
+    relatedScenarios:
+      - "council-chatbot"
+      - "foi-redaction"
+      - "planning-ai"
+      - "quicksight-dashboard"
+      - "smart-car-park"
+      - "text-to-speech"
+      - "localgov-drupal"
+    securitySummary: "NDX:Try session isolated - deploys all scenarios with full data protection"
+    skillsLearned:
+      - "Amazon Bedrock"
+      - "Amazon Polly"
+      - "Amazon Translate"
+      - "Amazon Textract"
+      - "Amazon Rekognition"
+      - "Amazon QuickSight"
+      - "Amazon DynamoDB"
+      - "AWS Lambda"
+      - "AWS Fargate"
+      - "CloudFormation Nested Stacks"
+    isMostPopular: false
+    featured: false
+    awsServices:
+      - "Amazon Bedrock"
+      - "Amazon Polly"
+      - "Amazon Translate"
+      - "Amazon Textract"
+      - "Amazon Rekognition"
+      - "Amazon QuickSight"
+      - "Amazon DynamoDB"
+      - "Amazon S3"
+      - "AWS Lambda"
+      - "AWS Fargate"
+      - "Amazon Aurora"
+      - "Amazon EFS"
+      - "Amazon Comprehend"
+    tags:
+      - "AI"
+      - "Demo"
+      - "All Scenarios"
+      - "Nested Stacks"
+      - "Showcase"
+    businessOutcomes:
+      - "Experience all 7 NDX:Try scenarios in a single deployment"
+      - "Showcase the full range of AWS AI services for local government"
+      - "Evaluate multiple use cases simultaneously"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "All 7 child templates accessible in the S3 bucket"
+    url: "/scenarios/all-demo/"
+    order: 8
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/all-demo/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/all-demo/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-all-demo"
+      parameters:
+        - name: "Environment"
+          value: "sandbox"
+          description: "Deployment environment (NDX:Try session)"
+        - name: "TemplateBucket"
+          value: "ndx-try-templates-us-east-1"
+          description: "S3 bucket containing scenario templates"
+        - name: "TemplateBucketRegion"
+          value: "us-east-1"
+          description: "Region of the S3 template bucket"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "all-demo"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+        - "CAPABILITY_AUTO_EXPAND"
+      deploymentTime: "60 to 90 minutes"
+      deploymentPhases:
+        - "Launching 7 nested stacks in parallel (~30 seconds)"
+        - "Council Chatbot deploying (~5 minutes)"
+        - "FOI Redaction deploying (~5 minutes)"
+        - "Planning AI deploying (~5 minutes)"
+        - "QuickSight Dashboard deploying (~15 minutes)"
+        - "Smart Car Park deploying (~10 minutes)"
+        - "Text to Speech deploying (~3 minutes)"
+        - "LocalGov Drupal deploying (~40 minutes)"
+      outputs:
+        - name: "ChatbotURL"
+          description: "Council Chatbot web interface URL"
+        - name: "RedactionURL"
+          description: "FOI Redaction API endpoint"
+        - name: "PlanningAnalyzerURL"
+          description: "Planning AI analysis endpoint"
+        - name: "QuicksightDashboardUrl"
+          description: "QuickSight Dashboard URL"
+        - name: "SmartCarParkAvailabilityAPI"
+          description: "Smart Car Park availability API"
+        - name: "TextToSpeechConvertURL"
+          description: "Text-to-Speech conversion endpoint"
+        - name: "DrupalUrl"
+          description: "LocalGov Drupal URL"
+        - name: "DrupalAdminUsername"
+          description: "Drupal admin username"
+        - name: "DrupalAdminPassword"
+          description: "Drupal admin password"
+        - name: "ScenarioInfo"
+          description: "Aggregate JSON listing all child scenarios"
+    screenshots:
+      steps: []
+    success_metrics:
+      service_area: "Cross-Service Demonstration"
+      primary_metric: "Scenario deployment coverage"
+      baseline:
+        description: "Individual scenario deployment requires 7 separate operations, ~3 hours total"
+        value: 7
+        unit: "separate deployments required"
+        source: "NDX:Try programme deployment experience"
+      projection:
+        description: "Single deployment covers all 7 scenarios in ~90 minutes"
+        value: 1
+        reduction_percent: 85
+      roi:
+        annual_savings: 249000
+        calculation: "Sum of all 7 scenario annual savings (72k + 30k + 45k + 35k + 50k + 20k - 3k AWS overhead)"
+        payback_months: 1
+        disclaimer: "Illustrative aggregate projection combining all 7 scenario ROI estimates. Actual savings depend on which scenarios are adopted and individual council circumstances."
+      committee_language: "Single deployment demonstrates full AI portfolio with combined annual savings potential of ~£249,000 across 7 local government use cases"
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "US (us-east-1 N. Virginia region)"
+      encryption: "AES-256 at rest, TLS 1.3 in transit"
+      data_handling: "Sample data only in sandbox; all scenarios use AWS shared responsibility model"
+    tco_projection:
+      year_1:
+        aws_services: 24500
+        integration: 44000
+        training: 17000
+        support: 9000
+        total: 94500
+      year_2:
+        aws_services: 26500
+        integration: 0
+        training: 5000
+        support: 9000
+        total: 40500
+      year_3:
+        aws_services: 28500
+        integration: 0
+        training: 5000
+        support: 9000
+        total: 42500

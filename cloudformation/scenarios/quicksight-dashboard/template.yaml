@@ -740,6 +740,8 @@ Resources:
   # ============================================================================
   QuickSightGroupSyncFunction:
     Type: AWS::Lambda::Function
+    DependsOn:
+      - QuickSightSetupTrigger    # Ensure QuickSight is subscribed & IAM role is propagated
     Properties:
       FunctionName: !Sub 'ndx-quicksight-group-sync-${AWS::Region}'
       Runtime: python3.12
@@ -836,6 +838,8 @@ Resources:
 
   QuickSightGroupSyncRule:
     Type: AWS::Events::Rule
+    DependsOn:
+      - QuickSightSetupTrigger    # No point enabling the rule before QuickSight exists
     Properties:
       Name: !Sub 'ndx-quicksight-user-sync-${AWS::Region}'
       Description: Auto-add new QuickSight users to ndx-all-users group

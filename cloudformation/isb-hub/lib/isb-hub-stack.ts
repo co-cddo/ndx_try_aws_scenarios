@@ -12,6 +12,7 @@ const BLUEPRINTS_BUCKET_NAME = `ndx-try-isb-blueprints-${HUB_ACCOUNT}`;
 const BLUEPRINTS_BUCKET_REGION = 'us-east-1';
 const GITHUB_REPO = 'co-cddo/ndx_try_aws_scenarios';
 const DEPLOY_ROLE_NAME = 'isb-hub-github-actions-deploy';
+const ORG_ID = 'o-4g8nrlnr9s';
 
 const SCENARIOS = [
   { name: 'council-chatbot', description: 'NDX:Try Council Chatbot - AI-powered resident Q&A assistant' },
@@ -21,6 +22,7 @@ const SCENARIOS = [
   { name: 'smart-car-park', description: 'NDX:Try Smart Car Park - Real-time parking availability with DynamoDB' },
   { name: 'text-to-speech', description: 'NDX:Try Text to Speech - Accessibility audio generation using Amazon Polly' },
   { name: 'localgov-drupal', description: 'NDX:Try LocalGov Drupal - AI-enhanced CMS for UK councils' },
+  { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 7 scenarios as nested stacks' },
 ];
 
 export class IsbHubStack extends cdk.Stack {
@@ -31,6 +33,31 @@ export class IsbHubStack extends cdk.Stack {
     // S3 BUCKET (imported — already exists in us-east-1)
     // ========================================================================
     const bucket = s3.Bucket.fromBucketName(this, 'BlueprintsBucket', BLUEPRINTS_BUCKET_NAME);
+
+    // ========================================================================
+    // BUCKET POLICY — allow sandbox accounts (within the org) to fetch
+    // nested stack templates via CloudFormation TemplateURL
+    // ========================================================================
+    new s3.CfnBucketPolicy(this, 'BlueprintsBucketPolicy', {
+      bucket: BLUEPRINTS_BUCKET_NAME,
+      policyDocument: {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Sid: 'AllowOrgAccountsReadTemplates',
+            Effect: 'Allow',
+            Principal: '*',
+            Action: 's3:GetObject',
+            Resource: `arn:aws:s3:::${BLUEPRINTS_BUCKET_NAME}/scenarios/*`,
+            Condition: {
+              StringEquals: {
+                'aws:PrincipalOrgID': ORG_ID,
+              },
+            },
+          },
+        ],
+      },
+    });
 
     // ========================================================================
     // TEMPLATE UPLOADS — one BucketDeployment per scenario
