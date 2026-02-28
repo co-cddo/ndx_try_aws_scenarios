@@ -1,0 +1,232 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  NDX:Try - All Demo
+  Deploys all 7 NDX:Try scenarios as nested stacks for demonstrations and showcases.
+  Each child stack is an independent scenario deployed in parallel.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Template Configuration
+        Parameters:
+          - TemplateBucket
+          - TemplateBucketRegion
+          - Environment
+
+Parameters:
+  Environment:
+    Type: String
+    Default: sandbox
+    AllowedValues:
+      - sandbox
+      - development
+      - production
+    Description: Deployment environment passed to all child stacks
+
+  TemplateBucket:
+    Type: String
+    Default: ndx-try-isb-blueprints-568672915267
+    Description: S3 bucket name containing the scenario templates
+
+  TemplateBucketRegion:
+    Type: String
+    Default: us-east-1
+    Description: Region of the S3 bucket containing the scenario templates
+
+Resources:
+  CouncilChatbot:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/council-chatbot/template.yaml'
+      Parameters:
+        Environment: !Ref Environment
+      TimeoutInMinutes: 15
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: council-chatbot
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+
+  FoiRedaction:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/foi-redaction/template.yaml'
+      Parameters:
+        Environment: !Ref Environment
+      TimeoutInMinutes: 15
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: foi-redaction
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+
+  PlanningAi:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/planning-ai/template.yaml'
+      Parameters:
+        Environment: !Ref Environment
+      TimeoutInMinutes: 15
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: planning-ai
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+
+  QuicksightDashboard:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/quicksight-dashboard/template.yaml'
+      Parameters:
+        Environment: !Ref Environment
+      TimeoutInMinutes: 30
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: quicksight-dashboard
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+
+  SmartCarPark:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/smart-car-park/template.yaml'
+      Parameters:
+        Environment: !Ref Environment
+      TimeoutInMinutes: 15
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: smart-car-park
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+
+  TextToSpeech:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/text-to-speech/template.yaml'
+      Parameters:
+        Environment: !Ref Environment
+      TimeoutInMinutes: 10
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: text-to-speech
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+
+  LocalgovDrupal:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/localgov-drupal/template.yaml'
+      Parameters: {}
+      TimeoutInMinutes: 60
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: localgov-drupal
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+
+Outputs:
+  # ========================================================================
+  # PRIMARY ENDPOINTS — user-facing URLs for each scenario
+  # ========================================================================
+  ChatbotURL:
+    Description: Council Chatbot web interface URL
+    Value: !GetAtt CouncilChatbot.Outputs.ChatbotURL
+
+  RedactionURL:
+    Description: FOI Redaction API endpoint
+    Value: !GetAtt FoiRedaction.Outputs.RedactionURL
+
+  PlanningAnalyzerURL:
+    Description: Planning Application AI analysis endpoint
+    Value: !GetAtt PlanningAi.Outputs.AnalyzerURL
+
+  QuicksightDashboardUrl:
+    Description: QuickSight Dashboard URL for council metrics
+    Value: !GetAtt QuicksightDashboard.Outputs.DashboardUrl
+
+  SmartCarParkAvailabilityAPI:
+    Description: Smart Car Park real-time availability API
+    Value: !GetAtt SmartCarPark.Outputs.AvailabilityAPI
+
+  TextToSpeechConvertURL:
+    Description: Text-to-Speech conversion API endpoint
+    Value: !GetAtt TextToSpeech.Outputs.ConvertURL
+
+  DrupalUrl:
+    Description: LocalGov Drupal URL (HTTPS)
+    Value: !GetAtt LocalgovDrupal.Outputs.DrupalUrl
+
+  DrupalAdminUsername:
+    Description: Drupal admin username
+    Value: !GetAtt LocalgovDrupal.Outputs.AdminUsername
+
+  DrupalAdminPassword:
+    Description: Drupal admin password (stored in Secrets Manager)
+    Value: !GetAtt LocalgovDrupal.Outputs.AdminPassword
+
+  # ========================================================================
+  # SECONDARY OUTPUTS — buckets, tables, and other resources
+  # ========================================================================
+  ChatbotKnowledgeBaseBucket:
+    Description: S3 bucket for chatbot knowledge base
+    Value: !GetAtt CouncilChatbot.Outputs.KnowledgeBaseBucket
+
+  FoiDocumentsBucket:
+    Description: S3 bucket for FOI documents
+    Value: !GetAtt FoiRedaction.Outputs.DocumentsBucket
+
+  PlanningDocumentsBucket:
+    Description: S3 bucket for planning documents
+    Value: !GetAtt PlanningAi.Outputs.DocumentsBucket
+
+  QuicksightDataBucket:
+    Description: S3 bucket for QuickSight data
+    Value: !GetAtt QuicksightDashboard.Outputs.DataBucket
+
+  SmartCarParkDataBucket:
+    Description: S3 bucket for parking data
+    Value: !GetAtt SmartCarPark.Outputs.DataBucket
+
+  SmartCarParkDataTable:
+    Description: DynamoDB table for parking data
+    Value: !GetAtt SmartCarPark.Outputs.DataTable
+
+  TextToSpeechAudioBucket:
+    Description: S3 bucket for generated audio files
+    Value: !GetAtt TextToSpeech.Outputs.AudioBucket
+
+  # ========================================================================
+  # AGGREGATE INFO
+  # ========================================================================
+  ScenarioInfo:
+    Description: NDX:Try all-demo scenario information
+    Value: !Sub |
+      {
+        "scenario": "all-demo",
+        "environment": "${Environment}",
+        "childScenarios": [
+          "council-chatbot",
+          "foi-redaction",
+          "planning-ai",
+          "quicksight-dashboard",
+          "smart-car-park",
+          "text-to-speech",
+          "localgov-drupal"
+        ],
+        "note": "All 7 NDX:Try scenarios deployed as nested stacks"
+      }
