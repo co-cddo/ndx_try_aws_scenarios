@@ -441,6 +441,41 @@ eleventyNavigation:
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Copy-to-clipboard for activity cards
+    document.querySelectorAll('.ndx-activity-copy-button').forEach(function(button) {
+      button.addEventListener('click', async function() {
+        var text = this.dataset.copyText;
+        var defaultSpan = this.querySelector('.ndx-activity-copy-button__default');
+        var successSpan = this.querySelector('.ndx-activity-copy-button__success');
+        try {
+          await navigator.clipboard.writeText(text);
+          defaultSpan.hidden = true;
+          successSpan.hidden = false;
+          setTimeout(function() {
+            defaultSpan.hidden = false;
+            successSpan.hidden = true;
+          }, 2000);
+          var announcement = document.createElement('div');
+          announcement.setAttribute('role', 'status');
+          announcement.setAttribute('aria-live', 'polite');
+          announcement.className = 'govuk-visually-hidden';
+          announcement.textContent = 'Prompt copied to clipboard';
+          document.body.appendChild(announcement);
+          setTimeout(function() { announcement.remove(); }, 1000);
+        } catch (err) {
+          // Fallback: select the code text
+          var code = this.closest('.ndx-activity-card').querySelector('.ndx-activity-card__code');
+          if (code && window.getSelection) {
+            var range = document.createRange();
+            range.selectNodeContents(code);
+            var selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        }
+      });
+    });
+
     // Persona selection
     const personaButtons = document.querySelectorAll('[data-persona-select]');
     const activitiesContainer = document.querySelector('[data-persona-filter]');

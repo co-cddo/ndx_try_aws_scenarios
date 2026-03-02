@@ -83,12 +83,16 @@
   </div>
 
   <div class="ndx-activity-card__actions">
-    <a href="/walkthroughs/{{ scenarioId }}/explore/{{ activity.category }}/{{ activity.id }}/"
-       class="govuk-button govuk-button--secondary"
-       data-module="govuk-button"
-       aria-describedby="activity-{{ activity.id }}-description">
-      Start activity
-    </a>
+    {% if activity.input_text or activity.input_variations %}
+      {% set copyText = activity.input_text if activity.input_text else activity.input_variations[0] %}
+      <button type="button"
+              class="govuk-button govuk-button--secondary ndx-activity-copy-button"
+              data-copy-text="{{ copyText }}"
+              aria-describedby="activity-{{ activity.id }}-description">
+        <span class="ndx-activity-copy-button__default">Copy prompt to clipboard</span>
+        <span class="ndx-activity-copy-button__success" hidden>Copied!</span>
+      </button>
+    {% endif %}
     <span id="activity-{{ activity.id }}-description" class="govuk-visually-hidden">
       {{ activity.title }} - {{ activity.time_estimate }}
     </span>
@@ -185,6 +189,11 @@
 
   [data-persona-filter="technical"] [data-persona="visual"] {
     display: none;
+  }
+
+  .ndx-activity-copy-button__success {
+    color: #00703c;
+    font-weight: 700;
   }
 
   @media (max-width: 640px) {
