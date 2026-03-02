@@ -32,8 +32,8 @@
   "license": "MIT",
   "dependencies": {
     "@sindresorhus/slugify": "^3.0.0",
-    "@x-govuk/govuk-eleventy-plugin": "^8.3.0",
-    "govuk-frontend": "5.14.0",
+    "@x-govuk/govuk-eleventy-plugin": "^8.3.1",
+    "govuk-frontend": "6.1.0",
     "jspdf": "^4.2.0",
     "markdown-it": "^14.1.1"
   },
