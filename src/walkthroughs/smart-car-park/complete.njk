@@ -138,8 +138,9 @@ scenarioId: smart-car-park
         TLS encryption, and message routing. Scales to millions of devices automatically.</li>
         <li><strong>AWS Lambda:</strong> Serverless processing - no EC2 instances to patch or maintain.
         Auto-scales from zero to thousands of concurrent executions.</li>
-        <li><strong>Amazon DynamoDB:</strong> NoSQL database with 99.99% availability SLA. 7-day
-        data retention via TTL minimizes storage costs.</li>
+        <li><strong>Amazon DynamoDB:</strong> Fully managed NoSQL database with on-demand capacity.
+        Sensor readings stored with 7-day TTL for automatic expiry. Global secondary index
+        enables efficient queries by zone and time range.</li>
         <li><strong>Amazon CloudWatch:</strong> Real-time dashboards and alarms. No third-party
         monitoring software required.</li>
         <li><strong>Security:</strong> All data encrypted in transit (TLS) and at rest (AES-256).

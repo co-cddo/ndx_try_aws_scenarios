@@ -74,9 +74,10 @@ scenarioId: smart-car-park
     <h4 class="govuk-heading-s">AWS IoT Core</h4>
     <p class="govuk-body"><strong>Role:</strong> Message broker for IoT devices</p>
     <p class="govuk-body">
-      <strong>What it does:</strong> Receives MQTT messages from 50 sensors, each publishing occupancy
-      state every 2 minutes when state changes. IoT Core can handle millions of messages per second,
-      so 50 sensors is trivial.
+      <strong>What it does:</strong> Receives a batch MQTT message every minute containing all 50
+      sensor readings on the <code>carpark/sensors/batch</code> topic. The IoT Rules Engine
+      routes the message to Lambda for processing. IoT Core can handle millions of messages per second,
+      so this is trivial.
     </p>
     <p class="govuk-body">
       <strong>Why it's useful:</strong> IoT Core manages device authentication, message routing,
@@ -85,8 +86,8 @@ scenarioId: smart-car-park
     </p>
     <div class="govuk-inset-text">
       <p class="govuk-body-s">
-        <strong>Cost:</strong> £1.00 per million messages. With 2.16M messages/month (50 sensors ×
-        30 msg/hour × 24h × 30 days), that's just £2.16/month.
+        <strong>Cost:</strong> £1.00 per million messages. With ~21,600 batch messages/month
+        (1 msg × 30/hour × 24h × 30 days), that's just £0.02/month.
       </p>
     </div>
   </div>
@@ -95,9 +96,10 @@ scenarioId: smart-car-park
     <h4 class="govuk-heading-s">AWS Lambda</h4>
     <p class="govuk-body"><strong>Role:</strong> Process sensor readings</p>
     <p class="govuk-body">
-      <strong>What it does:</strong> Every time IoT Core receives a sensor message, it triggers
-      the <code>ProcessSensorData</code> Lambda function. Lambda validates the reading, stores it
-      in DynamoDB, calculates zone metrics, and publishes to CloudWatch.
+      <strong>What it does:</strong> Two Lambda functions work together. The <code>SimulatorFunction</code>
+      generates realistic sensor data every minute via EventBridge. The <code>ProcessorFunction</code>
+      receives each batch from IoT Core, writes items to DynamoDB, and publishes
+      CloudWatch custom metrics (occupied spaces per zone, total occupancy, sensors reporting count).
     </p>
     <p class="govuk-body">
       <strong>Why it's useful:</strong> Lambda runs your code without servers. You only pay for
@@ -105,28 +107,30 @@ scenarioId: smart-car-park
     </p>
     <div class="govuk-inset-text">
       <p class="govuk-body-s">
-        <strong>Cost:</strong> £0.20 per million invocations. Processing 2.16M sensor messages/month
-        costs £0.43/month.
+        <strong>Cost:</strong> £0.20 per million invocations. Processing ~21,600 batch messages/month
+        costs less than £0.01/month.
       </p>
     </div>
   </div>
 
   <div class="ndx-service-card govuk-!-margin-top-3">
     <h4 class="govuk-heading-s">Amazon DynamoDB</h4>
-    <p class="govuk-body"><strong>Role:</strong> Store historical sensor readings</p>
+    <p class="govuk-body"><strong>Role:</strong> Store sensor readings with automatic expiry</p>
     <p class="govuk-body">
-      <strong>What it does:</strong> Stores every sensor reading as a time-series record. Each record
-      includes sensor ID, timestamp, occupancy state, and confidence level. DynamoDB keeps 7 days
-      of history (then auto-deletes via TTL) for trend analysis.
+      <strong>What it does:</strong> Stores every sensor reading as an item with
+      sensor ID, timestamp, zone, occupancy state, confidence level, and battery level. A global
+      secondary index on zone + timestamp enables efficient queries by zone. Items automatically
+      expire after 7 days via TTL.
     </p>
     <p class="govuk-body">
-      <strong>Why it's useful:</strong> DynamoDB scales automatically from zero to millions of
-      requests per second. No database servers to manage, no downtime for schema changes.
+      <strong>Why it's useful:</strong> Fully managed NoSQL database with on-demand capacity. No
+      servers to manage, no capacity planning for this demo scale. Queries like "current state by
+      zone" and "24-hour history" run in milliseconds via the GSI.
     </p>
     <div class="govuk-inset-text">
       <p class="govuk-body-s">
-        <strong>Cost:</strong> With 5 read/write capacity units and 2GB storage, ~£3.50/month.
-        Predictable pricing regardless of traffic spikes.
+        <strong>Cost:</strong> ~£3.50/month at this scale with on-demand pricing.
+        Pay only for reads and writes you actually use. TTL deletes are free.
       </p>
     </div>
   </div>
@@ -135,9 +139,10 @@ scenarioId: smart-car-park
     <h4 class="govuk-heading-s">Amazon CloudWatch</h4>
     <p class="govuk-body"><strong>Role:</strong> Dashboard visualization and alarms</p>
     <p class="govuk-body">
-      <strong>What it does:</strong> Lambda publishes custom metrics (total occupancy, zone occupancy,
-      average duration) to CloudWatch. The dashboard you're viewing queries these metrics and renders
-      charts. Alarms trigger SNS notifications when occupancy thresholds are exceeded or sensors go offline.
+      <strong>What it does:</strong> Lambda publishes custom metrics (occupied spaces per zone,
+      total occupancy, sensors reporting count) to CloudWatch under the <code>NDXTry/SmartCarPark</code>
+      namespace. The dashboard queries these metrics and renders 4 widgets. Two alarms monitor
+      high occupancy (>45/50) and sensor health (<45 reporting).
     </p>
     <p class="govuk-body">
       <strong>Why it's useful:</strong> CloudWatch handles all the complexity of time-series metric
@@ -145,7 +150,7 @@ scenarioId: smart-car-park
     </p>
     <div class="govuk-inset-text">
       <p class="govuk-body-s">
-        <strong>Cost:</strong> 10 custom metrics + 1 dashboard + 3 alarms = ~£5/month. Includes
+        <strong>Cost:</strong> Custom metrics + 1 dashboard + 2 alarms = ~£5/month. Includes
         15-month metric retention.
       </p>
     </div>
@@ -156,7 +161,7 @@ scenarioId: smart-car-park
 {% set wowMoment = {
   title: "Watch the Dashboard Update in Real-Time",
   explanation: "As the IoT simulator publishes sensor readings, you'll see the CloudWatch dashboard metrics change every 5-10 seconds. Notice how all widgets update automatically - no manual refresh needed. This is what \"real-time monitoring\" means: the dashboard always shows current state, not data from 30 minutes ago.",
-  technicalDetail: "Behind the scenes: Sensors publish MQTT messages → IoT Core routes to Lambda → Lambda processes and publishes CloudWatch metrics → Dashboard auto-refreshes every 10 seconds to fetch latest metrics. Total latency from sensor reading to dashboard update: 15 seconds maximum.",
+  technicalDetail: "Behind the scenes: Every minute, the simulator publishes a batch MQTT message with 50 sensor readings → IoT Core TopicRule routes to Lambda → Lambda writes to DynamoDB + publishes CloudWatch metrics → Dashboard auto-refreshes every 10 seconds. Total latency from batch publish to dashboard update: under 15 seconds.",
   icon: "refresh"
 } %}
 
@@ -228,11 +233,11 @@ scenarioId: smart-car-park
         ensure ON and set to 10 seconds
       </li>
       <li>
-        <strong>Verify IoT simulator is running</strong> - Lambda console → <code>IoTSimulator</code>
-        function → Recent invocations should show activity
+        <strong>Verify IoT simulator is running</strong> - Lambda console → find the simulator
+        function → Monitor tab should show invocations every minute
       </li>
       <li>
-        <strong>Check CloudWatch Logs</strong> - Lambda console → <code>ProcessSensorData</code> →
+        <strong>Check CloudWatch Logs</strong> - Lambda console → find the processor function →
         Logs tab → Look for "Published metric to CloudWatch" messages
       </li>
     </ul>
@@ -241,13 +246,13 @@ scenarioId: smart-car-park
     <p class="govuk-body">Three checkpoints:</p>
     <ol class="govuk-list govuk-list--number">
       <li>
-        <strong>DynamoDB table:</strong> <a href="https://console.aws.amazon.com/dynamodb/" target="_blank" rel="noopener noreferrer" class="govuk-link">Open DynamoDB console</a>,
-        find <code>SmartCarPark-SensorReadings</code> table, click "Explore table items" - should
-        see ~1000 records
+        <strong>DynamoDB table:</strong> <a href="https://console.aws.amazon.com/dynamodbv2/" target="_blank" rel="noopener noreferrer" class="govuk-link">Open DynamoDB console</a>,
+        find the table matching your stack name, click the Items tab, and click "Scan" —
+        should see recent sensor items with sensor_id, timestamp, zone, occupied, confidence, and battery_level
       </li>
       <li>
         <strong>Lambda invocations:</strong> <a href="https://console.aws.amazon.com/lambda/" target="_blank" rel="noopener noreferrer" class="govuk-link">Open Lambda console</a>,
-        click <code>ProcessSensorData</code>, Monitor tab shows recent invocations graph
+        click the processor function, Monitor tab shows recent invocations graph
       </li>
       <li>
         <strong>CloudWatch metrics:</strong> On your dashboard, click any widget's 3-dot menu →

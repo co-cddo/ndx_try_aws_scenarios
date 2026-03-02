@@ -46,7 +46,7 @@ sensorTypes:
     model: "PLS-200"
     accuracy: "99.5%"
     detectionRange: "30-230cm"
-    updateFrequency: "Every 2 minutes when state changes"
+    updateFrequency: "Every minute when state changes"
     powerSource: "Solar + battery backup"
     connectivity: "LoRaWAN → AWS IoT Core"
     description: "Ultrasonic sensors detect vehicle presence via distance measurement"
@@ -62,32 +62,32 @@ iotDataFlow:
       component: "LoRaWAN Gateway"
       action: "Collect sensor data from 50 sensors and forward to cloud"
       technology: "LoRaWAN network"
-      output: "MQTT message to AWS IoT Core"
+      output: "Batched MQTT message to AWS IoT Core"
     - step: 3
       component: "AWS IoT Core"
-      action: "Receive MQTT messages on topic car-park/sensors/{sensorId}"
-      technology: "MQTT broker"
-      output: "Trigger IoT Rule"
+      action: "Receive batched MQTT message on topic carpark/sensors/batch"
+      technology: "MQTT broker + IoT TopicRule"
+      output: "Trigger Processor Lambda via IoT Rule"
     - step: 4
-      component: "IoT Rule"
-      action: "Route message to Lambda function for processing"
-      technology: "AWS IoT Rules Engine"
-      output: "Invoke ProcessSensorData Lambda"
+      component: "IoT TopicRule"
+      action: "Match messages on carpark/sensors/batch and invoke Processor Lambda"
+      technology: "AWS IoT Rules Engine — SQL: SELECT * FROM 'carpark/sensors/batch'"
+      output: "Processor Lambda receives batch of 50 readings"
     - step: 5
-      component: "Lambda: ProcessSensorData"
-      action: "Parse sensor reading, validate data, calculate zone metrics"
+      component: "Lambda: Processor"
+      action: "Loop through readings array, write items to DynamoDB, publish CloudWatch metrics"
       technology: "Python Lambda function"
-      output: "Write to DynamoDB + publish CloudWatch metrics"
+      output: "DynamoDB items + CloudWatch custom metrics (OccupiedSpaces, TotalOccupancy, SensorsReportingCount)"
     - step: 6
       component: "Amazon DynamoDB"
-      action: "Store historical sensor readings (time-series data)"
-      technology: "DynamoDB with TTL (7-day retention)"
-      output: "Historical data for trend analysis"
+      action: "Store sensor readings as items with automatic TTL expiry"
+      technology: "DynamoDB BatchWriteItem — items with sensor_id, timestamp, zone, occupied, confidence, battery_level"
+      output: "Queryable data via table and GSI (7-day TTL for automatic cleanup)"
     - step: 7
       component: "Amazon CloudWatch"
       action: "Display metrics in dashboard, trigger alarms if thresholds exceeded"
-      technology: "CloudWatch Metrics + Dashboard"
-      output: "Real-time visual dashboard + SNS alerts"
+      technology: "CloudWatch Metrics + Dashboard + Alarms"
+      output: "Real-time visual dashboard + alarm state monitoring"
 
 sampleSensorReadings:
   description: "1000 simulated sensor readings across 50 sensors over 24 hours"
@@ -177,55 +177,40 @@ cloudWatchDashboard:
   widgets:
     - id: "total-occupancy"
       type: "line"
-      title: "Total Occupancy Over Time"
-      metric: "CarPark/Occupancy/TotalPercentage"
-      unit: "Percent"
+      title: "Occupied Spaces Over Time"
+      metric: "NDXTry/SmartCarPark/TotalOccupancy"
+      unit: "Count"
       period: 300  # 5 minutes
       statistic: "Average"
-      description: "Shows occupancy percentage for entire car park over last 24 hours"
+      description: "Shows occupied space count (0-50) for entire car park over last 24 hours"
 
     - id: "zone-breakdown"
       type: "stacked-area"
       title: "Occupancy by Zone"
       metrics:
-        - "CarPark/Occupancy/GroundFloor"
-        - "CarPark/Occupancy/Level1"
-        - "CarPark/Occupancy/Level2"
+        - "NDXTry/SmartCarPark/OccupiedSpaces/Zone=ground"
+        - "NDXTry/SmartCarPark/OccupiedSpaces/Zone=level1"
+        - "NDXTry/SmartCarPark/OccupiedSpaces/Zone=level2"
       unit: "Count"
       period: 300
-      statistic: "Sum"
-      description: "Compares occupancy across the three zones"
+      statistic: "Average"
+      description: "Compares occupied spaces across the three zones"
 
-    - id: "current-status"
+    - id: "available-spaces"
       type: "number"
-      title: "Available Spaces Right Now"
-      metric: "CarPark/Occupancy/AvailableSpaces"
+      title: "Available Spaces"
+      metric: "NDXTry/SmartCarPark/TotalOccupancy (metric math: 50 - TotalOccupancy)"
+      unit: "Count"
+      statistic: "Latest"
+      description: "Live count of currently available parking spaces (50 minus occupied)"
+
+    - id: "sensors-reporting"
+      type: "number"
+      title: "Sensors Reporting"
+      metric: "NDXTry/SmartCarPark/SensorsReportingCount"
       unit: "Count"
       statistic: "Average"
-      description: "Live count of currently available parking spaces"
-
-    - id: "peak-hours-heatmap"
-      type: "heatmap"
-      title: "Occupancy Patterns (24-Hour View)"
-      metric: "CarPark/Occupancy/TotalPercentage"
-      period: 3600  # 1 hour buckets
-      description: "Visualize busy vs quiet times across the day"
-
-    - id: "sensor-health"
-      type: "table"
-      title: "Sensor Status (Last Reading)"
-      metrics:
-        - "CarPark/Sensors/LastReading"
-        - "CarPark/Sensors/BatteryLevel"
-      description: "Shows last reading timestamp and battery level for each sensor"
-
-    - id: "average-duration"
-      type: "number"
-      title: "Average Parking Duration"
-      metric: "CarPark/Metrics/AverageDuration"
-      unit: "Minutes"
-      statistic: "Average"
-      description: "How long vehicles typically stay parked"
+      description: "Count of sensors that reported in the last cycle (expected: 50)"
 
 cloudWatchAlarms:
   - alarmName: "HighOccupancy-GroundFloor"
@@ -333,7 +318,7 @@ wowMomentDetails:
 
     - label: "Historical trends"
       description: "24 hours of occupancy patterns visible instantly"
-      technicalDetail: "DynamoDB stores time-series data with 7-day retention"
+      technicalDetail: "DynamoDB stores sensor data with 7-day TTL for automatic cleanup"
       icon: "chart"
 
     - label: "Automated insights"
@@ -364,9 +349,9 @@ troubleshooting:
         - "No sensor data seeded during deployment"
         - "CloudWatch metrics not publishing"
       solutions:
-        - "Go to Lambda console, find 'IoTSimulator' function, check Recent invocations"
-        - "Check DynamoDB table 'SensorReadings' has records (should have ~1000 entries)"
-        - "Verify CloudWatch Logs for ProcessSensorData Lambda - should show metric publications"
+        - "Go to Lambda console, find the simulator function (named ndx-try-...-simulator), check Recent invocations"
+        - "Check DynamoDB table has items via the DynamoDB console Items tab"
+        - "Verify CloudWatch Logs for the processor Lambda - should show metric publications"
 
     - symptom: "Stale data (older than 5 minutes)"
       possibleCauses:
@@ -375,7 +360,7 @@ troubleshooting:
         - "Lambda function errors"
       solutions:
         - "Check Lambda function CloudWatch Logs for errors"
-        - "Manually invoke IoTSimulator Lambda to restart data generation"
+        - "Manually invoke the simulator Lambda to restart data generation"
         - "Verify IoT Core rule is enabled in IoT console"
 
     - symptom: "'Access Denied' error"
@@ -390,11 +375,11 @@ troubleshooting:
 
     - symptom: "Metrics showing flat lines"
       possibleCauses:
-        - "DynamoDB throttling (write capacity exceeded)"
+        - "DynamoDB write throttled (check ThrottledRequests metric)"
         - "Lambda concurrent execution limit"
         - "IoT Core throttling"
       solutions:
-        - "Check DynamoDB table metrics for throttled requests"
+        - "Check DynamoDB write metrics for throttled requests"
         - "Check Lambda concurrent executions in CloudWatch metrics"
         - "Reduce simulator frequency if hitting AWS service limits"
 

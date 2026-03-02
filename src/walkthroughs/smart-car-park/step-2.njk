@@ -40,39 +40,17 @@ scenarioId: smart-car-park
 </p>
 
 <div class="ndx-widget-guide govuk-!-margin-top-4">
-  <h4 class="govuk-heading-s">1. Available Spaces Right Now</h4>
-  <div class="ndx-widget-card">
-    <p class="govuk-body">
-      <strong>Widget type:</strong> Number (large display)
-    </p>
-    <p class="govuk-body">
-      <strong>What it shows:</strong> The current count of available (empty) parking spaces across
-      the entire car park
-    </p>
-    <p class="govuk-body">
-      <strong>What to look for:</strong> This number updates in real-time as sensors detect vehicles
-      entering and leaving. In our simulation, expect to see 5-25 available spaces depending on
-      time of day patterns.
-    </p>
-    <div class="govuk-inset-text">
-      <p class="govuk-body-s">
-        <strong>Example:</strong> If you see "18 available", that means 18 out of 50 spaces are currently empty,
-        so occupancy is 64% (32 spaces occupied).
-      </p>
-    </div>
-  </div>
-
-  <h4 class="govuk-heading-s govuk-!-margin-top-4">2. Total Occupancy Over Time</h4>
+  <h4 class="govuk-heading-s">1. Occupied Spaces Over Time</h4>
   <div class="ndx-widget-card">
     <p class="govuk-body">
       <strong>Widget type:</strong> Line graph
     </p>
     <p class="govuk-body">
-      <strong>What it shows:</strong> Occupancy percentage (0-100%) over the last 24 hours
+      <strong>What it shows:</strong> Count of occupied spaces (0-50) over the last 24 hours
     </p>
     <p class="govuk-body">
-      <strong>What to look for:</strong> Peak hours (85% occupancy around 8-10am, 12-2pm, 5-7pm),
-      off-peak periods (60% occupancy), and overnight (20% occupancy). The line should show clear
+      <strong>What to look for:</strong> Peak hours (~42 occupied around 8-10am, 12-2pm, 5-7pm),
+      off-peak periods (~30 occupied), and overnight (~10 occupied). The line should show clear
       daily patterns.
     </p>
     <div class="govuk-inset-text">
@@ -83,7 +61,7 @@ scenarioId: smart-car-park
     </div>
   </div>
 
-  <h4 class="govuk-heading-s govuk-!-margin-top-4">3. Occupancy by Zone</h4>
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">2. Occupancy by Zone</h4>
   <div class="ndx-widget-card">
     <p class="govuk-body">
       <strong>Widget type:</strong> Stacked area chart
@@ -105,42 +83,46 @@ scenarioId: smart-car-park
     </div>
   </div>
 
-  <h4 class="govuk-heading-s govuk-!-margin-top-4">4. Average Parking Duration</h4>
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">3. Available Spaces</h4>
   <div class="ndx-widget-card">
     <p class="govuk-body">
-      <strong>Widget type:</strong> Number (minutes)
+      <strong>Widget type:</strong> Number (metric math expression)
     </p>
     <p class="govuk-body">
-      <strong>What it shows:</strong> How long, on average, vehicles stay parked
+      <strong>What it shows:</strong> The current count of available (empty) parking spaces,
+      calculated as 50 minus occupied spaces
     </p>
     <p class="govuk-body">
-      <strong>What to look for:</strong> In our simulation, expect ~90-180 minutes (1.5 to 3 hours).
-      Shorter durations indicate quick turnover (good for revenue), longer durations suggest all-day parkers.
+      <strong>What to look for:</strong> This number updates as sensors detect vehicles
+      entering and leaving. In our simulation, expect to see 5-25 available spaces depending on
+      time of day patterns.
     </p>
     <div class="govuk-inset-text">
       <p class="govuk-body-s">
-        <strong>Revenue optimization:</strong> If average duration is too long, consider time limits
-        or tiered pricing (first 2 hours £3, then £5/hour) to encourage turnover.
+        <strong>Example:</strong> If you see "18", that means 18 out of 50 spaces are currently empty,
+        so occupancy is 64% (32 spaces occupied).
       </p>
     </div>
   </div>
 
-  <h4 class="govuk-heading-s govuk-!-margin-top-4">5. Sensor Status Table</h4>
+  <h4 class="govuk-heading-s govuk-!-margin-top-4">4. Sensors Reporting</h4>
   <div class="ndx-widget-card">
     <p class="govuk-body">
-      <strong>Widget type:</strong> Table
+      <strong>Widget type:</strong> Number
     </p>
     <p class="govuk-body">
-      <strong>What it shows:</strong> Last reading timestamp and battery level for each of the 50 sensors
+      <strong>What it shows:</strong> How many sensors reported in the last batch cycle (expected: 50)
     </p>
     <p class="govuk-body">
-      <strong>What to look for:</strong> All sensors should show recent timestamps (within last 5 minutes).
-      Battery levels should be above 20%. Any sensor showing stale data (>30 min old) may need maintenance.
+      <strong>What to look for:</strong> This should consistently show 50. If it drops below 45,
+      the SensorOffline alarm will fire. This is the quick health check — per-sensor detail
+      (battery levels, individual status) is available in the Function URL dashboard.
     </p>
     <div class="govuk-inset-text">
       <p class="govuk-body-s">
-        <strong>Maintenance alert:</strong> CloudWatch alarms automatically notify facilities team
-        when sensors go offline or batteries run low.
+        <strong>Maintenance alert:</strong> CloudWatch alarms automatically monitor this metric.
+        If fewer than 45 sensors report, the alarm triggers — indicating potential connectivity
+        or hardware issues.
       </p>
     </div>
   </div>
@@ -194,12 +176,12 @@ scenarioId: smart-car-park
         the refresh button (circular arrow icon, top-right) after waiting.
       </li>
       <li>
-        <strong>Check DynamoDB table</strong> - Open the <a href="https://console.aws.amazon.com/dynamodb/" target="_blank" rel="noopener noreferrer" class="govuk-link">DynamoDB console</a>,
-        find the table named <code>SmartCarPark-SensorReadings</code>, and verify it has ~1000 items.
+        <strong>Check DynamoDB has data</strong> - Open the <a href="https://console.aws.amazon.com/dynamodbv2/" target="_blank" rel="noopener noreferrer" class="govuk-link">DynamoDB console</a>,
+        find the table matching your stack name, click the Items tab, and click "Scan" to see recent sensor readings.
       </li>
       <li>
-        <strong>Verify Lambda is running</strong> - Open the <a href="https://console.aws.amazon.com/lambda/" target="_blank" rel="noopener noreferrer" class="govuk-link">Lambda console</a>,
-        find <code>IoTSimulator</code>, and check Recent invocations shows activity.
+        <strong>Verify simulator is running</strong> - Open the <a href="https://console.aws.amazon.com/lambda/" target="_blank" rel="noopener noreferrer" class="govuk-link">Lambda console</a>,
+        find the simulator function, and check the Monitor tab shows invocations every minute.
       </li>
     </ul>
 
@@ -211,11 +193,11 @@ scenarioId: smart-car-park
         ensure it's ON and set to 10 seconds
       </li>
       <li>
-        <strong>Verify IoT simulator is still running</strong> - The simulator may have stopped.
-        Go to Lambda console, find <code>IoTSimulator</code>, click "Test" to manually restart it.
+        <strong>Verify IoT simulator is still running</strong> - The simulator runs on a 1-minute
+        EventBridge schedule. Check the Lambda console Monitor tab for recent invocations.
       </li>
       <li>
-        <strong>Check CloudWatch Logs</strong> - Open Logs for <code>ProcessSensorData</code> Lambda
+        <strong>Check CloudWatch Logs</strong> - Open Logs for the processor Lambda function
         to see if it's receiving and processing sensor messages
       </li>
     </ul>

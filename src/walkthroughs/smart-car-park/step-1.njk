@@ -17,7 +17,7 @@ scenarioId: smart-car-park
 
 {% set stepNumber = 1 %}
 {% set stepTitle = "Access CloudWatch Dashboard" %}
-{% set stepDescription = "Locate your deployed CloudWatch dashboard URL and open it to view real-time car park occupancy data." %}
+{% set stepDescription = "Locate your deployed dashboard URLs and open them to view real-time car park occupancy data." %}
 {% set timeEstimate = "2 minutes" %}
 {# Load screenshots from YAML data - Story 13.6 #}
 {% set screenshotData = screenshots["smart-car-park"] %}
@@ -25,18 +25,19 @@ scenarioId: smart-car-park
 {% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
 {% set expectedOutcomes = [
   "CloudFormation stack is in CREATE_COMPLETE status",
-  "Outputs tab shows DashboardURL value",
-  "CloudWatch dashboard opens in a new browser tab",
-  "Dashboard displays car park occupancy widgets"
+  "Outputs tab shows DashboardURL and CloudWatchDashboardURL",
+  "Function URL dashboard opens showing live zone occupancy",
+  "CloudWatch dashboard opens showing 4 metric widgets"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<h3 class="govuk-heading-m">How to access the dashboard</h3>
+<h3 class="govuk-heading-m">How to access the dashboards</h3>
 
 <p class="govuk-body">
-  Your CloudWatch dashboard was created when you deployed the Smart Car Park scenario.
-  The dashboard URL is available in your CloudFormation stack outputs.
+  Your Smart Car Park scenario deploys <strong>two dashboards</strong>: an HTML dashboard
+  accessible via Function URL (instant access, no login needed) and a CloudWatch console dashboard
+  (deeper metrics exploration). Both URLs are in your CloudFormation stack outputs.
 </p>
 
 <div class="govuk-!-margin-top-4">
@@ -48,7 +49,7 @@ scenarioId: smart-car-park
         AWS CloudFormation Console
       </a>
       <p class="govuk-body-s govuk-!-margin-top-1" style="color: #505a5f;">
-        Make sure you're in the same region where you deployed the scenario
+        Make sure you're in the <strong>us-east-1</strong> region
       </p>
     </li>
 
@@ -56,7 +57,7 @@ scenarioId: smart-car-park
       <strong>Find your Smart Car Park stack:</strong>
       <br>
       <p class="govuk-body govuk-!-margin-top-1">
-        Look for a stack name starting with <code>ndx-try-smart-car-park-</code> followed by a timestamp
+        Look for a stack name starting with <code>ndx-try-smart-car-park</code>
       </p>
       <p class="govuk-body-s" style="color: #505a5f;">
         The stack status should be <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span>
@@ -72,20 +73,20 @@ scenarioId: smart-car-park
     </li>
 
     <li>
-      <strong>Find the "DashboardURL" output:</strong>
+      <strong>Open the <code>DashboardURL</code> output first (instant gratification):</strong>
       <br>
       <p class="govuk-body govuk-!-margin-top-1">
-        Look for an output key named <code>DashboardURL</code> or <code>CloudWatchDashboardURL</code>
-      </p>
-      <p class="govuk-body-s" style="color: #505a5f;">
-        The value will be a long URL starting with <code>https://console.aws.amazon.com/cloudwatch/</code>
+        This opens the HTML dashboard powered by a Lambda Function URL. No login required.
+        You'll see live zone occupancy, available spaces, and a 24-hour trend chart.
       </p>
     </li>
 
     <li>
-      <strong>Click the URL</strong> to open the CloudWatch dashboard in a new tab
-      <p class="govuk-body-s govuk-!-margin-top-1" style="color: #505a5f;">
-        The URL includes embedded credentials so you won't need to log in again
+      <strong>Then open <code>CloudWatchDashboardURL</code> (deeper exploration):</strong>
+      <br>
+      <p class="govuk-body govuk-!-margin-top-1">
+        This opens the native CloudWatch dashboard with 4 metric widgets. You can change
+        time ranges, drill into individual metrics, and see the alarms.
       </p>
     </li>
   </ol>
@@ -94,32 +95,45 @@ scenarioId: smart-car-park
 <h3 class="govuk-heading-m">What you should see</h3>
 
 <p class="govuk-body">
-  After clicking the dashboard URL, you should see:
+  <strong>Function URL dashboard</strong> (DashboardURL):
 </p>
 
 <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
   <li>
-    <strong>Dashboard title:</strong> "Smart Car Park - Real-Time Occupancy" at the top
+    <strong>Zone cards:</strong> Ground Floor, Level 1, and Level 2 with occupied/available counts
   </li>
   <li>
-    <strong>Multiple widgets:</strong> Charts and numbers showing car park metrics
+    <strong>Overall stats:</strong> Total spaces, available, occupied, and occupancy percentage
   </li>
   <li>
-    <strong>Current occupancy:</strong> A number widget showing available spaces right now
+    <strong>24-hour trend:</strong> Sparkline showing occupancy over the last 24 hours
+  </li>
+</ul>
+
+<p class="govuk-body govuk-!-margin-top-4">
+  <strong>CloudWatch dashboard</strong> (CloudWatchDashboardURL):
+</p>
+
+<ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
+  <li>
+    <strong>Occupied Spaces Over Time:</strong> Line graph showing 24-hour occupancy trend
   </li>
   <li>
-    <strong>Zone breakdown:</strong> Charts comparing occupancy across Ground, Level 1, and Level 2
+    <strong>Occupancy by Zone:</strong> Stacked area chart comparing all 3 zones
   </li>
   <li>
-    <strong>Auto-refresh indicator:</strong> Dashboard set to refresh every 10 seconds
+    <strong>Available Spaces:</strong> Number widget (metric math: 50 minus occupied)
+  </li>
+  <li>
+    <strong>Sensors Reporting:</strong> Number widget showing sensor count per cycle (expected: 50)
   </li>
 </ul>
 
 <div class="govuk-inset-text govuk-!-margin-top-3">
   <p class="govuk-body">
-    <strong>Tip:</strong> If the dashboard appears empty or shows "No data", wait 30 seconds and click
-    the refresh button (circular arrow icon) in the top-right corner. The IoT simulator may still be
-    populating initial sensor readings.
+    <strong>Tip:</strong> If dashboards appear empty or show "Waiting for data", wait 2-3 minutes for
+    the IoT simulator to publish its first batch of sensor readings. The simulator runs every minute
+    via EventBridge.
   </p>
 </div>
 
@@ -152,32 +166,33 @@ scenarioId: smart-car-park
     <p class="govuk-body">Possible solutions:</p>
     <ul class="govuk-list govuk-list--bullet">
       <li>
-        <strong>Wait for stack creation to complete</strong> - Outputs only appear when status is CREATE_COMPLETE
+        <strong>Wait for stack creation to complete</strong> - Outputs only appear when status is CREATE_COMPLETE.
+        This template takes 15-20 minutes to deploy (IoT Core + DynamoDB resources).
       </li>
       <li>
-        <strong>Look for alternative output names</strong> - Try <code>CloudWatchDashboardURL</code>,
-        <code>DashboardLink</code>, or <code>MonitoringDashboard</code>
+        <strong>Look for both outputs</strong> - <code>DashboardURL</code> (Function URL, no login needed)
+        and <code>CloudWatchDashboardURL</code> (CloudWatch console)
       </li>
       <li>
-        <strong>Check the Resources tab</strong> - Find the Dashboard resource and note its physical ID,
-        then manually navigate to CloudWatch → Dashboards and open it
+        <strong>Check the Resources tab</strong> - Find the DashboardFunction resource and note its physical ID,
+        then check the Lambda console for its Function URL
       </li>
     </ul>
 
-    <h4 class="govuk-heading-s govuk-!-margin-top-4">Dashboard URL gives "Access Denied" error</h4>
+    <h4 class="govuk-heading-s govuk-!-margin-top-4">Function URL dashboard shows "Error" or empty</h4>
     <p class="govuk-body">Possible solutions:</p>
     <ul class="govuk-list govuk-list--bullet">
       <li>
-        <strong>Confirm correct AWS account</strong> - Ensure you're logged into the same AWS account
-        where you deployed the stack
+        <strong>Wait for simulator to run</strong> - The IoT simulator runs every minute. If the stack
+        just deployed, wait 1-2 minutes for data to appear in DynamoDB.
       </li>
       <li>
-        <strong>Re-generate the URL</strong> - Go back to CloudFormation Outputs and copy the URL again
-        (embedded credentials may have expired)
+        <strong>Check DynamoDB has data</strong> - Open the DynamoDB console → Tables → find the table
+        matching your stack name → Items tab → click "Scan" to see recent sensor readings
       </li>
       <li>
-        <strong>Use IAM permissions</strong> - Manually navigate to CloudWatch → Dashboards and open
-        the dashboard using your IAM permissions instead of the embedded URL
+        <strong>Check Lambda logs</strong> - Open CloudWatch Logs for the dashboard Lambda function
+        to see any error messages
       </li>
     </ul>
 

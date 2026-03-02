@@ -30,7 +30,7 @@ aws cloudformation create-stack-set \
   --execution-role-name InnovationSandbox-{NAMESPACE}-SandboxAccountRole \
   --managed-execution Active=true \
   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-  --description "NDX:Try Smart Car Park - Real-time parking availability with DynamoDB"
+  --description "NDX:Try Smart Car Park - Real-time parking availability with IoT sensors and DynamoDB"
 ```
 
 Notes:
@@ -45,8 +45,8 @@ Notes:
 2. Enter name: `ndx-try-smart-car-park` (must be 1-50 chars, start with letter, alphanumeric + hyphens only)
 3. Select the `ndx-try-smart-car-park` StackSet
 4. Configure deployment:
-   - Select target regions (template works in any region with DynamoDB and Lambda)
-   - Set timeout: **15 minutes** recommended for this template (deploys in 8-12 minutes)
+   - Select target regions: **us-east-1** (required for IoT Core + DynamoDB)
+   - Set timeout: **20 minutes** recommended for this template (deploys in 15-20 minutes)
 5. Review and submit
 
 ## Step 4 — Associate with Lease Template
@@ -59,11 +59,17 @@ Notes:
 ## Verification
 
 1. Request a test lease using the lease template from Step 4
-2. Wait for lease approval and blueprint deployment (should complete within 12 minutes)
+2. Wait for lease approval and blueprint deployment (should complete within 20 minutes)
 3. Check the sandbox account for:
-   - Lambda function `ndx-try-parking-simulator-{region}`
-   - DynamoDB table `ndx-try-parking-data-{region}`
-   - S3 bucket `ndx-try-parking-data-{account-id}-{region}`
-   - IAM role `ndx-try-smart-parking-role-{region}`
-4. Open the Lambda Function URL and verify the parking dashboard loads with simulated data
-5. Terminate the test lease and verify ISB cleans up all resources via AWS Nuke
+   - IoT Thing `{stack-name}-sensor-gateway`
+   - IoT Policy `{stack-name}-sensor-policy`
+   - IoT TopicRule `NdxTrySmartCarParkSensorBatch`
+   - Lambda functions: `ndx-try-{stack-name}-simulator`, `ndx-try-{stack-name}-processor`, `ndx-try-{stack-name}-dashboard`
+   - DynamoDB table `{stack-name}-sensor-readings`
+   - EventBridge rule invoking simulator every 2 minutes
+   - CloudWatch dashboard `{stack-name}-dashboard` with 4 widgets
+   - CloudWatch alarms: `{stack-name}-high-occupancy`, `{stack-name}-sensor-offline`
+   - 3 IAM roles: simulator, processor, dashboard
+4. Open the DashboardURL (Function URL) and verify the HTML parking dashboard loads with live data
+5. Open the CloudWatchDashboardURL and verify 4 widgets display metric data
+6. Terminate the test lease and verify ISB cleans up all resources via AWS Nuke
