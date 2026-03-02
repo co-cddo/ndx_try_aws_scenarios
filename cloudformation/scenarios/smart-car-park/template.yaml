@@ -18,7 +18,7 @@ Resources:
   SensorReadingsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub '${AWS::StackName}-sensor-readings'
+      TableName: !Sub 'ndx-try-carpark-sensor-readings-${AWS::Region}'
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: sensor_id
@@ -56,7 +56,7 @@ Resources:
   SimulatorLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'ndx-try-${AWS::StackName}-simulator-role'
+      RoleName: !Sub 'ndx-try-carpark-${AWS::Region}-simulator-role'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -86,7 +86,7 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/ndx-try-${AWS::StackName}-simulator:*'
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/ndx-try-carpark-${AWS::Region}-simulator:*'
       Tags:
         - Key: Project
           Value: ndx-try
@@ -96,7 +96,7 @@ Resources:
   ProcessorLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'ndx-try-${AWS::StackName}-processor-role'
+      RoleName: !Sub 'ndx-try-carpark-${AWS::Region}-processor-role'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -131,7 +131,7 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/ndx-try-${AWS::StackName}-processor:*'
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/ndx-try-carpark-${AWS::Region}-processor:*'
       Tags:
         - Key: Project
           Value: ndx-try
@@ -141,7 +141,7 @@ Resources:
   DashboardLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'ndx-try-${AWS::StackName}-dashboard-role'
+      RoleName: !Sub 'ndx-try-carpark-${AWS::Region}-dashboard-role'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -169,7 +169,7 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/ndx-try-${AWS::StackName}-dashboard:*'
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/ndx-try-carpark-${AWS::Region}-dashboard:*'
       Tags:
         - Key: Project
           Value: ndx-try
@@ -182,19 +182,19 @@ Resources:
   SimulatorLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/ndx-try-${AWS::StackName}-simulator'
+      LogGroupName: !Sub '/aws/lambda/ndx-try-carpark-${AWS::Region}-simulator'
       RetentionInDays: 7
 
   ProcessorLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/ndx-try-${AWS::StackName}-processor'
+      LogGroupName: !Sub '/aws/lambda/ndx-try-carpark-${AWS::Region}-processor'
       RetentionInDays: 7
 
   DashboardLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/ndx-try-${AWS::StackName}-dashboard'
+      LogGroupName: !Sub '/aws/lambda/ndx-try-carpark-${AWS::Region}-dashboard'
       RetentionInDays: 7
 
   # ============================================================
@@ -204,7 +204,7 @@ Resources:
     Type: AWS::Lambda::Function
     DependsOn: SimulatorLogGroup
     Properties:
-      FunctionName: !Sub 'ndx-try-${AWS::StackName}-simulator'
+      FunctionName: !Sub 'ndx-try-carpark-${AWS::Region}-simulator'
       Description: Publishes simulated IoT sensor batch to IoT Core every 2 minutes
       Runtime: python3.12
       Handler: index.lambda_handler
@@ -306,7 +306,7 @@ Resources:
     Type: AWS::Lambda::Function
     DependsOn: ProcessorLogGroup
     Properties:
-      FunctionName: !Sub 'ndx-try-${AWS::StackName}-processor'
+      FunctionName: !Sub 'ndx-try-carpark-${AWS::Region}-processor'
       Description: Processes IoT sensor batch, writes to DynamoDB, publishes CloudWatch metrics
       Runtime: python3.12
       Handler: index.lambda_handler
@@ -395,12 +395,12 @@ Resources:
   IoTThing:
     Type: AWS::IoT::Thing
     Properties:
-      ThingName: !Sub '${AWS::StackName}-sensor-gateway'
+      ThingName: !Sub 'ndx-try-carpark-sensor-gateway-${AWS::Region}'
 
   IoTPolicy:
     Type: AWS::IoT::Policy
     Properties:
-      PolicyName: !Sub '${AWS::StackName}-sensor-policy'
+      PolicyName: !Sub 'ndx-try-carpark-sensor-policy-${AWS::Region}'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -433,7 +433,7 @@ Resources:
     Type: AWS::Lambda::Function
     DependsOn: DashboardLogGroup
     Properties:
-      FunctionName: !Sub 'ndx-try-${AWS::StackName}-dashboard'
+      FunctionName: !Sub 'ndx-try-carpark-${AWS::Region}-dashboard'
       Description: HTML dashboard querying DynamoDB for real-time car park occupancy
       Runtime: python3.12
       Handler: index.lambda_handler
@@ -655,7 +655,7 @@ Resources:
   CarParkDashboard:
     Type: AWS::CloudWatch::Dashboard
     Properties:
-      DashboardName: !Sub '${AWS::StackName}-dashboard'
+      DashboardName: !Sub 'ndx-try-carpark-dashboard-${AWS::Region}'
       DashboardBody: !Sub |
         {
           "widgets": [
@@ -730,7 +730,7 @@ Resources:
   HighOccupancyAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: !Sub '${AWS::StackName}-high-occupancy'
+      AlarmName: !Sub 'ndx-try-carpark-high-occupancy-${AWS::Region}'
       AlarmDescription: Fires when total occupied spaces exceeds 45 (90% of 50)
       Namespace: NDXTry/SmartCarPark
       MetricName: TotalOccupancy
@@ -744,7 +744,7 @@ Resources:
   SensorOfflineAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: !Sub '${AWS::StackName}-sensor-offline'
+      AlarmName: !Sub 'ndx-try-carpark-sensor-offline-${AWS::Region}'
       AlarmDescription: Fires when fewer than 45 of 50 sensors report
       Namespace: NDXTry/SmartCarPark
       MetricName: SensorsReportingCount

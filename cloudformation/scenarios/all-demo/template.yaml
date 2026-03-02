@@ -159,9 +159,9 @@ Outputs:
     Description: QuickSight Dashboard URL for council metrics
     Value: !GetAtt QuicksightDashboard.Outputs.DashboardUrl
 
-  SmartCarParkAvailabilityAPI:
-    Description: Smart Car Park real-time availability API
-    Value: !GetAtt SmartCarPark.Outputs.AvailabilityAPI
+  SmartCarParkDashboardURL:
+    Description: Smart Car Park real-time dashboard URL
+    Value: !GetAtt SmartCarPark.Outputs.DashboardURL
 
   TextToSpeechConvertURL:
     Description: Text-to-Speech conversion API endpoint
@@ -198,13 +198,9 @@ Outputs:
     Description: S3 bucket for QuickSight data
     Value: !GetAtt QuicksightDashboard.Outputs.DataBucket
 
-  SmartCarParkDataBucket:
-    Description: S3 bucket for parking data
-    Value: !GetAtt SmartCarPark.Outputs.DataBucket
-
-  SmartCarParkDataTable:
-    Description: DynamoDB table for parking data
-    Value: !GetAtt SmartCarPark.Outputs.DataTable
+  SmartCarParkSensorReadingsTable:
+    Description: DynamoDB table for parking sensor readings
+    Value: !GetAtt SmartCarPark.Outputs.SensorReadingsTable
 
   TextToSpeechAudioBucket:
     Description: S3 bucket for generated audio files
