@@ -9,14 +9,20 @@ Register the NDX:Try Planning Application AI scenario as an Innovation Sandbox (
 - ISB namespace known (referred to as `{NAMESPACE}` below)
 - An S3 bucket accessible from the hub account for hosting the template (referred to as `{BUCKET}` in region `{REGION}`)
 
-## Step 1 — Upload Template to S3
+## Step 1 — Build and Upload Template to S3
 
-Upload the CloudFormation template to an S3 bucket accessible from the hub account:
+The source `template.yaml` contains placeholder markers for the sample PDF and extracted text. Build the deployable template first, then upload:
 
 ```bash
-aws s3 cp template.yaml \
+# Build deployable template (injects PDF base64 + extracted text from source files)
+python3 build-template.py -o /tmp/planning-ai-deploy.yaml
+
+# Upload to S3
+aws s3 cp /tmp/planning-ai-deploy.yaml \
   s3://{BUCKET}/scenarios/planning-ai/template.yaml
 ```
+
+> **Source files:** The sample PDF (`sample-planning-application.pdf`) is the single source of truth. To regenerate it, run `python3 generate-sample-pdf.py`. The build script reads both the PDF and `sample_document_text.txt` and injects them into the template at deploy time.
 
 ## Step 2 — Create StackSet
 
