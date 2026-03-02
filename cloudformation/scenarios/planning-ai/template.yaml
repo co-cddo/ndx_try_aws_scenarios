@@ -2,9 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: |
   NDX:Try - Planning Application AI Scenario
-  Intelligent document analysis using Amazon Textract for text extraction.
-  Real AWS service integration demonstrating document processing capabilities.
-  Version: 2.0.0
+  Intelligent document analysis using Amazon Textract for text extraction
+  and Amazon Bedrock (Nova Pro) for AI-powered analysis including committee
+  summaries, completeness checks, and application classification.
+  Version: 3.0.0
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -96,6 +97,15 @@ Resources:
                   - textract:DetectDocumentText
                   - textract:AnalyzeDocument
                 Resource: '*'
+        - PolicyName: BedrockAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource:
+                  - 'arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-pro-v1:0'
       Tags:
         - Key: Project
           Value: ndx-try
@@ -128,7 +138,60 @@ Resources:
 
           s3 = boto3.client('s3')
           textract = boto3.client('textract')
+          bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
           BUCKET = os.environ.get('DOCUMENTS_BUCKET', '')
+
+          PLANNING_ANALYSIS_PROMPT = """You are a UK planning application analyst. Analyse the following planning application text and return a JSON response with exactly this structure:
+
+          {
+            "summary": "A 2-3 sentence committee-ready summary suitable for planning officer reports. Describe the applicant, location, and proposed development concisely.",
+            "completeness": {
+              "status": "complete or incomplete",
+              "missingFields": ["list of any missing required fields"],
+              "notes": "Brief explanation of completeness assessment"
+            },
+            "classification": {
+              "applicationType": "One of: Householder, Full, Outline, Listed Building Consent, Change of Use, Advertisement, Prior Approval, Reserved Matters, Other",
+              "confidence": "high, medium, or low",
+              "reasoning": "One sentence explaining the classification"
+            }
+          }
+
+          Respond ONLY with valid JSON. Do not include any text before or after the JSON object."""
+
+          def analyze_with_bedrock(raw_text):
+              """Call Amazon Bedrock Nova Pro for AI analysis of planning application"""
+              try:
+                  response = bedrock.invoke_model(
+                      modelId='amazon.nova-pro-v1:0',
+                      body=json.dumps({
+                          "messages": [
+                              {"role": "user", "content": [{"text": f"Analyse this planning application:\n\n{raw_text}"}]}
+                          ],
+                          "system": [{"text": PLANNING_ANALYSIS_PROMPT}],
+                          "inferenceConfig": {
+                              "max_new_tokens": 1024,
+                              "temperature": 0.3
+                          }
+                      })
+                  )
+                  result = json.loads(response['body'].read())
+                  ai_text = result['output']['message']['content'][0]['text']
+
+                  try:
+                      analysis = json.loads(ai_text)
+                  except json.JSONDecodeError:
+                      analysis = {
+                          "summary": ai_text,
+                          "completeness": None,
+                          "classification": None
+                      }
+
+                  return analysis
+
+              except Exception as e:
+                  print(f"Bedrock error: {str(e)}")
+                  return None
 
           def render_upload_html():
               """Render the Planning AI upload interface"""
@@ -438,18 +501,18 @@ Resources:
               </div>
             </header>
 
-            <div class="banner">Powered by Amazon Textract - Document Text Extraction</div>
+            <div class="banner">Powered by Amazon Textract + Amazon Bedrock AI</div>
 
             <div class="phase-banner">
               <div class="phase-banner-content">
                 <span class="phase-tag">Sandbox</span>
-                <span>Try the sample document to experience Textract extraction</span>
+                <span>Try the sample document to experience AI-powered document analysis</span>
               </div>
             </div>
 
             <main class="main" id="main-content">
               <h2>Analyze Planning Applications</h2>
-              <p class="lead">Upload a planning application document to automatically extract text using Amazon Textract and receive analysis recommendations.</p>
+              <p class="lead">Upload a planning application document to extract text with Amazon Textract and get AI-powered analysis from Amazon Bedrock — including committee summaries, completeness checks, and application classification.</p>
 
               <div class="upload-zone" id="uploadZone" role="region" aria-label="Document upload area">
                 <div class="upload-icon">
@@ -476,18 +539,55 @@ Resources:
                   Use Sample Document
                 </button>
                 <button type="button" id="analyzeBtn" class="govuk-button" aria-disabled="true">
-                  Analyze with Textract
+                  Analyze with AI
                 </button>
               </div>
 
               <div class="loading" id="loading" aria-live="polite">
                 <div class="loading-spinner" aria-hidden="true"></div>
-                <p><strong>Analyzing document with Amazon Textract...</strong></p>
-                <p>Extracting text and identifying key information</p>
+                <p><strong>Analyzing document with Amazon Textract + Bedrock AI...</strong></p>
+                <p>Extracting text, generating committee summary, and checking completeness</p>
               </div>
 
               <div class="results" id="results" aria-live="polite">
-                <h3>Textract Analysis Results</h3>
+                <div class="document-preview" id="documentPreview" style="margin-bottom: 30px; background: #f8f8f8; border: 2px solid #b1b4b6; border-radius: 5px; padding: 20px;">
+                  <h3 style="margin-top: 0;">Document Analysed</h3>
+                  <div id="documentImageContainer" style="max-height: 500px; overflow-y: auto; border: 1px solid #dee0e2; background: #fff; display: none;">
+                    <img id="documentImage" style="width: 100%; display: block;" alt="The planning application document that was analysed" />
+                  </div>
+                  <div id="documentTextContainer" style="max-height: 500px; overflow-y: auto; border: 1px solid #dee0e2; background: #fff; display: none; padding: 25px 30px;">
+                    <pre id="documentText" style="white-space: pre-wrap; font-family: monospace; font-size: 14px; line-height: 1.6; margin: 0; color: #0b0c0c;"></pre>
+                  </div>
+                </div>
+
+                <h3>AI Analysis Results</h3>
+
+                <div class="ai-analysis" id="aiAnalysis">
+                  <div class="ai-summary" id="aiSummary" style="border-left: 4px solid #00703c; background: #f0faf0; padding: 20px; margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 19px; color: #00703c;">Committee Summary</h4>
+                    <p id="summaryText" style="font-size: 19px; line-height: 1.6; margin: 0;"></p>
+                  </div>
+
+                  <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
+                    <div class="ai-classification" id="aiClassification" style="flex: 1; min-width: 200px; background: #f8f8f8; padding: 15px; border-left: 4px solid #1d70b8;">
+                      <h4 style="margin: 0 0 8px 0; font-size: 16px;">Application Type</h4>
+                      <p style="margin: 0;"><span id="classType" style="font-weight: bold;"></span> <span id="classConfidence" class="confidence-badge"></span></p>
+                      <p id="classReasoning" style="margin: 8px 0 0 0; font-size: 14px; color: #505a5f;"></p>
+                    </div>
+
+                    <div class="ai-completeness" id="aiCompleteness" style="flex: 1; min-width: 200px; background: #f8f8f8; padding: 15px; border-left: 4px solid #1d70b8;">
+                      <h4 style="margin: 0 0 8px 0; font-size: 16px;">Completeness Check</h4>
+                      <p style="margin: 0;"><span id="completenessStatus" class="confidence-badge"></span></p>
+                      <p id="completenessNotes" style="margin: 8px 0 0 0; font-size: 14px; color: #505a5f;"></p>
+                      <ul id="missingFields" style="margin: 8px 0 0 0; font-size: 14px; color: #d4351c;"></ul>
+                    </div>
+                  </div>
+
+                  <div class="ai-error" id="aiError" style="display: none; background: #fef7e5; border-left: 4px solid #f47738; padding: 15px; margin-bottom: 20px;">
+                    <p style="margin: 0; font-weight: bold;">AI analysis unavailable</p>
+                    <p id="aiErrorMessage" style="margin: 5px 0 0 0; font-size: 14px;"></p>
+                  </div>
+                </div>
 
                 <div class="extracted-data">
                   <h4 style="margin-bottom: 15px;">Extracted Application Details</h4>
@@ -503,14 +603,14 @@ Resources:
                 </div>
 
                 <div class="textract-info" id="textractInfo">
-                  <strong>Amazon Textract Results:</strong>
+                  <strong>Amazon Textract + Bedrock AI Results:</strong>
                   <span id="textractStats"></span>
                 </div>
               </div>
             </main>
 
             <footer class="footer">
-              <p>NDX:Try Environment | Planning Application AI - Powered by Amazon Textract</p>
+              <p>NDX:Try Environment | Planning Application AI - Powered by Amazon Textract + Bedrock</p>
             </footer>
 
             <script>
@@ -525,6 +625,7 @@ Resources:
               var selectedFile = null;
               var usingSample = false;
               var fileBase64 = null;
+              var documentDataUrl = null;
 
               // Drag and drop handlers
               uploadZone.addEventListener("dragover", function(e) {
@@ -569,7 +670,8 @@ Resources:
                 // Read file as base64
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                  fileBase64 = e.target.result.split(",")[1]; // Remove data:...;base64, prefix
+                  documentDataUrl = e.target.result;
+                  fileBase64 = documentDataUrl.split(",")[1]; // Remove data:...;base64, prefix
                   analyzeBtn.classList.add("visible");
                   analyzeBtn.removeAttribute("aria-disabled");
                 };
@@ -633,6 +735,84 @@ Resources:
 
               function displayResults(data) {
                 results.classList.add("visible");
+
+                // Document preview
+                var imgContainer = document.getElementById("documentImageContainer");
+                var textContainer = document.getElementById("documentTextContainer");
+                if (documentDataUrl) {
+                  // Uploaded file - show the image
+                  document.getElementById("documentImage").src = documentDataUrl;
+                  imgContainer.style.display = "block";
+                  textContainer.style.display = "none";
+                } else if (data.rawText) {
+                  // Sample document - show the text as a formatted document
+                  document.getElementById("documentText").textContent = data.rawText;
+                  textContainer.style.display = "block";
+                  imgContainer.style.display = "none";
+                }
+
+                // AI Analysis section
+                var ai = data.aiAnalysis;
+                var aiAnalysisDiv = document.getElementById("aiAnalysis");
+                var aiErrorDiv = document.getElementById("aiError");
+                var aiSummaryDiv = document.getElementById("aiSummary");
+                var aiClassDiv = document.getElementById("aiClassification");
+                var aiComplDiv = document.getElementById("aiCompleteness");
+
+                if (ai && ai.error) {
+                  // Bedrock failed - show warning
+                  aiSummaryDiv.style.display = "none";
+                  aiClassDiv.style.display = "none";
+                  aiComplDiv.style.display = "none";
+                  aiErrorDiv.style.display = "block";
+                  document.getElementById("aiErrorMessage").textContent = ai.message || "AI analysis could not be completed.";
+                } else if (ai) {
+                  aiErrorDiv.style.display = "none";
+
+                  // Committee Summary
+                  if (ai.summary) {
+                    document.getElementById("summaryText").textContent = ai.summary;
+                    aiSummaryDiv.style.display = "block";
+                  } else {
+                    aiSummaryDiv.style.display = "none";
+                  }
+
+                  // Classification
+                  if (ai.classification) {
+                    document.getElementById("classType").textContent = ai.classification.applicationType || "Unknown";
+                    var confBadge = document.getElementById("classConfidence");
+                    var conf = (ai.classification.confidence || "").toLowerCase();
+                    confBadge.textContent = conf;
+                    confBadge.className = "confidence-badge confidence-" + conf;
+                    document.getElementById("classReasoning").textContent = ai.classification.reasoning || "";
+                    aiClassDiv.style.display = "block";
+                  } else {
+                    aiClassDiv.style.display = "none";
+                  }
+
+                  // Completeness
+                  if (ai.completeness) {
+                    var statusBadge = document.getElementById("completenessStatus");
+                    var status = (ai.completeness.status || "").toLowerCase();
+                    statusBadge.textContent = status;
+                    statusBadge.className = "confidence-badge " + (status === "complete" ? "confidence-high" : "confidence-medium");
+                    document.getElementById("completenessNotes").textContent = ai.completeness.notes || "";
+                    var missingList = document.getElementById("missingFields");
+                    missingList.innerHTML = "";
+                    if (ai.completeness.missingFields && ai.completeness.missingFields.length > 0) {
+                      ai.completeness.missingFields.forEach(function(field) {
+                        var li = document.createElement("li");
+                        li.textContent = field;
+                        missingList.appendChild(li);
+                      });
+                    }
+                    aiComplDiv.style.display = "block";
+                  } else {
+                    aiComplDiv.style.display = "none";
+                  }
+                } else {
+                  aiAnalysisDiv.style.display = "none";
+                }
 
                 // Extracted structured data
                 var extractedHtml = "";
@@ -1123,12 +1303,20 @@ Resources:
                       # since Textract works best with images/PDFs
                       extracted_data = parse_extracted_data(sample_text)
 
+                      # AI analysis with Bedrock
+                      bedrock_result = analyze_with_bedrock(sample_text)
+                      ai_analysis = bedrock_result if bedrock_result else {
+                          'error': 'AI analysis unavailable',
+                          'message': 'Textract extraction succeeded but Bedrock AI analysis could not be completed. Results show extracted fields only.'
+                      }
+
                       return {
                           'statusCode': 200,
                           'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                           'body': json.dumps({
                               'success': True,
                               'extractedData': extracted_data,
+                              'aiAnalysis': ai_analysis,
                               'rawText': sample_text,
                               'textractStats': {
                                   'lineCount': len(sample_text.split('\n')),
@@ -1156,12 +1344,20 @@ Resources:
 
                       extracted_data = parse_extracted_data(textract_result['rawText'])
 
+                      # AI analysis with Bedrock
+                      bedrock_result = analyze_with_bedrock(textract_result['rawText'])
+                      ai_analysis = bedrock_result if bedrock_result else {
+                          'error': 'AI analysis unavailable',
+                          'message': 'Textract extraction succeeded but Bedrock AI analysis could not be completed. Results show extracted fields only.'
+                      }
+
                       return {
                           'statusCode': 200,
                           'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                           'body': json.dumps({
                               'success': True,
                               'extractedData': extracted_data,
+                              'aiAnalysis': ai_analysis,
                               'rawText': textract_result['rawText'],
                               'textractStats': textract_result['stats'],
                               'resultId': result_id,

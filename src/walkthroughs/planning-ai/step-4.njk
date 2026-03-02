@@ -24,10 +24,10 @@ scenarioId: planning-ai
 {% set stepScreenshots = screenshotData.steps | selectattr("step", "equalto", 4) | first %}
 {% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
 {% set expectedOutcomes = [
-  "All key fields extracted correctly (applicant, address, description)",
-  "Confidence scores show 95%+ accuracy",
-  "Extracted data matches original document content",
-  "You understand time savings vs manual entry"
+  "AI-generated committee summary is displayed prominently",
+  "Application completeness assessment shows status",
+  "Classification identifies application type with confidence level",
+  "Extracted fields match original document content"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
@@ -85,6 +85,37 @@ scenarioId: planning-ai
     </details>
   {% endfor %}
 </div>
+
+<h3 class="govuk-heading-m">AI analysis results</h3>
+
+<p class="govuk-body">
+  The most prominent section shows three AI-generated outputs from Amazon Bedrock:
+</p>
+
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Committee Summary</dt>
+    <dd class="govuk-summary-list__value">
+      A 2-3 sentence summary of the application suitable for planning officer reports and
+      committee papers. This is the hero output — replacing 20-30 minutes of manual writing
+      per application.
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Completeness Check</dt>
+    <dd class="govuk-summary-list__value">
+      Shows whether the application appears complete or incomplete. If incomplete, lists
+      the missing required fields — saving back-and-forth with applicants.
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Application Classification</dt>
+    <dd class="govuk-summary-list__value">
+      Identifies the application type (Householder, Full, Outline, etc.) with a confidence
+      level. Enables intelligent routing to the right planning team.
+    </dd>
+  </div>
+</dl>
 
 <h3 class="govuk-heading-m">Understanding the results</h3>
 
@@ -163,9 +194,10 @@ scenarioId: planning-ai
 
 <div class="govuk-inset-text">
   <p class="govuk-body">
-    <strong>What's impressive:</strong> The AI understood document structure and planning
-    terminology. It didn't just scan text - it knew what information to look for and where
-    it typically appears in planning applications.
+    <strong>What's impressive:</strong> The AI didn't just extract text — it understood the
+    planning application and generated a committee-ready summary. It knew the difference between
+    an applicant name and an agent name, understood UK address formats, and produced analysis
+    that a planning officer could use directly in their work.
   </p>
 </div>
 
@@ -229,24 +261,28 @@ scenarioId: planning-ai
 
 <ul class="govuk-list govuk-list--bullet">
   <li>
+    <strong>Auto-generate committee report drafts:</strong> AI summaries flow directly into
+    committee papers, saving 20-30 minutes per application
+  </li>
+  <li>
+    <strong>Flag incomplete applications:</strong> Completeness checks identify missing fields
+    before officer review, reducing back-and-forth with applicants
+  </li>
+  <li>
     <strong>Auto-populate planning database:</strong> Extracted values flow directly into
     your planning system's application record
   </li>
   <li>
-    <strong>Trigger validation rules:</strong> Check extracted postcode against planning zones,
-    verify applicant details against land registry
-  </li>
-  <li>
-    <strong>Enable officer review:</strong> Low confidence scores (<95%) flag for human verification
-    while high confidence fields auto-approve
+    <strong>Intelligent routing:</strong> Application classification automatically assigns
+    cases to the right planning team (Householder, Full, Listed Building, etc.)
   </li>
   <li>
     <strong>Link to case management:</strong> Automatically create case files, assign to
     planning officers, generate acknowledgment letters
   </li>
   <li>
-    <strong>Audit trail:</strong> Original PDF stored with extracted metadata for compliance
-    and appeals
+    <strong>Audit trail:</strong> Original PDF stored with extracted metadata and AI analysis
+    for compliance and appeals
   </li>
 </ul>
 

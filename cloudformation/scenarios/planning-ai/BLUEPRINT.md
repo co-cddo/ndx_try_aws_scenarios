@@ -30,7 +30,7 @@ aws cloudformation create-stack-set \
   --execution-role-name InnovationSandbox-{NAMESPACE}-SandboxAccountRole \
   --managed-execution Active=true \
   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-  --description "NDX:Try Planning Application AI - Intelligent document analysis for planning decisions"
+  --description "NDX:Try Planning Application AI - Textract OCR + Bedrock AI analysis for planning decisions"
 ```
 
 Notes:
@@ -45,8 +45,10 @@ Notes:
 2. Enter name: `ndx-try-planning-ai` (must be 1-50 chars, start with letter, alphanumeric + hyphens only)
 3. Select the `ndx-try-planning-ai` StackSet
 4. Configure deployment:
-   - Select target regions (template works in any region with Amazon Textract)
+   - Select target regions (template works in any region with Amazon Textract; Bedrock uses us-east-1)
    - Set timeout: **10 minutes** recommended for this template (deploys in 5-8 minutes)
+   - **Bedrock model access**: Ensure Amazon Nova Pro (`amazon.nova-pro-v1:0`) is enabled in the sandbox account (us-east-1). Request model access in Bedrock console if not already enabled.
+   - **SCP**: Ensure `bedrock:InvokeModel` is allowed in the sandbox account SCP
 5. Review and submit
 
 ## Step 4 — Associate with Lease Template
@@ -65,4 +67,8 @@ Notes:
    - S3 bucket `ndx-try-planning-docs-{account-id}-{region}`
    - IAM role `ndx-try-planning-ai-role-{region}`
 4. Open the Lambda Function URL and verify the planning document analysis interface loads
-5. Terminate the test lease and verify ISB cleans up all resources via AWS Nuke
+5. Click "Use Sample Document" and verify:
+   - AI Analysis section shows a committee summary, completeness check, and classification
+   - Extracted fields show applicant name, site address, and description
+   - If Bedrock fails (SCP issue), verify graceful degradation with "AI analysis unavailable" message
+6. Terminate the test lease and verify ISB cleans up all resources via AWS Nuke
