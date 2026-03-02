@@ -61,8 +61,8 @@ steps:
 
       - id: confidence-scores
         filename: step-3-confidence-scores.png
-        alt: "Extracted Application Details showing Application Reference PA/2024/00456, Applicant Name, Site Address, and raw extracted text"
-        caption: "Extracted fields and raw text from the 17-page planning application with 2977 words detected at 100% confidence"
+        alt: "AI Analysis Results showing Committee Summary, Application Type Householder with high confidence, Completeness Check complete, and Extracted Application Details"
+        caption: "Bedrock AI produced a committee summary, classified as Householder (high confidence), and confirmed application completeness"
         width: 1024
         height: 1024
 
@@ -85,8 +85,8 @@ steps:
 
       - id: full-results
         filename: step-4-full-results.png
-        alt: "Extracted application details showing PA/2024/00456 reference, applicant name Sarah, and site address 12 Elm Grove"
-        caption: "AI extracted key planning fields from the 17-page document including application reference, applicant, and site address"
+        alt: "AI Analysis Results with Committee Summary, Householder classification with high confidence, completeness check showing complete, and extracted application details"
+        caption: "The AI analysis results: committee-ready summary, application type classification, completeness check, and extracted fields"
         width: 1024
         height: 1024
 
