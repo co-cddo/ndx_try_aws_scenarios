@@ -636,15 +636,17 @@ scenarios:
       - "council-chatbot"
     securitySummary: "NDX:Try session isolated - simulated IoT data, no real sensors"
     skillsLearned:
+      - "AWS IoT Core"
       - "Amazon DynamoDB"
       - "AWS Lambda"
-      - "Real-time dashboards"
-      - "CloudFormation"
+      - "Amazon CloudWatch"
     isMostPopular: false
     awsServices:
+      - "AWS IoT Core"
       - "AWS Lambda"
       - "Amazon DynamoDB"
-      - "Amazon S3"
+      - "Amazon CloudWatch"
+      - "Amazon EventBridge"
     tags:
       - "IoT"
       - "Real-time"
@@ -670,9 +672,6 @@ scenarios:
         - name: "Environment"
           value: "sandbox"
           description: "Deployment environment (NDX:Try session)"
-        - name: "SimulatedSensors"
-          value: "20"
-          description: "Number of simulated parking sensors"
       tags:
         - key: "Project"
           value: "ndx-try"
@@ -681,20 +680,25 @@ scenarios:
         - key: "AutoCleanup"
           value: "true"
       capabilities:
-        - "CAPABILITY_IAM"
         - "CAPABILITY_NAMED_IAM"
         - "CAPABILITY_AUTO_EXPAND"
-      deploymentTime: "8 to 12 minutes"
+      deploymentTime: "15 to 20 minutes"
       deploymentPhases:
         - "Creating IAM roles (~30 seconds)"
-        - "Creating DynamoDB table (~30 seconds)"
-        - "Creating S3 bucket (~10 seconds)"
+        - "Creating DynamoDB table (~60 seconds)"
         - "Creating Lambda functions (~90 seconds)"
+        - "Creating IoT Core resources (Thing, Policy, TopicRule) (~60 seconds)"
+        - "Creating EventBridge rule (~10 seconds)"
+        - "Creating CloudWatch dashboard and alarms (~30 seconds)"
       outputs:
         - name: "DashboardURL"
-          description: "Smart car park dashboard URL"
-        - name: "DataTable"
-          description: "DynamoDB table for parking data"
+          description: "HTML dashboard URL (no login required)"
+        - name: "CloudWatchDashboardURL"
+          description: "CloudWatch console dashboard URL"
+        - name: "SensorReadingsTable"
+          description: "DynamoDB table name for sensor readings"
+        - name: "StackRegion"
+          description: "Deployment region"
     # Screenshot Walkthrough (Story 2.5 - Zero-Deployment Path)
     screenshots:
       steps: []
