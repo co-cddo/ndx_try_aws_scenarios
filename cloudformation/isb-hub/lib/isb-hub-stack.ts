@@ -5,6 +5,8 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as cfn from 'aws-cdk-lib/aws-cloudformation';
 import { Construct } from 'constructs';
 import * as path from 'path';
+import * as fs from 'fs';
+import * as crypto from 'crypto';
 
 const HUB_ACCOUNT = '568672915267';
 const ISB_NAMESPACE = 'ndx';
@@ -150,6 +152,10 @@ export class IsbHubStack extends cdk.Stack {
         .map(s => s.charAt(0).toUpperCase() + s.slice(1))
         .join('');
 
+      const templatePath = path.join(__dirname, '..', '..', 'scenarios', scenario.name, 'template.yaml');
+      const templateContent = fs.readFileSync(templatePath, 'utf8');
+      const contentHash = crypto.createHash('sha256').update(templateContent).digest('hex').substring(0, 16);
+
       const stackSet = new cfn.CfnStackSet(this, `${pascalName}StackSet`, {
         stackSetName: `ndx-try-${scenario.name}`,
         permissionModel: 'SELF_MANAGED',
@@ -157,7 +163,7 @@ export class IsbHubStack extends cdk.Stack {
         executionRoleName: `InnovationSandbox-${ISB_NAMESPACE}-SandboxAccountRole`,
         capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
         managedExecution: { Active: true },
-        templateUrl: `https://${BLUEPRINTS_BUCKET_NAME}.s3.${BLUEPRINTS_BUCKET_REGION}.amazonaws.com/scenarios/${scenario.name}/template.yaml`,
+        templateUrl: `https://${BLUEPRINTS_BUCKET_NAME}.s3.${BLUEPRINTS_BUCKET_REGION}.amazonaws.com/scenarios/${scenario.name}/template.yaml?v=${contentHash}`,
         description: scenario.description,
       });
 
