@@ -47,7 +47,7 @@ Notes:
 3. Select the `ndx-try-council-chatbot` StackSet
 4. Configure deployment:
    - Select target regions (template is designed for `us-east-1` due to Bedrock model availability)
-   - Set timeout: **5 minutes** recommended for this lightweight template
+   - Set timeout: **15 minutes** recommended for this lightweight template
 5. Review and submit
 
 ## Step 4 — Associate with Lease Template
@@ -60,10 +60,12 @@ Notes:
 ## Verification
 
 1. Request a test lease using the lease template from Step 4
-2. Wait for lease approval and blueprint deployment (should complete within 5 minutes)
+2. Wait for lease approval and blueprint deployment (should complete within 15 minutes)
 3. Check the sandbox account for:
    - Lambda function `ndx-try-chatbot-handler-{region}`
    - S3 bucket `ndx-try-chatbot-kb-{account-id}-{region}`
    - IAM role `ndx-try-chatbot-role-{region}`
+   - Bedrock Guardrail is READY (`ndx-try-council-guardrail-{region}`)
+   - Sample council documents seeded in S3 bucket under `documents/` prefix
 4. Open the Lambda Function URL and verify the chatbot responds to queries
 5. Terminate the test lease and verify ISB cleans up all resources via AWS Nuke

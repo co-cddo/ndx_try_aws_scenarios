@@ -2,9 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: |
   NDX:Try - Council Chatbot Scenario (Sandbox)
-  AI-powered resident Q&A assistant.
-  Sandbox uses keyword matching; production uses Bedrock.
-  Version: 1.0.1
+  AI-powered resident Q&A with Bedrock Guardrails and council document retrieval.
+  Version: 2.0.0
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -53,6 +52,616 @@ Resources:
         - Key: AutoCleanup
           Value: 'true'
 
+  # Bedrock Guardrail for content safety
+  CouncilGuardrail:
+    Type: AWS::Bedrock::Guardrail
+    Properties:
+      Name: !Sub 'ndx-try-council-guardrail-${AWS::Region}'
+      Description: Content safety guardrail for council chatbot
+      BlockedInputMessaging: >-
+        I'm sorry, I can only help with council service enquiries such as
+        bin collections, council tax, planning applications, housing, and
+        parking. How can I help you with a council service today?
+      BlockedOutputsMessaging: >-
+        I apologise, but I'm unable to provide that information. I can help
+        with council services such as waste collection, council tax, planning,
+        housing, parking, and road maintenance. What council service can I
+        assist you with?
+      ContentPolicyConfig:
+        FiltersConfig:
+          - Type: HATE
+            InputStrength: HIGH
+            OutputStrength: HIGH
+          - Type: INSULTS
+            InputStrength: HIGH
+            OutputStrength: HIGH
+          - Type: SEXUAL
+            InputStrength: HIGH
+            OutputStrength: HIGH
+          - Type: VIOLENCE
+            InputStrength: HIGH
+            OutputStrength: HIGH
+          - Type: MISCONDUCT
+            InputStrength: HIGH
+            OutputStrength: HIGH
+          - Type: PROMPT_ATTACK
+            InputStrength: HIGH
+            OutputStrength: NONE
+      TopicPolicyConfig:
+        TopicsConfig:
+          - Name: PoliticalOpinions
+            Definition: >-
+              Political party views, voting recommendations, commentary on
+              government policy, partisan political advice
+            Type: DENY
+            Examples:
+              - "Which party should I vote for in the local elections?"
+              - "What do you think of the government's housing policy?"
+              - "Is the Conservative or Labour party better for local councils?"
+          - Name: MedicalLegalAdvice
+            Definition: >-
+              Medical diagnoses, legal counsel, medication recommendations,
+              treatment advice
+            Type: DENY
+            Examples:
+              - "Can you diagnose why I've been feeling unwell?"
+              - "Should I sue my landlord?"
+              - "What medication should I take for my condition?"
+          - Name: NonCouncilTopics
+            Definition: >-
+              Entertainment, sports, recipes, general knowledge trivia,
+              celebrity gossip, and other topics unrelated to council services
+            Type: DENY
+            Examples:
+              - "What's a good recipe for chocolate cake?"
+              - "Who won the football last night?"
+              - "Tell me a joke"
+      SensitiveInformationPolicyConfig:
+        PiiEntitiesConfig:
+          - Type: NAME
+            Action: ANONYMIZE
+          - Type: EMAIL
+            Action: ANONYMIZE
+          - Type: PHONE
+            Action: ANONYMIZE
+          - Type: ADDRESS
+            Action: ANONYMIZE
+          - Type: UK_NATIONAL_INSURANCE_NUMBER
+            Action: BLOCK
+          - Type: UK_NATIONAL_HEALTH_SERVICE_NUMBER
+            Action: BLOCK
+          - Type: UK_UNIQUE_TAXPAYER_REFERENCE_NUMBER
+            Action: BLOCK
+          - Type: CREDIT_DEBIT_CARD_NUMBER
+            Action: BLOCK
+      WordPolicyConfig:
+        ManagedWordListsConfig:
+          - Type: PROFANITY
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: council-chatbot
+
+  # Guardrail Version
+  CouncilGuardrailVersion:
+    Type: AWS::Bedrock::GuardrailVersion
+    Properties:
+      GuardrailIdentifier: !GetAtt CouncilGuardrail.GuardrailArn
+
+  # Seed Data Lambda Role
+  SeedDataRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3Write
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt KnowledgeBaseBucket.Arn
+                  - !Sub '${KnowledgeBaseBucket.Arn}/*'
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: council-chatbot
+
+  # Seed Data Lambda Function
+  SeedDataFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-chatbot-seed-data-${AWS::Region}'
+      Description: Seeds sample council documents into S3 bucket
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt SeedDataRole.Arn
+      Timeout: 300
+      MemorySize: 256
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref KnowledgeBaseBucket
+      Code:
+        ZipFile: |
+          import json, boto3, urllib.request, os
+
+          s3 = boto3.client('s3')
+
+          DOCUMENTS = {
+            "waste-collection-guide.txt": """SAMPLE COUNCIL - WASTE COLLECTION AND RECYCLING GUIDE
+
+          Bin Collection Schedule
+          Your bins are collected on a regular schedule based on your area. To find your exact collection day, enter your postcode on our website or contact us.
+
+          General Waste (Black Bin) - Collected WEEKLY every Monday
+          Place your black bin at the kerbside by 7am on collection day. The bin must have the lid fully closed. We will not collect overflowing bins.
+          Accepted: general household waste, nappies, pet waste (bagged), broken crockery, vacuum cleaner contents.
+          Not accepted: garden waste, electrical items, batteries, paint, chemicals, building rubble.
+
+          Recycling (Blue Bin) - Collected FORTNIGHTLY on Thursdays (odd weeks)
+          Clean and dry recyclables only. Do not bag items - place them loose in the bin.
+          Accepted: paper, cardboard (flattened), plastic bottles and tubs, tin cans, aluminium foil (clean), glass bottles and jars, aerosol cans (empty), food and drink cartons.
+          Not accepted: plastic bags, cling film, polystyrene, nappies, food waste, textiles, electrical items.
+
+          Garden Waste (Green Bin) - Collected FORTNIGHTLY on Thursdays (even weeks)
+          This is an opt-in service costing 35 pounds per year. Register on our website or call 01234-567-890.
+          Accepted: grass cuttings, hedge trimmings, weeds, leaves, small branches (under 10cm diameter), flowers, plants.
+          Not accepted: soil, stones, treated wood, animal waste, food waste, plastic pots.
+
+          Bulky Waste Collection
+          We collect large household items for a fee. Book online or by phone.
+          - 1-3 items: 25 pounds
+          - 4-6 items: 45 pounds
+          Items collected: furniture, mattresses, carpets, appliances (not fridges/freezers).
+
+          Household Waste Recycling Centre
+          Location: Riverside Industrial Estate, Sample Road, SM1 2AB
+          Opening hours: Monday to Saturday 8am-6pm, Sunday 9am-4pm
+          Proof of address required. Cars and small vans only (permit needed for larger vehicles).
+
+          Missed Collections
+          Report a missed collection within 2 working days. We will return within 3 working days.
+          Phone: 01234-567-890
+          Online: www.samplecouncil.gov.uk/missed-collection
+
+          Christmas Collection Changes
+          Collections may change during the Christmas period. Revised schedules are published in December on our website and in the local press.
+
+          Contaminated Bins
+          If your recycling bin contains non-recyclable items, we will leave a tag explaining why it was not collected. Remove the contamination and present the bin on your next collection day.
+
+          Contact: waste@samplecouncil.gov.uk or 01234-567-890""",
+
+            "council-tax-guide.txt": """SAMPLE COUNCIL - COUNCIL TAX GUIDE 2024-25
+
+          What is Council Tax?
+          Council tax is a local tax on domestic properties to fund local services including schools, police, fire service, roads, libraries, and waste collection.
+
+          Council Tax Bands and Charges 2024-25
+          Band A: 1,198.42 pounds (properties valued up to 40,000 pounds in 1991)
+          Band B: 1,398.16 pounds (40,001 to 52,000 pounds)
+          Band C: 1,597.90 pounds (52,001 to 68,000 pounds)
+          Band D: 1,797.63 pounds (68,001 to 88,000 pounds)
+          Band E: 2,197.10 pounds (88,001 to 120,000 pounds)
+          Band F: 2,596.58 pounds (120,001 to 160,000 pounds)
+          Band G: 2,996.05 pounds (160,001 to 320,000 pounds)
+          Band H: 3,595.26 pounds (over 320,000 pounds)
+
+          How to Pay
+          - Direct Debit: Set up online or by phone. Pay over 10 or 12 monthly instalments.
+          - Online: Pay by debit or credit card at www.samplecouncil.gov.uk/pay
+          - Phone: Call 01234-567-891 (automated 24-hour line)
+          - Bank transfer: Sort code 12-34-56, Account 12345678, Reference: your council tax account number
+          - Post Office or PayPoint: Take your bill to any branch
+
+          Discounts and Exemptions
+          - Single Person Discount: 25% reduction if only one adult lives in the property. Apply online or by phone.
+          - Student Exemption: Properties occupied only by full-time students are exempt. Provide student certificates from your institution.
+          - Disabled Band Reduction: If your property has been adapted for a disabled person, you may qualify for a reduction to the next lower band.
+          - Empty Properties: A 100% charge applies to unfurnished empty properties after 2 years, and a 200% premium after 5 years.
+          - Second Homes: 100% council tax premium applies from April 2025.
+
+          Council Tax Support (Reduction)
+          If you are on a low income or receiving benefits, you may qualify for council tax support of up to 100%. Apply online at www.samplecouncil.gov.uk/cts or collect a form from the council offices.
+
+          Moving Home
+          Tell us when you move so we can adjust your bill. You are liable for council tax at your new address from the date you move in. Contact us within 21 days.
+
+          Challenging Your Band
+          If you believe your property is in the wrong band, contact the Valuation Office Agency (VOA) at www.voa.gov.uk.
+
+          Contact: counciltax@samplecouncil.gov.uk or 01234-567-891""",
+
+            "planning-applications-guide.txt": """SAMPLE COUNCIL - PLANNING APPLICATIONS GUIDE
+
+          Do I Need Planning Permission?
+          You need planning permission for most building work, changes of use, and alterations that affect the external appearance of a building. Some minor works are covered by Permitted Development rights.
+
+          Works that usually NEED planning permission:
+          - Building a new house or flat
+          - Extensions beyond permitted development limits
+          - Changing the use of a building (e.g. house to flats, shop to restaurant)
+          - Building in a conservation area or on listed buildings
+          - Installing large solar panels facing a road
+          - Building a wall or fence over 2 metres high
+
+          Works that usually DO NOT need planning permission (Permitted Development):
+          - Small rear extensions (up to 3m for semi-detached, 4m for detached since 2019)
+          - Loft conversions within certain limits
+          - Internal alterations (unless listed building)
+          - Garden sheds and outbuildings under 2.5m height
+          - Fences under 2 metres (1 metre next to a highway)
+          - Solar panels (not on a listed building)
+
+          How to Apply
+          1. Check if you need permission: Use our online tool or speak to our planning team
+          2. Pre-application advice: We offer paid pre-application advice (150 pounds for householder, 500 pounds for major). Book at www.samplecouncil.gov.uk/planning
+          3. Submit your application: Apply online at www.planningportal.co.uk
+          4. Application fees: Householder applications 258 pounds; full applications vary by type
+
+          What Happens Next
+          - Validation: We check your application is complete (5 working days)
+          - Consultation: Neighbours and statutory consultees are notified (21 days)
+          - Assessment: Planning officer assesses against local and national policy
+          - Decision: Most applications decided within 8 weeks (householder) or 13 weeks (major)
+          - You will receive a decision notice by email
+
+          Planning Enforcement
+          If you believe someone has carried out work without planning permission, report it to us. We investigate all reports. Call 01234-567-892 or email planning.enforcement@samplecouncil.gov.uk.
+
+          Building Control
+          Building regulations approval is separate from planning permission. You may need both. Contact building.control@samplecouncil.gov.uk or 01234-567-893.
+
+          Contact: planning@samplecouncil.gov.uk or 01234-567-892""",
+
+            "housing-services-guide.txt": """SAMPLE COUNCIL - HOUSING SERVICES GUIDE
+
+          Council Housing
+          We manage approximately 8,500 council homes across the borough. Our tenants benefit from secure tenancies, affordable rents, and a responsive repairs service.
+
+          Housing Register (Waiting List)
+          To apply for council housing, you must join the housing register. Applications are assessed using a banding system:
+          - Band A (Emergency): Fleeing domestic abuse, severe overcrowding, demolition orders
+          - Band B (High Priority): Homeless households, medical needs requiring a move, overcrowded by 2+ bedrooms
+          - Band C (Medium Priority): Overcrowded by 1 bedroom, sharing facilities
+          - Band D (Low Priority): Adequately housed but wanting to move
+          Apply online at www.samplecouncil.gov.uk/housing-register. Average waiting time varies by band and property size (Band B: 12-18 months for a 2-bed; Band D: 3-5 years).
+
+          Reporting Repairs
+          Emergency repairs (24-hour): 01234-567-800 (gas leaks, burst pipes, no heating in winter, broken external door locks)
+          Urgent repairs (3 working days): Partial heating failure, toilet not flushing, leaking roof
+          Routine repairs (20 working days): Dripping taps, broken cupboard doors, cracked tiles
+          Report online: www.samplecouncil.gov.uk/repairs
+
+          Homelessness and Housing Advice
+          If you are homeless or at risk of homelessness, contact us immediately. We have a legal duty to help.
+          - Housing Options Team: 01234-567-801 (Mon-Fri 9am-5pm)
+          - Out of hours emergency: 01234-567-802
+          - Drop-in: Housing Centre, High Street, SM1 1AA (Mon-Fri 9am-4pm, no appointment needed)
+
+          Right to Buy
+          If you have been a council tenant for 3+ years, you may be eligible to buy your home at a discount (up to 87,200 pounds for houses, 116,200 pounds for flats in 2024-25). Contact us for an application form.
+
+          Private Sector Housing
+          We inspect private rented properties for hazards and can take enforcement action against landlords who fail to maintain safe conditions.
+
+          Contact: housing@samplecouncil.gov.uk or 01234-567-801""",
+
+            "parking-services-guide.txt": """SAMPLE COUNCIL - PARKING SERVICES GUIDE
+
+          Resident Parking Permits
+          Annual permits are available for residents in controlled parking zones:
+          - First permit: 50 pounds per year
+          - Second permit: 100 pounds per year
+          - Third permit: Not available (maximum 2 per household)
+          - Visitor permits: 1 pound per day (book of 20 for 20 pounds)
+          Apply online: www.samplecouncil.gov.uk/parking-permits
+          Processing time: 5-10 working days
+
+          Council Car Parks
+          Town Centre Multi-Storey (200 spaces): Up to 1 hour 1.50 pounds, up to 3 hours 3.50 pounds, all day 7 pounds
+          High Street Surface Car Park (80 spaces): Up to 1 hour 1 pound, up to 3 hours 2.50 pounds, all day 5 pounds
+          Railway Station Car Park (150 spaces): All day 8 pounds, season ticket 120 pounds/month
+          Free parking after 6pm and all day Sunday in all council car parks.
+          Pay by phone: Download the RingGo app or call 01onal number on the machine.
+
+          Penalty Charge Notices (PCNs)
+          If you receive a PCN, you have 28 days to pay or challenge it.
+          - Higher rate (e.g. parking on double yellow lines): 70 pounds (35 pounds if paid within 14 days)
+          - Lower rate (e.g. expired ticket): 50 pounds (25 pounds if paid within 14 days)
+          Challenge a PCN: Write to parking.challenges@samplecouncil.gov.uk within 28 days with evidence.
+
+          Blue Badge Holders
+          Blue badge holders can park free in all council car parks and on single yellow lines for up to 3 hours.
+          Apply for a blue badge: www.gov.uk/apply-blue-badge or visit our offices with supporting documentation.
+
+          Dropped Kerbs
+          To request a vehicle crossover (dropped kerb) for your driveway: apply online (250 pound inspection fee, construction costs vary).
+
+          Contact: parking@samplecouncil.gov.uk or 01234-567-894""",
+
+            "roads-highways-guide.txt": """SAMPLE COUNCIL - ROADS AND HIGHWAYS GUIDE
+
+          Report a Pothole
+          Report potholes online at www.samplecouncil.gov.uk/potholes or call 01234-567-895.
+          Response times:
+          - Emergency (danger to life, major road): 2 hours
+          - Category 1 (significant defect on main road): 24 hours
+          - Category 2 (defect on main road): 5 working days
+          - Category 3 (minor defect or residential road): 28 days
+          We inspect all reports and prioritise based on risk. We repair approximately 5,000 potholes per year.
+
+          Street Lighting
+          Report a faulty street light online or by phone. Include the lamp column number (on the column near the base).
+          - Light not working: Repaired within 5 working days
+          - Light on during the day: Repaired within 10 working days
+          - Damaged column (e.g. vehicle collision): Emergency response within 2 hours
+
+          Winter Gritting
+          We grit priority routes (A and B roads, bus routes, steep hills) when temperatures are forecast to drop below zero.
+          Grit bins are located on steep residential streets. Report empty grit bins online.
+          Priority route map: www.samplecouncil.gov.uk/gritting-routes
+
+          Road Closures and Roadworks
+          Check current and planned roadworks at www.one.network or www.samplecouncil.gov.uk/roadworks.
+          Apply for a temporary road closure: Contact highways@samplecouncil.gov.uk (minimum 12 weeks notice).
+
+          Pavement Maintenance
+          Report damaged or uneven pavements online. We inspect and repair based on the same categories as potholes.
+          Tree root damage: We work with our tree team to minimise root damage while preserving trees where possible.
+
+          Flooding and Drainage
+          Report blocked drains or flooding online or by phone. Emergency flooding: call 01234-567-895 (24 hours).
+          We are the Lead Local Flood Authority and maintain a flood risk register.
+
+          Contact: highways@samplecouncil.gov.uk or 01234-567-895""",
+
+            "contact-information.txt": """SAMPLE COUNCIL - CONTACT INFORMATION
+
+          Main Switchboard: 01234-567-890
+          Monday to Friday: 8:30am - 5:30pm
+          Saturday: 9:00am - 12:30pm (limited services)
+          Sunday and Bank Holidays: Closed (emergency services only)
+
+          Email: contact@samplecouncil.gov.uk
+          Website: www.samplecouncil.gov.uk
+
+          Main Council Offices
+          Sample Council, Civic Centre, High Street, Sampletown, SM1 1AA
+          Opening hours: Monday to Friday 9am-5pm (last entry 4:30pm)
+          Accessible entrance via the rear car park. Hearing loop available at all reception desks.
+
+          Key Service Numbers:
+          - Council Tax: 01234-567-891
+          - Housing Repairs (emergency 24hr): 01234-567-800
+          - Housing Options: 01234-567-801
+          - Planning: 01234-567-892
+          - Building Control: 01234-567-893
+          - Parking: 01234-567-894
+          - Highways and Potholes: 01234-567-895
+          - Waste and Recycling: 01234-567-890
+          - Environmental Health: 01234-567-896
+          - Licensing: 01234-567-897
+          - Benefits: 01234-567-898
+          - Electoral Services: 01234-567-899
+          - Libraries: 01234-567-870
+
+          Out of Hours Emergencies: 01234-567-999
+          For emergencies outside office hours including dangerous buildings, noise nuisance, emergency housing, and highways emergencies.
+
+          Report It Online
+          Most services can be reported or requested via our website 24/7:
+          www.samplecouncil.gov.uk/report-it
+
+          Social Media
+          Twitter/X: @SampleCouncil
+          Facebook: facebook.com/SampleCouncil
+
+          Complaints and Compliments
+          Stage 1: Contact the service directly
+          Stage 2: Write to complaints@samplecouncil.gov.uk
+          Stage 3: Local Government and Social Care Ombudsman (www.lgo.org.uk)""",
+
+            "environmental-services-guide.txt": """SAMPLE COUNCIL - ENVIRONMENTAL SERVICES GUIDE
+
+          Noise Complaints
+          Report noise nuisance (loud music, barking dogs, construction outside permitted hours, alarms):
+          - During office hours: 01234-567-896
+          - Out of hours noise service (Fri-Sat 8pm-3am): 01234-567-896 option 2
+          - Online diary: Record noise disturbances at www.samplecouncil.gov.uk/noise-diary
+          Construction noise is permitted Monday-Friday 8am-6pm, Saturday 8am-1pm. No construction noise on Sundays or bank holidays.
+
+          Pest Control
+          We offer subsidised pest control for council tenants (free for rats and mice, 50 pounds for other pests).
+          Private residents: Treatment from 75 pounds depending on pest type.
+          Pests treated: rats, mice, wasps, cockroaches, bedbugs, fleas.
+          Book: www.samplecouncil.gov.uk/pest-control or 01234-567-896
+
+          Fly-Tipping
+          Report fly-tipping (illegal dumping) online or by phone. Include photos and location details if possible.
+          We investigate all reports and prosecute offenders where evidence is available. Fines up to 50,000 pounds or imprisonment.
+          Fixed penalty notice for small-scale fly-tipping: 400 pounds.
+          Report: www.samplecouncil.gov.uk/fly-tipping or 01234-567-896
+
+          Air Quality
+          We monitor air quality across the borough. Live data available at www.samplecouncil.gov.uk/air-quality.
+          Air Quality Management Areas (AQMAs) are declared where pollution exceeds national standards.
+
+          Food Safety
+          We inspect all food businesses. Ratings are published at www.food.gov.uk/ratings.
+          Report a food safety concern: 01234-567-896 or environmental.health@samplecouncil.gov.uk
+
+          Contact: environmental.health@samplecouncil.gov.uk or 01234-567-896""",
+
+            "libraries-leisure-guide.txt": """SAMPLE COUNCIL - LIBRARIES AND LEISURE GUIDE
+
+          Libraries
+          We have 6 libraries across the borough. Library membership is free for all residents.
+
+          Central Library, High Street, SM1 1BB
+          Mon-Fri 9am-7pm, Sat 9am-5pm, Sun 11am-4pm
+          Services: books, DVDs, free WiFi, public computers, printing (10p/page), meeting rooms, children's activities.
+
+          Branch Libraries (5 locations):
+          Mon, Wed, Fri 10am-5pm, Tue, Thu 10am-7pm, Sat 10am-2pm
+          Locations: Northside, Southgate, East Park, Westfield, Hillcrest
+
+          Online Services: eBooks and eAudiobooks free via the BorrowBox app. Online reference databases available 24/7.
+
+          Events: Rhyme Time (weekly, under-5s), Code Club (weekly, ages 8-12), Reading Groups (monthly, adults), Digital Skills Drop-in (weekly).
+
+          Parks and Open Spaces
+          We maintain 15 parks and 8 play areas across the borough.
+          Victoria Park (SM1 3CC): Playground, skate park, tennis courts, bowling green, cafe.
+          Riverside Walk: 3km riverside path, accessible for wheelchairs and pushchairs.
+          Allotments: Apply for an allotment plot (waiting list approximately 2 years). Annual rent 50-100 pounds depending on plot size.
+
+          Leisure Centres
+          Sample Leisure Centre, Sports Way, SM1 4DD
+          Facilities: 25m pool, gym, sports hall, squash courts, studio.
+          Membership: 35 pounds/month (adult), 20 pounds/month (concession), under-16s free with paying adult.
+          Pay-as-you-go: Swim 5 pounds, gym 7 pounds, class 6 pounds.
+
+          Contact: libraries@samplecouncil.gov.uk or 01234-567-870""",
+
+            "benefits-support-guide.txt": """SAMPLE COUNCIL - BENEFITS AND SUPPORT GUIDE
+
+          Housing Benefit
+          Housing Benefit helps pay rent if you are on a low income. It is being replaced by Universal Credit for most new claims, but you may still be eligible if you are pension age or living in supported housing.
+          Apply: www.samplecouncil.gov.uk/housing-benefit or collect a form from council offices.
+          Processing time: New claims 20 working days, changes 10 working days.
+
+          Council Tax Support
+          You may be eligible for council tax support if you are on a low income or receiving certain benefits.
+          - Working age: Up to 80% reduction (you always pay at least 20%)
+          - Pension age: Up to 100% reduction
+          Apply online: www.samplecouncil.gov.uk/council-tax-support
+
+          Discretionary Housing Payments
+          If Housing Benefit or Universal Credit housing element does not cover your full rent, you may apply for additional help. Limited fund available.
+
+          Free School Meals
+          Children whose parents receive certain benefits qualify for free school meals. Apply online at www.samplecouncil.gov.uk/free-school-meals.
+
+          Local Welfare Assistance
+          Emergency help for residents in crisis. We can provide food bank vouchers, emergency fuel payments, and essential household items.
+          Contact: 01234-567-898 (Mon-Fri 9am-5pm)
+
+          Cost of Living Support
+          Visit our Cost of Living Hub: www.samplecouncil.gov.uk/cost-of-living for information about energy grants, food support, debt advice, and benefit calculators.
+
+          Warm Homes Scheme
+          Free home insulation and heating improvements for eligible residents (owner-occupiers on low incomes or receiving certain benefits).
+
+          Contact: benefits@samplecouncil.gov.uk or 01234-567-898""",
+
+            "elections-voting-guide.txt": """SAMPLE COUNCIL - ELECTIONS AND VOTING GUIDE
+
+          Register to Vote
+          You must be registered to vote in elections. Register online at www.gov.uk/register-to-vote. You need your National Insurance number.
+          Registration deadline: 12 working days before an election.
+          You can register if you are a British, Irish, or qualifying Commonwealth citizen aged 16 or over (you can vote when you turn 18).
+
+          Voting Methods
+          - In person: Vote at your polling station on election day (7am-10pm). Bring photo ID (since October 2023).
+          - Postal vote: Apply at www.gov.uk/apply-postal-vote. Applications must be received 11 working days before the election.
+          - Proxy vote: Appoint someone to vote on your behalf. Apply at www.gov.uk/apply-proxy-vote.
+
+          Accepted Photo ID for Voting
+          Passport, driving licence, blue badge, older person's bus pass, Voter Authority Certificate.
+          If you do not have accepted photo ID, apply for a free Voter Authority Certificate at www.gov.uk/apply-for-photo-id-voter-authority-certificate.
+
+          Upcoming Elections
+          Check www.samplecouncil.gov.uk/elections for details of upcoming elections in your area.
+          Council elections: Held in May. One third of councillors elected each year (no election in the fourth year).
+          Parish council elections: Held alongside council elections.
+
+          Becoming a Councillor
+          You can stand for election if you are 18 or over, a British/Irish/qualifying Commonwealth citizen, and live or work in the council area.
+
+          Contact: elections@samplecouncil.gov.uk or 01234-567-899""",
+
+            "licensing-guide.txt": """SAMPLE COUNCIL - LICENSING GUIDE
+
+          Premises Licence (Alcohol and Entertainment)
+          You need a premises licence to sell alcohol, provide late-night refreshment, or hold regulated entertainment.
+          Application fee: 100-1,905 pounds depending on rateable value.
+          Apply to: licensing@samplecouncil.gov.uk with plans, DPS consent, and operating schedule.
+          Processing time: 28 days consultation plus 2 weeks for decision.
+
+          Personal Licence
+          Required for anyone authorising the sale of alcohol. You must hold a licensing qualification.
+          Fee: 37 pounds. Apply with your qualification certificate and basic DBS check.
+
+          Taxi and Private Hire Licensing
+          Driver licence: Apply with DBS enhanced check, medical certificate, driving record, and knowledge test. Fee: 250 pounds (3 years).
+          Vehicle licence: Annual inspection required. Fee: 200 pounds per year.
+          Operator licence: For private hire operators. Fee: 500 pounds (5 years).
+          Apply: www.samplecouncil.gov.uk/taxi-licensing
+
+          Street Trading
+          You need a consent to trade on the street. Designated consent streets are listed on our website.
+          Daily consent: 25 pounds. Annual consent: 1,500 pounds.
+          Apply at least 28 days before you wish to start trading.
+
+          Animal Licensing
+          Licences required for: dog breeding (3+ litters/year), pet shops, animal boarding, riding schools, dangerous wild animals.
+          Fee: 150-400 pounds depending on licence type. Inspections required before licence granted.
+
+          Contact: licensing@samplecouncil.gov.uk or 01234-567-897"""
+          }
+
+          def handler(event, context):
+              request_type = event.get('RequestType', 'Create')
+              bucket = os.environ['BUCKET_NAME']
+              try:
+                  if request_type in ('Create', 'Update'):
+                      for key, content in DOCUMENTS.items():
+                          s3.put_object(Bucket=bucket, Key=f'documents/{key}', Body=content.strip(), ContentType='text/plain')
+                      print(f'Uploaded {len(DOCUMENTS)} documents to {bucket}')
+                  elif request_type == 'Delete':
+                      objs = s3.list_objects_v2(Bucket=bucket, Prefix='documents/')
+                      if 'Contents' in objs:
+                          s3.delete_objects(Bucket=bucket, Delete={'Objects': [{'Key': o['Key']} for o in objs['Contents']]})
+                      print(f'Cleaned up documents from {bucket}')
+                  send_response(event, context, 'SUCCESS', {'Message': f'{request_type} completed'})
+              except Exception as e:
+                  print(f'Error: {str(e)}')
+                  send_response(event, context, 'FAILED', {'Error': str(e)})
+
+          def send_response(event, context, status, data):
+              body = json.dumps({'Status': status, 'Reason': f'See CloudWatch Log Stream: {context.log_stream_name}', 'PhysicalResourceId': context.log_stream_name, 'StackId': event['StackId'], 'RequestId': event['RequestId'], 'LogicalResourceId': event['LogicalResourceId'], 'Data': data})
+              req = urllib.request.Request(event['ResponseURL'], data=body.encode('utf-8'), headers={'Content-Type': ''}, method='PUT')
+              urllib.request.urlopen(req)
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: council-chatbot
+
+  # Seed Data Custom Resource
+  SeedData:
+    Type: Custom::SeedData
+    DependsOn: KnowledgeBaseBucket
+    Properties:
+      ServiceToken: !GetAtt SeedDataFunction.Arn
+      # Change this value to trigger re-seeding on stack update
+      Version: '1'
+
   # IAM Role for Lambda
   ChatbotRole:
     Type: AWS::IAM::Role
@@ -87,103 +696,131 @@ Resources:
                 Action:
                   - bedrock:InvokeModel
                 Resource:
-                  - 'arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-pro-v1:0'
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-pro-v1:0'
+        - PolicyName: GuardrailAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:ApplyGuardrail
+                Resource:
+                  - !GetAtt CouncilGuardrail.GuardrailArn
       Tags:
         - Key: Project
           Value: ndx-try
         - Key: Scenario
           Value: council-chatbot
 
-  # Lambda Function - Chatbot Handler (Amazon Nova Pro)
+  # Lambda Function - Chatbot Handler (Amazon Nova Pro with Guardrails)
   ChatbotFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub 'ndx-try-chatbot-handler-${AWS::Region}'
-      Description: Council chatbot using Amazon Nova Pro AI
+      Description: Council chatbot using Amazon Nova Pro with Guardrails
       Runtime: python3.12
       Handler: index.lambda_handler
       Role: !GetAtt ChatbotRole.Arn
-      Timeout: 30
+      Timeout: 60
       MemorySize: 256
       Environment:
         Variables:
           KNOWLEDGE_BUCKET: !Ref KnowledgeBaseBucket
           ENVIRONMENT: !Ref Environment
           BEDROCK_MODEL_ID: amazon.nova-pro-v1:0
+          GUARDRAIL_ID: !GetAtt CouncilGuardrail.GuardrailId
+          GUARDRAIL_VERSION: !GetAtt CouncilGuardrailVersion.Version
       Code:
         ZipFile: |
-          import json
-          import boto3
+          import json, os, boto3
           from datetime import datetime
 
-          # Initialize Bedrock client
-          bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
+          bedrock = boto3.client('bedrock-runtime')
+          s3 = boto3.client('s3')
 
-          # Council assistant system prompt
-          SYSTEM_PROMPT = """You are a helpful UK local council service assistant for a sample council.
-          You help residents with questions about council services including:
-          - Waste collection and recycling (black bin weekly on Monday, blue recycling fortnightly Thursday, green garden waste fortnightly)
-          - Council Tax payments, discounts (25% single person), and support schemes
-          - Planning applications and building permissions
-          - Housing services, repairs, and housing register
-          - Parking permits, car parks, and penalties
-          - Road repairs, potholes, and street lighting
-          - General contact information (phone: 01234-567-890, email: contact@samplecouncil.gov.uk)
+          BUCKET = os.environ.get('KNOWLEDGE_BUCKET', '')
+          GUARDRAIL_ID = os.environ.get('GUARDRAIL_ID', '')
+          GUARDRAIL_VERSION = os.environ.get('GUARDRAIL_VERSION', '')
+          MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'amazon.nova-pro-v1:0')
 
-          Keep responses concise (under 200 words), friendly, and helpful.
-          Use bullet points and formatting for readability.
-          Include relevant contact details or next steps where appropriate.
-          If you don't know specific details, provide general guidance and suggest contacting the council directly.
-          This is a demo council - use sample data but make it realistic for UK councils."""
+          _docs_cache = None
 
-          def get_bedrock_response(user_message):
-              """Call Amazon Nova Pro for AI response"""
+          def load_documents():
+              global _docs_cache
+              if _docs_cache is not None:
+                  return _docs_cache
               try:
-                  response = bedrock.invoke_model(
-                      modelId='amazon.nova-pro-v1:0',
-                      body=json.dumps({
-                          "messages": [
-                              {"role": "user", "content": [{"text": user_message}]}
-                          ],
-                          "system": [{"text": SYSTEM_PROMPT}],
-                          "inferenceConfig": {
-                              "max_new_tokens": 1024,
-                              "temperature": 0.7
-                          }
-                      })
-                  )
-                  result = json.loads(response['body'].read())
-                  return {
-                      'success': True,
-                      'response': result['output']['message']['content'][0]['text'],
-                      'usage': result.get('usage', {})
-                  }
+                  resp = s3.list_objects_v2(Bucket=BUCKET, Prefix='documents/')
+                  docs = []
+                  for obj in resp.get('Contents', []):
+                      if obj['Key'].endswith('.txt'):
+                          body = s3.get_object(Bucket=BUCKET, Key=obj['Key'])['Body'].read().decode('utf-8')
+                          docs.append(body)
+                  _docs_cache = '\n\n---\n\n'.join(docs)
+                  print(f'Loaded {len(docs)} documents')
+                  return _docs_cache
               except Exception as e:
-                  print(f"Bedrock error: {str(e)}")
-                  return {
-                      'success': False,
-                      'error': str(e)
+                  print(f'Doc load error: {e}')
+                  _docs_cache = ''
+                  return ''
+
+          SYSTEM_PROMPT_TEMPLATE = """You are a helpful UK local council service assistant for Sample Council.
+          You help residents with council services including waste collection, council tax,
+          planning, housing, parking, roads, and general enquiries.
+          Keep responses concise (under 200 words), friendly, and helpful.
+          Use bullet points for readability. Include contact details where appropriate.
+          If you don't know specific details, suggest contacting the council directly.
+          Use ONLY the following council documents to answer questions. If the answer is not
+          in the documents, say you don't have that specific information and suggest contacting
+          the council directly.
+
+          COUNCIL DOCUMENTS:
+          {documents}"""
+
+          def get_response(user_message, history=None):
+              try:
+                  documents = load_documents()
+                  system_text = SYSTEM_PROMPT_TEMPLATE.format(documents=documents)
+                  messages = []
+                  if history:
+                      for msg in history[-10:]:
+                          role = 'assistant' if msg.get('role') == 'assistant' else 'user'
+                          text = msg.get('text', '')
+                          if text:
+                              messages.append({"role": role, "content": [{"text": text}]})
+                  # Strip leading assistant messages (Converse API requires user-first)
+                  while messages and messages[0]['role'] != 'user':
+                      messages.pop(0)
+                  messages.append({"role": "user", "content": [{"text": user_message}]})
+                  params = {
+                      "modelId": MODEL_ID,
+                      "messages": messages,
+                      "system": [{"text": system_text}],
+                      "inferenceConfig": {"maxTokens": 1024, "temperature": 0.7}
                   }
+                  if GUARDRAIL_ID and GUARDRAIL_VERSION:
+                      params["guardrailConfig"] = {
+                          "guardrailIdentifier": GUARDRAIL_ID,
+                          "guardrailVersion": GUARDRAIL_VERSION
+                      }
+                  response = bedrock.converse(**params)
+                  guardrail_active = response.get('stopReason') == 'guardrail_intervened'
+                  output_text = response['output']['message']['content'][0]['text']
+                  return {'success': True, 'response': output_text, 'guardrail': guardrail_active}
+              except Exception as e:
+                  print(f"Bedrock error: {e}")
+                  return {'success': False, 'error': str(e)}
 
           def get_topic_from_message(message):
-              """Categorize the message topic for display"""
-              message_lower = message.lower()
-              if any(w in message_lower for w in ['bin', 'waste', 'rubbish', 'recycling', 'collection']):
-                  return 'Bin Collections'
-              elif any(w in message_lower for w in ['council tax', 'payment', 'bill', 'discount']):
-                  return 'Council Tax'
-              elif any(w in message_lower for w in ['planning', 'application', 'build', 'extension', 'permission']):
-                  return 'Planning'
-              elif any(w in message_lower for w in ['housing', 'rent', 'repair', 'home', 'accommodation']):
-                  return 'Housing'
-              elif any(w in message_lower for w in ['parking', 'car park', 'permit', 'ticket']):
-                  return 'Parking'
-              elif any(w in message_lower for w in ['pothole', 'road', 'highway', 'street', 'pavement', 'light']):
-                  return 'Roads & Highways'
-              elif any(w in message_lower for w in ['contact', 'phone', 'email', 'hours', 'open']):
-                  return 'Contact Us'
-              else:
-                  return 'General Enquiry'
+              m = message.lower()
+              if any(w in m for w in ['bin','waste','rubbish','recycling','collection']): return 'Bin Collections'
+              if any(w in m for w in ['council tax','payment','bill','discount']): return 'Council Tax'
+              if any(w in m for w in ['planning','application','build','extension','permission']): return 'Planning'
+              if any(w in m for w in ['housing','rent','repair','home','accommodation']): return 'Housing'
+              if any(w in m for w in ['parking','car park','permit','ticket']): return 'Parking'
+              if any(w in m for w in ['pothole','road','highway','street','pavement','light']): return 'Roads & Highways'
+              if any(w in m for w in ['contact','phone','email','hours','open']): return 'Contact Us'
+              return 'General Enquiry'
 
           def render_chat_html():
               return '''<!DOCTYPE html>
@@ -207,7 +844,7 @@ Resources:
           .bot .bubble{background:#f3f2f1;color:#0b0c0c}
           .user .bubble{background:#1d70b8;color:#fff}
           .error-message{border:2px solid #d4351c;background:#f9e6e5}
-          .error-message:before{content:"⚠️ ";margin-right:4px}
+          .error-message:before{content:"\\26A0\\FE0F ";margin-right:4px}
           .loading{display:flex;gap:4px;align-items:center;padding:12px 16px;background:#f3f2f1;border-radius:8px;max-width:70px}
           .loading span{width:8px;height:8px;background:#505a5f;border-radius:50%;animation:pulse 1.4s infinite ease-in-out both}
           .loading span:nth-child(1){animation-delay:-0.32s}
@@ -232,6 +869,7 @@ Resources:
           #sendBtn:focus{outline:3px solid #ffdd00;outline-offset:0}
           #sendBtn:disabled{background:#b1b4b6;cursor:not-allowed}
           .sr-only{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+          .meta{font-size:12px;color:#505a5f;margin-top:4px}
           @media(max-width:768px){
           .header{font-size:20px;padding:12px 15px}
           .container{padding:15px}
@@ -247,7 +885,7 @@ Resources:
           </style>
           </head>
           <body>
-          <div class="banner">Powered by Amazon Nova Pro - Real AI responses for council enquiries</div>
+          <div class="banner">Powered by Amazon Nova Pro with Bedrock Guardrails</div>
           <div class="header"><span style="font-size:14px;opacity:0.8">NDX:Try</span> Council Chatbot Demo</div>
           <div class="container">
           <div class="messages" id="messages" role="log" aria-live="polite" aria-atomic="false"></div>
@@ -266,92 +904,61 @@ Resources:
           var conversationKey='ndx-chatbot-conversation';
           var maxMessages=20;
           var sampleQuestionsList=["What are my bin collection days?","How do I pay council tax?","I want to apply for planning permission","How do I report a pothole?","What are your opening hours?","How do I get a parking permit?"];
-          function escapeHtml(text){var div=document.createElement('div');div.textContent=text;return div.innerHTML}
-          function announceStatus(msg){var status=document.getElementById('statusMsg');status.textContent=msg}
+          function getHistory(){try{var saved=sessionStorage.getItem(conversationKey);if(!saved)return[];var c=JSON.parse(saved);var h=[];for(var i=0;i<c.length;i++){var item=c[i];h.push({role:item.type==='user'?'user':'assistant',text:item.text})}return h.slice(-10)}catch(e){return[]}}
+          function announceStatus(msg){document.getElementById('statusMsg').textContent=msg}
           function scrollToBottom(){var msgs=document.getElementById('messages');msgs.scrollTop=msgs.scrollHeight}
-          function setInputDisabled(disabled){document.getElementById('userInput').disabled=disabled;var btn=document.getElementById('sendBtn');btn.disabled=disabled;btn.textContent=disabled?'Sending...':'Send';var sampleBtns=document.querySelectorAll('.sample-question');for(var i=0;i<sampleBtns.length;i++){sampleBtns[i].disabled=disabled}}
+          function setInputDisabled(d){document.getElementById('userInput').disabled=d;var btn=document.getElementById('sendBtn');btn.disabled=d;btn.textContent=d?'Sending...':'Send';var sq=document.querySelectorAll('.sample-question');for(var i=0;i<sq.length;i++)sq[i].disabled=d}
           function focusInput(){document.getElementById('userInput').focus()}
-          function showLoadingIndicator(){var msg=document.createElement('div');msg.className='message bot';msg.id='loadingMsg';var loading=document.createElement('div');loading.className='loading';loading.setAttribute('aria-label','Waiting for response');loading.innerHTML='<span></span><span></span><span></span>';msg.appendChild(loading);loadingElement=msg;document.getElementById('messages').appendChild(msg);scrollToBottom()}
-          function hideLoadingIndicator(){if(loadingElement&&loadingElement.parentNode){loadingElement.parentNode.removeChild(loadingElement);loadingElement=null}}
-          function saveConversation(){try{var messages=document.getElementById('messages').querySelectorAll('.message:not(#loadingMsg)');var conversation=[];for(var i=0;i<messages.length;i++){var msg=messages[i];var type=msg.classList.contains('user')?'user':'bot';var bubble=msg.querySelector('.bubble');if(!bubble)continue;var text=bubble.textContent;var topic=null;var badge=msg.querySelector('.topic-badge');if(badge){topic=badge.textContent}conversation.push({type:type,text:text,topic:topic})}if(conversation.length>maxMessages){conversation=conversation.slice(-maxMessages)}sessionStorage.setItem(conversationKey,JSON.stringify(conversation))}catch(e){console.error('Failed to save conversation:',e)}}
-          function loadConversation(){try{var saved=sessionStorage.getItem(conversationKey);if(!saved)return false;var conversation=JSON.parse(saved);var messagesDiv=document.getElementById('messages');for(var i=0;i<conversation.length;i++){var item=conversation[i];var msg=document.createElement('div');msg.className='message '+item.type;if(item.type==='bot'&&item.topic){var badge=document.createElement('div');badge.className='topic-badge';badge.textContent=item.topic;msg.appendChild(badge)}var bubble=document.createElement('div');bubble.className='bubble';if(item.text.indexOf('⚠️')===0||item.text.indexOf('Unable to connect')!==-1||item.text.indexOf('Request timed out')!==-1||item.text.indexOf('API error')!==-1){bubble.className='bubble error-message'}bubble.textContent=item.text;msg.appendChild(bubble);messagesDiv.appendChild(msg)}scrollToBottom();return true}catch(e){console.error('Failed to load conversation:',e);return false}}
-          function clearConversation(){try{sessionStorage.removeItem(conversationKey);var messagesDiv=document.getElementById('messages');messagesDiv.innerHTML='';var welcomeMsg=document.createElement('div');welcomeMsg.className='message bot';var bubble=document.createElement('div');bubble.className='bubble';bubble.textContent="🤖 Hello! I'm the council chatbot. I can help with bin collections, council tax, planning, housing, parking, roads, and general enquiries. What would you like to know?";welcomeMsg.appendChild(bubble);messagesDiv.appendChild(welcomeMsg);saveConversation();announceStatus('Conversation cleared');focusInput()}catch(e){console.error('Failed to clear conversation:',e)}}
-          function addUserMessage(text){var msg=document.createElement('div');msg.className='message user';var bubble=document.createElement('div');bubble.className='bubble';bubble.textContent=text;msg.appendChild(bubble);document.getElementById('messages').appendChild(msg);scrollToBottom();saveConversation()}
-          function displayBotResponse(data){var msg=document.createElement('div');msg.className='message bot';if(data.topic){var badge=document.createElement('div');badge.className='topic-badge';badge.textContent=data.topic;msg.appendChild(badge)}var bubble=document.createElement('div');bubble.className='bubble';bubble.textContent=data.response;msg.appendChild(bubble);document.getElementById('messages').appendChild(msg);scrollToBottom();announceStatus('Response received: '+data.topic);saveConversation()}
-          function displayError(errMsg){var msg=document.createElement('div');msg.className='message bot';var bubble=document.createElement('div');bubble.className='bubble error-message';bubble.textContent=errMsg;msg.appendChild(bubble);document.getElementById('messages').appendChild(msg);scrollToBottom();announceStatus('Error: '+errMsg);saveConversation()}
-          async function sendMessage(text){if(isProcessing||!text.trim())return;isProcessing=true;try{setInputDisabled(true);announceStatus('Sending message');addUserMessage(text);showLoadingIndicator();var controller=new AbortController();var timeoutId=setTimeout(function(){controller.abort()},10000);var response=await fetch(window.location.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text}),signal:controller.signal});clearTimeout(timeoutId);hideLoadingIndicator();if(!response.ok){var errorData;try{errorData=await response.json();displayError(errorData.error||'API error: '+response.status)}catch(e){displayError('API error: '+response.status)}return}var data=await response.json();if(data.error){displayError(data.error)}else{displayBotResponse(data)}}catch(error){hideLoadingIndicator();if(error.name==='AbortError'){displayError('Request timed out. Please try again.')}else{displayError('Unable to connect. Please try again.')}}finally{isProcessing=false;setInputDisabled(false);focusInput()}}
+          function showLoading(){var msg=document.createElement('div');msg.className='message bot';msg.id='loadingMsg';var l=document.createElement('div');l.className='loading';l.setAttribute('aria-label','Waiting for response');l.innerHTML='<span></span><span></span><span></span>';msg.appendChild(l);loadingElement=msg;document.getElementById('messages').appendChild(msg);scrollToBottom()}
+          function hideLoading(){if(loadingElement&&loadingElement.parentNode){loadingElement.parentNode.removeChild(loadingElement);loadingElement=null}}
+          function saveConversation(){try{var msgs=document.getElementById('messages').querySelectorAll('.message:not(#loadingMsg)');var c=[];for(var i=0;i<msgs.length;i++){var msg=msgs[i];var type=msg.classList.contains('user')?'user':'bot';var bubble=msg.querySelector('.bubble');if(!bubble)continue;var text=bubble.textContent;var topic=null;var badge=msg.querySelector('.topic-badge');if(badge)topic=badge.textContent;c.push({type:type,text:text,topic:topic})}if(c.length>maxMessages)c=c.slice(-maxMessages);sessionStorage.setItem(conversationKey,JSON.stringify(c))}catch(e){console.error('Save failed:',e)}}
+          function loadConversation(){try{var saved=sessionStorage.getItem(conversationKey);if(!saved)return false;var c=JSON.parse(saved);var md=document.getElementById('messages');for(var i=0;i<c.length;i++){var item=c[i];var msg=document.createElement('div');msg.className='message '+item.type;if(item.type==='bot'&&item.topic){var badge=document.createElement('div');badge.className='topic-badge';badge.textContent=item.topic;msg.appendChild(badge)}var bubble=document.createElement('div');bubble.className='bubble';if(item.text.indexOf('Unable to connect')!==-1||item.text.indexOf('Request timed out')!==-1||item.text.indexOf('API error')!==-1)bubble.className='bubble error-message';bubble.textContent=item.text;msg.appendChild(bubble);md.appendChild(msg)}scrollToBottom();return true}catch(e){return false}}
+          function clearConversation(){try{sessionStorage.removeItem(conversationKey);var md=document.getElementById('messages');md.innerHTML='';var w=document.createElement('div');w.className='message bot';var b=document.createElement('div');b.className='bubble';b.textContent="Hello! I'm the council chatbot. I can help with bin collections, council tax, planning, housing, parking, roads, and general enquiries. What would you like to know?";w.appendChild(b);md.appendChild(w);saveConversation();announceStatus('Conversation cleared');focusInput()}catch(e){console.error('Clear failed:',e)}}
+          function addUserMessage(text){var msg=document.createElement('div');msg.className='message user';var b=document.createElement('div');b.className='bubble';b.textContent=text;msg.appendChild(b);document.getElementById('messages').appendChild(msg);scrollToBottom();saveConversation()}
+          function displayBotResponse(data){var msg=document.createElement('div');msg.className='message bot';if(data.topic){var badge=document.createElement('div');badge.className='topic-badge';badge.textContent=data.topic;msg.appendChild(badge)}var b=document.createElement('div');b.className='bubble';b.textContent=data.response;msg.appendChild(b);if(data.guardrail){var meta=document.createElement('div');meta.className='meta';meta.textContent='guardrail active';msg.appendChild(meta)}document.getElementById('messages').appendChild(msg);scrollToBottom();announceStatus('Response received: '+data.topic);saveConversation()}
+          function displayError(e){var msg=document.createElement('div');msg.className='message bot';var b=document.createElement('div');b.className='bubble error-message';b.textContent=e;msg.appendChild(b);document.getElementById('messages').appendChild(msg);scrollToBottom();announceStatus('Error: '+e);saveConversation()}
+          async function sendMessage(text){if(isProcessing||!text.trim())return;isProcessing=true;try{setInputDisabled(true);announceStatus('Sending message');var hist=getHistory();addUserMessage(text);showLoading();var controller=new AbortController();var tid=setTimeout(function(){controller.abort()},30000);var response=await fetch(window.location.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,history:hist}),signal:controller.signal});clearTimeout(tid);hideLoading();if(!response.ok){var ed;try{ed=await response.json();displayError(ed.error||'API error: '+response.status)}catch(e){displayError('API error: '+response.status)}return}var data=await response.json();if(data.error){displayError(data.error)}else{displayBotResponse(data)}}catch(error){hideLoading();if(error.name==='AbortError'){displayError('Request timed out. Please try again.')}else{displayError('Unable to connect. Please try again.')}}finally{isProcessing=false;setInputDisabled(false);focusInput()}}
           function handleSend(){var input=document.getElementById('userInput');var text=input.value.trim();if(text&&!isProcessing){input.value='';sendMessage(text)}}
-          function renderSampleQuestions(){var container=document.getElementById('sampleQuestions');for(var i=0;i<sampleQuestionsList.length;i++){var btn=document.createElement('button');btn.className='sample-question';btn.textContent=sampleQuestionsList[i];btn.setAttribute('aria-label','Send this question: '+sampleQuestionsList[i]);btn.onclick=(function(q){return function(){if(!isProcessing){sendMessage(q)}}})(sampleQuestionsList[i]);container.appendChild(btn)}}
-          window.onload=function(){var hasConversation=loadConversation();if(!hasConversation){var welcomeMsg=document.createElement('div');welcomeMsg.className='message bot';var bubble=document.createElement('div');bubble.className='bubble';bubble.textContent="🤖 Hello! I'm the council chatbot. I can help with bin collections, council tax, planning, housing, parking, roads, and general enquiries. What would you like to know?";welcomeMsg.appendChild(bubble);document.getElementById('messages').appendChild(welcomeMsg);saveConversation()}renderSampleQuestions();focusInput()};
+          function renderSampleQuestions(){var c=document.getElementById('sampleQuestions');for(var i=0;i<sampleQuestionsList.length;i++){var btn=document.createElement('button');btn.className='sample-question';btn.textContent=sampleQuestionsList[i];btn.setAttribute('aria-label','Send this question: '+sampleQuestionsList[i]);btn.onclick=(function(q){return function(){if(!isProcessing)sendMessage(q)}})(sampleQuestionsList[i]);c.appendChild(btn)}}
+          window.onload=function(){var has=loadConversation();if(!has){var w=document.createElement('div');w.className='message bot';var b=document.createElement('div');b.className='bubble';b.textContent="Hello! I'm the council chatbot. I can help with bin collections, council tax, planning, housing, parking, roads, and general enquiries. What would you like to know?";w.appendChild(b);document.getElementById('messages').appendChild(w);saveConversation()}renderSampleQuestions();focusInput()};
           document.getElementById('sendBtn').onclick=handleSend;
           document.getElementById('clearBtn').onclick=clearConversation;
-          document.getElementById('userInput').onkeypress=function(e){if(e.key==='Enter'&&!isProcessing){handleSend()}};
+          document.getElementById('userInput').onkeypress=function(e){if(e.key==='Enter'&&!isProcessing)handleSend()};
           </script>
           </body>
           </html>'''
 
           def lambda_handler(event, context):
               try:
-                  # Detect HTTP method
                   method = event.get('requestContext', {}).get('http', {}).get('method', 'GET')
-
-                  # Serve HTML for GET requests
                   if method == 'GET':
-                      return {
-                          'statusCode': 200,
-                          'headers': {'Content-Type': 'text/html'},
-                          'body': render_chat_html()
-                      }
+                      return {'statusCode': 200, 'headers': {'Content-Type': 'text/html'}, 'body': render_chat_html()}
 
-                  # Handle POST requests (JSON API)
-                  if isinstance(event.get('body'), str):
-                      body = json.loads(event['body'])
-                  else:
-                      body = event.get('body', event)
-
+                  body = json.loads(event['body']) if isinstance(event.get('body'), str) else event.get('body', event)
                   user_message = body.get('message', body.get('query', '')).strip()
-
                   if not user_message:
-                      return {
-                          'statusCode': 400,
-                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                          'body': json.dumps({'error': 'Message is required'})
-                      }
+                      return {'statusCode': 400, 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'error': 'Message is required'})}
 
-                  # Call Amazon Nova Pro for AI response
-                  bedrock_result = get_bedrock_response(user_message)
+                  history = body.get('history', [])
+                  result = get_response(user_message, history or None)
                   topic = get_topic_from_message(user_message)
 
-                  if not bedrock_result['success']:
-                      return {
-                          'statusCode': 500,
-                          'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                          'body': json.dumps({
-                              'error': f"AI service error: {bedrock_result.get('error', 'Unknown error')}"
-                          })
-                      }
+                  if not result.get('success'):
+                      return {'statusCode': 500, 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'error': f"AI service error: {result.get('error', 'Unknown')}"})}
 
                   return {
                       'statusCode': 200,
                       'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                       'body': json.dumps({
-                          'success': True,
-                          'response': bedrock_result['response'],
-                          'topic': topic,
+                          'success': True, 'response': result['response'], 'topic': topic,
                           'query': body.get('message', body.get('query', '')),
                           'timestamp': datetime.utcnow().isoformat(),
-                          'model': 'Amazon Nova Pro',
-                          'usage': bedrock_result.get('usage', {})
+                          'model': 'Amazon Nova Pro', 'guardrail': result.get('guardrail', False)
                       })
                   }
-
               except Exception as e:
                   print(f"Error: {str(e)}")
-                  return {
-                      'statusCode': 500,
-                      'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
-                      'body': json.dumps({'error': str(e)})
-                  }
+                  return {'statusCode': 500, 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'error': str(e)})}
       Tags:
         - Key: Project
           Value: ndx-try
@@ -368,6 +975,7 @@ Resources:
         AllowCredentials: false
         AllowHeaders:
           - content-type
+          - x-session-id
         AllowMethods:
           - POST
           - GET
@@ -417,12 +1025,16 @@ Outputs:
     Export:
       Name: !Sub '${AWS::StackName}-KnowledgeBaseBucket'
 
+  GuardrailId:
+    Description: Bedrock Guardrail ID
+    Value: !GetAtt CouncilGuardrail.GuardrailId
+
   ScenarioInfo:
     Description: NDX:Try scenario information
     Value: !Sub |
       {
         "scenario": "council-chatbot",
         "environment": "${Environment}",
-        "mode": "Amazon Nova Pro",
-        "note": "Real AI-powered responses using Amazon Bedrock"
+        "mode": "Amazon Nova Pro with Guardrails",
+        "note": "Council document retrieval with content safety guardrails"
       }
