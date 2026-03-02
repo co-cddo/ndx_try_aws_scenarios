@@ -94,15 +94,12 @@ activities:
       - title: "Textract OCR Processing"
         description: "Amazon Textract reads text from the document like a human would"
         screenshot: "architecture/step2-textract.png"
-      - title: "Comprehend Entity Extraction"
-        description: "Amazon Comprehend identifies key entities (names, addresses, dates)"
-        screenshot: "architecture/step3-comprehend.png"
-      - title: "Bedrock Intelligence"
-        description: "AWS Bedrock AI interprets and validates the extracted data"
-        screenshot: "architecture/step4-bedrock.png"
+      - title: "Bedrock AI Analysis"
+        description: "Amazon Bedrock AI analyses the extracted text to generate a committee-ready summary, check application completeness, and classify the application type"
+        screenshot: "architecture/step3-bedrock.png"
       - title: "Results Stored"
-        description: "Extracted data is stored for review and export"
-        screenshot: "architecture/step5-results.png"
+        description: "Extracted data and AI analysis are stored for review and export"
+        screenshot: "architecture/step4-results.png"
 
   # Console Architecture Tour (Story 7.3)
   - id: arch-console
@@ -196,9 +193,8 @@ production_guidance:
       total: "No cost to your council"
     production_costs:
       textract: "$750-1500/month"
-      comprehend: "$150-300/month"
-      bedrock: "$250-500/month"
-      total: "$1150-2300/month (500 applications)"
+      bedrock: "$50-150/month"
+      total: "$800-1650/month (500 applications)"
   - id: security
     title: "Security Hardening Checklist"
     items:

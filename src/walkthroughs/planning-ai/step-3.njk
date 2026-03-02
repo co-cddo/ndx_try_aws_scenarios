@@ -26,7 +26,7 @@ scenarioId: planning-ai
 {% set expectedOutcomes = [
   "Document uploads successfully",
   "Processing progress indicator shows real-time status",
-  "Extraction completes in 8-20 seconds",
+  "AI analysis completes in 15-30 seconds",
   "Extracted fields appear automatically"
 ] %}
 
@@ -68,16 +68,16 @@ scenarioId: planning-ai
       After upload completes, AI extraction begins automatically. You'll see:
     </p>
     <ul class="govuk-list govuk-list--bullet">
-      <li>Status changes to "Processing with Amazon Textract..."</li>
+      <li>Status changes to "Analyzing with Amazon Textract + Bedrock AI..."</li>
       <li>Animated spinner or progress indicator</li>
-      <li>Estimated time remaining (8-20 seconds depending on document)</li>
+      <li>Estimated time remaining (15-30 seconds depending on document)</li>
     </ul>
   </li>
 
   <li>
-    <strong>Extraction completes</strong>
+    <strong>Analysis completes</strong>
     <p class="govuk-body">
-      When done, you'll see "Extraction complete!" and the extracted fields appear on screen.
+      When done, you'll see the AI-generated committee summary, completeness check, and extracted fields appear on screen.
     </p>
   </li>
 </ol>
@@ -89,16 +89,17 @@ scenarioId: planning-ai
   <ol class="govuk-list govuk-list--number govuk-body-s">
     <li>Your PDF uploads to a secure S3 bucket</li>
     <li>Lambda function triggers Amazon Textract API</li>
-    <li>Textract performs OCR and identifies text regions</li>
-    <li>AI models extract key-value pairs (applicant name, address, etc.)</li>
+    <li>Textract performs OCR and extracts all text from the document</li>
+    <li>Extracted text is sent to Amazon Bedrock (Nova Pro AI model)</li>
+    <li>Bedrock generates a committee summary, checks completeness, and classifies the application</li>
     <li>Results return to your browser in structured JSON</li>
   </ol>
 </div>
 
 {# AC-3.3.5: Wow Moment - AI Extraction Capability #}
-{% set wowTitle = "The AI Extraction Magic" %}
-{% set wowExplanation = "In those 8-20 seconds, Amazon Textract and Comprehend worked together to read your multi-page PDF, identify text blocks, understand document structure, recognize UK address formats, and extract specific planning fields. This replaced 45 minutes of manual typing - with zero transcription errors. The AI didn't just scan text; it understood context, like knowing 'James Smith' is an applicant name and 'B15 2AB' is part of an address." %}
-{% set wowTechnicalDetail = "Amazon Textract uses deep learning models trained on millions of documents to perform Optical Character Recognition (OCR) and intelligent key-value extraction. It identifies forms, tables, and text relationships. Amazon Comprehend adds natural language understanding to classify entity types (person names, locations, etc.). The Lambda function orchestrates both services and applies planning-specific logic to map extracted data to expected fields. Total processing: 97-99% accuracy on typed documents, with confidence scores for each extracted field." %}
+{% set wowTitle = "The AI Analysis Magic" %}
+{% set wowExplanation = "In those 15-30 seconds, Amazon Textract extracted the text and Amazon Bedrock AI analysed it — generating a committee-ready application summary, checking completeness, and classifying the application type. This replaces 20-30 minutes of manual report writing per application, with zero transcription errors. The AI didn't just scan text; it understood planning context, producing a summary a planning officer could use directly in committee papers." %}
+{% set wowTechnicalDetail = "Amazon Textract uses deep learning models trained on millions of documents to perform Optical Character Recognition (OCR) and intelligent text extraction. It identifies forms, tables, and text relationships. Amazon Bedrock then analyses the extracted text using the Nova Pro foundation model with a structured prompt requesting JSON output — a committee summary, completeness assessment, and application classification. The Lambda function orchestrates both services in a two-stage pipeline: extract then analyse. Total processing: 97-99% OCR accuracy on typed documents, with AI-generated insights that would take a planning officer 20-30 minutes to produce manually." %}
 {% set wowIcon = "🤖" %}
 
 {% include "components/wow-moment.njk" %}
@@ -173,17 +174,17 @@ scenarioId: planning-ai
     <tr class="govuk-table__row">
       <td class="govuk-table__cell">House Extension</td>
       <td class="govuk-table__cell">1.2 MB</td>
-      <td class="govuk-table__cell">8-12 seconds</td>
+      <td class="govuk-table__cell">15-20 seconds</td>
     </tr>
     <tr class="govuk-table__row">
       <td class="govuk-table__cell">Change of Use</td>
       <td class="govuk-table__cell">2.8 MB</td>
-      <td class="govuk-table__cell">12-18 seconds</td>
+      <td class="govuk-table__cell">18-25 seconds</td>
     </tr>
     <tr class="govuk-table__row">
       <td class="govuk-table__cell">New Dwelling</td>
       <td class="govuk-table__cell">3.5 MB</td>
-      <td class="govuk-table__cell">15-20 seconds</td>
+      <td class="govuk-table__cell">22-28 seconds</td>
     </tr>
   </tbody>
 </table>
@@ -252,7 +253,7 @@ scenarioId: planning-ai
       <li>Wait 2-3 minutes then retry - may be temporary API slowness</li>
     </ul>
     <p class="govuk-body">
-      Normal processing is 8-20 seconds. Anything over 30 seconds indicates an issue.
+      Normal processing is 15-30 seconds (Textract extraction + Bedrock AI analysis). Anything over 45 seconds indicates an issue.
     </p>
   </div>
 </details>

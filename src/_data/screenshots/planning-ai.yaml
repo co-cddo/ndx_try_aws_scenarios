@@ -1,10 +1,10 @@
 # Screenshot data for Planning Application AI scenario (Story 13.2)
-# Used by screenshot.njk component to display S3-hosted screenshots
-# S3 Base: https://ndx-try-screenshots.s3.us-east-1.amazonaws.com/current/planning-ai/
+# Updated with real deployed screenshots from the live demo
+# Screenshots stored locally at /assets/images/screenshots/planning-ai/
 
 scenario: planning-ai
 scenarioTitle: "Planning Application AI"
-awsService: "Amazon Textract"
+awsService: "Amazon Textract + Amazon Bedrock AI"
 totalSteps: 4
 
 # Step-specific screenshots
@@ -16,8 +16,8 @@ steps:
         filename: step-1-cloudformation-outputs.png
         alt: "CloudFormation stack outputs showing the Planning AI application URL"
         caption: "Find your Planning AI application URL in CloudFormation Outputs"
-        width: 1920
-        height: 1080
+        width: 1024
+        height: 1024
         annotations:
           - number: 1
             x: "10%"
@@ -27,86 +27,68 @@ steps:
 
       - id: application-interface
         filename: step-1-application-interface.png
-        alt: "Planning Application AI web interface with document upload area"
-        caption: "The application is ready to process planning documents"
-        width: 1920
-        height: 1080
+        alt: "Planning Application AI landing page with drag-and-drop upload area and Use Sample Document button"
+        caption: "The application landing page with document upload area and sample document option"
+        width: 1024
+        height: 1024
 
   - step: 2
     title: "Upload a Planning Document"
     screenshots:
       - id: upload-interface
         filename: step-2-upload-interface.png
-        alt: "Document upload area showing drag-and-drop zone and file browser button"
-        caption: "Drag and drop a planning document or click to browse files"
-        width: 1920
-        height: 1080
-        annotations:
-          - number: 1
-            x: "31%"
-            y: "37%"
-            label: "Upload zone"
-            arrow: "down"
+        alt: "Sample document selected showing sample-planning-application.pdf (17-page comprehensive application) with Analyze with AI button"
+        caption: "After clicking Use Sample Document, the 17-page planning application PDF is selected and ready to analyze"
+        width: 1024
+        height: 1024
 
-      - id: processing-status
-        filename: step-2-processing-status.png
-        alt: "Processing indicator showing document being analyzed by Textract"
-        caption: "Amazon Textract extracts text and analyzes the document structure"
-        width: 1920
-        height: 1080
+      - id: sample-selected
+        filename: step-2-sample-selected.png
+        alt: "Sample document selected with green Analyze with AI button visible"
+        caption: "Click Analyze with AI to send the document to Amazon Textract and Bedrock"
+        width: 1024
+        height: 1024
 
   - step: 3
     title: "Review Extracted Information"
     screenshots:
       - id: extraction-results
         filename: step-3-extraction-results.png
-        alt: "Extracted planning application data showing property address, applicant, and proposal details"
-        caption: "AI-extracted fields from the planning document"
-        width: 1920
-        height: 1080
+        alt: "Full results page showing embedded PDF viewer with 17-page planning application, AI analysis results, extracted fields, and raw text"
+        caption: "Complete results showing the PDF viewer, extracted application details, and raw text from all 17 pages"
+        width: 780
+        height: 1548
 
       - id: confidence-scores
         filename: step-3-confidence-scores.png
-        alt: "Confidence indicators showing extraction accuracy for each field"
-        caption: "Confidence scores help identify fields that may need manual review"
-        width: 1920
-        height: 1080
-        annotations:
-          - number: 1
-            x: "39%"
-            y: "29%"
-            label: "Confidence score"
-            arrow: "left"
+        alt: "AI Analysis Results showing Committee Summary, Application Type Householder with high confidence, Completeness Check complete, and Extracted Application Details"
+        caption: "Bedrock AI produced a committee summary, classified as Householder (high confidence), and confirmed application completeness"
+        width: 1024
+        height: 1024
 
       - id: document-preview
         filename: step-3-document-preview.png
-        alt: "Original document with extracted regions highlighted"
-        caption: "See exactly where each piece of information was found"
-        width: 1920
-        height: 1080
+        alt: "PDF viewer showing Testville District Council planning application cover page with embedded PDF navigation showing 1 of 17 pages"
+        caption: "The embedded PDF viewer shows all 17 pages of the planning application including architectural drawings"
+        width: 1024
+        height: 1024
 
   - step: 4
-    title: "Export & Next Steps"
+    title: "Review AI Analysis"
     screenshots:
       - id: export-options
         filename: step-4-export-options.png
-        alt: "Export options showing JSON, CSV, and PDF formats"
-        caption: "Export extracted data in your preferred format"
-        width: 1920
-        height: 1080
+        alt: "Full results page with PDF viewer, AI analysis results, extracted fields and raw text from the 17-page planning application"
+        caption: "The complete analysis results showing how AI processed the comprehensive planning application"
+        width: 780
+        height: 1548
 
-      - id: textract-console
-        filename: step-4-textract-console.png
-        alt: "AWS Textract console showing document analysis configuration"
-        caption: "Amazon Textract uses machine learning to understand document structure"
-        width: 1920
-        height: 1080
-        annotations:
-          - number: 1
-            x: "21%"
-            y: "20%"
-            label: "Analysis type"
-            arrow: "down"
+      - id: full-results
+        filename: step-4-full-results.png
+        alt: "AI Analysis Results with Committee Summary, Householder classification with high confidence, completeness check showing complete, and extracted application details"
+        caption: "The AI analysis results: committee-ready summary, application type classification, completeness check, and extracted fields"
+        width: 1024
+        height: 1024
 
 # Explore section screenshots (Epic 7 content)
 explore:

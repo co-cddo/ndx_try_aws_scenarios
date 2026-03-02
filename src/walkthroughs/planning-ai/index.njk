@@ -17,10 +17,10 @@ scenarioId: planning-ai
 {# AC-3.3.6: Value proposition - 8 minutes to understand automatic extraction #}
 <div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
   <h2 class="govuk-panel__title">
-    8 minutes to see AI automatically extract planning data
+    8 minutes to see AI analyse planning applications and generate committee summaries
   </h2>
   <div class="govuk-panel__body">
-    No deployment needed. Upload a sample planning application and watch AI extract applicant details instantly.
+    No deployment needed. Upload a sample planning application and watch AI extract data, generate summaries, and check completeness.
   </div>
 </div>
 
@@ -51,7 +51,7 @@ scenarioId: planning-ai
     <strong>Upload and process the document</strong> - Watch AI extract information in real-time (2 minutes)
   </li>
   <li>
-    <strong>Review extracted fields</strong> - See applicant name, address, and description automatically populated (3 minutes)
+    <strong>Review AI analysis</strong> - See AI-generated committee summary, completeness check, classification, and extracted fields (3 minutes)
   </li>
 </ol>
 
@@ -109,10 +109,12 @@ scenarioId: planning-ai
   </div>
 </div>
 
-<h2 class="govuk-heading-m">Sample documents you'll use</h2>
+<h2 class="govuk-heading-m">Sample document you'll use</h2>
 
 <p class="govuk-body">
-  We've prepared 3 realistic planning application documents representing common application types:
+  We've prepared a comprehensive 17-page planning application PDF that reads like a real submission &mdash; complete with
+  architectural drawings, neighbour consultations, and some deliberately irrelevant content that tests the AI's ability
+  to separate signal from noise:
 </p>
 
 <div class="govuk-grid-row ndx-sample-documents-preview">
@@ -146,16 +148,16 @@ scenarioId: planning-ai
 <div class="ndx-wow-moment-preview govuk-!-margin-top-6">
   <h2 class="govuk-heading-m">The wow moment</h2>
   <p class="govuk-body">
-    After you upload a planning application PDF, you'll see AI automatically extract:
+    After you upload a planning application PDF, you'll see AI automatically produce:
   </p>
   <ul class="govuk-list govuk-list--bullet govuk-!-font-size-19">
-    <li><strong>Applicant name</strong> - Identified from anywhere in the document</li>
-    <li><strong>Site address</strong> - Including UK-specific postcode format</li>
-    <li><strong>Development description</strong> - The core of what's being proposed</li>
-    <li><strong>Application type</strong> - Householder, Full, Outline, etc.</li>
+    <li><strong>Committee-ready summary</strong> - A 2-3 sentence application summary for officer reports</li>
+    <li><strong>Completeness assessment</strong> - Identifies missing required fields before review</li>
+    <li><strong>Application classification</strong> - Householder, Full, Outline, etc. with confidence</li>
+    <li><strong>Extracted fields</strong> - Applicant name, site address, description automatically populated</li>
   </ul>
   <p class="govuk-body">
-    All in under 15 seconds. No manual typing. No transcription errors. No missing fields.
+    All in under 30 seconds. No manual report writing. No transcription errors. No missing fields.
   </p>
 </div>
 
