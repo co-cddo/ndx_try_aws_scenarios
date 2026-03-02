@@ -72,7 +72,7 @@ jobs:
             console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
           "
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: localgov-drupal-template
           path: cloudformation/scenarios/localgov-drupal/template.yaml
@@ -84,7 +84,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: localgov-drupal-template
           path: cloudformation/scenarios/localgov-drupal
@@ -95,7 +95,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: cloudformation/isb-hub/package-lock.json
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-deploy
           aws-region: us-west-2
