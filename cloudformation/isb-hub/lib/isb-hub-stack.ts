@@ -163,8 +163,8 @@ export class IsbHubStack extends cdk.Stack {
         executionRoleName: `InnovationSandbox-${ISB_NAMESPACE}-SandboxAccountRole`,
         capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
         managedExecution: { Active: true },
-        templateUrl: `https://${BLUEPRINTS_BUCKET_NAME}.s3.${BLUEPRINTS_BUCKET_REGION}.amazonaws.com/scenarios/${scenario.name}/template.yaml?v=${contentHash}`,
-        description: scenario.description,
+        templateUrl: `https://${BLUEPRINTS_BUCKET_NAME}.s3.${BLUEPRINTS_BUCKET_REGION}.amazonaws.com/scenarios/${scenario.name}/template.yaml`,
+        description: `${scenario.description} [${contentHash}]`,
       });
 
       // Ensure template is uploaded before StackSet references it
