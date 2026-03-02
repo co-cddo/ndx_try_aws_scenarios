@@ -54,13 +54,13 @@ scenarioId: council-chatbot
       Council knowledge base
     </h3>
     <p class="govuk-body">
-      Responses come from your council's actual knowledge - not just the AI's
-      general training. It retrieves documents, schedules, and policies specific
-      to your authority.
+      Responses are grounded in real council documents stored in S3. The chatbot
+      loads these documents and uses Amazon Nova Pro to compose accurate answers
+      based on actual council policies, schedules, and contact information.
     </p>
     <p class="govuk-body-s" style="color: #505a5f;">
-      <strong>Why it matters:</strong> Every council is different. This approach
-      means accurate, authority-specific answers without retraining the AI.
+      <strong>Why it matters:</strong> Every council is different. Upload your own
+      documents and the chatbot gives authority-specific answers without any AI retraining.
     </p>
   </div>
 
@@ -77,6 +77,23 @@ scenarioId: council-chatbot
       <strong>Why it matters:</strong> This sandbox uses sample data only in the US
       (us-east-1) region, which auto-deletes after 24 hours. Bedrock does not train
       on your data or share it with other customers.
+    </p>
+  </div>
+
+  <div class="ndx-detail-card">
+    <h3 class="govuk-heading-m ndx-detail-card__title">
+      <span class="ndx-detail-card__icon">🛡️</span>
+      Content safety guardrails
+    </h3>
+    <p class="govuk-body">
+      Amazon Bedrock Guardrails automatically filter harmful content, block off-topic
+      requests, and protect personal information. The chatbot stays focused on council
+      services and handles sensitive data responsibly.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> Public-facing AI needs strong safety controls.
+      Guardrails prevent the chatbot from giving political opinions, medical advice,
+      or exposing residents' personal data.
     </p>
   </div>
 
@@ -148,8 +165,9 @@ scenarioId: council-chatbot
       <li>No need to repeat context ("I asked about B15 earlier...")</li>
     </ul>
     <p class="govuk-body">
-      <strong>Technical detail:</strong> Amazon Lex manages session state. Bedrock receives
-      conversation history with each request for context-aware responses.
+      <strong>Technical detail:</strong> The chatbot sends recent conversation history
+      with each request using the Bedrock Converse API. This gives the AI full context
+      from earlier in the conversation for natural follow-up questions.
     </p>
   </div>
 </details>
@@ -170,8 +188,9 @@ scenarioId: council-chatbot
       <li>It can escalate to human operators if configured</li>
     </ul>
     <p class="govuk-body">
-      <strong>Technical detail:</strong> Confidence scoring on knowledge base retrieval.
-      Responses below threshold trigger fallback responses instead of hallucinated answers.
+      <strong>Technical detail:</strong> Bedrock Guardrails enforce content safety, topic
+      restrictions, and PII protection. If the council documents don't contain relevant
+      information, the chatbot admits uncertainty and suggests contacting the council directly.
     </p>
   </div>
 </details>
@@ -189,7 +208,7 @@ scenarioId: council-chatbot
     <ul class="govuk-list govuk-list--bullet">
       <li>Automatic language detection</li>
       <li>Translation of questions and responses</li>
-      <li>100+ languages supported by Claude 3</li>
+      <li>100+ languages supported by Amazon Nova Pro</li>
     </ul>
     <p class="govuk-body">
       <strong>Business value:</strong> Serve diverse communities without hiring
@@ -248,8 +267,13 @@ scenarioId: council-chatbot
     </tr>
     <tr class="govuk-table__row">
       <th scope="row" class="govuk-table__header">Knowledge base</th>
-      <td class="govuk-table__cell">Sample data</td>
+      <td class="govuk-table__cell">Sample council documents in S3</td>
       <td class="govuk-table__cell">Real council policies and schedules</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Guardrails</th>
+      <td class="govuk-table__cell">Content filters, topic restrictions, PII handling</td>
+      <td class="govuk-table__cell">Custom topic policies for your council</td>
     </tr>
     <tr class="govuk-table__row">
       <th scope="row" class="govuk-table__header">Human handoff</th>
