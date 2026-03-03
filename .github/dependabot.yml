@@ -5,6 +5,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     groups:
       dev-dependencies:
@@ -17,6 +19,8 @@ updates:
     directory: "/cloudformation/scenarios/localgov-drupal/cdk"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     groups:
       aws-cdk:
@@ -30,6 +34,8 @@ updates:
     directory: "/cloudformation/scenarios/localgov-drupal/drupal"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     groups:
       drupal-core:
@@ -49,6 +55,8 @@ updates:
     directory: "/cloudformation/layers/uk-data-generator"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
 
   # Docker dependencies
@@ -56,6 +64,8 @@ updates:
     directory: "/cloudformation/scenarios/localgov-drupal/docker"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 3
 
   # GitHub Actions
@@ -63,6 +73,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     groups:
       github-actions:
