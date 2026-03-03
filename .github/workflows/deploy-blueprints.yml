@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'cloudformation/scenarios/*/template.yaml'
+      - 'cloudformation/scenarios/planning-ai/**'
       - 'cloudformation/scenarios/localgov-drupal/cdk/**'
       - 'cloudformation/isb-hub/**'
   workflow_dispatch:
@@ -88,6 +89,9 @@ jobs:
         with:
           name: localgov-drupal-template
           path: cloudformation/scenarios/localgov-drupal
+
+      - name: Build planning-ai template (inject PDF + text into template)
+        run: python3 cloudformation/scenarios/planning-ai/build-template.py -o cloudformation/scenarios/planning-ai/template.yaml
 
       - uses: actions/setup-node@v6
         with:
