@@ -114,10 +114,41 @@ layout: page
             <span class="govuk-tag govuk-tag--green">Sandbox isolated</span>
           </dd>
         </div>
+        {% if scenarioData.sourceCode %}
+        <div class="govuk-summary-list__row">
+          <dt class="govuk-summary-list__key">Source code</dt>
+          <dd class="govuk-summary-list__value">
+            <a href="{{ scenarioData.sourceCode.repoUrl }}"
+               class="govuk-link"
+               target="_blank"
+               rel="noopener">
+              View on GitHub <span class="govuk-visually-hidden">(opens in new tab)</span>
+            </a>
+          </dd>
+        </div>
+        {% endif %}
       </dl>
     </div>
   </div>
 </div>
+
+{% if scenarioData.sourceCode %}
+<div class="govuk-grid-row govuk-!-margin-top-4">
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-m">How this was built</h2>
+    <p class="govuk-body">This scenario is built with open source code. You can view, learn from, and adapt it for your own needs.</p>
+    <p class="govuk-body">{{ scenarioData.sourceCode.description }}</p>
+    <p class="govuk-body">
+      <a href="{{ scenarioData.sourceCode.repoUrl }}"
+         class="govuk-link"
+         target="_blank"
+         rel="noopener">
+        View the source code on GitHub <span class="govuk-visually-hidden">(opens in new tab)</span>
+      </a>
+    </p>
+  </div>
+</div>
+{% endif %}
 
 {# Walkthrough CTA - Story 15.1 #}
 {# Positioned after description, before deployment section #}
