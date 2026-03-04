@@ -653,6 +653,31 @@
                 }
               }
             }
+          },
+          "sourceCode": {
+            "type": "object",
+            "description": "GitHub source code links for transparency and learning",
+            "properties": {
+              "repoUrl": {
+                "type": "string",
+                "format": "uri",
+                "description": "Direct GitHub URL to the scenario's source directory (deep link, not top-level repo)"
+              },
+              "cloudformationPath": {
+                "type": "string",
+                "description": "Path within repo to CloudFormation/CDK template directory"
+              },
+              "appCodePath": {
+                "type": "string",
+                "description": "Path within repo to application code (if separate from CloudFormation, e.g. CDK/Docker dirs)"
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 300,
+                "description": "Plain English description of what the source code contains"
+              }
+            },
+            "required": ["repoUrl", "cloudformationPath", "description"]
           }
         },
         "additionalProperties": false

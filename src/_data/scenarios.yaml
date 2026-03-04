@@ -224,6 +224,11 @@ scenarios:
         status: "available"
         statusLabel: "Available"
         order: 7
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/localgov-drupal"
+      cloudformationPath: "cloudformation/scenarios/localgov-drupal"
+      appCodePath: "cloudformation/scenarios/localgov-drupal/cdk"
+      description: "AWS CDK project with Docker configuration that deploys LocalGov Drupal CMS with 7 AI-powered features on Fargate and Aurora."
 
   - id: "council-chatbot"
     name: "Council Chatbot"
@@ -357,6 +362,10 @@ scenarios:
         training: 500
         support: 1000
         total: 4300
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/council-chatbot"
+      cloudformationPath: "cloudformation/scenarios/council-chatbot"
+      description: "CloudFormation template that deploys an Amazon Bedrock and Lex chatbot with Lambda functions for council resident Q&A."
 
   - id: "planning-ai"
     name: "Planning Application AI"
@@ -485,6 +494,10 @@ scenarios:
         training: 1000
         support: 1500
         total: 8100
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/planning-ai"
+      cloudformationPath: "cloudformation/scenarios/planning-ai"
+      description: "Python build script and CloudFormation template that deploys AI-powered planning application analysis using Amazon Bedrock and Textract."
 
   - id: "foi-redaction"
     name: "FOI Redaction"
@@ -618,6 +631,10 @@ scenarios:
         training: 500
         support: 1000
         total: 3900
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/foi-redaction"
+      cloudformationPath: "cloudformation/scenarios/foi-redaction"
+      description: "CloudFormation template that deploys Amazon Comprehend and Textract with Lambda functions to automatically redact sensitive data from documents."
 
   - id: "smart-car-park"
     name: "Smart Car Park"
@@ -754,6 +771,10 @@ scenarios:
         training: 1000
         support: 2000
         total: 10000
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/smart-car-park"
+      cloudformationPath: "cloudformation/scenarios/smart-car-park"
+      description: "CloudFormation template that deploys IoT-based parking availability monitoring using AWS IoT Core and Lambda."
 
   - id: "text-to-speech"
     name: "Text to Speech"
@@ -890,6 +911,10 @@ scenarios:
         training: 500
         support: 800
         total: 3000
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/text-to-speech"
+      cloudformationPath: "cloudformation/scenarios/text-to-speech"
+      description: "CloudFormation template that deploys accessibility audio generation using Amazon Polly and S3."
 
   - id: "quicksight-dashboard"
     name: "QuickSight Dashboard"
@@ -1021,6 +1046,10 @@ scenarios:
         training: 1000
         support: 1500
         total: 7300
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/quicksight-dashboard"
+      cloudformationPath: "cloudformation/scenarios/quicksight-dashboard"
+      description: "CloudFormation template that deploys Amazon QuickSight dashboards for service performance analytics and reporting."
 
   - id: "all-demo"
     name: "All Demo"
