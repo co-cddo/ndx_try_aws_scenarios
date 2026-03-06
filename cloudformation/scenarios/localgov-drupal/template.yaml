@@ -1,2095 +1,1318 @@
-# Auto-generated from CDK synthesis. Do not edit.
-{
-  "Description": "AI-Enhanced LocalGov Drupal on AWS - Demonstration Environment",
-  "Resources": {
-    "AdminSecretB9452750": {
-      "Type": "AWS::SecretsManager::Secret",
-      "Properties": {
-        "Description": "Admin credentials for LocalGov Drupal",
-        "GenerateSecretString": {
-          "ExcludePunctuation": true,
-          "GenerateStringKey": "password",
-          "PasswordLength": 32,
-          "SecretStringTemplate": "{\"username\":\"admin\"}"
-        },
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "UpdateReplacePolicy": "Delete",
-      "DeletionPolicy": "Delete",
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/AdminSecret/Resource"
-      }
-    },
-    "NetworkingVpc6B5E6F44": {
-      "Type": "AWS::EC2::VPC",
-      "Properties": {
-        "CidrBlock": "10.0.0.0/16",
-        "EnableDnsHostnames": true,
-        "EnableDnsSupport": true,
-        "InstanceTenancy": "default",
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Name",
-            "Value": "NdxDrupal-VPC"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/Resource"
-      }
-    },
-    "NetworkingVpcPublicSubnet1Subnet918289EE": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "AvailabilityZone": {
-          "Fn::Select": [
-            0,
-            {
-              "Fn::GetAZs": ""
-            }
-          ]
-        },
-        "CidrBlock": "10.0.0.0/24",
-        "MapPublicIpOnLaunch": true,
-        "Tags": [
-          {
-            "Key": "aws-cdk:subnet-name",
-            "Value": "Public"
-          },
-          {
-            "Key": "aws-cdk:subnet-type",
-            "Value": "Public"
-          },
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Name",
-            "Value": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet1"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "VpcId": {
-          "Ref": "NetworkingVpc6B5E6F44"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet1/Subnet"
-      }
-    },
-    "NetworkingVpcPublicSubnet1RouteTable8FB3C18A": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Name",
-            "Value": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet1"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "VpcId": {
-          "Ref": "NetworkingVpc6B5E6F44"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet1/RouteTable"
-      }
-    },
-    "NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "RouteTableId": {
-          "Ref": "NetworkingVpcPublicSubnet1RouteTable8FB3C18A"
-        },
-        "SubnetId": {
-          "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet1/RouteTableAssociation"
-      }
-    },
-    "NetworkingVpcPublicSubnet1DefaultRoute80C01FA6": {
-      "Type": "AWS::EC2::Route",
-      "Properties": {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": {
-          "Ref": "NetworkingVpcIGW21218DAB"
-        },
-        "RouteTableId": {
-          "Ref": "NetworkingVpcPublicSubnet1RouteTable8FB3C18A"
-        }
-      },
-      "DependsOn": [
-        "NetworkingVpcVPCGW12E561D8"
-      ],
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet1/DefaultRoute"
-      }
-    },
-    "NetworkingVpcPublicSubnet2Subnet9D9E5AFB": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "AvailabilityZone": {
-          "Fn::Select": [
-            1,
-            {
-              "Fn::GetAZs": ""
-            }
-          ]
-        },
-        "CidrBlock": "10.0.1.0/24",
-        "MapPublicIpOnLaunch": true,
-        "Tags": [
-          {
-            "Key": "aws-cdk:subnet-name",
-            "Value": "Public"
-          },
-          {
-            "Key": "aws-cdk:subnet-type",
-            "Value": "Public"
-          },
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Name",
-            "Value": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet2"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "VpcId": {
-          "Ref": "NetworkingVpc6B5E6F44"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet2/Subnet"
-      }
-    },
-    "NetworkingVpcPublicSubnet2RouteTable22886677": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Name",
-            "Value": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet2"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "VpcId": {
-          "Ref": "NetworkingVpc6B5E6F44"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet2/RouteTable"
-      }
-    },
-    "NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "RouteTableId": {
-          "Ref": "NetworkingVpcPublicSubnet2RouteTable22886677"
-        },
-        "SubnetId": {
-          "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet2/RouteTableAssociation"
-      }
-    },
-    "NetworkingVpcPublicSubnet2DefaultRouteDF98F60F": {
-      "Type": "AWS::EC2::Route",
-      "Properties": {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": {
-          "Ref": "NetworkingVpcIGW21218DAB"
-        },
-        "RouteTableId": {
-          "Ref": "NetworkingVpcPublicSubnet2RouteTable22886677"
-        }
-      },
-      "DependsOn": [
-        "NetworkingVpcVPCGW12E561D8"
-      ],
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/PublicSubnet2/DefaultRoute"
-      }
-    },
-    "NetworkingVpcIGW21218DAB": {
-      "Type": "AWS::EC2::InternetGateway",
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Name",
-            "Value": "NdxDrupal-VPC"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/IGW"
-      }
-    },
-    "NetworkingVpcVPCGW12E561D8": {
-      "Type": "AWS::EC2::VPCGatewayAttachment",
-      "Properties": {
-        "InternetGatewayId": {
-          "Ref": "NetworkingVpcIGW21218DAB"
-        },
-        "VpcId": {
-          "Ref": "NetworkingVpc6B5E6F44"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/Vpc/VPCGW"
-      }
-    },
-    "NetworkingAlbSecurityGroup5ADC578E": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "ALB security group for LocalGov Drupal (production)",
-        "GroupName": "NdxDrupal-ALB-SG",
-        "SecurityGroupIngress": [
-          {
-            "CidrIp": "0.0.0.0/0",
-            "Description": "Allow HTTPS from internet",
-            "FromPort": 443,
-            "IpProtocol": "tcp",
-            "ToPort": 443
-          },
-          {
-            "CidrIp": "0.0.0.0/0",
-            "Description": "Allow HTTP from internet (redirect to HTTPS)",
-            "FromPort": 80,
-            "IpProtocol": "tcp",
-            "ToPort": 80
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "VpcId": {
-          "Ref": "NetworkingVpc6B5E6F44"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/AlbSecurityGroup/Resource"
-      }
-    },
-    "NetworkingAlbSecurityGrouptoLocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A80DB56F8F4": {
-      "Type": "AWS::EC2::SecurityGroupEgress",
-      "Properties": {
-        "Description": "Allow HTTP to Fargate tasks",
-        "DestinationSecurityGroupId": {
-          "Fn::GetAtt": [
-            "NetworkingFargateSecurityGroupFC850E44",
-            "GroupId"
-          ]
-        },
-        "FromPort": 80,
-        "GroupId": {
-          "Fn::GetAtt": [
-            "NetworkingAlbSecurityGroup5ADC578E",
-            "GroupId"
-          ]
-        },
-        "IpProtocol": "tcp",
-        "ToPort": 80
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/AlbSecurityGroup/to LocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A:80"
-      }
-    },
-    "NetworkingFargateSecurityGroupFC850E44": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Fargate task security group for LocalGov Drupal (production)",
-        "GroupName": "NdxDrupal-Fargate-SG",
-        "SecurityGroupEgress": [
-          {
-            "CidrIp": "0.0.0.0/0",
-            "Description": "Allow all outbound traffic by default",
-            "IpProtocol": "-1"
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "VpcId": {
-          "Ref": "NetworkingVpc6B5E6F44"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/FargateSecurityGroup/Resource"
-      }
-    },
-    "NetworkingFargateSecurityGroupfromLocalGovDrupalStackNetworkingAlbSecurityGroupFBB25EE38007DBDA3F": {
-      "Type": "AWS::EC2::SecurityGroupIngress",
-      "Properties": {
-        "Description": "Allow HTTP from ALB",
-        "FromPort": 80,
-        "GroupId": {
-          "Fn::GetAtt": [
-            "NetworkingFargateSecurityGroupFC850E44",
-            "GroupId"
-          ]
-        },
-        "IpProtocol": "tcp",
-        "SourceSecurityGroupId": {
-          "Fn::GetAtt": [
-            "NetworkingAlbSecurityGroup5ADC578E",
-            "GroupId"
-          ]
-        },
-        "ToPort": 80
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/FargateSecurityGroup/from LocalGovDrupalStackNetworkingAlbSecurityGroupFBB25EE3:80"
-      }
-    },
-    "NetworkingAuroraSecurityGroupDB53DF94": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Aurora MySQL security group for LocalGov Drupal (production)",
-        "GroupName": "NdxDrupal-Aurora-SG",
-        "SecurityGroupEgress": [
-          {
-            "CidrIp": "255.255.255.255/32",
-            "Description": "Disallow all traffic",
-            "FromPort": 252,
-            "IpProtocol": "icmp",
-            "ToPort": 86
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "VpcId": {
-          "Ref": "NetworkingVpc6B5E6F44"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/AuroraSecurityGroup/Resource"
-      }
-    },
-    "NetworkingAuroraSecurityGroupfromLocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A3306ACB079EF": {
-      "Type": "AWS::EC2::SecurityGroupIngress",
-      "Properties": {
-        "Description": "Allow MySQL from Fargate tasks",
-        "FromPort": 3306,
-        "GroupId": {
-          "Fn::GetAtt": [
-            "NetworkingAuroraSecurityGroupDB53DF94",
-            "GroupId"
-          ]
-        },
-        "IpProtocol": "tcp",
-        "SourceSecurityGroupId": {
-          "Fn::GetAtt": [
-            "NetworkingFargateSecurityGroupFC850E44",
-            "GroupId"
-          ]
-        },
-        "ToPort": 3306
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/AuroraSecurityGroup/from LocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A:3306"
-      }
-    },
-    "NetworkingEfsSecurityGroupB65357BF": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "EFS security group for LocalGov Drupal (production)",
-        "GroupName": "NdxDrupal-EFS-SG",
-        "SecurityGroupEgress": [
-          {
-            "CidrIp": "255.255.255.255/32",
-            "Description": "Disallow all traffic",
-            "FromPort": 252,
-            "IpProtocol": "icmp",
-            "ToPort": 86
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "VpcId": {
-          "Ref": "NetworkingVpc6B5E6F44"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/EfsSecurityGroup/Resource"
-      }
-    },
-    "NetworkingEfsSecurityGroupfromLocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A204998F6FD54": {
-      "Type": "AWS::EC2::SecurityGroupIngress",
-      "Properties": {
-        "Description": "Allow NFS from Fargate tasks",
-        "FromPort": 2049,
-        "GroupId": {
-          "Fn::GetAtt": [
-            "NetworkingEfsSecurityGroupB65357BF",
-            "GroupId"
-          ]
-        },
-        "IpProtocol": "tcp",
-        "SourceSecurityGroupId": {
-          "Fn::GetAtt": [
-            "NetworkingFargateSecurityGroupFC850E44",
-            "GroupId"
-          ]
-        },
-        "ToPort": 2049
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Networking/EfsSecurityGroup/from LocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A:2049"
-      }
-    },
-    "DatabaseDbSecret1098DC6E": {
-      "Type": "AWS::SecretsManager::Secret",
-      "Properties": {
-        "Description": "Database credentials for LocalGov Drupal (production)",
-        "GenerateSecretString": {
-          "ExcludePunctuation": true,
-          "GenerateStringKey": "password",
-          "PasswordLength": 32,
-          "SecretStringTemplate": "{\"username\":\"drupal\"}"
-        },
-        "Name": "NdxDrupal/database-credentials-production",
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "UpdateReplacePolicy": "Delete",
-      "DeletionPolicy": "Delete",
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Database/DbSecret/Resource"
-      }
-    },
-    "DatabaseDbSecretAttachment34026B56": {
-      "Type": "AWS::SecretsManager::SecretTargetAttachment",
-      "Properties": {
-        "SecretId": {
-          "Ref": "DatabaseDbSecret1098DC6E"
-        },
-        "TargetId": {
-          "Ref": "DatabaseAuroraCF3B5693"
-        },
-        "TargetType": "AWS::RDS::DBCluster"
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Database/DbSecret/Attachment/Resource"
-      }
-    },
-    "DatabaseAuroraSubnetsC2098A6E": {
-      "Type": "AWS::RDS::DBSubnetGroup",
-      "Properties": {
-        "DBSubnetGroupDescription": "Subnets for Aurora database",
-        "SubnetIds": [
-          {
-            "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
-          },
-          {
-            "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Database/Aurora/Subnets/Default"
-      }
-    },
-    "DatabaseAuroraCF3B5693": {
-      "Type": "AWS::RDS::DBCluster",
-      "Properties": {
-        "BackupRetentionPeriod": 7,
-        "CopyTagsToSnapshot": true,
-        "DBClusterParameterGroupName": "default.aurora-mysql8.0",
-        "DBSubnetGroupName": {
-          "Ref": "DatabaseAuroraSubnetsC2098A6E"
-        },
-        "DatabaseName": "drupal",
-        "DeletionProtection": false,
-        "Engine": "aurora-mysql",
-        "EngineVersion": "8.0.mysql_aurora.3.04.0",
-        "MasterUserPassword": {
-          "Fn::Join": [
-            "",
-            [
-              "{{resolve:secretsmanager:",
-              {
-                "Ref": "DatabaseDbSecret1098DC6E"
-              },
-              ":SecretString:password::}}"
-            ]
-          ]
-        },
-        "MasterUsername": {
-          "Fn::Join": [
-            "",
-            [
-              "{{resolve:secretsmanager:",
-              {
-                "Ref": "DatabaseDbSecret1098DC6E"
-              },
-              ":SecretString:username::}}"
-            ]
-          ]
-        },
-        "ServerlessV2ScalingConfiguration": {
-          "MaxCapacity": 2,
-          "MinCapacity": 0.5
-        },
-        "StorageEncrypted": true,
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "VpcSecurityGroupIds": [
-          {
-            "Fn::GetAtt": [
-              "NetworkingAuroraSecurityGroupDB53DF94",
-              "GroupId"
-            ]
-          }
-        ]
-      },
-      "UpdateReplacePolicy": "Delete",
-      "DeletionPolicy": "Delete",
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Database/Aurora/Resource"
-      }
-    },
-    "DatabaseAurorawriter2449CF28": {
-      "Type": "AWS::RDS::DBInstance",
-      "Properties": {
-        "DBClusterIdentifier": {
-          "Ref": "DatabaseAuroraCF3B5693"
-        },
-        "DBInstanceClass": "db.serverless",
-        "Engine": "aurora-mysql",
-        "PromotionTier": 0,
-        "PubliclyAccessible": false,
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "DependsOn": [
-        "NetworkingVpcPublicSubnet1DefaultRoute80C01FA6",
-        "NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA",
-        "NetworkingVpcPublicSubnet2DefaultRouteDF98F60F",
-        "NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06"
-      ],
-      "UpdateReplacePolicy": "Delete",
-      "DeletionPolicy": "Delete",
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Database/Aurora/writer/Resource"
-      }
-    },
-    "StorageDrupalFilesD92DA4A5": {
-      "Type": "AWS::EFS::FileSystem",
-      "Properties": {
-        "Encrypted": true,
-        "FileSystemPolicy": {
-          "Statement": [
-            {
-              "Action": [
-                "elasticfilesystem:ClientWrite",
-                "elasticfilesystem:ClientRootAccess"
-              ],
-              "Condition": {
-                "Bool": {
-                  "elasticfilesystem:AccessedViaMountTarget": "true"
-                }
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": "*"
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "FileSystemTags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Name",
-            "Value": "NdxDrupal-Files-production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "LifecyclePolicies": [
-          {
-            "TransitionToIA": "AFTER_30_DAYS"
-          }
-        ],
-        "PerformanceMode": "generalPurpose",
-        "ThroughputMode": "bursting"
-      },
-      "UpdateReplacePolicy": "Delete",
-      "DeletionPolicy": "Delete",
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Storage/DrupalFiles/Resource"
-      }
-    },
-    "StorageDrupalFilesEfsMountTarget10BBF07C1": {
-      "Type": "AWS::EFS::MountTarget",
-      "Properties": {
-        "FileSystemId": {
-          "Ref": "StorageDrupalFilesD92DA4A5"
-        },
-        "SecurityGroups": [
-          {
-            "Fn::GetAtt": [
-              "NetworkingEfsSecurityGroupB65357BF",
-              "GroupId"
-            ]
-          }
-        ],
-        "SubnetId": {
-          "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Storage/DrupalFiles/EfsMountTarget1"
-      }
-    },
-    "StorageDrupalFilesEfsMountTarget2D6BEBE15": {
-      "Type": "AWS::EFS::MountTarget",
-      "Properties": {
-        "FileSystemId": {
-          "Ref": "StorageDrupalFilesD92DA4A5"
-        },
-        "SecurityGroups": [
-          {
-            "Fn::GetAtt": [
-              "NetworkingEfsSecurityGroupB65357BF",
-              "GroupId"
-            ]
-          }
-        ],
-        "SubnetId": {
-          "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Storage/DrupalFiles/EfsMountTarget2"
-      }
-    },
-    "StorageDrupalFilesDrupalFilesAP71E00C29": {
-      "Type": "AWS::EFS::AccessPoint",
-      "Properties": {
-        "AccessPointTags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Name",
-            "Value": "LocalGovDrupalStack/Storage/DrupalFiles/DrupalFilesAP"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "FileSystemId": {
-          "Ref": "StorageDrupalFilesD92DA4A5"
-        },
-        "PosixUser": {
-          "Gid": "33",
-          "Uid": "33"
-        },
-        "RootDirectory": {
-          "CreationInfo": {
-            "OwnerGid": "33",
-            "OwnerUid": "33",
-            "Permissions": "0755"
-          },
-          "Path": "/drupal-files"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Storage/DrupalFiles/DrupalFilesAP/Resource"
-      }
-    },
-    "ComputeCluster4F8E5F81": {
-      "Type": "AWS::ECS::Cluster",
-      "Properties": {
-        "ClusterName": "NdxDrupal-production",
-        "ClusterSettings": [
-          {
-            "Name": "containerInsights",
-            "Value": "enabled"
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/Cluster/Resource"
-      }
-    },
-    "ComputeLogGroup1A40385B": {
-      "Type": "AWS::Logs::LogGroup",
-      "Properties": {
-        "LogGroupName": "/ndx-drupal/production",
-        "RetentionInDays": 7,
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "UpdateReplacePolicy": "Delete",
-      "DeletionPolicy": "Delete",
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/LogGroup/Resource"
-      }
-    },
-    "ComputeExecutionRoleCE43D454": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "ecs-tasks.amazonaws.com"
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-              ]
-            ]
-          }
-        ],
-        "RoleName": "InnovationSandbox-ndx-production-exec",
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/ExecutionRole/Resource"
-      }
-    },
-    "ComputeExecutionRoleDefaultPolicy29213E53": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret"
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Ref": "DatabaseDbSecret1098DC6E"
-              }
-            },
-            {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret"
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Ref": "AdminSecretB9452750"
-              }
-            },
-            {
-              "Action": [
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "ComputeLogGroup1A40385B",
-                  "Arn"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": "ComputeExecutionRoleDefaultPolicy29213E53",
-        "Roles": [
-          {
-            "Ref": "ComputeExecutionRoleCE43D454"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/ExecutionRole/DefaultPolicy/Resource"
-      }
-    },
-    "ComputeTaskRole4AA3EDCB": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "ecs-tasks.amazonaws.com"
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "RoleName": "InnovationSandbox-ndx-production-task",
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/TaskRole/Resource"
-      }
-    },
-    "ComputeTaskRoleDefaultPolicyDBE426FD": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "bedrock:InvokeModel",
-                "bedrock:InvokeModelWithResponseStream",
-                "bedrock:Converse",
-                "bedrock:ConverseStream"
-              ],
-              "Effect": "Allow",
-              "Resource": "arn:aws:bedrock:*::foundation-model/amazon.nova-*"
-            },
-            {
-              "Action": [
-                "polly:SynthesizeSpeech",
-                "polly:DescribeVoices"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Action": [
-                "translate:TranslateText",
-                "translate:ListLanguages",
-                "comprehend:DetectDominantLanguage"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Action": [
-                "rekognition:DetectLabels",
-                "rekognition:DetectText"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Action": [
-                "textract:AnalyzeDocument",
-                "textract:DetectDocumentText",
-                "textract:StartDocumentAnalysis",
-                "textract:GetDocumentAnalysis",
-                "textract:StartDocumentTextDetection",
-                "textract:GetDocumentTextDetection"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Action": [
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "ComputeLogGroup1A40385B",
-                  "Arn"
-                ]
-              }
-            },
-            {
-              "Action": [
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret"
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Ref": "DatabaseDbSecret1098DC6E"
-              }
-            },
-            {
-              "Action": [
-                "elasticfilesystem:ClientMount",
-                "elasticfilesystem:ClientWrite",
-                "elasticfilesystem:ClientRootAccess"
-              ],
-              "Condition": {
-                "Bool": {
-                  "elasticfilesystem:AccessedViaMountTarget": "true"
-                }
-              },
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "StorageDrupalFilesD92DA4A5",
-                  "Arn"
-                ]
-              }
-            },
-            {
-              "Action": [
-                "ssmmessages:CreateControlChannel",
-                "ssmmessages:CreateDataChannel",
-                "ssmmessages:OpenControlChannel",
-                "ssmmessages:OpenDataChannel"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Action": "logs:DescribeLogGroups",
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Action": [
-                "logs:CreateLogStream",
-                "logs:DescribeLogStreams",
-                "logs:PutLogEvents"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": "ComputeTaskRoleDefaultPolicyDBE426FD",
-        "Roles": [
-          {
-            "Ref": "ComputeTaskRole4AA3EDCB"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/TaskRole/DefaultPolicy/Resource"
-      }
-    },
-    "ComputeTaskDefBA99999B": {
-      "Type": "AWS::ECS::TaskDefinition",
-      "Properties": {
-        "ContainerDefinitions": [
-          {
-            "Environment": [
-              {
-                "Name": "DEPLOYMENT_MODE",
-                "Value": "production"
-              },
-              {
-                "Name": "DB_HOST",
-                "Value": {
-                  "Fn::GetAtt": [
-                    "DatabaseAuroraCF3B5693",
-                    "Endpoint.Address"
-                  ]
-                }
-              },
-              {
-                "Name": "DB_NAME",
-                "Value": "drupal"
-              },
-              {
-                "Name": "DB_PORT",
-                "Value": {
-                  "Fn::GetAtt": [
-                    "DatabaseAuroraCF3B5693",
-                    "Endpoint.Port"
-                  ]
-                }
-              },
-              {
-                "Name": "DB_USER",
-                "Value": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "{{resolve:secretsmanager:",
-                      {
-                        "Ref": "DatabaseDbSecret1098DC6E"
-                      },
-                      ":SecretString:username::}}"
-                    ]
-                  ]
-                }
-              },
-              {
-                "Name": "DB_PASSWORD",
-                "Value": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "{{resolve:secretsmanager:",
-                      {
-                        "Ref": "DatabaseDbSecret1098DC6E"
-                      },
-                      ":SecretString:password::}}"
-                    ]
-                  ]
-                }
-              },
-              {
-                "Name": "ADMIN_PASSWORD",
-                "Value": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "{{resolve:secretsmanager:",
-                      {
-                        "Ref": "AdminSecretB9452750"
-                      },
-                      ":SecretString:password::}}"
-                    ]
-                  ]
-                }
-              }
-            ],
-            "Essential": true,
-            "HealthCheck": {
-              "Command": [
-                "CMD-SHELL",
-                "curl -f http://localhost/health || exit 1"
-              ],
-              "Interval": 30,
-              "Retries": 5,
-              "StartPeriod": 300,
-              "Timeout": 10
-            },
-            "Image": "ghcr.io/co-cddo/ndx_try_aws_scenarios-localgov_drupal:latest",
-            "LogConfiguration": {
-              "LogDriver": "awslogs",
-              "Options": {
-                "awslogs-group": {
-                  "Ref": "ComputeLogGroup1A40385B"
-                },
-                "awslogs-stream-prefix": "drupal",
-                "awslogs-region": {
-                  "Ref": "AWS::Region"
-                }
-              }
-            },
-            "MountPoints": [
-              {
-                "ContainerPath": "/var/www/drupal/sites/default/files",
-                "ReadOnly": false,
-                "SourceVolume": "drupal-files"
-              }
-            ],
-            "Name": "drupal",
-            "PortMappings": [
-              {
-                "ContainerPort": 80,
-                "Protocol": "tcp"
-              }
-            ]
-          }
-        ],
-        "Cpu": "1024",
-        "ExecutionRoleArn": {
-          "Fn::GetAtt": [
-            "ComputeExecutionRoleCE43D454",
-            "Arn"
-          ]
-        },
-        "Family": "LocalGovDrupalStackComputeTaskDefA610948B",
-        "Memory": "2048",
-        "NetworkMode": "awsvpc",
-        "RequiresCompatibilities": [
-          "FARGATE"
-        ],
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "TaskRoleArn": {
-          "Fn::GetAtt": [
-            "ComputeTaskRole4AA3EDCB",
-            "Arn"
-          ]
-        },
-        "Volumes": [
-          {
-            "EFSVolumeConfiguration": {
-              "AuthorizationConfig": {
-                "AccessPointId": {
-                  "Ref": "StorageDrupalFilesDrupalFilesAP71E00C29"
-                },
-                "IAM": "ENABLED"
-              },
-              "FilesystemId": {
-                "Ref": "StorageDrupalFilesD92DA4A5"
-              },
-              "TransitEncryption": "ENABLED"
-            },
-            "Name": "drupal-files"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/TaskDef/Resource"
-      }
-    },
-    "ComputeALB00A47009": {
-      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-      "Properties": {
-        "LoadBalancerAttributes": [
-          {
-            "Key": "deletion_protection.enabled",
-            "Value": "false"
-          }
-        ],
-        "Name": "NdxDrupal-ALB-production",
-        "Scheme": "internet-facing",
-        "SecurityGroups": [
-          {
-            "Fn::GetAtt": [
-              "NetworkingAlbSecurityGroup5ADC578E",
-              "GroupId"
-            ]
-          }
-        ],
-        "Subnets": [
-          {
-            "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
-          },
-          {
-            "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "Type": "application"
-      },
-      "DependsOn": [
-        "NetworkingVpcPublicSubnet1DefaultRoute80C01FA6",
-        "NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA",
-        "NetworkingVpcPublicSubnet2DefaultRouteDF98F60F",
-        "NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06"
-      ],
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/ALB/Resource"
-      }
-    },
-    "ComputeALBHTTP30E88DD3": {
-      "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Properties": {
-        "DefaultActions": [
-          {
-            "TargetGroupArn": {
-              "Ref": "ComputeALBHTTPDrupalTargetGroup2F6037E5"
-            },
-            "Type": "forward"
-          }
-        ],
-        "LoadBalancerArn": {
-          "Ref": "ComputeALB00A47009"
-        },
-        "Port": 80,
-        "Protocol": "HTTP"
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/ALB/HTTP/Resource"
-      }
-    },
-    "ComputeALBHTTPDrupalTargetGroup2F6037E5": {
-      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "Properties": {
-        "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPath": "/health",
-        "HealthCheckTimeoutSeconds": 10,
-        "HealthyThresholdCount": 2,
-        "Matcher": {
-          "HttpCode": "200"
-        },
-        "Port": 80,
-        "Protocol": "HTTP",
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "TargetGroupAttributes": [
-          {
-            "Key": "deregistration_delay.timeout_seconds",
-            "Value": "30"
-          },
-          {
-            "Key": "stickiness.enabled",
-            "Value": "false"
-          }
-        ],
-        "TargetType": "ip",
-        "UnhealthyThresholdCount": 5,
-        "VpcId": {
-          "Ref": "NetworkingVpc6B5E6F44"
-        }
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/ALB/HTTP/DrupalTargetGroup/Resource"
-      }
-    },
-    "ComputeServiceC2A22793": {
-      "Type": "AWS::ECS::Service",
-      "Properties": {
-        "Cluster": {
-          "Ref": "ComputeCluster4F8E5F81"
-        },
-        "DeploymentConfiguration": {
-          "Alarms": {
-            "AlarmNames": [],
-            "Enable": false,
-            "Rollback": false
-          },
-          "DeploymentCircuitBreaker": {
-            "Enable": true,
-            "Rollback": true
-          },
-          "MaximumPercent": 200,
-          "MinimumHealthyPercent": 50
-        },
-        "DeploymentController": {
-          "Type": "ECS"
-        },
-        "DesiredCount": 1,
-        "EnableECSManagedTags": false,
-        "EnableExecuteCommand": true,
-        "HealthCheckGracePeriodSeconds": 600,
-        "LaunchType": "FARGATE",
-        "LoadBalancers": [
-          {
-            "ContainerName": "drupal",
-            "ContainerPort": 80,
-            "TargetGroupArn": {
-              "Ref": "ComputeALBHTTPDrupalTargetGroup2F6037E5"
-            }
-          }
-        ],
-        "NetworkConfiguration": {
-          "AwsvpcConfiguration": {
-            "AssignPublicIp": "ENABLED",
-            "SecurityGroups": [
-              {
-                "Fn::GetAtt": [
-                  "NetworkingFargateSecurityGroupFC850E44",
-                  "GroupId"
-                ]
-              }
-            ],
-            "Subnets": [
-              {
-                "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
-              },
-              {
-                "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
-              }
-            ]
-          }
-        },
-        "ServiceName": "NdxDrupal-Service-production",
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ],
-        "TaskDefinition": {
-          "Ref": "ComputeTaskDefBA99999B"
-        }
-      },
-      "DependsOn": [
-        "ComputeALBHTTPDrupalTargetGroup2F6037E5",
-        "ComputeALBHTTP30E88DD3",
-        "ComputeTaskRoleDefaultPolicyDBE426FD",
-        "ComputeTaskRole4AA3EDCB"
-      ],
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/Compute/Service/Service"
-      }
-    },
-    "CDNDistributionD4FAE585": {
-      "Type": "AWS::CloudFront::Distribution",
-      "Properties": {
-        "DistributionConfig": {
-          "Comment": "LocalGov Drupal - HTTPS Termination",
-          "DefaultCacheBehavior": {
-            "AllowedMethods": [
-              "GET",
-              "HEAD",
-              "OPTIONS",
-              "PUT",
-              "PATCH",
-              "POST",
-              "DELETE"
-            ],
-            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
-            "Compress": true,
-            "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
-            "TargetOriginId": "LocalGovDrupalStackCDNDistributionOrigin1FF8340AC",
-            "ViewerProtocolPolicy": "redirect-to-https"
-          },
-          "Enabled": true,
-          "HttpVersion": "http2",
-          "IPV6Enabled": true,
-          "Origins": [
-            {
-              "CustomOriginConfig": {
-                "OriginProtocolPolicy": "http-only",
-                "OriginSSLProtocols": [
-                  "TLSv1.2"
-                ]
-              },
-              "DomainName": {
-                "Fn::GetAtt": [
-                  "ComputeALB00A47009",
-                  "DNSName"
-                ]
-              },
-              "Id": "LocalGovDrupalStackCDNDistributionOrigin1FF8340AC"
-            }
-          ]
-        },
-        "Tags": [
-          {
-            "Key": "CouncilTheme",
-            "Value": "random"
-          },
-          {
-            "Key": "DeploymentMode",
-            "Value": "production"
-          },
-          {
-            "Key": "Project",
-            "Value": "ndx-try-aws-scenarios"
-          },
-          {
-            "Key": "Scenario",
-            "Value": "localgov-drupal"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "LocalGovDrupalStack/CDN/Distribution/Resource"
-      }
-    }
-  },
-  "Outputs": {
-    "DrupalUrl": {
-      "Description": "URL to access LocalGov Drupal (HTTPS)",
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Fn::GetAtt": [
-                "CDNDistributionD4FAE585",
-                "DomainName"
-              ]
-            },
-            "/init-status"
-          ]
-        ]
-      },
-      "Export": {
-        "Name": "LocalGovDrupalStack-DrupalUrl"
-      }
-    },
-    "AdminUsername": {
-      "Description": "Drupal admin username",
-      "Value": "admin"
-    },
-    "AdminPassword": {
-      "Description": "Drupal admin password",
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "{{resolve:secretsmanager:",
-            {
-              "Ref": "AdminSecretB9452750"
-            },
-            ":SecretString:password::}}"
-          ]
-        ]
-      }
-    },
-    "CloudWatchLogsUrl": {
-      "Description": "CloudWatch Logs for initialization monitoring",
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Ref": "AWS::Region"
-            },
-            ".console.aws.amazon.com/cloudwatch/home?region=",
-            {
-              "Ref": "AWS::Region"
-            },
-            "#logsV2:log-groups/log-group/%2Fndx-drupal%2Fproduction"
-          ]
-        ]
-      }
-    },
-    "StackDescription": {
-      "Description": "Stack description",
-      "Value": "AI-Enhanced LocalGov Drupal - Try AWS Scenarios"
-    }
-  },
-  "Conditions": {
-    "CDKMetadataAvailable": {
-      "Fn::Or": [
-        {
-          "Fn::Or": [
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "af-south-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-east-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-northeast-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-northeast-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-northeast-3"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-south-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-south-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-southeast-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-southeast-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-southeast-3"
-              ]
-            }
-          ]
-        },
-        {
-          "Fn::Or": [
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-southeast-4"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ca-central-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ca-west-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "cn-north-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "cn-northwest-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-central-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-central-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-north-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-south-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-south-2"
-              ]
-            }
-          ]
-        },
-        {
-          "Fn::Or": [
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-west-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-west-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-west-3"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "il-central-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "me-central-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "me-south-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "sa-east-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "us-east-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "us-east-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "us-west-1"
-              ]
-            }
-          ]
-        },
-        {
-          "Fn::Equals": [
-            {
-              "Ref": "AWS::Region"
-            },
-            "us-west-2"
-          ]
-        }
-      ]
-    }
-  },
-  "Parameters": {},
-  "Rules": {}
-}
+Description: AI-Enhanced LocalGov Drupal on AWS - Demonstration Environment
+Resources:
+  AdminSecretB9452750:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Admin credentials for LocalGov Drupal
+      GenerateSecretString:
+        ExcludePunctuation: true
+        GenerateStringKey: password
+        PasswordLength: 32
+        SecretStringTemplate: '{"username":"admin"}'
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/AdminSecret/Resource
+  NetworkingVpc6B5E6F44:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Name
+          Value: NdxDrupal-VPC
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/Resource
+  NetworkingVpcPublicSubnet1Subnet918289EE:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: Public
+        - Key: aws-cdk:subnet-type
+          Value: Public
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Name
+          Value: LocalGovDrupalStack/Networking/Vpc/PublicSubnet1
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      VpcId:
+        Ref: NetworkingVpc6B5E6F44
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/PublicSubnet1/Subnet
+  NetworkingVpcPublicSubnet1RouteTable8FB3C18A:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Name
+          Value: LocalGovDrupalStack/Networking/Vpc/PublicSubnet1
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      VpcId:
+        Ref: NetworkingVpc6B5E6F44
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/PublicSubnet1/RouteTable
+  NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: NetworkingVpcPublicSubnet1RouteTable8FB3C18A
+      SubnetId:
+        Ref: NetworkingVpcPublicSubnet1Subnet918289EE
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/PublicSubnet1/RouteTableAssociation
+  NetworkingVpcPublicSubnet1DefaultRoute80C01FA6:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: NetworkingVpcIGW21218DAB
+      RouteTableId:
+        Ref: NetworkingVpcPublicSubnet1RouteTable8FB3C18A
+    DependsOn:
+      - NetworkingVpcVPCGW12E561D8
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/PublicSubnet1/DefaultRoute
+  NetworkingVpcPublicSubnet2Subnet9D9E5AFB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: Public
+        - Key: aws-cdk:subnet-type
+          Value: Public
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Name
+          Value: LocalGovDrupalStack/Networking/Vpc/PublicSubnet2
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      VpcId:
+        Ref: NetworkingVpc6B5E6F44
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/PublicSubnet2/Subnet
+  NetworkingVpcPublicSubnet2RouteTable22886677:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Name
+          Value: LocalGovDrupalStack/Networking/Vpc/PublicSubnet2
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      VpcId:
+        Ref: NetworkingVpc6B5E6F44
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/PublicSubnet2/RouteTable
+  NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: NetworkingVpcPublicSubnet2RouteTable22886677
+      SubnetId:
+        Ref: NetworkingVpcPublicSubnet2Subnet9D9E5AFB
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/PublicSubnet2/RouteTableAssociation
+  NetworkingVpcPublicSubnet2DefaultRouteDF98F60F:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: NetworkingVpcIGW21218DAB
+      RouteTableId:
+        Ref: NetworkingVpcPublicSubnet2RouteTable22886677
+    DependsOn:
+      - NetworkingVpcVPCGW12E561D8
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/PublicSubnet2/DefaultRoute
+  NetworkingVpcIGW21218DAB:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Name
+          Value: NdxDrupal-VPC
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/IGW
+  NetworkingVpcVPCGW12E561D8:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId:
+        Ref: NetworkingVpcIGW21218DAB
+      VpcId:
+        Ref: NetworkingVpc6B5E6F44
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/Vpc/VPCGW
+  NetworkingAlbSecurityGroup5ADC578E:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB security group for LocalGov Drupal (production)
+      GroupName: NdxDrupal-ALB-SG
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow HTTPS from internet
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+        - CidrIp: 0.0.0.0/0
+          Description: Allow HTTP from internet (redirect to HTTPS)
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      VpcId:
+        Ref: NetworkingVpc6B5E6F44
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/AlbSecurityGroup/Resource
+  NetworkingAlbSecurityGrouptoLocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A80DB56F8F4:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      Description: Allow HTTP to Fargate tasks
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+          - NetworkingFargateSecurityGroupFC850E44
+          - GroupId
+      FromPort: 80
+      GroupId:
+        Fn::GetAtt:
+          - NetworkingAlbSecurityGroup5ADC578E
+          - GroupId
+      IpProtocol: tcp
+      ToPort: 80
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/AlbSecurityGroup/to LocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A:80
+  NetworkingFargateSecurityGroupFC850E44:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Fargate task security group for LocalGov Drupal (production)
+      GroupName: NdxDrupal-Fargate-SG
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      VpcId:
+        Ref: NetworkingVpc6B5E6F44
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/FargateSecurityGroup/Resource
+  NetworkingFargateSecurityGroupfromLocalGovDrupalStackNetworkingAlbSecurityGroupFBB25EE38007DBDA3F:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow HTTP from ALB
+      FromPort: 80
+      GroupId:
+        Fn::GetAtt:
+          - NetworkingFargateSecurityGroupFC850E44
+          - GroupId
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+          - NetworkingAlbSecurityGroup5ADC578E
+          - GroupId
+      ToPort: 80
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/FargateSecurityGroup/from LocalGovDrupalStackNetworkingAlbSecurityGroupFBB25EE3:80
+  NetworkingAuroraSecurityGroupDB53DF94:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Aurora MySQL security group for LocalGov Drupal (production)
+      GroupName: NdxDrupal-Aurora-SG
+      SecurityGroupEgress:
+        - CidrIp: 255.255.255.255/32
+          Description: Disallow all traffic
+          FromPort: 252
+          IpProtocol: icmp
+          ToPort: 86
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      VpcId:
+        Ref: NetworkingVpc6B5E6F44
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/AuroraSecurityGroup/Resource
+  NetworkingAuroraSecurityGroupfromLocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A3306ACB079EF:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow MySQL from Fargate tasks
+      FromPort: 3306
+      GroupId:
+        Fn::GetAtt:
+          - NetworkingAuroraSecurityGroupDB53DF94
+          - GroupId
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+          - NetworkingFargateSecurityGroupFC850E44
+          - GroupId
+      ToPort: 3306
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/AuroraSecurityGroup/from LocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A:3306
+  NetworkingEfsSecurityGroupB65357BF:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EFS security group for LocalGov Drupal (production)
+      GroupName: NdxDrupal-EFS-SG
+      SecurityGroupEgress:
+        - CidrIp: 255.255.255.255/32
+          Description: Disallow all traffic
+          FromPort: 252
+          IpProtocol: icmp
+          ToPort: 86
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      VpcId:
+        Ref: NetworkingVpc6B5E6F44
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/EfsSecurityGroup/Resource
+  NetworkingEfsSecurityGroupfromLocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A204998F6FD54:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow NFS from Fargate tasks
+      FromPort: 2049
+      GroupId:
+        Fn::GetAtt:
+          - NetworkingEfsSecurityGroupB65357BF
+          - GroupId
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+          - NetworkingFargateSecurityGroupFC850E44
+          - GroupId
+      ToPort: 2049
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Networking/EfsSecurityGroup/from LocalGovDrupalStackNetworkingFargateSecurityGroup8A3BBF1A:2049
+  DatabaseDbSecret1098DC6E:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Database credentials for LocalGov Drupal (production)
+      GenerateSecretString:
+        ExcludePunctuation: true
+        GenerateStringKey: password
+        PasswordLength: 32
+        SecretStringTemplate: '{"username":"drupal"}'
+      Name: NdxDrupal/database-credentials-production
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Database/DbSecret/Resource
+  DatabaseDbSecretAttachment34026B56:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId:
+        Ref: DatabaseDbSecret1098DC6E
+      TargetId:
+        Ref: DatabaseAuroraCF3B5693
+      TargetType: AWS::RDS::DBCluster
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Database/DbSecret/Attachment/Resource
+  DatabaseAuroraSubnetsC2098A6E:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnets for Aurora database
+      SubnetIds:
+        - Ref: NetworkingVpcPublicSubnet1Subnet918289EE
+        - Ref: NetworkingVpcPublicSubnet2Subnet9D9E5AFB
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Database/Aurora/Subnets/Default
+  DatabaseAuroraCF3B5693:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      BackupRetentionPeriod: 7
+      CopyTagsToSnapshot: true
+      DBClusterParameterGroupName: default.aurora-mysql8.0
+      DBSubnetGroupName:
+        Ref: DatabaseAuroraSubnetsC2098A6E
+      DatabaseName: drupal
+      DeletionProtection: false
+      Engine: aurora-mysql
+      EngineVersion: 8.0.mysql_aurora.3.04.0
+      MasterUserPassword:
+        Fn::Join:
+          - ""
+          - - "{{resolve:secretsmanager:"
+            - Ref: DatabaseDbSecret1098DC6E
+            - :SecretString:password::}}
+      MasterUsername:
+        Fn::Join:
+          - ""
+          - - "{{resolve:secretsmanager:"
+            - Ref: DatabaseDbSecret1098DC6E
+            - :SecretString:username::}}
+      ServerlessV2ScalingConfiguration:
+        MaxCapacity: 2
+        MinCapacity: 0.5
+      StorageEncrypted: true
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      VpcSecurityGroupIds:
+        - Fn::GetAtt:
+            - NetworkingAuroraSecurityGroupDB53DF94
+            - GroupId
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Database/Aurora/Resource
+  DatabaseAurorawriter2449CF28:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier:
+        Ref: DatabaseAuroraCF3B5693
+      DBInstanceClass: db.serverless
+      Engine: aurora-mysql
+      PromotionTier: 0
+      PubliclyAccessible: false
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    DependsOn:
+      - NetworkingVpcPublicSubnet1DefaultRoute80C01FA6
+      - NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA
+      - NetworkingVpcPublicSubnet2DefaultRouteDF98F60F
+      - NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Database/Aurora/writer/Resource
+  StorageDrupalFilesD92DA4A5:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      Encrypted: true
+      FileSystemPolicy:
+        Statement:
+          - Action:
+              - elasticfilesystem:ClientWrite
+              - elasticfilesystem:ClientRootAccess
+            Condition:
+              Bool:
+                elasticfilesystem:AccessedViaMountTarget: "true"
+            Effect: Allow
+            Principal:
+              AWS: "*"
+        Version: "2012-10-17"
+      FileSystemTags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Name
+          Value: NdxDrupal-Files-production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      LifecyclePolicies:
+        - TransitionToIA: AFTER_30_DAYS
+      PerformanceMode: generalPurpose
+      ThroughputMode: bursting
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Storage/DrupalFiles/Resource
+  StorageDrupalFilesEfsMountTarget10BBF07C1:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId:
+        Ref: StorageDrupalFilesD92DA4A5
+      SecurityGroups:
+        - Fn::GetAtt:
+            - NetworkingEfsSecurityGroupB65357BF
+            - GroupId
+      SubnetId:
+        Ref: NetworkingVpcPublicSubnet1Subnet918289EE
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Storage/DrupalFiles/EfsMountTarget1
+  StorageDrupalFilesEfsMountTarget2D6BEBE15:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId:
+        Ref: StorageDrupalFilesD92DA4A5
+      SecurityGroups:
+        - Fn::GetAtt:
+            - NetworkingEfsSecurityGroupB65357BF
+            - GroupId
+      SubnetId:
+        Ref: NetworkingVpcPublicSubnet2Subnet9D9E5AFB
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Storage/DrupalFiles/EfsMountTarget2
+  StorageDrupalFilesDrupalFilesAP71E00C29:
+    Type: AWS::EFS::AccessPoint
+    Properties:
+      AccessPointTags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Name
+          Value: LocalGovDrupalStack/Storage/DrupalFiles/DrupalFilesAP
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      FileSystemId:
+        Ref: StorageDrupalFilesD92DA4A5
+      PosixUser:
+        Gid: "33"
+        Uid: "33"
+      RootDirectory:
+        CreationInfo:
+          OwnerGid: "33"
+          OwnerUid: "33"
+          Permissions: "0755"
+        Path: /drupal-files
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Storage/DrupalFiles/DrupalFilesAP/Resource
+  ComputeCluster4F8E5F81:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: NdxDrupal-production
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/Cluster/Resource
+  ComputeLogGroup1A40385B:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ndx-drupal/production
+      RetentionInDays: 7
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/LogGroup/Resource
+  ComputeExecutionRoleCE43D454:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      RoleName: InnovationSandbox-ndx-production-exec
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/ExecutionRole/Resource
+  ComputeExecutionRoleDefaultPolicy29213E53:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - secretsmanager:GetSecretValue
+              - secretsmanager:DescribeSecret
+            Effect: Allow
+            Resource:
+              Ref: DatabaseDbSecret1098DC6E
+          - Action:
+              - secretsmanager:GetSecretValue
+              - secretsmanager:DescribeSecret
+            Effect: Allow
+            Resource:
+              Ref: AdminSecretB9452750
+          - Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - ComputeLogGroup1A40385B
+                - Arn
+        Version: "2012-10-17"
+      PolicyName: ComputeExecutionRoleDefaultPolicy29213E53
+      Roles:
+        - Ref: ComputeExecutionRoleCE43D454
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/ExecutionRole/DefaultPolicy/Resource
+  ComputeTaskRole4AA3EDCB:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: "2012-10-17"
+      RoleName: InnovationSandbox-ndx-production-task
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/TaskRole/Resource
+  ComputeTaskRoleDefaultPolicyDBE426FD:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - bedrock:InvokeModel
+              - bedrock:InvokeModelWithResponseStream
+              - bedrock:Converse
+              - bedrock:ConverseStream
+            Effect: Allow
+            Resource: arn:aws:bedrock:*::foundation-model/amazon.nova-*
+          - Action:
+              - polly:SynthesizeSpeech
+              - polly:DescribeVoices
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - translate:TranslateText
+              - translate:ListLanguages
+              - comprehend:DetectDominantLanguage
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - rekognition:DetectLabels
+              - rekognition:DetectText
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - textract:AnalyzeDocument
+              - textract:DetectDocumentText
+              - textract:StartDocumentAnalysis
+              - textract:GetDocumentAnalysis
+              - textract:StartDocumentTextDetection
+              - textract:GetDocumentTextDetection
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - ComputeLogGroup1A40385B
+                - Arn
+          - Action:
+              - secretsmanager:GetSecretValue
+              - secretsmanager:DescribeSecret
+            Effect: Allow
+            Resource:
+              Ref: DatabaseDbSecret1098DC6E
+          - Action:
+              - elasticfilesystem:ClientMount
+              - elasticfilesystem:ClientWrite
+              - elasticfilesystem:ClientRootAccess
+            Condition:
+              Bool:
+                elasticfilesystem:AccessedViaMountTarget: "true"
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - StorageDrupalFilesD92DA4A5
+                - Arn
+          - Action:
+              - ssmmessages:CreateControlChannel
+              - ssmmessages:CreateDataChannel
+              - ssmmessages:OpenControlChannel
+              - ssmmessages:OpenDataChannel
+            Effect: Allow
+            Resource: "*"
+          - Action: logs:DescribeLogGroups
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - logs:CreateLogStream
+              - logs:DescribeLogStreams
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: ComputeTaskRoleDefaultPolicyDBE426FD
+      Roles:
+        - Ref: ComputeTaskRole4AA3EDCB
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/TaskRole/DefaultPolicy/Resource
+  ComputeTaskDefBA99999B:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - Environment:
+            - Name: DEPLOYMENT_MODE
+              Value: production
+            - Name: DB_HOST
+              Value:
+                Fn::GetAtt:
+                  - DatabaseAuroraCF3B5693
+                  - Endpoint.Address
+            - Name: DB_NAME
+              Value: drupal
+            - Name: DB_PORT
+              Value:
+                Fn::GetAtt:
+                  - DatabaseAuroraCF3B5693
+                  - Endpoint.Port
+            - Name: DB_USER
+              Value:
+                Fn::Join:
+                  - ""
+                  - - "{{resolve:secretsmanager:"
+                    - Ref: DatabaseDbSecret1098DC6E
+                    - :SecretString:username::}}
+            - Name: DB_PASSWORD
+              Value:
+                Fn::Join:
+                  - ""
+                  - - "{{resolve:secretsmanager:"
+                    - Ref: DatabaseDbSecret1098DC6E
+                    - :SecretString:password::}}
+            - Name: ADMIN_PASSWORD
+              Value:
+                Fn::Join:
+                  - ""
+                  - - "{{resolve:secretsmanager:"
+                    - Ref: AdminSecretB9452750
+                    - :SecretString:password::}}
+          Essential: true
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - curl -f http://localhost/health || exit 1
+            Interval: 30
+            Retries: 5
+            StartPeriod: 300
+            Timeout: 10
+          Image: ghcr.io/co-cddo/ndx_try_aws_scenarios-localgov_drupal:latest
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: ComputeLogGroup1A40385B
+              awslogs-stream-prefix: drupal
+              awslogs-region:
+                Ref: AWS::Region
+          MountPoints:
+            - ContainerPath: /var/www/drupal/sites/default/files
+              ReadOnly: false
+              SourceVolume: drupal-files
+          Name: drupal
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: tcp
+      Cpu: "1024"
+      ExecutionRoleArn:
+        Fn::GetAtt:
+          - ComputeExecutionRoleCE43D454
+          - Arn
+      Family: LocalGovDrupalStackComputeTaskDefA610948B
+      Memory: "2048"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      TaskRoleArn:
+        Fn::GetAtt:
+          - ComputeTaskRole4AA3EDCB
+          - Arn
+      Volumes:
+        - EFSVolumeConfiguration:
+            AuthorizationConfig:
+              AccessPointId:
+                Ref: StorageDrupalFilesDrupalFilesAP71E00C29
+              IAM: ENABLED
+            FilesystemId:
+              Ref: StorageDrupalFilesD92DA4A5
+            TransitEncryption: ENABLED
+          Name: drupal-files
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/TaskDef/Resource
+  ComputeALB00A47009:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      LoadBalancerAttributes:
+        - Key: deletion_protection.enabled
+          Value: "false"
+      Name: NdxDrupal-ALB-production
+      Scheme: internet-facing
+      SecurityGroups:
+        - Fn::GetAtt:
+            - NetworkingAlbSecurityGroup5ADC578E
+            - GroupId
+      Subnets:
+        - Ref: NetworkingVpcPublicSubnet1Subnet918289EE
+        - Ref: NetworkingVpcPublicSubnet2Subnet9D9E5AFB
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      Type: application
+    DependsOn:
+      - NetworkingVpcPublicSubnet1DefaultRoute80C01FA6
+      - NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA
+      - NetworkingVpcPublicSubnet2DefaultRouteDF98F60F
+      - NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/ALB/Resource
+  ComputeALBHTTP30E88DD3:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn:
+            Ref: ComputeALBHTTPDrupalTargetGroup2F6037E5
+          Type: forward
+      LoadBalancerArn:
+        Ref: ComputeALB00A47009
+      Port: 80
+      Protocol: HTTP
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/ALB/HTTP/Resource
+  ComputeALBHTTPDrupalTargetGroup2F6037E5:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /health
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: "200"
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: "30"
+        - Key: stickiness.enabled
+          Value: "false"
+      TargetType: ip
+      UnhealthyThresholdCount: 5
+      VpcId:
+        Ref: NetworkingVpc6B5E6F44
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/ALB/HTTP/DrupalTargetGroup/Resource
+  ComputeServiceC2A22793:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster:
+        Ref: ComputeCluster4F8E5F81
+      DeploymentConfiguration:
+        Alarms:
+          AlarmNames: []
+          Enable: false
+          Rollback: false
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      EnableECSManagedTags: false
+      EnableExecuteCommand: true
+      HealthCheckGracePeriodSeconds: 600
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: drupal
+          ContainerPort: 80
+          TargetGroupArn:
+            Ref: ComputeALBHTTPDrupalTargetGroup2F6037E5
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Fn::GetAtt:
+                - NetworkingFargateSecurityGroupFC850E44
+                - GroupId
+          Subnets:
+            - Ref: NetworkingVpcPublicSubnet1Subnet918289EE
+            - Ref: NetworkingVpcPublicSubnet2Subnet9D9E5AFB
+      ServiceName: NdxDrupal-Service-production
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      TaskDefinition:
+        Ref: ComputeTaskDefBA99999B
+    DependsOn:
+      - ComputeALBHTTPDrupalTargetGroup2F6037E5
+      - ComputeALBHTTP30E88DD3
+      - ComputeTaskRoleDefaultPolicyDBE426FD
+      - ComputeTaskRole4AA3EDCB
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/Compute/Service/Service
+  CDNDistributionD4FAE585:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: LocalGov Drupal - HTTPS Termination
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+          Compress: true
+          OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3
+          TargetOriginId: LocalGovDrupalStackCDNDistributionOrigin1FF8340AC
+          ViewerProtocolPolicy: redirect-to-https
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: true
+        Origins:
+          - CustomOriginConfig:
+              OriginProtocolPolicy: http-only
+              OriginSSLProtocols:
+                - TLSv1.2
+            DomainName:
+              Fn::GetAtt:
+                - ComputeALB00A47009
+                - DNSName
+            Id: LocalGovDrupalStackCDNDistributionOrigin1FF8340AC
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/CDN/Distribution/Resource
+  ReadSecretRole630BE8B4:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/ReadSecretRole/Resource
+  ReadSecretRoleDefaultPolicyF20D4372:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: secretsmanager:GetSecretValue
+            Effect: Allow
+            Resource:
+              Ref: AdminSecretB9452750
+        Version: "2012-10-17"
+      PolicyName: ReadSecretRoleDefaultPolicyF20D4372
+      Roles:
+        - Ref: ReadSecretRole630BE8B4
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/ReadSecretRole/DefaultPolicy/Resource
+  ReadSecretFn4A156775:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: "
+
+          const{SecretsManagerClient,GetSecretValueCommand}=require(\"@aws-sdk/client-secrets-manager\");
+
+          const r=require(\"https\");
+
+          exports.handler=async(e)=>{
+
+          \  const rp={Status:\"SUCCESS\",PhysicalResourceId:e.LogicalResourceId,StackId:e.StackId,RequestId:e.RequestId,LogicalResourceId:e.LogicalResourceId,Data:{}};
+
+          \  if(e.RequestType===\"Delete\"){await send(e.ResponseURL,rp);return}
+
+          \  try{
+
+          \    const sm=new SecretsManagerClient();
+
+          \    const sv=await sm.send(new GetSecretValueCommand({SecretId:e.ResourceProperties.SecretArn}));
+
+          \    rp.Data={Password:sv.SecretString};
+
+          \    await send(e.ResponseURL,rp);
+
+          \  }catch(err){rp.Status=\"FAILED\";rp.Reason=err.message;await send(e.ResponseURL,rp)}
+
+          };
+
+          function send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);const o=new URL(u);const opts={hostname:o.hostname,port:443,path:o.pathname+o.search,method:\"PUT\",headers:{\"Content-Type\":\"\",\"Content-Length\":b.length}};const req=r.request(opts,ok);req.on(\"error\",fail);req.write(b);req.end()})}
+
+          \      "
+      Handler: index.handler
+      Role:
+        Fn::GetAtt:
+          - ReadSecretRole630BE8B4
+          - Arn
+      Runtime: nodejs20.x
+      Tags:
+        - Key: CouncilTheme
+          Value: random
+        - Key: DeploymentMode
+          Value: production
+        - Key: Project
+          Value: ndx-try-aws-scenarios
+        - Key: Scenario
+          Value: localgov-drupal
+      Timeout: 30
+    DependsOn:
+      - ReadSecretRoleDefaultPolicyF20D4372
+      - ReadSecretRole630BE8B4
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/ReadSecretFn/Resource
+  ReadSecretCR:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - ReadSecretFn4A156775
+          - Arn
+      SecretArn:
+        Ref: AdminSecretB9452750
+    DependsOn:
+      - ReadSecretRoleDefaultPolicyF20D4372
+      - ReadSecretRole630BE8B4
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/ReadSecretCR/Default
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/31R0W7bMAz8lr4r2pZhw17TZCkCdFgQF30daJnx2MhSIFIJAkH/PsSyU7cF9sS740mijnM9//pDf76DM89Mc5hZqnWqBMxBwZn/JEYTULgDBy0Gnaqeq+XeDaiUJwgtykIEzN8O3cTwvpMVmrlOz0dz9Txvl2oba0umirUbLr6hnY+CT1BbfNVftQWzNwRC3t3MV7BxgsGhPIDgGS7DMwObjFihiYHk8hB8PA4D/0f42QZk/iBvXK9nFRrWaQUCNTAubWTBoMrMtwtX9x+E0dmTjWMBZzAr3LNOa7JYXViwu7bfsl8+uiFctTAGmbeeSvATek2bdZo8MsI1hBauSfJhhXtyNOb4XvFOgByGiTacrTCcyJTdFJiV9S3r9Ojb2xdHnBVBp9POl232destmX5DBWWFFljIWA9NDRacIdee5jotjkdLpl/2o4fmvu+VH73hUx+xoBs8I570S3i3OSc0K2N9bPbBO9FpRSyB6jgGNOVZWejqBnRaR2dGx4hzVjtkH0MJ6XeUYxS1jCy+mzZGnJXzDeoX/nSaf9Pf9Ze7FyaaheiEOtS7Uv8B8IyXlrMDAAA=
+    Metadata:
+      aws:cdk:path: LocalGovDrupalStack/CDKMetadata/Default
+    Condition: CDKMetadataAvailable
+Outputs:
+  DrupalUrl:
+    Description: URL to access LocalGov Drupal (HTTPS)
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Fn::GetAtt:
+              - CDNDistributionD4FAE585
+              - DomainName
+          - /init-status
+    Export:
+      Name: LocalGovDrupalStack-DrupalUrl
+  AdminUsername:
+    Description: Drupal admin username
+    Value: admin
+  AdminPassword:
+    Description: Admin password for login
+    Value:
+      Fn::GetAtt:
+        - ReadSecretCR
+        - Password
+  CloudWatchLogsUrl:
+    Description: CloudWatch Logs for initialization monitoring
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Ref: AWS::Region
+          - .console.aws.amazon.com/cloudwatch/home?region=
+          - Ref: AWS::Region
+          - "#logsV2:log-groups/log-group/%2Fndx-drupal%2Fproduction"
+  StackDescription:
+    Description: Stack description
+    Value: AI-Enhanced LocalGov Drupal - Try AWS Scenarios
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - af-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-3
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-4
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-2
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - il-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+      - Fn::Equals:
+          - Ref: AWS::Region
+          - us-west-2
+Parameters:
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
+
