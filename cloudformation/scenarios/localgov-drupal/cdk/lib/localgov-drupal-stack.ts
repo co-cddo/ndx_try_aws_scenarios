@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { CloudFrontConstruct } from './constructs/cloudfront';
@@ -128,10 +129,51 @@ export class LocalGovDrupalStack extends cdk.Stack {
       value: 'admin',
     });
 
-    // Admin password — link to Secrets Manager console to retrieve the value
+    // Custom Resource to resolve admin password for display in Outputs
+    const readSecretRole = new iam.Role(this, 'ReadSecretRole', {
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+      ],
+    });
+    readSecretRole.addToPolicy(new iam.PolicyStatement({
+      actions: ['secretsmanager:GetSecretValue'],
+      resources: [adminSecret.secretArn],
+    }));
+
+    const readSecretFn = new cdk.aws_lambda.Function(this, 'ReadSecretFn', {
+      runtime: cdk.aws_lambda.Runtime.NODEJS_20_X,
+      handler: 'index.handler',
+      role: readSecretRole,
+      timeout: cdk.Duration.seconds(30),
+      code: cdk.aws_lambda.Code.fromInline(`
+const{SecretsManagerClient,GetSecretValueCommand}=require("@aws-sdk/client-secrets-manager");
+const r=require("https");
+exports.handler=async(e)=>{
+  const rp={Status:"SUCCESS",PhysicalResourceId:e.LogicalResourceId,StackId:e.StackId,RequestId:e.RequestId,LogicalResourceId:e.LogicalResourceId,Data:{}};
+  if(e.RequestType==="Delete"){await send(e.ResponseURL,rp);return}
+  try{
+    const sm=new SecretsManagerClient();
+    const sv=await sm.send(new GetSecretValueCommand({SecretId:e.ResourceProperties.SecretArn}));
+    rp.Data={Password:sv.SecretString};
+    await send(e.ResponseURL,rp);
+  }catch(err){rp.Status="FAILED";rp.Reason=err.message;await send(e.ResponseURL,rp)}
+};
+function send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);const o=new URL(u);const opts={hostname:o.hostname,port:443,path:o.pathname+o.search,method:"PUT",headers:{"Content-Type":"","Content-Length":b.length}};const req=r.request(opts,ok);req.on("error",fail);req.write(b);req.end()})}
+      `),
+    });
+
+    const readSecretCR = new cdk.CustomResource(this, 'ReadSecretCR', {
+      serviceToken: readSecretFn.functionArn,
+      properties: {
+        SecretArn: adminSecret.secretArn,
+      },
+    });
+    readSecretCR.node.addDependency(readSecretRole);
+
     new cdk.CfnOutput(this, 'AdminPassword', {
-      description: 'Drupal admin password (retrieve from Secrets Manager)',
-      value: `https://console.aws.amazon.com/secretsmanager/secret?name=${adminSecret.secretName}&region=${cdk.Aws.REGION}`,
+      description: 'Admin password for login',
+      value: readSecretCR.getAttString('Password'),
     });
 
     // CloudWatch Logs URL for monitoring initialization
