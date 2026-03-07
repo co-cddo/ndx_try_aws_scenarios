@@ -1,0 +1,153 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Explore Features - Simply Readable Walkthrough"
+description: Try Quick Text translation and explore language options
+currentStep: 4
+totalSteps: 5
+timeEstimate: "5 minutes"
+scenarioId: simply-readable
+---
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Explore Features" %}
+{% set stepDescription = "Try Quick Text translation, explore the language selector, and understand the full capabilities of the tool." %}
+{% set timeEstimate = "5 minutes" %}
+{% set expectedOutcomes = [
+  "You have used Quick Text for instant translation",
+  "You have explored the language selector with 75+ languages",
+  "You understand the different translation modes available"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Quick Text translation</h3>
+
+<p class="govuk-body">
+  Quick Text lets you translate short pieces of text instantly without uploading a file.
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Navigate to Quick Text</strong>
+    <p class="govuk-body">
+      From the sidebar under Document Translation, click <strong>Quick Text</strong>.
+    </p>
+  </li>
+
+  <li>
+    <strong>Type or paste some text</strong>
+    <p class="govuk-body">
+      Try a common council communication, for example:
+    </p>
+    <div class="govuk-inset-text">
+      "Your bin collection day is changing. From next Monday, your recycling will be collected on Wednesday instead of Thursday. Please put your bin out by 7am."
+    </div>
+  </li>
+
+  <li>
+    <strong>Select a target language</strong>
+    <p class="govuk-body">
+      Choose from 75+ languages. Try some common community languages:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Welsh (cy)</strong> - for councils with bilingual obligations</li>
+      <li><strong>Polish (pl)</strong> - one of the most spoken community languages</li>
+      <li><strong>Urdu (ur)</strong> - widely spoken across UK councils</li>
+      <li><strong>Bengali (bn)</strong> - important for many London boroughs</li>
+      <li><strong>Arabic (ar)</strong> - right-to-left language support</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>View the translation</strong>
+    <p class="govuk-body">
+      The translation appears instantly. You'll see the original English text alongside the
+      translated version.
+    </p>
+  </li>
+</ol>
+
+<div class="ndx-walkthrough-step__screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/screenshots/simply-readable/05-translated-output.png"
+       alt="Quick Text translation showing English text translated to Welsh with side-by-side comparison"
+       class="ndx-walkthrough-step__image"
+       loading="lazy">
+  <p class="ndx-walkthrough-step__screenshot-caption govuk-body-s">Quick Text translation - instant English to Welsh translation</p>
+</div>
+
+<div class="ndx-walkthrough-step__screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-6">
+  <img src="/assets/images/screenshots/simply-readable/08-language-selector.png"
+       alt="Language selector dropdown showing over 75 available languages including Welsh, Polish, Urdu, and Arabic"
+       class="ndx-walkthrough-step__image"
+       loading="lazy">
+  <p class="ndx-walkthrough-step__screenshot-caption govuk-body-s">Choose from 75+ languages - supporting diverse community needs</p>
+</div>
+
+<h3 class="govuk-heading-m">Translation modes</h3>
+
+<p class="govuk-body">
+  Simply Readable offers several ways to translate content:
+</p>
+
+<div class="govuk-grid-row govuk-!-margin-top-4">
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-feature-card">
+      <h4 class="govuk-heading-s">Create Translation Job</h4>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        Upload files (.txt, .docx, .html, .xlsx, .pptx) and translate into one or more languages.
+        Jobs are tracked in history.
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-feature-card">
+      <h4 class="govuk-heading-s">Quick Text</h4>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        Instant text translation. Type or paste text and get immediate results.
+        Ideal for quick translations of short communications.
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-feature-card">
+      <h4 class="govuk-heading-s">Quick Translate</h4>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        Fast file translation that downloads results directly without creating a
+        persistent job record. Best for one-off document translations.
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Language auto-detection</h3>
+
+<p class="govuk-body">
+  The tool uses <strong>Amazon Comprehend</strong> to automatically detect the source language
+  of your text. You don't need to specify what language the original document is in -
+  the tool figures it out. This is powered by the same AI that processes millions of
+  documents across AWS.
+</p>
+
+<h3 class="govuk-heading-m">Real-world use cases</h3>
+
+<ul class="govuk-list govuk-list--bullet govuk-list--spaced">
+  <li><strong>Council tax notices</strong> - translate annually for all community languages in your area</li>
+  <li><strong>Public health communications</strong> - rapid translation during health emergencies</li>
+  <li><strong>Planning notifications</strong> - ensure affected residents can understand proposals</li>
+  <li><strong>Care plans</strong> - translate and simplify for service users and their families</li>
+  <li><strong>School communications</strong> - reach parents who speak different languages</li>
+</ul>
+
+<style>
+  .ndx-feature-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    margin-bottom: 20px;
+    min-height: 140px;
+  }
+
+  .ndx-feature-card h4 {
+    margin-top: 0;
+  }
+</style>

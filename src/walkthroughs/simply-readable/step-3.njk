@@ -1,0 +1,181 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Create Easy Read Version - Simply Readable Walkthrough"
+description: Convert a complex document to Easy Read format using Amazon Bedrock
+currentStep: 3
+totalSteps: 5
+timeEstimate: "5 minutes"
+scenarioId: simply-readable
+---
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Create Easy Read Version" %}
+{% set stepDescription = "Use the Simply Readable feature to convert complex text into Easy Read format, making vital information accessible to people with learning disabilities." %}
+{% set timeEstimate = "5 minutes" %}
+{% set expectedOutcomes = [
+  "You have uploaded a document to the Simply Readable section",
+  "The document has been converted to Easy Read format with simplified text",
+  "You understand the difference between the original and simplified versions"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<div class="govuk-inset-text ndx-hero-callout">
+  <p class="govuk-body">
+    <strong>This is the feature that makes Simply Readable special.</strong> Easy Read format
+    was co-created with <strong>Experts by Experience of a Learning Disability</strong> from
+    Swindon Borough Council to ensure the output genuinely meets users' needs.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">What is Easy Read?</h3>
+
+<p class="govuk-body">
+  Easy Read is a way of presenting information that is accessible to people with learning
+  disabilities. It uses short, simple sentences and clear layout. Traditional Easy Read
+  production costs approximately <strong>£120 per page</strong> and takes weeks. Simply Readable
+  reduces this to approximately <strong>1p per page</strong> in minutes.
+</p>
+
+<h3 class="govuk-heading-m">Creating an Easy Read version</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Navigate to Simply Readable</strong>
+    <p class="govuk-body">
+      From the sidebar, click <strong>Simply Readable</strong>. This section handles Easy Read conversion.
+    </p>
+  </li>
+
+  <li>
+    <strong>Upload a document</strong>
+    <p class="govuk-body">
+      Upload a .docx file containing the text you want to simplify. Use a real council document
+      for the best demonstration - a tenancy agreement, council tax notice, or planning letter
+      works well.
+    </p>
+  </li>
+
+<div class="ndx-walkthrough-step__screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/screenshots/simply-readable/06-readable-upload.png"
+       alt="Simply Readable upload interface showing a council tax notice document ready for Easy Read conversion"
+       class="ndx-walkthrough-step__image"
+       loading="lazy">
+  <p class="ndx-walkthrough-step__screenshot-caption govuk-body-s">Upload a .docx file to the Simply Readable section for Easy Read conversion</p>
+</div>
+
+  <li>
+    <strong>Wait for processing</strong>
+    <p class="govuk-body">
+      Simply Readable uses <strong>Amazon Bedrock</strong> (Claude) to process each paragraph:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>The document is split into individual paragraphs</li>
+      <li>Each paragraph is sent to the AI model for simplification</li>
+      <li>The AI rewrites complex language into short, clear sentences</li>
+    </ul>
+    <p class="govuk-body">
+      This typically takes 1-3 minutes depending on document length.
+    </p>
+  </li>
+
+  <li>
+    <strong>Review the results</strong>
+    <p class="govuk-body">
+      Once complete, you'll see the original text alongside the simplified Easy Read version
+      for each paragraph. Compare them to see how complex language has been transformed into
+      clear, accessible text.
+    </p>
+  </li>
+</ol>
+
+<div class="ndx-walkthrough-step__screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-6">
+  <img src="/assets/images/screenshots/simply-readable/07-readable-output.png"
+       alt="Simply Readable output showing original council tax text alongside simplified Easy Read version with completed status badges"
+       class="ndx-walkthrough-step__image"
+       loading="lazy">
+  <p class="ndx-walkthrough-step__screenshot-caption govuk-body-s">The Easy Read output - original text alongside simplified version, processed by Amazon Bedrock</p>
+</div>
+
+<h3 class="govuk-heading-m">Example transformation</h3>
+
+<div class="govuk-grid-row govuk-!-margin-top-4">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-comparison-card ndx-comparison-card--before">
+      <h4 class="govuk-heading-s">Original text</h4>
+      <p class="govuk-body govuk-!-margin-bottom-0">
+        "Your council tax charge is calculated based on the valuation band assigned to your
+        property by the Valuation Office Agency, with applicable discounts and exemptions applied
+        in accordance with the Local Government Finance Act 1992."
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-comparison-card ndx-comparison-card--after">
+      <h4 class="govuk-heading-s">Easy Read version</h4>
+      <p class="govuk-body govuk-!-margin-bottom-0">
+        "You pay council tax based on the value of your home. Your home is put into a group
+        called a band. You might get money off your bill."
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">The impact</h3>
+
+<p class="govuk-body">
+  Swindon Borough Council's Adult Social Care team was one of the first to adopt Simply Readable.
+  Previously, creating Easy Read versions of care plans cost £120 per page and took weeks.
+  Now staff can generate Easy Read versions in minutes, ensuring people with learning disabilities
+  can understand their own care plans independently.
+</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>98% community satisfaction</strong> — tested with Experts by Experience and
+    adopted by councils including Edinburgh, Newport, Southampton, and West Berkshire.
+  </p>
+</div>
+
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Easy Read not generating
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If the Easy Read version doesn't generate:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Ensure you uploaded a .docx file (other formats are not yet supported for Easy Read)</li>
+      <li>Wait up to 5 minutes - Amazon Bedrock processes each paragraph individually</li>
+      <li>Check the job status shows paragraphs being processed</li>
+      <li>If paragraphs show "generate" status for more than 5 minutes, the Bedrock invocation may have timed out - try uploading again</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  .ndx-hero-callout {
+    border-left-color: #00703c;
+    background-color: #f0f8f0;
+  }
+
+  .ndx-comparison-card {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .ndx-comparison-card h4 {
+    margin-top: 0;
+  }
+
+  .ndx-comparison-card--before {
+    background-color: #fef7f7;
+    border-left: 4px solid #d4351c;
+  }
+
+  .ndx-comparison-card--after {
+    background-color: #f0f8f0;
+    border-left: 4px solid #00703c;
+  }
+</style>

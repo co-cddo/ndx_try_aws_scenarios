@@ -1,0 +1,166 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Translate a Document - Simply Readable Walkthrough"
+description: Upload a document and translate it into Welsh and Polish
+currentStep: 2
+totalSteps: 5
+timeEstimate: "5 minutes"
+scenarioId: simply-readable
+---
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Translate a Document" %}
+{% set stepDescription = "Upload a sample document and translate it into multiple languages using Amazon Translate." %}
+{% set timeEstimate = "5 minutes" %}
+{% set expectedOutcomes = [
+  "You have uploaded a sample document",
+  "The document has been translated into at least two languages",
+  "You can download the translated files"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Preparing a sample document</h3>
+
+<p class="govuk-body">
+  For this walkthrough, you can use any text document (.txt, .docx, .html). We recommend
+  using a real council document - perhaps a council tax notice, tenancy agreement, or planning
+  notification. The more realistic the content, the more meaningful the translation.
+</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Tip:</strong> If you don't have a document handy, create a simple text file with
+    a few sentences of English text. The tool works with any plain text.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Uploading and translating</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Navigate to Document Translation</strong>
+    <p class="govuk-body">
+      From the sidebar, click <strong>Document Translation</strong> then <strong>Create Translation Job</strong>.
+    </p>
+  </li>
+
+  <li>
+    <strong>Upload your document</strong>
+    <p class="govuk-body">
+      Click the upload area or drag your file into it. The source language will be detected automatically.
+    </p>
+  </li>
+
+  <li>
+    <strong>Select target languages</strong>
+    <p class="govuk-body">
+      Choose at least two languages - we suggest <strong>Welsh (cy)</strong> and <strong>Polish (pl)</strong>.
+      Welsh is important for councils in Wales with legal bilingual obligations. Polish is one of the most
+      spoken community languages in UK councils.
+    </p>
+  </li>
+
+<div class="ndx-walkthrough-step__screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/screenshots/simply-readable/03-upload-interface.png"
+       alt="Document upload interface showing a sample council tax notice with Welsh and Polish selected as target languages"
+       class="ndx-walkthrough-step__image"
+       loading="lazy">
+  <p class="ndx-walkthrough-step__screenshot-caption govuk-body-s">Upload a document and select target languages - here translating a council tax notice to Welsh and Polish</p>
+</div>
+
+  <li>
+    <strong>Submit the translation</strong>
+    <p class="govuk-body">
+      Click <strong>Translate</strong>. For short documents, translation completes in seconds.
+      Larger documents may take a minute or two.
+    </p>
+  </li>
+
+  <li>
+    <strong>Download translated files</strong>
+    <p class="govuk-body">
+      Once complete, download each translated file. Open them to verify the translation quality.
+    </p>
+  </li>
+</ol>
+
+<div class="ndx-walkthrough-step__screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-6">
+  <img src="/assets/images/screenshots/simply-readable/04-translation-completed.png"
+       alt="Translation progress view showing Welsh and Polish translations completed with download links"
+       class="ndx-walkthrough-step__image"
+       loading="lazy">
+  <p class="ndx-walkthrough-step__screenshot-caption govuk-body-s">Both translations complete in seconds - ready to download</p>
+</div>
+
+<h3 class="govuk-heading-m">Understanding the cost savings</h3>
+
+<div class="govuk-grid-row govuk-!-margin-top-4">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-comparison-card ndx-comparison-card--before">
+      <h4 class="govuk-heading-s">Traditional translation</h4>
+      <p class="govuk-body"><strong>Cost:</strong> ~£160 per document</p>
+      <p class="govuk-body"><strong>Time:</strong> Up to 19 days</p>
+      <p class="govuk-body govuk-!-margin-bottom-0"><strong>Swindon's annual spend:</strong> £64,000 (Paediatric Therapy alone)</p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-comparison-card ndx-comparison-card--after">
+      <h4 class="govuk-heading-s">Amazon Translate</h4>
+      <p class="govuk-body"><strong>Cost:</strong> ~£0.07 per document</p>
+      <p class="govuk-body"><strong>Time:</strong> Under 14 minutes</p>
+      <p class="govuk-body govuk-!-margin-bottom-0"><strong>Swindon's new annual spend:</strong> £27</p>
+    </div>
+  </div>
+</div>
+
+<p class="govuk-body govuk-!-margin-top-4">
+  That's a <strong>99.96% cost reduction</strong> and a <strong>6,300,000% ROI</strong> based on
+  Swindon Borough Council's published figures.
+</p>
+
+<h3 class="govuk-heading-m">Quick Text translation</h3>
+
+<p class="govuk-body">
+  You can also try <strong>Quick Text</strong> from the sidebar for instant text translation
+  without uploading a file. Type or paste text, select a target language, and see the
+  translation appear immediately.
+</p>
+
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Translation not completing
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If translation doesn't complete:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check the file format is supported (.txt, .docx, .html, .xlf, .xlsx, .pptx)</li>
+      <li>Large documents take longer - wait up to 5 minutes</li>
+      <li>Try the Quick Text feature to verify translation is working</li>
+      <li>Check the browser console for any error messages</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  .ndx-comparison-card {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .ndx-comparison-card h4 {
+    margin-top: 0;
+  }
+
+  .ndx-comparison-card--before {
+    background-color: #fef7f7;
+    border-left: 4px solid #d4351c;
+  }
+
+  .ndx-comparison-card--after {
+    background-color: #f0f8f0;
+    border-left: 4px solid #00703c;
+  }
+</style>

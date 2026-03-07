@@ -1,0 +1,275 @@
+---
+layout: page
+title: How It Works
+description: Understand the architecture and data flows powering Simply Readable
+scenarioId: simply-readable
+eleventyNavigation:
+  key: simply-readable-understand
+  parent: simply-readable-explore
+  title: How It Works
+---
+
+{% set scenarioId = "simply-readable" %}
+
+<nav class="govuk-breadcrumbs govuk-!-margin-bottom-6" aria-label="Breadcrumb">
+  <ol class="govuk-breadcrumbs__list">
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/">Home</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/scenarios/simply-readable/">Simply Readable</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/walkthroughs/simply-readable/">Walkthrough</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item" aria-current="page">
+      How It Works
+    </li>
+  </ol>
+</nav>
+
+<h1 class="govuk-heading-xl">How It Works</h1>
+
+<p class="govuk-body-l">
+  Understand the fully serverless architecture behind Simply Readable. See how 11 AWS services
+  work together to deliver document translation and Easy Read at council scale.
+</p>
+
+<nav class="ndx-jump-links govuk-!-margin-bottom-8" aria-label="On this page">
+  <h2 class="govuk-heading-s ndx-jump-links__heading">On this page</h2>
+  <ul class="govuk-list ndx-jump-links__list">
+    <li><a class="govuk-link" href="#architecture">Architecture Overview</a></li>
+    <li><a class="govuk-link" href="#services">AWS Services</a></li>
+    <li><a class="govuk-link" href="#translation-flow">Document Translation Flow</a></li>
+    <li><a class="govuk-link" href="#readable-flow">Easy Read Flow</a></li>
+    <li><a class="govuk-link" href="#security">Security</a></li>
+    <li><a class="govuk-link" href="#costs">Cost Overview</a></li>
+  </ul>
+</nav>
+
+<section id="architecture" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Architecture Overview</h2>
+
+  <p class="govuk-body">
+    Simply Readable is a fully serverless application. There are no EC2 instances, no containers,
+    and no servers to patch or maintain. The entire stack scales automatically from zero to thousands
+    of concurrent document translations, and you only pay for what you use.
+  </p>
+
+  <p class="govuk-body">
+    The architecture follows an <strong>event-driven pattern</strong>: user actions create records in
+    DynamoDB, which trigger Step Functions workflows via EventBridge Pipes. This decouples the user
+    interface from the processing backend, enabling reliable, scalable document processing.
+  </p>
+</section>
+
+<section id="services" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">AWS Services</h2>
+
+  <div class="ndx-service-cards">
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">Amazon Translate</h3>
+      <p class="govuk-body-s">Neural machine translation supporting 75+ languages. Handles document-level translation preserving formatting. Supports custom terminology for council-specific terms.</p>
+    </div>
+
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">Amazon Bedrock</h3>
+      <p class="govuk-body-s">Foundation model API providing access to Anthropic Claude. Used for Easy Read text simplification via the Converse API. The model rewrites complex text into short, clear sentences.</p>
+    </div>
+
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">Amazon Comprehend</h3>
+      <p class="govuk-body-s">Natural language processing for automatic source language detection. Identifies the language of uploaded documents without user input.</p>
+    </div>
+
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">Amazon Cognito</h3>
+      <p class="govuk-body-s">User authentication and authorisation. User Pool manages admin accounts with MFA-ready password policies. Identity Pool provides scoped AWS credentials for S3 and Translate access.</p>
+    </div>
+
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">AWS AppSync</h3>
+      <p class="govuk-body-s">Managed GraphQL API with real-time subscriptions. Provides the data layer between the React frontend and DynamoDB backend. Supports offline operation and optimistic UI updates.</p>
+    </div>
+
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">AWS Step Functions</h3>
+      <p class="govuk-body-s">Serverless workflow orchestration. Manages multi-step translation and Easy Read pipelines with built-in error handling, retries, and parallel execution.</p>
+    </div>
+
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">AWS Lambda</h3>
+      <p class="govuk-body-s">Serverless compute for individual processing tasks: document parsing, DynamoDB stream unmarshalling, Bedrock invocation, and S3 operations.</p>
+    </div>
+
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">Amazon DynamoDB</h3>
+      <p class="govuk-body-s">Serverless NoSQL database for job tracking and metadata. DynamoDB Streams enable event-driven processing. Pay-per-request billing with point-in-time recovery.</p>
+    </div>
+
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">Amazon S3</h3>
+      <p class="govuk-body-s">Object storage for uploaded documents, translated outputs, and the React web application. Identity-scoped paths ensure users can only access their own files.</p>
+    </div>
+
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">Amazon CloudFront</h3>
+      <p class="govuk-body-s">Global content delivery network serving the React web application. TLS 1.2+ encryption, SPA routing via custom error pages.</p>
+    </div>
+
+    <div class="ndx-service-card">
+      <h3 class="govuk-heading-s">AWS WAF</h3>
+      <p class="govuk-body-s">Web Application Firewall protecting the AppSync API with AWS Managed Rules (Common Rule Set). Blocks common web exploits and bot traffic.</p>
+    </div>
+  </div>
+</section>
+
+<section id="translation-flow" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Document Translation Flow</h2>
+
+  <ol class="govuk-list govuk-list--number govuk-list--spaced">
+    <li><strong>Upload:</strong> User uploads a document via the React app. The file is stored in S3 under a Cognito identity-scoped path (<code>private/{identity-id}/...</code>).</li>
+    <li><strong>Job creation:</strong> The app creates a translation job record in DynamoDB via AppSync GraphQL mutation.</li>
+    <li><strong>Event trigger:</strong> DynamoDB Streams captures the new record. EventBridge Pipes filters for translation job events and starts a Step Functions workflow.</li>
+    <li><strong>Translation:</strong> Step Functions calls Amazon Translate for each target language. For short documents, this uses real-time translation. For longer documents, it uses asynchronous batch translation with a callback pattern.</li>
+    <li><strong>Storage:</strong> Translated files are written back to S3 alongside the original document.</li>
+    <li><strong>Notification:</strong> Job status is updated in DynamoDB. AppSync subscriptions notify the frontend in real-time, updating the UI without page refresh.</li>
+  </ol>
+</section>
+
+<section id="readable-flow" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Easy Read Flow</h2>
+
+  <ol class="govuk-list govuk-list--number govuk-list--spaced">
+    <li><strong>Upload:</strong> User uploads a .docx file to the Simply Readable section.</li>
+    <li><strong>Document parsing:</strong> A Lambda function converts the .docx to HTML, then splits it into individual paragraphs.</li>
+    <li><strong>Paragraph storage:</strong> Each paragraph is saved as a separate DynamoDB item with status "generate".</li>
+    <li><strong>Event trigger:</strong> DynamoDB Streams + EventBridge Pipes detect items with status "generate" and start a Step Functions workflow for each paragraph.</li>
+    <li><strong>AI simplification:</strong> Step Functions invokes Amazon Bedrock (Claude) via the Converse API with a prompt instructing it to simplify the text into Easy Read format.</li>
+    <li><strong>Result storage:</strong> The simplified text is saved back to DynamoDB with status "completed".</li>
+    <li><strong>Display:</strong> The frontend displays original and simplified text side by side via AppSync queries.</li>
+  </ol>
+</section>
+
+<section id="security" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Security</h2>
+
+  <ul class="govuk-list govuk-list--bullet govuk-list--spaced">
+    <li><strong>Authentication:</strong> Cognito User Pool with enforced advanced security mode, strong password policy, no self-signup</li>
+    <li><strong>Authorisation:</strong> Identity Pool issues scoped AWS credentials. Users can only access their own S3 paths.</li>
+    <li><strong>API protection:</strong> AWS WAF with Managed Rules protects the AppSync endpoint</li>
+    <li><strong>Encryption:</strong> AES-256 at rest (S3, DynamoDB), TLS 1.2+ in transit</li>
+    <li><strong>Data isolation:</strong> Each user's documents are stored in identity-scoped S3 paths, enforced by IAM policy conditions</li>
+    <li><strong>No data retention:</strong> Amazon Translate and Bedrock do not store input/output data for model training</li>
+  </ul>
+</section>
+
+<section id="costs" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Cost Overview</h2>
+
+  <p class="govuk-body">
+    This is a fully serverless architecture with pay-per-use pricing. Costs scale linearly
+    with usage, and there are no minimum charges for most services.
+  </p>
+
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="col">Service</th>
+        <th class="govuk-table__header" scope="col">Pricing model</th>
+        <th class="govuk-table__header" scope="col">Typical cost</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">Amazon Translate</td>
+        <td class="govuk-table__cell">Per character translated</td>
+        <td class="govuk-table__cell">~$15/million characters</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">Amazon Bedrock (Claude)</td>
+        <td class="govuk-table__cell">Per input/output token</td>
+        <td class="govuk-table__cell">~$0.003/1K input tokens</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">DynamoDB</td>
+        <td class="govuk-table__cell">Per read/write request</td>
+        <td class="govuk-table__cell">~$1.25/million writes</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">Lambda</td>
+        <td class="govuk-table__cell">Per request + duration</td>
+        <td class="govuk-table__cell">~$0.20/million requests</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">CloudFront</td>
+        <td class="govuk-table__cell">Per request + data transfer</td>
+        <td class="govuk-table__cell">~$0.085/GB</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="govuk-inset-text">
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      <strong>NDX:Try note:</strong> This scenario runs in the Innovation Sandbox with automatic
+      cleanup. There is no ongoing cost after your session ends.
+    </p>
+  </div>
+</section>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/simply-readable/explore/extend/" class="govuk-button" data-module="govuk-button">
+    Next: What's Next
+  </a>
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    <a href="/walkthroughs/simply-readable/complete/" class="govuk-link">Back to walkthrough completion</a>
+  </p>
+</div>
+
+<style>
+  .ndx-service-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-service-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-service-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-jump-links {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-jump-links__heading {
+    margin-top: 0;
+  }
+
+  .ndx-jump-links__list {
+    margin-bottom: 0;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 14px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-service-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

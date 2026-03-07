@@ -1,0 +1,126 @@
+scenarioId: simply-readable
+
+personas:
+  - id: "service-manager"
+    title: "Service Manager / Accessibility Officer"
+    description: "You're responsible for making council communications accessible to all residents."
+    nextSteps:
+      - title: "Build a business case"
+        description: "Use Swindon's published ROI data (6,300,000% for translation, 749,900% for Easy Read) to create a compelling case for your council."
+        url: "https://www.local.gov.uk/case-studies/swindon-borough-council-simply-readable-ai-easy-read-solution"
+        external: true
+      - title: "Connect with the community"
+        description: "Join the growing network of councils using Document Translation - Edinburgh, Newport, Southampton, West Berkshire are already live."
+        url: "https://socitm.net/resource-hub/case-studies/translate-machine-learning-swindon-bc/"
+        external: true
+      - title: "Explore commercial support"
+        description: "CityTrax offers commercial support and managed hosting for councils that need hands-off deployment."
+        url: "https://www.citytrax.co.uk/solution/translate"
+        external: true
+      - title: "Read the AI Knowledge Hub entry"
+        description: "CDDO's ai.gov.uk features Simply Readable as a recommended tool for public sector organisations."
+        url: "https://ai.gov.uk/knowledge-hub/tools/simply-readable/"
+        external: true
+
+  - id: "technical"
+    title: "IT / Technical Lead"
+    description: "You're evaluating the technical architecture and deployment requirements."
+    nextSteps:
+      - title: "Review the source code"
+        description: "The tool is open source on GitHub. Review the CDK infrastructure, Lambda functions, and Step Functions workflows."
+        url: "https://github.com/aws-samples/document-translation"
+        external: true
+      - title: "Read the AWS Samples documentation"
+        description: "Comprehensive deployment guide, architecture diagrams, and configuration reference."
+        url: "https://aws-samples.github.io/document-translation/"
+        external: true
+      - title: "Understand the Bedrock integration"
+        description: "Learn how Amazon Bedrock powers the Easy Read feature via the Converse API."
+        url: "https://aws.amazon.com/blogs/publicsector/swindon-borough-council-makes-vital-public-information-more-accessible-using-amazon-bedrock/"
+        external: true
+      - title: "Review the Amazon Translate ML blog"
+        description: "Deep dive into the Amazon Translate integration and how it handles 75+ languages."
+        url: "https://aws.amazon.com/blogs/machine-learning/improving-inclusion-and-accessibility-through-automated-document-translation-with-an-open-source-app-using-amazon-translate/"
+        external: true
+
+  - id: "leadership"
+    title: "Senior Leadership / Finance"
+    description: "You're considering strategic investment in AI-powered accessibility tools."
+    nextSteps:
+      - title: "AWS Case Study"
+        description: "Official AWS case study documenting Swindon's journey, cost savings, and outcomes."
+        url: "https://aws.amazon.com/solutions/case-studies/swindon-borough-council-case-study-amazon-translate/"
+        external: true
+      - title: "LGA Case Study"
+        description: "Local Government Association case study covering the Simply Readable Easy Read solution."
+        url: "https://www.local.gov.uk/case-studies/swindon-borough-council-simply-readable-ai-easy-read-solution"
+        external: true
+      - title: "GOV.UK Debt Toolkit reference"
+        description: "Simply Readable is referenced in the GOV.UK Public Sector Debt Management Communications Toolkit."
+        url: "https://www.gov.uk/government/publications/public-sector-toolkits/debt-management-communications-toolkit-v1"
+        external: true
+
+communityResources:
+  - title: "AWS Samples GitHub Repository"
+    url: "https://github.com/aws-samples/document-translation"
+    description: "Open source repository with full CDK infrastructure and Lambda functions"
+  - title: "AWS Samples Documentation Site"
+    url: "https://aws-samples.github.io/document-translation/"
+    description: "Deployment guide, architecture reference, and configuration documentation"
+  - title: "Socitm Case Study (Translation)"
+    url: "https://socitm.net/resource-hub/case-studies/translate-machine-learning-swindon-bc/"
+    description: "Society for Innovation, Technology and Modernisation case study on the translation tool"
+  - title: "Socitm Case Study (Simply Readable)"
+    url: "https://socitm.net/resource-hub/case-studies/simply-readable-ai-solution-swindon-bc/"
+    description: "Socitm case study on the Easy Read AI solution"
+  - title: "Digital Leaders (Translation)"
+    url: "https://digileaders.com/how-one-council-used-machine-learning-to-cut-translation-costs-by-99-6/"
+    description: "How one council used machine learning to cut translation costs by 99.6%"
+  - title: "Digital Leaders (Simply Readable)"
+    url: "https://digileaders.com/swindon-borough-council-innovates-with-generative-ai-to-transform-access-to-vital-information-service-accessibility-by-an-ai-enabled-easy-read-solution/"
+    description: "Swindon innovates with generative AI for Easy Read"
+  - title: "UKAuthority"
+    url: "https://www.ukauthority.com/articles/swindon-develops-genai-for-easy-read-documents/"
+    description: "Swindon develops GenAI for easy read documents"
+  - title: "Cities Today"
+    url: "https://cities-today.com/council-slashes-translation-costs-with-machine-learning/"
+    description: "Council slashes translation costs with machine learning"
+  - title: "LGC Plus"
+    url: "https://www.lgcplus.com/idea-exchange/idea-exchange-our-ai-solution-helps-improve-independence-of-people-with-learning-disabilities-30-04-2024/"
+    description: "Our AI solution helps improve independence of people with learning disabilities"
+  - title: "CityTrax (Commercial Support)"
+    url: "https://www.citytrax.co.uk/solution/translate"
+    description: "Commercial managed hosting and support for councils"
+
+awsResources:
+  - title: "Amazon Translate Documentation"
+    url: "https://docs.aws.amazon.com/translate/latest/dg/what-is.html"
+    description: "Official Amazon Translate developer guide"
+  - title: "Amazon Bedrock Documentation"
+    url: "https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html"
+    description: "Official Amazon Bedrock user guide"
+  - title: "AWS Step Functions Documentation"
+    url: "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html"
+    description: "Official AWS Step Functions developer guide"
+
+productionConsiderations:
+  - title: "Data residency"
+    description: "This NDX:Try deployment uses us-east-1 (N. Virginia). For production, any region is suitable per the UK government multi-region cloud guidance. Check Amazon Translate and Bedrock availability in your chosen region."
+  - title: "Bedrock model access"
+    description: "Production deployments require Amazon Bedrock model access to be enabled in the target region. Submit a model access request for Anthropic Claude via the Bedrock console."
+  - title: "Custom terminology"
+    description: "Amazon Translate supports custom terminology to ensure consistent translation of council-specific terms, acronyms, and names."
+  - title: "Integration options"
+    description: "The tool can be integrated with existing council systems via its GraphQL API, or documents can be submitted programmatically via S3."
+
+relatedScenarios:
+  - id: "council-chatbot"
+    reason: "Complements translation with AI-powered resident Q&A"
+  - id: "text-to-speech"
+    reason: "Adds audio accessibility alongside translated and simplified text"
+  - id: "foi-redaction"
+    reason: "PII redaction before translating or simplifying sensitive documents"
+
+feedback:
+  surveyUrl: "/contact/"
+  email: "ndx-try@digital.cabinet-office.gov.uk"

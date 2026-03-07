@@ -22,6 +22,7 @@ const SCENARIOS = [
   { name: 'smart-car-park', description: 'NDX:Try Smart Car Park - Real-time parking availability with DynamoDB' },
   { name: 'text-to-speech', description: 'NDX:Try Text to Speech - Accessibility audio generation using Amazon Polly' },
   { name: 'localgov-drupal', description: 'NDX:Try LocalGov Drupal - AI-enhanced CMS for UK councils' },
+  { name: 'simply-readable', description: 'NDX:Try Simply Readable - Document Translation & Easy Read, built by Swindon Borough Council' },
   { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 7 scenarios as nested stacks' },
 ];
 
@@ -50,10 +51,16 @@ export class IsbHubStack extends cdk.Stack {
         .map(s => s.charAt(0).toUpperCase() + s.slice(1))
         .join('');
 
+      // simply-readable needs lambda/ and website-build/ alongside template.yaml;
+      // must explicitly un-exclude parent directories before their contents
+      const excludePattern = scenario.name === 'simply-readable'
+        ? ['*', '!template.yaml', '!lambda', '!lambda/**', '!website-build', '!website-build/**']
+        : ['*', '!template.yaml'];
+
       const deployment = new s3deploy.BucketDeployment(this, `${pascalName}Templates`, {
         sources: [
           s3deploy.Source.asset(path.join(__dirname, '..', '..', 'scenarios', scenario.name), {
-            exclude: ['*', '!template.yaml'],
+            exclude: excludePattern,
           }),
         ],
         destinationBucket: bucket,
@@ -165,6 +172,14 @@ export class IsbHubStack extends cdk.Stack {
         managedExecution: { Active: true },
         templateUrl: `https://${BLUEPRINTS_BUCKET_NAME}.s3.${BLUEPRINTS_BUCKET_REGION}.amazonaws.com/scenarios/${scenario.name}/template.yaml`,
         description: `${scenario.description} [${contentHash}]`,
+        // simply-readable uses a BlueprintsBucketName parameter to locate Lambda code and website assets;
+        // override it to point at the hub account's bucket rather than the sandbox account's
+        ...(scenario.name === 'simply-readable' ? {
+          parameters: [{
+            parameterKey: 'BlueprintsBucketName',
+            parameterValue: BLUEPRINTS_BUCKET_NAME,
+          }],
+        } : {}),
       });
 
       // Ensure template is uploaded before StackSet references it

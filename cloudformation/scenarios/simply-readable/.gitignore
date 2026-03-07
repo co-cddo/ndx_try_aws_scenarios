@@ -1,0 +1,13 @@
+node_modules/
+cdk.out/
+*.js.map
+*.css.map
+
+# Upstream clone - fetched by build scripts
+.upstream/
+
+# Generated artifacts - rebuild with `npm run build`
+template.yaml
+lambda/*.zip
+website-build/
+.website-build-tmp/

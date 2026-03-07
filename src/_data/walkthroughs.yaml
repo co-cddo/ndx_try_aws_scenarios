@@ -115,6 +115,30 @@ walkthroughs:
       - title: "Voice options explored"
       - title: "Accessibility benefits understood"
 
+  simply-readable:
+    totalSteps: 5
+    url: "/walkthroughs/simply-readable/"
+    title: "Simply Readable Walkthrough"
+    duration: "25 minutes"
+    hasWalkthrough: true
+    category: "accessibility"
+    steps:
+      - title: "App accessed"
+        description: "Get your credentials and access the Simply Readable web application"
+        time: "3 minutes"
+      - title: "Document translated"
+        description: "Upload a document and translate it into Welsh and Polish"
+        time: "5 minutes"
+      - title: "Easy Read version created"
+        description: "Convert a complex document to Easy Read format using Amazon Bedrock"
+        time: "5 minutes"
+      - title: "Features explored"
+        description: "Try Quick Text translation and explore language options"
+        time: "5 minutes"
+      - title: "Architecture understood"
+        description: "Understand how Amazon Translate, Bedrock, and Step Functions work together"
+        time: "7 minutes"
+
   quicksight-dashboard:
     totalSteps: 4
     url: "/walkthroughs/quicksight-dashboard/"

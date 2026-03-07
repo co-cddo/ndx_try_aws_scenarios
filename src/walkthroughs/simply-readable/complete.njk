@@ -1,0 +1,222 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - Simply Readable"
+description: You've completed the Simply Readable walkthrough
+currentStep: 6
+totalSteps: 5
+scenarioId: simply-readable
+---
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">
+    Walkthrough complete
+  </h1>
+  <div class="govuk-panel__body">
+    You've explored Simply Readable - Document Translation and Easy Read
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  You've just experienced the tool that Swindon Borough Council built to slash translation
+  costs by 99.96% and make Easy Read accessible to every council. In this walkthrough, you've seen
+  what typically requires months of procurement and vendor negotiations.
+</p>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Document Translation
+    </h3>
+    <p class="govuk-body">
+      Translate documents into 75+ languages using Amazon Translate. From £160 per document
+      to £0.07. From 19 days to 14 minutes.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: 99.96% cost reduction, near-instant turnaround
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Easy Read
+    </h3>
+    <p class="govuk-body">
+      Convert complex documents to Easy Read format using Amazon Bedrock. Co-created with
+      people with learning disabilities to ensure genuine accessibility.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: From £120/page to ~1p/page, accessible in minutes not weeks
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Open Source
+    </h3>
+    <p class="govuk-body">
+      Built as an AWS Sample, open source and free to deploy. No vendor lock-in,
+      no licensing fees. Any council can use it today.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Zero cost to adopt, community-supported
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Built by Local Gov
+    </h3>
+    <p class="govuk-body">
+      Pioneered by Swindon Borough Council's Emerging Technology team. Now adopted
+      by Edinburgh, Newport, Southampton, West Berkshire, and councils in France.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Proven in production, designed for council needs
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">What's next</h2>
+
+{% set scenarioId = "simply-readable" %}
+{% set scenarioName = "Simply Readable" %}
+{% set totalSteps = 5 %}
+{% include "components/completion-next-steps.njk" %}
+
+{% set cleanupResources = [
+  "DynamoDB job data and metadata",
+  "S3 uploaded documents and translations",
+  "Any configuration changes you made"
+] %}
+{% include "components/cleanup-instructions.njk" %}
+
+<h2 class="govuk-heading-m">Try related scenarios</h2>
+
+<p class="govuk-body">
+  Explore other AI-powered scenarios for UK councils:
+</p>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-related-scenario">
+      <h3 class="govuk-heading-s">
+        <a href="/scenarios/council-chatbot/" class="govuk-link">Council Chatbot</a>
+      </h3>
+      <p class="govuk-body-s">
+        AI-powered chatbot for answering resident queries about council services
+      </p>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        <span class="govuk-tag govuk-tag--green">FREE</span>
+        <span class="govuk-tag govuk-tag--blue govuk-!-margin-left-1">10 mins</span>
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-related-scenario">
+      <h3 class="govuk-heading-s">
+        <a href="/scenarios/text-to-speech/" class="govuk-link">Text to Speech</a>
+      </h3>
+      <p class="govuk-body-s">
+        Make content accessible with neural text-to-speech in multiple languages
+      </p>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        <span class="govuk-tag govuk-tag--green">FREE</span>
+        <span class="govuk-tag govuk-tag--blue govuk-!-margin-left-1">8 mins</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-grid-row govuk-!-margin-top-4">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-related-scenario">
+      <h3 class="govuk-heading-s">
+        <a href="/scenarios/foi-redaction/" class="govuk-link">FOI Redaction</a>
+      </h3>
+      <p class="govuk-body-s">
+        Automatic PII detection and redaction for Freedom of Information requests
+      </p>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        <span class="govuk-tag govuk-tag--green">FREE</span>
+        <span class="govuk-tag govuk-tag--blue govuk-!-margin-left-1">10 mins</span>
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-related-scenario">
+      <h3 class="govuk-heading-s">
+        <a href="/scenarios/localgov-drupal/" class="govuk-link">LocalGov Drupal with AI</a>
+      </h3>
+      <p class="govuk-body-s">
+        AI-enhanced content management system with translation and accessibility features built in
+      </p>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        <span class="govuk-tag govuk-tag--green">FREE</span>
+        <span class="govuk-tag govuk-tag--blue govuk-!-margin-left-1">40 mins</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Questions or feedback?</h2>
+
+  <p class="govuk-body">
+    We'd love to hear about your experience with this walkthrough:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+    <li><a href="/contact/" class="govuk-link">Report an issue or give feedback</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .ndx-takeaway-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .ndx-related-scenario {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    min-height: 140px;
+  }
+
+  .ndx-related-scenario h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-takeaway-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-related-scenario {
+      min-height: auto;
+    }
+  }
+</style>

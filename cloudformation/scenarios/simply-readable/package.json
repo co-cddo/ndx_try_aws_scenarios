@@ -1,0 +1,13 @@
+{
+  "name": "ndx-try-simply-readable",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NDX:Try Simply Readable scenario - builds Lambda zips and React website from upstream aws-samples/document-translation",
+  "scripts": {
+    "build": "npm run build:lambdas && npm run build:website",
+    "build:lambdas": "node scripts/build-lambdas.js",
+    "build:website": "node scripts/build-website.js",
+    "build:template": "cd cdk && npm install && npx cdk synth --quiet",
+    "clean": "rm -rf lambda/*.zip website-build/"
+  }
+}

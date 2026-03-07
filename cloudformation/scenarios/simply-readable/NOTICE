@@ -1,0 +1,32 @@
+NDX:Try Simply Readable Scenario
+=================================
+
+This scenario deploys the Document Translation & Simply Readable application,
+originally created by Swindon Borough Council and published as an AWS Sample.
+
+Upstream Source
+--------------
+Repository: https://github.com/aws-samples/document-translation
+Version:    v3.4.0 (commit 0cd1b4a)
+License:    MIT-0 (MIT No Attribution)
+
+The following components are built from the upstream source (cloned automatically
+by the build scripts into .upstream/):
+
+  - Lambda function zips (lambda/*.zip) - built by scripts/build-lambdas.js
+  - React web application (website-build/) - built by scripts/build-website.js
+
+CDK Infrastructure
+------------------
+The CDK constructs in cdk/lib/ are reimplemented for Innovation Sandbox (ISB)
+compatibility. They follow the same architectural patterns as the upstream CDK
+but are original works adapted for StackSet deployment, S3-hosted assets, and
+ISB-specific requirements (no CDK bootstrap, account-agnostic bucket names).
+
+Runtime Config Patch
+--------------------
+The upstream React app uses build-time config via require("../cfnOutputs.json").
+The build-website.js script patches amplifyConfigure.tsx to load config at
+runtime from window.__DOCTRAN_CONFIG__, populated by a CloudFormation Custom
+Resource at deploy time. This allows the same build to work across multiple
+sandbox accounts.

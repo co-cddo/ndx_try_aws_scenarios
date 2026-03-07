@@ -44,36 +44,13 @@
            role="tabpanel"
            id="screenshot-panel-{{ stepNum }}"
            aria-labelledby="screenshot-tab-{{ stepNum }}">
-        {# Responsive picture element with WebP and PNG fallback (Story 16.5) #}
-        <picture>
-          {# WebP source with responsive srcset #}
-          {% if imgUrl and '.png' in imgUrl %}
-          <source srcset="{{ imgUrl | replace('.png', '-640w.webp') }} 640w,
-                          {{ imgUrl | replace('.png', '-1024w.webp') }} 1024w,
-                          {{ imgUrl | replace('.png', '.webp') }} 1920w"
-                  sizes="(max-width: 640px) 100vw,
-                         (max-width: 1024px) 90vw,
-                         800px"
-                  type="image/webp">
-          {# PNG fallback with responsive srcset #}
-          <source srcset="{{ imgUrl | replace('.png', '-640w.png') }} 640w,
-                          {{ imgUrl | replace('.png', '-1024w.png') }} 1024w,
-                          {{ imgUrl }} 1920w"
-                  sizes="(max-width: 640px) 100vw,
-                         (max-width: 1024px) 90vw,
-                         800px"
-                  type="image/png">
-          {% endif %}
-          <img
-            src="{{ imgUrl }}"
-            alt="{{ imgAlt }}"
-            class="ndx-screenshot-gallery__image"
-            width="1920"
-            height="1080"
-            loading="lazy"
-            decoding="async"
-          >
-        </picture>
+        <img
+          src="{{ imgUrl }}"
+          alt="{{ imgAlt }}"
+          class="ndx-screenshot-gallery__image"
+          loading="lazy"
+          decoding="async"
+        >
         <figcaption class="ndx-screenshot-gallery__caption">
           {% if step.stepNumber %}
           <span class="ndx-screenshot-gallery__step-number" aria-hidden="true">

@@ -35,9 +35,15 @@
       <span class="govuk-visually-hidden">Warning</span>
       Deleting your stack will permanently remove all data including:
       <ul class="govuk-list govuk-list--bullet govuk-!-margin-top-2 govuk-!-margin-bottom-0">
-        <li>Database content (RDS Aurora)</li>
-        <li>Uploaded files (EFS storage)</li>
-        <li>Any configuration changes you made</li>
+        {% if cleanupResources %}
+          {% for resource in cleanupResources %}
+            <li>{{ resource }}</li>
+          {% endfor %}
+        {% else %}
+          <li>Database content (RDS Aurora)</li>
+          <li>Uploaded files (EFS storage)</li>
+          <li>Any configuration changes you made</li>
+        {% endif %}
       </ul>
     </strong>
   </div>
@@ -51,10 +57,6 @@
       <p class="govuk-body govuk-!-margin-top-1">
         Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console (US East 1)<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
       </p>
-      {# Screenshot placeholder #}
-      <div class="ndx-screenshot-placeholder" aria-hidden="true">
-        <span class="ndx-screenshot-placeholder__text">Screenshot: CloudFormation console</span>
-      </div>
     </li>
     <li>
       <strong>Find your stack</strong>
@@ -70,10 +72,6 @@
       <p class="govuk-body govuk-!-margin-top-1">
         Select the checkbox next to your stack, then click the <strong>Delete</strong> button.
       </p>
-      {# Screenshot placeholder #}
-      <div class="ndx-screenshot-placeholder" aria-hidden="true">
-        <span class="ndx-screenshot-placeholder__text">Screenshot: Delete stack button</span>
-      </div>
     </li>
     <li>
       <strong>Confirm deletion</strong>
@@ -179,8 +177,7 @@
   {# Help link #}
   <p class="govuk-body govuk-!-margin-top-6">
     <strong>Still having trouble?</strong>
-    <a href="/contact/" class="govuk-link">Contact the NDX:Try team</a> or
-    <a href="https://github.com/co-cddo/ndx-try-feedback/issues" target="_blank" rel="noopener noreferrer" class="govuk-link">report an issue on GitHub<span class="govuk-visually-hidden"> (opens in new tab)</span></a>.
+    <a href="/contact/" class="govuk-link">contact us</a>.
   </p>
 </div>
 
@@ -216,21 +213,6 @@
     word-break: break-all;
   }
 
-  .ndx-screenshot-placeholder {
-    background-color: #f3f2f1;
-    border: 2px dashed #b1b4b6;
-    padding: 40px 20px;
-    text-align: center;
-    margin: 15px 0;
-    border-radius: 4px;
-  }
-
-  .ndx-screenshot-placeholder__text {
-    color: #505a5f;
-    font-style: italic;
-    font-size: 14px;
-  }
-
   .ndx-cost-confirmation {
     background-color: #00703c;
   }
@@ -254,8 +236,5 @@
       padding: 20px;
     }
 
-    .ndx-screenshot-placeholder {
-      padding: 30px 15px;
-    }
-  }
+}
 </style>

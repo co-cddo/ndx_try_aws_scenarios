@@ -1,0 +1,275 @@
+---
+layout: page
+title: What's Next
+description: Resources and next steps for adopting Simply Readable at your council
+scenarioId: simply-readable
+eleventyNavigation:
+  key: simply-readable-extend
+  parent: simply-readable-explore
+  title: What's Next
+---
+
+{% set scenarioId = "simply-readable" %}
+{% set extend = extend["simply-readable"] %}
+
+<nav class="govuk-breadcrumbs govuk-!-margin-bottom-6" aria-label="Breadcrumb">
+  <ol class="govuk-breadcrumbs__list">
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/">Home</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/scenarios/simply-readable/">Simply Readable</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/walkthroughs/simply-readable/">Walkthrough</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item" aria-current="page">
+      What's Next
+    </li>
+  </ol>
+</nav>
+
+<h1 class="govuk-heading-xl">What's Next</h1>
+
+<p class="govuk-body-l">
+  Ready to bring Simply Readable to your council? Find resources tailored to your role,
+  connect with other councils already using the tool, and explore production deployment options.
+</p>
+
+<nav class="ndx-jump-links govuk-!-margin-bottom-8" aria-label="On this page">
+  <h2 class="govuk-heading-s ndx-jump-links__heading">On this page</h2>
+  <ul class="govuk-list ndx-jump-links__list">
+    <li><a class="govuk-link" href="#next-steps">Next Steps by Role</a></li>
+    <li><a class="govuk-link" href="#swindon">The Swindon Story</a></li>
+    <li><a class="govuk-link" href="#community">Community Resources</a></li>
+    <li><a class="govuk-link" href="#aws">AWS Resources</a></li>
+    <li><a class="govuk-link" href="#production">Production Considerations</a></li>
+    <li><a class="govuk-link" href="#related">Related Scenarios</a></li>
+    <li><a class="govuk-link" href="#feedback">Feedback</a></li>
+  </ul>
+</nav>
+
+<section id="next-steps" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Next Steps by Role</h2>
+
+  {% if extend and extend.personas %}
+  {% for persona in extend.personas %}
+  <div class="ndx-persona-card govuk-!-margin-bottom-6">
+    <h3 class="govuk-heading-m">{{ persona.title }}</h3>
+    <p class="govuk-body">{{ persona.description }}</p>
+
+    <ul class="govuk-list govuk-list--spaced">
+      {% for step in persona.nextSteps %}
+      <li>
+        <strong>{{ step.title }}</strong>
+        <p class="govuk-body-s">
+          {{ step.description }}
+          {% if step.url %}
+          <br><a href="{{ step.url }}" {% if step.external %}target="_blank" rel="noopener noreferrer"{% endif %} class="govuk-link">
+            {{ step.title }}{% if step.external %}<span class="govuk-visually-hidden"> (opens in new tab)</span>{% endif %}
+          </a>
+          {% endif %}
+        </p>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+  {% endif %}
+</section>
+
+<section id="swindon" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">The Swindon Story</h2>
+
+  <p class="govuk-body">
+    Simply Readable was pioneered by <strong>Swindon Borough Council</strong>, led by
+    Chief Digital Officer <strong>Philip Murkin</strong> and Head of Emerging Technology
+    <strong>Sarah Pena</strong>. What makes this tool special isn't just the technology -
+    it's the people behind it.
+  </p>
+
+  <div class="govuk-inset-text">
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      The Easy Read feature was co-created with <strong>Experts by Experience of a Learning
+      Disability</strong> - a focus group of people with learning disabilities who tested,
+      iterated, and validated the output to ensure it genuinely meets their needs. This
+      user-centred approach achieved <strong>98% community satisfaction</strong>.
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-m">Key statistics</h3>
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <h4 class="govuk-heading-s">Document Translation</h4>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Cost: £160 per document reduced to £0.07 (99.96% reduction)</li>
+        <li>Time: 19 days reduced to 14 minutes</li>
+        <li>Annual savings (Paediatric Therapy): £64,000 reduced to £27</li>
+        <li>ROI: 6,300,000%</li>
+        <li>75 languages supported</li>
+      </ul>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <h4 class="govuk-heading-s">Simply Readable (Easy Read)</h4>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Cost: £120 per page reduced to approximately 1p per page</li>
+        <li>ROI (Adult Social Care): 749,900%</li>
+        <li>98% community satisfaction</li>
+        <li>Co-created with Experts by Experience</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="govuk-heading-m">Adopted by councils across the UK and internationally</h3>
+
+  <p class="govuk-body">
+    Edinburgh, Newport, Southampton, West Berkshire, and councils in France have adopted
+    the Document Translation tool. Simply Readable is gaining adoption as councils recognise
+    the need for affordable Easy Read production.
+  </p>
+</section>
+
+<section id="community" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Community Resources</h2>
+
+  {% if extend and extend.communityResources %}
+  <ul class="govuk-list govuk-list--spaced">
+    {% for resource in extend.communityResources %}
+    <li>
+      <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer" class="govuk-link">
+        {{ resource.title }}<span class="govuk-visually-hidden"> (opens in new tab)</span>
+      </a>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">{{ resource.description }}</p>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+<section id="aws" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">AWS Resources</h2>
+
+  {% if extend and extend.awsResources %}
+  <ul class="govuk-list govuk-list--spaced">
+    {% for resource in extend.awsResources %}
+    <li>
+      <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer" class="govuk-link">
+        {{ resource.title }}<span class="govuk-visually-hidden"> (opens in new tab)</span>
+      </a>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">{{ resource.description }}</p>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+<section id="production" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Production Considerations</h2>
+
+  {% if extend and extend.productionConsiderations %}
+  {% for item in extend.productionConsiderations %}
+  <div class="ndx-consideration-card govuk-!-margin-bottom-4">
+    <h3 class="govuk-heading-s">{{ item.title }}</h3>
+    <p class="govuk-body-s govuk-!-margin-bottom-0">{{ item.description }}</p>
+  </div>
+  {% endfor %}
+  {% endif %}
+</section>
+
+<section id="related" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Related Scenarios</h2>
+
+  {% if extend and extend.relatedScenarios %}
+  <div class="govuk-grid-row">
+    {% for related in extend.relatedScenarios %}
+    <div class="govuk-grid-column-one-third">
+      <div class="ndx-related-card">
+        <h3 class="govuk-heading-s">
+          <a href="/scenarios/{{ related.id }}/" class="govuk-link">{{ related.id | replace("-", " ") | title }}</a>
+        </h3>
+        <p class="govuk-body-s govuk-!-margin-bottom-0">{{ related.reason }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<section id="feedback" class="govuk-!-margin-bottom-8">
+  <h2 class="govuk-heading-l">Feedback</h2>
+
+  <p class="govuk-body">
+    We'd love to hear about your experience with Simply Readable:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+    {% if extend and extend.feedback %}
+    <li><a href="/contact/" class="govuk-link">Report an issue or give feedback</a></li>
+    {% endif %}
+  </ul>
+</section>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/walkthroughs/simply-readable/complete/" class="govuk-link">Back to walkthrough completion</a> |
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-persona-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-persona-card h3 {
+    margin-top: 0;
+  }
+
+  .ndx-consideration-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #f47738;
+  }
+
+  .ndx-consideration-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-related-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+    min-height: 100px;
+  }
+
+  .ndx-related-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-jump-links {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-jump-links__heading {
+    margin-top: 0;
+  }
+
+  .ndx-jump-links__list {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-related-card {
+      min-height: auto;
+      margin-bottom: 15px;
+    }
+  }
+</style>

@@ -1,0 +1,209 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 5: Understand the Architecture - Simply Readable Walkthrough"
+description: Understand how Amazon Translate, Bedrock, and Step Functions work together
+currentStep: 5
+totalSteps: 5
+timeEstimate: "7 minutes"
+scenarioId: simply-readable
+---
+
+{% set stepNumber = 5 %}
+{% set stepTitle = "Understand the Architecture" %}
+{% set stepDescription = "Explore the AWS services powering Simply Readable and understand how they work together to deliver document translation and Easy Read at scale." %}
+{% set timeEstimate = "7 minutes" %}
+{% set expectedOutcomes = [
+  "You understand how 11 AWS services work together",
+  "You can explain the document translation data flow",
+  "You can explain the Easy Read (Simply Readable) data flow"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<div class="ndx-walkthrough-step__screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-6">
+  <img src="/assets/images/screenshots/simply-readable/09-cloudformation-outputs.png"
+       alt="CloudFormation Outputs tab showing AppUrl, AdminUsername, AdminPassword in plain text, and other stack outputs"
+       class="ndx-walkthrough-step__image"
+       loading="lazy">
+  <p class="ndx-walkthrough-step__screenshot-caption govuk-body-s">CloudFormation Outputs showing the deployed stack configuration including the admin password</p>
+</div>
+
+<h3 class="govuk-heading-m">Architecture overview</h3>
+
+<p class="govuk-body">
+  Simply Readable is a fully serverless application built on 11 AWS services. There are no
+  servers to manage, and it scales automatically from zero to thousands of documents.
+</p>
+
+<div class="ndx-architecture-layers">
+  <div class="ndx-arch-layer">
+    <h4 class="govuk-heading-s">User interface</h4>
+    <div class="ndx-service-tags">
+      <span class="govuk-tag govuk-tag--blue">Amazon CloudFront</span>
+      <span class="govuk-tag govuk-tag--blue">Amazon S3</span>
+      <span class="govuk-tag govuk-tag--blue">Amazon Cognito</span>
+    </div>
+    <p class="govuk-body-s">
+      React web app served via CloudFront CDN. Authentication via Cognito User Pool.
+      Static assets stored in S3.
+    </p>
+  </div>
+
+  <div class="ndx-arch-layer">
+    <h4 class="govuk-heading-s">API layer</h4>
+    <div class="ndx-service-tags">
+      <span class="govuk-tag govuk-tag--turquoise">AWS AppSync</span>
+      <span class="govuk-tag govuk-tag--turquoise">AWS WAF</span>
+    </div>
+    <p class="govuk-body-s">
+      GraphQL API with real-time subscriptions. Protected by Web Application Firewall
+      with AWS Managed Rules.
+    </p>
+  </div>
+
+  <div class="ndx-arch-layer">
+    <h4 class="govuk-heading-s">Orchestration</h4>
+    <div class="ndx-service-tags">
+      <span class="govuk-tag govuk-tag--green">AWS Step Functions</span>
+      <span class="govuk-tag govuk-tag--green">AWS Lambda</span>
+      <span class="govuk-tag govuk-tag--green">Amazon EventBridge</span>
+    </div>
+    <p class="govuk-body-s">
+      Step Functions orchestrate multi-step translation and Easy Read workflows.
+      Lambda functions handle individual processing tasks. EventBridge Pipes connect
+      DynamoDB changes to Step Functions.
+    </p>
+  </div>
+
+  <div class="ndx-arch-layer">
+    <h4 class="govuk-heading-s">AI services</h4>
+    <div class="ndx-service-tags">
+      <span class="govuk-tag govuk-tag--orange">Amazon Translate</span>
+      <span class="govuk-tag govuk-tag--orange">Amazon Bedrock</span>
+      <span class="govuk-tag govuk-tag--orange">Amazon Comprehend</span>
+    </div>
+    <p class="govuk-body-s">
+      Amazon Translate for 75+ language translation. Amazon Bedrock (Claude) for Easy Read
+      text simplification. Amazon Comprehend for automatic language detection.
+    </p>
+  </div>
+
+  <div class="ndx-arch-layer">
+    <h4 class="govuk-heading-s">Storage</h4>
+    <div class="ndx-service-tags">
+      <span class="govuk-tag govuk-tag--grey">Amazon DynamoDB</span>
+      <span class="govuk-tag govuk-tag--grey">Amazon S3</span>
+    </div>
+    <p class="govuk-body-s">
+      DynamoDB for job tracking and metadata with streams for event-driven processing.
+      S3 for document storage with identity-scoped paths ensuring user isolation.
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Document Translation data flow</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>User uploads a document via the React app to <strong>S3</strong> (identity-scoped path)</li>
+  <li>Upload creates a job record in <strong>DynamoDB</strong></li>
+  <li>DynamoDB stream triggers <strong>EventBridge Pipes</strong></li>
+  <li>EventBridge starts a <strong>Step Functions</strong> workflow</li>
+  <li>Step Functions calls <strong>Amazon Translate</strong> for each target language</li>
+  <li>Translated files are saved back to <strong>S3</strong></li>
+  <li>Job status updated in DynamoDB, user notified via <strong>AppSync</strong> subscription</li>
+</ol>
+
+<h3 class="govuk-heading-m">Easy Read (Simply Readable) data flow</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>User uploads a .docx file via the Simply Readable section</li>
+  <li>A Lambda function converts the document to HTML, then to individual paragraphs</li>
+  <li>Each paragraph is saved to <strong>DynamoDB</strong> with status "generate"</li>
+  <li>DynamoDB stream triggers <strong>EventBridge Pipes</strong> (filtered to "generate" status)</li>
+  <li>A <strong>Step Functions</strong> workflow sends each paragraph to <strong>Amazon Bedrock</strong></li>
+  <li>Bedrock's Claude model simplifies the text into Easy Read format</li>
+  <li>Simplified text is saved back to DynamoDB with status "completed"</li>
+  <li>User sees original and simplified text side by side via <strong>AppSync</strong></li>
+</ol>
+
+<h3 class="govuk-heading-m">Key architectural patterns</h3>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-pattern-card">
+      <h4 class="govuk-heading-s">Event-driven processing</h4>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        DynamoDB Streams + EventBridge Pipes trigger processing automatically when data changes.
+        No polling, no wasted compute. This pattern scales from 1 to 10,000 documents without
+        code changes.
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-pattern-card">
+      <h4 class="govuk-heading-s">Identity-scoped storage</h4>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">
+        Each user's documents are stored under their Cognito identity ID in S3
+        (<code>private/{identity-id}/*</code>). IAM policies enforce this at the infrastructure
+        level - users can only access their own documents.
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Learn more</h3>
+
+<p class="govuk-body">
+  After completing this walkthrough, explore the architecture in more detail:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><a href="/walkthroughs/simply-readable/explore/understand/" class="govuk-link">Detailed architecture and service cards</a></li>
+  <li><a href="/walkthroughs/simply-readable/explore/extend/" class="govuk-link">Next steps, community resources, and source links</a></li>
+  <li><a href="https://aws-samples.github.io/document-translation/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS Samples documentation<span class="govuk-visually-hidden"> (opens in new tab)</span></a></li>
+  <li><a href="https://github.com/aws-samples/document-translation" target="_blank" rel="noopener noreferrer" class="govuk-link">Source code on GitHub<span class="govuk-visually-hidden"> (opens in new tab)</span></a></li>
+</ul>
+
+<style>
+  .ndx-architecture-layers {
+    margin: 30px 0;
+  }
+
+  .ndx-arch-layer {
+    padding: 20px;
+    margin-bottom: 2px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-arch-layer h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-service-tags {
+    margin-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .ndx-pattern-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+    margin-bottom: 20px;
+  }
+
+  .ndx-pattern-card h4 {
+    margin-top: 0;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 14px;
+  }
+</style>

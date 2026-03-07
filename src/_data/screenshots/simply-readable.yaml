@@ -1,0 +1,62 @@
+scenario: simply-readable
+scenarioTitle: "Simply Readable"
+awsService: "Amazon Translate & Amazon Bedrock"
+totalSteps: 5
+
+steps:
+  - title: "Step 1: Access the App"
+    screenshots:
+      - id: "login"
+        filename: "01-login.png"
+        alt: "Cognito hosted UI login page showing username and password fields for the Simply Readable application"
+        caption: "The Cognito login page where you enter your admin credentials"
+      - id: "dashboard"
+        filename: "02-dashboard.png"
+        alt: "Simply Readable main dashboard showing Document Translation history view with sidebar navigation"
+        caption: "The main dashboard after logging in - showing Document Translation and Simply Readable sections in the sidebar"
+
+  - title: "Step 2: Translate a Document"
+    screenshots:
+      - id: "upload-interface"
+        filename: "03-upload-interface.png"
+        alt: "Document upload interface showing a sample council tax notice with Welsh and Polish selected as target languages"
+        caption: "Upload a document and select target languages - here translating a council tax notice to Welsh and Polish"
+      - id: "translation-completed"
+        filename: "04-translation-completed.png"
+        alt: "Translation progress view showing Welsh and Polish translations completed with download links"
+        caption: "Both translations complete in seconds - ready to download"
+
+  - title: "Step 3: Create Easy Read Version"
+    screenshots:
+      - id: "readable-upload"
+        filename: "06-readable-upload.png"
+        alt: "Simply Readable upload interface showing a council tax notice document ready for Easy Read conversion"
+        caption: "Upload a .docx file to the Simply Readable section for Easy Read conversion"
+      - id: "readable-output"
+        filename: "07-readable-output.png"
+        alt: "Simply Readable output showing original council tax text alongside simplified Easy Read version with completed status badges"
+        caption: "The Easy Read output - original text alongside simplified version, processed by Amazon Bedrock"
+        annotations:
+          - "Original complex text on the left"
+          - "AI-simplified Easy Read text on the right"
+          - "Status badges showing completed processing"
+
+  - title: "Step 4: Explore Features"
+    screenshots:
+      - id: "translated-output"
+        filename: "05-translated-output.png"
+        alt: "Quick Text translation showing English text translated to Welsh with side-by-side comparison"
+        caption: "Quick Text translation - instant English to Welsh translation"
+      - id: "language-selector"
+        filename: "08-language-selector.png"
+        alt: "Language selector dropdown showing over 75 available languages including Welsh, Polish, Urdu, and Arabic"
+        caption: "Choose from 75+ languages - supporting diverse community needs"
+
+  - title: "Step 5: Understand the Architecture"
+    screenshots:
+      - id: "cloudformation-outputs"
+        filename: "09-cloudformation-outputs.png"
+        alt: "CloudFormation Outputs tab showing AppUrl, AdminUsername, AdminPassword in plain text, and other stack outputs"
+        caption: "CloudFormation Outputs showing the deployed stack configuration including the admin password"
+
+adminPages: []

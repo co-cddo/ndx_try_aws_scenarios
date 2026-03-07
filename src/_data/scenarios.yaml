@@ -246,6 +246,7 @@ scenarios:
     relatedScenarios:
       - "text-to-speech"
       - "quicksight-dashboard"
+      - "simply-readable"
     securitySummary: "NDX:Try session isolated - safe to experiment with full data protection"
     skillsLearned:
       - "Amazon Bedrock"
@@ -515,6 +516,7 @@ scenarios:
     relatedScenarios:
       - "planning-ai"
       - "council-chatbot"
+      - "simply-readable"
     securitySummary: "NDX:Try session isolated - uses synthetic sample data only"
     skillsLearned:
       - "Amazon Comprehend"
@@ -791,6 +793,7 @@ scenarios:
     relatedScenarios:
       - "council-chatbot"
       - "foi-redaction"
+      - "simply-readable"
     securitySummary: "NDX:Try session isolated - sample content only, no live data"
     skillsLearned:
       - "Amazon Polly"
@@ -1218,3 +1221,175 @@ scenarios:
         training: 5000
         support: 9000
         total: 42500
+
+  - id: "simply-readable"
+    name: "Simply Readable"
+    headline: "AI-powered document translation and Easy Read, built by Swindon Borough Council"
+    bestFor: "Councils making documents accessible in multiple languages and Easy Read format"
+    description: "Deploy the Simply Readable tool originally built by Swindon Borough Council. Translate documents into 75+ languages using Amazon Translate (99.96% cost reduction vs manual translation) and convert complex text to Easy Read format using Amazon Bedrock. Co-created with Experts by Experience of a Learning Disability."
+    difficulty: "intermediate"
+    timeEstimate: "25 minutes"
+    primaryPersona: "service-manager"
+    gcloud_search_term: "document translation Easy Read accessibility local government AI"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "council-chatbot"
+      - "text-to-speech"
+      - "foi-redaction"
+    securitySummary: "NDX:Try session isolated - safe to experiment with full data protection"
+    skillsLearned:
+      - "Amazon Translate"
+      - "Amazon Bedrock"
+      - "Amazon Cognito"
+      - "AWS Step Functions"
+      - "AWS AppSync"
+      - "CloudFormation"
+    isMostPopular: false
+    featured: true
+    awsServices:
+      - "Amazon Translate"
+      - "Amazon Bedrock"
+      - "Amazon Cognito"
+      - "Amazon S3"
+      - "Amazon CloudFront"
+      - "AWS Step Functions"
+      - "AWS Lambda"
+      - "Amazon DynamoDB"
+      - "AWS AppSync"
+      - "AWS WAF"
+      - "Amazon Comprehend"
+    tags:
+      - "AI"
+      - "Translation"
+      - "Accessibility"
+      - "Easy Read"
+      - "Document Processing"
+      - "UK Councils"
+      - "Open Source"
+    businessOutcomes:
+      - "Reduce document translation costs by 99.96% (£160 to £0.07 per document)"
+      - "Cut translation turnaround from 19 days to 14 minutes"
+      - "Create Easy Read versions of complex documents for people with learning disabilities"
+      - "Support 75+ languages to serve diverse communities"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "No technical expertise required"
+    url: "/scenarios/simply-readable/"
+    order: 2
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/simply-readable/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/simply-readable/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-simply-readable"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "simply-readable"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+      deploymentTime: "5 to 10 minutes"
+      deploymentPhases:
+        - "Creating Cognito User Pool and Identity Pool (~30 seconds)"
+        - "Creating AppSync GraphQL API and WAF (~60 seconds)"
+        - "Creating DynamoDB tables and S3 buckets (~30 seconds)"
+        - "Creating Step Functions workflows and Lambda functions (~120 seconds)"
+        - "Creating CloudFront distribution (~200 seconds)"
+        - "Deploying React web app and injecting runtime config (~60 seconds)"
+      outputs:
+        - name: "AppUrl"
+          description: "URL to access the Simply Readable web application"
+        - name: "AdminUsername"
+          description: "Admin username for logging in"
+        - name: "AdminPassword"
+          description: "Admin password for login"
+        - name: "CognitoUserPoolId"
+          description: "Cognito User Pool ID"
+        - name: "CognitoUserPoolClientId"
+          description: "Cognito User Pool Client ID"
+        - name: "AppSyncEndpoint"
+          description: "AppSync GraphQL API endpoint"
+        - name: "ContentBucketName"
+          description: "S3 bucket for uploaded documents"
+    screenshots:
+      steps:
+        - stepNumber: 1
+          image: "/assets/images/screenshots/simply-readable/01-login.png"
+          alt: "Cognito hosted UI login page showing username and password fields"
+          annotation: "Log in with your admin credentials from the CloudFormation Outputs tab"
+        - stepNumber: 2
+          image: "/assets/images/screenshots/simply-readable/02-dashboard.png"
+          alt: "Simply Readable main dashboard showing Document Translation and Simply Readable sections"
+          annotation: "The main dashboard with Document Translation and Simply Readable navigation"
+        - stepNumber: 3
+          image: "/assets/images/screenshots/simply-readable/03-upload-interface.png"
+          alt: "Document upload interface with Welsh and Polish target languages selected"
+          annotation: "Upload a document and select target languages for translation"
+        - stepNumber: 4
+          image: "/assets/images/screenshots/simply-readable/04-translation-completed.png"
+          alt: "Translation completed showing Welsh translation with download link"
+          annotation: "Translations complete in seconds - ready to download"
+        - stepNumber: 5
+          image: "/assets/images/screenshots/simply-readable/07-readable-output.png"
+          alt: "Simply Readable Easy Read output showing original and simplified text side by side"
+          annotation: "Easy Read conversion - original complex text alongside AI-simplified version"
+        - stepNumber: 6
+          image: "/assets/images/screenshots/simply-readable/09-cloudformation-outputs.png"
+          alt: "CloudFormation Outputs tab showing stack configuration"
+          annotation: "CloudFormation Outputs showing the deployed architecture configuration"
+    sourceCode:
+      repoUrl: "https://github.com/aws-samples/document-translation"
+      cloudformationPath: "cloudformation/scenarios/simply-readable/cdk"
+      description: "AWS CDK project deploying the Document Translation tool with Amazon Translate, Amazon Bedrock, Cognito, Step Functions, AppSync, and CloudFront."
+    success_metrics:
+      service_area: "Translation & Accessibility"
+      primary_metric: "Document translation cost and turnaround time"
+      baseline:
+        description: "Manual document translation costs £160 per document and takes up to 19 days"
+        value: 160
+        unit: "GBP per document"
+        source: "Swindon Borough Council / AWS Case Study"
+      projection:
+        description: "AI-powered translation reduces cost to £0.07 per document in under 14 minutes"
+        value: 0.07
+        reduction_percent: 99.96
+      roi:
+        annual_savings: 63973
+        calculation: "400 documents/year × (£160 - £0.07) = £63,973 annual savings (based on Swindon Paediatric Therapy: £64,000 → £27)"
+        payback_months: 1
+        disclaimer: "Illustrative projection based on Swindon Borough Council published data. Actual savings depend on translation volume, language pairs, and document complexity."
+      committee_language: "AI-powered translation saves over £63,000 annually while reducing document turnaround from 19 days to 14 minutes, serving 75+ languages"
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "US (us-east-1 N. Virginia region)"
+      encryption: "AES-256 at rest, TLS 1.3 in transit"
+      data_handling: "Sample data only in sandbox; documents processed via Amazon Translate and Amazon Bedrock with no data retention"
+    tco_projection:
+      year_1:
+        aws_services: 2400
+        integration: 3000
+        training: 1500
+        support: 1000
+        total: 7900
+      year_2:
+        aws_services: 2600
+        integration: 0
+        training: 500
+        support: 1000
+        total: 4100
+      year_3:
+        aws_services: 2800
+        integration: 0
+        training: 500
+        support: 1000
+        total: 4300

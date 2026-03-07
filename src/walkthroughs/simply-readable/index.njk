@@ -1,0 +1,185 @@
+---
+layout: layouts/walkthrough.njk
+title: Simply Readable Walkthrough
+description: Step-by-step guide to using the Simply Readable document translation and Easy Read tool
+currentStep: 0
+totalSteps: 5
+scenarioId: simply-readable
+---
+
+<h1 class="govuk-heading-xl">Explore Simply Readable</h1>
+
+{% set walkthroughData = walkthroughs.walkthroughs[scenarioId] %}
+
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    {{ walkthroughData.duration }} to translate documents and create Easy Read versions
+  </h2>
+  <div class="govuk-panel__body">
+    Built by Swindon Borough Council, co-created with Experts by Experience of a Learning Disability.
+  </div>
+</div>
+
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you through translating documents and creating Easy Read versions.
+    Perfect for service managers, accessibility officers, and anyone evaluating
+    AI-powered document translation for their council.
+  </p>
+</div>
+
+<div class="govuk-grid-row govuk-!-margin-bottom-6">
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-stat-card">
+      <span class="ndx-stat-card__number">99.96%</span>
+      <span class="ndx-stat-card__label">cost reduction vs manual translation</span>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-stat-card">
+      <span class="ndx-stat-card__number">75+</span>
+      <span class="ndx-stat-card__label">languages supported</span>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-stat-card">
+      <span class="ndx-stat-card__number">14 min</span>
+      <span class="ndx-stat-card__label">vs 19 days for traditional translation</span>
+    </div>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this {{ walkthroughData.duration }} walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  {% for step in walkthroughData.steps %}
+  <li>
+    <strong>{{ step.title }}</strong>{% if step.description %} - {{ step.description }}{% endif %}{% if step.time %} ({{ step.time }}){% endif %}
+  </li>
+  {% endfor %}
+</ol>
+
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already requested the Simply Readable scenario via NDX:Try.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/simply-readable/" class="govuk-link">Deploy the Simply Readable scenario</a> if you haven't already.
+  </p>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      Deployment takes 5 to 10 minutes.
+    </strong>
+  </div>
+
+  <details class="govuk-details govuk-!-margin-bottom-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">Why does deployment take this long?</span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">Simply Readable provisions a full serverless architecture:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>CloudFront distribution</strong> - global CDN for the web application (~3-5 min)</li>
+        <li><strong>Cognito User Pool</strong> - authentication and user management</li>
+        <li><strong>AppSync GraphQL API</strong> - real-time data synchronisation</li>
+        <li><strong>Step Functions workflows</strong> - document translation and Easy Read pipelines</li>
+        <li><strong>DynamoDB tables</strong> - job tracking and metadata</li>
+      </ul>
+      <p class="govuk-body govuk-!-margin-bottom-0">
+        The wait is worth it - you get a fully functional document translation tool to evaluate.
+      </p>
+    </div>
+  </details>
+
+  <h3 class="govuk-heading-s">You'll need</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Your CloudFormation stack to show <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span></li>
+    <li>The <strong>AppUrl</strong> from your stack's Outputs tab</li>
+    <li>The <strong>AdminPasswordSecret</strong> link to retrieve your admin password from Secrets Manager</li>
+  </ul>
+</div>
+
+<h2 class="govuk-heading-m">The story behind Simply Readable</h2>
+
+<p class="govuk-body">
+  Simply Readable was built by <strong>Swindon Borough Council</strong> in partnership with AWS. The tool
+  was co-created with <strong>Experts by Experience of a Learning Disability</strong> to ensure Easy Read
+  output truly meets the needs of its users. It's now open source and adopted by councils across the UK
+  and internationally, including Edinburgh, Newport, Southampton, and West Berkshire.
+</p>
+
+<div class="govuk-grid-row govuk-!-margin-top-4 govuk-!-margin-bottom-6">
+  <div class="govuk-grid-column-full">
+    <ul class="govuk-list govuk-list--bullet">
+      <li><a href="https://aws.amazon.com/solutions/case-studies/swindon-borough-council-case-study-amazon-translate/" target="_blank" rel="noopener noreferrer" class="govuk-link">AWS Case Study: Swindon Borough Council<span class="govuk-visually-hidden"> (opens in new tab)</span></a></li>
+      <li><a href="https://ai.gov.uk/knowledge-hub/tools/simply-readable/" target="_blank" rel="noopener noreferrer" class="govuk-link">CDDO AI Knowledge Hub: Simply Readable<span class="govuk-visually-hidden"> (opens in new tab)</span></a></li>
+      <li><a href="https://www.local.gov.uk/case-studies/swindon-borough-council-simply-readable-ai-easy-read-solution" target="_blank" rel="noopener noreferrer" class="govuk-link">LGA Case Study<span class="govuk-visually-hidden"> (opens in new tab)</span></a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/simply-readable/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately {{ walkthroughData.duration }}
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-stat-card {
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-top: 4px solid #00703c;
+  }
+
+  .ndx-stat-card__number {
+    display: block;
+    font-size: 36px;
+    font-weight: 700;
+    color: #00703c;
+  }
+
+  .ndx-stat-card__label {
+    display: block;
+    font-size: 14px;
+    color: #505a5f;
+    margin-top: 5px;
+  }
+</style>
