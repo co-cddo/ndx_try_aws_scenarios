@@ -1,0 +1,81 @@
+# Screenshot data for Simply Readable scenario
+# Used by screenshot.njk component to display locally-stored screenshots
+# Local path: /assets/images/screenshots/simply-readable/
+
+scenario: simply-readable
+scenarioTitle: "Simply Readable"
+awsService: "Amazon Translate, Amazon Bedrock"
+totalSteps: 5
+
+# Step-specific screenshots
+steps:
+  - step: 1
+    title: "Access the App"
+    screenshots:
+      - id: cloudformation-stacks
+        filename: step-1-cloudformation-stacks.png
+        alt: "CloudFormation Stacks page showing the Simply Readable stack with CREATE_COMPLETE status"
+        caption: "Your stack should show CREATE_COMPLETE status in the us-east-1 region"
+        width: 1200
+        height: 963
+
+      - id: cloudformation-outputs
+        filename: step-1-cloudformation-outputs.png
+        alt: "CloudFormation Outputs tab showing AppUrl, AdminPassword, AdminUsername, AppSyncEndpoint, and CognitoUserPoolId values"
+        caption: "Copy the AppUrl, AdminUsername, and AdminPassword from the Outputs tab"
+        width: 1200
+        height: 963
+
+      - id: dashboard
+        filename: step-1-dashboard.png
+        alt: "Simply Readable dashboard showing the Document Translation section with navigation sidebar including History, Create New, Quick Text, and Simply Readable sections"
+        caption: "The Document Translation dashboard after logging in"
+        width: 1200
+        height: 963
+
+  - step: 2
+    title: "Translate a Document"
+    screenshots:
+      - id: create-translation
+        filename: step-2-create-translation.png
+        alt: "Create New Document Translation page with file upload area, Original Language set to English, and a list of 75+ target languages including Afrikaans, Albanian, Amharic, Arabic, and more"
+        caption: "Upload a .docx file and select one or more target languages"
+        width: 1200
+        height: 963
+
+      - id: translation-complete
+        filename: step-2-translation-complete.png
+        alt: "Document Translation history showing a completed translation job for Process Map and Performance Metrics.docx from English to Afrikaans"
+        caption: "The translation completes in seconds and appears in the history"
+        width: 1200
+        height: 963
+
+  - step: 3
+    title: "Create an Easy Read Version"
+    screenshots:
+      - id: create-readable
+        filename: step-3-create-readable.png
+        alt: "Edit Simply Readable page showing job details, a Default style selector, Print Preview button, Claude 3 Haiku model selector, and a file upload area for .docx files"
+        caption: "Upload a document and select the Claude 3 Haiku model to create an Easy Read version"
+        width: 1200
+        height: 963
+
+  - step: 4
+    title: "Explore Features"
+    screenshots:
+      - id: readable-history
+        filename: step-4-readable-history.png
+        alt: "Simply Readable history page showing one completed Easy Read job with name, created time, and updated time columns"
+        caption: "The Simply Readable history shows all your Easy Read conversion jobs"
+        width: 1200
+        height: 963
+
+  - step: 5
+    title: "Understand the Architecture"
+    screenshots:
+      - id: step-functions
+        filename: step-5-step-functions.png
+        alt: "AWS Step Functions console showing 15 state machines powering Simply Readable, including translation and readable workflow state machines"
+        caption: "Step Functions console showing the 15 state machines that orchestrate the translation and Easy Read workflows"
+        width: 1200
+        height: 963

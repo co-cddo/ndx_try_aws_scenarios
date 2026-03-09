@@ -51,10 +51,14 @@
       <p class="govuk-body govuk-!-margin-top-1">
         Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console (US East 1)<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
       </p>
-      {# Screenshot placeholder #}
-      <div class="ndx-screenshot-placeholder" aria-hidden="true">
-        <span class="ndx-screenshot-placeholder__text">Screenshot: CloudFormation console</span>
-      </div>
+      {# CloudFormation stacks screenshot #}
+      {% set scenario = scenarioId %}
+      {% set filename = "step-1-cloudformation-stacks.png" %}
+      {% set alt = "CloudFormation Stacks page showing your deployed stack with CREATE_COMPLETE status" %}
+      {% set caption = "Find your stack in the CloudFormation console" %}
+      {% set width = 1200 %}
+      {% set height = 963 %}
+      {% include "components/screenshot.njk" %}
     </li>
     <li>
       <strong>Find your stack</strong>
@@ -70,10 +74,14 @@
       <p class="govuk-body govuk-!-margin-top-1">
         Select the checkbox next to your stack, then click the <strong>Delete</strong> button.
       </p>
-      {# Screenshot placeholder #}
-      <div class="ndx-screenshot-placeholder" aria-hidden="true">
-        <span class="ndx-screenshot-placeholder__text">Screenshot: Delete stack button</span>
-      </div>
+      {# Delete stack button screenshot - reuses stacks view showing Delete button in toolbar #}
+      {% set scenario = scenarioId %}
+      {% set filename = "step-1-cloudformation-stacks.png" %}
+      {% set alt = "CloudFormation console with the Delete stack button visible in the toolbar" %}
+      {% set caption = "Select your stack and click the Delete stack button" %}
+      {% set width = 1200 %}
+      {% set height = 963 %}
+      {% include "components/screenshot.njk" %}
     </li>
     <li>
       <strong>Confirm deletion</strong>
@@ -179,8 +187,7 @@
   {# Help link #}
   <p class="govuk-body govuk-!-margin-top-6">
     <strong>Still having trouble?</strong>
-    <a href="/contact/" class="govuk-link">Contact the NDX:Try team</a> or
-    <a href="https://github.com/co-cddo/ndx-try-feedback/issues" target="_blank" rel="noopener noreferrer" class="govuk-link">report an issue on GitHub<span class="govuk-visually-hidden"> (opens in new tab)</span></a>.
+    <a href="/contact/" class="govuk-link">Contact the NDX:Try team</a>.
   </p>
 </div>
 

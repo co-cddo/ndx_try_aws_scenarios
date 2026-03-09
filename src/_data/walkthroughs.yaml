@@ -127,3 +127,27 @@ walkthroughs:
       - title: "Metrics explored"
       - title: "Filters applied"
       - title: "Self-service value understood"
+
+  simply-readable:
+    totalSteps: 5
+    url: "/walkthroughs/simply-readable/"
+    title: "Simply Readable Walkthrough"
+    duration: "25 minutes"
+    hasWalkthrough: true
+    category: "accessibility"
+    steps:
+      - title: "App accessed"
+        description: "Find your credentials and access the deployed web application"
+        time: "3 minutes"
+      - title: "Document translated"
+        description: "Upload a document and translate it into another language"
+        time: "5 minutes"
+      - title: "Easy Read created"
+        description: "Convert a document to Easy Read format with AI-generated images"
+        time: "5 minutes"
+      - title: "Features explored"
+        description: "Discover multi-language support and additional capabilities"
+        time: "5 minutes"
+      - title: "Architecture understood"
+        description: "Learn how 12 AWS services work together to power the tool"
+        time: "7 minutes"

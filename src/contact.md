@@ -69,7 +69,7 @@ Join the conversation on the cross-government Slack:
 This is an open source project. You can:
 
 - [View our code on GitHub](https://github.com/co-cddo/ndx-try-aws-scenarios)
-- [Report issues or suggest features](https://github.com/co-cddo/ndx-try-aws-scenarios/issues)
+
 - [Contribute to the project](https://github.com/co-cddo/ndx-try-aws-scenarios/blob/main/CONTRIBUTING.md)
 
 ## Response times

@@ -246,6 +246,7 @@ scenarios:
     relatedScenarios:
       - "text-to-speech"
       - "quicksight-dashboard"
+      - "simply-readable"
     securitySummary: "NDX:Try session isolated - safe to experiment with full data protection"
     skillsLearned:
       - "Amazon Bedrock"
@@ -515,6 +516,7 @@ scenarios:
     relatedScenarios:
       - "planning-ai"
       - "council-chatbot"
+      - "simply-readable"
     securitySummary: "NDX:Try session isolated - uses synthetic sample data only"
     skillsLearned:
       - "Amazon Comprehend"
@@ -791,6 +793,7 @@ scenarios:
     relatedScenarios:
       - "council-chatbot"
       - "foi-redaction"
+      - "simply-readable"
     securitySummary: "NDX:Try session isolated - sample content only, no live data"
     skillsLearned:
       - "Amazon Polly"
@@ -1218,3 +1221,140 @@ scenarios:
         training: 5000
         support: 9000
         total: 42500
+
+  - id: "simply-readable"
+    name: "Simply Readable"
+    headline: "AI-powered document translation and Easy Read, built by Swindon Borough Council"
+    bestFor: "Councils needing accessible documents in multiple languages and Easy Read format"
+    description: "Deploy the award-winning Document Translation and Simply Readable tools built by Swindon Borough Council. Translate documents into 75 languages using Amazon Translate and convert them to Easy Read format using Amazon Bedrock. Originally developed with 'Experts by Experience' — residents with learning disabilities."
+    difficulty: "intermediate"
+    timeEstimate: "25 minutes"
+    primaryPersona: "service-manager"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "council-chatbot"
+      - "text-to-speech"
+      - "foi-redaction"
+    securitySummary: "NDX:Try session isolated - safe to experiment with full data protection"
+    skillsLearned:
+      - "Amazon Translate"
+      - "Amazon Bedrock"
+      - "Amazon Cognito"
+      - "AWS Step Functions"
+      - "AWS AppSync"
+      - "CloudFormation"
+    featured: true
+    order: 2
+    status: "active"
+    awsServices:
+      - "Amazon Translate"
+      - "Amazon Bedrock"
+      - "Amazon Cognito"
+      - "Amazon S3"
+      - "Amazon CloudFront"
+      - "AWS Step Functions"
+      - "AWS Lambda"
+      - "Amazon DynamoDB"
+      - "AWS AppSync"
+      - "AWS WAF"
+      - "Amazon Comprehend"
+    tags:
+      - "AI"
+      - "Translation"
+      - "Accessibility"
+      - "Easy Read"
+      - "Local Government"
+      - "Open Source"
+    businessOutcomes:
+      - "Reduce document translation costs by 99.96%"
+      - "Cut translation turnaround from 19 days to 14 minutes"
+      - "Create Easy Read versions at ~1p per page vs £120 per page"
+      - "Support 75 languages for multilingual communities"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "No technical expertise required"
+    url: "/scenarios/simply-readable/"
+    gcloud_search_term: "document translation AI accessibility Easy Read local government"
+    deployment:
+      templateUrl: "https://ndx-try-isb-blueprints-568672915267.s3.us-east-1.amazonaws.com/scenarios/simply-readable/simply-readable.template.json"
+      templateS3Url: "s3://ndx-try-isb-blueprints-568672915267/scenarios/simply-readable/simply-readable.template.json"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-simply-readable"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+      deploymentTime: "25 to 35 minutes"
+      deploymentPhases:
+        - "Creating Cognito User Pool and Identity Pool"
+        - "Setting up AppSync GraphQL API with WAF"
+        - "Creating DynamoDB tables and Step Functions workflows"
+        - "Deploying Lambda functions for translation and readability"
+        - "Creating CloudFront distribution and S3 buckets"
+        - "Deploying React web application"
+        - "Enabling Bedrock model access agreements"
+      outputs:
+        - name: "AppUrl"
+          description: "URL to access the Simply Readable web application"
+        - name: "AdminUsername"
+          description: "Admin username for login"
+        - name: "AdminPassword"
+          description: "Admin password for login"
+      tags:
+        - key: "Project"
+          value: "ndx-try-aws-scenarios"
+        - key: "Scenario"
+          value: "simply-readable"
+        - key: "AutoCleanup"
+          value: "true"
+    sourceCode:
+      repoUrl: "https://github.com/aws-samples/document-translation"
+      cloudformationPath: "cloudformation/scenarios/simply-readable/cdk"
+      description: "Open-source document translation and Easy Read tool, originally built by Swindon Borough Council, available as an AWS Sample under MIT-0 license"
+    success_metrics:
+      service_area: "Translation & Accessibility Services"
+      primary_metric: "Document translation cost per document"
+      baseline:
+        description: "Traditional human translation cost per document"
+        value: 160
+        unit: "GBP"
+        source: "Swindon Borough Council published statistics (AWS Case Study)"
+      projection:
+        description: "AI-powered translation cost per document"
+        value: 0.07
+        reduction_percent: 99.96
+      roi:
+        annual_savings: 63973
+        calculation: "(£64,000 annual translation spend - £27 AI cost) for Paediatric Therapy team alone"
+        payback_months: 1
+        disclaimer: "Based on Swindon Borough Council published statistics. Actual results vary by document volume and language pairs."
+      committee_language: "Swindon Borough Council reduced translation costs by 99.96% using this AWS-powered tool, cutting turnaround from 19 days to 14 minutes. The open-source solution is now adopted by Edinburgh, Newport, Southampton, and West Berkshire councils."
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "NCSC Cloud Security Principles"
+      data_residency: "US (us-east-1 N. Virginia region)"
+      encryption: "AES-256 at rest (S3, DynamoDB), TLS 1.2+ in transit"
+      data_handling: "Documents processed in-region, identity-scoped S3 storage, no data retained after session cleanup"
+    tco_projection:
+      year_1:
+        aws_services: 2400
+        integration: 5000
+        training: 1000
+        support: 500
+        total: 8900
+      year_2:
+        aws_services: 2400
+        integration: 0
+        training: 500
+        support: 500
+        total: 3400
+      year_3:
+        aws_services: 2400
+        integration: 0
+        training: 250
+        support: 500
+        total: 3150

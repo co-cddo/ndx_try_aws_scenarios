@@ -49,7 +49,7 @@ code_patterns:
   - 'Minimal scenario pages with layout inheritance (3-line frontmatter)'
   - 'Step-file walkthroughs with walkthrough-step.njk component'
   - 'Screenshot YAML data with S3-hosted images'
-  - 'CDK → synthesized CloudFormation referencing co-located S3 assets (Lambda zips + React build)'
+  - 'Minimum-change adaptation of upstream CDK → synthesized CloudFormation referencing co-located S3 assets (Lambda zips + React build)'
   - 'ISB Hub SCENARIOS array + directory upload (template.yaml + lambda/ + website-build/)'
   - 'Environment-agnostic CDK (no env) for StackSet cross-account deployment'
   - 'IAM roles named InnovationSandbox-ndx-* for SCP compatibility'
@@ -142,8 +142,11 @@ Deploy the AWS Samples Document Translation tool (originally built by Swindon Bo
 - **Scenario ID**: `simply-readable` — highlights the Easy Read capability
 - **Upstream repo**: `aws-samples/document-translation` v3.4.0 (Dec 2025)
 - **Upstream deployment model**: Pipeline-based (CodePipeline + CodeBuild + SSM config). This is NOT directly compatible with ISB StackSets. The upstream app creates a self-mutating CodePipeline that watches a GitHub repo, requiring a GitHub OAuth token in Secrets Manager and config in SSM Parameter Store.
-- **ISB adaptation approach**: Create a NEW standalone CDK stack (`cloudformation/scenarios/simply-readable/cdk/`) that deploys the same AWS resources (Cognito, S3, CloudFront, Step Functions, Lambda, DynamoDB, AppSync) but without the CodePipeline wrapper. This follows the LocalGov Drupal pattern — environment-agnostic, single synthesized template. The React frontend can be pre-built and bundled as an S3 asset.
-- **Execution approach**: Sequential with hard gate. Build CDK stack → deploy to sandbox → verify ALL services work end-to-end (Cognito login, document upload, translation, Simply Readable, CloudFront UI) → **STOP if anything fails and report to user** → only after verified deployment, proceed to portal content. No compromises, no papering over issues.
+- **ISB adaptation approach**: Make the **bare minimum changes** to the upstream `aws-samples/document-translation` CDK to get it deploying into an ISB sandbox account. Changes should be applied as diffs/patches or lightweight augmentation on top of the upstream code — NOT a full rewrite. The goal is to wrap the existing upstream CDK into a StackSet-compatible deployment that ISB can manage. Where upstream uses CodePipeline/SSM config, strip or bypass those layers with the lightest touch possible. Pre-build the React frontend and Lambda zips, then reference them from S3 in the synthesized template. Keep the upstream construct structure intact wherever possible.
+- **Execution approach**: Sequential with hard gate. Adapt upstream CDK → deploy to sandbox → verify ALL services work end-to-end (Cognito login, document upload, translation, Simply Readable, CloudFront UI) → **STOP if anything fails and ask the user** → only after verified deployment, proceed to portal content. No compromises, no papering over issues.
+- **Change philosophy**: Minimal diff. Every change to the upstream code must be justified. Prefer CDK Aspects, wrapper constructs, and build-time patching over modifying upstream source files directly. Where upstream files must be modified, keep the diff as small as possible so future upstream updates can be merged easily. If something works upstream, don't rewrite it — adapt it.
+- **Sandbox access**: An AWS sandbox account is already open and available. Use `--profile NDX/SandboxUser` for standard operations and `--profile NDX/SandboxAdmin` for admin-level access. No need to request or provision an account.
+- **SCP handling**: The user has access to relax any SCPs that block deployment. **If you hit an SCP block or permission error, STOP and ask the user** rather than working around it or building fallback mechanisms. The user will adjust the SCP and you can retry.
 - **AWS services deployed**: Cognito (User Pool + Identity Pool), AppSync (GraphQL), WAF, S3 (website + content), CloudFront, DynamoDB (job tables), Step Functions (orchestration), Lambda (12+ functions), Amazon Translate, Amazon Bedrock, Amazon Comprehend, EventBridge Pipes
 - **Authentication**: Cognito User Pool with local users. Admin user created at deployment time via Secrets Manager (password) similar to LocalGov Drupal pattern. Self-signup disabled.
 - **Region**: us-east-1 (required for Bedrock model availability)
@@ -204,105 +207,72 @@ Deploy the AWS Samples Document Translation tool (originally built by Swindon Bo
 
 ### Execution Strategy
 
-**Sequential with hard gate.** Phase 1 (infrastructure) must be fully verified before Phase 2 (portal content) begins. If any deployment or verification step fails, STOP and report to user — do not proceed or paper over issues.
+**Sequential with hard gate, minimum-change philosophy.** Phase 1 (infrastructure) must be fully verified before Phase 2 (portal content) begins. If any deployment or verification step fails, STOP and ask the user — do not proceed, paper over issues, or build elaborate workarounds. The user can relax SCPs or adjust account configuration as needed.
+
+**Key principle:** Make the absolute bare minimum changes to the upstream application. Clone the upstream CDK, apply lightweight patches (diffs, CDK Aspects, wrapper scripts) to make it ISB-compatible, synthesize to CloudFormation, and deploy via StackSet. Do NOT rewrite constructs that already work upstream. AWS profiles `NDX/SandboxUser` and `NDX/SandboxAdmin` are already available for deployment.
 
 ### Tasks
 
 #### Phase 1: Infrastructure — CDK Stack & Deployment
 
 - [ ] Task 0: Pre-flight checks — SCP, Bedrock, and service compatibility
-  - Action: Before any CDK work, verify the sandbox account supports all required services. Using SSO profile `NDX/SandboxUser` in us-east-1:
-    1. Verify Bedrock model access: `aws bedrock list-foundation-models --by-provider Anthropic --region us-east-1` and `aws bedrock list-foundation-models --by-provider "Stability AI" --region us-east-1`. Confirm Claude 3 Sonnet and Stable Diffusion models are available.
-    2. Test EventBridge Pipes permissions: attempt `aws pipes list-pipes --region us-east-1` — if access denied, EventBridge Pipes is SCP-blocked.
+  - Action: Verify the sandbox account supports all required services. Using `--profile NDX/SandboxUser` in us-east-1:
+    1. Verify Bedrock model access: `aws bedrock list-foundation-models --by-provider Anthropic --region us-east-1` and `aws bedrock list-foundation-models --by-provider "Stability AI" --region us-east-1`. Confirm Claude 3 Haiku and Stable Diffusion models are available.
+    2. Test EventBridge Pipes permissions: `aws pipes list-pipes --region us-east-1`
     3. Test AppSync permissions: `aws appsync list-graphql-apis --region us-east-1`
     4. Test WAFv2 permissions: `aws wafv2 list-web-acls --scope REGIONAL --region us-east-1`
     5. Test Comprehend permissions: `aws comprehend detect-dominant-language --text "hello" --region us-east-1`
     6. Verify Amazon Translate: `aws translate translate-text --text "hello" --source-language-code en --target-language-code cy --region us-east-1`
-  - Notes: **If ANY pre-flight check fails, STOP and report to the user.** The user will adjust SCPs. Do not begin CDK work until all services are confirmed accessible. This prevents wasting a 30-minute deploy cycle on a predictable failure.
+  - Notes: **If ANY pre-flight check fails, STOP and ask the user.** The user will adjust SCPs. Do not begin CDK work until all services are confirmed accessible. Use `--profile NDX/SandboxAdmin` if `NDX/SandboxUser` lacks permissions for any check.
 
-- [ ] Task 1: Clone upstream and investigate React build-time config requirements
-  - Action: Clone `aws-samples/document-translation` v3.4.0. Investigate two critical questions:
-    1. **React build-time config:** Read `website/src/` to determine if Amplify v6 requires `amplifyconfiguration.json` at build time or if it supports runtime injection. Search for `Amplify.configure()` calls and check if config is imported statically or loaded dynamically. If build-time config is required, test building with placeholder values (dummy region, dummy pool ID) and verify the bundle can be reconfigured at runtime via a `window.__CONFIG__` pattern or similar.
-    2. **Lambda function sizes:** For each Lambda in `infrastructure/lambda/`, measure the source code size and identify dependencies. Determine which can be inlined (<4KB) vs. which need S3-hosted zips. List all Lambda functions with: name, approximate size, runtime, required IAM permissions.
-  - Output: Document findings in `cloudformation/scenarios/simply-readable/UPSTREAM-ANALYSIS.md` — this file is referenced by subsequent tasks.
-  - Notes: This replaces the old "analyse and document dependency graph" task with specific, verifiable deliverables.
+- [ ] Task 1: Clone upstream and assess minimum required changes
+  - Action: Clone `aws-samples/document-translation` v3.4.0. Assess what the **minimum** changes are to make it deploy as a standalone StackSet-compatible template:
+    1. **Identify pipeline dependencies:** Find where the upstream CDK depends on CodePipeline, CodeBuild, SSM Parameter Store, GitHub tokens. These are the layers to strip/bypass.
+    2. **React build-time config:** Determine if the React app can be pre-built with placeholders and reconfigured at deploy time (runtime injection via `window.__CONFIG__` or similar).
+    3. **Lambda functions:** Catalogue all Lambda functions — sizes, runtimes, dependencies. Determine which need bundling as S3-hosted zips vs. which can be inlined.
+    4. **ISB compatibility gaps:** Identify what needs to change for ISB (IAM role naming `InnovationSandbox-ndx-*`, no CDK asset hashes, environment-agnostic synthesis).
+  - Output: Brief notes in `cloudformation/scenarios/simply-readable/UPSTREAM-ANALYSIS.md`.
+  - Notes: The goal is to understand the minimum diff — not to plan a rewrite. Reuse upstream constructs wherever possible.
 
 - [ ] Task 2: Pre-build React frontend and Lambda zips
-  - Action: Based on Task 1 findings:
-    1. **React build:** `cd website && npm install && npm run build`. If build-time config is needed, use placeholder values. Copy built output to `cloudformation/scenarios/simply-readable/website-build/`.
-    2. **Lambda zips:** For each Lambda function identified in Task 1, create a zip bundle at `cloudformation/scenarios/simply-readable/lambda/{functionName}.zip`. Include only the function code and any dependencies not available in the Lambda runtime.
+  - Action: Using the upstream repo:
+    1. **React build:** `cd website && npm install && npm run build`. If build-time config is needed, use placeholder values and plan a lightweight runtime injection patch. Copy built output to `cloudformation/scenarios/simply-readable/website-build/`.
+    2. **Lambda zips:** For each Lambda function, create a zip bundle at `cloudformation/scenarios/simply-readable/lambda/{functionName}.zip`. Use esbuild or similar for TypeScript compilation. External `@aws-sdk/*` (Lambda runtime provides it).
     3. Verify all builds succeed.
-  - Notes: These pre-built artifacts will be uploaded to the ISB blueprints S3 bucket alongside `template.yaml`. The CDK template will reference them via `S3Bucket`/`S3Key` — NOT via CDK asset hashes. This is critical for StackSet compatibility.
+  - Notes: These pre-built artifacts will be uploaded to the ISB blueprints S3 bucket. The CDK template will reference them via `S3Bucket`/`S3Key` — NOT via CDK asset hashes. This is critical for StackSet compatibility. Create a build script (`scripts/build-lambdas.js`, `scripts/build-website.js`) to make this repeatable.
 
-- [ ] Task 3: Create CDK project scaffold
-  - File: `cloudformation/scenarios/simply-readable/cdk/package.json`
-  - File: `cloudformation/scenarios/simply-readable/cdk/cdk.json`
-  - File: `cloudformation/scenarios/simply-readable/cdk/tsconfig.json`
-  - File: `cloudformation/scenarios/simply-readable/cdk/bin/app.ts`
-  - Action: Create CDK project following LocalGov Drupal pattern. Entry point creates `SimplyReadableStack` with NO explicit `env` (environment-agnostic for StackSets). Dependencies: `aws-cdk-lib ^2.241.0`, `constructs ^10.5.1` (same as LocalGov Drupal). Set `cdk.json` output to `../cdk.out`. Use `aws-cdk-lib` native `CfnIdentityPool` for Cognito Identity Pool (NOT the deprecated `@aws-cdk/aws-cognito-identitypool-alpha`). Use `aws-cdk-lib/aws-appsync` for AppSync (NOT external `awscdk-appsync-utils`).
-  - Notes: Stack description: "NDX:Try Simply Readable — Document Translation & Easy Read powered by Amazon Translate and Amazon Bedrock. Originally built by Swindon Borough Council."
+- [ ] Task 3: Adapt upstream CDK for ISB deployment
+  - Action: Apply the **minimum changes** to the upstream CDK to make it ISB-compatible. Preferred approaches, in order:
+    1. **CDK Aspects** (best): Use a CDK Aspect to rename all IAM roles to `InnovationSandbox-ndx-*` pattern. This requires zero changes to upstream construct files.
+    2. **Wrapper entry point** (good): Create a new `bin/app.ts` that instantiates the upstream stack without the pipeline wrapper, with ISB-specific config.
+    3. **Patch files** (acceptable): Where upstream source must be modified, keep changes minimal and document the diff clearly.
+    4. **Rewrite** (last resort): Only rewrite a construct if patching is genuinely harder than rewriting.
+  - Key ISB adaptations needed:
+    - Strip CodePipeline/CodeBuild wrapper — instantiate the app stack directly
+    - Replace SSM Parameter Store config with hardcoded values or CloudFormation parameters
+    - Replace CDK asset references (Lambda code, website) with S3 bucket/key references to the ISB blueprints bucket
+    - Add ISB role naming Aspect for SCP compatibility
+    - Add Custom Resource for runtime config injection (React app needs Cognito/AppSync endpoints at deploy time)
+    - Ensure no explicit `env` (environment-agnostic for StackSets)
+  - Notes: **Do NOT rewrite upstream constructs that already work.** The auth, API, translation, and readable constructs are well-factored upstream — adapt them, don't rebuild them. If a construct uses an external package (e.g., `awscdk-appsync-utils`), evaluate whether it's simpler to keep the dependency or replace it — prefer keeping it if it works.
 
-- [ ] Task 4: Build standalone CDK stack — Authentication
-  - File: `cloudformation/scenarios/simply-readable/cdk/lib/simply-readable-stack.ts`
-  - File: `cloudformation/scenarios/simply-readable/cdk/lib/constructs/auth.ts`
-  - Action: Create Cognito User Pool (password policy, advanced security ENFORCED, self-signup disabled) + Identity Pool (using `CfnIdentityPool` from `aws-cdk-lib`). Admin user password via Secrets Manager (auto-generated, NO explicit secretName — prevents rollback collisions). Identity Pool scoped IAM roles: authenticated users get `translate:TranslateText`, `translate:TranslateDocument`, `comprehend:DetectDominantLanguage`, and S3 access scoped to `private/${cognito-identity.amazonaws.com:sub}/*`. Unauthenticated gets explicit DENY ALL. ALL IAM role names must follow `InnovationSandbox-ndx-simply-readable-*` pattern for SCP compatibility.
-  - Notes: Follow upstream's auth pattern from `infrastructure/lib/features/api.ts`. Expose Cognito Pool ID, Client ID, Identity Pool ID, and admin secret ARN as construct properties (not just CloudFormation Outputs) so the config injection Custom Resource can receive them directly.
-
-- [ ] Task 5: Build standalone CDK stack — API Layer
-  - File: `cloudformation/scenarios/simply-readable/cdk/lib/constructs/api.ts`
-  - Action: Create AppSync GraphQL API using `aws-cdk-lib/aws-appsync` (native CDK constructs, NOT external packages). Cognito User Pool primary auth + IAM secondary. WAF with `AWSManagedRulesCommonRuleSet`. Replicate the GraphQL schema definitions from upstream's `infrastructure/lib/features/translation/translation.ts` and `readable/readable.ts`. Expose AppSync endpoint as construct property.
-  - Notes: If `aws-cdk-lib/aws-appsync` does not support code-first schema natively, define the schema as a string literal or `.graphql` file and use `SchemaFile`. This avoids the deprecated external package dependency.
-
-- [ ] Task 6: Build standalone CDK stack — Web UI + Config Injection
-  - File: `cloudformation/scenarios/simply-readable/cdk/lib/constructs/web.ts`
-  - Action: S3 bucket (block all public access) + CloudFront distribution with OAI. TLS 1.2+. 403→`/index.html` for SPA routing. Server access logging to logging bucket. **NO `BucketDeployment` — the React build and runtime config are handled by an inline Custom Resource Lambda (<4KB).** The Custom Resource:
-    1. Receives construct properties as CloudFormation resource properties (Cognito Pool ID, Client ID, Identity Pool ID, AppSync endpoint, S3 content bucket name, region) — NOT by "reading CloudFormation Outputs"
-    2. Copies the pre-built React app from the ISB blueprints S3 bucket (`s3://ndx-try-isb-blueprints-{account}/scenarios/simply-readable/website-build/`) to the CloudFront origin S3 bucket
-    3. Generates `aws-exports.json` with the runtime config values and writes it to the origin bucket
-    4. Invalidates CloudFront cache
-  - Notes: The Custom Resource Lambda must be inline (ZipFile, <4KB) to avoid CDK asset dependencies. The blueprints bucket name is derived from `Fn::Sub` using `AWS::AccountId`. On stack DELETE, the Custom Resource should empty the origin bucket to allow clean stack deletion.
-
-- [ ] Task 7: Build standalone CDK stack — Document Translation
-  - File: `cloudformation/scenarios/simply-readable/cdk/lib/constructs/translation.ts`
-  - Action: S3 content bucket (identity-scoped paths, 7-day lifecycle), DynamoDB job table (PAY_PER_REQUEST, PITR, streams NEW_AND_OLD_IMAGES, GSI `byOwnerAndCreatedAt`), Step Functions workflows (Main orchestrator, Translate, Callback, Errors, Lifecycle), EventBridge integration. Lambda functions reference S3-hosted zips: `Code: { S3Bucket: Fn::Sub('ndx-try-isb-blueprints-${AWS::AccountId}'), S3Key: 'scenarios/simply-readable/lambda/{functionName}.zip' }`. Functions: unmarshallDdb, parseS3Key, decodeS3Key, regexReplace, trim, split, passLogToEventBridge.
-  - Notes: Lambda functions must specify: runtime (Node.js 20.x), memory (128-512MB as appropriate), timeout (30-300s as appropriate), and IAM execution role following `InnovationSandbox-ndx-simply-readable-*` naming. Step Functions use callback pattern for async Amazon Translate jobs.
-
-- [ ] Task 8: Build standalone CDK stack — Simply Readable
-  - File: `cloudformation/scenarios/simply-readable/cdk/lib/constructs/readable.ts`
-  - Action: S3 content bucket, DynamoDB job + model tables (with streams), Step Functions (Main orchestrator, MainRename, Generate with Bedrock model dispatch via Choice state), EventBridge Pipes (DDB stream → Step Functions, filter INSERT/MODIFY where status="generate"). Lambda functions via S3-hosted zips (same pattern as Task 7): invokeBedrock, docToHtml, htmlToMd, invokeBedrockSaveToS3, appsyncMutationRequest, unmarshallDdb.
-  - Notes: Support Anthropic Claude 3 via Converse API (text simplification) and Stability AI Stable Diffusion (image generation). If EventBridge Pipes was SCP-blocked in Task 0, use DynamoDB Streams with a Lambda trigger as a fallback (functionally equivalent).
-
-- [ ] Task 9: Build standalone CDK stack — Tagging, Outputs & Tests
-  - File: `cloudformation/scenarios/simply-readable/cdk/lib/simply-readable-stack.ts`
-  - File: `cloudformation/scenarios/simply-readable/cdk/test/simply-readable.test.ts`
-  - Action: Add resource-level tags (`Project: ndx-try-aws-scenarios`, `Scenario: simply-readable`, `AutoCleanup: true`). Add CloudFormation Outputs: `AppUrl` (CloudFront URL), `AdminUsername` (static "admin"), `AdminPasswordSecret` (Secrets Manager console URL), `CognitoUserPoolId`, `CognitoUserPoolClientId`, `AppSyncEndpoint`, `ContentBucketName`. Write CDK snapshot test and construct assertion tests (verify Cognito pool exists, AppSync API exists, CloudFront distribution exists, at least one Step Functions state machine exists, all S3 buckets block public access).
-  - Notes: No resources should use explicit physical names (except IAM roles for SCP compatibility) to prevent rollback collisions.
-
-- [ ] Task 10: CDK synth — generate template.yaml
+- [ ] Task 4: CDK synth and validate template
   - File: `cloudformation/scenarios/simply-readable/template.yaml`
-  - Action: Run `cd cloudformation/scenarios/simply-readable/cdk && npm install && npm test && npx cdk synth > ../template.yaml`. Verify the synthesized template:
-    1. Is a single, self-contained CloudFormation template with NO asset hash references
+  - Action: Run `npx cdk synth` and verify the synthesized template:
+    1. Is a single, self-contained CloudFormation template with NO CDK asset hash references
     2. All Lambda `Code` properties reference S3 bucket/key (not local paths)
-    3. No `BucketDeployment` constructs (the Custom Resource handles web deployment)
-    4. Template size is within CloudFormation limits (target <500KB, hard limit 1MB for S3-hosted)
-    5. All `Fn::Sub` references to the blueprints bucket resolve correctly
-  - Notes: If template exceeds 500KB, consider extracting Step Functions state machine definitions into separate S3-hosted files loaded via a Custom Resource. The ISB hub uploads the full scenario directory, so co-located files are available.
+    3. Template size is within CloudFormation limits (target <500KB, hard limit 1MB for S3-hosted)
+    4. All `Fn::Sub` references to the blueprints bucket resolve correctly
+  - Notes: If there are issues, fix them with minimal changes. If template exceeds 500KB, consider extracting Step Functions state machine definitions into separate S3-hosted files.
 
-- [ ] Task 11: Update ISB hub for directory uploads
-  - File: `cloudformation/isb-hub/lib/isb-hub-stack.ts`
-  - Action: Two changes:
-    1. Add `{ name: 'simply-readable', description: 'NDX:Try Simply Readable - Document Translation & Easy Read, built by Swindon Borough Council' }` to the `SCENARIOS` array.
-    2. Update the `BucketDeployment` for `simply-readable` to upload the full scenario directory (not just `template.yaml`). Change the exclude pattern from `['*', '!template.yaml']` to `['*', '!template.yaml', '!lambda/**', '!website-build/**']` for the `simply-readable` scenario specifically.
-  - Notes: Both changes must be in the same commit as `template.yaml`, `lambda/`, and `website-build/` to maintain atomicity. The ISB hub `cdk synth` will fail if template.yaml doesn't exist when the SCENARIOS entry is present. Other scenarios' exclude patterns remain unchanged.
-
-- [ ] Task 12: Deploy to sandbox
-  - Action: Using SSO profile `NDX/SandboxUser`, deploy to us-east-1. First upload the Lambda zips and website build to the blueprints bucket (since the template references them), then deploy the template:
+- [ ] Task 5: Deploy to sandbox
+  - Action: Using `--profile NDX/SandboxUser`, deploy to us-east-1. First upload the Lambda zips and website build to the blueprints bucket (since the template references them), then deploy the template:
     1. `aws s3 sync cloudformation/scenarios/simply-readable/lambda/ s3://ndx-try-isb-blueprints-{ACCOUNT_ID}/scenarios/simply-readable/lambda/ --profile NDX/SandboxUser`
     2. `aws s3 sync cloudformation/scenarios/simply-readable/website-build/ s3://ndx-try-isb-blueprints-{ACCOUNT_ID}/scenarios/simply-readable/website-build/ --profile NDX/SandboxUser`
-    3. `aws cloudformation deploy --template-file cloudformation/scenarios/simply-readable/template.yaml --stack-name ndx-try-simply-readable --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --region us-east-1 --profile NDX/SandboxUser`
-  - Notes: Expected deployment time: 20-35 minutes (CloudFront distribution alone takes 15-25 min). **If deployment fails, STOP immediately.** Report the specific error. If stack enters ROLLBACK_COMPLETE, note that Secrets Manager secrets without explicit names auto-generate unique physical names, so redeployment won't collide. Do NOT delete the failed stack without user confirmation.
+    3. `aws cloudformation deploy --template-file cloudformation/scenarios/simply-readable/template.yaml --stack-name ndx-try-simply-readable --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --region us-east-1 --profile NDX/SandboxUser` (use `--s3-bucket` if template >51KB)
+  - Notes: Expected deployment time: 20-35 minutes (CloudFront distribution alone takes 15-25 min). **If deployment fails, STOP and ask the user.** Report the specific error. The user can relax SCPs, adjust account config, or advise on next steps. Do NOT delete the failed stack without user confirmation. Use `--profile NDX/SandboxAdmin` if `NDX/SandboxUser` lacks permissions.
 
-- [ ] Task 13: **HARD GATE — Verify deployment end-to-end**
+- [ ] Task 6: **HARD GATE — Verify deployment end-to-end**
   - Action: Verify ALL of the following work correctly in the deployed sandbox:
     1. CloudFront URL from `AppUrl` output loads the React web app (not a blank page, not a CloudFront error)
     2. Verify the app can authenticate — Cognito login works with admin credentials from Secrets Manager (`AdminPasswordSecret` output)
@@ -311,22 +281,28 @@ Deploy the AWS Samples Document Translation tool (originally built by Swindon Bo
     5. Document Translation: translate to Welsh and Polish — verify both complete and output is downloadable
     6. Simply Readable: convert a document to Easy Read format — verify simplified text and auto-generated images
     7. Verify all CloudFormation Outputs are correct and accessible
-  - Notes: **If ANY step fails, STOP and report with specific failure details and any error messages/logs.** Do not proceed to Phase 2. Do not attempt workarounds. The user may need to adjust SCPs, enable Bedrock model access, fix the Custom Resource, or make other changes.
+  - Notes: **If ANY step fails, STOP and ask the user** with specific failure details and any error messages/logs. Do not proceed to Phase 2. Do not attempt workarounds. The user can adjust SCPs, enable Bedrock model access, or advise on fixes.
 
-- [ ] Task 14: Create BLUEPRINT.md
+- [ ] Task 7: Update ISB hub for directory uploads
+  - File: `cloudformation/isb-hub/lib/isb-hub-stack.ts`
+  - Action: Two changes:
+    1. Add `{ name: 'simply-readable', description: 'NDX:Try Simply Readable - Document Translation & Easy Read, built by Swindon Borough Council' }` to the `SCENARIOS` array.
+    2. Update the `BucketDeployment` for `simply-readable` to upload the full scenario directory (not just `template.yaml`). Include lambda zips and website build in the upload.
+  - Notes: Both changes must be in the same commit as `template.yaml`, `lambda/`, and `website-build/` to maintain atomicity.
+
+- [ ] Task 8: Create BLUEPRINT.md
   - File: `cloudformation/scenarios/simply-readable/BLUEPRINT.md`
   - Action: Create ISB blueprint registration guide following LocalGov Drupal pattern. Include:
-    - Prerequisites: Bedrock model access (Claude 3 Sonnet, Stability AI Stable Diffusion) enabled in us-east-1 in sandbox accounts. EventBridge Pipes, AppSync, WAFv2, Comprehend, Translate not SCP-blocked.
-    - S3 upload commands for template.yaml, lambda/, and website-build/ (unlike simpler scenarios that only upload template.yaml)
+    - Prerequisites: Bedrock model access (Claude 3 Haiku, Stability AI Stable Diffusion) enabled in us-east-1. Required services not SCP-blocked.
+    - S3 upload commands for template.yaml, lambda/, and website-build/
     - StackSet creation: self-managed, ISB roles, CAPABILITY_IAM + CAPABILITY_NAMED_IAM, managed execution
-    - Deployment timeout: 35 minutes (CloudFront provisioning dominates)
-    - Blueprint name: `ndx-try-simply-readable`
-    - Verification steps matching Task 13
+    - Deployment timeout: 35 minutes
+    - Verification steps matching Task 6
   - Notes: Document that this scenario requires the ISB blueprints bucket to contain Lambda zips and website build in addition to the template.
 
-#### Phase 2: Portal Content (only after Phase 1 Task 12 passes)
+#### Phase 2: Portal Content (only after Phase 1 Task 6 passes)
 
-- [ ] Task 15: Capture screenshots of deployed app
+- [ ] Task 9: Capture screenshots of deployed app
   - Action: Using the verified deployed app from Task 13, capture screenshots of:
     1. Login page (Cognito hosted UI or app login)
     2. Main dashboard / document list view
@@ -341,7 +317,7 @@ Deploy the AWS Samples Document Translation tool (originally built by Swindon Bo
   - Action: Copy fallback images to `src/assets/images/screenshots/simply-readable/` for local dev (these are git-tracked fallbacks only; production serves from S3)
   - Notes: Use realistic sample content — a council tenancy agreement, planning notice, or similar. Screenshots should be 1920x1080. S3 is the primary source; local copies are fallbacks only (fixes F12).
 
-- [ ] Task 16: Add scenario entry to scenarios.yaml
+- [ ] Task 10: Add scenario entry to scenarios.yaml
   - File: `src/_data/scenarios.yaml`
   - Action: Add complete scenario entry for `simply-readable` with all required fields per schema. Key values:
     - `id: "simply-readable"`, `name: "Simply Readable"`, `difficulty: "intermediate"`, `timeEstimate: "25 minutes"`
@@ -355,22 +331,22 @@ Deploy the AWS Samples Document Translation tool (originally built by Swindon Bo
     - `featured: true`, `order: 2`
   - Notes: Validate against `schemas/scenario.schema.json` after writing. Cross-reference every field name against the schema to ensure no unrecognised fields are added (`additionalProperties: false` will reject them). Also update the 3 related scenarios (`council-chatbot`, `text-to-speech`, `foi-redaction`) to add `simply-readable` to their `relatedScenarios` arrays for bidirectional cross-linking.
 
-- [ ] Task 17: Create scenario page
+- [ ] Task 11: Create scenario page
   - File: `src/scenarios/simply-readable.njk`
   - Action: Create minimal scenario page with 4-field frontmatter: `layout: layouts/scenario.njk`, `title: "Simply Readable"`, `description` (50-500 chars), `scenario: simply-readable`. The layout handles all rendering.
   - Notes: Follow exact pattern of `src/scenarios/localgov-drupal.njk`.
 
-- [ ] Task 18: Add walkthrough metadata
+- [ ] Task 12: Add walkthrough metadata
   - File: `src/_data/walkthroughs.yaml`
   - Action: Add `simply-readable` entry under `walkthroughs` with: `totalSteps: 5`, `url: "/walkthroughs/simply-readable/"`, `title: "Simply Readable Walkthrough"`, `duration: "25 minutes"`, `hasWalkthrough: true`, `category: "accessibility"`, and 5 step definitions with titles, descriptions, and time estimates.
   - Notes: Steps: 1) Access the app (3 min), 2) Translate a document (5 min), 3) Create Easy Read version (5 min), 4) Explore features (5 min), 5) Understand the architecture (7 min). The 25-minute total excludes deployment time — ISB handles deployment automatically when a lease is approved, so the app is already running when the user starts the walkthrough. Step 1 is "here's your deployed app, let's access it" not "deploy the app."
 
-- [ ] Task 19: Create walkthrough landing page
+- [ ] Task 13: Create walkthrough landing page
   - File: `src/walkthroughs/simply-readable/index.njk`
   - Action: Create walkthrough landing page following LocalGov Drupal pattern. Include: value proposition panel celebrating Swindon's innovation, "developed with public sector for public sector" messaging, key statistics (99.96% cost reduction, 75 languages), step list from walkthrough data, prerequisites section, CTA button to start.
   - Notes: Lead with the people story — mention "Experts by Experience" co-creation. Include Tier 1 source links (AWS case study, ai.gov.uk, LGA).
 
-- [ ] Task 20: Create walkthrough steps 1-5
+- [ ] Task 14: Create walkthrough steps 1-5
   - File: `src/walkthroughs/simply-readable/step-1.njk` — Access the App
   - File: `src/walkthroughs/simply-readable/step-2.njk` — Translate a Document
   - File: `src/walkthroughs/simply-readable/step-3.njk` — Create Easy Read Version (hero step)
@@ -379,95 +355,88 @@ Deploy the AWS Samples Document Translation tool (originally built by Swindon Bo
   - Action: Create each step following the LocalGov Drupal walkthrough step pattern. Frontmatter with `layout: layouts/walkthrough.njk`, `currentStep`, `totalSteps: 5`, `scenarioId: simply-readable`, `timeEstimate`. Include `{% include "components/walkthrough-step.njk" %}`. Add step-specific instructions, screenshots, troubleshooting details sections.
   - Notes: Step 3 (Easy Read) is the "wow moment" — give it the most detailed content and best screenshots. Step 5 (Architecture) should explain how Amazon Translate, Bedrock, Step Functions, and the other services work together. Include a data flow description.
 
-- [ ] Task 21: Create walkthrough completion page
+- [ ] Task 15: Create walkthrough completion page
   - File: `src/walkthroughs/simply-readable/complete.njk`
   - Action: Create completion page following LocalGov Drupal pattern. Confirmation panel, 4 key takeaway cards (Document Translation, Easy Read, Open Source, Built by Local Gov), "What's next" section with explore links, cleanup instructions component, related scenarios grid.
   - Notes: Celebrate Swindon's contribution in the takeaway cards. Link to explore pages.
 
-- [ ] Task 22: Create screenshot YAML data
+- [ ] Task 16: Create screenshot YAML data
   - File: `src/_data/screenshots/simply-readable.yaml`
   - Action: Create screenshot manifest with `scenario: simply-readable`, `scenarioTitle: "Simply Readable"`, `totalSteps: 5`. Define screenshots for each step with: id, filename, alt text, caption, width (1920), height (1080), and annotations where useful.
   - Notes: Screenshot filenames must match files uploaded to S3 in Task 15. Alt text must be descriptive for accessibility.
 
-- [ ] Task 23: Create explore/understand page
+- [ ] Task 17: Create explore/understand page
   - File: `src/walkthroughs/simply-readable/explore/understand/index.njk`
   - Action: Create architecture exploration page following LocalGov Drupal pattern. Include: architecture overview (how Amazon Translate, Bedrock, Cognito, Step Functions, S3, CloudFront, AppSync, DynamoDB, Lambda work together), service cards for each AWS service used, data flow description (document upload → S3 → Step Functions → Translate/Bedrock → S3 → user download), cost breakdown, security overview.
   - Notes: Explain the event-driven architecture (DynamoDB Streams → EventBridge Pipes → Step Functions). Explain identity-scoped S3 storage pattern.
 
-- [ ] Task 24: Create explore/extend page
+- [ ] Task 18: Create explore/extend page
   - File: `src/walkthroughs/simply-readable/explore/extend/index.njk`
   - Action: Create next-steps page with persona-specific pathways and the full list of Tier 2 source links. Include links to all 30+ official sources grouped by category (AWS Official, GOV.UK, Local Government, Industry Media).
   - Notes: This is where the celebration of Swindon's work really shines. Include key people, key statistics, adoption by other councils.
 
-- [ ] Task 25: Create extended data YAML
+- [ ] Task 19: Create extended data YAML
   - File: `src/_data/extend/simply-readable.yaml`
   - Action: Create persona-specific next steps data. Personas: Service Manager (community links, business case resources), IT/Technical Lead (architecture review, source code, AWS partners), Content/Accessibility Officer (Easy Read guidance, translation best practices). Each persona gets 3-4 next-step actions with titles, descriptions, URLs, and external flags.
   - Notes: Include links to upstream documentation (aws-samples.github.io/document-translation/), CityTrax (commercial support option), LGA/Socitm case studies.
 
-- [ ] Task 26: Validate and build
+- [ ] Task 20: Validate and build
   - Action: Run schema validation (`npm run validate-schema` or equivalent), Eleventy build (`npm run build`), check for build errors. Verify the new scenario page renders correctly. Verify walkthrough navigation works (previous/next buttons, progress bar, step linking). Verify related scenarios cross-link bidirectionally.
   - Notes: Fix any validation or build errors before marking complete. All new pages must pass accessibility checks.
 
-- [ ] Task 27: Clean up sandbox deployment
+- [ ] Task 21: Clean up sandbox deployment
   - Action: After screenshots are captured and walkthrough content verified against the real app, delete the sandbox stack: `aws cloudformation delete-stack --stack-name ndx-try-simply-readable --region us-east-1 --profile NDX/SandboxUser`. Wait for DELETE_COMPLETE. Verify no orphaned resources remain (CloudFront distributions, Cognito User Pools, S3 buckets with data).
-  - Notes: The Custom Resource in Task 6 should empty the CloudFront origin S3 bucket on DELETE to allow clean teardown. Content buckets may need manual emptying if they contain uploaded documents. Confirm with user before deleting.
+  - Notes: The Custom Resource should empty the CloudFront origin S3 bucket on DELETE to allow clean teardown. Content buckets may need manual emptying if they contain uploaded documents. Confirm with user before deleting.
 
 ### Acceptance Criteria
 
 #### Phase 1: Infrastructure
 
-- [ ] AC0: Given the sandbox account, when pre-flight checks (Task 0) are run, then all required services (Bedrock, EventBridge Pipes, AppSync, WAFv2, Comprehend, Translate) are accessible without SCP blocks.
-- [ ] AC1: Given the CDK project at `cloudformation/scenarios/simply-readable/cdk/`, when `npm test` is run, then all snapshot and construct assertion tests pass.
-- [ ] AC2: Given the CDK project, when `npx cdk synth` is run, then a valid CloudFormation template is produced with NO CDK asset hash references — all Lambda code references S3 bucket/key, no `BucketDeployment` constructs, template size under 500KB.
-- [ ] AC3: Given the synthesized template with Lambda zips and website build uploaded to the blueprints S3 bucket, when deployed to us-east-1 via `aws cloudformation deploy`, then the stack reaches CREATE_COMPLETE within 35 minutes.
-- [ ] AC4: Given the deployed stack, when accessing the CloudFront URL from the `AppUrl` output, then the React web app loads (not blank, not CloudFront error) and the login page is displayed.
-- [ ] AC5: Given the deployed stack, when logging in with admin credentials from Secrets Manager, then authentication succeeds AND the dashboard loads data (proving runtime config injection worked).
-- [ ] AC6: Given a logged-in user, when uploading a .docx document and selecting Welsh as the target language, then the document is translated and available for download within 2 minutes.
-- [ ] AC7: Given a logged-in user, when submitting a document for Simply Readable (Easy Read) processing, then the document is simplified with auto-generated images and available for download.
-- [ ] AC8: Given the ISB hub stack with the `simply-readable` SCENARIOS entry AND the template.yaml + lambda/ + website-build/ files committed atomically, when `cdk synth` is run, then the hub synthesizes successfully with the StackSet definition included.
-- [ ] AC9: Given the BLUEPRINT.md, when following its instructions, then the ISB blueprint registration can be completed with correct directory uploads and StackSet creation.
+- [ ] AC0: Given the sandbox account (`--profile NDX/SandboxUser`), when pre-flight checks (Task 0) are run, then all required services (Bedrock, EventBridge Pipes, AppSync, WAFv2, Comprehend, Translate) are accessible. If any fail, user adjusts SCPs.
+- [ ] AC1: Given the adapted upstream CDK, when `npx cdk synth` is run, then a valid CloudFormation template is produced with NO CDK asset hash references — all Lambda code references S3 bucket/key, template size within limits.
+- [ ] AC2: Given the synthesized template with Lambda zips and website build uploaded to the blueprints S3 bucket, when deployed to us-east-1 via `aws cloudformation deploy`, then the stack reaches CREATE_COMPLETE within 35 minutes.
+- [ ] AC3: Given the deployed stack, when accessing the CloudFront URL from the `AppUrl` output, then the React web app loads and the login page is displayed.
+- [ ] AC4: Given the deployed stack, when logging in with admin credentials, then authentication succeeds AND the dashboard loads data (proving runtime config injection worked).
+- [ ] AC5: Given a logged-in user, when uploading a .docx document and selecting Welsh as the target language, then the document is translated and available for download within 2 minutes.
+- [ ] AC6: Given a logged-in user, when submitting a document for Simply Readable (Easy Read) processing, then the document is simplified with auto-generated images and available for download.
+- [ ] AC7: Given the ISB hub stack with the `simply-readable` SCENARIOS entry AND the template.yaml + lambda/ + website-build/ files committed atomically, when `cdk synth` is run, then the hub synthesizes successfully with the StackSet definition included.
+- [ ] AC8: Given the BLUEPRINT.md, when following its instructions, then the ISB blueprint registration can be completed with correct directory uploads and StackSet creation.
+- [ ] AC9: Given the upstream `aws-samples/document-translation` CDK, the total diff of changes made is minimal — CDK Aspects and wrapper entry point preferred over rewriting upstream constructs.
 
 #### Phase 2: Portal Content
 
-- [ ] AC10: Given the new scenario entry in `scenarios.yaml`, when `npm run validate-schema` is run, then validation passes with no errors. No fields outside the schema definition are present.
+- [ ] AC10: Given the new scenario entry in `scenarios.yaml`, when `npm run validate-schema` is run, then validation passes with no errors.
 - [ ] AC11: Given the new scenario and walkthrough pages, when `npm run build` is run, then the Eleventy build succeeds with no errors.
-- [ ] AC12: Given the built site, when navigating to `/scenarios/simply-readable/`, then the scenario page renders with correct metadata, AWS service tags, deployment section, and source links.
-- [ ] AC13: Given the built site, when navigating to `/walkthroughs/simply-readable/`, then the walkthrough landing page renders with value proposition, step list, and start button.
-- [ ] AC14: Given the walkthrough, when clicking through steps 1-5, then each step renders with screenshots, instructions, troubleshooting sections, and correct previous/next navigation.
-- [ ] AC15: Given the walkthrough, when reaching the completion page, then takeaway cards, explore links, cleanup instructions, and related scenarios render correctly.
-- [ ] AC16: Given the explore/understand page, when navigating to it, then architecture overview, service cards, data flow, and cost information render correctly.
-- [ ] AC17: Given the explore/extend page, when navigating to it, then persona-specific next steps, full source link list, and Swindon celebration content render correctly.
-- [ ] AC18: Given screenshots captured from the deployed app, when referenced in the screenshot YAML, then all screenshots load from S3 and display with correct alt text and captions.
-- [ ] AC19: Given the 3 related scenarios (council-chatbot, text-to-speech, foi-redaction), when their `relatedScenarios` arrays are checked, then each includes `simply-readable` for bidirectional cross-linking.
+- [ ] AC12: Given the built site, when navigating to `/scenarios/simply-readable/`, then the scenario page renders correctly.
+- [ ] AC13: Given the walkthrough, when clicking through steps 1-5, then each step renders with correct navigation.
+- [ ] AC14: Given screenshots captured from the deployed app, when referenced in the screenshot YAML, then all screenshots load from S3.
+- [ ] AC15: Given the 3 related scenarios, when their `relatedScenarios` arrays are checked, then each includes `simply-readable` for bidirectional cross-linking.
 
 ## Additional Context
 
 ### Dependencies
 
-- Access to `NDX/SandboxUser` SSO profile for deployment and screenshot capture
-- Amazon Bedrock model access enabled in us-east-1 (Anthropic Claude 3 via Converse API, Stability AI Stable Diffusion) — verified in Task 0
+- **Sandbox account is OPEN and available** — `--profile NDX/SandboxUser` (standard) and `--profile NDX/SandboxAdmin` (admin) are ready to use
+- **User can relax SCPs** — if any service is blocked, STOP and ask the user. Do not build workarounds.
+- Amazon Bedrock model access enabled in us-east-1 (Anthropic Claude 3 Haiku, Stability AI Stable Diffusion) — verified in Task 0
 - Amazon Translate, Comprehend, AppSync, WAFv2, EventBridge Pipes available and not SCP-blocked in us-east-1 — verified in Task 0
 - S3 bucket for screenshot hosting (`ndx-try-screenshots`)
 - S3 bucket for ISB blueprints (`ndx-try-isb-blueprints-568672915267`) in us-east-1
 - GitHub repo access for `aws-samples/document-translation` (public, MIT-0 license)
 - Node.js v22+ for CDK and React builds
-- May need SCP adjustments if pre-flight checks fail (user will handle)
-- All CDK constructs use `aws-cdk-lib` native packages only — NO external/alpha packages
+- Upstream CDK dependencies are acceptable — do NOT replace working external packages unless they cause deployment issues
 
 ### Testing Strategy
 
-- **Pre-flight**: All required AWS services accessible in sandbox (Task 0)
-- **CDK tests**: Snapshot tests + construct assertion tests pass (`npm test`)
-- **CDK synth**: Template synthesizes with no CDK asset references, under 500KB
-- **Deployment**: Stack deploys to us-east-1 and reaches CREATE_COMPLETE
-- **Functional verification**: All 7 verification checks in Task 13 pass (including runtime config injection)
-- **Schema validation**: Scenario entry validates against `schemas/scenario.schema.json` with no unrecognised fields
+- **Pre-flight**: All required AWS services accessible in sandbox (Task 0). If blocked, ask user to relax SCPs.
+- **CDK synth**: Template synthesizes with no CDK asset references
+- **Deployment**: Stack deploys to us-east-1 and reaches CREATE_COMPLETE using `--profile NDX/SandboxUser`
+- **Functional verification**: All 7 verification checks in Task 6 pass (including runtime config injection)
+- **Schema validation**: Scenario entry validates against `schemas/scenario.schema.json`
 - **Eleventy build**: Site builds without errors with new scenario
-- **Accessibility**: Pa11y passes on all new pages
 - **Screenshots**: All referenced screenshots exist and load from S3
-- **Navigation**: Walkthrough step navigation works correctly (previous/next, progress bar)
+- **Navigation**: Walkthrough step navigation works correctly
 - **Cross-linking**: Related scenarios bidirectionally reference simply-readable
-- **Manual**: Walkthrough steps are accurate and match the real deployed app
 - **Cleanup**: Sandbox stack deleted after screenshots captured (user confirms)
 
 ### Upstream Architecture Deep Dive
@@ -490,13 +459,14 @@ The upstream project deploys via a self-mutating CDK Pipeline (CodePipeline + Co
 - Feature flags: translation and readable are independently toggleable
 - Config via SSM Parameter Store (wizard-driven)
 
-**ISB Adaptation Challenge:**
-The upstream project is pipeline-driven. To create a standalone StackSet-compatible template, we need to:
-1. Extract/recreate the core constructs without the pipeline wrapper
-2. Pre-build and bundle the React frontend as an S3 deployment asset
-3. Replace SSM Parameter Store config with CloudFormation parameters
-4. Use Secrets Manager dynamic references for Cognito admin password (SCP-compatible)
-5. Ensure all IAM roles follow `InnovationSandbox-ndx-*` naming
+**ISB Adaptation Challenge (minimum-change approach):**
+The upstream project is pipeline-driven. To adapt it for ISB StackSet deployment with the **bare minimum changes**:
+1. Strip the CodePipeline wrapper — instantiate the app stack directly via a new entry point
+2. Pre-build and bundle the React frontend and Lambda zips as S3-hosted artifacts
+3. Replace SSM Parameter Store config with hardcoded values or CloudFormation parameters
+4. Add a CDK Aspect to rename all IAM roles to `InnovationSandbox-ndx-*` for SCP compatibility
+5. Add a Custom Resource for runtime config injection (React app needs deploy-time endpoints)
+6. Keep upstream construct code intact wherever possible — patch, don't rewrite
 
 ### Party Mode Insights (2026-03-04)
 
@@ -506,7 +476,7 @@ The upstream project is pipeline-driven. To create a standalone StackSet-compati
 - **UX (Sally)**: The Easy Read transformation is the "wow moment" — needs the best screenshots. Frame Step 3 as the hero step. Walkthrough emotional journey: inspired → empowered → understanding. Headline on scenario card should capture both the what and the who.
 
 **Session 2 — Execution Strategy (Post-Investigation):**
-- **Architecture (Winston)**: Upstream is pipeline-married (CodePipeline + SSM config + GitHub token). Not compatible with ISB StackSets. Need standalone CDK stack. Can reference/adapt upstream constructs from `infrastructure/lib/features/` but don't depend on their pipeline wrapper. Pre-build React frontend and bundle as S3 asset.
-- **Dev (Amelia)**: Upstream constructs in `api.ts`, `web.ts`, `translation/translation.ts`, `readable/readable.ts` are reasonably well-factored. Can import or adapt rather than full rewrite. Estimate 2-3 days CDK work.
+- **Architecture (Winston)**: Upstream is pipeline-married (CodePipeline + SSM config + GitHub token). Not compatible with ISB StackSets. Need to strip pipeline wrapper with minimum changes. Can reference/adapt upstream constructs from `infrastructure/lib/features/` — don't rewrite what works. CDK Aspects for ISB role naming. Pre-build React frontend and bundle as S3 asset.
+- **Dev (Amelia)**: Upstream constructs in `api.ts`, `web.ts`, `translation/translation.ts`, `readable/readable.ts` are reasonably well-factored. Adapt with patches, don't rewrite. Keep the diff minimal so future upstream updates can be merged.
 - **PM (John)**: Single spec, sequential execution with hard gate. Infrastructure proven before content begins. No placeholder deployments. Acceptance criteria must include "all AWS services verified functional in deployed sandbox."
-- **User directive**: Build stack → deploy → prove it works → **stop if anything isn't right** → then build portal content. No compromises.
+- **User directive**: Minimum changes to upstream. Adapt CDK → deploy → prove it works → **stop and ask if anything isn't right** → then build portal content. User can relax SCPs. No workarounds, no rewrites unless absolutely necessary.

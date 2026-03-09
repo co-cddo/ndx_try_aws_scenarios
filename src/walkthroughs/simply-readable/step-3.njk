@@ -1,0 +1,291 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Create an Easy Read Version - Simply Readable Walkthrough"
+description: Use AI to simplify a document into Easy Read format with auto-generated images
+currentStep: 3
+totalSteps: 5
+timeEstimate: "5 minutes"
+scenarioId: simply-readable
+---
+
+{#
+  Step 3: Create Easy Read Version -- HERO STEP
+  - This is the "wow moment"
+  - Upload a document for Simply Readable
+  - Watch Claude 3 Haiku simplify the text
+  - See auto-generated images (Nova Canvas)
+  - Explain the co-creation with "Experts by Experience"
+  - Key stat: Easy Read costs ~1p/page vs £120/page
+#}
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Create an Easy Read Version" %}
+{% set stepDescription = "This is the standout feature. Watch as AI simplifies complex text into plain language and generates supporting images -- creating Easy Read documents that traditionally cost £120 per page." %}
+{% set timeEstimate = "5 minutes" %}
+{% set expectedOutcomes = [
+  "You have submitted a document for Easy Read conversion",
+  "You can see AI-simplified text in plain language",
+  "You can see auto-generated images alongside the simplified text",
+  "You understand the cost and time savings compared to traditional Easy Read"
+] %}
+
+{# Load screenshots from YAML data #}
+{% set screenshotData = screenshots["simply-readable"] %}
+{% set stepScreenshots = screenshotData.steps[2] %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<div class="ndx-hero-callout">
+  <h3 class="govuk-heading-m">Why this matters</h3>
+  <p class="govuk-body">
+    Easy Read is a format that makes information accessible to people with learning disabilities.
+    It uses simple words, short sentences, and images to support understanding. In the UK,
+    approximately 1.5 million people have a learning disability, and councils have a legal
+    duty under the Equality Act 2010 to make information accessible.
+  </p>
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    Traditional Easy Read production costs around <strong>&pound;120 per page</strong> and takes weeks.
+    Simply Readable does it for approximately <strong>1p per page</strong> in minutes -- making it
+    practical for councils to make <em>all</em> their documents accessible, not just the most critical ones.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Creating an Easy Read document</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Navigate to Readable</strong>
+    <p class="govuk-body">
+      From the dashboard, click <strong>"Readable"</strong> in the sidebar navigation.
+      Then click <strong>"Create Readable"</strong> or the equivalent button.
+    </p>
+  </li>
+
+  <li>
+    <strong>Upload your document</strong>
+    <p class="govuk-body">
+      Upload a <code>.docx</code> document. For the best demonstration, use a document with
+      formal or complex language -- a policy document, a council notice, or a letter about
+      services. The more complex the source, the more impressive the simplification.
+    </p>
+  </li>
+
+  <li>
+    <strong>Start the Easy Read conversion</strong>
+    <p class="govuk-body">
+      Click <strong>"Create"</strong> or <strong>"Submit"</strong>. This triggers a more
+      complex Step Functions workflow than translation.
+    </p>
+  </li>
+
+  <li>
+    <strong>Watch the AI at work</strong>
+    <p class="govuk-body">
+      The dashboard will show the job progressing through multiple stages. This takes longer
+      than translation because it involves multiple AI steps:
+    </p>
+
+    <div class="ndx-ai-pipeline">
+      <div class="ndx-ai-pipeline__step">
+        <span class="ndx-ai-pipeline__number">1</span>
+        <div>
+          <strong>Text extraction</strong>
+          <p class="govuk-body-s govuk-!-margin-bottom-0">The document text is extracted and structured</p>
+        </div>
+      </div>
+      <div class="ndx-ai-pipeline__step">
+        <span class="ndx-ai-pipeline__number">2</span>
+        <div>
+          <strong>Text simplification (Claude 3 Haiku)</strong>
+          <p class="govuk-body-s govuk-!-margin-bottom-0">Amazon Bedrock uses Claude 3 Haiku to rewrite the text in plain language with short sentences</p>
+        </div>
+      </div>
+      <div class="ndx-ai-pipeline__step">
+        <span class="ndx-ai-pipeline__number">3</span>
+        <div>
+          <strong>Image generation (Nova Canvas)</strong>
+          <p class="govuk-body-s govuk-!-margin-bottom-0">AI generates supporting images for each section to aid understanding</p>
+        </div>
+      </div>
+      <div class="ndx-ai-pipeline__step">
+        <span class="ndx-ai-pipeline__number">4</span>
+        <div>
+          <strong>Document assembly</strong>
+          <p class="govuk-body-s govuk-!-margin-bottom-0">The simplified text and images are combined into an Easy Read format</p>
+        </div>
+      </div>
+    </div>
+  </li>
+
+  <li>
+    <strong>Review the result</strong>
+    <p class="govuk-body">
+      Once complete, click on the job to view the Easy Read output. You will see:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Simplified text</strong> -- complex language rewritten in plain, short sentences</li>
+      <li><strong>Supporting images</strong> -- AI-generated illustrations that reinforce the meaning</li>
+      <li><strong>Clear layout</strong> -- large text, plenty of white space, one idea per section</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">Co-created with Experts by Experience</h3>
+
+<p class="govuk-body">
+  Simply Readable was not built in isolation. Swindon Borough Council worked with
+  "Experts by Experience" -- people with learning disabilities who reviewed and
+  shaped the Easy Read output. Their feedback directly influenced how the AI
+  simplifies text and what kinds of images are generated.
+</p>
+
+<p class="govuk-body">
+  This co-creation approach ensures the output genuinely meets the needs of the people
+  it is designed for, rather than being based on assumptions about what "simple" means.
+</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>98% community satisfaction:</strong> In user testing with people with learning
+    disabilities, 98% rated the AI-generated Easy Read documents as helpful and easy to understand.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">The cost impact</h3>
+
+<div class="ndx-cost-comparison">
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Method</th>
+        <th scope="col" class="govuk-table__header">Cost per page</th>
+        <th scope="col" class="govuk-table__header">Turnaround</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">Traditional Easy Read production</td>
+        <td class="govuk-table__cell">&pound;120</td>
+        <td class="govuk-table__cell">Weeks</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">Simply Readable (AI)</td>
+        <td class="govuk-table__cell">~1p</td>
+        <td class="govuk-table__cell">Minutes</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="govuk-body-s" style="color: #505a5f;">
+    Source: <a href="https://www.local.gov.uk/case-studies/swindon-borough-council-simply-readable-ai-easy-read-solution" class="govuk-link" target="_blank" rel="noopener noreferrer">LGA Case Study<span class="govuk-visually-hidden"> (opens in new tab)</span></a>.
+    Swindon's Adult Social Care team achieved a 749,900% ROI with Simply Readable.
+  </p>
+</div>
+
+<p class="govuk-body">
+  This cost reduction changes the economics of accessibility. Instead of only converting
+  the most critical documents, councils can make <em>everything</em> available in Easy Read --
+  housing letters, benefits information, health guidance, and more.
+</p>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Easy Read job taking a long time
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      Easy Read conversion involves multiple AI services and takes longer than simple translation:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>A 2-page document typically takes 2 to 5 minutes</li>
+      <li>Image generation is the longest step -- each image takes 10 to 30 seconds</li>
+      <li>If the job has been processing for more than 10 minutes, check the Step Functions console for errors</li>
+      <li>Try with a shorter document if a long one is timing out</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: No images generated
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the Easy Read output has simplified text but no images:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>The Bedrock model agreement for Nova Canvas may not have been activated -- check the Bedrock console</li>
+      <li>Image generation may have failed silently -- the text simplification still works without images</li>
+      <li>Check the Step Functions execution for any error steps</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-hero-callout {
+    margin: 30px 0;
+    padding: 25px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-hero-callout h3 {
+    margin-top: 0;
+  }
+
+  .ndx-ai-pipeline {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-ai-pipeline__step {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #b1b4b6;
+  }
+
+  .ndx-ai-pipeline__step:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .ndx-ai-pipeline__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background-color: #1d70b8;
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .ndx-cost-comparison {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+</style>
