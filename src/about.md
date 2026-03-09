@@ -141,7 +141,7 @@ All code is open source under the MIT License: [View on GitHub](https://github.c
 ### For Developers
 
 - **Contribute code**: Submit pull requests on [GitHub](https://github.com/co-cddo/ndx-try-aws-scenarios)
-- **Report bugs**: Use GitHub Issues for technical problems
+
 - **Suggest improvements**: Share ideas for new scenarios or features
 
 ## Governance

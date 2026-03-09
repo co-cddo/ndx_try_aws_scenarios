@@ -1,0 +1,419 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 5: Understand the Architecture - Simply Readable Walkthrough"
+description: Learn how 12 AWS services orchestrate document translation and Easy Read
+currentStep: 5
+totalSteps: 5
+timeEstimate: "7 minutes"
+scenarioId: simply-readable
+---
+
+{#
+  Step 5: Understand the Architecture
+  - How Amazon Translate, Bedrock, Step Functions work together
+  - Event-driven architecture
+  - Identity-scoped S3 storage pattern
+  - 12 AWS services orchestrated
+#}
+
+{% set stepNumber = 5 %}
+{% set stepTitle = "Understand the Architecture" %}
+{% set stepDescription = "Look under the bonnet to see how 12 AWS services work together in an event-driven architecture to power document translation and Easy Read." %}
+{% set timeEstimate = "7 minutes" %}
+{% set expectedOutcomes = [
+  "You understand the high-level architecture",
+  "You can identify the key AWS services and their roles",
+  "You understand the event-driven data flow",
+  "You can explain the architecture to a colleague"
+] %}
+
+{# Load screenshots from YAML data #}
+{% set screenshotData = screenshots["simply-readable"] %}
+{% set stepScreenshots = screenshotData.steps[4] %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Architecture overview</h3>
+
+<p class="govuk-body">
+  Simply Readable is a fully serverless application. There are no servers to manage, no
+  databases to maintain, and no infrastructure to patch. Everything runs on managed AWS
+  services that scale automatically and charge only for what you use.
+</p>
+
+{# Architecture Diagram #}
+<figure class="ndx-architecture-diagram govuk-!-margin-bottom-6" role="figure" aria-labelledby="arch-diagram-caption">
+  <div class="ndx-architecture-diagram__svg" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" class="ndx-architecture-svg">
+      {# Background layers #}
+      <rect x="20" y="20" width="760" height="60" fill="#f3f2f1" rx="4"/>
+      <rect x="20" y="90" width="760" height="80" fill="#e8f4e8" rx="4"/>
+      <rect x="20" y="180" width="370" height="80" fill="#e8f0f8" rx="4"/>
+      <rect x="410" y="180" width="370" height="80" fill="#f8e8f8" rx="4"/>
+      <rect x="20" y="270" width="760" height="80" fill="#fff4e8" rx="4"/>
+      <rect x="20" y="360" width="760" height="100" fill="#e8e8f8" rx="4"/>
+
+      {# Layer labels #}
+      <text x="40" y="55" class="ndx-arch-label">Frontend: React (Cloudscape UI) on CloudFront + S3</text>
+
+      {# Auth + API Layer #}
+      <text x="40" y="115" class="ndx-arch-label">Auth + API</text>
+      <rect x="60" y="125" width="120" height="35" fill="#fff" stroke="#00703c" stroke-width="2" rx="4"/>
+      <text x="120" y="148" text-anchor="middle" class="ndx-arch-box">Cognito</text>
+
+      <rect x="200" y="125" width="120" height="35" fill="#fff" stroke="#00703c" stroke-width="2" rx="4"/>
+      <text x="260" y="148" text-anchor="middle" class="ndx-arch-box">AppSync</text>
+
+      <rect x="340" y="125" width="80" height="35" fill="#fff" stroke="#00703c" stroke-width="2" rx="4"/>
+      <text x="380" y="148" text-anchor="middle" class="ndx-arch-box">WAF</text>
+
+      <rect x="440" y="125" width="120" height="35" fill="#fff" stroke="#00703c" stroke-width="2" rx="4"/>
+      <text x="500" y="148" text-anchor="middle" class="ndx-arch-box">S3 (Files)</text>
+
+      {# Data Layer #}
+      <text x="40" y="205" class="ndx-arch-label">Data + Events</text>
+      <rect x="60" y="215" width="120" height="35" fill="#fff" stroke="#1d70b8" stroke-width="2" rx="4"/>
+      <text x="120" y="238" text-anchor="middle" class="ndx-arch-box">DynamoDB</text>
+
+      <rect x="200" y="215" width="170" height="35" fill="#fff" stroke="#1d70b8" stroke-width="2" rx="4"/>
+      <text x="285" y="238" text-anchor="middle" class="ndx-arch-box">EventBridge Pipes</text>
+
+      {# AI Services #}
+      <text x="430" y="205" class="ndx-arch-label">AI Services</text>
+      <rect x="430" y="215" width="100" height="35" fill="#fff" stroke="#912b88" stroke-width="2" rx="4"/>
+      <text x="480" y="238" text-anchor="middle" class="ndx-arch-box">Translate</text>
+
+      <rect x="550" y="215" width="100" height="35" fill="#fff" stroke="#912b88" stroke-width="2" rx="4"/>
+      <text x="600" y="238" text-anchor="middle" class="ndx-arch-box">Bedrock</text>
+
+      <rect x="670" y="215" width="100" height="35" fill="#fff" stroke="#912b88" stroke-width="2" rx="4"/>
+      <text x="720" y="238" text-anchor="middle" class="ndx-arch-box">Comprehend</text>
+
+      {# Orchestration Layer #}
+      <text x="40" y="295" class="ndx-arch-label">Orchestration</text>
+      <rect x="60" y="305" width="160" height="35" fill="#fff" stroke="#f47738" stroke-width="2" rx="4"/>
+      <text x="140" y="328" text-anchor="middle" class="ndx-arch-box">Step Functions</text>
+
+      <rect x="240" y="305" width="300" height="35" fill="#fff" stroke="#f47738" stroke-width="2" rx="4"/>
+      <text x="390" y="328" text-anchor="middle" class="ndx-arch-box">Lambda (12+ functions)</text>
+
+      {# Data Flow #}
+      <text x="40" y="385" class="ndx-arch-label">Data Flow: Translation</text>
+      <rect x="60" y="395" width="80" height="30" fill="#1d70b8" rx="4"/>
+      <text x="100" y="415" text-anchor="middle" fill="#fff" class="ndx-arch-flow">Upload</text>
+
+      <line x1="140" y1="410" x2="170" y2="410" stroke="#1d70b8" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+      <rect x="175" y="395" width="55" height="30" fill="#1d70b8" rx="4"/>
+      <text x="202" y="415" text-anchor="middle" fill="#fff" class="ndx-arch-flow">S3</text>
+
+      <line x1="230" y1="410" x2="260" y2="410" stroke="#1d70b8" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+      <rect x="265" y="395" width="75" height="30" fill="#1d70b8" rx="4"/>
+      <text x="302" y="415" text-anchor="middle" fill="#fff" class="ndx-arch-flow">SFN</text>
+
+      <line x1="340" y1="410" x2="370" y2="410" stroke="#912b88" stroke-width="2" marker-end="url(#arrowhead-purple)"/>
+
+      <rect x="375" y="395" width="95" height="30" fill="#912b88" rx="4"/>
+      <text x="422" y="415" text-anchor="middle" fill="#fff" class="ndx-arch-flow">Translate</text>
+
+      <line x1="470" y1="410" x2="500" y2="410" stroke="#00703c" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+
+      <rect x="505" y="395" width="55" height="30" fill="#00703c" rx="4"/>
+      <text x="532" y="415" text-anchor="middle" fill="#fff" class="ndx-arch-flow">S3</text>
+
+      <line x1="560" y1="410" x2="590" y2="410" stroke="#00703c" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+
+      <rect x="595" y="395" width="100" height="30" fill="#00703c" rx="4"/>
+      <text x="645" y="415" text-anchor="middle" fill="#fff" class="ndx-arch-flow">Download</text>
+
+      {# Data Flow: Easy Read #}
+      <text x="40" y="438" class="ndx-arch-label">Data Flow: Easy Read</text>
+      <rect x="60" y="443" width="80" height="30" fill="#1d70b8" rx="4"/>
+      <text x="100" y="463" text-anchor="middle" fill="#fff" class="ndx-arch-flow">Upload</text>
+
+      <line x1="140" y1="458" x2="170" y2="458" stroke="#1d70b8" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+      <rect x="175" y="443" width="55" height="30" fill="#1d70b8" rx="4"/>
+      <text x="202" y="463" text-anchor="middle" fill="#fff" class="ndx-arch-flow">S3</text>
+
+      <line x1="230" y1="458" x2="260" y2="458" stroke="#1d70b8" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+      <rect x="265" y="443" width="75" height="30" fill="#1d70b8" rx="4"/>
+      <text x="302" y="463" text-anchor="middle" fill="#fff" class="ndx-arch-flow">SFN</text>
+
+      <line x1="340" y1="458" x2="370" y2="458" stroke="#912b88" stroke-width="2" marker-end="url(#arrowhead-purple)"/>
+
+      <rect x="375" y="443" width="95" height="30" fill="#912b88" rx="4"/>
+      <text x="422" y="463" text-anchor="middle" fill="#fff" class="ndx-arch-flow">Bedrock</text>
+
+      <line x1="470" y1="458" x2="500" y2="458" stroke="#912b88" stroke-width="2" marker-end="url(#arrowhead-purple)"/>
+
+      <rect x="505" y="443" width="90" height="30" fill="#912b88" rx="4"/>
+      <text x="550" y="463" text-anchor="middle" fill="#fff" class="ndx-arch-flow">Images</text>
+
+      <line x1="595" y1="458" x2="625" y2="458" stroke="#00703c" stroke-width="2" marker-end="url(#arrowhead-green)"/>
+
+      <rect x="630" y="443" width="65" height="30" fill="#00703c" rx="4"/>
+      <text x="662" y="463" text-anchor="middle" fill="#fff" class="ndx-arch-flow">Output</text>
+
+      {# Arrow markers #}
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#1d70b8"/>
+        </marker>
+        <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#912b88"/>
+        </marker>
+        <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#00703c"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+  <figcaption id="arch-diagram-caption" class="govuk-body-s ndx-architecture-diagram__caption">
+    High-level architecture: Users interact with a React frontend on CloudFront. Cognito handles authentication.
+    AppSync provides real-time GraphQL. DynamoDB stores job state, and EventBridge Pipes trigger Step Functions
+    workflows that orchestrate Lambda, Amazon Translate, and Amazon Bedrock.
+  </figcaption>
+</figure>
+
+{# Text alternative #}
+<details class="govuk-details govuk-!-margin-bottom-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">View architecture as text</span>
+  </summary>
+  <div class="govuk-details__text">
+    <h4 class="govuk-heading-s">AWS Services Used</h4>
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Layer</th>
+          <th scope="col" class="govuk-table__header">Service</th>
+          <th scope="col" class="govuk-table__header">Purpose</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Frontend</td>
+          <td class="govuk-table__cell">Amazon CloudFront + S3</td>
+          <td class="govuk-table__cell">Hosts the React web application globally</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Auth</td>
+          <td class="govuk-table__cell">Amazon Cognito</td>
+          <td class="govuk-table__cell">User authentication and identity-scoped access</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">API</td>
+          <td class="govuk-table__cell">AWS AppSync</td>
+          <td class="govuk-table__cell">Real-time GraphQL API with subscriptions</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Security</td>
+          <td class="govuk-table__cell">AWS WAF</td>
+          <td class="govuk-table__cell">Web application firewall protecting the API</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Storage</td>
+          <td class="govuk-table__cell">Amazon S3</td>
+          <td class="govuk-table__cell">Document storage with identity-scoped prefixes</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Data</td>
+          <td class="govuk-table__cell">Amazon DynamoDB</td>
+          <td class="govuk-table__cell">Job tracking and status management</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Events</td>
+          <td class="govuk-table__cell">Amazon EventBridge Pipes</td>
+          <td class="govuk-table__cell">Connects DynamoDB Streams to Step Functions</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Orchestration</td>
+          <td class="govuk-table__cell">AWS Step Functions</td>
+          <td class="govuk-table__cell">Orchestrates multi-step translation and Easy Read workflows</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Compute</td>
+          <td class="govuk-table__cell">AWS Lambda</td>
+          <td class="govuk-table__cell">12+ functions for document processing, admin setup, and more</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">AI</td>
+          <td class="govuk-table__cell">Amazon Translate</td>
+          <td class="govuk-table__cell">Document translation into 75 languages</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">AI</td>
+          <td class="govuk-table__cell">Amazon Bedrock (Claude 3 Haiku)</td>
+          <td class="govuk-table__cell">Text simplification for Easy Read</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">AI</td>
+          <td class="govuk-table__cell">Amazon Comprehend</td>
+          <td class="govuk-table__cell">Language detection for uploaded documents</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<h3 class="govuk-heading-m">Event-driven architecture</h3>
+
+<p class="govuk-body">
+  Simply Readable uses an event-driven pattern. Rather than a traditional request-response
+  model, the system reacts to events:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>User uploads a document</strong> -- the React app uploads directly to S3 using
+    Cognito-authenticated credentials, then writes a job record to DynamoDB via AppSync.
+  </li>
+  <li>
+    <strong>DynamoDB Stream fires</strong> -- the new job record triggers a DynamoDB Stream event.
+  </li>
+  <li>
+    <strong>EventBridge Pipes routes the event</strong> -- the stream event is filtered and
+    transformed by EventBridge Pipes, which starts a Step Functions execution.
+  </li>
+  <li>
+    <strong>Step Functions orchestrates the workflow</strong> -- the state machine calls
+    Lambda functions that interact with Translate, Bedrock, and S3.
+  </li>
+  <li>
+    <strong>Status updates flow back</strong> -- Lambda functions update the DynamoDB job record,
+    which AppSync picks up via subscriptions and pushes to the browser in real-time.
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Why event-driven?</strong> This pattern means there are no always-on servers.
+    Each component only runs when needed, keeping costs near zero when the system is idle.
+    It also scales naturally -- if 100 documents are uploaded simultaneously, Step Functions
+    runs 100 parallel workflows.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Explore in the AWS Console</h3>
+
+<p class="govuk-body">
+  To see the architecture in action, explore these AWS Console pages while a job is running:
+</p>
+
+<div class="ndx-console-links">
+  <div class="ndx-console-link">
+    <h4 class="govuk-heading-s">Step Functions</h4>
+    <p class="govuk-body-s">
+      <a href="https://us-east-1.console.aws.amazon.com/states/home?region=us-east-1#/statemachines" target="_blank" rel="noopener noreferrer" class="govuk-link">
+        View state machines<span class="govuk-visually-hidden"> (opens in new tab)</span>
+      </a>
+      -- see the visual workflow and execution history
+    </p>
+  </div>
+  <div class="ndx-console-link">
+    <h4 class="govuk-heading-s">DynamoDB</h4>
+    <p class="govuk-body-s">
+      <a href="https://us-east-1.console.aws.amazon.com/dynamodbv2/home?region=us-east-1#tables" target="_blank" rel="noopener noreferrer" class="govuk-link">
+        View tables<span class="govuk-visually-hidden"> (opens in new tab)</span>
+      </a>
+      -- see job records and their status changes
+    </p>
+  </div>
+  <div class="ndx-console-link">
+    <h4 class="govuk-heading-s">S3</h4>
+    <p class="govuk-body-s">
+      <a href="https://us-east-1.console.aws.amazon.com/s3/home?region=us-east-1" target="_blank" rel="noopener noreferrer" class="govuk-link">
+        View buckets<span class="govuk-visually-hidden"> (opens in new tab)</span>
+      </a>
+      -- see uploaded and translated documents in identity-scoped folders
+    </p>
+  </div>
+  <div class="ndx-console-link">
+    <h4 class="govuk-heading-s">CloudWatch Logs</h4>
+    <p class="govuk-body-s">
+      <a href="https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups" target="_blank" rel="noopener noreferrer" class="govuk-link">
+        View log groups<span class="govuk-visually-hidden"> (opens in new tab)</span>
+      </a>
+      -- see Lambda function logs for debugging
+    </p>
+  </div>
+</div>
+
+<p class="govuk-body govuk-!-margin-top-6">
+  For a deeper dive into the architecture, visit the
+  <a href="/walkthroughs/simply-readable/explore/understand/" class="govuk-link">How It Works</a>
+  page after completing the walkthrough.
+</p>
+
+<style>
+  .ndx-architecture-diagram {
+    margin: 0;
+  }
+
+  .ndx-architecture-diagram__svg {
+    background: #fff;
+    border: 1px solid #b1b4b6;
+    padding: 10px;
+    overflow-x: auto;
+  }
+
+  .ndx-architecture-svg {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    min-height: 380px;
+  }
+
+  .ndx-arch-label {
+    font-size: 13px;
+    font-weight: bold;
+    fill: #0b0c0c;
+  }
+
+  .ndx-arch-box {
+    font-size: 11px;
+    fill: #0b0c0c;
+  }
+
+  .ndx-arch-flow {
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  .ndx-architecture-diagram__caption {
+    margin-top: 10px;
+    color: #505a5f;
+  }
+
+  .ndx-console-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+  }
+
+  .ndx-console-link {
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-console-link h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+  }
+
+  .ndx-console-link p {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-console-links {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

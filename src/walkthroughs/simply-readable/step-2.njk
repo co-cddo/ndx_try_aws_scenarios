@@ -1,0 +1,213 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Translate a Document - Simply Readable Walkthrough"
+description: Upload a document and translate it into another language
+currentStep: 2
+totalSteps: 5
+timeEstimate: "5 minutes"
+scenarioId: simply-readable
+---
+
+{#
+  Step 2: Translate a Document
+  - Upload a .docx file
+  - Select target language
+  - Watch translation progress
+  - Download the translated document
+#}
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Translate a Document" %}
+{% set stepDescription = "Upload a document and watch Amazon Translate convert it into another language while preserving the original formatting." %}
+{% set timeEstimate = "5 minutes" %}
+{% set expectedOutcomes = [
+  "You have uploaded a .docx document",
+  "You have selected a target language and started the translation",
+  "You can see the translation progress in the dashboard",
+  "You have downloaded the translated document"
+] %}
+
+{# Load screenshots from YAML data #}
+{% set screenshotData = screenshots["simply-readable"] %}
+{% set stepScreenshots = screenshotData.steps[1] %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Preparing your document</h3>
+
+<p class="govuk-body">
+  You will need a <code>.docx</code> document to upload. Any short Word document will work --
+  a letter, a policy document, or a council notice. If you do not have one to hand, create
+  a simple document with a few paragraphs of text.
+</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Tip:</strong> Start with a short document (1 to 2 pages) for your first translation.
+    This will complete in under a minute and lets you see the full workflow quickly.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Uploading and translating</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Navigate to Translation</strong>
+    <p class="govuk-body">
+      From the dashboard, click <strong>"Translation"</strong> in the sidebar navigation.
+      Then click <strong>"Create Translation"</strong> or the equivalent button.
+    </p>
+  </li>
+
+  <li>
+    <strong>Upload your document</strong>
+    <p class="govuk-body">
+      Click the upload area or drag and drop your <code>.docx</code> file.
+      The file will be uploaded to S3 via the Cognito-authenticated session.
+    </p>
+  </li>
+
+  <li>
+    <strong>Select a target language</strong>
+    <p class="govuk-body">
+      Choose a target language from the dropdown. Recommended choices for testing:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Welsh (Cymraeg)</strong> -- a common requirement for UK councils</li>
+      <li><strong>Polish</strong> -- one of the most requested community languages</li>
+      <li><strong>French</strong> -- easy to verify accuracy if you have some knowledge</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Start the translation</strong>
+    <p class="govuk-body">
+      Click <strong>"Translate"</strong> or <strong>"Submit"</strong>. This triggers an
+      AWS Step Functions workflow that orchestrates the translation process.
+    </p>
+  </li>
+
+  <li>
+    <strong>Watch the progress</strong>
+    <p class="govuk-body">
+      The dashboard will show the job status updating in real-time via the AppSync
+      GraphQL subscription. You will see the status change from "Submitted" through
+      "Processing" to "Complete".
+    </p>
+
+    <div class="ndx-progress-explainer">
+      <h4 class="govuk-heading-s">What happens behind the scenes</h4>
+      <ol class="govuk-list govuk-list--number">
+        <li>Your document is stored in S3 (identity-scoped to your user)</li>
+        <li>A DynamoDB record tracks the job status</li>
+        <li>EventBridge Pipes detects the new job and triggers Step Functions</li>
+        <li>Step Functions calls Amazon Translate with your document</li>
+        <li>The translated document is saved back to S3</li>
+        <li>The dashboard updates in real-time via AppSync subscriptions</li>
+      </ol>
+    </div>
+  </li>
+
+  <li>
+    <strong>Download the result</strong>
+    <p class="govuk-body">
+      Once the status shows "Complete", click on the job to view the result.
+      Download the translated document and open it to verify the translation
+      and formatting have been preserved.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">What to look for</h3>
+
+<p class="govuk-body">
+  When you open the translated document, notice:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Formatting preserved</strong> -- headings, bullet points, and paragraph styles are maintained</li>
+  <li><strong>Full document translated</strong> -- all text content has been converted to the target language</li>
+  <li><strong>Fast turnaround</strong> -- what traditionally took days or weeks completed in seconds</li>
+</ul>
+
+<div class="ndx-cost-comparison">
+  <h4 class="govuk-heading-s">Cost comparison</h4>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header">Method</th>
+        <th scope="col" class="govuk-table__header">Cost per document</th>
+        <th scope="col" class="govuk-table__header">Turnaround</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">Traditional human translation</td>
+        <td class="govuk-table__cell">&pound;160</td>
+        <td class="govuk-table__cell">Up to 19 days</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td class="govuk-table__cell">Simply Readable (Amazon Translate)</td>
+        <td class="govuk-table__cell">&pound;0.07</td>
+        <td class="govuk-table__cell">Under 14 minutes</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="govuk-body-s" style="color: #505a5f;">
+    Source: <a href="https://aws.amazon.com/solutions/case-studies/swindon-borough-council-case-study-amazon-translate/" class="govuk-link" target="_blank" rel="noopener noreferrer">AWS Case Study<span class="govuk-visually-hidden"> (opens in new tab)</span></a>.
+    Swindon's Paediatric Therapy team reduced annual translation costs from &pound;64,000 to &pound;27.
+  </p>
+</div>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Translation stuck on "Processing"
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the translation appears stuck:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Wait 2 to 3 minutes -- larger documents take longer to process</li>
+      <li>Refresh the page to check if the status has updated</li>
+      <li>Check the Step Functions console for the execution status</li>
+      <li>Ensure you uploaded a valid <code>.docx</code> file (not <code>.doc</code> or <code>.pdf</code>)</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-progress-explainer {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-progress-explainer h4 {
+    margin-top: 0;
+  }
+
+  .ndx-cost-comparison {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-cost-comparison h4 {
+    margin-top: 0;
+  }
+</style>

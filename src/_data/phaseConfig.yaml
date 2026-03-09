@@ -85,6 +85,13 @@ scenarios:
     walkthroughUrl: "/walkthroughs/quicksight-dashboard/"
     exploreUrl: "/walkthroughs/quicksight-dashboard/explore/"
 
+  simply-readable:
+    phases: [try, walkthrough, explore]
+    evidencePackPhase: walkthrough
+    tryUrl: "/scenarios/simply-readable/"
+    walkthroughUrl: "/walkthroughs/simply-readable/"
+    exploreUrl: "/walkthroughs/simply-readable/explore/"
+
   localgov-drupal:
     phases: [try, walkthrough, explore]
     evidencePackPhase: walkthrough

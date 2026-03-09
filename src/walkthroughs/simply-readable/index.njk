@@ -1,0 +1,314 @@
+---
+layout: layouts/walkthrough.njk
+title: Simply Readable Walkthrough
+description: Step-by-step guide to exploring document translation and Easy Read powered by AWS
+currentStep: 0
+totalSteps: 5
+scenarioId: simply-readable
+---
+
+{#
+  Walkthrough Landing Page
+  - Value proposition celebrating Swindon's innovation
+  - Prerequisites and deployment check
+  - Overview of what users will learn
+#}
+
+<h1 class="govuk-heading-xl">Explore Simply Readable</h1>
+
+{# Get walkthrough data for dynamic content #}
+{% set walkthroughData = walkthroughs.walkthroughs["simply-readable"] %}
+
+{# Value proposition #}
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    {{ walkthroughData.duration }} to see how one council transformed accessibility
+  </h2>
+  <div class="govuk-panel__body">
+    Swindon Borough Council built an open-source tool that cuts document translation costs by 99.96%
+    and makes Easy Read accessible to every council. Deploy it via NDX:Try and explore it yourself.
+  </div>
+</div>
+
+{# Key stats #}
+<div class="govuk-grid-row ndx-stats-row govuk-!-margin-bottom-8">
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-stat-card">
+      <span class="ndx-stat-card__number">99.96%</span>
+      <span class="ndx-stat-card__label">Cost reduction</span>
+      <span class="ndx-stat-card__detail">From &pound;160 to &pound;0.07 per document</span>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-stat-card">
+      <span class="ndx-stat-card__number">75</span>
+      <span class="ndx-stat-card__label">Languages supported</span>
+      <span class="ndx-stat-card__detail">Via Amazon Translate</span>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-stat-card">
+      <span class="ndx-stat-card__number">14 min</span>
+      <span class="ndx-stat-card__label">Turnaround time</span>
+      <span class="ndx-stat-card__detail">Down from 19 days</span>
+    </div>
+  </div>
+</div>
+
+{# People-first storytelling #}
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">Developed with public sector, for public sector</strong>
+  <p class="govuk-body">
+    Simply Readable was co-created with "Experts by Experience" -- people with learning disabilities
+    who helped shape how Easy Read documents should look and feel. It is now adopted by councils
+    including Edinburgh, Newport, Southampton, and West Berkshire, and it is available as an
+    open-source AWS Sample for any organisation to deploy.
+  </p>
+</div>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this {{ walkthroughData.duration }} walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  {% for step in walkthroughData.steps %}
+  <li>
+    <strong>{{ step.title }}</strong>{% if step.description %} -- {{ step.description }}{% endif %}{% if step.time %} ({{ step.time }}){% endif %}
+  </li>
+  {% endfor %}
+</ol>
+
+{# Prerequisites #}
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already requested the Simply Readable scenario via NDX:Try.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/simply-readable/" class="govuk-link">Deploy the Simply Readable scenario</a> if you haven't already.
+  </p>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      Deployment takes approximately 5 minutes. This provisions Cognito authentication, AppSync, Step Functions, and a React frontend on CloudFront.
+    </strong>
+  </div>
+
+  <details class="govuk-details govuk-!-margin-bottom-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">Why does deployment take this long?</span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">Simply Readable provisions 12 AWS services working together:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Amazon Cognito</strong> -- user authentication and identity pools</li>
+        <li><strong>AWS AppSync</strong> -- real-time GraphQL API</li>
+        <li><strong>AWS Step Functions</strong> -- orchestration workflows for translation and Easy Read</li>
+        <li><strong>Amazon CloudFront</strong> -- global content delivery for the React frontend</li>
+        <li><strong>Amazon Bedrock</strong> -- AI model access agreement for Claude 3 Haiku</li>
+      </ul>
+      <p class="govuk-body govuk-!-margin-bottom-0">
+        The wait is worth it -- you get a fully functional document translation and Easy Read platform.
+      </p>
+    </div>
+  </details>
+
+  <div class="govuk-inset-text">
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      <strong>While you wait:</strong> Explore the CloudFormation Events tab to watch resources being created.
+      You can also browse other areas of the AWS Console -- deployment continues in the background.
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-s">You'll need</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Your CloudFormation stack to show <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span></li>
+    <li>The <strong>AppUrl</strong> from your stack's Outputs tab</li>
+    <li>The <strong>AdminUsername</strong> and <strong>AdminPassword</strong> from Outputs</li>
+    <li>A sample <code>.docx</code> document to upload (any short document will work)</li>
+  </ul>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For service managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How document translation works end-to-end</li>
+      <li>What Easy Read looks like with AI-generated images</li>
+      <li>The cost savings compared to traditional methods</li>
+      <li>How other councils are already using this</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical teams</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How 12 AWS services orchestrate together</li>
+      <li>Event-driven architecture with Step Functions</li>
+      <li>Identity-scoped S3 storage patterns</li>
+      <li>Serverless deployment with no running servers</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">Key capabilities</h2>
+
+<div class="govuk-grid-row ndx-content-types-preview">
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-content-type-card">
+      <h3 class="govuk-heading-s">Document Translation</h3>
+      <p class="govuk-body-s">
+        Translate .docx documents into 75 languages while preserving formatting
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-content-type-card">
+      <h3 class="govuk-heading-s">Easy Read</h3>
+      <p class="govuk-body-s">
+        Simplify complex documents with AI-generated plain language and images
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-content-type-card">
+      <h3 class="govuk-heading-s">Job Dashboard</h3>
+      <p class="govuk-body-s">
+        Track translation and Easy Read jobs with real-time status updates
+      </p>
+    </div>
+  </div>
+</div>
+
+{# Tier 1 source links #}
+<h2 class="govuk-heading-m">Learn more about Simply Readable</h2>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>
+    <a href="https://aws.amazon.com/solutions/case-studies/swindon-borough-council-case-study-amazon-translate/" class="govuk-link" target="_blank" rel="noopener noreferrer">
+      AWS Case Study: Swindon Borough Council<span class="govuk-visually-hidden"> (opens in new tab)</span>
+    </a>
+  </li>
+  <li>
+    <a href="https://ai.gov.uk/knowledge-hub/tools/simply-readable/" class="govuk-link" target="_blank" rel="noopener noreferrer">
+      i.AI Knowledge Hub: Simply Readable<span class="govuk-visually-hidden"> (opens in new tab)</span>
+    </a>
+  </li>
+  <li>
+    <a href="https://ai.gov.uk/knowledge-hub/tools/document-translate/" class="govuk-link" target="_blank" rel="noopener noreferrer">
+      i.AI Knowledge Hub: Document Translate<span class="govuk-visually-hidden"> (opens in new tab)</span>
+    </a>
+  </li>
+  <li>
+    <a href="https://www.local.gov.uk/case-studies/swindon-borough-council-simply-readable-ai-easy-read-solution" class="govuk-link" target="_blank" rel="noopener noreferrer">
+      LGA Case Study: Simply Readable<span class="govuk-visually-hidden"> (opens in new tab)</span>
+    </a>
+  </li>
+</ul>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/simply-readable/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately {{ walkthroughData.duration }}
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+
+  .ndx-stats-row {
+    margin-top: 20px;
+  }
+
+  .ndx-stat-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .ndx-stat-card__number {
+    display: block;
+    font-size: 36px;
+    font-weight: 700;
+    color: #00703c;
+    line-height: 1.2;
+  }
+
+  .ndx-stat-card__label {
+    display: block;
+    font-size: 19px;
+    font-weight: 700;
+    margin-top: 5px;
+    color: #0b0c0c;
+  }
+
+  .ndx-stat-card__detail {
+    display: block;
+    font-size: 14px;
+    color: #505a5f;
+    margin-top: 5px;
+  }
+
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-content-types-preview {
+    margin-top: 20px;
+  }
+
+  .ndx-content-type-card {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-content-type-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-content-type-card p {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-stat-card {
+      margin-bottom: 15px;
+    }
+
+    .ndx-content-type-card {
+      margin-bottom: 15px;
+    }
+  }
+</style>

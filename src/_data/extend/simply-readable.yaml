@@ -1,0 +1,175 @@
+# Extend page data for Simply Readable scenario
+
+scenarioId: simply-readable
+
+# Personas with tailored next steps
+personas:
+  - id: service-manager
+    name: "Service Manager"
+    description: "Service delivery, community engagement, and adoption"
+    icon: "document"
+    nextSteps:
+      - title: "Contact Swindon Borough Council"
+        description: "Learn from the team that built and uses Simply Readable"
+        url: "https://www.swindon.gov.uk/"
+        external: true
+      - title: "Build a business case"
+        description: "Use the evidence pack to support adoption in your council"
+        url: "/walkthroughs/simply-readable/evidence-pack/"
+        external: false
+      - title: "Explore adoption examples"
+        description: "See how councils are using AI-powered accessibility tools"
+        url: "https://aws.amazon.com/government-education/government/uk/"
+        external: true
+      - title: "Generate your evidence pack"
+        description: "Create a committee-ready PDF documenting your experience"
+        url: "/walkthroughs/simply-readable/evidence-pack/"
+        external: false
+
+  - id: it-technical
+    name: "IT / Technical Lead"
+    description: "Architecture, deployment, and infrastructure"
+    icon: "code"
+    nextSteps:
+      - title: "Review the architecture"
+        description: "Understand how 12 AWS services power document translation and Easy Read"
+        url: "/walkthroughs/simply-readable/explore/understand/"
+        external: false
+      - title: "Explore the source code"
+        description: "Fork and customise the CDK infrastructure for your needs"
+        url: "https://github.com/swindon-gov/simply-readable"
+        external: true
+      - title: "Review AWS Translate documentation"
+        description: "Deep dive into Amazon Translate capabilities and language support"
+        url: "https://docs.aws.amazon.com/translate/"
+        external: true
+      - title: "Review Amazon Bedrock documentation"
+        description: "Understand AI model integration for Easy Read content generation"
+        url: "https://docs.aws.amazon.com/bedrock/"
+        external: true
+
+  - id: content-accessibility
+    name: "Content / Accessibility Lead"
+    description: "Accessible content, Easy Read, and translation best practices"
+    icon: "edit"
+    nextSteps:
+      - title: "Easy Read guidance"
+        description: "Learn best practices for creating Easy Read documents"
+        url: "https://www.gov.uk/government/publications/inclusive-communication/accessible-communication-formats#easy-read"
+        external: true
+      - title: "Translation best practices"
+        description: "Guidance on providing multilingual public sector content"
+        url: "https://www.gov.uk/government/publications/inclusive-communication"
+        external: true
+      - title: "WCAG 2.2 compliance"
+        description: "Review Web Content Accessibility Guidelines for public sector"
+        url: "https://www.w3.org/TR/WCAG22/"
+        external: true
+      - title: "Generate your evidence pack"
+        description: "Create a committee-ready PDF documenting your experience"
+        url: "/walkthroughs/simply-readable/evidence-pack/"
+        external: false
+
+# Community resources
+communityResources:
+  title: "Simply Readable Community"
+  description: "Connect with councils using AI-powered document accessibility tools"
+  resources:
+    - name: "Swindon Borough Council"
+      description: "The team behind Simply Readable"
+      url: "https://www.swindon.gov.uk/"
+      icon: "globe"
+    - name: "GOV.UK Accessibility"
+      description: "Government accessibility requirements and guidance"
+      url: "https://accessibility.blog.gov.uk/"
+      icon: "document"
+    - name: "Easy Read UK"
+      description: "Resources for creating Easy Read content"
+      url: "https://www.gov.uk/government/publications/inclusive-communication/accessible-communication-formats#easy-read"
+      icon: "chat"
+    - name: "Local Digital"
+      description: "DLUHC programme supporting digital transformation in councils"
+      url: "https://www.localdigital.gov.uk/"
+      icon: "calendar"
+
+# AWS resources
+awsResources:
+  title: "AWS for UK Public Sector"
+  description: "AWS resources and support for UK local government"
+  resources:
+    - name: "AWS UK Public Sector"
+      description: "Dedicated resources for UK government customers"
+      url: "https://aws.amazon.com/government-education/government/uk/"
+      icon: "aws"
+    - name: "Amazon Translate"
+      description: "Neural machine translation supporting 75+ languages"
+      url: "https://aws.amazon.com/translate/"
+      icon: "partner"
+    - name: "Amazon Bedrock"
+      description: "Foundation models for Easy Read content and image generation"
+      url: "https://aws.amazon.com/bedrock/"
+      icon: "calculator"
+    - name: "G-Cloud Framework"
+      description: "AWS services on the Digital Marketplace"
+      url: "https://www.digitalmarketplace.service.gov.uk/g-cloud/search?q=AWS"
+      icon: "marketplace"
+
+# Production considerations
+productionConsiderations:
+  title: "Moving to Production"
+  description: "Key considerations when deploying Simply Readable for real use"
+  categories:
+    - name: "Security & Compliance"
+      items:
+        - "Review Cognito user pool settings for production authentication"
+        - "Enable AWS WAF for web application firewall protection"
+        - "Configure VPC with private subnets for Lambda and AppSync"
+        - "Enable AWS CloudTrail for audit logging"
+        - "Review IAM policies for least privilege access"
+    - name: "Scalability"
+      items:
+        - "Configure Lambda concurrency limits based on expected usage"
+        - "Monitor DynamoDB capacity and enable auto-scaling"
+        - "Implement CloudFront CDN for the React web application"
+        - "Consider Step Functions Express Workflows for high-throughput translation"
+    - name: "Backup & Recovery"
+      items:
+        - "Enable DynamoDB point-in-time recovery"
+        - "Configure S3 versioning for translated documents"
+        - "Document and test disaster recovery procedures"
+        - "Implement cross-region backup for critical data"
+    - name: "Monitoring"
+      items:
+        - "Set up CloudWatch alarms for Lambda errors and duration"
+        - "Monitor Step Functions execution failures"
+        - "Configure X-Ray for end-to-end request tracing"
+        - "Set up SNS notifications for critical alerts"
+
+# Related scenarios
+relatedScenarios:
+  title: "Explore More Scenarios"
+  description: "Discover other AWS solutions for UK councils"
+  scenarios:
+    - id: "localgov-drupal"
+      name: "LocalGov Drupal with AI"
+      description: "CMS with AI content editing, accessibility tools, and translation"
+      url: "/scenarios/localgov-drupal/"
+      tag: "CMS"
+    - id: "text-to-speech"
+      name: "Text to Speech"
+      description: "Convert text to natural speech with Amazon Polly"
+      url: "/scenarios/text-to-speech/"
+      tag: "Accessibility"
+    - id: "council-chatbot"
+      name: "Council Chatbot"
+      description: "AI-powered 24/7 resident Q&A using Amazon Bedrock"
+      url: "/scenarios/council-chatbot/"
+      tag: "AI"
+
+# Feedback section
+feedback:
+  title: "Share Your Feedback"
+  description: "Help us improve NDX Try AWS Scenarios"
+  callToAction: "We'd love to hear about your experience with Simply Readable on AWS"
+  email: "ndx@dsit.gov.uk"
+  buttonText: "Send Feedback"

@@ -1,0 +1,241 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Explore Features - Simply Readable Walkthrough"
+description: Discover multi-language translation, document formats, and the dashboard
+currentStep: 4
+totalSteps: 5
+timeEstimate: "5 minutes"
+scenarioId: simply-readable
+---
+
+{#
+  Step 4: Explore Features
+  - Multi-language translation
+  - Different document formats
+  - Print styles for Easy Read
+  - Dashboard and job management
+#}
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Explore Features" %}
+{% set stepDescription = "Now that you have seen translation and Easy Read in action, explore the full range of features including multi-language support, job management, and print-ready output." %}
+{% set timeEstimate = "5 minutes" %}
+{% set expectedOutcomes = [
+  "You have tried translating into a second language",
+  "You have explored the job dashboard and its filtering options",
+  "You understand the range of features available"
+] %}
+
+{# Load screenshots from YAML data #}
+{% set screenshotData = screenshots["simply-readable"] %}
+{% set stepScreenshots = screenshotData.steps[3] %}
+{% set screenshots = stepScreenshots.screenshots if stepScreenshots else [] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Multi-language translation</h3>
+
+<p class="govuk-body">
+  Simply Readable supports translation into 75 languages via Amazon Translate. Try translating
+  the same document into multiple languages to see how the tool handles different scripts and
+  character sets.
+</p>
+
+<div class="ndx-try-this">
+  <p class="govuk-body">
+    <strong>Try this:</strong>
+  </p>
+  <ol class="govuk-list govuk-list--number">
+    <li>Create a new translation of the same document, this time selecting a language with a different script (for example, Arabic, Chinese, or Hindi)</li>
+    <li>Compare the output -- notice how formatting is preserved even with right-to-left text</li>
+    <li>Try Welsh or Scottish Gaelic -- commonly needed by UK councils</li>
+  </ol>
+</div>
+
+<h3 class="govuk-heading-m">Languages commonly used by UK councils</h3>
+
+<p class="govuk-body">
+  Different councils have different translation needs based on their local demographics.
+  Some of the most commonly requested languages include:
+</p>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Language</th>
+          <th scope="col" class="govuk-table__header">Use case</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Welsh</td>
+          <td class="govuk-table__cell">Statutory requirement in Wales</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Polish</td>
+          <td class="govuk-table__cell">Largest non-English community language</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Urdu</td>
+          <td class="govuk-table__cell">Widely spoken community language</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Arabic</td>
+          <td class="govuk-table__cell">Growing community language</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="govuk-grid-column-one-half">
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Language</th>
+          <th scope="col" class="govuk-table__header">Use case</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Romanian</td>
+          <td class="govuk-table__cell">Growing community language</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Bengali</td>
+          <td class="govuk-table__cell">Widely spoken in London boroughs</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Punjabi</td>
+          <td class="govuk-table__cell">Widely spoken community language</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">Chinese (Simplified)</td>
+          <td class="govuk-table__cell">Growing community language</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Dashboard and job management</h3>
+
+<p class="govuk-body">
+  The dashboard provides a central view of all translation and Easy Read jobs. Explore these features:
+</p>
+
+<div class="ndx-explore-grid">
+  <div class="ndx-explore-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-explore-card__number">1</span>
+      Job list
+    </h4>
+    <p class="govuk-body-s">
+      View all your translation and Easy Read jobs in one place. Each job shows its
+      status, language, and creation time.
+    </p>
+  </div>
+
+  <div class="ndx-explore-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-explore-card__number">2</span>
+      Real-time updates
+    </h4>
+    <p class="govuk-body-s">
+      Job statuses update in real-time via GraphQL subscriptions. No need to refresh
+      the page to see progress.
+    </p>
+  </div>
+
+  <div class="ndx-explore-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-explore-card__number">3</span>
+      Download outputs
+    </h4>
+    <p class="govuk-body-s">
+      Click on any completed job to download the translated or Easy Read document.
+      Files are stored securely in S3 with identity-scoped access.
+    </p>
+  </div>
+
+  <div class="ndx-explore-card">
+    <h4 class="govuk-heading-s">
+      <span class="ndx-explore-card__number">4</span>
+      Print-ready output
+    </h4>
+    <p class="govuk-body-s">
+      Easy Read documents include print-friendly styles. Use your browser's print
+      function to create physical copies suitable for distribution.
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Identity-scoped storage</h3>
+
+<p class="govuk-body">
+  Each user's documents are stored separately in S3, scoped by their Cognito Identity Pool ID.
+  This means:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>Users can only access their own documents</li>
+  <li>No server-side code manages file permissions -- S3 policies enforce access</li>
+  <li>Documents are automatically isolated between users</li>
+</ul>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>For technical teams:</strong> This pattern uses Cognito Identity Pool authenticated
+    roles with S3 prefix-based IAM policies. The user's identity ID becomes the S3 key prefix,
+    ensuring isolation without application-level access control code.
+  </p>
+</div>
+
+<style>
+  .ndx-try-this {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-explore-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-explore-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-explore-card h4 {
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ndx-explore-card__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background-color: #1d70b8;
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-explore-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

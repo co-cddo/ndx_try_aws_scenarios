@@ -7,6 +7,8 @@ on:
       - 'cloudformation/scenarios/*/template.yaml'
       - 'cloudformation/scenarios/planning-ai/**'
       - 'cloudformation/scenarios/localgov-drupal/cdk/**'
+      - 'cloudformation/scenarios/simply-readable/cdk/**'
+      - 'cloudformation/scenarios/simply-readable/scripts/**'
       - 'cloudformation/isb-hub/**'
   workflow_dispatch:
 
@@ -79,8 +81,106 @@ jobs:
           path: cloudformation/scenarios/localgov-drupal/template.yaml
           retention-days: 1
 
+  synth-simply-readable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Clone upstream document-translation
+        run: |
+          git clone --depth 1 --branch v3.4.0 \
+            https://github.com/aws-samples/document-translation.git \
+            cloudformation/scenarios/simply-readable/.upstream
+
+      - name: Build React website
+        working-directory: cloudformation/scenarios/simply-readable
+        run: node scripts/build-website.cjs
+
+      - name: Install CDK dependencies
+        run: |
+          cd cloudformation/scenarios/simply-readable/cdk && npm install
+          cd ../../../..
+          cd cloudformation/scenarios/simply-readable/.upstream/infrastructure && npm install
+
+      - name: CDK synth
+        working-directory: cloudformation/scenarios/simply-readable/cdk
+        run: npx cdk synth
+
+      - name: Package template (rewrite bootstrap refs, zip Lambda assets)
+        working-directory: cloudformation/scenarios/simply-readable
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const { execSync } = require('child_process');
+
+            const CDK_OUT = 'cdk/cdk.out';
+            const template = JSON.parse(fs.readFileSync(CDK_OUT + '/SimplyReadableStack.template.json', 'utf8'));
+            const assets = JSON.parse(fs.readFileSync(CDK_OUT + '/SimplyReadableStack.assets.json', 'utf8'));
+
+            // Strip CDK bootstrap metadata
+            delete template.Parameters?.BootstrapVersion;
+            delete template.Resources?.CDKMetadata;
+            delete template.Rules?.CheckBootstrapVersion;
+
+            // Zip Lambda assets
+            const assetEntries = Object.entries(assets.files).filter(([, m]) => m.source.packaging === 'zip');
+            fs.mkdirSync('dist/asset-zips', { recursive: true });
+
+            for (const [hash, meta] of assetEntries) {
+              const assetDir = path.join(CDK_OUT, meta.source.path);
+              if (!fs.existsSync(assetDir)) continue;
+              execSync('cd \"' + assetDir + '\" && zip -qr \"' + path.resolve('dist/asset-zips/' + hash + '.zip') + '\" .');
+            }
+
+            // Rewrite Lambda S3 references: CDK bootstrap bucket → BlueprintsBucketName param
+            const ASSETS_PREFIX = 'scenarios/simply-readable/assets';
+            for (const [, resource] of Object.entries(template.Resources)) {
+              if (resource.Type !== 'AWS::Lambda::Function') continue;
+              const code = resource.Properties?.Code;
+              if (!code?.S3Bucket?.['Fn::Sub'] || !code.S3Bucket['Fn::Sub'].includes('cdk-hnb659fds-assets')) continue;
+              code.S3Bucket = { Ref: 'BlueprintsBucketName' };
+              code.S3Key = ASSETS_PREFIX + '/' + code.S3Key;
+            }
+
+            // Validate
+            const str = JSON.stringify(template);
+            if (str.includes('cdk-hnb659fds') || str.includes('AssetParameters')) {
+              console.error('ERROR: Template still contains CDK bootstrap references');
+              process.exit(1);
+            }
+
+            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(template, null, 2);
+            fs.writeFileSync('template.yaml', content);
+            const size = Buffer.byteLength(content);
+            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(template.Resources || {}).length + ' resources)');
+            console.log('Zipped ' + assetEntries.length + ' Lambda assets');
+          "
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: simply-readable-template
+          path: cloudformation/scenarios/simply-readable/template.yaml
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: simply-readable-assets
+          path: cloudformation/scenarios/simply-readable/dist/asset-zips/
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: simply-readable-website
+          path: cloudformation/scenarios/simply-readable/website-build/
+          retention-days: 1
+
   deploy:
-    needs: synth-localgov-drupal
+    needs: [synth-localgov-drupal, synth-simply-readable]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -89,6 +189,21 @@ jobs:
         with:
           name: localgov-drupal-template
           path: cloudformation/scenarios/localgov-drupal
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: simply-readable-template
+          path: cloudformation/scenarios/simply-readable
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: simply-readable-assets
+          path: cloudformation/scenarios/simply-readable/dist/asset-zips
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: simply-readable-website
+          path: cloudformation/scenarios/simply-readable/website-build
 
       - name: Build planning-ai template (inject PDF + text into template)
         run: python3 cloudformation/scenarios/planning-ai/build-template.py -o cloudformation/scenarios/planning-ai/template.yaml
@@ -103,6 +218,14 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-deploy
           aws-region: us-west-2
+
+      - name: Upload Simply Readable assets and website to S3
+        run: |
+          BUCKET=ndx-try-isb-blueprints-568672915267
+          aws s3 sync cloudformation/scenarios/simply-readable/dist/asset-zips/ \
+            "s3://${BUCKET}/scenarios/simply-readable/assets/" --region us-east-1
+          aws s3 sync cloudformation/scenarios/simply-readable/website-build/ \
+            "s3://${BUCKET}/scenarios/simply-readable/website-build/" --region us-east-1 --delete
 
       - run: npm ci
         working-directory: cloudformation/isb-hub

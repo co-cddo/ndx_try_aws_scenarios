@@ -1,0 +1,166 @@
+---
+layout: page
+title: How It Works
+description: Understand the architecture and data flows powering Simply Readable's document translation and Easy Read features
+scenarioId: simply-readable
+eleventyNavigation:
+  key: simply-readable-understand
+  parent: simply-readable-explore
+  title: How It Works
+---
+
+{% set scenarioId = "simply-readable" %}
+
+<nav class="govuk-breadcrumbs govuk-!-margin-bottom-6" aria-label="Breadcrumb">
+  <ol class="govuk-breadcrumbs__list">
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/">Home</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/scenarios/simply-readable/">Simply Readable</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item">
+      <a class="govuk-breadcrumbs__link" href="/walkthroughs/simply-readable/">Walkthrough</a>
+    </li>
+    <li class="govuk-breadcrumbs__list-item" aria-current="page">
+      How It Works
+    </li>
+  </ol>
+</nav>
+
+<h1 class="govuk-heading-xl">How It Works</h1>
+
+<p class="govuk-body-l">
+  Simply Readable orchestrates 12 AWS services to power document translation into 75 languages and Easy Read conversion using generative AI. Here's how it all fits together.
+</p>
+
+<hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+<h2 class="govuk-heading-l">Architecture overview</h2>
+
+<p class="govuk-body">
+  The application uses an event-driven architecture built on AWS Step Functions. When a user uploads a document, the system automatically routes it through the appropriate processing pipeline &mdash; either translation via Amazon Translate or Easy Read conversion via Amazon Bedrock.
+</p>
+
+<div class="govuk-grid-row govuk-!-margin-bottom-6">
+  <div class="govuk-grid-column-full">
+    <div class="ndx-card ndx-card--blue">
+      <h3 class="govuk-heading-m">High-level flow</h3>
+      <ol class="govuk-list govuk-list--number">
+        <li>User uploads a document through the React web app (hosted on CloudFront + S3)</li>
+        <li>Document is stored in an identity-scoped S3 path (<code>private/{cognito_sub}/*</code>)</li>
+        <li>A DynamoDB stream triggers an EventBridge Pipe, which starts a Step Functions workflow</li>
+        <li>For <strong>translation</strong>: Step Functions calls Amazon Translate directly</li>
+        <li>For <strong>Easy Read</strong>: The document is parsed (DOCX to HTML to Markdown), then sent to Amazon Bedrock (Claude 3 Haiku for text simplification, Nova Canvas for image generation)</li>
+        <li>Results are written back to S3 and the user is notified via AppSync subscriptions</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">AWS services used</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+    <div class="ndx-card">
+      <h3 class="govuk-heading-s">Amazon Translate</h3>
+      <p class="govuk-body-s">Translates documents into 75 languages. Supports .docx, .xlsx, .pptx, .txt, and .html formats.</p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+    <div class="ndx-card">
+      <h3 class="govuk-heading-s">Amazon Bedrock</h3>
+      <p class="govuk-body-s">Powers Easy Read conversion. Claude 3 Haiku simplifies text; Nova Canvas generates supporting images.</p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+    <div class="ndx-card">
+      <h3 class="govuk-heading-s">AWS Step Functions</h3>
+      <p class="govuk-body-s">Orchestrates processing workflows with error handling and parallel processing.</p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+    <div class="ndx-card">
+      <h3 class="govuk-heading-s">Amazon Cognito</h3>
+      <p class="govuk-body-s">Authentication and identity-scoped S3 access ensures users only see their own documents.</p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+    <div class="ndx-card">
+      <h3 class="govuk-heading-s">AWS AppSync</h3>
+      <p class="govuk-body-s">GraphQL API with real-time subscriptions for live progress updates.</p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+    <div class="ndx-card">
+      <h3 class="govuk-heading-s">Amazon DynamoDB</h3>
+      <p class="govuk-body-s">Stores job metadata and status. DynamoDB Streams trigger workflows via EventBridge Pipes.</p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+    <div class="ndx-card">
+      <h3 class="govuk-heading-s">AWS Lambda</h3>
+      <p class="govuk-body-s">12 functions for document parsing, Bedrock invocation, and AppSync mutations.</p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+    <div class="ndx-card">
+      <h3 class="govuk-heading-s">Amazon CloudFront + S3</h3>
+      <p class="govuk-body-s">Serves the React app with TLS 1.2+. Separate buckets for translation and readable content.</p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+    <div class="ndx-card">
+      <h3 class="govuk-heading-s">AWS WAF</h3>
+      <p class="govuk-body-s">Protects the AppSync API with AWS Managed Rules.</p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-half govuk-!-margin-bottom-4">
+    <div class="ndx-card">
+      <h3 class="govuk-heading-s">Amazon Comprehend</h3>
+      <p class="govuk-body-s">Detects document language automatically for translation source language selection.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+<h2 class="govuk-heading-l">Easy Read processing pipeline</h2>
+
+<ol class="govuk-list govuk-list--number">
+  <li><strong>Document import</strong> &mdash; Upload triggers a DynamoDB Stream event via EventBridge Pipes</li>
+  <li><strong>DOCX to HTML</strong> &mdash; Lambda uses mammoth.js to extract structured content</li>
+  <li><strong>HTML to Markdown</strong> &mdash; Lambda uses TurndownService to create clean text</li>
+  <li><strong>Split into sections</strong> &mdash; Markdown is split into chunks for AI processing</li>
+  <li><strong>Text simplification</strong> &mdash; Claude 3 Haiku rewrites each section in plain English</li>
+  <li><strong>Image generation</strong> &mdash; Nova Canvas generates supporting images</li>
+  <li><strong>Assembly</strong> &mdash; Results are combined and stored in S3 for download</li>
+</ol>
+
+<hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+<h2 class="govuk-heading-l">Security patterns</h2>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Identity-scoped storage</strong> &mdash; Documents stored under Cognito identity ID in S3</li>
+  <li><strong>Dual authentication</strong> &mdash; AppSync uses Cognito User Pools and IAM authorization</li>
+  <li><strong>WAF protection</strong> &mdash; AWS Managed Rules protect the API</li>
+  <li><strong>Encryption</strong> &mdash; AES-256 at rest, TLS 1.2+ in transit</li>
+  <li><strong>Least privilege</strong> &mdash; Purpose-specific IAM roles for each Lambda</li>
+</ul>
+
+<div class="govuk-!-margin-top-6">
+  <a href="/walkthroughs/simply-readable/explore/extend/" class="govuk-link govuk-body">What's next: resources and next steps &rarr;</a>
+</div>

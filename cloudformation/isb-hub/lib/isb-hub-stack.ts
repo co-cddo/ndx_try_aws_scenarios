@@ -22,6 +22,7 @@ const SCENARIOS = [
   { name: 'smart-car-park', description: 'NDX:Try Smart Car Park - Real-time parking availability with DynamoDB' },
   { name: 'text-to-speech', description: 'NDX:Try Text to Speech - Accessibility audio generation using Amazon Polly' },
   { name: 'localgov-drupal', description: 'NDX:Try LocalGov Drupal - AI-enhanced CMS for UK councils' },
+  { name: 'simply-readable', description: 'NDX:Try Simply Readable - Document Translation & Easy Read, built by Swindon Borough Council' },
   { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 7 scenarios as nested stacks' },
 ];
 
