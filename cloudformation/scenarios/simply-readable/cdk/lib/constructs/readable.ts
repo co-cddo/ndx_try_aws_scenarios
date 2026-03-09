@@ -95,12 +95,24 @@ export class ReadableConstruct extends Construct {
     });
     modelTable.grantWriteData(seedRole);
     printStyleTable.grantWriteData(seedRole);
+    seedRole.addToPolicy(new iam.PolicyStatement({
+      actions: [
+        'bedrock:ListFoundationModelAgreementOffers',
+        'bedrock:CreateFoundationModelAgreement',
+        'bedrock:GetFoundationModelAvailability',
+      ],
+      resources: ['*'],
+    }));
+    seedRole.addToPolicy(new iam.PolicyStatement({
+      actions: ['aws-marketplace:Subscribe', 'aws-marketplace:Unsubscribe', 'aws-marketplace:ViewSubscriptions'],
+      resources: ['*'],
+    }));
 
     const seedFn = new lambda.CfnFunction(this, 'SeedFn', {
       runtime: 'nodejs20.x',
       handler: 'index.handler',
       role: seedRole.roleArn,
-      timeout: 30,
+      timeout: 60,
       code: {
         zipFile: SEED_LAMBDA_CODE,
       },
@@ -418,10 +430,11 @@ export class ReadableConstruct extends Construct {
               Payload: {
                 'ModelId.$': '$.modelId',
                 Body: {
-                  inferenceConfig: { maxTokens: 2048 },
+                  anthropic_version: 'bedrock-2023-05-31',
+                  max_tokens: 2048,
                   messages: [{
                     role: 'user',
-                    content: [{ 'text.$': '$.prompt' }],
+                    content: [{ type: 'text', 'text.$': '$.prompt' }],
                   }],
                 },
               },
@@ -433,7 +446,7 @@ export class ReadableConstruct extends Construct {
           ExtractTextResponse: {
             Type: 'Pass',
             Parameters: {
-              'simplifiedText.$': '$.bedrockResult.Payload.Body.output.message.content[0].text',
+              'simplifiedText.$': '$.bedrockResult.Payload.Body.content[0].text',
               'id.$': '$.id',
               'itemId.$': '$.itemId',
             },
@@ -585,13 +598,11 @@ export class ReadableConstruct extends Construct {
       }),
     });
 
-    // Scope states:StartExecution to the specific state machines (must be after both are defined)
+    // Allow starting any state machine in this account (avoids circular dependency
+    // between state machines → role → policy → state machines)
     sfnRole.addToPolicy(new iam.PolicyStatement({
       actions: ['states:StartExecution'],
-      resources: [
-        generateSfn.attrArn,
-        parseDocSfn.attrArn,
-      ],
+      resources: [`arn:aws:states:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:stateMachine:*`],
     }));
 
     // EventBridge Pipe: DDB Stream → Generate Step Functions (trigger on status=generate)
@@ -735,14 +746,34 @@ export class ReadableConstruct extends Construct {
   }
 }
 
-// Seed Lambda code — populates model and print style tables with defaults
-const SEED_LAMBDA_CODE = `const{DynamoDBClient,PutItemCommand}=require("@aws-sdk/client-dynamodb");const https=require("https");
-exports.handler=async(e)=>{const rp={Status:"SUCCESS",PhysicalResourceId:e.LogicalResourceId,StackId:e.StackId,RequestId:e.RequestId,LogicalResourceId:e.LogicalResourceId};
-if(e.RequestType==="Delete"){await send(e.ResponseURL,rp);return}
-try{const db=new DynamoDBClient();const p=e.ResourceProperties;
-const models=[{id:"amazon.nova-lite-v1:0",name:"Amazon Nova Lite",type:"text",default:true},{id:"amazon.nova-canvas-v1:0",name:"Amazon Nova Canvas",type:"image",default:true}];
-for(const m of models){await db.send(new PutItemCommand({TableName:p.ModelTableName,Item:{id:{S:m.id},modelId:{S:m.id},name:{S:m.name},type:{S:m.type},default:{BOOL:m.default}}}))}
-const styles=[{id:"default",name:"Default",type:"default",default:true}];
-for(const s of styles){await db.send(new PutItemCommand({TableName:p.PrintStyleTableName,Item:{id:{S:s.id},name:{S:s.name},type:{S:s.type},default:{BOOL:s.default}}}))}
-await send(e.ResponseURL,rp)}catch(err){console.error(err);rp.Status="FAILED";rp.Reason=err.message;await send(e.ResponseURL,rp)}};
-function send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);const o=new URL(u);const opts={hostname:o.hostname,port:443,path:o.pathname+o.search,method:"PUT",headers:{"Content-Type":"","Content-Length":b.length}};const req=https.request(opts,ok);req.on("error",fail);req.write(b);req.end()})}`;
+// Seed Lambda code — populates model/print-style tables and enables Bedrock model agreements
+const SEED_LAMBDA_CODE = [
+  'const{DynamoDBClient,PutItemCommand}=require("@aws-sdk/client-dynamodb");',
+  'const{BedrockClient,ListFoundationModelAgreementOffersCommand,CreateFoundationModelAgreementCommand,GetFoundationModelAvailabilityCommand}=require("@aws-sdk/client-bedrock");',
+  'const https=require("https");',
+  'exports.handler=async(e)=>{',
+  '  const rp={Status:"SUCCESS",PhysicalResourceId:e.LogicalResourceId,StackId:e.StackId,RequestId:e.RequestId,LogicalResourceId:e.LogicalResourceId};',
+  '  if(e.RequestType==="Delete"){await send(e.ResponseURL,rp);return}',
+  '  try{',
+  '    const db=new DynamoDBClient();const br=new BedrockClient();const p=e.ResourceProperties;',
+  '    const models=[{id:"anthropic.claude-3-haiku-20240307-v1:0",name:"Claude 3 Haiku",type:"text",default:true},{id:"amazon.nova-canvas-v1:0",name:"Amazon Nova Canvas",type:"image",default:true}];',
+  '    for(const m of models){',
+  '      await db.send(new PutItemCommand({TableName:p.ModelTableName,Item:{id:{S:m.id},modelId:{S:m.id},name:{S:m.name},type:{S:m.type},default:{BOOL:m.default}}}));',
+  '      try{',
+  '        const avail=await br.send(new GetFoundationModelAvailabilityCommand({modelId:m.id}));',
+  '        if(avail.agreementAvailability!=="AVAILABLE"){',
+  '          const offers=await br.send(new ListFoundationModelAgreementOffersCommand({modelId:m.id}));',
+  '          if(offers.modelAgreementOffers&&offers.modelAgreementOffers.length>0){',
+  '            await br.send(new CreateFoundationModelAgreementCommand({modelId:m.id,offerToken:offers.modelAgreementOffers[0].offerToken}));',
+  '            console.log("Enabled model agreement for",m.id)',
+  '          }',
+  '        }else{console.log("Model already available:",m.id)}',
+  '      }catch(err){console.warn("Could not enable model agreement for",m.id,err.message)}',
+  '    }',
+  '    const styles=[{id:"default",name:"Default",type:"default",default:true}];',
+  '    for(const s of styles){await db.send(new PutItemCommand({TableName:p.PrintStyleTableName,Item:{id:{S:s.id},name:{S:s.name},type:{S:s.type},default:{BOOL:s.default}}}))}',
+  '    await send(e.ResponseURL,rp)',
+  '  }catch(err){console.error(err);rp.Status="FAILED";rp.Reason=err.message;await send(e.ResponseURL,rp)}',
+  '};',
+  'function send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);const o=new URL(u);const opts={hostname:o.hostname,port:443,path:o.pathname+o.search,method:"PUT",headers:{"Content-Type":"","Content-Length":b.length}};const req=https.request(opts,ok);req.on("error",fail);req.write(b);req.end()})}',
+].join('\n');

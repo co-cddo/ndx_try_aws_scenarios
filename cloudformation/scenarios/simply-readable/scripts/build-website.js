@@ -254,9 +254,12 @@ fs.writeFileSync(
 console.log("8. Injecting config.js script tag into index.html...");
 const indexPath = path.join(OUTPUT_DIR, "index.html");
 let indexHtml = fs.readFileSync(indexPath, "utf8");
+// Fix Amplify oauthSignIn localStorage corruption: the Cognito hosted UI
+// OAuth flow sets this to "true,false" which causes fetchAuthSession() to hang.
+const oauthFix = `<script>try{Object.keys(localStorage).filter(k=>k.endsWith('.oauthSignIn')).forEach(k=>{var v=localStorage.getItem(k);if(v&&v!=='true'&&v!=='false')localStorage.setItem(k,'false')})}catch(e){}</script>`;
 indexHtml = indexHtml.replace(
   '<script defer="defer" src="/static/js/main',
-  '<script src="/config.js"></script><script defer="defer" src="/static/js/main'
+  `<script src="/config.js"></script>${oauthFix}<script defer="defer" src="/static/js/main`
 );
 fs.writeFileSync(indexPath, indexHtml);
 
