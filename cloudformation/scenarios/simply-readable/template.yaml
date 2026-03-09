@@ -388,7 +388,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-baseapiidentityPoolAuthenticatedR-7819e881"
+        "RoleName": "InnovationSandbox-ndx-baseapiidentityPoolAuthenticatedR-7819e881",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "DependsOn": [
         "baseapiuserPoolcognitoDomain330369A2",
@@ -452,7 +478,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-baseapiidentityPoolUnauthenticate-70465c46"
+        "RoleName": "InnovationSandbox-ndx-baseapiidentityPoolUnauthenticate-70465c46",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "DependsOn": [
         "baseapiuserPoolcognitoDomain330369A2",
@@ -547,7 +599,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-baseapiapiLoggingRole-d3be284c"
+        "RoleName": "InnovationSandbox-ndx-baseapiapiLoggingRole-d3be284c",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_api/apiLoggingRole/Resource"
@@ -728,7 +806,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-baseapiApiapiDsHelpTableServiceRo-a767ad65"
+        "RoleName": "InnovationSandbox-ndx-baseapiApiapiDsHelpTableServiceRo-a767ad65",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_api/Api/apiDsHelpTable/ServiceRole/Resource",
@@ -894,7 +998,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-baseapiApiapiDsPreferencesTableSe-de495549"
+        "RoleName": "InnovationSandbox-ndx-baseapiApiapiDsPreferencesTableSe-de495549",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_api/Api/apiDsPreferencesTable/ServiceRole/Resource",
@@ -1060,7 +1190,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-baseapiApitranslationJobTableServ-8f22b92c"
+        "RoleName": "InnovationSandbox-ndx-baseapiApitranslationJobTableServ-8f22b92c",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_api/Api/translationJobTable/ServiceRole/Resource",
@@ -1237,7 +1393,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-baseapiApireadableJobTableService-e82c32cc"
+        "RoleName": "InnovationSandbox-ndx-baseapiApireadableJobTableService-e82c32cc",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_api/Api/readableJobTable/ServiceRole/Resource",
@@ -1393,7 +1575,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-baseapiApireadableModelTableServi-e254740f"
+        "RoleName": "InnovationSandbox-ndx-baseapiApireadableModelTableServi-e254740f",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_api/Api/readableModelTable/ServiceRole/Resource"
@@ -1505,7 +1713,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-baseapiApireadablePrintStyleTable-0c09b47d"
+        "RoleName": "InnovationSandbox-ndx-baseapiApireadablePrintStyleTable-0c09b47d",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_api/Api/readablePrintStyleTable/ServiceRole/Resource"
@@ -2087,7 +2321,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-LogRetentionaae0aa3c5b4d4f87b02d8-039f8f42"
+        "RoleName": "InnovationSandbox-ndx-LogRetentionaae0aa3c5b4d4f87b02d8-039f8f42",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource",
@@ -2671,7 +2931,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationTrans-b3a5c1e5"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationTrans-b3a5c1e5",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationTranslate/parseTerminologiesLambdaRole/Resource",
@@ -2926,7 +3212,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationTrans-789aec5d"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationTrans-789aec5d",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationTranslate/translateRole/Resource"
@@ -3023,7 +3335,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationTrans-a6b3479c"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationTrans-a6b3479c",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationTranslate/resumeWorkflow/SimplyReadableStack_TranslationTranslateResume/SimplyReadableStack_TranslationTranslateResume/Role/Resource",
@@ -3360,7 +3698,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationTrans-4ba4cc6f"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationTrans-4ba4cc6f",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationTranslate/resumeWorkflow/SimplyReadableStack_TranslationTranslateResume/SimplyReadableStack_TranslationTranslateResume/EventsRole/Resource"
@@ -3483,7 +3847,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationTrans-ac0b137f"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationTrans-ac0b137f",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationTranslate/SimplyReadableStack_TranslationTranslate/SimplyReadableStack_TranslationTranslate/Role/Resource",
@@ -4215,7 +4605,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationMainS-618a250b"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationMainS-618a250b",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationMain/SimplyReadableStack_TranslationMain/SimplyReadableStack_TranslationMain/Role/Resource",
@@ -4600,7 +5016,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationMainS-8dfcfe62"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationMainS-8dfcfe62",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationMain/SimplyReadableStack_TranslationMainRename/SimplyReadableStack_TranslationMainRename/Role/Resource",
@@ -4926,7 +5368,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationMainp-0f3aa2e0"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationMainp-0f3aa2e0",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationMain/pipeJobToSfnRole/Resource"
@@ -5133,7 +5601,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationError-46f9e79a"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationError-46f9e79a",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationErrors/SimplyReadableStack_TranslationErrors/SimplyReadableStack_TranslationErrors/Role/Resource",
@@ -5409,7 +5903,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationError-0182fd98"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationError-0182fd98",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationErrors/SimplyReadableStack_TranslationErrors/SimplyReadableStack_TranslationErrors/EventsRole/Resource"
@@ -5495,7 +6015,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationLifec-1eb547f8"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationLifec-1eb547f8",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationLifecycle/parseS3KeySfn/SimplyReadableStack_TranslationParseS3Key/SimplyReadableStack_TranslationParseS3Key/Role/Resource",
@@ -5750,7 +6296,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationLifec-745bf064"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationLifec-745bf064",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationLifecycle/SimplyReadableStack_TranslationLifecycle/SimplyReadableStack_TranslationLifecycle/Role/Resource",
@@ -6110,7 +6682,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationLifec-165b90c0"
+        "RoleName": "InnovationSandbox-ndx-basetranslatefeatTranslationLifec-165b90c0",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_translate/featTranslationLifecycle/SimplyReadableStack_TranslationLifecycle/SimplyReadableStack_TranslationLifecycle/EventsRole/Resource"
@@ -6233,7 +6831,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-BucketNotificationsHandler050a058-d30ff6cc"
+        "RoleName": "InnovationSandbox-ndx-BucketNotificationsHandler050a058-d30ff6cc",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/BucketNotificationsHandler050a0587b7544547bf325f094a3db834/Role/Resource",
@@ -7129,7 +7753,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-c8953817"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-c8953817",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/workflowGenerate/invokeBedrockLambdaRole/Resource",
@@ -7446,7 +8096,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-6f185279"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-6f185279",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/workflowGenerate/workflow_anthropic3/utilRegexReplaceRole/Resource",
@@ -7701,7 +8377,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-1061b8ac"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-1061b8ac",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/workflowGenerate/workflow_anthropic3/utilTrimRole/Resource",
@@ -7980,7 +8682,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-a9d2eb50"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-a9d2eb50",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/workflowGenerate/workflow_anthropic3/SimplyReadableStack_Readable_anthropic_3/SimplyReadableStack_Readable_anthropic_3/Role/Resource",
@@ -8384,7 +9112,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-436f5bee"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-436f5bee",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/workflowGenerate/workflow_stabilityai/invokeBedrockSaveToS3/Resource",
@@ -8752,7 +9506,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-93a57939"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-93a57939",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/workflowGenerate/workflow_stabilityai/SimplyReadableStack_Readable_stability_workflow_stabilityai/SimplyReadableStack_Readable_stability_workflow_stabilityai/Role/Resource",
@@ -9044,7 +9824,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-14fead29"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-14fead29",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/workflowGenerate/workflow_stabilityai_3/invokeBedrockSaveToS3/Resource",
@@ -9412,7 +10218,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-53fcad24"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-53fcad24",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/workflowGenerate/workflow_stabilityai_3/SimplyReadableStack_Readable_stability_workflow_stabilityai_3/SimplyReadableStack_Readable_stability_workflow_stabilityai_3/Role/Resource",
@@ -9728,7 +10560,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-c1c2ac41"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-c1c2ac41",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/workflowGenerate/workflow_converseText/SimplyReadableStack_Readable_converseText/SimplyReadableStack_Readable_converseText/Role/Resource",
@@ -10034,7 +10892,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-469d68cf"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowworkf-469d68cf",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/workflowGenerate/SimplyReadableStack_ReadableGenerate/SimplyReadableStack_ReadableGenerate/Role/Resource",
@@ -10546,7 +11430,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowunmar-01c84e3f"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowunmar-01c84e3f",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/unmarshallDdbLambdaRole/Resource",
@@ -10801,7 +11711,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowupdat-b82d1046"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowupdat-b82d1046",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/updateDbLambdaRole/Resource",
@@ -11140,7 +12076,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowSimpl-d74f588a"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowSimpl-d74f588a",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/SimplyReadableStack_ReadableMain/SimplyReadableStack_ReadableMain/Role/Resource",
@@ -11680,7 +12642,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowSimpl-3d811d70"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowSimpl-3d811d70",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/SimplyReadableStack_ReadableMainRename/SimplyReadableStack_ReadableMainRename/Role/Resource",
@@ -12006,7 +12994,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowpipeJ-551b1a71"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowpipeJ-551b1a71",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflow/pipeJobToSfnRole/Resource"
@@ -12148,7 +13162,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-c1b8e878"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-c1b8e878",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflowParseDoc/unmarshallDdbLambda/LambdaRole/Resource",
@@ -12464,7 +13504,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-6a6e591a"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-6a6e591a",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflowParseDoc/docToHtmlLambda/LambdaRole/Resource",
@@ -12727,7 +13793,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-24276a2e"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-24276a2e",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflowParseDoc/htmlToMdLambda/LambdaRole/Resource",
@@ -12990,7 +14082,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-99cff8ab"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-99cff8ab",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflowParseDoc/splitMdLambda/LambdaRole/Resource",
@@ -13299,7 +14417,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-d702055b"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-d702055b",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflowParseDoc/updateDbLambda/LambdaRole/Resource",
@@ -13614,7 +14758,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-f21a96b4"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-f21a96b4",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflowParseDoc/updateDbLambdaParseDoc/LambdaRole/Resource",
@@ -13907,7 +15077,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-7abf3fab"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-7abf3fab",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflowParseDoc/SimplyReadableStack_ReadableParseDoc/SimplyReadableStack_ReadableParseDoc/Role/Resource",
@@ -14355,7 +15551,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-11768c1e"
+        "RoleName": "InnovationSandbox-ndx-basereadablereadableWorkflowParse-11768c1e",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/base_readable/readableWorkflowParseDoc/pipeJobToSfnRole/Resource"
@@ -14510,7 +15732,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-AWS679f53fac002430cb0da5b7982bd22-435a71b4"
+        "RoleName": "InnovationSandbox-ndx-AWS679f53fac002430cb0da5b7982bd22-435a71b4",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource",
@@ -14947,7 +16195,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-SetPasswordRole-974fdea7"
+        "RoleName": "InnovationSandbox-ndx-SetPasswordRole-974fdea7",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/SetPasswordRole/Resource"
@@ -15085,7 +16359,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-IsbSeedRole-82bc6338"
+        "RoleName": "InnovationSandbox-ndx-IsbSeedRole-82bc6338",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/IsbSeedRole/Resource"
@@ -15141,7 +16441,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "ZipFile": "const{DynamoDBClient,PutItemCommand,ScanCommand,DeleteItemCommand}=require(\"@aws-sdk/client-dynamodb\");\nconst{BedrockClient,ListFoundationModelAgreementOffersCommand,CreateFoundationModelAgreementCommand,GetFoundationModelAvailabilityCommand}=require(\"@aws-sdk/client-bedrock\");\nconst https=require(\"https\");\nexports.handler=async(e)=>{\n  const rp={Status:\"SUCCESS\",PhysicalResourceId:e.LogicalResourceId,StackId:e.StackId,RequestId:e.RequestId,LogicalResourceId:e.LogicalResourceId};\n  if(e.RequestType===\"Delete\"){await send(e.ResponseURL,rp);return}\n  try{\n    const db=new DynamoDBClient();const br=new BedrockClient();const p=e.ResourceProperties;\n    // Clear existing upstream-seeded models\n    const existing=await db.send(new ScanCommand({TableName:p.ModelTableName}));\n    if(existing.Items){for(const item of existing.Items){await db.send(new DeleteItemCommand({TableName:p.ModelTableName,Key:{id:item.id}}))}}\n    // Seed ISB-compatible models\n    const models=[{id:\"anthropic.claude-3-haiku-20240307-v1:0\",name:\"Claude 3 Haiku\",type:\"text\",default:true},{id:\"amazon.nova-canvas-v1:0\",name:\"Amazon Nova Canvas\",type:\"image\",default:true}];\n    for(const m of models){\n      await db.send(new PutItemCommand({TableName:p.ModelTableName,Item:{id:{S:m.id},modelId:{S:m.id},name:{S:m.name},type:{S:m.type},default:{BOOL:m.default}}}));\n      try{\n        const avail=await br.send(new GetFoundationModelAvailabilityCommand({modelId:m.id}));\n        if(avail.agreementAvailability!==\"AVAILABLE\"){\n          const offers=await br.send(new ListFoundationModelAgreementOffersCommand({modelId:m.id}));\n          if(offers.modelAgreementOffers&&offers.modelAgreementOffers.length>0){\n            await br.send(new CreateFoundationModelAgreementCommand({modelId:m.id,offerToken:offers.modelAgreementOffers[0].offerToken}));\n            console.log(\"Enabled model agreement for\",m.id)\n          }\n        }else{console.log(\"Model already available:\",m.id)}\n      }catch(err){console.warn(\"Could not enable model agreement for\",m.id,err.message)}\n    }\n    // Seed ISB print style (clear and re-add)\n    const existingStyles=await db.send(new ScanCommand({TableName:p.PrintStyleTableName}));\n    if(existingStyles.Items){for(const item of existingStyles.Items){await db.send(new DeleteItemCommand({TableName:p.PrintStyleTableName,Key:{id:item.id}}))}}\n    const styles=[{id:\"default\",name:\"Default\",type:\"default\",default:true}];\n    for(const s of styles){await db.send(new PutItemCommand({TableName:p.PrintStyleTableName,Item:{id:{S:s.id},name:{S:s.name},type:{S:s.type},default:{BOOL:s.default}}}))}\n    await send(e.ResponseURL,rp)\n  }catch(err){console.error(err);rp.Status=\"FAILED\";rp.Reason=err.message;await send(e.ResponseURL,rp)}\n};\nfunction send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);const o=new URL(u);const opts={hostname:o.hostname,port:443,path:o.pathname+o.search,method:\"PUT\",headers:{\"Content-Type\":\"\",\"Content-Length\":b.length}};const req=https.request(opts,ok);req.on(\"error\",fail);req.write(b);req.end()})}"
+          "ZipFile": "const{DynamoDBClient,PutItemCommand,ScanCommand,DeleteItemCommand}=require(\"@aws-sdk/client-dynamodb\");\nconst{BedrockClient,ListFoundationModelAgreementOffersCommand,CreateFoundationModelAgreementCommand,GetFoundationModelAvailabilityCommand}=require(\"@aws-sdk/client-bedrock\");\nconst https=require(\"https\");\nexports.handler=async(e)=>{\n  const rp={Status:\"SUCCESS\",PhysicalResourceId:e.LogicalResourceId,StackId:e.StackId,RequestId:e.RequestId,LogicalResourceId:e.LogicalResourceId};\n  if(e.RequestType===\"Delete\"){await send(e.ResponseURL,rp);return}\n  try{\n    const db=new DynamoDBClient();const br=new BedrockClient();const p=e.ResourceProperties;\n    // Clear existing upstream-seeded models\n    const existing=await db.send(new ScanCommand({TableName:p.ModelTableName}));\n    if(existing.Items){for(const item of existing.Items){await db.send(new DeleteItemCommand({TableName:p.ModelTableName,Key:{id:item.id}}))}}\n    // Seed ISB-compatible models\n    const textModel={id:\"anthropic.claude-3-haiku-20240307-v1:0\",name:\"Claude 3 Haiku\",type:\"text\"};\n    const imageModel={id:\"amazon.nova-canvas-v1:0\",name:\"Amazon Nova Canvas\",type:\"image\"};\n    // Text model: needs nested text object with modelId, parameters (anthropic_version, max_tokens), prePrompt\n    await db.send(new PutItemCommand({TableName:p.ModelTableName,Item:{id:{S:textModel.id},modelId:{S:textModel.id},name:{S:textModel.name},type:{S:textModel.type},default:{BOOL:true},text:{M:{modelId:{S:textModel.id},parameters:{M:{anthropic_version:{S:\"bedrock-2023-05-31\"},max_tokens:{N:\"2048\"}}},prePrompt:{S:\"Simplify the following text so it can be easily understood by those with a low reading age. Use short sentences, explain any abbreviations or words that can have two meanings, and separate the sentences into new lines.\"}}}}}));\n    // Image model: needs nested image object AND text object (for generating image prompts)\n    await db.send(new PutItemCommand({TableName:p.ModelTableName,Item:{id:{S:imageModel.id},modelId:{S:imageModel.id},name:{S:imageModel.name},type:{S:imageModel.type},default:{BOOL:true},image:{M:{modelId:{S:imageModel.id},parameters:{M:{}}}},text:{M:{modelId:{S:textModel.id},parameters:{M:{InferenceConfig:{M:{MaxTokens:{N:\"512\"},Temperature:{N:\"0.7\"},TopP:{N:\"0.9\"}}}}},prePrompt:{S:\"You are a prompt engineer trying to design a prompt for an image generation model so it can generate a photographic image to illustrate the following text showing no people in the image:\"}}}}}));\n    const models=[textModel,imageModel];\n    for(const m of models){\n      try{\n        const avail=await br.send(new GetFoundationModelAvailabilityCommand({modelId:m.id}));\n        const agStatus=avail.agreementAvailability&&avail.agreementAvailability.status;\n        if(agStatus!==\"AVAILABLE\"){\n          const offers=await br.send(new ListFoundationModelAgreementOffersCommand({modelId:m.id}));\n          const offerList=offers.offers||offers.modelAgreementOffers||[];\n          if(offerList.length>0){\n            await br.send(new CreateFoundationModelAgreementCommand({modelId:m.id,offerToken:offerList[0].offerToken}));\n            console.log(\"Enabled model agreement for\",m.id)\n          }\n        }else{console.log(\"Model already available:\",m.id)}\n      }catch(err){console.warn(\"Could not enable model agreement for\",m.id,err.message)}\n    }\n    // Seed ISB print style (clear and re-add)\n    const existingStyles=await db.send(new ScanCommand({TableName:p.PrintStyleTableName}));\n    if(existingStyles.Items){for(const item of existingStyles.Items){await db.send(new DeleteItemCommand({TableName:p.PrintStyleTableName,Key:{id:item.id}}))}}\n    const styles=[{id:\"default\",name:\"Default\",type:\"default\",default:true}];\n    for(const s of styles){await db.send(new PutItemCommand({TableName:p.PrintStyleTableName,Item:{id:{S:s.id},name:{S:s.name},type:{S:s.type},default:{BOOL:s.default}}}))}\n    await send(e.ResponseURL,rp)\n  }catch(err){console.error(err);rp.Status=\"FAILED\";rp.Reason=err.message;await send(e.ResponseURL,rp)}\n};\nfunction send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);const o=new URL(u);const opts={hostname:o.hostname,port:443,path:o.pathname+o.search,method:\"PUT\",headers:{\"Content-Type\":\"\",\"Content-Length\":b.length}};const req=https.request(opts,ok);req.on(\"error\",fail);req.write(b);req.end()})}"
         },
         "Handler": "index.handler",
         "Role": {
@@ -15254,7 +16554,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-WebDeployRole-acd79460"
+        "RoleName": "InnovationSandbox-ndx-WebDeployRole-acd79460",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/WebDeployRole/Resource"
@@ -15443,7 +16769,7 @@
             "DomainName"
           ]
         },
-        "Timestamp": "1773064938122"
+        "Timestamp": "1773068052591"
       },
       "DependsOn": [
         "WebDeployRoleDefaultPolicy2B60B402",
@@ -15496,7 +16822,33 @@
             "Value": "simply-readable"
           }
         ],
-        "RoleName": "InnovationSandbox-ndx-EmptyBucketRole-70e5024a"
+        "RoleName": "InnovationSandbox-ndx-EmptyBucketRole-70e5024a",
+        "Policies": [
+          {
+            "PolicyName": "ISB-BedrockAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "bedrock:InvokeModel",
+                    "bedrock:InvokeModelWithResponseStream"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "aws-marketplace:ViewSubscriptions",
+                    "aws-marketplace:Subscribe"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
       },
       "Metadata": {
         "aws:cdk:path": "SimplyReadableStack/EmptyBucketRole/Resource"
