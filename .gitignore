@@ -53,3 +53,34 @@ package-lock.json
 
 # Generated CloudFormation templates
 cloudformation/scenarios/*/template.yaml
+
+# BSL Sign Language - downloaded/proprietary video and data (not licensed for redistribution)
+research/bsldict/videos/
+research/auslan/
+research/s3-backup/
+research/ml-training/
+cloudformation/scenarios/bsl-sign-language/frontend/test-videos/
+cloudformation/scenarios/bsl-sign-language/research/ml-training/videos-backup/
+cloudformation/scenarios/bsl-sign-language/research/ml-training/data-backup/
+cloudformation/scenarios/bsl-sign-language/research/ml-training/checkpoints/
+cloudformation/scenarios/bsl-sign-language/research/auslan/
+cloudformation/scenarios/bsl-sign-language/research/bsldict/
+cloudformation/scenarios/bsl-sign-language/research/bsl-signbank/
+cloudformation/scenarios/bsl-sign-language/research/bks/
+cloudformation/scenarios/bsl-sign-language/research/nzsl/
+cloudformation/scenarios/bsl-sign-language/research/dicta-sign/
+cloudformation/scenarios/bsl-sign-language/research/ssc-stem/
+cloudformation/scenarios/bsl-sign-language/research/christian-bsl/
+cloudformation/scenarios/bsl-sign-language/research/youtube-sl-25/
+cloudformation/scenarios/bsl-sign-language/research/bslcp-cava/
+cloudformation/scenarios/bsl-sign-language/research/mm-wlauslan/
+cloudformation/scenarios/bsl-sign-language/research/Auslan_Daily/
+cloudformation/scenarios/bsl-sign-language/research/banz-fs/
+
+# BSL large binary/derived files
+*.onnx
+cloudformation/scenarios/bsl-sign-language/research/ml-training/bsldict_features.json
+cloudformation/scenarios/bsl-sign-language/research/ml-training/extracted_features.json
+
+# Claude session files
+.claude/scheduled_tasks.lock
