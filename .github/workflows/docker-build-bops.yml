@@ -79,6 +79,7 @@ jobs:
 
       - name: Copy overlay files
         run: |
+          mkdir -p bops-src/scripts
           cp cloudformation/scenarios/bops-planning/docker/bops/config/initializers/default_local_authority.rb bops-src/config/initializers/
           cp cloudformation/scenarios/bops-planning/docker/bops/scripts/seed_sample_data.rb bops-src/scripts/
           cp cloudformation/scenarios/bops-planning/docker/bops/scripts/seed-entrypoint.sh bops-src/scripts/
