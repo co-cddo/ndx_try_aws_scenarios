@@ -11,7 +11,7 @@ name: Build BOPS Container Images
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/bops-planning]
     paths:
       - 'cloudformation/scenarios/bops-planning/docker/**'
       - '.github/workflows/docker-build-bops.yml'
@@ -110,7 +110,7 @@ jobs:
         with:
           context: bops-src
           file: bops-src/Dockerfile.production
-          push: ${{ (github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image != 'false')) }}
+          push: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/bops-planning' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image != 'false')) }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=bops
@@ -179,7 +179,7 @@ jobs:
         with:
           context: bops-applicants-src
           file: bops-applicants-src/Dockerfile.production
-          push: ${{ (github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image != 'false')) }}
+          push: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/bops-planning' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image != 'false')) }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=bops-applicants
