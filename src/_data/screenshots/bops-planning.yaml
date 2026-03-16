@@ -1,0 +1,44 @@
+# BOPS Planning System Screenshot Manifest
+#
+# Screenshots to capture from a deployed BOPS instance.
+# Manual capture via Playwright after deployment.
+
+scenario: bops-planning
+generated: 2026-03-16T00:00:00.000Z
+description: Screenshots of deployed BOPS Planning System instance
+
+# Admin pages (authentication required)
+admin_pages:
+  - path: "/users/sign_in"
+    name: "login"
+    description: "BOPS login page"
+  - path: "/"
+    name: "dashboard"
+    description: "BOPS dashboard showing planning applications"
+  - path: "/planning_applications?status=in_assessment"
+    name: "applications-list"
+    description: "Planning applications filtered by status"
+
+# Application detail pages
+detail_pages:
+  - path: "/planning_applications/1"
+    name: "application-detail"
+    description: "Planning application detail page with map and constraints"
+  - path: "/planning_applications/1/assessment"
+    name: "application-assessment"
+    description: "Application assessment view"
+
+# Applicants portal pages (separate ALB:8080, no auth)
+applicants_pages:
+  - path: "/"
+    name: "applicants-homepage"
+    description: "BOPS-Applicants public portal homepage"
+
+# CloudFormation outputs page
+deployment_pages:
+  - path: "cloudformation-outputs"
+    name: "cfn-outputs"
+    description: "CloudFormation stack outputs showing URLs and credentials"
+
+# Screenshot naming convention: {name}-{viewport}.png
+# Viewport: 1920x1080 (desktop)

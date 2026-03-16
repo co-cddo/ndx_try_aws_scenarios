@@ -1358,3 +1358,113 @@ scenarios:
         training: 250
         support: 500
         total: 3150
+
+  - id: "bops-planning"
+    name: "Digital Planning (BOPS)"
+    headline: "Experience the Back Office Planning System used by UK councils"
+    bestFor: "Planning departments evaluating digital transformation"
+    description: "Deploy the Back Office Planning System (BOPS) — the open-source digital planning platform used by UK councils. Experience the complete planning application lifecycle from validation through to decision, with 80 realistic sample applications, automated officer reports, and Ordnance Survey mapping."
+    difficulty: "intermediate"
+    timeEstimate: "15 to 20 minutes"
+    primaryPersona: "service-manager"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "localgov-drupal"
+      - "planning-ai"
+    securitySummary: "Sample data only in isolated sandbox. All secrets auto-generated. No real citizen data."
+    skillsLearned:
+      - "Container orchestration with ECS Fargate"
+      - "Aurora PostgreSQL with PostGIS"
+      - "Rails application deployment on AWS"
+      - "Load balancer configuration"
+    isMostPopular: false
+    featured: false
+    awsServices:
+      - "Amazon ECS"
+      - "Amazon Aurora"
+      - "Amazon ElastiCache"
+      - "Amazon S3"
+      - "Amazon CloudFront"
+      - "Elastic Load Balancing"
+    tags:
+      - "Planning"
+      - "Digital Transformation"
+      - "Open Source"
+      - "Rails"
+      - "UK Councils"
+      - "BOPS"
+    businessOutcomes:
+      - "Experience automated planning application processing"
+      - "See data-driven policy matching and constraint checking"
+      - "Explore automated officer report generation"
+      - "Understand the ODP digital planning ecosystem"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "No technical expertise required"
+    url: "/scenarios/bops-planning/"
+    order: 10
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/bops-planning/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/bops-planning/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-bops-planning"
+      parameters:
+        - name: "OSVectorTilesApiKey"
+          value: ""
+          description: "Ordnance Survey Vector Tiles API key"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "bops-planning"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+      deploymentTime: "25 to 35 minutes"
+      deploymentPhases:
+        - "Creating VPC and networking (~30 seconds)"
+        - "Creating Aurora PostgreSQL Serverless database (~600 seconds)"
+        - "Creating ElastiCache Redis (~480 seconds)"
+        - "Creating ECS Fargate services (~120 seconds)"
+        - "Running database seed task (~600 seconds)"
+        - "Creating CloudFront distribution (~600 seconds)"
+      outputs:
+        - name: "BOPSUrl"
+          description: "BOPS back-office URL (HTTPS)"
+        - name: "BOPSLoginUrl"
+          description: "BOPS login page"
+        - name: "BOPSUsername"
+          description: "Admin username"
+        - name: "BOPSPassword"
+          description: "Admin password (Secrets Manager link)"
+        - name: "ApplicantsPortalUrl"
+          description: "Public applicants portal URL"
+        - name: "CloudWatchLogsUrl"
+          description: "CloudWatch Logs"
+    screenshots:
+      steps: []
+    success_metrics:
+      service_area: "Planning & Development Management"
+      primary_metric: "Planning application processing time"
+      baseline:
+        description: "Average planning application processing takes 8-12 weeks with manual workflows"
+        value: 56
+        unit: "days average processing time"
+        source: "DLUHC Planning Statistics Q4 2024"
+      projection:
+        description: "BOPS councils report 40% faster processing through automation"
+        value: 34
+        unit: "days average processing time"
+        source: "ODP Programme evaluation 2024"
+        reduction_percent: 40
+      roi:
+        annual_savings: 180000
+        calculation: "Based on ODP programme figures: 40% time savings across ~2,000 applications/year at average cost of £225/application"
+        payback_months: 6
+        disclaimer: "Figures are illustrative and based on published ODP programme outcomes. Actual savings depend on application volumes and current process efficiency."
+      committee_language: "BOPS demonstrates how digital planning tools can reduce application processing time by 40%, saving an estimated £180,000 annually through automated validation, policy matching, and report generation."
