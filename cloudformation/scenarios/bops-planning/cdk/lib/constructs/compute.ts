@@ -138,6 +138,9 @@ export class ComputeConstruct extends Construct {
       ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: areKeySalt,
       DEFAULT_LOCAL_AUTHORITY: 'ndx-demo',
       NOTIFY_API_KEY: 'test-00000000-0000-0000-0000-000000000000-00000000-0000-0000-0000-000000000000',
+      NOTIFY_EMAIL_TEMPLATE_ID: '00000000-0000-0000-0000-000000000000',
+      NOTIFY_EMAIL_REPLY_TO_ID: '00000000-0000-0000-0000-000000000000',
+      NOTIFY_SMS_TEMPLATE_ID: '00000000-0000-0000-0000-000000000000',
       OS_VECTOR_TILES_API_KEY: props.osMapApiKeyParam.valueAsString,
       S3_BUCKET: props.uploadsBucket.bucketName,
       AWS_REGION: cdk.Aws.REGION,
@@ -167,7 +170,9 @@ export class ComputeConstruct extends Construct {
     });
 
     bopsWebTaskDef.addContainer('bops-web', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:latest'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:feat-bops-planning'),
+      // Override upstream CMD to use our entrypoint with DB wait
+      command: ['bash', '/rails/entrypoint.sh'],
       logging: ecs.LogDrivers.awsLogs({
         logGroup: this.logGroup,
         streamPrefix: 'bops-web',
@@ -200,13 +205,14 @@ export class ComputeConstruct extends Construct {
     });
 
     bopsWorkerTaskDef.addContainer('bops-worker', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:latest'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:feat-bops-planning'),
       logging: ecs.LogDrivers.awsLogs({
         logGroup: this.logGroup,
         streamPrefix: 'bops-worker',
       }),
       environment: bopsCommonEnv,
-      command: ['bundle', 'exec', 'sidekiq'],
+      // Wait for DB before starting Sidekiq (needs DB connection on boot)
+      command: ['bash', '-c', 'until pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USER" 2>/dev/null; do echo "Waiting for database..." && sleep 5; done && bundle exec sidekiq'],
     });
 
     // ==========================================================================
@@ -224,7 +230,7 @@ export class ComputeConstruct extends Construct {
     });
 
     bopsApplicantsTaskDef.addContainer('bops-applicants', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops-applicants:latest'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops-applicants:feat-bops-planning'),
       // Upstream Dockerfile has no CMD — must provide one
       command: ['bundle', 'exec', 'rails', 'server', '-b', '0.0.0.0', '-p', '80'],
       logging: ecs.LogDrivers.awsLogs({
@@ -361,13 +367,13 @@ export class ComputeConstruct extends Construct {
     });
 
     seedTaskDef.addContainer('seed', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:latest'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:feat-bops-planning'),
       logging: ecs.LogDrivers.awsLogs({
         logGroup: this.logGroup,
         streamPrefix: 'bops-seed',
       }),
       environment: bopsCommonEnv,
-      command: ['bash', '/rails/scripts/seed-entrypoint.sh'],
+      command: ['bash', '-x', '/rails/scripts/seed-entrypoint.sh'],
       essential: true,
     });
 
@@ -413,8 +419,12 @@ export class ComputeConstruct extends Construct {
     seedCR.addPropertyOverride('SecurityGroups', [props.fargateSecurityGroup.securityGroupId]);
     seedCR.addPropertyOverride('Timestamp', Date.now().toString());
     seedCR.node.addDependency(seedRole);
-    // Seed needs Aurora (creates DBs) but NOT the ECS services
-    // Applicants service needs the seed (creates bops_applicants_production DB)
+    // Seed needs Aurora (creates DBs) but NOT the ECS services.
+    // ALL services need the seed to complete first — it runs db:create and db:migrate.
+    // Without this, services start before the database is ready/migrated, crash repeatedly,
+    // and the circuit breaker triggers a CloudFormation rollback.
+    bopsWebService.node.addDependency(seedCR);
+    bopsWorkerService.node.addDependency(seedCR);
     bopsApplicantsService.node.addDependency(seedCR);
   }
 }
@@ -427,7 +437,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 exports.handler=async(e)=>{const rp={Status:"SUCCESS",PhysicalResourceId:e.LogicalResourceId,StackId:e.StackId,RequestId:e.RequestId,LogicalResourceId:e.LogicalResourceId,Data:{}};
 try{if(e.RequestType==="Delete"){await send(e.ResponseURL,rp);return;}
 const p=e.ResourceProperties;const ecs=new ECSClient();
-console.log("Starting seed task...");
+console.log("Starting seed task (waiting 30s for IAM propagation)...");await sleep(30000);
 const r=await ecs.send(new RunTaskCommand({cluster:p.ClusterName,taskDefinition:p.TaskDefinitionArn,launchType:"FARGATE",networkConfiguration:{awsvpcConfiguration:{subnets:p.Subnets,securityGroups:p.SecurityGroups,assignPublicIp:"ENABLED"}}}));
 if(!r.tasks||r.tasks.length===0){const reason=r.failures?r.failures.map(f=>f.reason).join(", "):"unknown";throw new Error("RunTask failed: "+reason);}
 const taskArn=r.tasks[0].taskArn;const cluster=taskArn.split("/")[1];
@@ -436,8 +446,8 @@ for(let i=0;i<28;i++){await sleep(30000);
 const d=await ecs.send(new DescribeTasksCommand({cluster,tasks:[taskArn]}));
 const t=d.tasks&&d.tasks[0];if(!t){console.log("Task not found");break;}
 console.log("Poll",i+1,"status:",t.lastStatus);
-if(t.lastStatus==="STOPPED"){const exit=t.containers&&t.containers[0]?t.containers[0].exitCode:null;
-if(exit!==0){throw new Error("Seed task failed with exit code "+exit);}
+if(t.lastStatus==="STOPPED"){console.log("Task stoppedReason:",t.stoppedReason);console.log("Task stopCode:",t.stopCode);if(t.containers){t.containers.forEach(c=>console.log("Container",c.name,"exitCode:",c.exitCode,"reason:",c.reason));}const exit=t.containers&&t.containers[0]?t.containers[0].exitCode:null;
+if(exit!==0){throw new Error("Seed task failed with exit code "+exit+". stoppedReason: "+(t.stoppedReason||"none")+". containerReason: "+(t.containers&&t.containers[0]?t.containers[0].reason:"none"));}
 console.log("Seed complete");rp.PhysicalResourceId=taskArn;await send(e.ResponseURL,rp);return;}}
 throw new Error("Seed task did not complete within timeout");}catch(err){console.error(err);rp.Status="FAILED";rp.Reason=err.message;await send(e.ResponseURL,rp)}};
 function send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);const o=new URL(u);const opts={hostname:o.hostname,port:443,path:o.pathname+o.search,method:"PUT",headers:{"Content-Type":"","Content-Length":b.length}};const req=https.request(opts,ok);req.on("error",fail);req.write(b);req.end()})}`;
