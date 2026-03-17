@@ -30,6 +30,10 @@
             "pattern": "^[a-z0-9-]+$",
             "description": "URL-safe unique identifier for the scenario"
           },
+          "hidden": {
+            "type": "boolean",
+            "description": "If true, scenario is excluded from navigation and listing pages"
+          },
           "name": {
             "type": "string",
             "minLength": 3,
