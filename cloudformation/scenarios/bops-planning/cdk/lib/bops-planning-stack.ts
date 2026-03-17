@@ -201,8 +201,8 @@ export class BopsPlanningStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'ApplicantsPortalUrl', {
-      description: 'BOPS-Applicants public portal URL',
-      value: `http://${compute.loadBalancerDnsName}:8080`,
+      description: 'BOPS-Applicants public portal URL (HTTPS via CloudFront)',
+      value: `https://${cdn.applicantsDomainName}`,
     });
 
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {

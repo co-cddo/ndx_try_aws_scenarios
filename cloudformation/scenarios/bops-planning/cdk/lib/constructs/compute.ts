@@ -203,24 +203,20 @@ export class ComputeConstruct extends Construct {
       },
     });
 
+    // Applicants boot: disable force_ssl, wait for DB, migrate, start
+    const applicantsBootScript = 'sed -i "s/config.force_ssl = true/config.force_ssl = false/" /app/config/environments/production.rb && ' +
+      'echo "force_ssl disabled" && ' +
+      'echo "Waiting for bops_applicants_production..." && ' +
+      "for i in $(seq 1 48); do if su app -c 'bundle exec ruby -e \"require \\\"pg\\\"; PG.connect(ENV[\\\"DATABASE_URL\\\"])\"' 2>/dev/null; then break; fi; echo \"Attempt $i/48\"; sleep 15; done && " +
+      'echo "DB ready" && ' +
+      'su app -c "bundle exec rails db:migrate" 2>&1 || echo "Migration skipped" && ' +
+      'echo "Starting applicants server..." && ' +
+      'exec su app -c "bundle exec rails server -b 0.0.0.0 -p 3000"';
+
     bopsApplicantsTaskDef.addContainer('bops-applicants', {
       image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops-applicants:feat-bops-planning'),
       user: 'root',
-      command: ['bash', '-c', [
-        // Disable SSL (HTTP-only, no CloudFront for applicants)
-        'sed -i "s/config.assume_ssl = true/config.assume_ssl = false/" /app/config/environments/production.rb',
-        'sed -i "s/config.force_ssl = true/config.force_ssl = false/" /app/config/environments/production.rb',
-        'echo "SSL disabled"',
-        // Wait for DB using ruby pg gem (no pg_isready in this image)
-        'echo "Waiting for bops_applicants_production..."',
-        'for i in $(seq 1 48); do if su app -c "bundle exec ruby -e \\"require \'pg\'; PG.connect(ENV[\'DATABASE_URL\\'])\\"" 2>/dev/null; then break; fi; echo "Attempt $i/48"; sleep 15; done',
-        'echo "DB ready"',
-        // Run migrations
-        'su app -c "bundle exec rails db:migrate" 2>&1 || echo "Migration skipped"',
-        // Start server as app user
-        'echo "Starting applicants server..."',
-        'exec su app -c "bundle exec rails server -b 0.0.0.0 -p 3000"',
-      ].join(' && ')],
+      command: ['bash', '-c', applicantsBootScript],
       logging: ecs.LogDrivers.awsLogs({ logGroup: this.logGroup, streamPrefix: 'bops-applicants' }),
       environment: {
         RAILS_ENV: 'production',
