@@ -19,6 +19,7 @@ description: Answer 3 quick questions to discover the AWS scenario that best mat
     </p>
     <div class="ndx-scenario-grid">
       {% for scenario in scenarios.scenarios %}
+        {% if not scenario.hidden %}
         <div class="ndx-scenario-card">
           <div class="ndx-scenario-card__content">
             <h3 class="govuk-heading-s govuk-!-margin-bottom-2">
@@ -31,6 +32,7 @@ description: Answer 3 quick questions to discover the AWS scenario that best mat
             </p>
           </div>
         </div>
+        {% endif %}
       {% endfor %}
     </div>
   </noscript>

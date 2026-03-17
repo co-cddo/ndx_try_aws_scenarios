@@ -83,8 +83,10 @@ description: Browse all 6 AWS evaluation scenarios designed for UK local governm
 {# Scenario grid #}
 <div class="ndx-scenario-grid js-scenario-grid">
   {% for scenario in scenarios.scenarios %}
-    {% set scenario = scenario %}
-    {% include "components/scenario-card.njk" %}
+    {% if not scenario.hidden %}
+      {% set scenario = scenario %}
+      {% include "components/scenario-card.njk" %}
+    {% endif %}
   {% endfor %}
 </div>
 

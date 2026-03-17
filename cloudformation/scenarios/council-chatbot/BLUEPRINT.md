@@ -9,6 +9,7 @@ Register the NDX:Try Council Chatbot scenario as an Innovation Sandbox (ISB) blu
 - ISB namespace known (referred to as `{NAMESPACE}` below)
 - An S3 bucket accessible from the hub account for hosting the template (referred to as `{BUCKET}` in region `{REGION}`)
 - Amazon Bedrock model `amazon.nova-pro-v1:0` enabled in `us-east-1` in sandbox accounts
+- Amazon Bedrock model `amazon.titan-embed-text-v2:0` enabled in `us-east-1` in sandbox accounts
 
 ## Step 1 — Upload Template to S3
 
@@ -47,7 +48,7 @@ Notes:
 3. Select the `ndx-try-council-chatbot` StackSet
 4. Configure deployment:
    - Select target regions (template is designed for `us-east-1` due to Bedrock model availability)
-   - Set timeout: **15 minutes** recommended for this lightweight template
+   - Set timeout: **20 minutes** recommended for this lightweight template
 5. Review and submit
 
 ## Step 4 — Associate with Lease Template
@@ -67,5 +68,8 @@ Notes:
    - IAM role `ndx-try-chatbot-role-{region}`
    - Bedrock Guardrail is READY (`ndx-try-council-guardrail-{region}`)
    - Sample council documents seeded in S3 bucket under `documents/` prefix
+   - Bedrock Knowledge Base status is ACTIVE
+   - Data source sync completed successfully (31 documents indexed)
+   - Knowledge Base ID visible in stack outputs
 4. Open the Lambda Function URL and verify the chatbot responds to queries
 5. Terminate the test lease and verify ISB cleans up all resources via AWS Nuke

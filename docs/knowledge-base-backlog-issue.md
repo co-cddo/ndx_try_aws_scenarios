@@ -1,3 +1,5 @@
+> **Status: IMPLEMENTED** — Merged in v3.0.0 of the council chatbot template. The implementation uses S3 Vectors storage (not AOSS), with 31 council documents indexed via Bedrock Knowledge Base. The ISB SCP blocking issue was resolved.
+
 # Add Bedrock Knowledge Base with RAG to Council Chatbot
 
 ## Context

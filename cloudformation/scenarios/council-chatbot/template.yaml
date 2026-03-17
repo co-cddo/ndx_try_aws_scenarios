@@ -2,8 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: |
   NDX:Try - Council Chatbot Scenario (Sandbox)
-  AI-powered resident Q&A with Bedrock Guardrails and council document retrieval.
-  Version: 2.0.0
+  AI-powered resident Q&A with Bedrock Knowledge Base, Guardrails, and RAG retrieval.
+  Version: 3.0.0
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -51,6 +51,24 @@ Resources:
           Value: council-chatbot
         - Key: AutoCleanup
           Value: 'true'
+
+  # S3 Vectors storage for Knowledge Base embeddings
+  KnowledgeBaseVectorBucket:
+    Type: AWS::S3Vectors::VectorBucket
+    DeletionPolicy: Delete
+    Properties:
+      VectorBucketName: !Sub 'ndx-try-chatbot-vectors-${AWS::AccountId}-${AWS::Region}'
+
+  KnowledgeBaseVectorIndex:
+    Type: AWS::S3Vectors::Index
+    DeletionPolicy: Delete
+    DependsOn: KnowledgeBaseVectorBucket
+    Properties:
+      VectorBucketName: !Sub 'ndx-try-chatbot-vectors-${AWS::AccountId}-${AWS::Region}'
+      IndexName: council-kb-index
+      DataType: float32
+      Dimension: 1024
+      DistanceMetric: cosine
 
   # Bedrock Guardrail for content safety
   CouncilGuardrail:
@@ -149,10 +167,113 @@ Resources:
     Properties:
       GuardrailIdentifier: !GetAtt CouncilGuardrail.GuardrailArn
 
+  # IAM Role for Bedrock Knowledge Base service
+  KnowledgeBaseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'InnovationSandbox-ndx-chatbot-kb-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: bedrock.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnLike:
+                AWS:SourceArn: !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/*'
+      Policies:
+        - PolicyName: BedrockModelAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:ListFoundationModels
+                  - bedrock:ListCustomModels
+                Resource: '*'
+              - Effect: Allow
+                Action: bedrock:InvokeModel
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v2:0'
+        - PolicyName: S3DataSourceAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !GetAtt KnowledgeBaseBucket.Arn
+                Condition:
+                  StringEquals:
+                    aws:ResourceAccount: !Ref AWS::AccountId
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub '${KnowledgeBaseBucket.Arn}/*'
+                Condition:
+                  StringEquals:
+                    aws:ResourceAccount: !Ref AWS::AccountId
+        - PolicyName: S3VectorsAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3vectors:PutVectors
+                  - s3vectors:GetVectors
+                  - s3vectors:DeleteVectors
+                  - s3vectors:QueryVectors
+                  - s3vectors:GetIndex
+                Resource: !Sub 'arn:aws:s3vectors:${AWS::Region}:${AWS::AccountId}:bucket/ndx-try-chatbot-vectors-${AWS::AccountId}-${AWS::Region}/index/council-kb-index'
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: council-chatbot
+
+  # Bedrock Knowledge Base with S3 Vectors storage
+  CouncilKnowledgeBase:
+    Type: AWS::Bedrock::KnowledgeBase
+    DependsOn:
+      - KnowledgeBaseRole
+      - KnowledgeBaseVectorIndex
+    Properties:
+      Name: !Sub 'ndx-try-council-kb-${AWS::Region}'
+      Description: Council service documents for RAG retrieval
+      RoleArn: !GetAtt KnowledgeBaseRole.Arn
+      KnowledgeBaseConfiguration:
+        Type: VECTOR
+        VectorKnowledgeBaseConfiguration:
+          EmbeddingModelArn: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v2:0'
+      StorageConfiguration:
+        Type: S3_VECTORS
+        S3VectorsConfiguration:
+          IndexArn: !GetAtt KnowledgeBaseVectorIndex.IndexArn
+      Tags:
+        Project: ndx-try
+        Scenario: council-chatbot
+
+  # S3 Data Source for Knowledge Base
+  CouncilDataSource:
+    Type: AWS::Bedrock::DataSource
+    DependsOn: CouncilKnowledgeBase
+    Properties:
+      Name: council-documents
+      KnowledgeBaseId: !Ref CouncilKnowledgeBase
+      DataDeletionPolicy: DELETE
+      DataSourceConfiguration:
+        Type: S3
+        S3Configuration:
+          BucketArn: !GetAtt KnowledgeBaseBucket.Arn
+          InclusionPrefixes:
+            - 'documents/'
+
   # Seed Data Lambda Role
   SeedDataRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub 'InnovationSandbox-ndx-chatbot-seed-${AWS::Region}'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -175,6 +296,16 @@ Resources:
                 Resource:
                   - !GetAtt KnowledgeBaseBucket.Arn
                   - !Sub '${KnowledgeBaseBucket.Arn}/*'
+        - PolicyName: BedrockIngestion
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:StartIngestionJob
+                  - bedrock:GetIngestionJob
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/*'
       Tags:
         - Key: Project
           Value: ndx-try
@@ -195,9 +326,11 @@ Resources:
       Environment:
         Variables:
           BUCKET_NAME: !Ref KnowledgeBaseBucket
+          KB_ID: !Ref CouncilKnowledgeBase
+          DS_ID: !GetAtt CouncilDataSource.DataSourceId
       Code:
         ZipFile: |
-          import json, boto3, urllib.request, os
+          import json, boto3, urllib.request, os, time
 
           s3 = boto3.client('s3')
 
@@ -622,17 +755,463 @@ Resources:
           Licences required for: dog breeding (3+ litters/year), pet shops, animal boarding, riding schools, dangerous wild animals.
           Fee: 150-400 pounds depending on licence type. Inspections required before licence granted.
 
-          Contact: licensing@samplecouncil.gov.uk or 01234-567-897"""
+          Contact: licensing@samplecouncil.gov.uk or 01234-567-897""",
+
+            "council-tax-faq.txt": """SAMPLE COUNCIL - COUNCIL TAX FREQUENTLY ASKED QUESTIONS
+
+          Q: When is my council tax bill due?
+          A: Bills are issued in March for the financial year starting 1 April. If paying by direct debit over 10 months, the first payment is in April. You can also choose 12 monthly instalments.
+
+          Q: I've just moved in - what should I do?
+          A: Notify us within 21 days at www.samplecouncil.gov.uk/council-tax or call 01234-567-891. We will calculate your bill from the date you moved in.
+
+          Q: Can I pay my council tax weekly?
+          A: We offer monthly direct debit (10 or 12 instalments), but not weekly payments. You can make additional payments at any time online.
+
+          Q: My circumstances have changed - will this affect my bill?
+          A: Yes, changes such as someone moving in or out, a death, or starting or finishing full-time education can affect your bill. Contact us within 21 days.
+
+          Q: What happens if I don't pay?
+          A: We will send reminders. If you still don't pay, we apply to the Magistrates Court for a Liability Order (83 pounds court cost added). This allows us to deduct from wages or benefits, use enforcement agents, or in extreme cases apply for committal to prison. Please contact us early if you are struggling to pay.
+
+          Q: Can I get a reduction if I'm on a low income?
+          A: Yes, apply for Council Tax Support (up to 80 percent reduction for working age, up to 100 percent for pension age). Apply online at www.samplecouncil.gov.uk/council-tax-support.
+
+          Contact: counciltax@samplecouncil.gov.uk or 01234-567-891""",
+
+            "waste-collection-faq.txt": """SAMPLE COUNCIL - WASTE AND RECYCLING FREQUENTLY ASKED QUESTIONS
+
+          Q: My bin wasn't collected today - what should I do?
+          A: Report it within 2 working days at www.samplecouncil.gov.uk/missed-collection or call 01234-567-890. We will return within 3 working days. Please leave your bin out until collected.
+
+          Q: How do I get a new or replacement bin?
+          A: Order online at www.samplecouncil.gov.uk/new-bin. Delivery takes 10 working days. Cost: 25 pounds for a replacement black or blue bin. Green bins are free when you sign up for garden waste.
+
+          Q: Can I put extra rubbish out beside my bin?
+          A: No, we only collect waste from the wheeled bin. Extra bags left beside the bin will not be collected. If you regularly have too much waste, consider a larger bin (available for households with 6 or more residents).
+
+          Q: What do I do with old batteries?
+          A: Place batteries in a small clear bag on top of your blue recycling bin on collection day. Do not put them loose inside the bin.
+
+          Q: My recycling bin was rejected - why?
+          A: Common reasons include food-contaminated items, plastic bags, nappies, or textiles in the blue bin. Remove the contamination and present the bin on your next collection day.
+
+          Contact: waste@samplecouncil.gov.uk or 01234-567-890""",
+
+            "housing-repairs-faq.txt": """SAMPLE COUNCIL - HOUSING REPAIRS FREQUENTLY ASKED QUESTIONS
+
+          Q: I have no heating or hot water - is this an emergency?
+          A: Yes, between October and April this is treated as an emergency repair. Call 01234-567-800 (24 hours). Between May and September, it is treated as urgent (3 working days).
+
+          Q: Who is responsible for repairs - me or the council?
+          A: The council is responsible for the structure, exterior, plumbing, electrical wiring, heating systems, and communal areas. You are responsible for internal decoration, minor fixtures (curtain rails, shelves), and replacing light bulbs.
+
+          Q: How long will my repair take?
+          A: Emergency: 2-4 hours. Urgent: 3 working days. Routine: 20 working days. Complex repairs requiring parts may take longer.
+
+          Q: Can I do my own repairs?
+          A: Yes for minor work such as painting and shelving. For gas, electrical, or structural work, you must use the council's approved contractors. Unauthorised alterations may affect your tenancy.
+
+          Q: My window is broken - will the council fix it?
+          A: If the damage is due to wear and tear or an attempted break-in, yes. If you or your household caused the damage, you may be charged for the repair.
+
+          Contact: repairs@samplecouncil.gov.uk or 01234-567-800""",
+
+            "planning-faq.txt": """SAMPLE COUNCIL - PLANNING FREQUENTLY ASKED QUESTIONS
+
+          Q: Do I need planning permission for a garden shed?
+          A: Usually no, if it meets Permitted Development rules: maximum 2.5m height, located behind the building line, and covering less than 50 percent of the garden. Different rules apply in conservation areas.
+
+          Q: How long does a planning application take?
+          A: Householder applications: 8 weeks. Minor applications: 8 weeks. Major applications: 13 weeks. These are statutory deadlines and most applications are decided within these timescales.
+
+          Q: Can I see planning applications for my area?
+          A: Yes, view the planning register at www.samplecouncil.gov.uk/planning-register. You can search by address, application number, or view weekly lists.
+
+          Q: My neighbour's extension blocks my light - can I object?
+          A: You can comment on any planning application during the 21-day consultation period. Loss of light is a material planning consideration. However, there is no legal right to light in planning law.
+
+          Q: Do I need permission to convert my garage?
+          A: If you are converting an integral garage to a habitable room, you usually need planning permission as it changes the front elevation. You will also need Building Regulations approval.
+
+          Contact: planning@samplecouncil.gov.uk or 01234-567-892""",
+
+            "schools-education-guide.txt": """SAMPLE COUNCIL - SCHOOLS AND EDUCATION GUIDE
+
+          School Admissions
+          Apply for school places at www.samplecouncil.gov.uk/school-admissions or call 01234-567-860.
+          Primary school (Reception year): Apply by 15 January, offers made on 16 April.
+          Secondary school (Year 7): Apply by 31 October, offers made on 1 March.
+          In-year transfers: Apply at any time, decisions within 15 school days.
+
+          Schools in the Borough
+          We have 24 primary schools, 5 secondary schools, and 1 special school. All school performance data and Ofsted reports are available at www.gov.uk/school-performance-tables.
+
+          Special Educational Needs and Disabilities (SEND)
+          If your child has additional needs, contact our SEND team: send@samplecouncil.gov.uk or 01234-567-861.
+          Education, Health and Care (EHC) plans: Apply via the SEND team. Assessment takes up to 20 weeks.
+
+          School Transport
+          Free transport for primary pupils living more than 2 miles from their nearest school, and secondary pupils living more than 3 miles. Additional support for SEND pupils.
+          Apply: www.samplecouncil.gov.uk/school-transport
+
+          Free School Meals
+          Children whose parents receive Universal Credit (with net earnings under 7,400 pounds) or other qualifying benefits are eligible. Apply online.
+
+          Contact: education@samplecouncil.gov.uk or 01234-567-860""",
+
+            "adult-social-care-guide.txt": """SAMPLE COUNCIL - ADULT SOCIAL CARE GUIDE
+
+          If you or someone you care for needs help with daily living, we can assess your needs and arrange support.
+
+          Requesting an Assessment
+          Anyone can request a care needs assessment. Call 01234-567-850 or visit www.samplecouncil.gov.uk/adult-care.
+          Assessments are free and usually completed within 28 days.
+
+          Types of Support Available
+          Home care: Help with washing, dressing, meals, and medication.
+          Day centres: Social activities and respite for carers.
+          Residential care: Full-time care in a care home.
+          Supported living: Help to live independently in your own home.
+          Equipment and adaptations: Grab rails, stairlifts, level-access showers.
+          Direct payments: Money to arrange your own care.
+
+          Paying for Care
+          If your savings are above 23,250 pounds, you will pay the full cost of care.
+          Between 14,250 and 23,250 pounds, you contribute from your savings.
+          Below 14,250 pounds, you pay from your income only (assessed individually).
+
+          Carers Support
+          If you care for someone, you are entitled to a carer's assessment. We can provide respite care, support groups, and emergency planning.
+          Carers helpline: 01234-567-851
+
+          Safeguarding
+          If you are concerned about an adult at risk of abuse or neglect, call 01234-567-850 immediately. In an emergency, call 999.
+
+          Contact: adult.care@samplecouncil.gov.uk or 01234-567-850""",
+
+            "childrens-services-guide.txt": """SAMPLE COUNCIL - CHILDREN'S SERVICES GUIDE
+
+          Early Years and Childcare
+          Free childcare: 15 hours per week for all 3-4 year olds. 30 hours for eligible working parents.
+          2-year-old funding: Free 15 hours for families on low incomes or qualifying benefits.
+          Find childcare: www.samplecouncil.gov.uk/childcare-search
+
+          Children's Centres
+          Five centres across the borough offering parenting support, health visitor sessions, stay-and-play groups, and adult learning. All services are free.
+
+          Safeguarding Children
+          If you are concerned about a child's safety or welfare:
+          During office hours: 01234-567-840 (Children's Social Care)
+          Out of hours: 01234-567-802 (Emergency Duty Team)
+          In immediate danger: Call 999
+          All concerns are treated confidentially and investigated by qualified social workers.
+
+          Fostering and Adoption
+          We urgently need foster carers, especially for teenagers and sibling groups.
+          Fostering enquiries: 01234-567-841 or fostering@samplecouncil.gov.uk
+          Adoption enquiries: 01234-567-842 or adoption@samplecouncil.gov.uk
+
+          Youth Services
+          Youth clubs for ages 11-19 at three locations. Activities include sports, arts, music, and mentoring.
+
+          Contact: childrens.services@samplecouncil.gov.uk or 01234-567-840""",
+
+            "community-safety-guide.txt": """SAMPLE COUNCIL - COMMUNITY SAFETY GUIDE
+
+          Anti-Social Behaviour (ASB)
+          Report ASB online at www.samplecouncil.gov.uk/report-asb or call 01234-567-880.
+          Types of ASB we deal with: noise nuisance, harassment, vandalism, fly-tipping, abandoned vehicles, drug dealing, intimidation.
+          We work with the police and housing associations to tackle persistent ASB using Community Protection Notices and injunctions.
+
+          Domestic Abuse
+          If you or someone you know is experiencing domestic abuse:
+          National helpline (24hr): 0808 2000 247
+          Local support: Sample Refuge 01234-567-881
+          In immediate danger: Call 999
+          We can help with emergency housing, legal support, and safety planning.
+
+          CCTV
+          We operate 150 CCTV cameras across the town centre, car parks, and key locations. Monitored 24 hours a day 7 days a week. Subject Access Requests for footage must be made within 30 days.
+
+          Neighbourhood Watch
+          Join or start a Neighbourhood Watch scheme. Contact community.safety@samplecouncil.gov.uk for support and resources.
+
+          Hate Crime
+          Report hate crime to the police on 101 (or 999 in emergency). Third-party reporting is available through our offices or online. All reports are taken seriously.
+
+          Contact: community.safety@samplecouncil.gov.uk or 01234-567-880""",
+
+            "christmas-bin-schedule.txt": """SAMPLE COUNCIL - CHRISTMAS AND NEW YEAR BIN COLLECTION SCHEDULE
+
+          Revised Collection Dates
+          If your normal collection day falls on a bank holiday, your collection will be delayed:
+          Wednesday 25 December (Christmas Day): Collected Saturday 28 December
+          Thursday 26 December (Boxing Day): Collected Sunday 29 December
+          Wednesday 1 January (New Year's Day): Collected Saturday 4 January
+          All other collection days remain unchanged. Normal schedules resume from Monday 6 January.
+
+          Extra Recycling
+          We expect more recycling over the Christmas period. If your blue bin is full:
+          Flatten all cardboard boxes.
+          Place extra recycling in clear bags next to your blue bin (Christmas period only).
+          Remove all wrapping paper that is NOT recyclable (metallic, glitter, or plastic-coated paper goes in the black bin).
+
+          Real Christmas Trees
+          Free collection service available in January. Register at www.samplecouncil.gov.uk/tree-collection by 10 January. Trees must be placed at the kerbside on your normal collection day. Remove all decorations and pot.
+          The Household Waste Recycling Centre is closed on 25-26 December and 1 January only.
+
+          Contact: waste@samplecouncil.gov.uk or 01234-567-890""",
+
+            "summer-activities-guide.txt": """SAMPLE COUNCIL - SUMMER ACTIVITIES AND EVENTS GUIDE
+
+          Summer Holiday Activities for Children
+          Our leisure centres and parks offer activities during the school holidays (late July to early September):
+          Sports camps (ages 5-14): Multi-sport, football, tennis, swimming. Book at the leisure centre.
+          Play schemes (ages 5-11): Free play sessions in parks and community centres.
+          Holiday Activity and Food programme (HAF): Free for children receiving free school meals. Register at www.samplecouncil.gov.uk/haf.
+
+          Outdoor Events
+          Music in the Park: Free concerts every Sunday in July and August at Victoria Park bandstand.
+          Summer Reading Challenge: Free for all children at our libraries. Complete the challenge to earn a medal and certificate.
+          Outdoor cinema: Two screenings per month in Victoria Park. Tickets 5 pounds.
+
+          Parks and Play Areas
+          All 15 parks are open from dawn to dusk. Paddling pools at Victoria Park and East Park are open 10am-5pm daily in July and August (weather permitting).
+
+          Swimming
+          Outdoor swim sessions at Sample Leisure Centre lido: May to September. Adult 5 pounds, child 3 pounds, family (2 adults and 2 children) 12 pounds.
+
+          Contact: events@samplecouncil.gov.uk or 01234-567-870""",
+
+            "flood-emergency-guide.txt": """SAMPLE COUNCIL - FLOOD EMERGENCY INFORMATION
+
+          Flood Risk
+          Parts of the borough are at risk of flooding from rivers and surface water. Check your flood risk at www.gov.uk/check-flood-risk.
+
+          Before a Flood
+          Sign up for free flood warnings from the Environment Agency: www.gov.uk/sign-up-for-flood-warnings or call 0345 988 1188.
+          Prepare a flood kit: torch, phone charger, medication, important documents, insurance details.
+          Know how to turn off gas, electricity, and water.
+
+          During a Flood
+          Call 999 if there is a danger to life.
+          Do not walk or drive through flood water (15cm can knock you over, 30cm can move a car).
+          Move to higher ground if advised.
+          Council emergency line: 01234-567-999.
+
+          After a Flood
+          Do not return to your property until advised it is safe.
+          Report flood damage: www.samplecouncil.gov.uk/flood-report or 01234-567-895.
+          We can provide sandbags for future protection (limited availability, priority given to vulnerable residents).
+          Council Tax discount may be available for uninhabitable properties. Contact 01234-567-891.
+
+          Contact: flooding@samplecouncil.gov.uk or 01234-567-895""",
+
+            "severe-weather-guide.txt": """SAMPLE COUNCIL - SEVERE WEATHER GUIDANCE
+
+          Snow and Ice
+          Priority gritting routes are treated when temperatures drop below zero. Map: www.samplecouncil.gov.uk/gritting-routes.
+          Report dangerous ice on pavements: 01234-567-895.
+          Grit bins on steep residential streets are refilled regularly during cold spells.
+          School closures are announced on our website and social media by 7:30am.
+
+          Heatwave Advice
+          Check on elderly and vulnerable neighbours.
+          Cool Centres open during heatwaves at libraries and community centres (air-conditioned).
+          Report concerns about vulnerable people: 01234-567-850.
+          Avoid outdoor exercise between 11am and 3pm during extreme heat.
+
+          High Winds and Storms
+          Secure loose items in gardens (trampolines, bins, furniture).
+          Report fallen trees blocking roads: 01234-567-895 (priority clearance within 2 hours for main roads).
+          Report damaged buildings: 01234-567-999 (out of hours emergency).
+          Power cuts: Contact your electricity provider or call 105.
+
+          Cancelled Services
+          During severe weather, some services may be affected including bin collections, street cleaning, and outdoor events. Check our website and social media for updates.
+
+          Contact: highways@samplecouncil.gov.uk or 01234-567-895""",
+
+            "birth-death-marriage-guide.txt": """SAMPLE COUNCIL - REGISTRATION SERVICES (BIRTHS, DEATHS, MARRIAGES)
+
+          Registering a Birth
+          Births must be registered within 42 days. Book an appointment at the Register Office.
+          Both parents' details can be included if married. Unmarried parents must both attend to include the father's details.
+          Register Office: Civic Centre, High Street, SM1 1AA
+          Appointments: www.samplecouncil.gov.uk/register-birth or 01234-567-865
+
+          Registering a Death
+          Deaths must be registered within 5 days (unless referred to the coroner). Book an appointment.
+          Bring: medical certificate of cause of death, deceased's birth certificate, NHS card, and marriage certificate if applicable.
+          Tell Us Once service available to notify multiple government departments in a single call.
+
+          Marriage and Civil Partnership
+          Notice of marriage: Both parties must give notice at their local register office at least 28 days before the ceremony.
+          Ceremony venues: Register Office (165 pounds), approved venues across the borough (fees vary).
+          Citizenship ceremonies: Held on the third Thursday of each month at the Civic Centre.
+
+          Certificates
+          Copies of birth, death, and marriage certificates: 11 pounds each (standard delivery 7 working days) or 35 pounds for priority (next working day).
+
+          Contact: registrars@samplecouncil.gov.uk or 01234-567-865""",
+
+            "dog-warden-stray-animals.txt": """SAMPLE COUNCIL - DOG WARDEN AND STRAY ANIMALS
+
+          Stray Dogs
+          If you find a stray dog, contact the Dog Warden: 01234-567-875 (Mon-Fri 8am-5pm).
+          Out of hours strays: Call 01234-567-999 (emergency line).
+          Stray dogs are held for 7 days. If unclaimed, they are rehomed through local rescue partners.
+          Collection fee for reclaimed dogs: 75 pounds plus 15 pounds per day kennelling.
+
+          Dog Fouling
+          Dog fouling is an offence. Fixed penalty: 100 pounds. Report persistent fouling hotspots online.
+          Dog waste bins are located in all parks. If a dog waste bin is full, use any litter bin.
+          All dog walkers must carry bags and clean up after their dogs in public areas.
+
+          Dangerous Dogs
+          Report dangerous or out-of-control dogs to the police on 101 (999 if immediate danger).
+          Banned breeds under the Dangerous Dogs Act: Pit Bull Terrier, Japanese Tosa, Dogo Argentino, Fila Brasileiro.
+
+          Microchipping
+          All dogs over 8 weeks old must be microchipped by law. Free microchipping events are held quarterly at council offices.
+
+          Dog Control Orders
+          Dogs must be kept on leads in cemeteries, playing fields, and marked areas in parks.
+          Dogs are excluded from children's play areas and formal gardens.
+
+          Contact: dogwarden@samplecouncil.gov.uk or 01234-567-875""",
+
+            "parks-allotments-guide.txt": """SAMPLE COUNCIL - PARKS AND ALLOTMENTS DETAILED GUIDE
+
+          Our Parks
+          We maintain 15 parks across the borough, from small pocket parks to Victoria Park (20 acres).
+          All parks are open from dawn to dusk. No entry fee.
+
+          Victoria Park (SM1 3CC)
+          Our flagship park with playground, skate park, tennis courts (book online, 6 pounds per hour), bowling green, bandstand, and cafe. Friends of Victoria Park volunteer group meets monthly.
+
+          Play Areas
+          8 equipped play areas for ages 2-14. Inspected weekly. Report damaged equipment online or call 01234-567-870.
+
+          Allotments
+          We manage 4 allotment sites with 200 plots total.
+          Full plot (250 sq m): 65 pounds per year.
+          Half plot (125 sq m): 35 pounds per year.
+          Concession rate (over 65 or registered disabled): 50 percent discount.
+          Waiting list: Apply at www.samplecouncil.gov.uk/allotments. Average wait approximately 2 years.
+          Plots not cultivated for 6 months may be reclaimed.
+
+          Tree Planting
+          We plant approximately 200 new trees per year. Request a tree for your street at www.samplecouncil.gov.uk/tree-request.
+
+          Contact: parks@samplecouncil.gov.uk or 01234-567-870""",
+
+            "council-meeting-schedule.txt": """SAMPLE COUNCIL - COUNCIL MEETINGS AND DEMOCRACY
+
+          Council Meetings
+          Full Council meets on the first Wednesday of every month at 7pm in the Council Chamber, Civic Centre.
+          Cabinet meets on the third Tuesday of every month at 6pm.
+          Planning Committee meets on the second Thursday of every month at 6pm.
+          All meetings are open to the public. Agendas published 5 working days before each meeting.
+
+          Public Questions
+          Members of the public can ask questions at Full Council meetings. Submit questions at least 3 working days before the meeting to democratic.services@samplecouncil.gov.uk.
+
+          Petitions
+          Submit petitions with 25 or more signatures to trigger a council response. Petitions with 1,000 or more signatures trigger a Full Council debate.
+          Submit online: www.samplecouncil.gov.uk/petitions
+
+          Your Councillors
+          The borough has 36 councillors representing 12 wards (3 per ward). Find your councillor at www.samplecouncil.gov.uk/find-councillor.
+          Councillor surgeries are held regularly in each ward. Check your councillor's page for times and locations.
+
+          Freedom of Information
+          Submit FOI requests at foi@samplecouncil.gov.uk. Response within 20 working days.
+
+          Contact: democratic.services@samplecouncil.gov.uk or 01234-567-866""",
+
+            "accessibility-services-guide.txt": """SAMPLE COUNCIL - ACCESSIBILITY AND INCLUSIVE SERVICES
+
+          Our Commitment
+          We are committed to making all council services accessible. We hold the Disability Confident Leader accreditation.
+
+          Communication
+          Documents available in large print, audio, Braille, and Easy Read on request.
+          British Sign Language (BSL) interpretation available for appointments (book 5 working days in advance).
+          Telephone relay service (TextRelay): Dial 18001 followed by the council number.
+          Language interpretation available for over 100 languages.
+
+          Physical Access
+          All council buildings have step-free access, accessible toilets, and hearing loops.
+          Blue Badge parking spaces at all council buildings.
+          Changing Places facility at the Civic Centre and Sample Leisure Centre.
+
+          Online Access
+          Our website meets WCAG 2.1 AA standards. Report accessibility issues to webteam@samplecouncil.gov.uk.
+          Screen reader compatible forms available for all online services.
+
+          Disabled Facilities Grants
+          Grants up to 30,000 pounds for home adaptations (ramps, stairlifts, wet rooms, door widening). Means-tested for adults, not means-tested for children.
+          Apply: www.samplecouncil.gov.uk/dfg or call 01234-567-850.
+
+          Contact: accessibility@samplecouncil.gov.uk or 01234-567-890""",
+
+            "business-rates-guide.txt": """SAMPLE COUNCIL - BUSINESS RATES GUIDE
+
+          What are Business Rates?
+          Business rates (National Non-Domestic Rates) are the way businesses and other non-domestic property occupiers contribute towards the cost of local services.
+
+          How Rates are Calculated
+          Your rates are based on the rateable value (RV) set by the Valuation Office Agency (VOA) multiplied by the rate multiplier set by government.
+          2024-25 standard multiplier: 51.2p. Small business multiplier: 49.9p.
+          Example: Property with RV of 20,000 pounds = 20,000 x 0.499 = 9,980 pounds per year.
+
+          Small Business Rate Relief
+          If your property has a rateable value below 15,000 pounds, you may qualify for Small Business Rate Relief (up to 100 percent for RV under 12,000 pounds, tapered to 0 percent at 15,000 pounds).
+          Apply: www.samplecouncil.gov.uk/business-rates-relief
+
+          Other Reliefs Available
+          Charitable relief: 80 percent mandatory plus 20 percent discretionary for registered charities.
+          Empty property relief: 3 months for commercial, 6 months for industrial.
+          Retail, hospitality, and leisure relief: 75 percent discount (current government scheme).
+          Hardship relief: Discretionary relief for businesses in financial difficulty.
+
+          Payment
+          Pay monthly by direct debit over 10 or 12 instalments. Online payment also available.
+
+          Contact: businessrates@samplecouncil.gov.uk or 01234-567-891"""
           }
 
           def handler(event, context):
               request_type = event.get('RequestType', 'Create')
               bucket = os.environ['BUCKET_NAME']
+              kb_id = os.environ.get('KB_ID', '')
+              ds_id = os.environ.get('DS_ID', '')
               try:
                   if request_type in ('Create', 'Update'):
                       for key, content in DOCUMENTS.items():
                           s3.put_object(Bucket=bucket, Key=f'documents/{key}', Body=content.strip(), ContentType='text/plain')
                       print(f'Uploaded {len(DOCUMENTS)} documents to {bucket}')
+                      if kb_id and ds_id:
+                          bedrock_agent = boto3.client('bedrock-agent')
+                          resp = bedrock_agent.start_ingestion_job(knowledgeBaseId=kb_id, dataSourceId=ds_id)
+                          job_id = resp['ingestionJob']['ingestionJobId']
+                          print(f'Started ingestion job {job_id}')
+                          for _ in range(24):
+                              time.sleep(10)
+                              job = bedrock_agent.get_ingestion_job(knowledgeBaseId=kb_id, dataSourceId=ds_id, ingestionJobId=job_id)
+                              status = job['ingestionJob']['status']
+                              print(f'Ingestion status: {status}')
+                              if status == 'COMPLETE':
+                                  stats = job['ingestionJob'].get('statistics', {})
+                                  print(f'Ingestion complete: {stats}')
+                                  break
+                              if status == 'FAILED':
+                                  reasons = job['ingestionJob'].get('failureReasons', ['Unknown'])
+                                  raise Exception(f'Ingestion failed: {reasons}')
+                          else:
+                              print('Ingestion still in progress, returning SUCCESS (will complete async)')
                   elif request_type == 'Delete':
                       objs = s3.list_objects_v2(Bucket=bucket, Prefix='documents/')
                       if 'Contents' in objs:
@@ -656,17 +1235,17 @@ Resources:
   # Seed Data Custom Resource
   SeedData:
     Type: Custom::SeedData
-    DependsOn: KnowledgeBaseBucket
+    DependsOn: CouncilDataSource
     Properties:
       ServiceToken: !GetAtt SeedDataFunction.Arn
       # Change this value to trigger re-seeding on stack update
-      Version: '1'
+      Version: '2'
 
   # IAM Role for Lambda
   ChatbotRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'ndx-try-chatbot-role-${AWS::Region}'
+      RoleName: !Sub 'InnovationSandbox-ndx-chatbot-handler-${AWS::Region}'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -677,17 +1256,6 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
-        - PolicyName: S3Access
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:ListBucket
-                Resource:
-                  - !GetAtt KnowledgeBaseBucket.Arn
-                  - !Sub '${KnowledgeBaseBucket.Arn}/*'
         - PolicyName: BedrockAccess
           PolicyDocument:
             Version: '2012-10-17'
@@ -706,18 +1274,27 @@ Resources:
                   - bedrock:ApplyGuardrail
                 Resource:
                   - !GetAtt CouncilGuardrail.GuardrailArn
+        - PolicyName: KnowledgeBaseAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:RetrieveAndGenerate
+                  - bedrock:Retrieve
+                Resource: '*'
       Tags:
         - Key: Project
           Value: ndx-try
         - Key: Scenario
           Value: council-chatbot
 
-  # Lambda Function - Chatbot Handler (Amazon Nova Pro with Guardrails)
+  # Lambda Function - Chatbot Handler (Amazon Nova Pro with Knowledge Base + Guardrails)
   ChatbotFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub 'ndx-try-chatbot-handler-${AWS::Region}'
-      Description: Council chatbot using Amazon Nova Pro with Guardrails
+      Description: Council chatbot using Amazon Nova Pro with Knowledge Base RAG and Guardrails
       Runtime: python3.12
       Handler: index.lambda_handler
       Role: !GetAtt ChatbotRole.Arn
@@ -725,7 +1302,7 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
-          KNOWLEDGE_BUCKET: !Ref KnowledgeBaseBucket
+          KNOWLEDGE_BASE_ID: !Ref CouncilKnowledgeBase
           ENVIRONMENT: !Ref Environment
           BEDROCK_MODEL_ID: amazon.nova-pro-v1:0
           GUARDRAIL_ID: !GetAtt CouncilGuardrail.GuardrailId
@@ -735,92 +1312,106 @@ Resources:
           import json, os, boto3
           from datetime import datetime
 
-          bedrock = boto3.client('bedrock-runtime')
-          s3 = boto3.client('s3')
+          bedrock_agent = boto3.client('bedrock-agent-runtime')
 
-          BUCKET = os.environ.get('KNOWLEDGE_BUCKET', '')
+          KB_ID = os.environ.get('KNOWLEDGE_BASE_ID', '')
           GUARDRAIL_ID = os.environ.get('GUARDRAIL_ID', '')
           GUARDRAIL_VERSION = os.environ.get('GUARDRAIL_VERSION', '')
           MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'amazon.nova-pro-v1:0')
+          REGION = os.environ.get('AWS_REGION', 'us-east-1')
+          MODEL_ARN = f'arn:aws:bedrock:{REGION}::foundation-model/{MODEL_ID}'
 
-          _docs_cache = None
-
-          def load_documents():
-              global _docs_cache
-              if _docs_cache is not None:
-                  return _docs_cache
-              try:
-                  resp = s3.list_objects_v2(Bucket=BUCKET, Prefix='documents/')
-                  docs = []
-                  for obj in resp.get('Contents', []):
-                      if obj['Key'].endswith('.txt'):
-                          body = s3.get_object(Bucket=BUCKET, Key=obj['Key'])['Body'].read().decode('utf-8')
-                          docs.append(body)
-                  _docs_cache = '\n\n---\n\n'.join(docs)
-                  print(f'Loaded {len(docs)} documents')
-                  return _docs_cache
-              except Exception as e:
-                  print(f'Doc load error: {e}')
-                  _docs_cache = ''
-                  return ''
-
-          SYSTEM_PROMPT_TEMPLATE = """You are a helpful UK local council service assistant for Sample Council.
+          SYSTEM_PROMPT = """You are a helpful UK local council service assistant for Sample Council.
           You help residents with council services including waste collection, council tax,
-          planning, housing, parking, roads, and general enquiries.
+          planning, housing, parking, roads, schools, social care, and general enquiries.
           Keep responses concise (under 200 words), friendly, and helpful.
           Use bullet points for readability. Include contact details where appropriate.
-          If you don't know specific details, suggest contacting the council directly.
-          Use ONLY the following council documents to answer questions. If the answer is not
-          in the documents, say you don't have that specific information and suggest contacting
+          Answer ONLY based on the following search results. If the answer is not in the
+          search results, say you don't have that specific information and suggest contacting
           the council directly.
 
-          COUNCIL DOCUMENTS:
-          {documents}"""
+          $search_results$"""
 
-          def get_response(user_message, history=None):
-              try:
-                  documents = load_documents()
-                  system_text = SYSTEM_PROMPT_TEMPLATE.format(documents=documents)
-                  messages = []
-                  if history:
-                      for msg in history[-10:]:
-                          role = 'assistant' if msg.get('role') == 'assistant' else 'user'
-                          text = msg.get('text', '')
-                          if text:
-                              messages.append({"role": role, "content": [{"text": text}]})
-                  # Strip leading assistant messages (Converse API requires user-first)
-                  while messages and messages[0]['role'] != 'user':
-                      messages.pop(0)
-                  messages.append({"role": "user", "content": [{"text": user_message}]})
-                  params = {
-                      "modelId": MODEL_ID,
-                      "messages": messages,
-                      "system": [{"text": system_text}],
-                      "inferenceConfig": {"maxTokens": 1024, "temperature": 0.7}
-                  }
-                  if GUARDRAIL_ID and GUARDRAIL_VERSION:
-                      params["guardrailConfig"] = {
-                          "guardrailIdentifier": GUARDRAIL_ID,
-                          "guardrailVersion": GUARDRAIL_VERSION
-                      }
-                  response = bedrock.converse(**params)
-                  guardrail_active = response.get('stopReason') == 'guardrail_intervened'
-                  output_text = response['output']['message']['content'][0]['text']
-                  return {'success': True, 'response': output_text, 'guardrail': guardrail_active}
-              except Exception as e:
-                  print(f"Bedrock error: {e}")
-                  return {'success': False, 'error': str(e)}
+          TOPIC_MAP = {
+              'waste-collection': 'Bin Collections', 'council-tax': 'Council Tax',
+              'planning': 'Planning', 'housing': 'Housing', 'parking': 'Parking',
+              'roads-highways': 'Roads & Highways', 'contact': 'Contact Us',
+              'environmental': 'Environmental', 'libraries-leisure': 'Libraries & Leisure',
+              'benefits-support': 'Benefits & Support', 'elections': 'Elections',
+              'licensing': 'Licensing', 'schools-education': 'Education',
+              'adult-social-care': 'Social Care', 'childrens-services': "Children's Services",
+              'community-safety': 'Community Safety', 'christmas-bin': 'Bin Collections',
+              'summer-activities': 'Events', 'flood': 'Emergencies',
+              'severe-weather': 'Emergencies', 'birth-death-marriage': 'Registration',
+              'dog-warden': 'Animal Services', 'parks-allotments': 'Parks',
+              'council-meeting': 'Council Meetings', 'accessibility': 'Accessibility',
+              'business-rates': 'Business Rates', 'building-control': 'Building Control'
+          }
 
-          def get_topic_from_message(message):
-              m = message.lower()
-              if any(w in m for w in ['bin','waste','rubbish','recycling','collection']): return 'Bin Collections'
-              if any(w in m for w in ['council tax','payment','bill','discount']): return 'Council Tax'
-              if any(w in m for w in ['planning','application','build','extension','permission']): return 'Planning'
-              if any(w in m for w in ['housing','rent','repair','home','accommodation']): return 'Housing'
-              if any(w in m for w in ['parking','car park','permit','ticket']): return 'Parking'
-              if any(w in m for w in ['pothole','road','highway','street','pavement','light']): return 'Roads & Highways'
-              if any(w in m for w in ['contact','phone','email','hours','open']): return 'Contact Us'
+          def get_topic_from_citations(citations):
+              for c in citations:
+                  for ref in c.get('retrievedReferences', []):
+                      uri = ref.get('location', {}).get('s3Location', {}).get('uri', '')
+                      fname = uri.split('/')[-1].replace('.txt', '')
+                      for key, topic in TOPIC_MAP.items():
+                          if key in fname:
+                              return topic
               return 'General Enquiry'
+
+          def get_rag_response(user_message, session_id=None):
+              config = {
+                  'type': 'KNOWLEDGE_BASE',
+                  'knowledgeBaseConfiguration': {
+                      'knowledgeBaseId': KB_ID,
+                      'modelArn': MODEL_ARN,
+                      'retrievalConfiguration': {
+                          'vectorSearchConfiguration': {
+                              'numberOfResults': 5
+                          }
+                      },
+                      'generationConfiguration': {
+                          'inferenceConfig': {
+                              'textInferenceConfig': {
+                                  'maxTokens': 1024,
+                                  'temperature': 0.7
+                              }
+                          },
+                          'promptTemplate': {
+                              'textPromptTemplate': SYSTEM_PROMPT
+                          }
+                      }
+                  }
+              }
+              if GUARDRAIL_ID and GUARDRAIL_VERSION:
+                  config['knowledgeBaseConfiguration']['generationConfiguration']['guardrailConfiguration'] = {
+                      'guardrailId': GUARDRAIL_ID,
+                      'guardrailVersion': GUARDRAIL_VERSION
+                  }
+              kwargs = {
+                  'input': {'text': user_message},
+                  'retrieveAndGenerateConfiguration': config
+              }
+              if session_id:
+                  kwargs['sessionId'] = session_id
+              try:
+                  response = bedrock_agent.retrieve_and_generate(**kwargs)
+              except Exception as e:
+                  if session_id and ('session' in str(e).lower() or 'Validation' in str(e)):
+                      print(f'Session error, retrying: {e}')
+                      kwargs.pop('sessionId', None)
+                      response = bedrock_agent.retrieve_and_generate(**kwargs)
+                  else:
+                      raise
+              citations = response.get('citations', [])
+              topic = get_topic_from_citations(citations)
+              return {
+                  'success': True,
+                  'response': response['output']['text'],
+                  'sessionId': response.get('sessionId', ''),
+                  'citations': len(citations),
+                  'topic': topic,
+                  'guardrail': response.get('guardrailAction') == 'INTERVENED'
+              }
 
           def render_chat_html():
               return '''<!DOCTYPE html>
@@ -885,7 +1476,7 @@ Resources:
           </style>
           </head>
           <body>
-          <div class="banner">Powered by Amazon Nova Pro with Bedrock Guardrails</div>
+          <div class="banner">Powered by Amazon Bedrock Knowledge Base with Guardrails</div>
           <div class="header"><span style="font-size:14px;opacity:0.8">NDX:Try</span> Council Chatbot Demo</div>
           <div class="container">
           <div class="messages" id="messages" role="log" aria-live="polite" aria-atomic="false"></div>
@@ -901,26 +1492,28 @@ Resources:
           <script>
           var isProcessing=false;
           var loadingElement=null;
-          var conversationKey='ndx-chatbot-conversation';
+          var sessionKey='ndx-chatbot-session-id';
+          var displayKey='ndx-chatbot-display';
           var maxMessages=20;
-          var sampleQuestionsList=["What are my bin collection days?","How do I pay council tax?","I want to apply for planning permission","How do I report a pothole?","What are your opening hours?","How do I get a parking permit?"];
-          function getHistory(){try{var saved=sessionStorage.getItem(conversationKey);if(!saved)return[];var c=JSON.parse(saved);var h=[];for(var i=0;i<c.length;i++){var item=c[i];h.push({role:item.type==='user'?'user':'assistant',text:item.text})}return h.slice(-10)}catch(e){return[]}}
+          var sampleQuestionsList=["What are my bin collection days?","How do I pay council tax?","I want to apply for planning permission","How do I report a pothole?","What are your opening hours?","How do I get a parking permit?","Tell me about school admissions","What social care support is available?"];
+          function getSessionId(){return sessionStorage.getItem(sessionKey)||''}
+          function setSessionId(id){if(id)sessionStorage.setItem(sessionKey,id)}
           function announceStatus(msg){document.getElementById('statusMsg').textContent=msg}
           function scrollToBottom(){var msgs=document.getElementById('messages');msgs.scrollTop=msgs.scrollHeight}
           function setInputDisabled(d){document.getElementById('userInput').disabled=d;var btn=document.getElementById('sendBtn');btn.disabled=d;btn.textContent=d?'Sending...':'Send';var sq=document.querySelectorAll('.sample-question');for(var i=0;i<sq.length;i++)sq[i].disabled=d}
           function focusInput(){document.getElementById('userInput').focus()}
           function showLoading(){var msg=document.createElement('div');msg.className='message bot';msg.id='loadingMsg';var l=document.createElement('div');l.className='loading';l.setAttribute('aria-label','Waiting for response');l.innerHTML='<span></span><span></span><span></span>';msg.appendChild(l);loadingElement=msg;document.getElementById('messages').appendChild(msg);scrollToBottom()}
           function hideLoading(){if(loadingElement&&loadingElement.parentNode){loadingElement.parentNode.removeChild(loadingElement);loadingElement=null}}
-          function saveConversation(){try{var msgs=document.getElementById('messages').querySelectorAll('.message:not(#loadingMsg)');var c=[];for(var i=0;i<msgs.length;i++){var msg=msgs[i];var type=msg.classList.contains('user')?'user':'bot';var bubble=msg.querySelector('.bubble');if(!bubble)continue;var text=bubble.textContent;var topic=null;var badge=msg.querySelector('.topic-badge');if(badge)topic=badge.textContent;c.push({type:type,text:text,topic:topic})}if(c.length>maxMessages)c=c.slice(-maxMessages);sessionStorage.setItem(conversationKey,JSON.stringify(c))}catch(e){console.error('Save failed:',e)}}
-          function loadConversation(){try{var saved=sessionStorage.getItem(conversationKey);if(!saved)return false;var c=JSON.parse(saved);var md=document.getElementById('messages');for(var i=0;i<c.length;i++){var item=c[i];var msg=document.createElement('div');msg.className='message '+item.type;if(item.type==='bot'&&item.topic){var badge=document.createElement('div');badge.className='topic-badge';badge.textContent=item.topic;msg.appendChild(badge)}var bubble=document.createElement('div');bubble.className='bubble';if(item.text.indexOf('Unable to connect')!==-1||item.text.indexOf('Request timed out')!==-1||item.text.indexOf('API error')!==-1)bubble.className='bubble error-message';bubble.textContent=item.text;msg.appendChild(bubble);md.appendChild(msg)}scrollToBottom();return true}catch(e){return false}}
-          function clearConversation(){try{sessionStorage.removeItem(conversationKey);var md=document.getElementById('messages');md.innerHTML='';var w=document.createElement('div');w.className='message bot';var b=document.createElement('div');b.className='bubble';b.textContent="Hello! I'm the council chatbot. I can help with bin collections, council tax, planning, housing, parking, roads, and general enquiries. What would you like to know?";w.appendChild(b);md.appendChild(w);saveConversation();announceStatus('Conversation cleared');focusInput()}catch(e){console.error('Clear failed:',e)}}
-          function addUserMessage(text){var msg=document.createElement('div');msg.className='message user';var b=document.createElement('div');b.className='bubble';b.textContent=text;msg.appendChild(b);document.getElementById('messages').appendChild(msg);scrollToBottom();saveConversation()}
-          function displayBotResponse(data){var msg=document.createElement('div');msg.className='message bot';if(data.topic){var badge=document.createElement('div');badge.className='topic-badge';badge.textContent=data.topic;msg.appendChild(badge)}var b=document.createElement('div');b.className='bubble';b.textContent=data.response;msg.appendChild(b);if(data.guardrail){var meta=document.createElement('div');meta.className='meta';meta.textContent='guardrail active';msg.appendChild(meta)}document.getElementById('messages').appendChild(msg);scrollToBottom();announceStatus('Response received: '+data.topic);saveConversation()}
-          function displayError(e){var msg=document.createElement('div');msg.className='message bot';var b=document.createElement('div');b.className='bubble error-message';b.textContent=e;msg.appendChild(b);document.getElementById('messages').appendChild(msg);scrollToBottom();announceStatus('Error: '+e);saveConversation()}
-          async function sendMessage(text){if(isProcessing||!text.trim())return;isProcessing=true;try{setInputDisabled(true);announceStatus('Sending message');var hist=getHistory();addUserMessage(text);showLoading();var controller=new AbortController();var tid=setTimeout(function(){controller.abort()},30000);var response=await fetch(window.location.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,history:hist}),signal:controller.signal});clearTimeout(tid);hideLoading();if(!response.ok){var ed;try{ed=await response.json();displayError(ed.error||'API error: '+response.status)}catch(e){displayError('API error: '+response.status)}return}var data=await response.json();if(data.error){displayError(data.error)}else{displayBotResponse(data)}}catch(error){hideLoading();if(error.name==='AbortError'){displayError('Request timed out. Please try again.')}else{displayError('Unable to connect. Please try again.')}}finally{isProcessing=false;setInputDisabled(false);focusInput()}}
+          function saveDisplay(){try{var msgs=document.getElementById('messages').querySelectorAll('.message:not(#loadingMsg)');var c=[];for(var i=0;i<msgs.length;i++){var msg=msgs[i];var type=msg.classList.contains('user')?'user':'bot';var bubble=msg.querySelector('.bubble');if(!bubble)continue;var text=bubble.textContent;var topic=null;var badge=msg.querySelector('.topic-badge');if(badge)topic=badge.textContent;var meta=null;var metaEl=msg.querySelector('.meta');if(metaEl)meta=metaEl.textContent;c.push({type:type,text:text,topic:topic,meta:meta})}if(c.length>maxMessages)c=c.slice(-maxMessages);sessionStorage.setItem(displayKey,JSON.stringify(c))}catch(e){console.error('Save failed:',e)}}
+          function loadDisplay(){try{var saved=sessionStorage.getItem(displayKey);if(!saved)return false;var c=JSON.parse(saved);var md=document.getElementById('messages');for(var i=0;i<c.length;i++){var item=c[i];var msg=document.createElement('div');msg.className='message '+item.type;if(item.type==='bot'&&item.topic){var badge=document.createElement('div');badge.className='topic-badge';badge.textContent=item.topic;msg.appendChild(badge)}var bubble=document.createElement('div');bubble.className='bubble';if(item.text.indexOf('Unable to connect')!==-1||item.text.indexOf('Request timed out')!==-1||item.text.indexOf('API error')!==-1)bubble.className='bubble error-message';bubble.textContent=item.text;msg.appendChild(bubble);if(item.meta){var meta=document.createElement('div');meta.className='meta';meta.textContent=item.meta;msg.appendChild(meta)}md.appendChild(msg)}scrollToBottom();return true}catch(e){return false}}
+          function clearConversation(){try{sessionStorage.removeItem(sessionKey);sessionStorage.removeItem(displayKey);var md=document.getElementById('messages');md.innerHTML='';var w=document.createElement('div');w.className='message bot';var b=document.createElement('div');b.className='bubble';b.textContent="Hello! I'm the council chatbot. I can help with bin collections, council tax, planning, housing, parking, roads, schools, social care, and general enquiries. What would you like to know?";w.appendChild(b);md.appendChild(w);saveDisplay();announceStatus('Conversation cleared');focusInput()}catch(e){console.error('Clear failed:',e)}}
+          function addUserMessage(text){var msg=document.createElement('div');msg.className='message user';var b=document.createElement('div');b.className='bubble';b.textContent=text;msg.appendChild(b);document.getElementById('messages').appendChild(msg);scrollToBottom();saveDisplay()}
+          function displayBotResponse(data){var msg=document.createElement('div');msg.className='message bot';if(data.topic){var badge=document.createElement('div');badge.className='topic-badge';badge.textContent=data.topic;msg.appendChild(badge)}var b=document.createElement('div');b.className='bubble';b.textContent=data.response;msg.appendChild(b);var metaParts=[];if(data.guardrail)metaParts.push('guardrail active');if(data.citations>0)metaParts.push(data.citations+' source'+(data.citations>1?'s':''));if(metaParts.length>0){var meta=document.createElement('div');meta.className='meta';meta.textContent=metaParts.join(' | ');msg.appendChild(meta)}document.getElementById('messages').appendChild(msg);scrollToBottom();announceStatus('Response received: '+data.topic);saveDisplay()}
+          function displayError(e){var msg=document.createElement('div');msg.className='message bot';var b=document.createElement('div');b.className='bubble error-message';b.textContent=e;msg.appendChild(b);document.getElementById('messages').appendChild(msg);scrollToBottom();announceStatus('Error: '+e);saveDisplay()}
+          async function sendMessage(text){if(isProcessing||!text.trim())return;isProcessing=true;try{setInputDisabled(true);announceStatus('Sending message');addUserMessage(text);showLoading();var payload={message:text};var sid=getSessionId();if(sid)payload.sessionId=sid;var controller=new AbortController();var tid=setTimeout(function(){controller.abort()},30000);var response=await fetch(window.location.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});clearTimeout(tid);hideLoading();if(!response.ok){var ed;try{ed=await response.json();displayError(ed.error||'API error: '+response.status)}catch(e){displayError('API error: '+response.status)}return}var data=await response.json();if(data.error){displayError(data.error)}else{if(data.sessionId)setSessionId(data.sessionId);displayBotResponse(data)}}catch(error){hideLoading();if(error.name==='AbortError'){displayError('Request timed out. Please try again.')}else{displayError('Unable to connect. Please try again.')}}finally{isProcessing=false;setInputDisabled(false);focusInput()}}
           function handleSend(){var input=document.getElementById('userInput');var text=input.value.trim();if(text&&!isProcessing){input.value='';sendMessage(text)}}
           function renderSampleQuestions(){var c=document.getElementById('sampleQuestions');for(var i=0;i<sampleQuestionsList.length;i++){var btn=document.createElement('button');btn.className='sample-question';btn.textContent=sampleQuestionsList[i];btn.setAttribute('aria-label','Send this question: '+sampleQuestionsList[i]);btn.onclick=(function(q){return function(){if(!isProcessing)sendMessage(q)}})(sampleQuestionsList[i]);c.appendChild(btn)}}
-          window.onload=function(){var has=loadConversation();if(!has){var w=document.createElement('div');w.className='message bot';var b=document.createElement('div');b.className='bubble';b.textContent="Hello! I'm the council chatbot. I can help with bin collections, council tax, planning, housing, parking, roads, and general enquiries. What would you like to know?";w.appendChild(b);document.getElementById('messages').appendChild(w);saveConversation()}renderSampleQuestions();focusInput()};
+          window.onload=function(){var has=loadDisplay();if(!has){var w=document.createElement('div');w.className='message bot';var b=document.createElement('div');b.className='bubble';b.textContent="Hello! I'm the council chatbot. I can help with bin collections, council tax, planning, housing, parking, roads, schools, social care, and general enquiries. What would you like to know?";w.appendChild(b);document.getElementById('messages').appendChild(w);saveDisplay()}renderSampleQuestions();focusInput()};
           document.getElementById('sendBtn').onclick=handleSend;
           document.getElementById('clearBtn').onclick=clearConversation;
           document.getElementById('userInput').onkeypress=function(e){if(e.key==='Enter'&&!isProcessing)handleSend()};
@@ -939,9 +1532,8 @@ Resources:
                   if not user_message:
                       return {'statusCode': 400, 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'error': 'Message is required'})}
 
-                  history = body.get('history', [])
-                  result = get_response(user_message, history or None)
-                  topic = get_topic_from_message(user_message)
+                  session_id = body.get('sessionId', '') or None
+                  result = get_rag_response(user_message, session_id)
 
                   if not result.get('success'):
                       return {'statusCode': 500, 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}, 'body': json.dumps({'error': f"AI service error: {result.get('error', 'Unknown')}"})}
@@ -950,7 +1542,10 @@ Resources:
                       'statusCode': 200,
                       'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                       'body': json.dumps({
-                          'success': True, 'response': result['response'], 'topic': topic,
+                          'success': True, 'response': result['response'],
+                          'sessionId': result.get('sessionId', ''),
+                          'topic': result.get('topic', 'General Enquiry'),
+                          'citations': result.get('citations', 0),
                           'query': body.get('message', body.get('query', '')),
                           'timestamp': datetime.utcnow().isoformat(),
                           'model': 'Amazon Nova Pro', 'guardrail': result.get('guardrail', False)
@@ -1029,12 +1624,18 @@ Outputs:
     Description: Bedrock Guardrail ID
     Value: !GetAtt CouncilGuardrail.GuardrailId
 
+  KnowledgeBaseId:
+    Description: Bedrock Knowledge Base ID
+    Value: !Ref CouncilKnowledgeBase
+    Export:
+      Name: !Sub '${AWS::StackName}-KnowledgeBaseId'
+
   ScenarioInfo:
     Description: NDX:Try scenario information
     Value: !Sub |
       {
         "scenario": "council-chatbot",
         "environment": "${Environment}",
-        "mode": "Amazon Nova Pro with Guardrails",
-        "note": "Council document retrieval with content safety guardrails"
+        "mode": "Amazon Nova Pro with Knowledge Base RAG and Guardrails",
+        "note": "Bedrock Knowledge Base with vector search, RAG retrieval, and content safety guardrails"
       }

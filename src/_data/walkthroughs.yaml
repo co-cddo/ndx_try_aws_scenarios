@@ -50,10 +50,10 @@ walkthroughs:
         time: "3 minutes"
 
   council-chatbot:
-    totalSteps: 4
+    totalSteps: 5
     url: "/walkthroughs/council-chatbot/"
     title: "Council Chatbot Walkthrough"
-    duration: "10 minutes"
+    duration: "15 minutes"
     hasWalkthrough: true
     category: "ai"
     steps:
@@ -61,6 +61,7 @@ walkthroughs:
       - title: "First question answered"
       - title: "Custom question tested"
       - title: "AI behaviour understood"
+      - title: "Knowledge base updated"
 
   planning-ai:
     totalSteps: 4

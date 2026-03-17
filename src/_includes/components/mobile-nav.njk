@@ -66,12 +66,14 @@
       <div id="mobile-nav-scenarios" class="ndx-mobile-nav__accordion-content">
         <ul class="ndx-mobile-nav__sublist">
           {% for scenario in scenarios.scenarios %}
-            <li class="ndx-mobile-nav__subitem">
-              <a href="{{ scenario.url }}" class="ndx-mobile-nav__sublink">
-                <span class="ndx-mobile-nav__sublink-title">{{ scenario.name }}</span>
-                <span class="ndx-mobile-nav__sublink-desc">{{ scenario.headline | truncate(50) }}</span>
-              </a>
-            </li>
+            {% if not scenario.hidden %}
+              <li class="ndx-mobile-nav__subitem">
+                <a href="{{ scenario.url }}" class="ndx-mobile-nav__sublink">
+                  <span class="ndx-mobile-nav__sublink-title">{{ scenario.name }}</span>
+                  <span class="ndx-mobile-nav__sublink-desc">{{ scenario.headline | truncate(50) }}</span>
+                </a>
+              </li>
+            {% endif %}
           {% endfor %}
           <li class="ndx-mobile-nav__subitem">
             <a href="/scenarios/" class="ndx-mobile-nav__sublink">
@@ -96,12 +98,14 @@
       <div id="mobile-nav-walkthroughs" class="ndx-mobile-nav__accordion-content">
         <ul class="ndx-mobile-nav__sublist">
           {% for scenario in scenarios.scenarios %}
-            <li class="ndx-mobile-nav__subitem">
-              <a href="/walkthroughs/{{ scenario.id }}/" class="ndx-mobile-nav__sublink">
-                <span class="ndx-mobile-nav__sublink-title">{{ scenario.name }}</span>
-                <span class="ndx-mobile-nav__sublink-desc">{{ scenario.timeEstimate }}</span>
-              </a>
-            </li>
+            {% if not scenario.hidden %}
+              <li class="ndx-mobile-nav__subitem">
+                <a href="/walkthroughs/{{ scenario.id }}/" class="ndx-mobile-nav__sublink">
+                  <span class="ndx-mobile-nav__sublink-title">{{ scenario.name }}</span>
+                  <span class="ndx-mobile-nav__sublink-desc">{{ scenario.timeEstimate }}</span>
+                </a>
+              </li>
+            {% endif %}
           {% endfor %}
           <li class="ndx-mobile-nav__subitem">
             <a href="/walkthroughs/" class="ndx-mobile-nav__sublink">

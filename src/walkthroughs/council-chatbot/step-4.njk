@@ -3,7 +3,7 @@ layout: layouts/walkthrough.njk
 title: "Step 4: Notice the Details - Council Chatbot Walkthrough"
 description: Understand what makes this chatbot intelligent and production-ready
 currentStep: 4
-totalSteps: 4
+totalSteps: 5
 timeEstimate: "1 minute"
 scenarioId: council-chatbot
 ---
@@ -54,13 +54,15 @@ scenarioId: council-chatbot
       Council knowledge base
     </h3>
     <p class="govuk-body">
-      Responses are grounded in real council documents stored in S3. The chatbot
-      loads these documents and uses Amazon Nova Pro to compose accurate answers
-      based on actual council policies, schedules, and contact information.
+      Responses are grounded in 30+ council documents indexed in a Bedrock Knowledge Base.
+      When a resident asks a question, vector embeddings find the most relevant document
+      chunks, and Amazon Nova Pro generates an accurate answer from those specific
+      passages — not the entire corpus.
     </p>
     <p class="govuk-body-s" style="color: #505a5f;">
       <strong>Why it matters:</strong> Every council is different. Upload your own
-      documents and the chatbot gives authority-specific answers without any AI retraining.
+      documents, trigger a sync, and the Knowledge Base re-indexes them
+      automatically — no AI retraining needed.
     </p>
   </div>
 
@@ -133,8 +135,9 @@ scenarioId: council-chatbot
       Easy knowledge updates
     </h3>
     <p class="govuk-body">
-      Update the knowledge base by uploading new documents - no retraining required.
-      New policies, changed schedules, or updated procedures are available immediately.
+      Update the Knowledge Base by uploading new documents to S3 and triggering a sync.
+      New policies, changed schedules, or updated procedures are indexed and searchable
+      within minutes.
     </p>
     <p class="govuk-body-s" style="color: #505a5f;">
       <strong>Why it matters:</strong> Council information changes frequently.
@@ -165,9 +168,10 @@ scenarioId: council-chatbot
       <li>No need to repeat context ("I asked about B15 earlier...")</li>
     </ul>
     <p class="govuk-body">
-      <strong>Technical detail:</strong> The chatbot sends recent conversation history
-      with each request using the Bedrock Converse API. This gives the AI full context
-      from earlier in the conversation for natural follow-up questions.
+      <strong>Technical detail:</strong> Bedrock manages conversation context server-side
+      using session IDs. The browser sends a session ID with each request, and Bedrock
+      automatically maintains the conversation history — no client-side history
+      management needed.
     </p>
   </div>
 </details>
@@ -267,7 +271,7 @@ scenarioId: council-chatbot
     </tr>
     <tr class="govuk-table__row">
       <th scope="row" class="govuk-table__header">Knowledge base</th>
-      <td class="govuk-table__cell">Sample council documents in S3</td>
+      <td class="govuk-table__cell">Bedrock Knowledge Base with 30+ sample documents</td>
       <td class="govuk-table__cell">Real council policies and schedules</td>
     </tr>
     <tr class="govuk-table__row">
