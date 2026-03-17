@@ -151,10 +151,10 @@ export class ComputeConstruct extends Construct {
       // Patch routing via base64 decode (avoids nested heredoc issues)
       `echo "${routingB64}" | base64 -d > /rails/engines/bops_core/lib/bops_core/routing.rb`,
       'echo "Routing patched."',
-      // Disable SSL (CloudFront handles HTTPS)
-      'sed -i "s/config.assume_ssl = true/config.assume_ssl = false/" /rails/config/environments/production.rb',
+      // Keep assume_ssl=true (CloudFront terminates HTTPS, Rails needs to generate https:// URLs)
+      // Disable force_ssl only (CloudFront handles the redirect)
       'sed -i "s/config.force_ssl = true/config.force_ssl = false/" /rails/config/environments/production.rb',
-      'echo "SSL disabled."',
+      'echo "force_ssl disabled (CloudFront handles redirect)."',
       // Wait for DB
       'echo "[1/6] Waiting for database..."',
       'until pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USER" 2>/dev/null; do echo "Waiting..." && sleep 5; done',
