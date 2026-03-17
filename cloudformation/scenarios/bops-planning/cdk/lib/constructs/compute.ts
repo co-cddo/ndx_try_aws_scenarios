@@ -194,10 +194,8 @@ export class ComputeConstruct extends Construct {
       '  echo "Creating bops_applicants_production database..."\n' +
       '  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres \\\n' +
       '    -c "CREATE DATABASE bops_applicants_production;" 2>/dev/null || true\n' +
-      '\n' +
-      '  echo "Running BOPS-Applicants migrations..."\n' +
-      '  DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:${DB_PORT:-5432}/bops_applicants_production" \\\n' +
-      '    bundle exec rails db:migrate 2>&1 || echo "Applicants migration skipped"\n' +
+      '  # Do NOT run migrations here — the BOPS app has different migrations than BOPS-Applicants.\n' +
+      '  # The applicants container runs its own migrations on boot via rails server.\n' +
       '\n' +
       '  touch "$SEED_MARKER"\n' +
       '  echo "Seed complete."\n' +
@@ -239,8 +237,11 @@ export class ComputeConstruct extends Construct {
 
     bopsApplicantsTaskDef.addContainer('bops-applicants', {
       image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops-applicants:feat-bops-planning'),
-      // Wait for DB using bash TCP check (no pg_isready in this image), then start Rails
-      command: ['bash', '-c', 'until bash -c "echo > /dev/tcp/$DB_HOST/${DB_PORT:-5432}" 2>/dev/null; do echo "Waiting for database..." && sleep 5; done && echo "DB reachable, waiting for bops_applicants_production..." && until bundle exec rails runner "ActiveRecord::Base.connection.execute(\'SELECT 1\')" 2>/dev/null; do echo "DB not ready yet..." && sleep 10; done && echo "DB ready, starting server" && bundle exec rails server -b 0.0.0.0 -p 80'],
+      // Wait for bops_applicants_production DB to exist (created by web entrypoint seed).
+      // Use ruby pg gem directly — no pg_isready/psql in this image.
+      // Retry every 15s for up to 12 min (web needs ~5 min to seed + create applicants DB).
+      // Port 3000 — the container runs as non-root (app:app) and can't bind to 80
+      command: ['bash', '-c', 'echo "Waiting for bops_applicants_production DB to be created by web service..."; for i in $(seq 1 48); do if bundle exec ruby -e "require \'pg\'; PG.connect(ENV[\'DATABASE_URL\'])" 2>/dev/null; then echo "DB ready, starting server"; exec bundle exec rails server -b 0.0.0.0 -p 3000; fi; echo "Attempt $i/48 - DB not ready yet..."; sleep 15; done; echo "Timed out waiting for DB"; exit 1'],
       logging: ecs.LogDrivers.awsLogs({ logGroup: this.logGroup, streamPrefix: 'bops-applicants' }),
       environment: {
         RAILS_ENV: 'production',
@@ -258,9 +259,9 @@ export class ComputeConstruct extends Construct {
         DB_USER: dbUser,
         DB_PASSWORD: dbPassword,
       },
-      portMappings: [{ containerPort: 80, protocol: ecs.Protocol.TCP }],
+      portMappings: [{ containerPort: 3000, protocol: ecs.Protocol.TCP }],
       healthCheck: {
-        command: ['CMD-SHELL', 'curl -f http://localhost/healthcheck || exit 1'],
+        command: ['CMD-SHELL', 'curl -f http://localhost:3000/healthcheck || exit 1'],
         interval: cdk.Duration.seconds(30),
         timeout: cdk.Duration.seconds(10),
         retries: 5,
@@ -330,7 +331,7 @@ export class ComputeConstruct extends Construct {
     });
 
     applicantsListener.addTargets('BopsApplicantsTarget', {
-      port: 80,
+      port: 3000,
       protocol: elbv2.ApplicationProtocol.HTTP,
       targets: [bopsApplicantsService],
       deregistrationDelay: cdk.Duration.seconds(30),
