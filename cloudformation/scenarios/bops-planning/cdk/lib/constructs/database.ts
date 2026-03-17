@@ -32,8 +32,10 @@ export class DatabaseConstruct extends Construct {
       securityGroups: [props.securityGroup],
       credentials: rds.Credentials.fromGeneratedSecret('bops', {
         // Password is embedded in postgres://user:pass@host/db DATABASE_URL
-        // Exclude chars that break Ruby URI.parse in userinfo component (RFC 3986)
-        excludeCharacters: ' "\'\\/@#%:<>?[]^`{|}',
+        // and also used in shell via PGPASSWORD="$DB_PASSWORD".
+        // Exclude: URI-reserved chars, shell-special chars, and whitespace.
+        // Remaining valid special chars: !*_-. (enough for requireEachIncludedType)
+        excludeCharacters: ' "\'\\/@#%:<>?[]^`{|}$&()+,;=~',
       }),
       defaultDatabaseName: 'bops_production',
       storageEncrypted: true,

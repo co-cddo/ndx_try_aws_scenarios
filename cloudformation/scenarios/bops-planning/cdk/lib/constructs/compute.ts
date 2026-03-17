@@ -3,7 +3,6 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as iam from 'aws-cdk-lib/aws-iam';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as s3 from 'aws-cdk-lib/aws-s3';
@@ -41,22 +40,19 @@ export class ComputeConstruct extends Construct {
   constructor(scope: Construct, id: string, props: ComputeConstructProps) {
     super(scope, id);
 
-    // ECS Cluster
     this.cluster = new ecs.Cluster(this, 'Cluster', {
       vpc: props.vpc,
       clusterName: 'NdxBops-Cluster',
     });
 
-    // CloudWatch Log Group
+    // RETAIN so we can debug failures after rollback
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
       logGroupName: '/ndx-bops/production',
       retention: logs.RetentionDays.ONE_WEEK,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
-    // ==========================================================================
     // IAM Roles — ISB SCP requires InnovationSandbox-ndx-* prefix
-    // ==========================================================================
     const executionRole = new iam.Role(this, 'ExecutionRole', {
       roleName: 'InnovationSandbox-ndx-bops-exec',
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
@@ -64,18 +60,13 @@ export class ComputeConstruct extends Construct {
         iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
       ],
     });
-
     props.databaseSecret.grantRead(executionRole);
 
     const taskRole = new iam.Role(this, 'TaskRole', {
       roleName: 'InnovationSandbox-ndx-bops-task',
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
     });
-
-    // S3 permissions for Active Storage
     props.uploadsBucket.grantReadWrite(taskRole);
-
-    // CloudWatch Logs permissions
     taskRole.addToPolicy(
       new iam.PolicyStatement({
         actions: ['logs:CreateLogStream', 'logs:PutLogEvents'],
@@ -83,23 +74,12 @@ export class ComputeConstruct extends Construct {
       }),
     );
 
-    // ==========================================================================
     // Shared environment variables
-    // ==========================================================================
     const dbHost = props.databaseCluster.clusterEndpoint.hostname;
     const dbPort = props.databaseCluster.clusterEndpoint.port.toString();
     const dbUser = props.databaseSecret.secretValueFromJson('username').unsafeUnwrap();
     const dbPassword = props.databaseSecret.secretValueFromJson('password').unsafeUnwrap();
 
-    const bopsSecretKeyBase = props.secrets.secretKeyBase;
-    const otpSecretKey = props.secrets.otpSecretEncryptionKey;
-    const arePrimaryKey = props.secrets.arePrimaryKey;
-    const areDeterministicKey = props.secrets.areDeterministicKey;
-    const areKeySalt = props.secrets.areKeySalt;
-    const adminPassword = props.secrets.adminPassword;
-    const apiBearer = props.secrets.apiBearer;
-
-    // BOPS uses postgres:// scheme — Rails postgis adapter is configured in database.yml
     const databaseUrl = cdk.Fn.join('', [
       'postgres://', dbUser, ':', dbPassword, '@', dbHost, ':', dbPort, '/bops_production',
     ]);
@@ -108,20 +88,15 @@ export class ComputeConstruct extends Construct {
       'postgres://', dbUser, ':', dbPassword, '@', dbHost, ':', dbPort, '/bops_applicants_production',
     ]);
 
-    // ==========================================================================
-    // Application Load Balancer
-    // ==========================================================================
+    // ALB
     this.loadBalancer = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
       vpc: props.vpc,
       internetFacing: true,
       securityGroup: props.albSecurityGroup,
       loadBalancerName: 'NdxBops-ALB',
     });
-
     this.loadBalancerDnsName = this.loadBalancer.loadBalancerDnsName;
 
-    // Common BOPS environment
-    // DB_HOST/DB_PORT/DB_USER needed by entrypoint.sh wait_for_database()
     const bopsCommonEnv: Record<string, string> = {
       RAILS_ENV: 'production',
       DATABASE_URL: databaseUrl,
@@ -131,11 +106,11 @@ export class ComputeConstruct extends Construct {
       DB_USER: dbUser,
       DB_PASSWORD: dbPassword,
       DB_NAME: 'bops_production',
-      SECRET_KEY_BASE: bopsSecretKeyBase,
-      OTP_SECRET_ENCRYPTION_KEY: otpSecretKey,
-      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: arePrimaryKey,
-      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: areDeterministicKey,
-      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: areKeySalt,
+      SECRET_KEY_BASE: props.secrets.secretKeyBase,
+      OTP_SECRET_ENCRYPTION_KEY: props.secrets.otpSecretEncryptionKey,
+      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: props.secrets.arePrimaryKey,
+      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: props.secrets.areDeterministicKey,
+      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: props.secrets.areKeySalt,
       DEFAULT_LOCAL_AUTHORITY: 'ndx-demo',
       NOTIFY_API_KEY: 'test-00000000-0000-0000-0000-000000000000-00000000-0000-0000-0000-000000000000',
       NOTIFY_EMAIL_TEMPLATE_ID: '00000000-0000-0000-0000-000000000000',
@@ -149,15 +124,13 @@ export class ComputeConstruct extends Construct {
       RAILS_SERVE_STATIC_FILES: 'true',
       RAILS_LOG_TO_STDOUT: 'true',
       BOPS_ENVIRONMENT: 'production',
-      ADMIN_PASSWORD: adminPassword,
-      API_BEARER: apiBearer,
+      ADMIN_PASSWORD: props.secrets.adminPassword,
+      API_BEARER: props.secrets.apiBearer,
       DOMAIN: this.loadBalancerDnsName,
       APPLICANTS_DOMAIN: `${this.loadBalancerDnsName}:8080`,
     };
 
-    // ==========================================================================
-    // BOPS Web Task Definition (1 vCPU, 2GB, port 3000)
-    // ==========================================================================
+    // BOPS Web (1 vCPU, 2GB) — entrypoint handles DB wait + seed on first boot
     const bopsWebTaskDef = new ecs.FargateTaskDefinition(this, 'BopsWebTaskDef', {
       cpu: 1024,
       memoryLimitMiB: 2048,
@@ -171,12 +144,8 @@ export class ComputeConstruct extends Construct {
 
     bopsWebTaskDef.addContainer('bops-web', {
       image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:feat-bops-planning'),
-      // Override upstream CMD to use our entrypoint with DB wait
       command: ['bash', '/rails/entrypoint.sh'],
-      logging: ecs.LogDrivers.awsLogs({
-        logGroup: this.logGroup,
-        streamPrefix: 'bops-web',
-      }),
+      logging: ecs.LogDrivers.awsLogs({ logGroup: this.logGroup, streamPrefix: 'bops-web' }),
       environment: bopsCommonEnv,
       portMappings: [{ containerPort: 3000, protocol: ecs.Protocol.TCP }],
       healthCheck: {
@@ -186,38 +155,9 @@ export class ComputeConstruct extends Construct {
         retries: 5,
         startPeriod: cdk.Duration.seconds(300),
       },
-      // Note: sharedMemorySize not supported on Fargate. Chrome PDF generation
-      // uses /tmp instead of /dev/shm. If PDF fails, increase task memory.
     });
 
-    // ==========================================================================
-    // BOPS Worker Task Definition (0.5 vCPU, 1GB, Sidekiq)
-    // ==========================================================================
-    const bopsWorkerTaskDef = new ecs.FargateTaskDefinition(this, 'BopsWorkerTaskDef', {
-      cpu: 512,
-      memoryLimitMiB: 1024,
-      executionRole,
-      taskRole,
-      runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.X86_64,
-        operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
-      },
-    });
-
-    bopsWorkerTaskDef.addContainer('bops-worker', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:feat-bops-planning'),
-      logging: ecs.LogDrivers.awsLogs({
-        logGroup: this.logGroup,
-        streamPrefix: 'bops-worker',
-      }),
-      environment: bopsCommonEnv,
-      // Wait for DB before starting Sidekiq (needs DB connection on boot)
-      command: ['bash', '-c', 'until pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USER" 2>/dev/null; do echo "Waiting for database..." && sleep 5; done && bundle exec sidekiq'],
-    });
-
-    // ==========================================================================
-    // BOPS-Applicants Task Definition (0.5 vCPU, 1GB, port 80)
-    // ==========================================================================
+    // BOPS-Applicants (0.5 vCPU, 1GB) — needs DB wait too (applicants DB created by web entrypoint)
     const bopsApplicantsTaskDef = new ecs.FargateTaskDefinition(this, 'BopsApplicantsTaskDef', {
       cpu: 512,
       memoryLimitMiB: 1024,
@@ -231,23 +171,24 @@ export class ComputeConstruct extends Construct {
 
     bopsApplicantsTaskDef.addContainer('bops-applicants', {
       image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops-applicants:feat-bops-planning'),
-      // Upstream Dockerfile has no CMD — must provide one
-      command: ['bundle', 'exec', 'rails', 'server', '-b', '0.0.0.0', '-p', '80'],
-      logging: ecs.LogDrivers.awsLogs({
-        logGroup: this.logGroup,
-        streamPrefix: 'bops-applicants',
-      }),
+      // Wait for DB + applicants DB to exist, then start Rails
+      command: ['bash', '-c', 'until pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USER" 2>/dev/null; do echo "Waiting for database..." && sleep 5; done && until PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d bops_applicants_production -c "SELECT 1" 2>/dev/null; do echo "Waiting for bops_applicants_production..." && sleep 10; done && bundle exec rails server -b 0.0.0.0 -p 80'],
+      logging: ecs.LogDrivers.awsLogs({ logGroup: this.logGroup, streamPrefix: 'bops-applicants' }),
       environment: {
         RAILS_ENV: 'production',
         DATABASE_URL: applicantsDatabaseUrl,
-        SECRET_KEY_BASE: bopsSecretKeyBase,
+        SECRET_KEY_BASE: props.secrets.secretKeyBase,
         API_HOST: this.loadBalancerDnsName,
         PROTOCOL: 'http',
-        API_BEARER: apiBearer,
+        API_BEARER: props.secrets.apiBearer,
         OS_VECTOR_TILES_API_KEY: props.osMapApiKeyParam.valueAsString,
         RAILS_SERVE_STATIC_FILES: 'true',
         RAILS_LOG_TO_STDOUT: 'true',
         DEFAULT_LOCAL_AUTHORITY: 'ndx-demo',
+        DB_HOST: dbHost,
+        DB_PORT: dbPort,
+        DB_USER: dbUser,
+        DB_PASSWORD: dbPassword,
       },
       portMappings: [{ containerPort: 80, protocol: ecs.Protocol.TCP }],
       healthCheck: {
@@ -259,9 +200,7 @@ export class ComputeConstruct extends Construct {
       },
     });
 
-    // ==========================================================================
-    // ALB Listeners and Target Groups
-    // ==========================================================================
+    // ALB Listeners
     const httpListener = this.loadBalancer.addListener('HTTP', {
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
@@ -280,9 +219,7 @@ export class ComputeConstruct extends Construct {
       }),
     });
 
-    // ==========================================================================
-    // ECS Services
-    // ==========================================================================
+    // ECS Services — no worker for now (add back when core app works)
     const bopsWebService = new ecs.FargateService(this, 'BopsWebService', {
       cluster: this.cluster,
       taskDefinition: bopsWebTaskDef,
@@ -293,18 +230,7 @@ export class ComputeConstruct extends Construct {
       enableExecuteCommand: true,
       circuitBreaker: { rollback: true },
       serviceName: 'NdxBops-Web',
-      healthCheckGracePeriod: cdk.Duration.minutes(10),
-    });
-
-    const bopsWorkerService = new ecs.FargateService(this, 'BopsWorkerService', {
-      cluster: this.cluster,
-      taskDefinition: bopsWorkerTaskDef,
-      desiredCount: 1,
-      securityGroups: [props.fargateSecurityGroup],
-      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
-      assignPublicIp: true,
-      enableExecuteCommand: true,
-      serviceName: 'NdxBops-Worker',
+      healthCheckGracePeriod: cdk.Duration.minutes(15),
     });
 
     const bopsApplicantsService = new ecs.FargateService(this, 'BopsApplicantsService', {
@@ -317,10 +243,9 @@ export class ComputeConstruct extends Construct {
       enableExecuteCommand: true,
       circuitBreaker: { rollback: true },
       serviceName: 'NdxBops-Applicants',
-      healthCheckGracePeriod: cdk.Duration.minutes(10),
+      healthCheckGracePeriod: cdk.Duration.minutes(15),
     });
 
-    // Register BOPS Web with port 80 listener
     httpListener.addTargets('BopsWebTarget', {
       port: 3000,
       protocol: elbv2.ApplicationProtocol.HTTP,
@@ -336,7 +261,6 @@ export class ComputeConstruct extends Construct {
       },
     });
 
-    // Register BOPS-Applicants with port 8080 listener
     applicantsListener.addTargets('BopsApplicantsTarget', {
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
@@ -351,103 +275,5 @@ export class ComputeConstruct extends Construct {
         healthyHttpCodes: '200',
       },
     });
-
-    // ==========================================================================
-    // Seed Task — ECS one-shot task as CloudFormation custom resource
-    // ==========================================================================
-    const seedTaskDef = new ecs.FargateTaskDefinition(this, 'SeedTaskDef', {
-      cpu: 1024,
-      memoryLimitMiB: 2048,
-      executionRole,
-      taskRole,
-      runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.X86_64,
-        operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
-      },
-    });
-
-    seedTaskDef.addContainer('seed', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:feat-bops-planning'),
-      logging: ecs.LogDrivers.awsLogs({
-        logGroup: this.logGroup,
-        streamPrefix: 'bops-seed',
-      }),
-      environment: bopsCommonEnv,
-      command: ['bash', '-x', '/rails/scripts/seed-entrypoint.sh'],
-      essential: true,
-    });
-
-    // Single Lambda that runs ECS task and polls synchronously (up to 15 min Lambda timeout).
-    // Cannot use cr.Provider — it creates S3-backed state machine Lambdas requiring CDK bootstrap,
-    // which ISB sandbox accounts do not have.
-    const seedRole = new iam.Role(this, 'SeedLambdaRole', {
-      roleName: 'InnovationSandbox-ndx-bops-seed-lambda',
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
-      ],
-    });
-
-    seedRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ['ecs:RunTask', 'ecs:DescribeTasks'],
-        resources: ['*'],
-      }),
-    );
-
-    seedRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ['iam:PassRole'],
-        resources: [executionRole.roleArn, taskRole.roleArn],
-      }),
-    );
-
-    const seedFn = new lambda.Function(this, 'SeedFn', {
-      runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'index.handler',
-      role: seedRole,
-      timeout: cdk.Duration.minutes(14),
-      code: lambda.Code.fromInline(SEED_LAMBDA_CODE),
-    });
-
-    const seedCR = new cdk.CfnCustomResource(this, 'SeedCustomResource', {
-      serviceToken: seedFn.functionArn,
-    });
-    seedCR.addPropertyOverride('ClusterName', this.cluster.clusterName);
-    seedCR.addPropertyOverride('TaskDefinitionArn', seedTaskDef.taskDefinitionArn);
-    seedCR.addPropertyOverride('Subnets', props.vpc.publicSubnets.map(s => s.subnetId));
-    seedCR.addPropertyOverride('SecurityGroups', [props.fargateSecurityGroup.securityGroupId]);
-    seedCR.addPropertyOverride('Timestamp', Date.now().toString());
-    seedCR.node.addDependency(seedRole);
-    // Seed needs Aurora (creates DBs) but NOT the ECS services.
-    // ALL services need the seed to complete first — it runs db:create and db:migrate.
-    // Without this, services start before the database is ready/migrated, crash repeatedly,
-    // and the circuit breaker triggers a CloudFormation rollback.
-    bopsWebService.node.addDependency(seedCR);
-    bopsWorkerService.node.addDependency(seedCR);
-    bopsApplicantsService.node.addDependency(seedCR);
   }
 }
-
-// Single Lambda: runs ECS task then polls every 30s until STOPPED.
-// Uses CfnCustomResource (not cr.Provider) to avoid CDK bootstrap dependency.
-// Lambda timeout is 14 minutes — seed task typically completes in 5-10 minutes.
-const SEED_LAMBDA_CODE = `const{ECSClient,RunTaskCommand,DescribeTasksCommand}=require("@aws-sdk/client-ecs");const https=require("https");
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-exports.handler=async(e)=>{const rp={Status:"SUCCESS",PhysicalResourceId:e.LogicalResourceId,StackId:e.StackId,RequestId:e.RequestId,LogicalResourceId:e.LogicalResourceId,Data:{}};
-try{if(e.RequestType==="Delete"){await send(e.ResponseURL,rp);return;}
-const p=e.ResourceProperties;const ecs=new ECSClient();
-console.log("Starting seed task (waiting 30s for IAM propagation)...");await sleep(30000);
-const r=await ecs.send(new RunTaskCommand({cluster:p.ClusterName,taskDefinition:p.TaskDefinitionArn,launchType:"FARGATE",networkConfiguration:{awsvpcConfiguration:{subnets:p.Subnets,securityGroups:p.SecurityGroups,assignPublicIp:"ENABLED"}}}));
-if(!r.tasks||r.tasks.length===0){const reason=r.failures?r.failures.map(f=>f.reason).join(", "):"unknown";throw new Error("RunTask failed: "+reason);}
-const taskArn=r.tasks[0].taskArn;const cluster=taskArn.split("/")[1];
-console.log("Task started:",taskArn);
-for(let i=0;i<28;i++){await sleep(30000);
-const d=await ecs.send(new DescribeTasksCommand({cluster,tasks:[taskArn]}));
-const t=d.tasks&&d.tasks[0];if(!t){console.log("Task not found");break;}
-console.log("Poll",i+1,"status:",t.lastStatus);
-if(t.lastStatus==="STOPPED"){console.log("Task stoppedReason:",t.stoppedReason);console.log("Task stopCode:",t.stopCode);if(t.containers){t.containers.forEach(c=>console.log("Container",c.name,"exitCode:",c.exitCode,"reason:",c.reason));}const exit=t.containers&&t.containers[0]?t.containers[0].exitCode:null;
-if(exit!==0){throw new Error("Seed task failed with exit code "+exit+". stoppedReason: "+(t.stoppedReason||"none")+". containerReason: "+(t.containers&&t.containers[0]?t.containers[0].reason:"none"));}
-console.log("Seed complete");rp.PhysicalResourceId=taskArn;await send(e.ResponseURL,rp);return;}}
-throw new Error("Seed task did not complete within timeout");}catch(err){console.error(err);rp.Status="FAILED";rp.Reason=err.message;await send(e.ResponseURL,rp)}};
-function send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);const o=new URL(u);const opts={hostname:o.hostname,port:443,path:o.pathname+o.search,method:"PUT",headers:{"Content-Type":"","Content-Length":b.length}};const req=https.request(opts,ok);req.on("error",fail);req.write(b);req.end()})}`;

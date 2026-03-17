@@ -86,7 +86,7 @@ describe('BopsPlanningStack', () => {
     const template = Template.fromStack(stack);
 
     const services = template.findResources('AWS::ECS::Service');
-    expect(Object.keys(services).length).toBe(3);
+    expect(Object.keys(services).length).toBe(2); // web + applicants (worker deferred)
   });
 
   test('Stack creates internet-facing ALB', () => {

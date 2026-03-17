@@ -3,11 +3,13 @@ set -e
 
 STATUS_DIR="/rails/public"
 STATUS_FILE="${STATUS_DIR}/init-status.html"
+SEED_MARKER="/tmp/.bops-seeded"
 
 update_status() {
   local step="$1"
   local message="$2"
   local progress="$3"
+  mkdir -p "$STATUS_DIR"
   cat > "$STATUS_FILE" <<STATUSEOF
 <!DOCTYPE html>
 <html lang="en">
@@ -39,7 +41,7 @@ STATUSEOF
 }
 
 wait_for_database() {
-  local retries=60
+  local retries=120
   local count=0
   while ! pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USER" 2>/dev/null; do
     count=$((count + 1))
@@ -54,17 +56,57 @@ wait_for_database() {
 }
 
 echo "=== BOPS Entrypoint ==="
-mkdir -p "$STATUS_DIR"
 
-update_status "1/3" "Waiting for database..." "20"
+update_status "1/6" "Waiting for database..." "10"
 wait_for_database
 
-update_status "2/3" "Running database migrations..." "50"
-bundle exec rails db:migrate 2>&1 || echo "Migration skipped or already up to date"
+# Verify authentication works
+echo "Testing database authentication..."
+PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres -c "SELECT 1;" > /dev/null 2>&1 || {
+  echo "ERROR: Cannot authenticate to database"
+  exit 1
+}
 
-update_status "3/3" "Starting BOPS..." "90"
+# Ensure bops_production database exists
+echo "Checking database exists..."
+PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres \
+  -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME:-bops_production}'" | grep -q 1 || {
+  echo "Creating ${DB_NAME:-bops_production} database..."
+  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres \
+    -c "CREATE DATABASE ${DB_NAME:-bops_production};"
+}
 
-# Remove status file — the Rails app will serve its own pages now
+update_status "2/6" "Enabling PostGIS extensions..." "20"
+PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "${DB_NAME:-bops_production}" \
+  -c "CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS postgis_topology; CREATE EXTENSION IF NOT EXISTS btree_gin;" 2>&1 || true
+
+update_status "3/6" "Running database migrations..." "35"
+bundle exec rails db:prepare 2>&1
+
+# Seed on first run only
+if [ ! -f "$SEED_MARKER" ]; then
+  update_status "4/6" "Loading seed data..." "50"
+  bundle exec rails db:seed 2>&1 || echo "db:seed skipped or already done"
+
+  update_status "5/6" "Generating sample planning applications..." "70"
+  bundle exec rails runner scripts/seed_sample_data.rb 2>&1 || echo "Sample data generation skipped"
+
+  # Create BOPS-Applicants database
+  echo "Creating bops_applicants_production database..."
+  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres \
+    -c "CREATE DATABASE bops_applicants_production;" 2>/dev/null || true
+
+  echo "Running BOPS-Applicants migrations..."
+  DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:${DB_PORT:-5432}/bops_applicants_production" \
+    bundle exec rails db:migrate 2>&1 || echo "Applicants migration skipped"
+
+  touch "$SEED_MARKER"
+  echo "Seed complete."
+else
+  echo "Already seeded, skipping."
+fi
+
+update_status "6/6" "Starting BOPS..." "95"
 rm -f "$STATUS_FILE"
 
 echo "Starting Puma server..."

@@ -159,7 +159,7 @@ export class BopsPlanningStack extends cdk.Stack {
     // Storage (S3)
     const storage = new StorageConstruct(this, 'Storage');
 
-    // Compute (ECS, ALB, seed task)
+    // Compute (ECS, ALB) — seed runs inside web entrypoint, no separate task
     const compute = new ComputeConstruct(this, 'Compute', {
       vpc: networking.vpc,
       albSecurityGroup: networking.albSecurityGroup,
@@ -171,14 +171,6 @@ export class BopsPlanningStack extends cdk.Stack {
       secrets: resolvedSecrets,
       osMapApiKeyParam: osMapApiKeyParam,
     });
-
-    // The seed custom resource must wait for the Aurora writer instance (not just the cluster).
-    // The cluster endpoint resolves when the cluster resource is created, but you cannot connect
-    // until the writer instance is fully available. Without this, the seed ECS task starts before
-    // the database is actually reachable, causing it to fail.
-    const writerInstance = database.cluster.node.findChild('writer');
-    const seedCR = compute.node.findChild('SeedCustomResource');
-    seedCR.node.addDependency(writerInstance);
 
     // CloudFront
     const cdn = new CloudFrontConstruct(this, 'CDN', {
