@@ -2,7 +2,7 @@
 #
 # BOPS uses subdomain-based tenant routing:
 #   1. Middleware sets env["bops.local_authority"] from subdomain lookup
-#   2. Route constraints check request.subdomains.first == local_authority.subdomain
+#   2. Route constraints (class methods) check request.subdomains.first == local_authority.subdomain
 #
 # On CloudFront/ALB domains there are no subdomains, so both fail.
 # This initializer patches:
@@ -27,22 +27,25 @@ Rails.application.config.after_initialize do
     end
   end
 
-  # Patch route constraints — trust middleware when DEFAULT_LOCAL_AUTHORITY is set
+  # Patch route constraints (singleton/class methods) — trust middleware in single-tenant mode
   if ENV["DEFAULT_LOCAL_AUTHORITY"]
-    # LocalAuthoritySubdomain: allow if middleware found a tenant
-    BopsCore::Routing::LocalAuthoritySubdomain.define_method(:matches?) do |request|
+    # LocalAuthoritySubdomain.matches? — allow if middleware set a tenant
+    BopsCore::Routing::LocalAuthoritySubdomain.define_singleton_method(:matches?) do |request|
       request.env["bops.local_authority"].present?
     end
 
-    # DeviseSubdomain: allow if middleware found a tenant (covers login pages)
-    BopsCore::Routing::DeviseSubdomain.define_method(:matches?) do |request|
+    # DeviseSubdomain.matches? — allow if middleware set a tenant
+    BopsCore::Routing::DeviseSubdomain.define_singleton_method(:matches?) do |request|
       BopsCore::Routing::ConfigSubdomain.matches?(request) ||
         request.env["bops.local_authority"].present?
     end
 
-    # BopsDomain: always match in single-tenant mode (no domain splitting)
-    BopsCore::Routing::BopsDomain.define_method(:matches?) do |request|
+    # BopsDomain.matches? — always match in single-tenant mode
+    BopsCore::Routing::BopsDomain.define_singleton_method(:matches?) do |request|
       true
     end
+
+    # Reload routes so constraints are re-evaluated with patches
+    Rails.application.reload_routes!
   end
 end
