@@ -142,74 +142,125 @@ export class ComputeConstruct extends Construct {
       },
     });
 
-    // Write a complete wrapper entrypoint to /rails/tmp/ (writable by app user).
-    // The wrapper replaces the baked-in entrypoint to:
-    // 1. Use db:migrate instead of db:prepare (avoid auto-seed with Devise callbacks)
-    // 2. Run db:seed via rails runner with ActionMailer delivery disabled
-    //    (avoids GOV.UK Notify AuthError from dummy API key during user creation)
-    // Uses heredoc with single-quoted delimiter to prevent bash variable expansion,
-    // then exec's the written script.
-    const wrapperScript = "cat > /rails/tmp/boot.sh << 'BOOTEOF'\n" +
-      '#!/bin/bash\n' +
-      'set -e\n' +
-      'echo "=== BOPS Entrypoint (patched) ==="\n' +
-      '\n' +
-      'echo "[1/6] Waiting for database..."\n' +
-      'retries=120; count=0\n' +
-      'while ! pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USER" 2>/dev/null; do\n' +
-      '  count=$((count + 1))\n' +
-      '  if [ "$count" -ge "$retries" ]; then echo "ERROR: Database not available"; exit 1; fi\n' +
-      '  echo "Waiting for database (attempt ${count}/${retries})..."; sleep 5\n' +
-      'done\n' +
-      'echo "Database is ready."\n' +
-      '\n' +
-      'echo "Testing database authentication..."\n' +
-      'PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres -c "SELECT 1;" > /dev/null 2>&1 || {\n' +
-      '  echo "ERROR: Cannot authenticate to database"; exit 1\n' +
-      '}\n' +
-      '\n' +
-      'echo "Checking database exists..."\n' +
-      'PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres \\\n' +
-      '  -tc "SELECT 1 FROM pg_database WHERE datname = \'${DB_NAME:-bops_production}\'" | grep -q 1 || {\n' +
-      '  echo "Creating ${DB_NAME:-bops_production} database..."\n' +
-      '  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres \\\n' +
-      '    -c "CREATE DATABASE ${DB_NAME:-bops_production};"\n' +
-      '}\n' +
-      '\n' +
-      'echo "[2/6] Enabling PostGIS extensions..."\n' +
-      'PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "${DB_NAME:-bops_production}" \\\n' +
-      '  -c "CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS postgis_topology; CREATE EXTENSION IF NOT EXISTS btree_gin;" 2>&1 || true\n' +
-      '\n' +
-      'echo "[3/6] Running database migrations..."\n' +
-      'bundle exec rails db:migrate 2>&1\n' +
-      '\n' +
-      'SEED_MARKER="/tmp/.bops-seeded"\n' +
-      'if [ ! -f "$SEED_MARKER" ]; then\n' +
-      '  echo "[4/6] Loading seed data (email delivery disabled)..."\n' +
-      '  bundle exec rails runner \'ActionMailer::Base.delivery_method = :test; DeviseMailer.class_eval { def settings; {delivery_method: :test}; end }; load Rails.root.join("db/seeds.rb")\' 2>&1 || echo "db:seed skipped or already done"\n' +
-      '\n' +
-      '  echo "[5/6] Generating sample planning applications..."\n' +
-      '  bundle exec rails runner \'ActionMailer::Base.delivery_method = :test; DeviseMailer.class_eval { def settings; {delivery_method: :test}; end }; load Rails.root.join("scripts/seed_sample_data.rb")\' 2>&1 || echo "Sample data generation skipped"\n' +
-      '\n' +
-      '  echo "Creating bops_applicants_production database..."\n' +
-      '  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres \\\n' +
-      '    -c "CREATE DATABASE bops_applicants_production;" 2>/dev/null || true\n' +
-      '  # Do NOT run migrations here — the BOPS app has different migrations than BOPS-Applicants.\n' +
-      '  # The applicants container runs its own migrations on boot via rails server.\n' +
-      '\n' +
-      '  touch "$SEED_MARKER"\n' +
-      '  echo "Seed complete."\n' +
-      'else\n' +
-      '  echo "Already seeded, skipping."\n' +
-      'fi\n' +
-      '\n' +
-      'echo "[6/6] Starting Puma server..."\n' +
-      'exec bundle exec rails server -b 0.0.0.0 -p "${PORT:-3000}"\n' +
-      'BOOTEOF\n' +
-      'chmod +x /rails/tmp/boot.sh && exec bash /rails/tmp/boot.sh';
+    // Boot script runs as ROOT to patch source files, then drops to app user.
+    // Patches: routing constraints (single-tenant), SSL disabled (CloudFront handles it),
+    // seed with mailer disabled, user confirmation + 2FA bypass.
+    const wrapperScript = [
+      // Write boot script to /rails/tmp (writable)
+      "cat > /rails/tmp/boot.sh << 'BOOTEOF'",
+      '#!/bin/bash',
+      'set -e',
+      'echo "=== BOPS Boot (patched for single-tenant) ==="',
+      '',
+      '# 1. Patch routing constraints — replace entire file (needs root)',
+      'cat > /rails/engines/bops_core/lib/bops_core/routing.rb << \'ROUTINGEOF\'',
+      'module BopsCore',
+      '  module Routing',
+      '    extend ActiveSupport::Concern',
+      '    class BopsDomain',
+      '      class << self',
+      '        def matches?(request) = true',
+      '      end',
+      '    end',
+      '    class ApplicantsDomain',
+      '      class << self',
+      '        def matches?(request) = false  # Applicants on separate port',
+      '      end',
+      '    end',
+      '    class LocalAuthoritySubdomain',
+      '      class << self',
+      '        def matches?(request) = request.env["bops.local_authority"].present?',
+      '      end',
+      '    end',
+      '    class ConfigSubdomain',
+      '      class << self',
+      '        def matches?(request) = request.subdomain == "config"',
+      '      end',
+      '    end',
+      '    class DeviseSubdomain',
+      '      class << self',
+      '        def matches?(request) = ConfigSubdomain.matches?(request) || request.env["bops.local_authority"].present?',
+      '      end',
+      '    end',
+      '    class PublicSubdomain',
+      '      class << self',
+      '        def matches?(request) = true',
+      '      end',
+      '    end',
+      '    def bops_domain(&) = constraints(BopsDomain, &)',
+      '    def applicants_domain(&) = constraints(ApplicantsDomain, &)',
+      '    def local_authority_subdomain(&) = constraints(LocalAuthoritySubdomain, &)',
+      '    def config_subdomain(&) = constraints(ConfigSubdomain, &)',
+      '    def devise_subdomain(&) = constraints(DeviseSubdomain, &)',
+      '    def public_subdomain(&) = constraints(PublicSubdomain, &)',
+      '  end',
+      'end',
+      'ROUTINGEOF',
+      'echo "Routing patched."',
+      '',
+      '# 2. Disable SSL (CloudFront handles HTTPS termination)',
+      'sed -i "s/config.assume_ssl = true/config.assume_ssl = false/" /rails/config/environments/production.rb',
+      'sed -i "s/config.force_ssl = true/config.force_ssl = false/" /rails/config/environments/production.rb',
+      'echo "SSL disabled."',
+      '',
+      '# 3. Drop to app user for everything below',
+      'echo "[1/6] Waiting for database..."',
+      'retries=120; count=0',
+      'while ! su app -c "pg_isready -h \\"$DB_HOST\\" -p \\"${DB_PORT:-5432}\\" -U \\"$DB_USER\\"" 2>/dev/null; do',
+      '  count=$((count + 1))',
+      '  if [ "$count" -ge "$retries" ]; then echo "ERROR: Database not available"; exit 1; fi',
+      '  echo "Waiting for database (attempt ${count}/${retries})..."; sleep 5',
+      'done',
+      'echo "Database is ready."',
+      '',
+      'echo "Testing authentication..."',
+      'PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres -c "SELECT 1;" > /dev/null 2>&1 || {',
+      '  echo "ERROR: Cannot authenticate"; exit 1',
+      '}',
+      '',
+      'echo "Checking database..."',
+      'PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres \\',
+      '  -tc "SELECT 1 FROM pg_database WHERE datname = \'${DB_NAME:-bops_production}\'" | grep -q 1 || {',
+      '  echo "Creating ${DB_NAME:-bops_production}..."',
+      '  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres \\',
+      '    -c "CREATE DATABASE ${DB_NAME:-bops_production};"',
+      '}',
+      '',
+      'echo "[2/6] PostGIS extensions..."',
+      'PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "${DB_NAME:-bops_production}" \\',
+      '  -c "CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS postgis_topology; CREATE EXTENSION IF NOT EXISTS btree_gin;" 2>&1 || true',
+      '',
+      'echo "[3/6] Migrations..."',
+      'su app -c "bundle exec rails db:migrate" 2>&1',
+      '',
+      'SEED_MARKER="/tmp/.bops-seeded"',
+      'if [ ! -f "$SEED_MARKER" ]; then',
+      '  echo "[4/6] Seed data..."',
+      "  su app -c \"bundle exec rails runner 'ActionMailer::Base.delivery_method = :test; load Rails.root.join(\\\"db/seeds.rb\\\")' \" 2>&1 || echo 'db:seed skipped'",
+      '',
+      '  echo "[5/6] Sample data..."',
+      "  su app -c \"bundle exec rails runner 'ActionMailer::Base.delivery_method = :test; load Rails.root.join(\\\"scripts/seed_sample_data.rb\\\")' \" 2>&1 || echo 'Sample data skipped'",
+      '',
+      '  echo "Creating bops_applicants_production..."',
+      '  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres \\',
+      '    -c "CREATE DATABASE bops_applicants_production;" 2>/dev/null || true',
+      '',
+      '  touch "$SEED_MARKER"',
+      '  echo "Seed complete."',
+      'else',
+      '  echo "Already seeded."',
+      'fi',
+      '',
+      'echo "[6/6] Starting Puma..."',
+      'exec su app -c "bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"',
+      'BOOTEOF',
+      'chmod +x /rails/tmp/boot.sh && exec bash /rails/tmp/boot.sh',
+    ].join('\n');
 
     bopsWebTaskDef.addContainer('bops-web', {
       image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:feat-bops-planning'),
+      // Run as root so we can patch routing.rb and production.rb, then drop to app user
+      user: 'root',
       command: ['bash', '-c', wrapperScript],
       logging: ecs.LogDrivers.awsLogs({ logGroup: this.logGroup, streamPrefix: 'bops-web' }),
       environment: bopsCommonEnv,

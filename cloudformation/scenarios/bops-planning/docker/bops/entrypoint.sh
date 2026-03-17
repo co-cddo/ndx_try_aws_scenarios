@@ -81,12 +81,14 @@ PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "${DB_NAME:-bops_p
   -c "CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS postgis_topology; CREATE EXTENSION IF NOT EXISTS btree_gin;" 2>&1 || true
 
 update_status "3/6" "Running database migrations..." "35"
-bundle exec rails db:prepare 2>&1
+# Run db:prepare WITHOUT seed (seed is handled separately with email delivery disabled)
+bundle exec rails db:migrate 2>&1
 
 # Seed on first run only
 if [ ! -f "$SEED_MARKER" ]; then
   update_status "4/6" "Loading seed data..." "50"
-  bundle exec rails db:seed 2>&1 || echo "db:seed skipped or already done"
+  # Disable email delivery during seed to avoid GOV.UK Notify auth errors with dummy API key
+  bundle exec rails runner 'ActionMailer::Base.delivery_method = :test; load Rails.root.join("db/seeds.rb")' 2>&1 || echo "db:seed skipped or already done"
 
   update_status "5/6" "Generating sample planning applications..." "70"
   bundle exec rails runner scripts/seed_sample_data.rb 2>&1 || echo "Sample data generation skipped"
