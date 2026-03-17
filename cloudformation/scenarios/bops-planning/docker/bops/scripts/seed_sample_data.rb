@@ -1,76 +1,205 @@
-# NDX:Try BOPS Sample Data Generator
-# Creates a demo local authority and admin user for the NDX Demo Borough
+# NDX:Try BOPS Comprehensive Seed Script
+# Creates LocalAuthority, users, application types from fixtures,
+# and 35 planning applications with proper case_records.
 #
-# Usage: bundle exec rails runner scripts/seed_sample_data.rb
-# NOTE: ActionMailer must be set to :test BEFORE loading this script
-#       to avoid GOV.UK Notify auth errors from the dummy API key.
+# Run with ActionMailer disabled:
+#   bundle exec rails runner 'ActionMailer::Base.delivery_method = :test; load "scripts/seed_sample_data.rb"'
+#
+# All dates are relative to Time.current so data looks realistic whenever deployed.
 
-puts "=== NDX:Try Sample Data Seed ==="
+puts "=== NDX:Try BOPS Seed ==="
 
-# Idempotency guard
-if LocalAuthority.exists?(subdomain: "ndx-demo")
-  puts "NDX Demo Borough already exists — skipping seed."
-  exit 0
+la = LocalAuthority.find_by(subdomain: "ndx-demo")
+unless la
+  puts "ERROR: ndx-demo LocalAuthority not found — run db:seed first"
+  exit 1
 end
 
-ActiveRecord::Base.transaction do
-  # --- Create Local Authority ---
-  puts "Creating local authority..."
-  local_authority = LocalAuthority.new(
-    council_name: "NDX Demo Borough Council",
-    short_name: "NDX Demo",
-    subdomain: "ndx-demo",
-    council_code: "BUC",
-    signatory_name: "Alex Morgan",
-    signatory_job_title: "Head of Planning",
-    enquiries_paragraph: "For enquiries about planning applications, please contact the planning department.",
-    email_address: "planning@ndx-demo.example.com",
-    feedback_email: "feedback@ndx-demo.example.com",
-    press_notice_email: "press@ndx-demo.example.com",
-    reviewer_group_email: "reviewers@ndx-demo.example.com",
-    email_reply_to_id: "00000000-0000-0000-0000-000000000002",
-    applicants_url: ENV.fetch("APPLICANTS_DOMAIN", "http://localhost:8080"),
-    submission_url: ENV.fetch("APPLICANTS_DOMAIN", "http://localhost:8080")
-  )
-  local_authority.save!(validate: false)
-  puts "Created local authority: #{local_authority.council_name} (#{local_authority.subdomain})"
+# 1. Activate council
+la.update_column(:active, true)
+puts "Council active: #{la.reload.active}"
 
-  # --- Create Users (skip validations + disable mailer to avoid Notify) ---
+# 2. Fix ApplicationType::Config categories (needed for filters)
+ApplicationType::Config.all.each do |c|
+  cat = case c.code
+  when /^ldc/ then "lawfulness_certificate"
+  when /^pa/ then "prior_approval"
+  when /^pp/ then "planning_permission"
+  when /^preApp/ then "pre_application"
+  else "other"
+  end
+  c.update_column(:category, cat) if c.category.blank? || c.category != cat
+end
+
+# 3. Create ApplicationTypes from fixtures if missing
+if ApplicationType.where(local_authority: la).count == 0
+  puts "Creating application types from fixtures..."
+  fixture = YAML.load_file(File.expand_path("db/seeds/application_types.yml", Rails.root))
+  fixture.each do |attrs|
+    config = ApplicationType::Config.find_or_initialize_by(code: attrs["code"])
+    config.name = attrs["name"]
+    config.suffix = attrs["suffix"]
+    config.category = case attrs["code"]
+      when /^ldc/ then "lawfulness_certificate"
+      when /^pa/ then "prior_approval"
+      when /^pp/ then "planning_permission"
+      when /^preApp/ then "pre_application"
+      else "other"
+    end
+    config.configured = true
+    config.determination_period_days = attrs["determination_period_days"]
+    config.features = attrs["features"] || {}
+    config.steps = attrs["steps"]
+    config.decisions = attrs["decisions"]
+    config.assessment_details = attrs["assessment_details"]
+    config.consistency_checklist = attrs["consistency_checklist"]
+    config.disclaimer = attrs["disclaimer"]
+    config.save(validate: false)
+
+    app_type = ApplicationType.find_or_initialize_by(local_authority: la, config: config)
+    app_type.name = attrs["name"]
+    app_type.code = attrs["code"]
+    app_type.suffix = attrs["suffix"]
+    app_type.determination_period_days = attrs["determination_period_days"] || 56
+    app_type.save(validate: false)
+    puts "  #{app_type.name} (#{app_type.code})"
+  end
+end
+
+# 4. Create users if missing
+assessor = User.find_by(email: "ndx-demo_assessor@example.com", local_authority: la)
+admin = User.find_by(email: "ndx-demo_administrator@example.com", local_authority: la)
+
+unless assessor
   puts "Creating users..."
   admin_password = ENV.fetch("ADMIN_PASSWORD", "BopsDemo2024!")
-
   [
     { email: "ndx-demo_administrator@example.com", role: "administrator" },
     { email: "ndx-demo_assessor@example.com", role: "assessor" },
     { email: "ndx-demo_reviewer@example.com", role: "reviewer" }
   ].each do |attrs|
     user = User.new(
-      email: attrs[:email],
-      password: admin_password,
+      email: attrs[:email], password: admin_password,
       password_confirmation: admin_password,
-      local_authority: local_authority,
-      role: attrs[:role]
+      local_authority: la, role: attrs[:role]
     )
     user.confirmed_at = Time.current
     user.otp_required_for_login = false
     user.mobile_number = "07000000000" if user.respond_to?(:mobile_number=)
     user.skip_confirmation! if user.respond_to?(:skip_confirmation!)
     user.save!(validate: false)
-    puts "  Created #{attrs[:role]}: #{attrs[:email]}"
+    puts "  #{attrs[:role]}: #{attrs[:email]}"
   end
-
-  # --- Create API User (for BOPS-Applicants Bearer token auth) ---
-  puts "Creating API user..."
-  api_bearer = ENV.fetch("API_BEARER", "ndx-demo-api-bearer-token-placeholder")
-  if defined?(ApiUser)
-    api_user = ApiUser.new(
-      name: "BOPS Applicants",
-      token: api_bearer,
-      local_authority: local_authority
-    )
-    api_user.save(validate: false)
-    puts "  Created API user (validate: false)"
-  end
-
-  puts "=== Sample Data Seed Complete ==="
+  assessor = User.find_by(email: "ndx-demo_assessor@example.com", local_authority: la)
+  admin = User.find_by(email: "ndx-demo_administrator@example.com", local_authority: la)
 end
+
+# 5. Create planning applications
+if PlanningApplication.where(local_authority: la).count > 0
+  puts "Already have #{PlanningApplication.where(local_authority: la).count} applications — skipping"
+  exit 0
+end
+
+householder = ApplicationType.find_by(local_authority: la, code: "pp.full.householder")
+prior = ApplicationType.find_by(local_authority: la, code: "pa.part1.classA")
+ldc = ApplicationType.find_by(local_authority: la, code: "ldc.existing")
+
+streets = ["Oakwood Terrace","Victoria Road","Church Lane","Mill Street","Park Avenue",
+           "High Street","Station Road","Elm Grove","Cedar Close","Willow Way"]
+descs = {
+  householder => [
+    "Single storey rear extension measuring 4m in depth with flat roof and bi-fold doors",
+    "Loft conversion with rear dormer window and 2 Velux rooflights to front elevation",
+    "Two storey side extension to create additional bedroom and en-suite bathroom",
+    "Detached timber garden room (4m x 3m) for home office use",
+    "Installation of solar panels to south-facing roof elevation (16 panels)",
+    "New vehicular crossover and dropped kerb to create off-street parking",
+    "Replacement conservatory with single storey rear extension",
+    "Front porch addition (2m x 1.5m) with pitched roof",
+  ],
+  prior => [
+    "Change of use from office (Class E) to 4no. residential units (Class C3)",
+    "Larger home extension: single storey rear extending 6m from original rear wall",
+    "Agricultural building conversion to 3no. dwelling houses",
+  ],
+  ldc => [
+    "Certificate of lawfulness for proposed single storey rear extension (permitted development)",
+    "Certificate of lawfulness for existing loft conversion completed in 2018",
+  ],
+}
+first_names = ["James","Sarah","Michael","Emma","David","Lucy","Robert","Anna","Thomas","Helen"]
+last_names = ["Smith","Jones","Williams","Brown","Taylor","Davies","Wilson","Evans","Thomas","Roberts"]
+
+types = [[householder, 20], [prior, 10], [ldc, 5]].select { |t, _| t }
+created = 0
+errors = 0
+
+puts "Creating planning applications..."
+types.each do |app_type, count|
+  type_descs = descs[app_type] || ["Development proposal"]
+  count.times do |i|
+    idx = created
+    begin
+      pa = PlanningApplication.new(
+        local_authority: la,
+        application_type: app_type,
+        applicant_email: "applicant#{idx}@example.com",
+        applicant_first_name: first_names[idx % first_names.length],
+        applicant_last_name: last_names[idx % last_names.length],
+        address_1: "#{(idx * 3 + 1) % 120 + 1} #{streets[idx % streets.length]}",
+        town: "NDX Demo Borough",
+        postcode: "SW1A 1AA",
+        description: type_descs[i % type_descs.length],
+      )
+      pa.build_case_record(local_authority: la)
+      pa.save!
+      pa.mark_accepted! if pa.may_mark_accepted?
+
+      # Assign 50% to the assessor
+      if idx % 2 == 0 && pa.case_record
+        pa.case_record.update_column(:user_id, assessor.id)
+      end
+
+      # Progress ~66% to in_assessment
+      if idx % 3 != 0
+        pa.update_columns(validated_at: Time.current - rand(5..30).days)
+        pa.start! if pa.may_start?
+      end
+
+      created += 1
+    rescue => e
+      errors += 1
+      puts "  ERR #{idx}: #{e.message[0..80]}" if errors <= 5
+    end
+  end
+end
+
+# 6. Backdate for realistic "days to determination" display
+PlanningApplication.where(local_authority: la).each_with_index do |pa, idx|
+  days_ago = case pa.status
+  when "not_started" then rand(1..7)
+  when "in_assessment" then rand(7..35)
+  else rand(1..14)
+  end
+
+  received = Time.current - days_ago.days
+  validated = pa.validated_at ? received + rand(1..5).days : nil
+  target = received + 56.days
+  expiry = received + 56.days
+
+  pa.update_columns(
+    received_at: received,
+    created_at: received - rand(0..2).days,
+    validated_at: validated,
+    target_date: target,
+    expiry_date: expiry,
+    started_at: validated ? validated + rand(0..3).days : pa.started_at,
+    in_assessment_at: pa.status == "in_assessment" ? (validated || received) + rand(1..5).days : pa.in_assessment_at,
+  )
+end
+
+puts "Created: #{created}, Errors: #{errors}"
+puts "By status: #{PlanningApplication.where(local_authority: la).group(:status).count}"
+assigned = PlanningApplication.where(local_authority: la).joins(:case_record).where(case_records: { user_id: assessor.id }).count
+puts "Assigned to assessor: #{assigned}/#{created}"
+puts "=== Seed Complete ==="
