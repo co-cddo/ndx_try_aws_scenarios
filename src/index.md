@@ -72,6 +72,7 @@ Choose from 6 AWS scenarios designed for UK local government:
 
 <div class="ndx-scenario-grid">
   {% for scenario in scenarios.scenarios %}
+    {% if not scenario.hidden %}
     <div class="ndx-scenario-card{% if scenario.featured %} ndx-scenario-card--featured{% endif %}">
       <div class="ndx-scenario-card__content">
         {% if scenario.featured %}
@@ -120,6 +121,7 @@ Choose from 6 AWS scenarios designed for UK local government:
         </a>
       </div>
     </div>
+    {% endif %}
   {% endfor %}
 </div>
 

@@ -87,7 +87,9 @@ description: Step-by-step guides for exploring AWS scenarios in your NDX:Try ses
   {# Cards Grid #}
   <div class="ndx-walkthrough-index__grid" aria-live="polite">
     {% for scenario in scenarios.scenarios %}
-      {% include "components/walkthrough-card.njk" %}
+      {% if not scenario.hidden %}
+        {% include "components/walkthrough-card.njk" %}
+      {% endif %}
     {% endfor %}
   </div>
 

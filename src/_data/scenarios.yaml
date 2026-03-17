@@ -1055,6 +1055,7 @@ scenarios:
       description: "CloudFormation template that deploys Amazon QuickSight dashboards for service performance analytics and reporting."
 
   - id: "all-demo"
+    hidden: true
     name: "All Demo"
     headline: "Deploy all 7 NDX:Try scenarios in a single stack for showcases"
     bestFor: "Demonstrations and showcases deploying all scenarios at once"
