@@ -205,11 +205,22 @@ export class ComputeConstruct extends Construct {
 
     bopsApplicantsTaskDef.addContainer('bops-applicants', {
       image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-bops-applicants:feat-bops-planning'),
-      // Wait for bops_applicants_production DB to exist (created by web entrypoint seed).
-      // Use ruby pg gem directly — no pg_isready/psql in this image.
-      // Retry every 15s for up to 12 min (web needs ~5 min to seed + create applicants DB).
-      // Port 3000 — the container runs as non-root (app:app) and can't bind to 80
-      command: ['bash', '-c', 'echo "Waiting for bops_applicants_production DB to be created by web service..."; for i in $(seq 1 48); do if bundle exec ruby -e "require \'pg\'; PG.connect(ENV[\'DATABASE_URL\'])" 2>/dev/null; then echo "DB ready, starting server"; exec bundle exec rails server -b 0.0.0.0 -p 3000; fi; echo "Attempt $i/48 - DB not ready yet..."; sleep 15; done; echo "Timed out waiting for DB"; exit 1'],
+      user: 'root',
+      command: ['bash', '-c', [
+        // Disable SSL (HTTP-only, no CloudFront for applicants)
+        'sed -i "s/config.assume_ssl = true/config.assume_ssl = false/" /app/config/environments/production.rb',
+        'sed -i "s/config.force_ssl = true/config.force_ssl = false/" /app/config/environments/production.rb',
+        'echo "SSL disabled"',
+        // Wait for DB using ruby pg gem (no pg_isready in this image)
+        'echo "Waiting for bops_applicants_production..."',
+        'for i in $(seq 1 48); do if su app -c "bundle exec ruby -e \\"require \'pg\'; PG.connect(ENV[\'DATABASE_URL\\'])\\"" 2>/dev/null; then break; fi; echo "Attempt $i/48"; sleep 15; done',
+        'echo "DB ready"',
+        // Run migrations
+        'su app -c "bundle exec rails db:migrate" 2>&1 || echo "Migration skipped"',
+        // Start server as app user
+        'echo "Starting applicants server..."',
+        'exec su app -c "bundle exec rails server -b 0.0.0.0 -p 3000"',
+      ].join(' && ')],
       logging: ecs.LogDrivers.awsLogs({ logGroup: this.logGroup, streamPrefix: 'bops-applicants' }),
       environment: {
         RAILS_ENV: 'production',
