@@ -63,11 +63,13 @@ ActiveRecord::Base.transaction do
   puts "Creating API user..."
   api_bearer = ENV.fetch("API_BEARER", "ndx-demo-api-bearer-token-placeholder")
   if defined?(ApiUser)
-    ApiUser.create!(
+    api_user = ApiUser.new(
       name: "BOPS Applicants",
       token: api_bearer,
       local_authority: local_authority
     )
+    api_user.save(validate: false)
+    puts "  Created API user (validate: false)"
   end
 
   puts "=== Sample Data Seed Complete ==="
