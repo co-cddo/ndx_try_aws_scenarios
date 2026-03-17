@@ -70,12 +70,17 @@
     </p>
 
     {# Technical details - hidden in simplified mode #}
-    {% if activity.input_text or activity.expected_output %}
+    {% if activity.input_text or activity.input_variations or activity.expected_output %}
       <div class="ndx-activity-card__technical">
         {% if activity.input_text %}
           <p class="govuk-body-s">
             <strong>Try this:</strong>
             <code class="ndx-activity-card__code">{{ activity.input_text | truncate(100) }}</code>
+          </p>
+        {% elif activity.input_variations %}
+          <p class="govuk-body-s">
+            <strong>Try this:</strong>
+            <code class="ndx-activity-card__code">{{ activity.input_variations[0] }}</code>
           </p>
         {% endif %}
       </div>
