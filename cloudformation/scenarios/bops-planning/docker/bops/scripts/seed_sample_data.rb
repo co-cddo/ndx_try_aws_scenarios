@@ -198,8 +198,28 @@ PlanningApplication.where(local_authority: la).each_with_index do |pa, idx|
   )
 end
 
+# 7. Publish ~30% of in_assessment apps for the applicants portal
+# Applicants portal only shows apps where published_at is set
+geojson = {
+  type: "Feature",
+  geometry: {
+    type: "Polygon",
+    coordinates: [[[-0.128, 51.507], [-0.127, 51.507], [-0.127, 51.508], [-0.128, 51.508], [-0.128, 51.507]]]
+  }
+}.to_json
+
+published = 0
+PlanningApplication.where(local_authority: la, status: "in_assessment", published_at: nil).limit(10).each do |pa|
+  pa.update_columns(published_at: Time.current - rand(1..7).days, boundary_geojson: geojson)
+  consultation = pa.consultation || pa.create_consultation!
+  consultation.update_columns(end_date: Time.current + 14.days, start_date: Time.current - 7.days) unless consultation.end_date
+  published += 1
+end
+puts "Published #{published} apps for applicants portal"
+
 puts "Created: #{created}, Errors: #{errors}"
 puts "By status: #{PlanningApplication.where(local_authority: la).group(:status).count}"
 assigned = PlanningApplication.where(local_authority: la).joins(:case_record).where(case_records: { user_id: assessor.id }).count
 puts "Assigned to assessor: #{assigned}/#{created}"
+puts "Published: #{PlanningApplication.where(local_authority: la).where.not(published_at: nil).count}"
 puts "=== Seed Complete ==="
