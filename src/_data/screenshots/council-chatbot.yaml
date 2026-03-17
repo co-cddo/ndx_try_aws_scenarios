@@ -5,7 +5,7 @@
 scenario: council-chatbot
 scenarioTitle: "Council Chatbot"
 awsService: "Amazon Bedrock"
-totalSteps: 4
+totalSteps: 5
 
 # Step-specific screenshots
 steps:
@@ -101,6 +101,65 @@ steps:
             y: "19%"
             label: "Claude model selection"
             arrow: "down"
+
+  - step: 5
+    title: "Update the Knowledge Base"
+    screenshots:
+      - id: knotweed-no-answer
+        filename: step-5-knotweed-no-answer.png
+        alt: "Chatbot responding that it does not have information about Japanese knotweed"
+        caption: "Before: The chatbot cannot answer questions about topics not in the knowledge base"
+        width: 1920
+        height: 1080
+
+      - id: cfn-outputs
+        filename: step-5-cfn-outputs.png
+        alt: "CloudFormation Outputs tab showing KnowledgeBaseBucket and KnowledgeBaseId values"
+        caption: "Find the S3 bucket name in CloudFormation Outputs"
+        width: 1920
+        height: 1080
+
+      - id: s3-documents
+        filename: step-5-s3-documents.png
+        alt: "S3 bucket showing 30 council documents in the documents prefix"
+        caption: "The knowledge base S3 bucket contains all the council documents"
+        width: 1920
+        height: 1080
+
+      - id: s3-file-selected
+        filename: step-5-s3-file-selected.png
+        alt: "S3 upload page with knotweed-guide.txt selected ready to upload"
+        caption: "Select your new document file and click Upload"
+        width: 1920
+        height: 1080
+
+      - id: s3-upload-success
+        filename: step-5-s3-upload-success.png
+        alt: "S3 upload success page showing knotweed-guide.txt uploaded successfully"
+        caption: "Upload succeeded - the document is now in the S3 bucket"
+        width: 1920
+        height: 1080
+
+      - id: bedrock-kb-overview
+        filename: step-5-bedrock-kb-overview.png
+        alt: "Bedrock Knowledge Base detail page showing Data source section with Sync button"
+        caption: "Select the data source and click Sync to index new documents"
+        width: 1920
+        height: 1080
+
+      - id: bedrock-sync-completed
+        filename: step-5-bedrock-sync-in-progress.png
+        alt: "Bedrock console showing sync completed banner for council-documents data source"
+        caption: "The sync completes in under a minute for small documents"
+        width: 1920
+        height: 1080
+
+      - id: knotweed-answered
+        filename: step-5-knotweed-answered.png
+        alt: "Chatbot now answering the Japanese knotweed question with specific details from the uploaded document"
+        caption: "After: The chatbot answers with specific details from the new document"
+        width: 1920
+        height: 1080
 
 # Explore section screenshots (Epic 6 content)
 explore:

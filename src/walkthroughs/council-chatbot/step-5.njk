@@ -1,0 +1,466 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 5: Update the Knowledge Base - Council Chatbot Walkthrough"
+description: Add a new document to the knowledge base and see the chatbot learn it
+currentStep: 5
+totalSteps: 5
+timeEstimate: "5 minutes"
+scenarioId: council-chatbot
+---
+
+{#
+  Step 5: Update the Knowledge Base
+  - Ask a question the chatbot can't answer
+  - Upload a new document to S3
+  - Trigger Knowledge Base sync
+  - Verify the chatbot can now answer
+#}
+
+<h1 class="govuk-heading-xl">Update the Knowledge Base</h1>
+
+<p class="govuk-body-l">
+  The real power of a Knowledge Base is that you can update it without any code changes.
+  In this step, you'll add a new council document and see the chatbot learn from it in minutes.
+</p>
+
+<h2 class="govuk-heading-l">Part 1: Ask a question the chatbot can't answer</h2>
+
+<p class="govuk-body">
+  First, let's find a gap in the chatbot's knowledge. The knowledge base doesn't include
+  anything about Japanese knotweed — a common council responsibility.
+</p>
+
+<div class="ndx-walkthrough-step__copy-section">
+  <h3 class="govuk-heading-m">Copy this question</h3>
+  <div class="ndx-walkthrough-step__copy-container">
+    <pre class="ndx-walkthrough-step__copy-text" id="copy-text-5a">How do I report a Japanese knotweed infestation on council land?</pre>
+    <button type="button"
+            class="govuk-button govuk-button--secondary ndx-walkthrough-step__copy-btn"
+            data-copy-target="copy-text-5a"
+            data-step="5"
+            aria-label="Copy question to clipboard">
+      <span class="ndx-walkthrough-step__copy-icon">📋</span>
+      <span class="ndx-walkthrough-step__copy-label">Copy</span>
+    </button>
+  </div>
+  <div class="ndx-walkthrough-step__copy-confirmation"
+       id="copy-confirmation-5a"
+       role="status"
+       aria-live="polite"
+       aria-atomic="true"
+       hidden>
+    <span class="ndx-walkthrough-step__copy-success">✓ Copied to clipboard!</span>
+  </div>
+</div>
+
+<p class="govuk-body">
+  Paste this into the chatbot and press Send. You should see a response like:
+</p>
+
+<div class="ndx-expected-response">
+  <div class="ndx-expected-response__label">
+    <strong>Expected response:</strong>
+  </div>
+  <div class="ndx-expected-response__content">
+    "Sorry, I don't have specific information on reporting Japanese knotweed infestations
+    on council land. Please contact the council directly for assistance."
+  </div>
+</div>
+
+<p class="govuk-body govuk-!-margin-top-4">
+  The chatbot admits it doesn't have this information — exactly what we want. Now let's fix that.
+</p>
+
+<img src="/assets/images/screenshots/council-chatbot/step-5-knotweed-no-answer.png"
+     alt="Chatbot responding that it does not have information about Japanese knotweed"
+     class="ndx-screenshot govuk-!-margin-bottom-6"
+     loading="lazy" />
+
+<h2 class="govuk-heading-l">Part 2: Download the document</h2>
+
+<p class="govuk-body">
+  We've prepared a sample council document about Japanese knotweed services.
+  Download it to your computer — you'll upload it to the Knowledge Base in the next step.
+</p>
+
+<div class="ndx-download-section">
+  <div class="ndx-download-section__info">
+    <strong class="govuk-body">knotweed-guide.txt</strong>
+    <span class="govuk-body-s govuk-!-margin-left-2" style="color: #505a5f;">Plain text, ~1 KB</span>
+  </div>
+  <a href="/assets/downloads/council-chatbot/knotweed-guide.txt"
+     download="knotweed-guide.txt"
+     class="govuk-button govuk-button--secondary ndx-download-section__button"
+     role="button"
+     draggable="false">
+    Download knotweed-guide.txt
+  </a>
+</div>
+
+<details class="govuk-details govuk-!-margin-top-4">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Preview: what's in the document
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body-s" style="white-space: pre-line; font-family: monospace; background: #f3f2f1; padding: 15px; border-radius: 3px;">Japanese Knotweed Guide - Northfield Metropolitan Borough Council
+
+REPORTING JAPANESE KNOTWEED
+
+Japanese knotweed is an invasive plant that damages buildings and drains. Report it on council land so we can act.
+
+How to report: Call Environmental Services on 0121 555 0183, email knotweed@northfield.gov.uk, or report online at www.northfield.gov.uk/japanese-knotweed
+
+After reporting: We inspect within 10 working days, create a treatment plan, and treat over 3 to 5 years with herbicide.
+
+Identifying it: Tall bamboo-like stems up to 3 metres, shield-shaped leaves, white flowers in late summer. Roots spread up to 7 metres.
+
+Your responsibilities: You must not cause it to spread. It is controlled waste, never put it in garden waste bins. Mortgage lenders may require treatment plans.
+
+Council programme: We manage over 45 sites on public land at no cost to residents. For private land, use a Property Care Association certified contractor.</p>
+  </div>
+</details>
+
+<h2 class="govuk-heading-l">Part 3: Upload to the Knowledge Base S3 bucket</h2>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Find the S3 bucket name</strong>
+    <p class="govuk-body">
+      Go to your CloudFormation stack's <strong>Outputs</strong> tab and find the
+      <code>KnowledgeBaseBucket</code> value. It will look like:
+      <code>ndx-try-chatbot-kb-[account-id]-us-east-1</code>
+    </p>
+    <img src="/assets/images/screenshots/council-chatbot/step-5-cfn-outputs.png"
+         alt="CloudFormation Outputs tab showing KnowledgeBaseBucket value"
+         class="ndx-screenshot govuk-!-margin-bottom-4"
+         loading="lazy" />
+  </li>
+
+  <li>
+    <strong>Open the S3 bucket</strong>
+    <p class="govuk-body">
+      Navigate to
+      <a href="https://us-east-1.console.aws.amazon.com/s3/buckets?region=us-east-1" target="_blank" rel="noopener noreferrer" class="govuk-link">
+        S3 in the AWS Console<span class="govuk-visually-hidden"> (opens in new tab)</span></a>,
+      find the bucket, and open the <code>documents/</code> folder.
+      You'll see the 30 existing council documents.
+    </p>
+    <img src="/assets/images/screenshots/council-chatbot/step-5-s3-documents.png"
+         alt="S3 bucket showing 30 council documents"
+         class="ndx-screenshot govuk-!-margin-bottom-4"
+         loading="lazy" />
+  </li>
+
+  <li>
+    <strong>Click Upload</strong>
+    <p class="govuk-body">
+      Click the orange <strong>Upload</strong> button, then <strong>Add files</strong>,
+      and select your <code>knotweed-guide.txt</code> file.
+    </p>
+    <img src="/assets/images/screenshots/council-chatbot/step-5-s3-file-selected.png"
+         alt="S3 upload page with knotweed-guide.txt selected"
+         class="ndx-screenshot govuk-!-margin-bottom-4"
+         loading="lazy" />
+  </li>
+
+  <li>
+    <strong>Confirm the upload</strong>
+    <p class="govuk-body">
+      Check the destination shows <code>s3://[your-bucket]/documents/</code>,
+      then click <strong>Upload</strong> at the bottom of the page.
+    </p>
+    <img src="/assets/images/screenshots/council-chatbot/step-5-s3-upload-success.png"
+         alt="S3 upload success confirmation"
+         class="ndx-screenshot govuk-!-margin-bottom-4"
+         loading="lazy" />
+  </li>
+</ol>
+
+<h2 class="govuk-heading-l">Part 4: Sync the Knowledge Base</h2>
+
+<p class="govuk-body">
+  The document is in S3, but the Knowledge Base doesn't know about it yet.
+  You need to trigger a <strong>sync</strong> to index the new document.
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the Bedrock Knowledge Base console</strong>
+    <p class="govuk-body">
+      Go to
+      <a href="https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/knowledge-bases" target="_blank" rel="noopener noreferrer" class="govuk-link">
+        Amazon Bedrock &gt; Knowledge Bases<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+      in the AWS Console.
+    </p>
+  </li>
+
+  <li>
+    <strong>Click on your Knowledge Base</strong>
+    <p class="govuk-body">
+      You'll see one Knowledge Base listed — click on its name (e.g. <code>ndx-try-council-kb-us-east-1</code>)
+      to open the detail page.
+    </p>
+    <img src="/assets/images/screenshots/council-chatbot/step-5-bedrock-kb-overview.png"
+         alt="Bedrock Knowledge Base detail page showing the Data source section with Sync button"
+         class="ndx-screenshot govuk-!-margin-bottom-4"
+         loading="lazy" />
+  </li>
+
+  <li>
+    <strong>Select the data source and click Sync</strong>
+    <p class="govuk-body">
+      In the <strong>Data source</strong> section, tick the checkbox next to <code>council-documents</code>,
+      then click the <strong>Sync</strong> button. This tells the Knowledge Base to scan the S3 bucket
+      for new or changed documents and index them.
+    </p>
+  </li>
+
+  <li>
+    <strong>Wait for the sync to complete</strong>
+    <p class="govuk-body">
+      You'll see a blue banner saying "Syncing data source". For a single new document, this
+      typically takes 30 to 60 seconds. When it finishes, you'll see a green
+      "Sync completed" banner.
+    </p>
+    <img src="/assets/images/screenshots/council-chatbot/step-5-bedrock-sync-in-progress.png"
+         alt="Bedrock console showing sync completed for data source council-documents"
+         class="ndx-screenshot govuk-!-margin-bottom-4"
+         loading="lazy" />
+  </li>
+</ol>
+
+<h2 class="govuk-heading-l">Part 5: Test the chatbot again</h2>
+
+<p class="govuk-body">
+  Go back to your chatbot tab, click <strong>Clear conversation</strong>, and ask the same question:
+</p>
+
+<div class="ndx-walkthrough-step__copy-section">
+  <div class="ndx-walkthrough-step__copy-container">
+    <pre class="ndx-walkthrough-step__copy-text" id="copy-text-5e">How do I report a Japanese knotweed infestation on council land?</pre>
+    <button type="button"
+            class="govuk-button govuk-button--secondary ndx-walkthrough-step__copy-btn"
+            data-copy-target="copy-text-5e"
+            data-step="5"
+            aria-label="Copy question to clipboard">
+      <span class="ndx-walkthrough-step__copy-icon">📋</span>
+      <span class="ndx-walkthrough-step__copy-label">Copy</span>
+    </button>
+  </div>
+  <div class="ndx-walkthrough-step__copy-confirmation"
+       id="copy-confirmation-5e"
+       role="status"
+       aria-live="polite"
+       aria-atomic="true"
+       hidden>
+    <span class="ndx-walkthrough-step__copy-success">✓ Copied to clipboard!</span>
+  </div>
+</div>
+
+<div class="ndx-expected-response ndx-expected-response--success">
+  <div class="ndx-expected-response__label">
+    <strong>New response:</strong>
+  </div>
+  <div class="ndx-expected-response__content">
+    "Call Environmental Services on 0121 555 0183, email knotweed@northfield.gov.uk,
+    or report online at www.northfield.gov.uk/japanese-knotweed.
+    After reporting, an inspection will be conducted within 10 working days,
+    followed by a treatment plan and herbicide application over 3 to 5 years."
+  </div>
+</div>
+
+<img src="/assets/images/screenshots/council-chatbot/step-5-knotweed-answered.png"
+     alt="Chatbot now answering the Japanese knotweed question with specific details"
+     class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-6"
+     loading="lazy" />
+
+<div class="ndx-walkthrough-step__outcomes govuk-!-margin-top-6">
+  <h2 class="govuk-heading-m">What just happened</h2>
+  <ul class="govuk-list ndx-walkthrough-step__outcome-list">
+    <li class="ndx-walkthrough-step__outcome-item">
+      <span class="ndx-walkthrough-step__checkmark" aria-hidden="true">✓</span>
+      You uploaded a new document to S3 — no code changes needed
+    </li>
+    <li class="ndx-walkthrough-step__outcome-item">
+      <span class="ndx-walkthrough-step__checkmark" aria-hidden="true">✓</span>
+      You triggered a Knowledge Base sync to index the new content
+    </li>
+    <li class="ndx-walkthrough-step__outcome-item">
+      <span class="ndx-walkthrough-step__checkmark" aria-hidden="true">✓</span>
+      The chatbot immediately answered using the new document
+    </li>
+    <li class="ndx-walkthrough-step__outcome-item">
+      <span class="ndx-walkthrough-step__checkmark" aria-hidden="true">✓</span>
+      No retraining, no redeployment, no downtime
+    </li>
+  </ul>
+</div>
+
+<h2 class="govuk-heading-l govuk-!-margin-top-8">Why this matters for councils</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h3 class="govuk-heading-s">Content teams can update it</h3>
+      <p class="govuk-body-s">
+        Adding new knowledge doesn't require developers. Anyone who can upload a file to S3
+        can update what the chatbot knows — just like updating a website.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h3 class="govuk-heading-s">Changes take effect in minutes</h3>
+      <p class="govuk-body-s">
+        New policies, changed opening hours, seasonal information — upload the document,
+        sync the knowledge base, and residents get accurate answers within minutes.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h3 class="govuk-heading-s">Plain text documents work</h3>
+      <p class="govuk-body-s">
+        The Knowledge Base accepts .txt, .pdf, .html, .csv, and .md files.
+        You can use existing council documents without reformatting.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h3 class="govuk-heading-s">Scale without limits</h3>
+      <p class="govuk-body-s">
+        Add hundreds or thousands of documents. The vector search finds the right
+        information regardless of how large the knowledge base grows.
+      </p>
+    </div>
+  </div>
+</div>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Chatbot still doesn't know the answer
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Wait 60 seconds after the sync command and try again — indexing takes time</li>
+      <li>Click <strong>Clear conversation</strong> in the chatbot before asking again — old sessions may use cached context</li>
+      <li>Check the file was uploaded to the <code>documents/</code> folder (not the bucket root)</li>
+      <li>Make sure the file is plain text (.txt) — binary formats like .docx won't work without conversion</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: CloudShell command fails
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check you replaced <code>YOUR_KB_ID</code> with the actual Knowledge Base ID from CloudFormation Outputs</li>
+      <li>Ensure you're in the <code>us-east-1</code> region (check the region selector in the top-right)</li>
+      <li>If you see "access denied", the sandbox session may have expired — try refreshing the page</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  .ndx-expected-response {
+    border-left: 4px solid #00703c;
+    background-color: #f8f8f8;
+    padding: 20px;
+    margin: 20px 0;
+  }
+
+  .ndx-expected-response--success {
+    border-left-color: #00703c;
+    background-color: #e8f5e9;
+  }
+
+  .ndx-expected-response__label {
+    margin-bottom: 10px;
+    color: #00703c;
+  }
+
+  .ndx-expected-response__content {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .ndx-feature-highlight {
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    min-height: 140px;
+  }
+
+  .ndx-feature-highlight h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-feature-highlight p {
+    margin-bottom: 0;
+  }
+
+  .ndx-download-section {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .ndx-download-section__info {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .ndx-download-section__button {
+    white-space: nowrap;
+  }
+
+  .ndx-screenshot {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #b1b4b6;
+    border-radius: 3px;
+  }
+
+  .ndx-walkthrough-step__copy-text--small {
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-feature-highlight {
+      min-height: auto;
+    }
+  }
+</style>
