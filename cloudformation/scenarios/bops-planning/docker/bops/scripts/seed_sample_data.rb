@@ -109,6 +109,19 @@ unless assessor
   end
   assessor = User.find_by(email: "ndx-demo_assessor@example.com", local_authority: la)
   admin = User.find_by(email: "ndx-demo_administrator@example.com", local_authority: la)
+
+  # Create API user for BOPS-Applicants portal Bearer token auth
+  api_bearer = ENV.fetch("API_BEARER", "ndx-demo-api-bearer-placeholder")
+  if defined?(ApiUser) && ApiUser.where(local_authority: la, token: api_bearer).none?
+    puts "Creating API user..."
+    conn = ActiveRecord::Base.connection
+    conn.execute(
+      "INSERT INTO api_users (name, token, local_authority_id, permissions, created_at, updated_at) VALUES (" +
+      "#{conn.quote('BOPS Applicants')}, #{conn.quote(api_bearer)}, #{la.id}, " +
+      "'{\"planning_application:read\",\"planning_application:write\",\"comment:read\",\"comment:write\",\"validation_request:read\",\"validation_request:write\"}', NOW(), NOW())"
+    )
+    puts "  API user created with full permissions"
+  end
 end
 
 # 5. Create planning applications
