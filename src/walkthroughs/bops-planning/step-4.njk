@@ -1,0 +1,107 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Explore the Applicants Portal — Back Office Planning System (BOPS) Walkthrough"
+description: See the public-facing view of planning applications with maps and consultation dates
+currentStep: 4
+totalSteps: 4
+timeEstimate: "4 minutes"
+scenarioId: bops-planning
+---
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Explore the Applicants Portal" %}
+{% set stepDescription = "See the public-facing portal that residents and applicants use to view planning applications, check progress, and find consultation deadlines." %}
+{% set timeEstimate = "4 minutes" %}
+{% set screenshotData = screenshots["bops-planning"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 4 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Applicants portal shows published planning applications on a map",
+  "Application details include site boundary, description, and consultation dates",
+  "Public comments section is available for applications in consultation"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Find the Applicants Portal URL</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Get the URL from CloudFormation outputs</strong>
+    <p class="govuk-body">
+      Go back to the <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console<span class="govuk-visually-hidden"> (opens in new tab)</span></a> and find the <code>ApplicantsPortalUrl</code> output. This is a separate CloudFront HTTPS URL.
+    </p>
+  </li>
+
+  <li>
+    <strong>Browse the application list</strong>
+    <p class="govuk-body">
+      The portal landing page shows published planning applications. You should see around 10 applications that have been made public. Each shows:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Reference number</strong> — the BOPS application reference</li>
+      <li><strong>Address</strong> — the site location</li>
+      <li><strong>Description</strong> — what's being proposed</li>
+      <li><strong>Status</strong> — current stage in the planning process</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>View the map</strong>
+    <p class="govuk-body">
+      The portal includes an interactive map showing application locations with site boundary polygons. If an Ordnance Survey API key was provided during deployment, you'll see OS Maps tiles. Otherwise, the map uses a basic tileset.
+    </p>
+  </li>
+
+  <li>
+    <strong>Open an application</strong>
+    <p class="govuk-body">
+      Click on any application to see its full public details:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Site boundary</strong> — red line boundary on the map</li>
+      <li><strong>Application details</strong> — type, description, key dates</li>
+      <li><strong>Consultation period</strong> — when public comments are accepted</li>
+      <li><strong>Documents</strong> — plans and supporting documents (if uploaded)</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Check consultation dates</strong>
+    <p class="govuk-body">
+      Published applications show consultation start and end dates. The seed data sets consultations to end 14 days from deployment, so you should see active consultation periods.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">How the two portals connect</h3>
+
+<p class="govuk-body">
+  The applicants portal is a separate Rails application that reads data from the same Aurora PostgreSQL database via an internal API. When a planning officer publishes an application in the back-office, it appears on the public portal automatically.
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th class="govuk-table__header">Portal</th>
+      <th class="govuk-table__header">Audience</th>
+      <th class="govuk-table__header">Purpose</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><strong>Back-office</strong> (Step 1-3)</td>
+      <td class="govuk-table__cell">Planning officers</td>
+      <td class="govuk-table__cell">Process, assess, and determine applications</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><strong>Applicants portal</strong> (this step)</td>
+      <td class="govuk-table__cell">Residents and applicants</td>
+      <td class="govuk-table__cell">Track applications, view decisions, submit comments</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text">
+  <strong>This is the public face of <a href="https://opendigitalplanning.org/back-office-planning-system-bops" class="govuk-link">BOPS</a>:</strong> Residents can track their applications, neighbours can view proposals and comment during consultation, and everything stays in sync with the back-office system. No more phone calls asking "what's happening with my application?"
+</div>

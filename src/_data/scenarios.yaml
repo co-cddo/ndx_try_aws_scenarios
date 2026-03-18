@@ -1360,10 +1360,10 @@ scenarios:
         total: 3150
 
   - id: "bops-planning"
-    name: "Digital Planning (BOPS)"
-    headline: "Experience the Back Office Planning System used by UK councils"
+    name: "Back Office Planning System (BOPS)"
+    headline: "Experience the open-source planning case management system from Open Digital Planning"
     bestFor: "Planning departments evaluating digital transformation"
-    description: "Deploy the Back Office Planning System (BOPS) — the open-source digital planning platform used by UK councils. Experience the complete planning application lifecycle from validation through to decision, with 80 realistic sample applications, automated officer reports, and Ordnance Survey mapping."
+    description: "Deploy the Back Office Planning System (BOPS) — the open-source planning case management system developed by the Open Digital Planning programme and used by UK councils including Lambeth, Southwark, and Buckinghamshire. Experience the complete planning application lifecycle from validation through to decision, with 35 realistic sample applications across householder, prior approval, and lawful development types, and Ordnance Survey mapping."
     difficulty: "intermediate"
     timeEstimate: "15 to 20 minutes"
     primaryPersona: "service-manager"

@@ -1,44 +1,109 @@
-# BOPS Planning System Screenshot Manifest
-#
-# Screenshots to capture from a deployed BOPS instance.
-# Manual capture via Playwright after deployment.
+# Screenshot data for BOPS Planning scenario
+# Used by screenshot.njk component to display screenshots in walkthrough steps
+# Images stored in src/assets/images/screenshots/bops-planning/
 
 scenario: bops-planning
-generated: 2026-03-16T00:00:00.000Z
-description: Screenshots of deployed BOPS Planning System instance
+scenarioTitle: "Back Office Planning System (BOPS)"
+awsService: "Amazon ECS"
+totalSteps: 4
 
-# Admin pages (authentication required)
-admin_pages:
-  - path: "/users/sign_in"
-    name: "login"
-    description: "BOPS login page"
-  - path: "/"
-    name: "dashboard"
-    description: "BOPS dashboard showing planning applications"
-  - path: "/planning_applications?status=in_assessment"
-    name: "applications-list"
-    description: "Planning applications filtered by status"
+# Step-specific screenshots
+steps:
+  - step: 1
+    title: "Log In as a Planning Officer"
+    screenshots:
+      - id: cfn-stacks-list
+        filename: 01-cfn-stacks-list.png
+        alt: "CloudFormation console showing BOPS stack with CREATE_COMPLETE status"
+        caption: "Find your bops-planning stack in the CloudFormation console"
+        width: 1024
+        height: 1024
 
-# Application detail pages
-detail_pages:
-  - path: "/planning_applications/1"
-    name: "application-detail"
-    description: "Planning application detail page with map and constraints"
-  - path: "/planning_applications/1/assessment"
-    name: "application-assessment"
-    description: "Application assessment view"
+      - id: cfn-stack-outputs
+        filename: 03-cfn-stack-outputs.png
+        alt: "CloudFormation Outputs tab showing BOPSLoginUrl, BOPSUsername, BOPSPassword, and ApplicantsPortalUrl"
+        caption: "The Outputs tab shows your login URL, credentials, and applicants portal URL"
+        width: 1024
+        height: 1024
 
-# Applicants portal pages (separate ALB:8080, no auth)
-applicants_pages:
-  - path: "/"
-    name: "applicants-homepage"
-    description: "BOPS-Applicants public portal homepage"
+      - id: bops-login
+        filename: 04-bops-login.png
+        alt: "BOPS login page with email and password fields"
+        caption: "The BOPS login page — enter the credentials from the stack outputs"
+        width: 1024
+        height: 1024
 
-# CloudFormation outputs page
-deployment_pages:
-  - path: "cloudformation-outputs"
-    name: "cfn-outputs"
-    description: "CloudFormation stack outputs showing URLs and credentials"
+  - step: 2
+    title: "Browse Planning Applications"
+    screenshots:
+      - id: my-applications
+        filename: 05-bops-my-applications.png
+        alt: "BOPS My Applications dashboard showing 18 assigned planning cases with varied statuses and expiry dates"
+        caption: "My Applications shows cases assigned to you with days to determination"
+        width: 1024
+        height: 2400
 
-# Screenshot naming convention: {name}-{viewport}.png
-# Viewport: 1920x1080 (desktop)
+      - id: all-cases
+        filename: 06-bops-all-cases.png
+        alt: "BOPS All Cases tab showing all 35 planning applications with descriptions and planning officer assignments"
+        caption: "All Cases shows every application across the council"
+        width: 1024
+        height: 1024
+
+  - step: 3
+    title: "Review an Application in Detail"
+    screenshots:
+      - id: application-detail
+        filename: 07-bops-application-detail.png
+        alt: "BOPS application detail page showing address, status, key dates, and workflow stages from Validation through to Review"
+        caption: "Application detail shows the full planning workflow — validation, consultation, assessment, and review"
+        width: 1024
+        height: 2000
+
+      - id: validation-tasks
+        filename: 08-bops-validation-tasks.png
+        alt: "BOPS validation tasks page showing document checks, red line boundary, fee verification, and ownership certificate tasks"
+        caption: "The validation checklist ensures every required check is completed"
+        width: 1024
+        height: 2200
+
+      - id: assessment-tasks
+        filename: 09-bops-assessment-tasks.png
+        alt: "BOPS assessment tasks page showing policy assessment, site visit, consultation summary, and recommendation tasks"
+        caption: "Assessment tasks guide the case officer through the full planning assessment"
+        width: 1024
+        height: 2200
+
+  - step: 4
+    title: "Explore the Applicants Portal"
+    screenshots:
+      - id: applicants-portal-home
+        filename: 10-applicants-portal-home.png
+        alt: "BOPS Applicants Portal homepage showing NDX Demo Council branding"
+        caption: "The public-facing applicants portal"
+        width: 1024
+        height: 1024
+
+      - id: applicants-portal-application
+        filename: 11-applicants-portal-application.png
+        alt: "Applicants portal showing a planning application with OS Maps, red line boundary, application summary, and consultation comment form"
+        caption: "Published applications show the site boundary on OS Maps with consultation dates and public comment submission"
+        width: 1024
+        height: 1800
+
+# AWS Console screenshots (not step-specific, for exploration/architecture tours)
+console:
+  - id: ecs-clusters
+    filename: 12-aws-ecs-clusters.png
+    alt: "ECS console showing NdxBops-Cluster with 2 services and 2 running tasks"
+    caption: "ECS Fargate cluster running the BOPS web and applicants services"
+
+  - id: rds-databases
+    filename: 13-aws-rds-databases.png
+    alt: "RDS console showing Aurora PostgreSQL Serverless v2 cluster with Available status"
+    caption: "Aurora PostgreSQL Serverless v2 database with PostGIS extensions"
+
+  - id: cloudfront-distributions
+    filename: 14-aws-cloudfront-distributions.png
+    alt: "CloudFront console showing two enabled distributions — Back Office HTTPS and Applicants Portal HTTPS"
+    caption: "Two CloudFront distributions provide HTTPS for both portals"

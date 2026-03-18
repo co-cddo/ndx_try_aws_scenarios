@@ -49,6 +49,27 @@ walkthroughs:
         description: "Know how to delete your stack when finished"
         time: "3 minutes"
 
+  bops-planning:
+    totalSteps: 4
+    url: "/walkthroughs/bops-planning/"
+    title: "Back Office Planning System (BOPS) Walkthrough"
+    duration: "15 minutes"
+    hasWalkthrough: true
+    category: "planning"
+    steps:
+      - title: "Logged in as planning officer"
+        description: "Find your credentials and access the BOPS dashboard"
+        time: "2 minutes"
+      - title: "Applications browsed"
+        description: "Explore the dashboard with 35 realistic planning cases"
+        time: "4 minutes"
+      - title: "Application reviewed"
+        description: "Open an application to see the full assessment workflow"
+        time: "5 minutes"
+      - title: "Applicants portal explored"
+        description: "See the public-facing portal with maps and consultations"
+        time: "4 minutes"
+
   council-chatbot:
     totalSteps: 4
     url: "/walkthroughs/council-chatbot/"

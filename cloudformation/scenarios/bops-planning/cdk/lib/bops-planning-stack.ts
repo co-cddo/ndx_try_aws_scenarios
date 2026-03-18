@@ -108,6 +108,10 @@ export class BopsPlanningStack extends cdk.Stack {
       },
     });
 
+    // NOTE: template.yaml has been manually edited to replace this with a Lambda-backed
+    // custom resource (PasswordGeneratorFunction) that generates a random password and
+    // returns it via Fn::GetAtt, so it can be displayed in CloudFormation outputs.
+    // Secrets Manager dynamic references ({{resolve:...}}) don't work in outputs.
     const adminPasswordSecret = new secretsmanager.Secret(this, 'AdminPasswordSecret', {
       description: 'BOPS demo admin password',
       generateSecretString: {
@@ -196,8 +200,8 @@ export class BopsPlanningStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'BOPSPassword', {
-      description: 'BOPS admin password (retrieve from Secrets Manager)',
-      value: `https://console.aws.amazon.com/secretsmanager/secret?name=${adminPasswordSecret.secretName}&region=${cdk.Aws.REGION}`,
+      description: 'BOPS admin password',
+      value: adminPasswordSecret.secretValueFromJson('ADMIN_PASSWORD').unsafeUnwrap(),
     });
 
     new cdk.CfnOutput(this, 'ApplicantsPortalUrl', {

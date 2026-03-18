@@ -1,0 +1,75 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Browse Applications — Back Office Planning System (BOPS) Walkthrough"
+description: Explore the planning applications dashboard with 35 realistic cases
+currentStep: 2
+totalSteps: 4
+timeEstimate: "4 minutes"
+scenarioId: bops-planning
+---
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Browse Planning Applications" %}
+{% set stepDescription = "Explore the dashboard to see how BOPS organises planning cases by status, type, and assignment." %}
+{% set timeEstimate = "4 minutes" %}
+{% set screenshotData = screenshots["bops-planning"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 2 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "My Applications tab shows cases assigned to you",
+  "All Cases tab shows all 35 applications",
+  "Applications have varied statuses and expiry dates"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Explore the dashboard tabs</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>My Applications</strong>
+    <p class="govuk-body">
+      After logging in as the assessor, you'll land on "My Applications". This shows the 18 cases assigned to you — a mix of "Not started" and "In assessment" statuses.
+    </p>
+    <p class="govuk-body">
+      Notice the <strong>days to determination date</strong> column — each application has a statutory deadline. Cases closer to their deadline appear with fewer days remaining.
+    </p>
+  </li>
+
+  <li>
+    <strong>All Cases</strong>
+    <p class="govuk-body">
+      Click the <strong>All cases</strong> tab to see all 35 applications across the council. This includes cases assigned to other officers and unassigned cases.
+    </p>
+  </li>
+
+  <li>
+    <strong>Unassigned Cases</strong>
+    <p class="govuk-body">
+      Click <strong>Unassigned cases</strong> to see applications that haven't been allocated to a case officer yet. In a real council, a team leader would assign these.
+    </p>
+  </li>
+
+  <li>
+    <strong>Filters</strong>
+    <p class="govuk-body">
+      Click <strong>Show all sections</strong> under Filters to see application type and status filters. Try filtering by:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Planning Permission</strong> — householder extensions, new builds</li>
+      <li><strong>Prior Approval</strong> — change of use, larger home extensions</li>
+      <li><strong>Lawfulness Certificate</strong> — certificates for proposed or existing development</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Search</strong>
+    <p class="govuk-body">
+      Try searching for an address like <code>Oakwood</code> or a reference number like <code>26-00110</code>. BOPS searches across addresses, descriptions, and references.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>What you're seeing:</strong> This is the same interface used by councils like Lambeth, Southwark, and Buckinghamshire to manage real planning applications. The workflow stages (validation, consultation, assessment, review, determination) mirror the statutory planning process. <a href="https://opendigitalplanning.org/back-office-planning-system-bops" class="govuk-link">Learn more about BOPS</a>.
+</div>
