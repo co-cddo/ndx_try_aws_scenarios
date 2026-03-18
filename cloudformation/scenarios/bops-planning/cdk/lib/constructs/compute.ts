@@ -168,7 +168,7 @@ export class ComputeConstruct extends Construct {
       'echo "[3/6] Migrations..."',
       'su app -c "bundle exec rails db:migrate" 2>&1',
       // Seed (use ; not && for if/fi blocks)
-      'if [ ! -f /tmp/.bops-seeded ]; then echo "[4/6] Seed..."; su app -c "bundle exec rails runner \'ActionMailer::Base.delivery_method = :test; load Rails.root.join(\\\"db/seeds.rb\\\");\'" 2>&1 || echo "seed skipped"; echo "[5/6] Sample data..."; su app -c "bundle exec rails runner \'ActionMailer::Base.delivery_method = :test; load Rails.root.join(\\\"scripts/seed_sample_data.rb\\\");\'" 2>&1 || echo "sample data skipped"; PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres -c "CREATE DATABASE bops_applicants_production;" 2>/dev/null || true; touch /tmp/.bops-seeded; echo "Seed complete."; else echo "Already seeded."; fi',
+      'if [ ! -f /tmp/.bops-seeded ]; then echo "[4/6] Skipping upstream seed (Notify auth issue)..."; echo "[5/6] Running NDX:Try seed (creates LA, users, types, apps)..."; su app -c "bundle exec rails runner \'ActionMailer::Base.delivery_method = :test; load Rails.root.join(\\\"scripts/seed_sample_data.rb\\\");\'" 2>&1 || echo "sample data skipped"; PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d postgres -c "CREATE DATABASE bops_applicants_production;" 2>/dev/null || true; touch /tmp/.bops-seeded; echo "Seed complete."; else echo "Already seeded."; fi',
       // Start Puma
       'echo "[6/6] Starting Puma..."',
       'exec su app -c "bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"',

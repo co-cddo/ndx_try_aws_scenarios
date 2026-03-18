@@ -11,8 +11,25 @@ puts "=== NDX:Try BOPS Seed ==="
 
 la = LocalAuthority.find_by(subdomain: "ndx-demo")
 unless la
-  puts "ERROR: ndx-demo LocalAuthority not found — run db:seed first"
-  exit 1
+  puts "Creating ndx-demo LocalAuthority..."
+  la = LocalAuthority.new(
+    council_name: "NDX Demo Borough Council",
+    short_name: "NDX Demo",
+    subdomain: "ndx-demo",
+    council_code: "BUC",
+    signatory_name: "Alex Morgan",
+    signatory_job_title: "Head of Planning",
+    enquiries_paragraph: "For enquiries about planning applications, please contact the planning department.",
+    email_address: "planning@ndx-demo.example.com",
+    feedback_email: "feedback@ndx-demo.example.com",
+    press_notice_email: "press@ndx-demo.example.com",
+    reviewer_group_email: "reviewers@ndx-demo.example.com",
+    email_reply_to_id: "00000000-0000-0000-0000-000000000002",
+    applicants_url: ENV.fetch("APPLICANTS_DOMAIN", "http://localhost:8080"),
+    submission_url: ENV.fetch("APPLICANTS_DOMAIN", "http://localhost:8080")
+  )
+  la.save!(validate: false)
+  puts "Created: #{la.council_name} (#{la.subdomain})"
 end
 
 # 1. Activate council
