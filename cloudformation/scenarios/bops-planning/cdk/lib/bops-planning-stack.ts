@@ -195,8 +195,8 @@ export class BopsPlanningStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'BOPSUsername', {
-      description: 'BOPS admin username',
-      value: 'ndx-demo_administrator@example.com',
+      description: 'BOPS login username (case officer view)',
+      value: 'ndx-demo_assessor@example.com',
     });
 
     new cdk.CfnOutput(this, 'BOPSPassword', {
