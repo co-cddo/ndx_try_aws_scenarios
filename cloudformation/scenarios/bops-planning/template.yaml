@@ -2572,8 +2572,8 @@
       }
     },
     "BOPSUsername": {
-      "Description": "BOPS admin username",
-      "Value": "ndx-demo_administrator@example.com"
+      "Description": "BOPS login username (case officer view)",
+      "Value": "ndx-demo_assessor@example.com"
     },
     "BOPSPassword": {
       "Description": "BOPS admin password",
