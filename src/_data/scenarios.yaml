@@ -1426,14 +1426,12 @@ scenarios:
       capabilities:
         - "CAPABILITY_IAM"
         - "CAPABILITY_NAMED_IAM"
-      deploymentTime: "25 to 35 minutes"
+      deploymentTime: "10 to 15 minutes"
       deploymentPhases:
-        - "Creating VPC and networking (~30 seconds)"
-        - "Creating Aurora PostgreSQL Serverless database (~600 seconds)"
-        - "Creating ElastiCache Redis (~480 seconds)"
-        - "Creating ECS Fargate services (~120 seconds)"
-        - "Running database seed task (~600 seconds)"
-        - "Creating CloudFront distribution (~600 seconds)"
+        - "Creating VPC, networking, and security groups (~30 seconds)"
+        - "Creating Aurora PostgreSQL and ElastiCache in parallel (~5 minutes)"
+        - "Creating ECS Fargate services and CloudFront (~3 minutes)"
+        - "Running database migrations and seed (~2 minutes)"
       outputs:
         - name: "BOPSUrl"
           description: "BOPS back-office URL (HTTPS)"
