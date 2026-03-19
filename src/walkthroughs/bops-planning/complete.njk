@@ -1,0 +1,203 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - Back Office Planning System (BOPS)"
+description: You've completed the Back Office Planning System (BOPS) walkthrough
+currentStep: 5
+totalSteps: 4
+scenarioId: bops-planning
+---
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">
+    Walkthrough complete
+  </h1>
+  <div class="govuk-panel__body">
+    You've explored the Back Office Planning System used by UK councils
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  You've just experienced the <a href="https://opendigitalplanning.org/back-office-planning-system-bops" class="govuk-link">Back Office Planning System (BOPS)</a> — the same system used by councils like Lambeth, Southwark, and Buckinghamshire to process real planning applications. In 15 minutes, you've seen what would take weeks of procurement and vendor demos.
+</p>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f3d7;</span>
+      Structured workflow
+    </h3>
+    <p class="govuk-body">
+      BOPS enforces a consistent validation, consultation, assessment, and determination workflow. Every application follows the same process, reducing errors and ensuring nothing is missed.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Consistent quality across thousands of applications per year
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f4ca;</span>
+      Dashboard-driven management
+    </h3>
+    <p class="govuk-body">
+      Case officers see their assigned workload with days-to-determination deadlines. Team leaders can monitor all cases and identify bottlenecks before statutory deadlines are missed.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Real-time visibility into team workload and statutory compliance
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f310;</span>
+      Public transparency
+    </h3>
+    <p class="govuk-body">
+      The applicants portal gives residents real-time visibility into planning applications affecting their area. Map views, consultation dates, and application tracking reduce phone calls and FOI requests.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Fewer enquiries, better public engagement, statutory consultation compliance
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f527;</span>
+      Open source platform
+    </h3>
+    <p class="govuk-body">
+      BOPS is developed by the <a href="https://opendigitalplanning.org/back-office-planning-system-bops" class="govuk-link">Open Digital Planning programme</a> and freely available. No licence fees, no vendor lock-in. Multiple councils contribute to and benefit from shared development.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Zero licence costs, community-driven development, shared innovation
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">Production readiness</h2>
+
+<p class="govuk-body">
+  This demo runs the same codebase used in production by multiple UK councils. For a full deployment, you'd additionally want:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Feature</th>
+      <th scope="col" class="govuk-table__header">Demo status</th>
+      <th scope="col" class="govuk-table__header">Production requirement</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Custom domain</th>
+      <td class="govuk-table__cell">CloudFront URL</td>
+      <td class="govuk-table__cell">planning.yourcouncil.gov.uk</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">GOV.UK Notify</th>
+      <td class="govuk-table__cell">Disabled (demo)</td>
+      <td class="govuk-table__cell">Email notifications, 2FA codes</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">OS Maps</th>
+      <td class="govuk-table__cell">Optional API key</td>
+      <td class="govuk-table__cell">Full OS Vector Tiles integration</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Data migration</th>
+      <td class="govuk-table__cell">35 sample applications</td>
+      <td class="govuk-table__cell">Import from existing planning system</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Backup</th>
+      <td class="govuk-table__cell">Aurora automated (24hr sandbox)</td>
+      <td class="govuk-table__cell">Point-in-time recovery, cross-region</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Integrations</th>
+      <td class="govuk-table__cell">Standalone</td>
+      <td class="govuk-table__cell">PlanX submission, GIS, document management</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>Good news:</strong> The core platform you've just tested is production-ready. The checklist items are about integrating it into your council's existing infrastructure and data, not rebuilding the system.
+  </p>
+</div>
+
+{% set scenarioId = "bops-planning" %}
+{% set scenarioName = "Back Office Planning System (BOPS)" %}
+{% set totalSteps = 4 %}
+{% include "components/completion-next-steps.njk" %}
+
+{% include "components/cleanup-instructions.njk" %}
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Learn more about BOPS</h2>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="https://opendigitalplanning.org/back-office-planning-system-bops" class="govuk-link">Back Office Planning System (BOPS)</a> — full details on the Open Digital Planning website</li>
+    <li><a href="https://opendigitalplanning.org/" class="govuk-link">Open Digital Planning</a> — the programme behind BOPS, PlanX, and other digital planning tools</li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Questions or feedback?</h2>
+
+  <p class="govuk-body">
+    We'd love to hear about your experience with this walkthrough:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .ndx-takeaway-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ndx-takeaway-card__icon {
+    font-size: 32px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-takeaway-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-takeaway-card h3 {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

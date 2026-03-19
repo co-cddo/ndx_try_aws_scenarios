@@ -1,0 +1,168 @@
+# BOPS Planning Exploration Data
+# Defines exploration activities for the Back Office Planning System (BOPS) scenario
+
+scenario_id: bops-planning
+scenario_title: Back Office Planning System (BOPS)
+total_time_estimate: "30 minutes"
+description: "Explore the Back Office Planning System beyond the basic walkthrough"
+
+# Persona paths
+personas:
+  visual:
+    id: visual
+    title: "Planning Manager / Service Lead"
+    description: "Explore through the application interface and officer workflows"
+    icon: "eye"
+    time_estimate: "20 minutes"
+  technical:
+    id: technical
+    title: "Developer / Technical Architect"
+    description: "Explore the infrastructure, database, and container architecture"
+    icon: "code"
+    time_estimate: "30 minutes"
+
+# All exploration activities
+activities:
+  - id: exp1
+    title: "Process an Application Through Validation"
+    category: experiments
+    persona: visual
+    time_estimate: "5 min"
+    learning: "Understanding the validation workflow that every application goes through"
+    is_first: true
+    safe_badge: true
+    expected_output: "Validation checklist items can be marked complete, moving the application forward"
+
+  - id: exp2
+    title: "Try Different User Roles"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "Each role sees a different view of the system — assessors see their caseload, reviewers see recommendations, administrators manage settings"
+    safe_badge: true
+    input_text: |
+      Log in as each role:
+      - ndx-demo_assessor@example.com (case officer view)
+      - ndx-demo_reviewer@example.com (reviewer view)
+      - ndx-demo_administrator@example.com (admin settings)
+    expected_output: "Each role shows different navigation options and dashboard content"
+
+  - id: exp3
+    title: "Filter and Search Applications"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "BOPS provides powerful filtering by application type, status, and free-text search"
+    safe_badge: true
+    input_variations:
+      - "Search for 'Oakwood' to find applications by address"
+      - "Filter by 'Prior Approval' application type"
+      - "Filter by 'Not started' status"
+    expected_output: "Filtered results show matching applications with correct counts"
+
+  - id: exp4
+    title: "Compare Application Types"
+    category: experiments
+    persona: visual
+    time_estimate: "5 min"
+    learning: "Different application types have different workflow steps and determination periods"
+    safe_badge: true
+    expected_output: "Householder applications have different assessment criteria than Prior Approval or LDC applications"
+
+  - id: exp5
+    title: "Explore the Public Portal as a Resident"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "The public portal provides transparency without exposing internal workflows"
+    safe_badge: true
+    expected_output: "Published applications show on a map with site boundaries and consultation dates, but internal assessment notes are not visible"
+
+  # Console Architecture Tour
+  - id: arch-console
+    title: "Console Architecture Tour"
+    category: architecture
+    persona: technical
+    time_estimate: "15 min"
+    learning: "Navigate AWS Console to understand the BOPS infrastructure"
+    steps:
+      - title: "ECS Cluster"
+        console_url: "https://console.aws.amazon.com/ecs/v2/clusters"
+        what_to_look_for: "Two services (web and applicants), task definitions, container health"
+      - title: "Aurora Database"
+        console_url: "https://console.aws.amazon.com/rds/home#databases:"
+        what_to_look_for: "Aurora Serverless v2 cluster, PostgreSQL 16.6, writer instance"
+      - title: "ElastiCache Redis"
+        console_url: "https://console.aws.amazon.com/elasticache/home"
+        what_to_look_for: "Redis 7.0 cache cluster for session storage and Sidekiq"
+      - title: "CloudFront Distributions"
+        console_url: "https://console.aws.amazon.com/cloudfront/v4/home#/distributions"
+        what_to_look_for: "Two distributions — back-office and applicants portal, both with HTTPS"
+      - title: "Application Load Balancer"
+        console_url: "https://console.aws.amazon.com/ec2/home#LoadBalancers:"
+        what_to_look_for: "ALB with two target groups (port 80 for web, port 8080 for applicants)"
+      - title: "Secrets Manager"
+        console_url: "https://console.aws.amazon.com/secretsmanager/listsecrets"
+        what_to_look_for: "Database credentials, Rails secret key base, admin password"
+      - title: "CloudWatch Logs"
+        console_url: "https://console.aws.amazon.com/cloudwatch/home#logsV2:log-groups"
+        what_to_look_for: "ECS task logs for both web and applicants containers"
+
+  # Boundary Challenges
+  - id: limit1
+    title: "Application Volume Scaling"
+    category: limits
+    persona: technical
+    time_estimate: "5 min"
+    learning: "Aurora Serverless v2 scales capacity automatically, but ECS task count is fixed"
+    challenge_description: "Consider what happens with 10,000+ concurrent applications"
+    expected_behavior: "Database scales ACUs automatically; ECS would need service auto-scaling policies"
+    business_implication: "For high-volume councils, add ECS auto-scaling based on CPU/memory metrics"
+
+  - id: limit2
+    title: "Document Storage"
+    category: limits
+    persona: both
+    time_estimate: "5 min"
+    learning: "Planning documents (plans, reports) need S3 storage with lifecycle policies"
+    challenge_description: "Production BOPS uses S3 for document storage — this demo has sample data only"
+    expected_behavior: "Documents section shows minimal content"
+    business_implication: "Document migration and S3 lifecycle policies are critical for production"
+
+# Production guidance topics
+production_guidance:
+  - id: scale
+    title: "What Would Change at Scale"
+    topics:
+      - "ECS auto-scaling: Add target tracking policies for CPU and request count"
+      - "Aurora capacity: Configure min/max ACUs for expected load"
+      - "Redis: Move to Redis cluster mode for high availability"
+      - "CloudFront: Add WAF rules for DDoS protection"
+  - id: customization
+    title: "Customization Options"
+    topics:
+      - "GOV.UK Notify: Enable email notifications and 2FA"
+      - "OS Maps: Add Ordnance Survey API key for proper mapping"
+      - "PlanX: Connect submission portal for end-to-end digital planning"
+      - "GIS integration: Connect to council spatial data services"
+  - id: costs
+    title: "Cost Projection"
+    demo_costs:
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
+    production_costs:
+      ecs_fargate: "$150-400/month (2 services, always-on)"
+      aurora: "$100-300/month (Serverless v2, scales with usage)"
+      elasticache: "$50-100/month (single node)"
+      cloudfront: "$20-50/month (HTTPS termination, caching)"
+      total: "$320-850/month"
+  - id: security
+    title: "Security Hardening Checklist"
+    items:
+      - "Custom domain with ACM certificate"
+      - "GOV.UK Notify integration for 2FA and notifications"
+      - "VPC endpoints for AWS service access"
+      - "WAF rules on CloudFront distributions"
+      - "Database encryption at rest (enabled by default)"
+      - "Regular Aurora snapshots with cross-region replication"
+      - "IAM roles with least-privilege access"

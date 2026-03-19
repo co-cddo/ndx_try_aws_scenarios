@@ -1,0 +1,149 @@
+---
+layout: layouts/walkthrough.njk
+title: Back Office Planning System (BOPS) Walkthrough
+description: Step-by-step guide to exploring the Back Office Planning System (BOPS) used by UK councils
+currentStep: 0
+totalSteps: 4
+scenarioId: bops-planning
+---
+
+<h1 class="govuk-heading-xl">Try the Back Office Planning System (BOPS)</h1>
+
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    15 minutes to experience BOPS
+  </h2>
+  <div class="govuk-panel__body">
+    Log in as a planning officer, review live applications, and see the public-facing applicants portal.
+  </div>
+</div>
+
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you through <a href="https://opendigitalplanning.org/back-office-planning-system-bops" class="govuk-link">BOPS</a> as a case officer would use it.
+    You'll log in, browse planning applications, and explore the public portal.
+    Perfect for planning managers, digital transformation leads, and anyone evaluating BOPS.
+  </p>
+</div>
+
+<p class="govuk-body">
+  The <a href="https://opendigitalplanning.org/back-office-planning-system-bops" class="govuk-link">Back Office Planning System (BOPS)</a> is the open-source planning case management system developed by the <a href="https://opendigitalplanning.org/" class="govuk-link">Open Digital Planning</a> programme. It's used by councils including Lambeth, Southwark, and Buckinghamshire to process real planning applications.
+</p>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this 15-minute walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Log in as a planning officer</strong> — Find your credentials and access the BOPS dashboard (2 minutes)
+  </li>
+  <li>
+    <strong>Browse planning applications</strong> — See 35 realistic applications across different types and statuses (4 minutes)
+  </li>
+  <li>
+    <strong>Review an application in detail</strong> — Open an application to see the full workflow: validation, consultation, assessment (5 minutes)
+  </li>
+  <li>
+    <strong>Explore the applicants portal</strong> — See what the public sees, with maps and consultation deadlines (4 minutes)
+  </li>
+</ol>
+
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already requested the Back Office Planning System (BOPS) scenario via NDX:Try.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/bops-planning/" class="govuk-link">Deploy the BOPS scenario</a> if you haven't already.
+    Deployment takes 25 to 35 minutes.
+  </p>
+
+  <div class="govuk-!-margin-top-4">
+    <h3 class="govuk-heading-s">Sample data check</h3>
+    {% include "components/sample-data-status.njk" %}
+  </div>
+
+  <div class="govuk-!-margin-top-4">
+    {% include "components/sample-data-panel.njk" %}
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For planning managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How <a href="https://opendigitalplanning.org/back-office-planning-system-bops" class="govuk-link">BOPS</a> structures the planning application lifecycle</li>
+      <li>Dashboard views for case management and workload</li>
+      <li>The validation, consultation, assessment, determination workflow</li>
+      <li>What applicants see on the public portal</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical staff</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>ECS Fargate deployment with Aurora PostgreSQL</li>
+      <li>Multi-service architecture (web, applicants, worker)</li>
+      <li>CloudFront HTTPS termination pattern</li>
+      <li>PostGIS spatial data and OS Maps integration</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What's included</h2>
+
+<p class="govuk-body">
+  Your deployment comes pre-loaded with:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>35 planning applications</strong> across householder, prior approval, and lawful development types</li>
+  <li><strong>3 user roles</strong> — assessor, reviewer, and administrator</li>
+  <li><strong>Varied statuses</strong> — applications at different stages from "not started" to "in assessment"</li>
+  <li><strong>10 published applications</strong> visible on the public applicants portal</li>
+  <li><strong>Ordnance Survey maps</strong> showing site boundaries</li>
+</ul>
+
+<p class="govuk-body">
+  <a href="https://opendigitalplanning.org/back-office-planning-system-bops" class="govuk-link">Learn more about BOPS on the Open Digital Planning website</a>
+</p>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/bops-planning/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 15 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+</style>

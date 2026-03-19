@@ -1,0 +1,2894 @@
+{
+  "Description": "BOPS Planning System - NDX:Try Demonstration Environment",
+  "Parameters": {
+    "OSVectorTilesApiKey": {
+      "Type": "String",
+      "Description": "Ordnance Survey Vector Tiles API key",
+      "NoEcho": true
+    },
+    "AdminPassword": {
+      "Type": "String",
+      "Description": "BOPS admin password (leave blank to auto-generate)",
+      "Default": ""
+    }
+  },
+  "Resources": {
+    "PasswordGeneratorRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+          "Fn::Join": ["-", ["InnovationSandbox-ndx-Pwd", { "Fn::Select": [2, { "Fn::Split": ["/", { "Ref": "AWS::StackId" }] }] }]]
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{ "Effect": "Allow", "Principal": { "Service": "lambda.amazonaws.com" }, "Action": "sts:AssumeRole" }]
+        },
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+      }
+    },
+    "PasswordGeneratorFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Runtime": "python3.12",
+        "Handler": "index.handler",
+        "Timeout": 30,
+        "Role": { "Fn::GetAtt": ["PasswordGeneratorRole", "Arn"] },
+        "Code": {
+          "ZipFile": "import cfnresponse, string, secrets\ndef handler(event, context):\n  if event['RequestType'] == 'Delete':\n    cfnresponse.send(event, context, cfnresponse.SUCCESS, {})\n    return\n  pwd = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))\n  cfnresponse.send(event, context, cfnresponse.SUCCESS, {'Password': pwd})\n"
+        }
+      }
+    },
+    "GeneratedPassword": {
+      "Type": "AWS::CloudFormation::CustomResource",
+      "Condition": "GeneratePassword",
+      "Properties": {
+        "ServiceToken": { "Fn::GetAtt": ["PasswordGeneratorFunction", "Arn"] }
+      }
+    },
+    "BopsSecretsE61B2455": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "BOPS application secrets (SECRET_KEY_BASE, encryption keys, admin password, API bearer)",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "SECRET_KEY_BASE",
+          "PasswordLength": 128,
+          "SecretStringTemplate": "{}"
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/BopsSecrets/Resource"
+      }
+    },
+    "OtpSecret5B2D0CAC": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "BOPS OTP encryption key",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "OTP_SECRET_ENCRYPTION_KEY",
+          "PasswordLength": 32,
+          "SecretStringTemplate": "{}"
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/OtpSecret/Resource"
+      }
+    },
+    "ArePrimaryKeySecret71F8CB92": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "BOPS Active Record Encryption primary key",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY",
+          "PasswordLength": 32,
+          "SecretStringTemplate": "{}"
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/ArePrimaryKeySecret/Resource"
+      }
+    },
+    "AreDeterministicKeySecretD90CA35A": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "BOPS Active Record Encryption deterministic key",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY",
+          "PasswordLength": 32,
+          "SecretStringTemplate": "{}"
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/AreDeterministicKeySecret/Resource"
+      }
+    },
+    "AreKeySaltSecretE033C24F": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "BOPS Active Record Encryption key derivation salt",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT",
+          "PasswordLength": 32,
+          "SecretStringTemplate": "{}"
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/AreKeySaltSecret/Resource"
+      }
+    },
+    "ApiBearerSecret1FA92BAF": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "BOPS API Bearer token for Applicants portal",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "API_BEARER",
+          "PasswordLength": 64,
+          "SecretStringTemplate": "{}"
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/ApiBearerSecret/Resource"
+      }
+    },
+    "NetworkingVpc6B5E6F44": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "NdxBops-VPC"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/Resource"
+      }
+    },
+    "NetworkingVpcPublicSubnet1Subnet918289EE": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.0.0.0/24",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "BopsPlanningStack/Networking/Vpc/PublicSubnet1"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/PublicSubnet1/Subnet"
+      }
+    },
+    "NetworkingVpcPublicSubnet1RouteTable8FB3C18A": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "BopsPlanningStack/Networking/Vpc/PublicSubnet1"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/PublicSubnet1/RouteTable"
+      }
+    },
+    "NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "NetworkingVpcPublicSubnet1RouteTable8FB3C18A"
+        },
+        "SubnetId": {
+          "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/PublicSubnet1/RouteTableAssociation"
+      }
+    },
+    "NetworkingVpcPublicSubnet1DefaultRoute80C01FA6": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "NetworkingVpcIGW21218DAB"
+        },
+        "RouteTableId": {
+          "Ref": "NetworkingVpcPublicSubnet1RouteTable8FB3C18A"
+        }
+      },
+      "DependsOn": [
+        "NetworkingVpcVPCGW12E561D8"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/PublicSubnet1/DefaultRoute"
+      }
+    },
+    "NetworkingVpcPublicSubnet2Subnet9D9E5AFB": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.0.1.0/24",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "BopsPlanningStack/Networking/Vpc/PublicSubnet2"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/PublicSubnet2/Subnet"
+      }
+    },
+    "NetworkingVpcPublicSubnet2RouteTable22886677": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "BopsPlanningStack/Networking/Vpc/PublicSubnet2"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/PublicSubnet2/RouteTable"
+      }
+    },
+    "NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "NetworkingVpcPublicSubnet2RouteTable22886677"
+        },
+        "SubnetId": {
+          "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/PublicSubnet2/RouteTableAssociation"
+      }
+    },
+    "NetworkingVpcPublicSubnet2DefaultRouteDF98F60F": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "NetworkingVpcIGW21218DAB"
+        },
+        "RouteTableId": {
+          "Ref": "NetworkingVpcPublicSubnet2RouteTable22886677"
+        }
+      },
+      "DependsOn": [
+        "NetworkingVpcVPCGW12E561D8"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/PublicSubnet2/DefaultRoute"
+      }
+    },
+    "NetworkingVpcIGW21218DAB": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "NdxBops-VPC"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/IGW"
+      }
+    },
+    "NetworkingVpcVPCGW12E561D8": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "NetworkingVpcIGW21218DAB"
+        },
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/Vpc/VPCGW"
+      }
+    },
+    "NetworkingAlbSecurityGroup5ADC578E": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ALB security group for BOPS Planning",
+        "GroupName": "NdxBops-ALB-SG",
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow HTTP from internet",
+            "FromPort": 80,
+            "IpProtocol": "tcp",
+            "ToPort": 80
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow HTTP:8080 from internet (BOPS-Applicants)",
+            "FromPort": 8080,
+            "IpProtocol": "tcp",
+            "ToPort": 8080
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow HTTPS from internet",
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/AlbSecurityGroup/Resource"
+      }
+    },
+    "NetworkingAlbSecurityGrouptoBopsPlanningStackNetworkingFargateSecurityGroup8EC4CA96300014B13321": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "Description": "Allow HTTP:3000 to BOPS Fargate tasks",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingFargateSecurityGroupFC850E44",
+            "GroupId"
+          ]
+        },
+        "FromPort": 3000,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAlbSecurityGroup5ADC578E",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 3000
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/AlbSecurityGroup/to BopsPlanningStackNetworkingFargateSecurityGroup8EC4CA96:3000"
+      }
+    },
+    "NetworkingAlbSecurityGrouptoBopsPlanningStackNetworkingFargateSecurityGroup8EC4CA9680853780A2": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "Description": "Allow HTTP:80 to BOPS-Applicants Fargate tasks",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingFargateSecurityGroupFC850E44",
+            "GroupId"
+          ]
+        },
+        "FromPort": 80,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAlbSecurityGroup5ADC578E",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 80
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/AlbSecurityGroup/to BopsPlanningStackNetworkingFargateSecurityGroup8EC4CA96:80"
+      }
+    },
+    "NetworkingFargateSecurityGroupFC850E44": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Fargate task security group for BOPS Planning",
+        "GroupName": "NdxBops-Fargate-SG",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/FargateSecurityGroup/Resource"
+      }
+    },
+    "NetworkingFargateSecurityGroupfromBopsPlanningStackNetworkingAlbSecurityGroup0B9D45033000ABB9B6E2": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "Allow HTTP:3000 from ALB (BOPS web)",
+        "FromPort": 3000,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingFargateSecurityGroupFC850E44",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAlbSecurityGroup5ADC578E",
+            "GroupId"
+          ]
+        },
+        "ToPort": 3000
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/FargateSecurityGroup/from BopsPlanningStackNetworkingAlbSecurityGroup0B9D4503:3000"
+      }
+    },
+    "NetworkingFargateSecurityGroupfromBopsPlanningStackNetworkingAlbSecurityGroup0B9D450380E94B2184": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "Allow HTTP:80 from ALB (BOPS-Applicants)",
+        "FromPort": 80,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingFargateSecurityGroupFC850E44",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAlbSecurityGroup5ADC578E",
+            "GroupId"
+          ]
+        },
+        "ToPort": 80
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/FargateSecurityGroup/from BopsPlanningStackNetworkingAlbSecurityGroup0B9D4503:80"
+      }
+    },
+    "NetworkingAuroraSecurityGroupDB53DF94": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Aurora PostgreSQL security group for BOPS Planning",
+        "GroupName": "NdxBops-Aurora-SG",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "255.255.255.255/32",
+            "Description": "Disallow all traffic",
+            "FromPort": 252,
+            "IpProtocol": "icmp",
+            "ToPort": 86
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/AuroraSecurityGroup/Resource"
+      }
+    },
+    "NetworkingAuroraSecurityGroupfromBopsPlanningStackNetworkingFargateSecurityGroup8EC4CA965432DA1D04D4": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "Allow PostgreSQL from Fargate tasks",
+        "FromPort": 5432,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAuroraSecurityGroupDB53DF94",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingFargateSecurityGroupFC850E44",
+            "GroupId"
+          ]
+        },
+        "ToPort": 5432
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/AuroraSecurityGroup/from BopsPlanningStackNetworkingFargateSecurityGroup8EC4CA96:5432"
+      }
+    },
+    "NetworkingRedisSecurityGroupF70E9C50": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ElastiCache Redis security group for BOPS Planning",
+        "GroupName": "NdxBops-Redis-SG",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "255.255.255.255/32",
+            "Description": "Disallow all traffic",
+            "FromPort": 252,
+            "IpProtocol": "icmp",
+            "ToPort": 86
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/RedisSecurityGroup/Resource"
+      }
+    },
+    "NetworkingRedisSecurityGroupfromBopsPlanningStackNetworkingFargateSecurityGroup8EC4CA966379E11507F4": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "Allow Redis from Fargate tasks",
+        "FromPort": 6379,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingRedisSecurityGroupF70E9C50",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingFargateSecurityGroupFC850E44",
+            "GroupId"
+          ]
+        },
+        "ToPort": 6379
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Networking/RedisSecurityGroup/from BopsPlanningStackNetworkingFargateSecurityGroup8EC4CA96:6379"
+      }
+    },
+    "DatabaseBopsParams33B5D5C9": {
+      "Type": "AWS::RDS::DBClusterParameterGroup",
+      "Properties": {
+        "Description": "Cluster parameter group for aurora-postgresql16",
+        "Family": "aurora-postgresql16",
+        "Parameters": {
+          "rds.allowed_extensions": "plpgsql,postgis,postgis_topology,btree_gin,pg_stat_statements",
+          "shared_preload_libraries": "pg_stat_statements"
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Database/BopsParams/Resource"
+      }
+    },
+    "DatabaseAuroraSubnetsC2098A6E": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "Subnets for Aurora database",
+        "SubnetIds": [
+          {
+            "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
+          },
+          {
+            "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Database/Aurora/Subnets/Default"
+      }
+    },
+    "BopsPlanningStackDatabaseAuroraSecretADC001A09fd7a93e70ec3553c2bfa619434455b6": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": {
+          "Fn::Join": [
+            "",
+            [
+              "Generated by the CDK for stack: ",
+              {
+                "Ref": "AWS::StackName"
+              }
+            ]
+          ]
+        },
+        "GenerateSecretString": {
+          "ExcludeCharacters": " \"'\\/@#%:<>?[]^`{|}$&()+,;=~",
+          "GenerateStringKey": "password",
+          "PasswordLength": 30,
+          "SecretStringTemplate": "{\"username\":\"bops\"}"
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Database/Aurora/Secret/Resource"
+      }
+    },
+    "DatabaseAuroraSecretAttachment046E2110": {
+      "Type": "AWS::SecretsManager::SecretTargetAttachment",
+      "Properties": {
+        "SecretId": {
+          "Ref": "BopsPlanningStackDatabaseAuroraSecretADC001A09fd7a93e70ec3553c2bfa619434455b6"
+        },
+        "TargetId": {
+          "Ref": "DatabaseAuroraCF3B5693"
+        },
+        "TargetType": "AWS::RDS::DBCluster"
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Database/Aurora/Secret/Attachment/Resource"
+      }
+    },
+    "DatabaseAuroraCF3B5693": {
+      "Type": "AWS::RDS::DBCluster",
+      "Properties": {
+        "BackupRetentionPeriod": 1,
+        "CopyTagsToSnapshot": true,
+        "DBClusterParameterGroupName": {
+          "Ref": "DatabaseBopsParams33B5D5C9"
+        },
+        "DBSubnetGroupName": {
+          "Ref": "DatabaseAuroraSubnetsC2098A6E"
+        },
+        "DatabaseName": "bops_production",
+        "DeletionProtection": false,
+        "Engine": "aurora-postgresql",
+        "EngineVersion": "16.6",
+        "MasterUserPassword": {
+          "Fn::Join": [
+            "",
+            [
+              "{{resolve:secretsmanager:",
+              {
+                "Ref": "BopsPlanningStackDatabaseAuroraSecretADC001A09fd7a93e70ec3553c2bfa619434455b6"
+              },
+              ":SecretString:password::}}"
+            ]
+          ]
+        },
+        "MasterUsername": "bops",
+        "Port": 5432,
+        "ServerlessV2ScalingConfiguration": {
+          "MaxCapacity": 2,
+          "MinCapacity": 0.5
+        },
+        "StorageEncrypted": true,
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "VpcSecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "NetworkingAuroraSecurityGroupDB53DF94",
+              "GroupId"
+            ]
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Database/Aurora/Resource"
+      }
+    },
+    "DatabaseAurorawriter2449CF28": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBClusterIdentifier": {
+          "Ref": "DatabaseAuroraCF3B5693"
+        },
+        "DBInstanceClass": "db.serverless",
+        "Engine": "aurora-postgresql",
+        "PromotionTier": 0,
+        "PubliclyAccessible": false,
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "DependsOn": [
+        "NetworkingVpcPublicSubnet1DefaultRoute80C01FA6",
+        "NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA",
+        "NetworkingVpcPublicSubnet2DefaultRouteDF98F60F",
+        "NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Database/Aurora/writer/Resource"
+      }
+    },
+    "RedisRedisSubnetGroupE7D796E2": {
+      "Type": "AWS::ElastiCache::SubnetGroup",
+      "Properties": {
+        "Description": "BOPS Redis subnet group",
+        "SubnetIds": [
+          {
+            "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
+          },
+          {
+            "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Redis/RedisSubnetGroup"
+      }
+    },
+    "RedisRedisClusterF55D8A3B": {
+      "Type": "AWS::ElastiCache::CacheCluster",
+      "Properties": {
+        "CacheNodeType": "cache.t3.micro",
+        "CacheSubnetGroupName": {
+          "Ref": "RedisRedisSubnetGroupE7D796E2"
+        },
+        "Engine": "redis",
+        "EngineVersion": "7.0",
+        "NumCacheNodes": 1,
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "VpcSecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "NetworkingRedisSecurityGroupF70E9C50",
+              "GroupId"
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Redis/RedisCluster"
+      }
+    },
+    "StorageUploadsBucket03E44DD0": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "CorsConfiguration": {
+          "CorsRules": [
+            {
+              "AllowedHeaders": [
+                "*"
+              ],
+              "AllowedMethods": [
+                "GET",
+                "PUT",
+                "POST"
+              ],
+              "AllowedOrigins": [
+                "*"
+              ]
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Storage/UploadsBucket/Resource"
+      }
+    },
+    "StorageEmptyBucketRoleCA7D2905": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "RoleName": "InnovationSandbox-ndx-bops-empty-bucket",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Storage/EmptyBucketRole/Resource"
+      }
+    },
+    "StorageEmptyBucketRoleDefaultPolicyB436C558": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:ListBucket",
+                "s3:DeleteObject",
+                "s3:ListBucketVersions",
+                "s3:DeleteObjectVersion"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "StorageUploadsBucket03E44DD0",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "StorageUploadsBucket03E44DD0",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "StorageEmptyBucketRoleDefaultPolicyB436C558",
+        "Roles": [
+          {
+            "Ref": "StorageEmptyBucketRoleCA7D2905"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Storage/EmptyBucketRole/DefaultPolicy/Resource"
+      }
+    },
+    "StorageEmptyBucketFn0B94C410": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": "const{S3Client,ListObjectVersionsCommand,DeleteObjectsCommand}=require(\"@aws-sdk/client-s3\");const https=require(\"https\");\nexports.handler=async(e)=>{const rp={Status:\"SUCCESS\",PhysicalResourceId:e.LogicalResourceId,StackId:e.StackId,RequestId:e.RequestId,LogicalResourceId:e.LogicalResourceId,Data:{}};\ntry{if(e.RequestType===\"Delete\"){const s3=new S3Client();const b=e.ResourceProperties.BucketName;let k;do{const r=await s3.send(new ListObjectVersionsCommand({Bucket:b,KeyMarker:k}));const objs=[...(r.Versions||[]).map(v=>({Key:v.Key,VersionId:v.VersionId})),...(r.DeleteMarkers||[]).map(v=>({Key:v.Key,VersionId:v.VersionId}))];if(objs.length>0){for(let i=0;i<objs.length;i+=1000){await s3.send(new DeleteObjectsCommand({Bucket:b,Delete:{Objects:objs.slice(i,i+1000),Quiet:true}}))}}k=r.IsTruncated?r.NextKeyMarker:undefined}while(k)}\nawait send(e.ResponseURL,rp)}catch(err){console.error(err);rp.Status=\"FAILED\";rp.Reason=err.message;await send(e.ResponseURL,rp)}};\nfunction send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);const o=new URL(u);const opts={hostname:o.hostname,port:443,path:o.pathname+o.search,method:\"PUT\",headers:{\"Content-Type\":\"\",\"Content-Length\":b.length}};const req=https.request(opts,ok);req.on(\"error\",fail);req.write(b);req.end()})}"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "StorageEmptyBucketRoleCA7D2905",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "Timeout": 300
+      },
+      "DependsOn": [
+        "StorageEmptyBucketRoleDefaultPolicyB436C558",
+        "StorageEmptyBucketRoleCA7D2905"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Storage/EmptyBucketFn/Resource"
+      }
+    },
+    "StorageEmptyBucketCR9D402C24": {
+      "Type": "AWS::CloudFormation::CustomResource",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "StorageEmptyBucketFn0B94C410",
+            "Arn"
+          ]
+        },
+        "BucketName": {
+          "Ref": "StorageUploadsBucket03E44DD0"
+        }
+      },
+      "DependsOn": [
+        "StorageEmptyBucketRoleDefaultPolicyB436C558",
+        "StorageEmptyBucketRoleCA7D2905"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Storage/EmptyBucketCR"
+      }
+    },
+    "ComputeCluster4F8E5F81": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties": {
+        "ClusterName": "NdxBops-Cluster",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/Cluster/Resource"
+      }
+    },
+    "ComputeLogGroup1A40385B": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/ndx-bops/production",
+        "RetentionInDays": 7,
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/LogGroup/Resource"
+      }
+    },
+    "ComputeExecutionRoleCE43D454": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+              ]
+            ]
+          }
+        ],
+        "RoleName": "InnovationSandbox-ndx-bops-exec",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/ExecutionRole/Resource"
+      }
+    },
+    "ComputeExecutionRoleDefaultPolicy29213E53": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "DatabaseAuroraSecretAttachment046E2110"
+              }
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "ComputeLogGroup1A40385B",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "ComputeExecutionRoleDefaultPolicy29213E53",
+        "Roles": [
+          {
+            "Ref": "ComputeExecutionRoleCE43D454"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/ExecutionRole/DefaultPolicy/Resource"
+      }
+    },
+    "ComputeTaskRole4AA3EDCB": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "RoleName": "InnovationSandbox-ndx-bops-task",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/TaskRole/Resource"
+      }
+    },
+    "ComputeTaskRoleDefaultPolicyDBE426FD": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "StorageUploadsBucket03E44DD0",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "StorageUploadsBucket03E44DD0",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "ComputeLogGroup1A40385B",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Action": [
+                "ssmmessages:CreateControlChannel",
+                "ssmmessages:CreateDataChannel",
+                "ssmmessages:OpenControlChannel",
+                "ssmmessages:OpenDataChannel"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": "logs:DescribeLogGroups",
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "ComputeTaskRoleDefaultPolicyDBE426FD",
+        "Roles": [
+          {
+            "Ref": "ComputeTaskRole4AA3EDCB"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/TaskRole/DefaultPolicy/Resource"
+      }
+    },
+    "ComputeALB00A47009": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "LoadBalancerAttributes": [
+          {
+            "Key": "deletion_protection.enabled",
+            "Value": "false"
+          }
+        ],
+        "Name": "NdxBops-ALB",
+        "Scheme": "internet-facing",
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "NetworkingAlbSecurityGroup5ADC578E",
+              "GroupId"
+            ]
+          }
+        ],
+        "Subnets": [
+          {
+            "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
+          },
+          {
+            "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "Type": "application"
+      },
+      "DependsOn": [
+        "NetworkingVpcPublicSubnet1DefaultRoute80C01FA6",
+        "NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA",
+        "NetworkingVpcPublicSubnet2DefaultRouteDF98F60F",
+        "NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/ALB/Resource"
+      }
+    },
+    "ComputeALBHTTP30E88DD3": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "ComputeALBHTTPBopsWebTargetGroup5B02843B"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "ComputeALB00A47009"
+        },
+        "Port": 80,
+        "Protocol": "HTTP"
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/ALB/HTTP/Resource"
+      }
+    },
+    "ComputeALBHTTPBopsWebTargetGroup5B02843B": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/healthcheck",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 2,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 3000,
+        "Protocol": "HTTP",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "30"
+          },
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false"
+          }
+        ],
+        "TargetType": "ip",
+        "UnhealthyThresholdCount": 5,
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/ALB/HTTP/BopsWebTargetGroup/Resource"
+      }
+    },
+    "ComputeALBHTTP808022E7271B": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "ComputeALBHTTP8080BopsApplicantsTargetGroup5FA2D233"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "ComputeALB00A47009"
+        },
+        "Port": 8080,
+        "Protocol": "HTTP"
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/ALB/HTTP8080/Resource"
+      }
+    },
+    "ComputeALBHTTP8080BopsApplicantsTargetGroup5FA2D233": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/healthcheck",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 2,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 3000,
+        "Protocol": "HTTP",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "30"
+          },
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false"
+          }
+        ],
+        "TargetType": "ip",
+        "UnhealthyThresholdCount": 5,
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/ALB/HTTP8080/BopsApplicantsTargetGroup/Resource"
+      }
+    },
+    "ComputeBopsWebTaskDefC5A9969D": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Command": [
+              "bash",
+              "-c",
+              "echo \"bW9kdWxlIEJvcHNDb3JlCiAgbW9kdWxlIFJvdXRpbmcKICAgIGV4dGVuZCBBY3RpdmVTdXBwb3J0OjpDb25jZXJuCiAgICBjbGFzcyBCb3BzRG9tYWluCiAgICAgIGNsYXNzIDw8IHNlbGYKICAgICAgICBkZWYgbWF0Y2hlcz8ocmVxdWVzdCkgPSB0cnVlCiAgICAgIGVuZAogICAgZW5kCiAgICBjbGFzcyBBcHBsaWNhbnRzRG9tYWluCiAgICAgIGNsYXNzIDw8IHNlbGYKICAgICAgICBkZWYgbWF0Y2hlcz8ocmVxdWVzdCkgPSBmYWxzZQogICAgICBlbmQKICAgIGVuZAogICAgY2xhc3MgTG9jYWxBdXRob3JpdHlTdWJkb21haW4KICAgICAgY2xhc3MgPDwgc2VsZgogICAgICAgIGRlZiBtYXRjaGVzPyhyZXF1ZXN0KSA9IHJlcXVlc3QuZW52WyJib3BzLmxvY2FsX2F1dGhvcml0eSJdLnByZXNlbnQ/CiAgICAgIGVuZAogICAgZW5kCiAgICBjbGFzcyBDb25maWdTdWJkb21haW4KICAgICAgY2xhc3MgPDwgc2VsZgogICAgICAgIGRlZiBtYXRjaGVzPyhyZXF1ZXN0KSA9IHJlcXVlc3Quc3ViZG9tYWluID09ICJjb25maWciCiAgICAgIGVuZAogICAgZW5kCiAgICBjbGFzcyBEZXZpc2VTdWJkb21haW4KICAgICAgY2xhc3MgPDwgc2VsZgogICAgICAgIGRlZiBtYXRjaGVzPyhyZXF1ZXN0KSA9IENvbmZpZ1N1YmRvbWFpbi5tYXRjaGVzPyhyZXF1ZXN0KSB8fCByZXF1ZXN0LmVudlsiYm9wcy5sb2NhbF9hdXRob3JpdHkiXS5wcmVzZW50PwogICAgICBlbmQKICAgIGVuZAogICAgY2xhc3MgUHVibGljU3ViZG9tYWluCiAgICAgIGNsYXNzIDw8IHNlbGYKICAgICAgICBkZWYgbWF0Y2hlcz8ocmVxdWVzdCkgPSB0cnVlCiAgICAgIGVuZAogICAgZW5kCiAgICBkZWYgYm9wc19kb21haW4oJikgPSBjb25zdHJhaW50cyhCb3BzRG9tYWluLCAmKQogICAgZGVmIGFwcGxpY2FudHNfZG9tYWluKCYpID0gY29uc3RyYWludHMoQXBwbGljYW50c0RvbWFpbiwgJikKICAgIGRlZiBsb2NhbF9hdXRob3JpdHlfc3ViZG9tYWluKCYpID0gY29uc3RyYWludHMoTG9jYWxBdXRob3JpdHlTdWJkb21haW4sICYpCiAgICBkZWYgY29uZmlnX3N1YmRvbWFpbigmKSA9IGNvbnN0cmFpbnRzKENvbmZpZ1N1YmRvbWFpbiwgJikKICAgIGRlZiBkZXZpc2Vfc3ViZG9tYWluKCYpID0gY29uc3RyYWludHMoRGV2aXNlU3ViZG9tYWluLCAmKQogICAgZGVmIHB1YmxpY19zdWJkb21haW4oJikgPSBjb25zdHJhaW50cyhQdWJsaWNTdWJkb21haW4sICYpCiAgZW5kCmVuZAo=\" | base64 -d > /rails/engines/bops_core/lib/bops_core/routing.rb && echo \"Routing patched.\" && sed -i \"s/config.force_ssl = true/config.force_ssl = false/\" /rails/config/environments/production.rb && echo \"force_ssl disabled (CloudFront handles redirect).\" && echo \"[1/6] Waiting for database...\" && until pg_isready -h \"$DB_HOST\" -p \"${DB_PORT:-5432}\" -U \"$DB_USER\" 2>/dev/null; do echo \"Waiting...\" && sleep 5; done && echo \"Database ready.\" && PGPASSWORD=\"$DB_PASSWORD\" psql -h \"$DB_HOST\" -U \"$DB_USER\" -d postgres -tc \"SELECT 1 FROM pg_database WHERE datname = 'bops_production'\" | grep -q 1 || PGPASSWORD=\"$DB_PASSWORD\" psql -h \"$DB_HOST\" -U \"$DB_USER\" -d postgres -c \"CREATE DATABASE bops_production;\" && echo \"[2/6] PostGIS...\" && PGPASSWORD=\"$DB_PASSWORD\" psql -h \"$DB_HOST\" -U \"$DB_USER\" -d bops_production -c \"CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS postgis_topology; CREATE EXTENSION IF NOT EXISTS btree_gin;\" 2>&1 || true && echo \"[3/6] Migrations...\" && su app -c \"bundle exec rails db:migrate\" 2>&1 && if [ ! -f /tmp/.bops-seeded ]; then echo \"[4/6] Skipping upstream seed (Notify auth issue)...\"; echo \"[5/6] Running NDX:Try seed (creates LA, users, types, apps)...\"; su app -c \"bundle exec rails runner 'ActionMailer::Base.delivery_method = :test; load Rails.root.join(\\\"scripts/seed_sample_data.rb\\\");'\" 2>&1 || echo \"sample data skipped\"; PGPASSWORD=\"$DB_PASSWORD\" psql -h \"$DB_HOST\" -U \"$DB_USER\" -d postgres -c \"CREATE DATABASE bops_applicants_production;\" 2>/dev/null || true; touch /tmp/.bops-seeded; echo \"Seed complete.\"; else echo \"Already seeded.\"; fi && echo \"[6/6] Starting Puma...\" && exec su app -c \"bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}\""
+            ],
+            "Environment": [
+              {
+                "Name": "RAILS_ENV",
+                "Value": "production"
+              },
+              {
+                "Name": "DATABASE_URL",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "postgres://{{resolve:secretsmanager:",
+                      {
+                        "Ref": "DatabaseAuroraSecretAttachment046E2110"
+                      },
+                      ":SecretString:username::}}:{{resolve:secretsmanager:",
+                      {
+                        "Ref": "DatabaseAuroraSecretAttachment046E2110"
+                      },
+                      ":SecretString:password::}}@",
+                      {
+                        "Fn::GetAtt": [
+                          "DatabaseAuroraCF3B5693",
+                          "Endpoint.Address"
+                        ]
+                      },
+                      ":",
+                      {
+                        "Fn::GetAtt": [
+                          "DatabaseAuroraCF3B5693",
+                          "Endpoint.Port"
+                        ]
+                      },
+                      "/bops_production"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "REDIS_URL",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "redis://",
+                      {
+                        "Fn::GetAtt": [
+                          "RedisRedisClusterF55D8A3B",
+                          "RedisEndpoint.Address"
+                        ]
+                      },
+                      ":",
+                      {
+                        "Fn::GetAtt": [
+                          "RedisRedisClusterF55D8A3B",
+                          "RedisEndpoint.Port"
+                        ]
+                      },
+                      "/1"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "DB_HOST",
+                "Value": {
+                  "Fn::GetAtt": [
+                    "DatabaseAuroraCF3B5693",
+                    "Endpoint.Address"
+                  ]
+                }
+              },
+              {
+                "Name": "DB_PORT",
+                "Value": {
+                  "Fn::GetAtt": [
+                    "DatabaseAuroraCF3B5693",
+                    "Endpoint.Port"
+                  ]
+                }
+              },
+              {
+                "Name": "DB_USER",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "DatabaseAuroraSecretAttachment046E2110"
+                      },
+                      ":SecretString:username::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "DB_PASSWORD",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "DatabaseAuroraSecretAttachment046E2110"
+                      },
+                      ":SecretString:password::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "DB_NAME",
+                "Value": "bops_production"
+              },
+              {
+                "Name": "SECRET_KEY_BASE",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "BopsSecretsE61B2455"
+                      },
+                      ":SecretString:SECRET_KEY_BASE::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "OTP_SECRET_ENCRYPTION_KEY",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "OtpSecret5B2D0CAC"
+                      },
+                      ":SecretString:OTP_SECRET_ENCRYPTION_KEY::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "ArePrimaryKeySecret71F8CB92"
+                      },
+                      ":SecretString:ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "AreDeterministicKeySecretD90CA35A"
+                      },
+                      ":SecretString:ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "AreKeySaltSecretE033C24F"
+                      },
+                      ":SecretString:ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "DEFAULT_LOCAL_AUTHORITY",
+                "Value": "ndx-demo"
+              },
+              {
+                "Name": "NOTIFY_API_KEY",
+                "Value": "test-00000000-0000-0000-0000-000000000000-00000000-0000-0000-0000-000000000000"
+              },
+              {
+                "Name": "NOTIFY_EMAIL_TEMPLATE_ID",
+                "Value": "00000000-0000-0000-0000-000000000000"
+              },
+              {
+                "Name": "NOTIFY_EMAIL_REPLY_TO_ID",
+                "Value": "00000000-0000-0000-0000-000000000000"
+              },
+              {
+                "Name": "NOTIFY_SMS_TEMPLATE_ID",
+                "Value": "00000000-0000-0000-0000-000000000000"
+              },
+              {
+                "Name": "OS_VECTOR_TILES_API_KEY",
+                "Value": {
+                  "Ref": "OSVectorTilesApiKey"
+                }
+              },
+              {
+                "Name": "S3_BUCKET",
+                "Value": {
+                  "Ref": "StorageUploadsBucket03E44DD0"
+                }
+              },
+              {
+                "Name": "AWS_REGION",
+                "Value": {
+                  "Ref": "AWS::Region"
+                }
+              },
+              {
+                "Name": "GROVER_NO_SANDBOX",
+                "Value": "true"
+              },
+              {
+                "Name": "PUPPETEER_EXECUTABLE_PATH",
+                "Value": "/usr/bin/chromium"
+              },
+              {
+                "Name": "RAILS_SERVE_STATIC_FILES",
+                "Value": "true"
+              },
+              {
+                "Name": "RAILS_LOG_TO_STDOUT",
+                "Value": "true"
+              },
+              {
+                "Name": "BOPS_ENVIRONMENT",
+                "Value": "production"
+              },
+              {
+                "Name": "ADMIN_PASSWORD",
+                "Value": {
+                  "Fn::If": ["GeneratePassword", { "Fn::GetAtt": ["GeneratedPassword", "Password"] }, { "Ref": "AdminPassword" }]
+                }
+              },
+              {
+                "Name": "API_BEARER",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "ApiBearerSecret1FA92BAF"
+                      },
+                      ":SecretString:API_BEARER::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "DOMAIN",
+                "Value": {
+                  "Fn::GetAtt": [
+                    "ComputeALB00A47009",
+                    "DNSName"
+                  ]
+                }
+              },
+              {
+                "Name": "APPLICANTS_DOMAIN",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "ComputeALB00A47009",
+                          "DNSName"
+                        ]
+                      },
+                      ":8080"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "Essential": true,
+            "HealthCheck": {
+              "Command": [
+                "CMD-SHELL",
+                "curl -f http://localhost:3000/healthcheck || exit 1"
+              ],
+              "Interval": 30,
+              "Retries": 5,
+              "StartPeriod": 300,
+              "Timeout": 10
+            },
+            "Image": "ghcr.io/co-cddo/ndx_try_aws_scenarios-bops:feat-bops-planning",
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "ComputeLogGroup1A40385B"
+                },
+                "awslogs-stream-prefix": "bops-web",
+                "awslogs-region": {
+                  "Ref": "AWS::Region"
+                }
+              }
+            },
+            "Name": "bops-web",
+            "PortMappings": [
+              {
+                "ContainerPort": 3000,
+                "Protocol": "tcp"
+              }
+            ],
+            "User": "root"
+          }
+        ],
+        "Cpu": "1024",
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ComputeExecutionRoleCE43D454",
+            "Arn"
+          ]
+        },
+        "Family": "BopsPlanningStackComputeBopsWebTaskDef15B910E6",
+        "Memory": "2048",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE"
+        ],
+        "RuntimePlatform": {
+          "CpuArchitecture": "X86_64",
+          "OperatingSystemFamily": "LINUX"
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "ComputeTaskRole4AA3EDCB",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/BopsWebTaskDef/Resource"
+      }
+    },
+    "ComputeBopsApplicantsTaskDef0F8CC539": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Command": [
+              "bash",
+              "-c",
+              "sed -i \"s/config.force_ssl = true/config.force_ssl = false/\" /app/config/environments/production.rb && echo \"force_ssl disabled\" && echo \"Waiting for bops_applicants_production...\" && for i in $(seq 1 48); do if su app -c 'bundle exec ruby -e \"require \\\"pg\\\"; PG.connect(ENV[\\\"DATABASE_URL\\\"])\"' 2>/dev/null; then break; fi; echo \"Attempt $i/48\"; sleep 15; done && echo \"DB ready\" && su app -c \"bundle exec rails db:migrate\" 2>&1 || echo \"Migration skipped\" && echo \"Starting applicants server...\" && exec su app -c \"bundle exec rails server -b 0.0.0.0 -p 3000\""
+            ],
+            "Environment": [
+              {
+                "Name": "RAILS_ENV",
+                "Value": "production"
+              },
+              {
+                "Name": "DATABASE_URL",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "postgres://{{resolve:secretsmanager:",
+                      {
+                        "Ref": "DatabaseAuroraSecretAttachment046E2110"
+                      },
+                      ":SecretString:username::}}:{{resolve:secretsmanager:",
+                      {
+                        "Ref": "DatabaseAuroraSecretAttachment046E2110"
+                      },
+                      ":SecretString:password::}}@",
+                      {
+                        "Fn::GetAtt": [
+                          "DatabaseAuroraCF3B5693",
+                          "Endpoint.Address"
+                        ]
+                      },
+                      ":",
+                      {
+                        "Fn::GetAtt": [
+                          "DatabaseAuroraCF3B5693",
+                          "Endpoint.Port"
+                        ]
+                      },
+                      "/bops_applicants_production"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "SECRET_KEY_BASE",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "BopsSecretsE61B2455"
+                      },
+                      ":SecretString:SECRET_KEY_BASE::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "API_HOST",
+                "Value": {
+                  "Fn::GetAtt": [
+                    "ComputeALB00A47009",
+                    "DNSName"
+                  ]
+                }
+              },
+              {
+                "Name": "PROTOCOL",
+                "Value": "http"
+              },
+              {
+                "Name": "API_BEARER",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "ApiBearerSecret1FA92BAF"
+                      },
+                      ":SecretString:API_BEARER::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "OS_VECTOR_TILES_API_KEY",
+                "Value": {
+                  "Ref": "OSVectorTilesApiKey"
+                }
+              },
+              {
+                "Name": "RAILS_SERVE_STATIC_FILES",
+                "Value": "true"
+              },
+              {
+                "Name": "RAILS_LOG_TO_STDOUT",
+                "Value": "true"
+              },
+              {
+                "Name": "DEFAULT_LOCAL_AUTHORITY",
+                "Value": "ndx-demo"
+              },
+              {
+                "Name": "DB_HOST",
+                "Value": {
+                  "Fn::GetAtt": [
+                    "DatabaseAuroraCF3B5693",
+                    "Endpoint.Address"
+                  ]
+                }
+              },
+              {
+                "Name": "DB_PORT",
+                "Value": {
+                  "Fn::GetAtt": [
+                    "DatabaseAuroraCF3B5693",
+                    "Endpoint.Port"
+                  ]
+                }
+              },
+              {
+                "Name": "DB_USER",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "DatabaseAuroraSecretAttachment046E2110"
+                      },
+                      ":SecretString:username::}}"
+                    ]
+                  ]
+                }
+              },
+              {
+                "Name": "DB_PASSWORD",
+                "Value": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "DatabaseAuroraSecretAttachment046E2110"
+                      },
+                      ":SecretString:password::}}"
+                    ]
+                  ]
+                }
+              }
+            ],
+            "Essential": true,
+            "HealthCheck": {
+              "Command": [
+                "CMD-SHELL",
+                "curl -f http://localhost:3000/healthcheck || exit 1"
+              ],
+              "Interval": 30,
+              "Retries": 5,
+              "StartPeriod": 300,
+              "Timeout": 10
+            },
+            "Image": "ghcr.io/co-cddo/ndx_try_aws_scenarios-bops-applicants:feat-bops-planning",
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "ComputeLogGroup1A40385B"
+                },
+                "awslogs-stream-prefix": "bops-applicants",
+                "awslogs-region": {
+                  "Ref": "AWS::Region"
+                }
+              }
+            },
+            "Name": "bops-applicants",
+            "PortMappings": [
+              {
+                "ContainerPort": 3000,
+                "Protocol": "tcp"
+              }
+            ],
+            "User": "root"
+          }
+        ],
+        "Cpu": "512",
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ComputeExecutionRoleCE43D454",
+            "Arn"
+          ]
+        },
+        "Family": "BopsPlanningStackComputeBopsApplicantsTaskDefDA53AFE8",
+        "Memory": "1024",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE"
+        ],
+        "RuntimePlatform": {
+          "CpuArchitecture": "X86_64",
+          "OperatingSystemFamily": "LINUX"
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "ComputeTaskRole4AA3EDCB",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/BopsApplicantsTaskDef/Resource"
+      }
+    },
+    "ComputeBopsWebService813D94BA": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "Cluster": {
+          "Ref": "ComputeCluster4F8E5F81"
+        },
+        "DeploymentConfiguration": {
+          "Alarms": {
+            "AlarmNames": [],
+            "Enable": false,
+            "Rollback": false
+          },
+          "DeploymentCircuitBreaker": {
+            "Enable": true,
+            "Rollback": true
+          },
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 50
+        },
+        "DeploymentController": {
+          "Type": "ECS"
+        },
+        "DesiredCount": 1,
+        "EnableECSManagedTags": false,
+        "EnableExecuteCommand": true,
+        "HealthCheckGracePeriodSeconds": 900,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "bops-web",
+            "ContainerPort": 3000,
+            "TargetGroupArn": {
+              "Ref": "ComputeALBHTTPBopsWebTargetGroup5B02843B"
+            }
+          }
+        ],
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "ENABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": [
+                  "NetworkingFargateSecurityGroupFC850E44",
+                  "GroupId"
+                ]
+              }
+            ],
+            "Subnets": [
+              {
+                "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
+              },
+              {
+                "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
+              }
+            ]
+          }
+        },
+        "ServiceName": "NdxBops-Web",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "TaskDefinition": {
+          "Ref": "ComputeBopsWebTaskDefC5A9969D"
+        }
+      },
+      "DependsOn": [
+        "ComputeALBHTTPBopsWebTargetGroup5B02843B",
+        "ComputeALBHTTP30E88DD3",
+        "ComputeTaskRoleDefaultPolicyDBE426FD",
+        "ComputeTaskRole4AA3EDCB"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/BopsWebService/Service"
+      }
+    },
+    "ComputeBopsApplicantsService243992C3": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "Cluster": {
+          "Ref": "ComputeCluster4F8E5F81"
+        },
+        "DeploymentConfiguration": {
+          "Alarms": {
+            "AlarmNames": [],
+            "Enable": false,
+            "Rollback": false
+          },
+          "DeploymentCircuitBreaker": {
+            "Enable": true,
+            "Rollback": true
+          },
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 50
+        },
+        "DeploymentController": {
+          "Type": "ECS"
+        },
+        "DesiredCount": 1,
+        "EnableECSManagedTags": false,
+        "EnableExecuteCommand": true,
+        "HealthCheckGracePeriodSeconds": 900,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "bops-applicants",
+            "ContainerPort": 3000,
+            "TargetGroupArn": {
+              "Ref": "ComputeALBHTTP8080BopsApplicantsTargetGroup5FA2D233"
+            }
+          }
+        ],
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "ENABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": [
+                  "NetworkingFargateSecurityGroupFC850E44",
+                  "GroupId"
+                ]
+              }
+            ],
+            "Subnets": [
+              {
+                "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
+              },
+              {
+                "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
+              }
+            ]
+          }
+        },
+        "ServiceName": "NdxBops-Applicants",
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ],
+        "TaskDefinition": {
+          "Ref": "ComputeBopsApplicantsTaskDef0F8CC539"
+        }
+      },
+      "DependsOn": [
+        "ComputeALBHTTP8080BopsApplicantsTargetGroup5FA2D233",
+        "ComputeALBHTTP808022E7271B",
+        "ComputeTaskRoleDefaultPolicyDBE426FD",
+        "ComputeTaskRole4AA3EDCB"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/Compute/BopsApplicantsService/Service"
+      }
+    },
+    "CDNDistributionD4FAE585": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Comment": "BOPS Planning System - Back Office HTTPS",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS",
+              "PUT",
+              "PATCH",
+              "POST",
+              "DELETE"
+            ],
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "Compress": true,
+            "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+            "TargetOriginId": "BopsPlanningStackCDNDistributionOrigin1B0E81F30",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "CustomOriginConfig": {
+                "OriginProtocolPolicy": "http-only",
+                "OriginSSLProtocols": [
+                  "TLSv1.2"
+                ]
+              },
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "ComputeALB00A47009",
+                  "DNSName"
+                ]
+              },
+              "Id": "BopsPlanningStackCDNDistributionOrigin1B0E81F30"
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/CDN/Distribution/Resource"
+      }
+    },
+    "CDNApplicantsDistributionE35A58F4": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Comment": "BOPS Applicants Portal - HTTPS",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS",
+              "PUT",
+              "PATCH",
+              "POST",
+              "DELETE"
+            ],
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "Compress": true,
+            "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+            "TargetOriginId": "BopsPlanningStackCDNApplicantsDistributionOrigin1C9DC7368",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "CustomOriginConfig": {
+                "HTTPPort": 8080,
+                "OriginProtocolPolicy": "http-only",
+                "OriginSSLProtocols": [
+                  "TLSv1.2"
+                ]
+              },
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "ComputeALB00A47009",
+                  "DNSName"
+                ]
+              },
+              "Id": "BopsPlanningStackCDNApplicantsDistributionOrigin1C9DC7368"
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "bops-planning"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/CDN/ApplicantsDistribution/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/31S227bMAz9lr4r2pZ2e89lLQIUaJAUfR1omXHVyFIgUgkKQf8+2LIdLQX2xMPDQ4oXzeX84V5+v4MLzVR9nBldybhnUEexOtgteGiR0Qu40J9IqDwytWChQS/jvvc74YCyeQXfIC+YQb23aAvBbSQJVHMZ306q07xtV2IbKqPVPlR2KDyhnQuMr1AZvPJXbkHklAbWzk7iDmwso7fIT8B4gc/hmcErWtyjCl7z55N34TQ0/B/id+OR6Au9sT2fhK9Jxml7U431cmUCMfqb0BoYKiAcoiJPV6SVxCi+bn8qm52NJQarMAk0QKwVqHeUcdraVHfVBYbUJOhexmVQx1wzoyQ0tDLuXN56b7fOaNVvMqMkDLRVDTI+BqvGC4y4OzHJWDQ4wkfwDXTno+MaD9rqMfWWcZZBW/QFN+Tu0Z+1yh8iwySMa0jGZ9dMY4542odxUFdgwCptm/NcxsXpZLTqf8+zg3rZx3K3//ilThOjHTQjLuL5q089FG4SyrhQH7yzLONaE3tdhXH40k9J7JBc8HnEVSB2bcm8BD4FTsK6GuUHfTvPf8pf8sfdB2k988GyblHusv0L+nyWPuoDAAA="
+      },
+      "Metadata": {
+        "aws:cdk:path": "BopsPlanningStack/CDKMetadata/Default"
+      },
+      "Condition": "CDKMetadataAvailable"
+    }
+  },
+  "Outputs": {
+    "BOPSUrl": {
+      "Description": "BOPS back-office URL (HTTPS via CloudFront)",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "CDNDistributionD4FAE585",
+                "DomainName"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "BOPSLoginUrl": {
+      "Description": "BOPS login page URL",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "CDNDistributionD4FAE585",
+                "DomainName"
+              ]
+            },
+            "/users/sign_in"
+          ]
+        ]
+      }
+    },
+    "BOPSUsername": {
+      "Description": "BOPS admin username",
+      "Value": "ndx-demo_administrator@example.com"
+    },
+    "BOPSPassword": {
+      "Description": "BOPS admin password",
+      "Value": {
+        "Fn::If": ["GeneratePassword", { "Fn::GetAtt": ["GeneratedPassword", "Password"] }, { "Ref": "AdminPassword" }]
+      }
+    },
+    "ApplicantsPortalUrl": {
+      "Description": "BOPS-Applicants public portal URL (HTTPS via CloudFront)",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "CDNApplicantsDistributionE35A58F4",
+                "DomainName"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "CloudWatchLogsUrl": {
+      "Description": "CloudWatch Logs for BOPS containers",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".console.aws.amazon.com/cloudwatch/home?region=",
+            {
+              "Ref": "AWS::Region"
+            },
+            "#logsV2:log-groups/log-group/%2Fndx-bops%2Fproduction"
+          ]
+        ]
+      }
+    },
+    "StackDescription": {
+      "Description": "Stack description",
+      "Value": "BOPS Planning System - NDX:Try"
+    }
+  },
+  "Conditions": {
+    "GeneratePassword": {
+      "Fn::Equals": [{ "Ref": "AdminPassword" }, ""]
+    },
+    "CDKMetadataAvailable": {
+      "Fn::Or": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "af-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-3"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-4"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-northwest-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-2"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "il-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "sa-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-1"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AWS::Region"
+            },
+            "us-west-2"
+          ]
+        }
+      ]
+    }
+  }
+}

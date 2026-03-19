@@ -1,0 +1,115 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Review an Application — Back Office Planning System (BOPS) Walkthrough"
+description: Open a planning application to see the full assessment workflow
+currentStep: 3
+totalSteps: 4
+timeEstimate: "5 minutes"
+scenarioId: bops-planning
+---
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Review an Application in Detail" %}
+{% set stepDescription = "Open a planning application to see the full workflow stages, from validation through to determination." %}
+{% set timeEstimate = "5 minutes" %}
+{% set screenshotData = screenshots["bops-planning"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 3 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Application detail page shows address, description, and status",
+  "Workflow stages visible: Validation, Consultation, Assessment, Review",
+  "Key dates shown: valid from, consultation end, expiry date"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Open an application</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Pick an "In assessment" application</strong>
+    <p class="govuk-body">
+      From the dashboard, click any application reference number with status "In assessment". For example, try one of the <code>HAPP</code> (householder) applications.
+    </p>
+  </li>
+
+  <li>
+    <strong>Review the header</strong>
+    <p class="govuk-body">
+      The application detail page shows:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Address and reference number</strong> — the site location</li>
+      <li><strong>Status badge</strong> — "In assessment" with days to determination</li>
+      <li><strong>Description</strong> — what the applicant is proposing</li>
+      <li><strong>Application type</strong> — e.g., "Planning Permission - Full householder"</li>
+      <li><strong>Public on BOPS Public Portal</strong> — whether this application is visible to the public</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Check the key dates</strong>
+    <p class="govuk-body">
+      Three date panels at the top show the statutory timeline:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Valid from</strong> — when the application was validated</li>
+      <li><strong>Consultation end</strong> — deadline for neighbour/consultee comments</li>
+      <li><strong>Expiry date</strong> — statutory determination deadline (typically 56 days)</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Explore the workflow stages</strong>
+    <p class="govuk-body">
+      The main section shows the planning workflow as a task list:
+    </p>
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th class="govuk-table__header">Stage</th>
+          <th class="govuk-table__header">What it covers</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Validation</strong></td>
+          <td class="govuk-table__cell">Check documents, verify fee, confirm red line boundary</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Consultation</strong></td>
+          <td class="govuk-table__cell">Notify neighbours, manage consultee responses, publicity</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Assessment</strong></td>
+          <td class="govuk-table__cell">Assess against policies, site visits, planning considerations</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Review</strong></td>
+          <td class="govuk-table__cell">Reviewer checks recommendation, publish determination</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="govuk-body">
+      Click into <strong>Check and validate</strong> or <strong>Check and assess</strong> to see the sub-tasks within each stage.
+    </p>
+  </li>
+
+  <li>
+    <strong>Check the details sections</strong>
+    <p class="govuk-body">
+      Expand the accordion sections at the bottom to see:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Application information</strong> — applicant details, agent information</li>
+      <li><strong>Proposal details</strong> — what's being proposed</li>
+      <li><strong>Documents</strong> — uploaded plans and supporting documents</li>
+      <li><strong>Key application dates</strong> — full timeline</li>
+      <li><strong>Audit log</strong> — history of all actions taken</li>
+    </ul>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>This is the core of <a href="https://opendigitalplanning.org/back-office-planning-system-bops" class="govuk-link">BOPS</a>:</strong> Every planning application follows this structured workflow. The system ensures nothing is missed — each task must be completed before moving to the next stage. This is how councils like Lambeth process thousands of applications per year with consistent quality.
+</div>
