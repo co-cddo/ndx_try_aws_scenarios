@@ -137,6 +137,7 @@ RUN [Environment]::SetEnvironmentVariable('PATH', $env:PATH + ';C:\sqlcmd', [Env
 
 # Copy entrypoint and configuration scripts
 COPY entrypoint.ps1 C:\entrypoint.ps1
+COPY start-kestrel.ps1 C:\start-kestrel.ps1
 COPY seed-data.sql C:\seed-data.sql
 COPY iis-config.ps1 C:\iis-config.ps1
 

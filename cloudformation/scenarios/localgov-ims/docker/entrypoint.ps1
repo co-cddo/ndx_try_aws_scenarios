@@ -274,14 +274,7 @@ Write-Host "GOV.UK Pay EF Core migrations complete"
 # =============================================================================
 Write-Host "=== Step 14/15: Starting GOV.UK Pay Kestrel on port 83 ==="
 
-Start-Process powershell -NoNewWindow -ArgumentList '-Command', @"
-while (`$true) {
-    Write-Host '[Kestrel] Starting GOV.UK Pay on port 83'
-    & C:\dotnet6\dotnet.exe C:\govukpay\LocalGovIms.Integration.GovUKPay.Web.dll --urls http://0.0.0.0:83 2>&1 | ForEach-Object { Write-Host "[Kestrel] `$_" }
-    Write-Host '[Kestrel] Process exited, restarting in 5s'
-    Start-Sleep 5
-}
-"@
+Start-Process powershell -NoNewWindow -ArgumentList '-File', 'C:\start-kestrel.ps1'
 
 Write-Host "Kestrel background process launched"
 
