@@ -87,16 +87,16 @@ RUN Set-Content -Path C:\src\NuGet.Config -Value ( `
     '</github></packageSourceCredentials></configuration>' `
     )
 
-# Restore and publish
-RUN dotnet restore ; `
-    dotnet publish -c Release -o C:\app
+# Restore and publish (solution is under src/ in the repo)
+RUN dotnet restore src\LocalGovIms.Integration.GovUKPay.sln ; `
+    dotnet publish src\Web\Web.csproj -c Release -o C:\app
 
 # --- Build efmigrate — small .NET 6 console app for EF Core migrations ---
 
-WORKDIR C:\efmigrate
+# Copy efmigrate source into the repo's src directory so the project reference resolves
+COPY efmigrate/ C:\src\efmigrate\
 
-# Copy efmigrate source files (avoids PowerShell here-string issues in Docker)
-COPY efmigrate/ C:\efmigrate\
+WORKDIR C:\src\efmigrate
 
 RUN dotnet publish efmigrate.csproj -c Release -o C:\efmigrate-out
 
