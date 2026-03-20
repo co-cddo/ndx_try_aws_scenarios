@@ -42,44 +42,11 @@ RUN msbuild src\LocalGovIms.sln `
 
 WORKDIR C:\hash-password
 
+# Copy hash-password source files (avoids PowerShell here-string issues in Docker)
+COPY hash-password/ C:\hash-password\
+
 # Download the NuGet package for ASP.NET Identity
 RUN nuget install Microsoft.AspNet.Identity.Core -Version 2.2.4 -OutputDirectory packages
-
-# Write the C# source
-RUN Set-Content -Path Program.cs -Value @' `
-using System; `
-using Microsoft.AspNet.Identity; `
-class Program { `
-    static void Main() { `
-        var password = Console.ReadLine(); `
-        var hasher = new PasswordHasher(); `
-        Console.Write(hasher.HashPassword(password)); `
-    } `
-} `
-'@
-
-# Write the project file
-RUN Set-Content -Path HashPassword.csproj -Value @' `
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003"> `
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" /> `
-  <PropertyGroup> `
-    <OutputType>Exe</OutputType> `
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion> `
-    <OutputPath>bin\</OutputPath> `
-    <AssemblyName>hash-password</AssemblyName> `
-  </PropertyGroup> `
-  <ItemGroup> `
-    <Reference Include="Microsoft.AspNet.Identity.Core"> `
-      <HintPath>packages\Microsoft.AspNet.Identity.Core.2.2.4\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath> `
-    </Reference> `
-    <Reference Include="System" /> `
-  </ItemGroup> `
-  <ItemGroup> `
-    <Compile Include="Program.cs" /> `
-  </ItemGroup> `
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" /> `
-</Project> `
-'@
 
 RUN msbuild HashPassword.csproj /p:Configuration=Release /verbosity:minimal
 
@@ -119,39 +86,8 @@ RUN dotnet restore ; `
 
 WORKDIR C:\efmigrate
 
-# Write the project file referencing the GOV.UK Pay Infrastructure project
-RUN Set-Content -Path efmigrate.csproj -Value @' `
-<Project Sdk="Microsoft.NET.Sdk"> `
-  <PropertyGroup> `
-    <OutputType>Exe</OutputType> `
-    <TargetFramework>net6.0</TargetFramework> `
-    <ImplicitUsings>enable</ImplicitUsings> `
-  </PropertyGroup> `
-  <ItemGroup> `
-    <ProjectReference Include="..\src\Infrastructure\Infrastructure.csproj" /> `
-  </ItemGroup> `
-</Project> `
-'@
-
-# Write the migration runner
-RUN Set-Content -Path Program.cs -Value @' `
-using Microsoft.EntityFrameworkCore; `
-using Microsoft.Extensions.DependencyInjection; `
- `
-var connectionString = args.FirstOrDefault(a => a.StartsWith("--connection="))?.Substring("--connection=".Length) `
-    ?? throw new ArgumentException("Usage: efmigrate --connection=<connection-string>"); `
- `
-Console.WriteLine("Running EF Core migrations for GOV.UK Pay integration..."); `
- `
-// Build DbContext with the provided connection string `
-var optionsBuilder = new DbContextOptionsBuilder<LocalGovIms.Integration.GovUKPay.Infrastructure.GovUkPayDbContext>(); `
-optionsBuilder.UseSqlServer(connectionString); `
- `
-using var context = new LocalGovIms.Integration.GovUKPay.Infrastructure.GovUkPayDbContext(optionsBuilder.Options); `
-context.Database.Migrate(); `
- `
-Console.WriteLine("EF Core migrations completed successfully."); `
-'@
+# Copy efmigrate source files (avoids PowerShell here-string issues in Docker)
+COPY efmigrate/ C:\efmigrate\
 
 RUN dotnet publish efmigrate.csproj -c Release -o C:\efmigrate-out
 
