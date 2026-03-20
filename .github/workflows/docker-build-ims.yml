@@ -1,0 +1,108 @@
+name: Build LocalGov IMS Container Image
+
+on:
+  push:
+    branches: [main, feat/localgov-ims]
+    paths:
+      - 'cloudformation/scenarios/localgov-ims/docker/**'
+      - '.github/workflows/docker-build-ims.yml'
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/localgov-ims/docker/**'
+      - '.github/workflows/docker-build-ims.yml'
+  workflow_dispatch:
+    inputs:
+      push_image:
+        description: 'Push image to registry'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ghcr.io/co-cddo/ndx_try_aws_scenarios-localgov-ims
+
+jobs:
+  build:
+    name: Build Windows Container
+    runs-on: windows-latest
+    # WARNING: Windows runners are billed at 2x Linux rate (~$0.24-0.32/build)
+    # WARNING: Do NOT use docker/build-push-action or buildx — not supported on Windows runners
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image tags
+        id: tags
+        shell: pwsh
+        run: |
+          $sha = "${{ github.sha }}".Substring(0, 7)
+          $tags = @("${{ env.IMAGE_NAME }}:sha-$sha")
+          if ("${{ github.ref }}" -eq "refs/heads/main") {
+            $tags += "${{ env.IMAGE_NAME }}:latest"
+          } elseif ("${{ github.ref }}" -ne "") {
+            $branch = "${{ github.ref_name }}" -replace '[^a-zA-Z0-9-]', '-'
+            $tags += "${{ env.IMAGE_NAME }}:$branch"
+          }
+          $tagStr = $tags -join "`n"
+          echo "tags<<EOF" >> $env:GITHUB_OUTPUT
+          echo $tagStr >> $env:GITHUB_OUTPUT
+          echo "EOF" >> $env:GITHUB_OUTPUT
+          echo "first_tag=$($tags[0])" >> $env:GITHUB_OUTPUT
+
+      - name: Build Docker image
+        working-directory: cloudformation/scenarios/localgov-ims
+        shell: pwsh
+        run: |
+          $tags = @"
+          ${{ steps.tags.outputs.tags }}
+          "@ -split "`n" | Where-Object { $_.Trim() }
+
+          $tagArgs = ($tags | ForEach-Object { "-t", $_.Trim() }) -join " "
+
+          Write-Host "Building with tags: $($tags -join ', ')"
+          docker build $tagArgs --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} docker/
+
+      - name: Push Docker image
+        if: >-
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/feat/localgov-ims' ||
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image != 'false')
+        shell: pwsh
+        run: |
+          $tags = @"
+          ${{ steps.tags.outputs.tags }}
+          "@ -split "`n" | Where-Object { $_.Trim() }
+
+          foreach ($tag in $tags) {
+            Write-Host "Pushing $($tag.Trim())"
+            docker push $tag.Trim()
+          }
+
+      - name: Output image details
+        shell: pwsh
+        run: |
+          $summary = @"
+          ## LocalGov IMS Image Built
+          **Platform:** Windows Server 2022 Core (amd64)
+          **Tags:**
+          ``````
+          ${{ steps.tags.outputs.tags }}
+          ``````
+
+          > **After first push:** Set GHCR package visibility to PUBLIC via GitHub UI
+          > (Settings > Packages > localgov-ims > Danger Zone > Change visibility)
+          > Required for Fargate to pull without auth.
+          "@
+          echo $summary >> $env:GITHUB_STEP_SUMMARY

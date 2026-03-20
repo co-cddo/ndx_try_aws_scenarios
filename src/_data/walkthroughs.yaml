@@ -173,3 +173,27 @@ walkthroughs:
       - title: "Architecture understood"
         description: "Learn how 12 AWS services work together to power the tool"
         time: "7 minutes"
+
+  localgov-ims:
+    totalSteps: 5
+    url: "/walkthroughs/localgov-ims/"
+    title: "LocalGov IMS Walkthrough"
+    duration: "20 minutes"
+    hasWalkthrough: true
+    category: "finance"
+    steps:
+      - title: "Payment processed"
+        description: "Use the payment portal and GOV.UK Pay sandbox to make a test Council Tax payment"
+        time: "5 minutes"
+      - title: "Transactions reviewed"
+        description: "Log into the admin portal to search accounts and view payment receipts"
+        time: "4 minutes"
+      - title: "Suspense item resolved"
+        description: "Find an unallocated payment and allocate it to the correct account"
+        time: "4 minutes"
+      - title: "eReturn generated"
+        description: "Run end-of-day cashing up to reconcile the day's transactions"
+        time: "3 minutes"
+      - title: "Bank file processed"
+        description: "Import a bank file and review the reconciliation results"
+        time: "3 minutes"

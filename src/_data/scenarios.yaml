@@ -1467,3 +1467,127 @@ scenarios:
         payback_months: 6
         disclaimer: "Figures are illustrative and based on published ODP programme outcomes. Actual savings depend on application volumes and current process efficiency."
       committee_language: "BOPS demonstrates how digital planning tools can reduce application processing time by 40%, saving an estimated £180,000 annually through automated validation, policy matching, and report generation."
+
+  - id: "localgov-ims"
+    name: "LocalGov IMS"
+    headline: "Deploy a full open-source income management system with live GOV.UK Pay integration"
+    bestFor: "Finance teams evaluating council income management systems"
+    description: "Experience the full LocalGov IMS income management system running on Windows containers. Process test payments through GOV.UK Pay sandbox, manage suspense items, run eReturns, and explore comprehensive seed data including 200+ account holders and 500+ transactions across 10 council funds."
+    difficulty: "advanced"
+    timeEstimate: "35 to 55 minutes"
+    primaryPersona: "finance"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "bops-planning"
+      - "localgov-drupal"
+    securitySummary: "Isolated sandbox with SQL Server encryption and CloudFront HTTPS termination"
+    skillsLearned:
+      - "Windows containers on AWS"
+      - ".NET Framework modernisation"
+      - "SQL Server on RDS"
+      - "GOV.UK Pay integration"
+      - "IIS on ECS Fargate"
+    isMostPopular: false
+    featured: false
+    awsServices:
+      - "Amazon ECS (Fargate)"
+      - "Amazon RDS (SQL Server)"
+      - "Amazon CloudFront"
+      - "Amazon VPC"
+      - "Elastic Load Balancing"
+      - "Amazon CloudWatch"
+      - "AWS Secrets Manager"
+    tags:
+      - "Windows"
+      - "Finance"
+      - ".NET"
+      - "Payments"
+    businessOutcomes:
+      - "Evaluate open-source income management for your council"
+      - "Experience real GOV.UK Pay payment flows"
+      - "Assess Windows workload viability on AWS"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "GOV.UK Pay sandbox API key"
+    url: "/scenarios/localgov-ims/"
+    order: 10
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-isb-blueprints-568672915267.s3.us-east-1.amazonaws.com/scenarios/localgov-ims/template.yaml"
+      templateS3Url: "s3://ndx-try-isb-blueprints-568672915267/scenarios/localgov-ims/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-localgov-ims"
+      parameters:
+        - name: "GovUkPayApiKey"
+          value: ""
+          description: "GOV.UK Pay sandbox API key from your test account"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "localgov-ims"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+      deploymentTime: "35 to 55 minutes"
+      deploymentPhases:
+        - "Creating network infrastructure (~30 seconds)"
+        - "Provisioning SQL Server database (~10 minutes)"
+        - "Starting Windows container (~10-20 minutes)"
+        - "Running database migrations (~60 seconds)"
+        - "Seeding sample council data (~30 seconds)"
+        - "Configuring payment integration (~10 seconds)"
+        - "Ready!"
+      outputs:
+        - name: "AdminPortalUrl"
+          description: "URL to access the Admin portal"
+        - name: "PaymentPortalUrl"
+          description: "URL to access the Payment portal"
+        - name: "AdminUsername"
+          description: "Admin login username"
+        - name: "AdminPassword"
+          description: "Admin login password"
+        - name: "CloudWatchLogsUrl"
+          description: "CloudWatch Logs for monitoring"
+      costBreakdown:
+        services:
+          - name: "ECS Fargate (Windows, 2 vCPU / 4GB)"
+            cost: "~$0.96/hr (~$23/day)"
+            note: "Includes Windows licensing surcharge"
+          - name: "RDS SQL Server Express (db.t3.medium)"
+            cost: "~$0.086/hr (~$2/day)"
+            note: "License Included"
+          - name: "Application Load Balancer"
+            cost: "~$0.025/hr (~$0.60/day)"
+          - name: "3x CloudFront distributions"
+            cost: "~$0/day"
+            note: "Minimal traffic"
+        autoCleanup: "ISB terminates lease and runs AWS Nuke"
+    screenshots:
+      steps: []
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/localgov-ims"
+      cloudformationPath: "cloudformation/scenarios/localgov-ims"
+      description: "Windows ECS Fargate stack with IIS multi-site, RDS SQL Server, and GOV.UK Pay integration"
+    success_metrics:
+      service_area: "Income Management & Payment Processing"
+      primary_metric: "Payment processing and reconciliation efficiency"
+      baseline:
+        description: "Manual income management with legacy systems averages 3-5 days for reconciliation"
+        value: 4
+        unit: "days for bank reconciliation"
+        source: "CIPFA Financial Management Survey 2024"
+      projection:
+        description: "Automated reconciliation reduces processing to same-day"
+        value: 1
+        reduction_percent: 75
+      roi:
+        annual_savings: 45000
+        calculation: "Based on 2 FTE days/week saved on manual reconciliation and suspense management at £35/hour"
+        payback_months: 3
+        disclaimer: "Figures are illustrative and based on typical UK council income management operations. Actual savings depend on transaction volumes and current process efficiency."
+      committee_language: "LocalGov IMS demonstrates how open-source income management with GOV.UK Pay integration can reduce reconciliation time by 75% and save an estimated £45,000 annually through automated payment matching and suspense resolution."
