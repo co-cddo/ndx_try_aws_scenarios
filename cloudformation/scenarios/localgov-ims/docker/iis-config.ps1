@@ -47,8 +47,8 @@ foreach ($site in $sites) {
     & $appcmd add site /name:$($site.Name) /physicalPath:$($site.Path) /bindings:"http/*:$($site.Port):"
     if ($LASTEXITCODE -ne 0) { Write-Error "Failed to create site $($site.Name)"; exit 1 }
 
-    # Assign AppPool
-    & $appcmd set site /site.name:$($site.Name) /[path='/'].applicationPool:$($site.Pool)
+    # Assign AppPool -- use app command instead of site collection indexer
+    & $appcmd set app "$($site.Name)/" /applicationPool:$($site.Pool)
     if ($LASTEXITCODE -ne 0) { Write-Error "Failed to assign AppPool for $($site.Name)"; exit 1 }
 }
 
