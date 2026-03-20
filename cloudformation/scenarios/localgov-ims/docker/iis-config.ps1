@@ -76,4 +76,4 @@ if (!(Test-Path $uploadsDir)) {
     Write-Host "[IIS] Created $uploadsDir"
 }
 
-Write-Host "[IIS] Configuration complete — Portal:80, Admin:81, Api:82"
+Write-Host "[IIS] Configuration complete -- Portal:80, Admin:81, Api:82"

@@ -1,5 +1,5 @@
 # =============================================================================
-# LocalGov IMS — Container Entrypoint (15-step boot sequence)
+# LocalGov IMS -- Container Entrypoint (15-step boot sequence)
 #
 # IIS starts FIRST with static /health files so ALB health checks pass
 # immediately, then database setup, migrations, and seeding run in sequence.
@@ -15,7 +15,7 @@
 $ErrorActionPreference = "Stop"
 
 Write-Host "============================================="
-Write-Host "  LocalGov IMS — Container Boot Sequence"
+Write-Host "  LocalGov IMS -- Container Boot Sequence"
 Write-Host "============================================="
 
 # =============================================================================
@@ -60,7 +60,7 @@ Write-Host "All required environment variables present"
 Write-Host "=== Step 2/15: Starting IIS with health check endpoints ==="
 & C:\iis-config.ps1
 Start-Service W3SVC
-Write-Host "IIS started — ALB health checks will now pass"
+Write-Host "IIS started -- ALB health checks will now pass"
 
 # =============================================================================
 # Step 3/15: Wait for SQL Server connectivity
@@ -81,7 +81,7 @@ for ($i = 1; $i -le $maxRetries; $i++) {
     Start-Sleep -Seconds 5
 }
 
-# Common sqlcmd args — all calls use -b (batch abort on error)
+# Common sqlcmd args -- all calls use -b (batch abort on error)
 $sqlcmdBase = @('-S', $dbHost, '-U', $dbUser, '-P', $dbPassword, '-b')
 
 # =============================================================================
@@ -230,7 +230,7 @@ if (-not $alreadySeeded) {
 
     # =========================================================================
     # Step 11/15: Update PaymentIntegrations with CloudFront URL
-    # DemoData.sql may have created one or more PaymentIntegration rows —
+    # DemoData.sql may have created one or more PaymentIntegration rows --
     # update all of them to point at the GOV.UK Pay CloudFront distribution.
     # =========================================================================
     Write-Host "=== Step 11/15: Configuring payment integration URLs ==="
@@ -254,7 +254,7 @@ if (-not $alreadySeeded) {
     Write-Host "Admin password set for all users"
 
 } else {
-    Write-Host "Seed data already exists — skipping steps 10-12"
+    Write-Host "Seed data already exists -- skipping steps 10-12"
 }
 
 # =============================================================================
