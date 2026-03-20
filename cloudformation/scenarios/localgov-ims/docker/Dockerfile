@@ -74,18 +74,9 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims-integrat
     Copy-Item -Path 'C:\tmp\localgov-ims-integration-govukpay-main\*' -Destination C:\src -Recurse -Force ; `
     Remove-Item src.zip, C:\tmp -Recurse -Force
 
-# Add GitHub Packages NuGet source for LocalGovIMS packages
-# Write NuGet.Config directly to avoid add/remove/update issues
-RUN Set-Content -Path C:\src\NuGet.Config -Value ( `
-    '<?xml version="1.0" encoding="utf-8"?>' + `
-    '<configuration><packageSources>' + `
-    '<add key="nuget.org" value="https://api.nuget.org/v3/index.json" />' + `
-    '<add key="github" value="https://nuget.pkg.github.com/LocalGovIMS/index.json" />' + `
-    '</packageSources><packageSourceCredentials><github>' + `
-    '<add key="Username" value="USERNAME" />' + `
-    '<add key="ClearTextPassword" value="' + $env:GITHUB_TOKEN + '" />' + `
-    '</github></packageSourceCredentials></configuration>' `
-    )
+# Add GitHub Packages NuGet source — use static template to avoid XML quoting issues
+COPY nuget.config.template C:\src\NuGet.Config
+RUN (Get-Content C:\src\NuGet.Config) -replace '__GITHUB_TOKEN__', $env:GITHUB_TOKEN | Set-Content C:\src\NuGet.Config
 
 # Restore and publish (solution is under src/ in the repo)
 RUN dotnet restore src\LocalGovIms.Integration.GovUKPay.sln ; `
