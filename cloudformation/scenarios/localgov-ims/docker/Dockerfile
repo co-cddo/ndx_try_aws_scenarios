@@ -26,14 +26,13 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build with Live configuration, publish all web projects to C:\build
-RUN msbuild src\LocalGovIms.sln `
-    /p:Configuration=Live `
-    /p:DeployOnBuild=true `
-    /p:WebPublishMethod=FileSystem `
-    /p:PublishUrl=C:\build `
-    /t:Build `
-    /verbosity:minimal
+# Build the solution first
+RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /t:Build /verbosity:minimal
+
+# Publish each web project separately to its own output directory
+RUN msbuild src\PaymentPortal\PaymentPortal.csproj /p:Configuration=Live /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=C:\build\portal /verbosity:minimal
+RUN msbuild src\Admin\Admin.csproj /p:Configuration=Live /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=C:\build\admin /verbosity:minimal
+RUN msbuild src\Api\Api.csproj /p:Configuration=Live /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=C:\build\api /verbosity:minimal
 
 # --- Build hash-password.exe ---
 # Tiny .NET Framework 4.8 console app using Microsoft.AspNet.Identity.Core
@@ -99,9 +98,9 @@ FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2022 AS
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
 # Copy published IMS apps from build-ims stage
-COPY --from=build-ims C:\build\LocalGovIms.Web C:\inetpub\portal
-COPY --from=build-ims C:\build\LocalGovIms.Admin C:\inetpub\admin
-COPY --from=build-ims C:\build\LocalGovIms.Api C:\inetpub\api
+COPY --from=build-ims C:\build\portal C:\inetpub\portal
+COPY --from=build-ims C:\build\admin C:\inetpub\admin
+COPY --from=build-ims C:\build\api C:\inetpub\api
 
 # Copy GOV.UK Pay integration from build-govukpay stage
 COPY --from=build-govukpay C:\app C:\govukpay
