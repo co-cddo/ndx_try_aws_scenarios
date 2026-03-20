@@ -75,7 +75,9 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims-integrat
     Remove-Item src.zip, C:\tmp -Recurse -Force
 
 # Add GitHub Packages NuGet source for LocalGovIMS packages
-RUN dotnet nuget add source "https://nuget.pkg.github.com/LocalGovIMS/index.json" `
+# Use remove+add to avoid "source already exists" error on rebuild
+RUN dotnet nuget remove source github 2>$null ; `
+    dotnet nuget add source "https://nuget.pkg.github.com/LocalGovIMS/index.json" `
     -n github -u USERNAME -p $env:GITHUB_TOKEN --store-password-in-clear-text
 
 # Restore and publish
