@@ -26,13 +26,23 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build the solution first
-RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /t:Build /verbosity:minimal
-
-# Publish each web project separately to its own output directory
-RUN msbuild src\PaymentPortal\PaymentPortal.csproj /p:Configuration=Live /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=C:\build\portal /verbosity:minimal
-RUN msbuild src\Admin\Admin.csproj /p:Configuration=Live /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=C:\build\admin /verbosity:minimal
-RUN msbuild src\Api\Api.csproj /p:Configuration=Live /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=C:\build\api /verbosity:minimal
+# Build and publish: solution build with DeployOnBuild publishes each web project.
+# PublishUrl is relative to each project dir, so "../_build" puts all in src/_build.
+# Then copy each project's content to separate output directories for IIS sites.
+RUN msbuild src\LocalGovIms.sln `
+    /p:Configuration=Live `
+    /p:DeployOnBuild=true `
+    /p:WebPublishMethod=FileSystem `
+    /p:publishUrl=C:\build\_shared `
+    /verbosity:minimal ; `
+    New-Item -ItemType Directory -Force -Path C:\build\portal, C:\build\admin, C:\build\api | Out-Null ; `
+    robocopy src\PaymentPortal C:\build\portal /E /XD obj packages node_modules /NFL /NDL /NJH /NJS ; `
+    robocopy src\Admin C:\build\admin /E /XD obj packages node_modules /NFL /NDL /NJH /NJS ; `
+    robocopy src\Api C:\build\api /E /XD obj packages node_modules /NFL /NDL /NJH /NJS ; `
+    if ($LASTEXITCODE -le 7) { $LASTEXITCODE = 0 } ; `
+    Write-Host "Published portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files" ; `
+    Write-Host "Published admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files" ; `
+    Write-Host "Published api: $((Get-ChildItem C:\build\api -Recurse -File).Count) files"
 
 # --- Build hash-password.exe ---
 # Tiny .NET Framework 4.8 console app using Microsoft.AspNet.Identity.Core
