@@ -16,9 +16,12 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPref
 
 WORKDIR C:\src
 
-# Clone LocalGov IMS — pin to main (update to specific commit SHA for reproducibility)
-RUN git clone https://github.com/LocalGovIMS/localgov-ims.git . ; `
-    git checkout main
+# Download LocalGov IMS source archive (no git needed in SDK image)
+# Pin to main branch — update URL to a specific commit SHA for reproducibility
+RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/refs/heads/main.zip' -OutFile src.zip ; `
+    Expand-Archive src.zip -DestinationPath C:\tmp ; `
+    Copy-Item -Path 'C:\tmp\localgov-ims-main\*' -Destination C:\src -Recurse -Force ; `
+    Remove-Item src.zip, C:\tmp -Recurse -Force
 
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
@@ -98,9 +101,11 @@ ARG GITHUB_TOKEN
 
 WORKDIR C:\src
 
-# Clone GOV.UK Pay integration — pin to main (update to commit SHA for reproducibility)
-RUN git clone https://github.com/LocalGovIMS/localgov-ims-integration-govukpay.git . ; `
-    git checkout main
+# Download GOV.UK Pay integration source archive (no git needed)
+RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims-integration-govukpay/archive/refs/heads/main.zip' -OutFile src.zip ; `
+    Expand-Archive src.zip -DestinationPath C:\tmp ; `
+    Copy-Item -Path 'C:\tmp\localgov-ims-integration-govukpay-main\*' -Destination C:\src -Recurse -Force ; `
+    Remove-Item src.zip, C:\tmp -Recurse -Force
 
 # Add GitHub Packages NuGet source for LocalGovIMS packages
 RUN dotnet nuget add source "https://nuget.pkg.github.com/LocalGovIMS/index.json" `
