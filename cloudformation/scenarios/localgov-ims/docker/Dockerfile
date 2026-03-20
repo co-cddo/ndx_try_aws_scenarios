@@ -126,20 +126,14 @@ RUN Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile dotn
     .\dotnet-install.ps1 -Channel 6.0 -Runtime aspnetcore -InstallDir C:\dotnet6 ; `
     Remove-Item dotnet-install.ps1
 
-# Install sqlcmd (SQL Server command-line tools)
-RUN Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=2142258' -OutFile sqlcmd.msi ; `
-    Start-Process msiexec -ArgumentList '/i','sqlcmd.msi','/quiet','/norestart','IACCEPTMSODBCSQLLICENSETERMS=YES' -Wait ; `
-    Remove-Item sqlcmd.msi
-
-# Verify sqlcmd installation
-RUN if (!(Test-Path 'C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\*\Tools\Binn\SQLCMD.EXE')) { `
-        Write-Error 'sqlcmd install failed' ; exit 1 `
-    } ; `
-    Write-Host 'sqlcmd installed successfully'
+# Install sqlcmd via the standalone Go-based sqlcmd (smaller, no ODBC MSI needed)
+RUN Invoke-WebRequest -Uri 'https://github.com/microsoft/go-sqlcmd/releases/latest/download/sqlcmd-windows-amd64.zip' -OutFile sqlcmd.zip ; `
+    Expand-Archive sqlcmd.zip -DestinationPath C:\sqlcmd ; `
+    Remove-Item sqlcmd.zip ; `
+    Write-Host "sqlcmd installed: $(C:\sqlcmd\sqlcmd.exe --version 2>&1)"
 
 # Add sqlcmd to PATH
-RUN $sqlcmdDir = (Resolve-Path 'C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\*\Tools\Binn').Path ; `
-    [Environment]::SetEnvironmentVariable('PATH', $env:PATH + ';' + $sqlcmdDir, [EnvironmentVariableTarget]::Machine)
+RUN [Environment]::SetEnvironmentVariable('PATH', $env:PATH + ';C:\sqlcmd', [EnvironmentVariableTarget]::Machine)
 
 # Copy entrypoint and configuration scripts
 COPY entrypoint.ps1 C:\entrypoint.ps1
