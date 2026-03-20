@@ -67,12 +67,16 @@ jobs:
         run: |
           $tags = @"
           ${{ steps.tags.outputs.tags }}
-          "@ -split "`n" | Where-Object { $_.Trim() }
+          "@ -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ }
 
-          $tagArgs = ($tags | ForEach-Object { "-t", $_.Trim() }) -join " "
+          # Build tag arguments as an array for proper splatting
+          $tagArgList = @()
+          foreach ($tag in $tags) {
+            $tagArgList += @('-t', $tag)
+          }
 
           Write-Host "Building with tags: $($tags -join ', ')"
-          docker build $tagArgs --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} docker/
+          docker build @tagArgList --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} docker/
 
       - name: Push Docker image
         if: >-
@@ -83,11 +87,11 @@ jobs:
         run: |
           $tags = @"
           ${{ steps.tags.outputs.tags }}
-          "@ -split "`n" | Where-Object { $_.Trim() }
+          "@ -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ }
 
           foreach ($tag in $tags) {
-            Write-Host "Pushing $($tag.Trim())"
-            docker push $tag.Trim()
+            Write-Host "Pushing $tag"
+            docker push $tag
           }
 
       - name: Output image details
