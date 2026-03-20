@@ -1,0 +1,110 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 5: Bank File Import — LocalGov IMS Walkthrough"
+description: Import and process a monthly bank reconciliation file
+currentStep: 5
+totalSteps: 5
+timeEstimate: "3 minutes"
+scenarioId: localgov-ims
+---
+
+{% set stepNumber = 5 %}
+{% set stepTitle = "Monthly Bank File Review" %}
+{% set stepDescription = "Import a bank file and review how LocalGov IMS matches bank transactions against its records." %}
+{% set timeEstimate = "3 minutes" %}
+{% set screenshotData = screenshots["localgov-ims"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 5 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Bank file import interface is accessible",
+  "Sample bank file can be uploaded and processed",
+  "Matched and unmatched transactions are identified"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Understanding bank file imports</h3>
+
+<p class="govuk-body">
+  Councils receive electronic bank statements (bank files) that list all transactions processed through their bank accounts. The income management system imports these files and matches each bank transaction against payments recorded in the system. This is how councils verify that every payment received at the bank has been properly recorded and allocated.
+</p>
+
+<h3 class="govuk-heading-m">Import a bank file</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Navigate to bank file import</strong>
+    <p class="govuk-body">
+      From the admin portal, navigate to the bank file import section. This is where bank statements are uploaded and processed.
+    </p>
+  </li>
+
+  <li>
+    <strong>Upload the sample bank file</strong>
+    <p class="govuk-body">
+      The deployment includes sample bank files for testing. Select a sample file and upload it. The system will process the file and attempt to match each transaction against its records.
+    </p>
+  </li>
+
+  <li>
+    <strong>Review the matching results</strong>
+    <p class="govuk-body">
+      After processing, you'll see the results broken down into:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Matched transactions</strong> — bank entries that match a recorded payment (these are confirmed as correct)</li>
+      <li><strong>Unmatched transactions</strong> — bank entries with no corresponding system record (these need investigation)</li>
+      <li><strong>Discrepancies</strong> — transactions where amounts don't match between the bank and the system</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Review an unmatched transaction</strong>
+    <p class="govuk-body">
+      Click on an unmatched transaction to see its details. In practice, these might be:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Direct debit payments processed by the bank but not yet recorded</li>
+      <li>Standing orders from residents paying by bank transfer</li>
+      <li>Refunds or reversals that need manual processing</li>
+    </ul>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>Why this matters:</strong> Bank reconciliation is a fundamental financial control. Unreconciled items represent a risk — either the council has received money it hasn't accounted for, or it has recorded payments that the bank hasn't processed. Timely reconciliation is essential for accurate financial reporting and is a key focus of internal and external audit.
+</div>
+
+<h3 class="govuk-heading-m">The reconciliation workflow</h3>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th class="govuk-table__header">Step</th>
+      <th class="govuk-table__header">Action</th>
+      <th class="govuk-table__header">Outcome</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">1. Import</td>
+      <td class="govuk-table__cell">Upload bank file</td>
+      <td class="govuk-table__cell">Transactions parsed and loaded</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">2. Auto-match</td>
+      <td class="govuk-table__cell">System matches by reference</td>
+      <td class="govuk-table__cell">Most transactions matched automatically</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">3. Manual match</td>
+      <td class="govuk-table__cell">Officer reviews unmatched items</td>
+      <td class="govuk-table__cell">Remaining items allocated or flagged</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">4. Sign off</td>
+      <td class="govuk-table__cell">Reconciliation approved</td>
+      <td class="govuk-table__cell">Bank and system balances agree</td>
+    </tr>
+  </tbody>
+</table>

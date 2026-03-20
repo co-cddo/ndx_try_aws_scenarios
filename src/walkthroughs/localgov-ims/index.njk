@@ -1,0 +1,153 @@
+---
+layout: layouts/walkthrough.njk
+title: LocalGov IMS Walkthrough
+description: Step-by-step guide to exploring the LocalGov IMS income management system with GOV.UK Pay integration
+currentStep: 0
+totalSteps: 5
+scenarioId: localgov-ims
+---
+
+<h1 class="govuk-heading-xl">Try the LocalGov IMS Income Management System</h1>
+
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    20 minutes to experience LocalGov IMS
+  </h2>
+  <div class="govuk-panel__body">
+    Process a payment, manage suspense items, run eReturns, and explore council income management.
+  </div>
+</div>
+
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you through <a href="https://localgovims.digital" class="govuk-link">LocalGov IMS</a> as a finance officer would use it.
+    You'll process payments, review transactions, manage suspense items, and run end-of-day reports.
+    Perfect for finance managers, revenues and benefits staff, and anyone evaluating income management systems.
+  </p>
+</div>
+
+<p class="govuk-body">
+  <a href="https://localgovims.digital" class="govuk-link">LocalGov IMS</a> is an open-source income management system designed for UK local authorities. It handles payment processing, account management, fund allocation, and financial reporting — the core back-office functions that every council needs to manage income from Council Tax, business rates, housing rents, and other revenue streams.
+</p>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this 20-minute walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Process a citizen payment</strong> — Use the payment portal to pay Council Tax through GOV.UK Pay sandbox (5 minutes)
+  </li>
+  <li>
+    <strong>Review transactions as a finance officer</strong> — Search accounts, view receipts, and browse transaction history (4 minutes)
+  </li>
+  <li>
+    <strong>Handle an unallocated payment</strong> — Find and resolve a suspense item that needs manual allocation (4 minutes)
+  </li>
+  <li>
+    <strong>Run end-of-day cashing up</strong> — Generate an eReturn to reconcile the day's transactions (3 minutes)
+  </li>
+  <li>
+    <strong>Process a bank file</strong> — Import and review a monthly bank reconciliation file (3 minutes)
+  </li>
+</ol>
+
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already requested the LocalGov IMS scenario via NDX:Try.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/localgov-ims/" class="govuk-link">Deploy the LocalGov IMS scenario</a> if you haven't already.
+    Deployment takes 35 to 55 minutes.
+  </p>
+
+  <div class="govuk-!-margin-top-4">
+    <h3 class="govuk-heading-s">Sample data check</h3>
+    {% include "components/sample-data-status.njk" %}
+  </div>
+
+  <div class="govuk-!-margin-top-4">
+    {% include "components/sample-data-panel.njk" %}
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For finance managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How LocalGov IMS structures income management workflows</li>
+      <li>Payment processing with GOV.UK Pay integration</li>
+      <li>Suspense item management for unallocated payments</li>
+      <li>eReturns and end-of-day reconciliation</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical staff</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Windows containers on ECS Fargate with IIS multi-site</li>
+      <li>SQL Server Express on Amazon RDS</li>
+      <li>GOV.UK Pay API integration patterns</li>
+      <li>.NET Framework modernisation on AWS</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What's included</h2>
+
+<p class="govuk-body">
+  Your deployment comes pre-loaded with:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>200+ account holders</strong> across 10 council funds (Council Tax, business rates, housing rents, and more)</li>
+  <li><strong>500+ transactions</strong> showing realistic payment history</li>
+  <li><strong>GOV.UK Pay sandbox</strong> for processing test card payments</li>
+  <li><strong>Admin and payment portals</strong> — separate interfaces for staff and citizens</li>
+  <li><strong>Sample suspense items</strong> requiring manual allocation</li>
+  <li><strong>Bank import files</strong> ready for processing</li>
+</ul>
+
+<p class="govuk-body">
+  <a href="https://localgovims.digital" class="govuk-link">Learn more about LocalGov IMS</a>
+</p>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/localgov-ims/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 20 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+</style>
