@@ -26,15 +26,14 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build solution (compiles all projects including libs with Configuration=Live).
-# Then robocopy each web project source dir (which includes bin/ with compiled
-# DLLs, Views/, Content/, Scripts/, Web.config etc.) to separate build dirs.
-# This is how ASP.NET Framework MVC apps are deployed: source + bin.
+# Build solution, then robocopy each web project excluding source code files.
+# CRITICAL: Exclude *.cs files to prevent ASP.NET dynamic compilation from
+# conflicting with pre-compiled DLLs. Keep .cshtml (Razor views need runtime compile).
 RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /verbosity:minimal ; `
     New-Item -ItemType Directory -Force -Path C:\build\portal, C:\build\admin, C:\build\api | Out-Null ; `
-    robocopy src\PaymentPortal C:\build\portal /E /XD obj packages node_modules /NFL /NDL /NJH /NJS ; `
-    robocopy src\Admin C:\build\admin /E /XD obj packages node_modules /NFL /NDL /NJH /NJS ; `
-    robocopy src\Api C:\build\api /E /XD obj packages node_modules /NFL /NDL /NJH /NJS ; `
+    robocopy src\PaymentPortal C:\build\portal /E /XD obj packages node_modules Properties /XF *.cs *.csproj *.csproj.user *.sln /NFL /NDL /NJH /NJS ; `
+    robocopy src\Admin C:\build\admin /E /XD obj packages node_modules Properties /XF *.cs *.csproj *.csproj.user *.sln /NFL /NDL /NJH /NJS ; `
+    robocopy src\Api C:\build\api /E /XD obj packages node_modules Properties /XF *.cs *.csproj *.csproj.user *.sln /NFL /NDL /NJH /NJS ; `
     if ($LASTEXITCODE -le 7) { $LASTEXITCODE = 0 }
 
 RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\portal\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
