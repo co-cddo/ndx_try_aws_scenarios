@@ -26,21 +26,16 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build and package: WebPublishMethod=Package creates .zip Web Deploy packages
-# in each project's obj/Live/Package/ dir. PackageTmp is temporary and deleted
-# after zipping, so we extract from the .zip files instead. The zips contain a
-# nested path (Content/C_C/src/src/.../PackageTmp/) which we flatten.
-RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /p:DeployOnBuild=true `
-    /p:WebPublishMethod=Package /verbosity:minimal
-
-# Extract published output from the Web Deploy .zip packages.
-# The zips nest content under Content/C_C/.../PackageTmp/ — we find PackageTmp and copy.
-COPY extract-zip.ps1 C:\extract-zip.ps1
-RUN Write-Host 'Listing zip packages:' ; `
-    Get-ChildItem -Path C:\src\src -Recurse -Filter '*.zip' | ForEach-Object { Write-Host "  $_" } ; `
-    C:\extract-zip.ps1 -Zip 'C:\src\src\PaymentPortal\obj\Live\Package\PaymentPortal.zip' -Dest 'C:\build\portal' ; `
-    C:\extract-zip.ps1 -Zip 'C:\src\src\Admin\obj\Live\Package\Admin.zip' -Dest 'C:\build\admin' ; `
-    C:\extract-zip.ps1 -Zip 'C:\src\src\Api\obj\Live\Package\Api.zip' -Dest 'C:\build\api'
+# Build solution (compiles all projects including libs with Configuration=Live).
+# Then robocopy each web project source dir (which includes bin/ with compiled
+# DLLs, Views/, Content/, Scripts/, Web.config etc.) to separate build dirs.
+# This is how ASP.NET Framework MVC apps are deployed: source + bin.
+RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /verbosity:minimal ; `
+    New-Item -ItemType Directory -Force -Path C:\build\portal, C:\build\admin, C:\build\api | Out-Null ; `
+    robocopy src\PaymentPortal C:\build\portal /E /XD obj packages node_modules /NFL /NDL /NJH /NJS ; `
+    robocopy src\Admin C:\build\admin /E /XD obj packages node_modules /NFL /NDL /NJH /NJS ; `
+    robocopy src\Api C:\build\api /E /XD obj packages node_modules /NFL /NDL /NJH /NJS ; `
+    if ($LASTEXITCODE -le 7) { $LASTEXITCODE = 0 }
 
 RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\portal\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
     Write-Host "Admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\admin\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
