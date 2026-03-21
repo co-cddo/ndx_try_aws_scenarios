@@ -36,9 +36,11 @@ RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /p:DeployOnBuild=true `
 # Extract published output from the Web Deploy .zip packages.
 # The zips nest content under Content/C_C/.../PackageTmp/ — we find PackageTmp and copy.
 COPY extract-zip.ps1 C:\extract-zip.ps1
-RUN C:\extract-zip.ps1 -Zip 'src\PaymentPortal\obj\Live\Package\PaymentPortal.zip' -Dest 'C:\build\portal' ; `
-    C:\extract-zip.ps1 -Zip 'src\Admin\obj\Live\Package\Admin.zip' -Dest 'C:\build\admin' ; `
-    C:\extract-zip.ps1 -Zip 'src\Api\obj\Live\Package\Api.zip' -Dest 'C:\build\api'
+RUN Write-Host 'Listing zip packages:' ; `
+    Get-ChildItem -Path C:\src\src -Recurse -Filter '*.zip' | ForEach-Object { Write-Host "  $_" } ; `
+    C:\extract-zip.ps1 -Zip 'C:\src\src\PaymentPortal\obj\Live\Package\PaymentPortal.zip' -Dest 'C:\build\portal' ; `
+    C:\extract-zip.ps1 -Zip 'C:\src\src\Admin\obj\Live\Package\Admin.zip' -Dest 'C:\build\admin' ; `
+    C:\extract-zip.ps1 -Zip 'C:\src\src\Api\obj\Live\Package\Api.zip' -Dest 'C:\build\api'
 
 RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\portal\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
     Write-Host "Admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\admin\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
