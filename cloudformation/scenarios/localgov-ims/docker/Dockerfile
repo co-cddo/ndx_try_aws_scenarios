@@ -26,36 +26,37 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build the full solution (compiles all projects including dependencies)
-RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /t:Build /verbosity:minimal
+# Build and publish: solution build compiles with Live config (maps to Release for libs).
+# DeployOnBuild publishes each web project. We publish three times with different publishUrl
+# to get separate output directories. Each publish overwrites _shared but we copy immediately.
+RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /p:DeployOnBuild=true `
+    /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\_shared /verbosity:minimal ; `
+    Copy-Item -Path C:\build\_shared -Destination C:\build\portal -Recurse -Force ; `
+    Write-Host "Portal snapshot taken"
 
-# Publish each web project individually to separate directories
-RUN msbuild src\PaymentPortal\PaymentPortal.csproj `
-    /p:Configuration=Live /t:pipelinePreDeployCopyAllFilesToOneFolder `
-    /p:_PackageTempDir=C:\build\portal /verbosity:minimal ; `
-    if ($LASTEXITCODE -ne 0) { `
-        Write-Host 'pipelinePreDeploy failed, falling back to WebPublishMethod' ; `
-        msbuild src\PaymentPortal\PaymentPortal.csproj `
-            /p:Configuration=Live /p:DeployOnBuild=true `
-            /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\portal /verbosity:minimal `
-    }
-RUN msbuild src\Admin\Admin.csproj `
-    /p:Configuration=Live /t:pipelinePreDeployCopyAllFilesToOneFolder `
-    /p:_PackageTempDir=C:\build\admin /verbosity:minimal ; `
-    if ($LASTEXITCODE -ne 0) { `
-        Write-Host 'pipelinePreDeploy failed, falling back to WebPublishMethod' ; `
-        msbuild src\Admin\Admin.csproj `
-            /p:Configuration=Live /p:DeployOnBuild=true `
-            /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\admin /verbosity:minimal `
-    }
-RUN msbuild src\Api\Api.csproj `
-    /p:Configuration=Live /t:pipelinePreDeployCopyAllFilesToOneFolder `
-    /p:_PackageTempDir=C:\build\api /verbosity:minimal ; `
-    if ($LASTEXITCODE -ne 0) { `
-        Write-Host 'pipelinePreDeploy failed, falling back to WebPublishMethod' ; `
-        msbuild src\Api\Api.csproj `
-            /p:Configuration=Live /p:DeployOnBuild=true `
-            /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\api /verbosity:minimal `
+# The solution publish puts all web projects into _shared (last one wins). We need to
+# identify each project's output. Since all three share the same _shared dir, we use
+# the WAP (Web Application Project) _PackageTempDir which is created during publish.
+# Actually, let's just use the obj/Live/Package/PackageTmp directories that MSBuild creates.
+RUN if (Test-Path 'src\PaymentPortal\obj\Live\Package\PackageTmp') { `
+        Copy-Item -Path 'src\PaymentPortal\obj\Live\Package\PackageTmp\*' -Destination C:\build\portal -Recurse -Force ; `
+        Write-Host "Portal from PackageTmp" `
+    } ; `
+    if (Test-Path 'src\Admin\obj\Live\Package\PackageTmp') { `
+        Copy-Item -Path 'src\Admin\obj\Live\Package\PackageTmp\*' -Destination C:\build\admin -Recurse -Force ; `
+        Write-Host "Admin from PackageTmp" `
+    } else { `
+        New-Item -ItemType Directory -Force C:\build\admin | Out-Null ; `
+        Copy-Item -Path C:\build\_shared\* -Destination C:\build\admin -Recurse -Force ; `
+        Write-Host "Admin from _shared fallback" `
+    } ; `
+    if (Test-Path 'src\Api\obj\Live\Package\PackageTmp') { `
+        Copy-Item -Path 'src\Api\obj\Live\Package\PackageTmp\*' -Destination C:\build\api -Recurse -Force ; `
+        Write-Host "Api from PackageTmp" `
+    } else { `
+        New-Item -ItemType Directory -Force C:\build\api | Out-Null ; `
+        Copy-Item -Path C:\build\_shared\* -Destination C:\build\api -Recurse -Force ; `
+        Write-Host "Api from _shared fallback" `
     }
 
 RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files" ; `
