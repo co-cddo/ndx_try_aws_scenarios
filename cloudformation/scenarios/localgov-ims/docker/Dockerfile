@@ -26,15 +26,22 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build solution, then robocopy each web project excluding source code files.
-# CRITICAL: Exclude *.cs files to prevent ASP.NET dynamic compilation from
-# conflicting with pre-compiled DLLs. Keep .cshtml (Razor views need runtime compile).
-RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /verbosity:minimal ; `
-    New-Item -ItemType Directory -Force -Path C:\build\portal, C:\build\admin, C:\build\api | Out-Null ; `
-    robocopy src\PaymentPortal C:\build\portal /E /XD obj packages node_modules Properties /XF *.cs *.csproj *.csproj.user *.sln /NFL /NDL /NJH /NJS ; `
-    robocopy src\Admin C:\build\admin /E /XD obj packages node_modules Properties /XF *.cs *.csproj *.csproj.user *.sln /NFL /NDL /NJH /NJS ; `
-    robocopy src\Api C:\build\api /E /XD obj packages node_modules Properties /XF *.cs *.csproj *.csproj.user *.sln /NFL /NDL /NJH /NJS ; `
-    if ($LASTEXITCODE -le 7) { $LASTEXITCODE = 0 }
+# Build the solution first (compiles all projects including libs with Live config).
+RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /t:Build /verbosity:minimal
+
+# Publish each web project with FileSystem method. BuildProjectReferences=false
+# is CRITICAL: the dependency projects (BusinessLogic, DataAccess, Web) lack a
+# 'Live' OutputPath configuration. Since the solution build above already compiled
+# them, we skip rebuilding and just publish the web project output.
+RUN msbuild src\PaymentPortal\PaymentPortal.csproj /p:Configuration=Live `
+    /p:BuildProjectReferences=false /p:DeployOnBuild=true `
+    /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\portal /verbosity:minimal
+RUN msbuild src\Admin\Admin.csproj /p:Configuration=Live `
+    /p:BuildProjectReferences=false /p:DeployOnBuild=true `
+    /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\admin /verbosity:minimal
+RUN msbuild src\Api\Api.csproj /p:Configuration=Live `
+    /p:BuildProjectReferences=false /p:DeployOnBuild=true `
+    /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\api /verbosity:minimal
 
 RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\portal\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
     Write-Host "Admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\admin\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
