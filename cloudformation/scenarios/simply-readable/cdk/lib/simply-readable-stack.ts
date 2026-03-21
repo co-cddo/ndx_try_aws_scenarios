@@ -5,6 +5,7 @@ import {
   aws_s3 as s3,
   aws_cognito as cognito,
   aws_lambda as lambda,
+  aws_servicecatalogappregistry as appregistry,
 } from "aws-cdk-lib";
 import { NagSuppressions } from "cdk-nag";
 import * as crypto from "crypto";
@@ -40,6 +41,28 @@ export class SimplyReadableStack extends cdk.Stack {
     cdk.Tags.of(this).add("Project", "ndx-try-aws-scenarios");
     cdk.Tags.of(this).add("Scenario", "simply-readable");
     cdk.Tags.of(this).add("AutoCleanup", "true");
+
+    // AppRegistry Application - visible in myApplications on the AWS Console
+    const appRegistryApp = new appregistry.CfnApplication(
+      this,
+      "AppRegistryApplication",
+      {
+        name: `NDXTry_Simply_Readable_${this.account}`,
+        description:
+          "NDX:Try - Document Translation & Easy Read with Bedrock AI",
+        tags: { Project: "ndx-try", Scenario: "simply-readable" },
+      },
+    );
+
+    new appregistry.CfnResourceAssociation(
+      this,
+      "AppRegistryAssociation",
+      {
+        application: appRegistryApp.attrId,
+        resource: this.stackId,
+        resourceType: "CFN_STACK",
+      },
+    );
 
     // ========================================================================
     // SERVER ACCESS LOGGING BUCKET (same as upstream DocTranStack)

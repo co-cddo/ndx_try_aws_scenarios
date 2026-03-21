@@ -1252,6 +1252,23 @@ Resources:
         - Key: Scenario
           Value: quicksight-dashboard
 
+  # AppRegistry Application - visible in myApplications on the AWS Console
+  AppRegistryApplication:
+    Type: AWS::ServiceCatalogAppRegistry::Application
+    Properties:
+      Name: !Sub 'NDXTry_QuickSight_Dashboard_${AWS::AccountId}'
+      Description: 'NDX:Try - Service performance analytics with Amazon QuickSight'
+      Tags:
+        Project: ndx-try
+        Scenario: quicksight-dashboard
+
+  AppRegistryAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt AppRegistryApplication.Id
+      Resource: !Ref 'AWS::StackId'
+      ResourceType: CFN_STACK
+
 # ============================================================================
 # OUTPUTS
 # ============================================================================

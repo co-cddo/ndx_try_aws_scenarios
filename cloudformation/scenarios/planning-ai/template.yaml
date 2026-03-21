@@ -1136,6 +1136,23 @@ Resources:
         - Key: Scenario
           Value: planning-ai
 
+  # AppRegistry Application - visible in myApplications on the AWS Console
+  AppRegistryApplication:
+    Type: AWS::ServiceCatalogAppRegistry::Application
+    Properties:
+      Name: !Sub 'NDXTry_Planning_AI_${AWS::AccountId}'
+      Description: 'NDX:Try - Intelligent planning application analysis using Textract and Bedrock'
+      Tags:
+        Project: ndx-try
+        Scenario: planning-ai
+
+  AppRegistryAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt AppRegistryApplication.Id
+      Resource: !Ref 'AWS::StackId'
+      ResourceType: CFN_STACK
+
 Outputs:
   AnalyzerURL:
     Description: Planning document analysis API endpoint

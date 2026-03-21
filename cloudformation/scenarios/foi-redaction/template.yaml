@@ -783,6 +783,23 @@ Resources:
         - Key: Scenario
           Value: foi-redaction
 
+  # AppRegistry Application - visible in myApplications on the AWS Console
+  AppRegistryApplication:
+    Type: AWS::ServiceCatalogAppRegistry::Application
+    Properties:
+      Name: !Sub 'NDXTry_FOI_Redaction_${AWS::AccountId}'
+      Description: 'NDX:Try - Automated sensitive data redaction for Freedom of Information requests'
+      Tags:
+        Project: ndx-try
+        Scenario: foi-redaction
+
+  AppRegistryAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt AppRegistryApplication.Id
+      Resource: !Ref 'AWS::StackId'
+      ResourceType: CFN_STACK
+
 Outputs:
   RedactionURL:
     Description: FOI document redaction API endpoint

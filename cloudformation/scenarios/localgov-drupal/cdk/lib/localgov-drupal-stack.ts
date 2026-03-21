@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as appregistry from 'aws-cdk-lib/aws-servicecatalogappregistry';
 import { Construct } from 'constructs';
 import { CloudFrontConstruct } from './constructs/cloudfront';
 import { ComputeConstruct } from './constructs/compute';
@@ -72,6 +73,19 @@ export class LocalGovDrupalStack extends cdk.Stack {
     cdk.Tags.of(this).add('Scenario', 'localgov-drupal');
     cdk.Tags.of(this).add('DeploymentMode', deploymentMode);
     cdk.Tags.of(this).add('CouncilTheme', councilTheme);
+
+    // AppRegistry Application - visible in myApplications on the AWS Console
+    const appRegistryApp = new appregistry.CfnApplication(this, 'AppRegistryApplication', {
+      name: `NDXTry_LocalGov_Drupal_${this.account}`,
+      description: 'NDX:Try - AI-Enhanced LocalGov Drupal CMS for UK councils',
+      tags: { Project: 'ndx-try', Scenario: 'localgov-drupal' },
+    });
+
+    new appregistry.CfnResourceAssociation(this, 'AppRegistryAssociation', {
+      application: appRegistryApp.attrId,
+      resource: this.stackId,
+      resourceType: 'CFN_STACK',
+    });
 
     // Story 1.4 - Networking construct (security groups)
     const networking = new NetworkingConstruct(this, 'Networking', {
