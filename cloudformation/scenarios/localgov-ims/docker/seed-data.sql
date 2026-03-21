@@ -280,12 +280,13 @@ BEGIN
 END
 
 PRINT '=== Seed data complete ==='
-PRINT '  Funds: ' + CAST((SELECT COUNT(*) FROM Funds WHERE Disabled = 0) AS VARCHAR)
-PRINT '  MOPs: ' + CAST((SELECT COUNT(*) FROM Mops WHERE Disabled = 0) AS VARCHAR)
-PRINT '  Account Holders: ' + CAST((SELECT COUNT(*) FROM AccountHolders) AS VARCHAR)
-PRINT '  Transactions: ' + CAST((SELECT COUNT(*) FROM ProcessedTransactions) AS VARCHAR)
-PRINT '  Suspense Items: ' + CAST((SELECT COUNT(*) FROM Suspenses) AS VARCHAR)
-PRINT '  Users: ' + CAST((SELECT COUNT(*) FROM Users WHERE UserId > 0) AS VARCHAR)
+DECLARE @cnt INT;
+SELECT @cnt = COUNT(*) FROM Funds WHERE Disabled = 0; PRINT '  Funds: ' + CAST(@cnt AS VARCHAR);
+SELECT @cnt = COUNT(*) FROM Mops WHERE Disabled = 0; PRINT '  MOPs: ' + CAST(@cnt AS VARCHAR);
+SELECT @cnt = COUNT(*) FROM AccountHolders; PRINT '  Account Holders: ' + CAST(@cnt AS VARCHAR);
+SELECT @cnt = COUNT(*) FROM ProcessedTransactions; PRINT '  Transactions: ' + CAST(@cnt AS VARCHAR);
+SELECT @cnt = COUNT(*) FROM Suspenses; PRINT '  Suspense Items: ' + CAST(@cnt AS VARCHAR);
+SELECT @cnt = COUNT(*) FROM Users WHERE UserId > 0; PRINT '  Users: ' + CAST(@cnt AS VARCHAR);
 
 COMMIT TRANSACTION;
 PRINT '=== Transaction committed ==='
