@@ -140,39 +140,38 @@ END
 -- 4. Additional staff users
 PRINT '=== Seeding staff users ==='
 
-DECLARE @maxUid INT;
-SELECT @maxUid = ISNULL(MAX(UserId), 2) FROM Users WHERE UserId > 0;
+DECLARE @newUid INT;
 
 IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'finance.officer')
 BEGIN
-    SET @maxUid = @maxUid + 1;
-    INSERT INTO Users (UserId, UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
-    VALUES (@maxUid, 'finance.officer', 'Finance Officer', 0, 365, GETDATE(), 'S');
+    INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
+    VALUES ('finance.officer', 'Finance Officer', 0, 365, GETDATE(), 'S');
+    SET @newUid = SCOPE_IDENTITY();
     INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)
     VALUES (LOWER(NEWID()), 'finance@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'finance.officer');
-    INSERT INTO UserRoles (UserId, RoleId) SELECT @maxUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details','Transaction.Create','Transfer');
+    INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details','Transaction.Create','Transfer');
     PRINT '  Created finance.officer'
 END
 
 IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'cashier')
 BEGIN
-    SET @maxUid = @maxUid + 1;
-    INSERT INTO Users (UserId, UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
-    VALUES (@maxUid, 'cashier', 'Cashier', 0, 365, GETDATE(), 'S');
+    INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
+    VALUES ('cashier', 'Cashier', 0, 365, GETDATE(), 'S');
+    SET @newUid = SCOPE_IDENTITY();
     INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)
     VALUES (LOWER(NEWID()), 'cashier@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'cashier');
-    INSERT INTO UserRoles (UserId, RoleId) SELECT @maxUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details','Transaction.Create');
+    INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details','Transaction.Create');
     PRINT '  Created cashier'
 END
 
 IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'auditor')
 BEGIN
-    SET @maxUid = @maxUid + 1;
-    INSERT INTO Users (UserId, UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
-    VALUES (@maxUid, 'auditor', 'Read-Only Auditor', 0, 365, GETDATE(), 'S');
+    INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
+    VALUES ('auditor', 'Read-Only Auditor', 0, 365, GETDATE(), 'S');
+    SET @newUid = SCOPE_IDENTITY();
     INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)
     VALUES (LOWER(NEWID()), 'auditor@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'auditor');
-    INSERT INTO UserRoles (UserId, RoleId) SELECT @maxUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details');
+    INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details');
     PRINT '  Created auditor'
 END
 
