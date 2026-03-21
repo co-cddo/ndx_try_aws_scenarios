@@ -26,21 +26,16 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build solution, then publish each web project individually to separate directories.
-# Using per-project msbuild publish avoids PackageTmp cleanup races between projects.
-RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /verbosity:minimal
-
-RUN msbuild src\PaymentPortal\PaymentPortal.csproj /p:Configuration=Live `
-    /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem `
-    /p:publishUrl=C:\build\portal /verbosity:minimal
-
-RUN msbuild src\Admin\Admin.csproj /p:Configuration=Live `
-    /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem `
-    /p:publishUrl=C:\build\admin /verbosity:minimal
-
-RUN msbuild src\Api\Api.csproj /p:Configuration=Live `
-    /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem `
-    /p:publishUrl=C:\build\api /verbosity:minimal
+# Build and package in one step: WebPublishMethod=Package creates PackageTmp dirs
+# under each web project. We must copy them in the SAME RUN command because the
+# Package method cleans up PackageTmp after creating zips — files won't survive
+# to the next Docker layer.
+RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /p:DeployOnBuild=true `
+    /p:WebPublishMethod=Package /verbosity:minimal ; `
+    New-Item -ItemType Directory -Force -Path C:\build\portal, C:\build\admin, C:\build\api | Out-Null ; `
+    Copy-Item -Path 'src\PaymentPortal\obj\Live\Package\PackageTmp\*' -Destination C:\build\portal -Recurse -Force ; `
+    Copy-Item -Path 'src\Admin\obj\Live\Package\PackageTmp\*' -Destination C:\build\admin -Recurse -Force ; `
+    Copy-Item -Path 'src\Api\obj\Live\Package\PackageTmp\*' -Destination C:\build\api -Recurse -Force
 
 RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\portal\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
     Write-Host "Admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\admin\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
