@@ -27,19 +27,13 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 RUN nuget restore src\LocalGovIms.sln
 
 # Build the solution first (compiles all projects including libs).
+RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /t:Build /verbosity:minimal
+
 # The .sln maps Configuration=Live to Release for library projects (BusinessLogic,
-# DataAccess, Web), so their output is in bin\Release\. But web projects reference
-# them at bin\Live\. We copy Release -> Live to fix the reference paths.
-RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /t:Build /verbosity:minimal ; `
-    foreach ($lib in @('BusinessLogic','DataAccess','Web')) { `
-        $src = "src\$lib\bin\Release" ; `
-        $dst = "src\$lib\bin\Live" ; `
-        if (Test-Path $src) { `
-            New-Item -ItemType Directory -Force -Path $dst | Out-Null ; `
-            Copy-Item -Path "$src\*" -Destination $dst -Recurse -Force ; `
-            Write-Host "Copied $lib bin\Release -> bin\Live" `
-        } `
-    }
+# DataAccess, Web), so their output is in bin\Release\. Web projects reference them
+# at bin\Live\. Copy Release -> Live to fix the reference paths.
+COPY fix-lib-paths.ps1 C:\fix-lib-paths.ps1
+RUN C:\fix-lib-paths.ps1
 
 # Publish each web project with FileSystem method. BuildProjectReferences=false
 # prevents re-building dependencies that lack a Live OutputPath.
