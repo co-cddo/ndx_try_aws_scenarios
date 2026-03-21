@@ -26,30 +26,21 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build and package: solution build with DeployOnBuild creates PackageTmp directories
-# under each web project's obj/Live/Package/PackageTmp with the correct published output.
-# We then copy from those per-project directories to separate build output dirs.
-RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /p:DeployOnBuild=true `
-    /p:WebPublishMethod=Package /verbosity:minimal
+# Build solution, then publish each web project individually to separate directories.
+# Using per-project msbuild publish avoids PackageTmp cleanup races between projects.
+RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /verbosity:minimal
 
-# Copy each web project's PackageTmp output to separate directories.
-# List available PackageTmp dirs for debugging, then copy what exists.
-RUN New-Item -ItemType Directory -Force -Path C:\build\portal, C:\build\admin, C:\build\api | Out-Null ; `
-    Write-Host 'Available PackageTmp dirs:' ; `
-    Get-ChildItem -Path src -Recurse -Directory -Filter PackageTmp -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $_" } ; `
-    $ptPortal = Get-Item 'src\PaymentPortal\obj\Live\Package\PackageTmp' -ErrorAction SilentlyContinue ; `
-    $ptAdmin = Get-Item 'src\Admin\obj\Live\Package\PackageTmp' -ErrorAction SilentlyContinue ; `
-    $ptApi = Get-Item 'src\Api\obj\Live\Package\PackageTmp' -ErrorAction SilentlyContinue ; `
-    if ($ptPortal) { Copy-Item -Path "$ptPortal\*" -Destination C:\build\portal -Recurse -Force } `
-    else { Write-Host 'WARNING: No PackageTmp for Portal' } ; `
-    if ($ptAdmin) { Copy-Item -Path "$ptAdmin\*" -Destination C:\build\admin -Recurse -Force } `
-    else { Write-Host 'WARNING: No PackageTmp for Admin, trying _PublishedWebsites' ; `
-        $pw = Get-Item 'src\Admin\bin\Live\_PublishedWebsites\Admin' -ErrorAction SilentlyContinue ; `
-        if ($pw) { Copy-Item -Path "$pw\*" -Destination C:\build\admin -Recurse -Force } `
-        else { Write-Host 'WARNING: No _PublishedWebsites either, using bin/Live' ; `
-            Copy-Item -Path 'src\Admin\bin\Live\*' -Destination C:\build\admin -Recurse -Force -ErrorAction SilentlyContinue } } ; `
-    if ($ptApi) { Copy-Item -Path "$ptApi\*" -Destination C:\build\api -Recurse -Force } `
-    else { Write-Host 'WARNING: No PackageTmp for Api' }
+RUN msbuild src\PaymentPortal\PaymentPortal.csproj /p:Configuration=Live `
+    /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem `
+    /p:publishUrl=C:\build\portal /verbosity:minimal
+
+RUN msbuild src\Admin\Admin.csproj /p:Configuration=Live `
+    /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem `
+    /p:publishUrl=C:\build\admin /verbosity:minimal
+
+RUN msbuild src\Api\Api.csproj /p:Configuration=Live `
+    /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem `
+    /p:publishUrl=C:\build\api /verbosity:minimal
 
 RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\portal\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
     Write-Host "Admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\admin\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
