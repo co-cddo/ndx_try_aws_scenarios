@@ -26,38 +26,17 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build and publish: solution build compiles with Live config (maps to Release for libs).
-# DeployOnBuild publishes each web project. We publish three times with different publishUrl
-# to get separate output directories. Each publish overwrites _shared but we copy immediately.
+# Build and package: solution build with DeployOnBuild creates PackageTmp directories
+# under each web project's obj/Live/Package/PackageTmp with the correct published output.
+# We then copy from those per-project directories to separate build output dirs.
 RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /p:DeployOnBuild=true `
-    /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\_shared /verbosity:minimal ; `
-    Copy-Item -Path C:\build\_shared -Destination C:\build\portal -Recurse -Force ; `
-    Write-Host "Portal snapshot taken"
+    /p:WebPublishMethod=Package /verbosity:minimal
 
-# The solution publish puts all web projects into _shared (last one wins). We need to
-# identify each project's output. Since all three share the same _shared dir, we use
-# the WAP (Web Application Project) _PackageTempDir which is created during publish.
-# Actually, let's just use the obj/Live/Package/PackageTmp directories that MSBuild creates.
-RUN if (Test-Path 'src\PaymentPortal\obj\Live\Package\PackageTmp') { `
-        Copy-Item -Path 'src\PaymentPortal\obj\Live\Package\PackageTmp\*' -Destination C:\build\portal -Recurse -Force ; `
-        Write-Host "Portal from PackageTmp" `
-    } ; `
-    if (Test-Path 'src\Admin\obj\Live\Package\PackageTmp') { `
-        Copy-Item -Path 'src\Admin\obj\Live\Package\PackageTmp\*' -Destination C:\build\admin -Recurse -Force ; `
-        Write-Host "Admin from PackageTmp" `
-    } else { `
-        New-Item -ItemType Directory -Force C:\build\admin | Out-Null ; `
-        Copy-Item -Path C:\build\_shared\* -Destination C:\build\admin -Recurse -Force ; `
-        Write-Host "Admin from _shared fallback" `
-    } ; `
-    if (Test-Path 'src\Api\obj\Live\Package\PackageTmp') { `
-        Copy-Item -Path 'src\Api\obj\Live\Package\PackageTmp\*' -Destination C:\build\api -Recurse -Force ; `
-        Write-Host "Api from PackageTmp" `
-    } else { `
-        New-Item -ItemType Directory -Force C:\build\api | Out-Null ; `
-        Copy-Item -Path C:\build\_shared\* -Destination C:\build\api -Recurse -Force ; `
-        Write-Host "Api from _shared fallback" `
-    }
+# Copy each web project's PackageTmp output to separate directories for the runtime stage.
+RUN New-Item -ItemType Directory -Force -Path C:\build\portal, C:\build\admin, C:\build\api | Out-Null ; `
+    Copy-Item -Path 'src\PaymentPortal\obj\Live\Package\PackageTmp\*' -Destination C:\build\portal -Recurse -Force ; `
+    Copy-Item -Path 'src\Admin\obj\Live\Package\PackageTmp\*' -Destination C:\build\admin -Recurse -Force ; `
+    Copy-Item -Path 'src\Api\obj\Live\Package\PackageTmp\*' -Destination C:\build\api -Recurse -Force
 
 RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files" ; `
     Write-Host "Admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files" ; `
