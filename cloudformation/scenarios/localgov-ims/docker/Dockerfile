@@ -26,13 +26,23 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build the solution first (compiles all projects including libs with Live config).
-RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /t:Build /verbosity:minimal
+# Build the solution first (compiles all projects including libs).
+# The .sln maps Configuration=Live to Release for library projects (BusinessLogic,
+# DataAccess, Web), so their output is in bin\Release\. But web projects reference
+# them at bin\Live\. We copy Release -> Live to fix the reference paths.
+RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /t:Build /verbosity:minimal ; `
+    foreach ($lib in @('BusinessLogic','DataAccess','Web')) { `
+        $src = "src\$lib\bin\Release" ; `
+        $dst = "src\$lib\bin\Live" ; `
+        if (Test-Path $src) { `
+            New-Item -ItemType Directory -Force -Path $dst | Out-Null ; `
+            Copy-Item -Path "$src\*" -Destination $dst -Recurse -Force ; `
+            Write-Host "Copied $lib bin\Release -> bin\Live" `
+        } `
+    }
 
 # Publish each web project with FileSystem method. BuildProjectReferences=false
-# is CRITICAL: the dependency projects (BusinessLogic, DataAccess, Web) lack a
-# 'Live' OutputPath configuration. Since the solution build above already compiled
-# them, we skip rebuilding and just publish the web project output.
+# prevents re-building dependencies that lack a Live OutputPath.
 RUN msbuild src\PaymentPortal\PaymentPortal.csproj /p:Configuration=Live `
     /p:BuildProjectReferences=false /p:DeployOnBuild=true `
     /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\portal /verbosity:minimal
