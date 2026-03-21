@@ -1607,6 +1607,23 @@ Resources:
         - Key: Scenario
           Value: council-chatbot
 
+  # AppRegistry Application - visible in myApplications on the AWS Console
+  AppRegistryApplication:
+    Type: AWS::ServiceCatalogAppRegistry::Application
+    Properties:
+      Name: !Sub 'NDXTry_Council_Chatbot_${AWS::AccountId}'
+      Description: 'NDX:Try - AI-powered resident Q&A with Bedrock Knowledge Base and RAG retrieval'
+      Tags:
+        Project: ndx-try
+        Scenario: council-chatbot
+
+  AppRegistryAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt AppRegistryApplication.Id
+      Resource: !Ref 'AWS::StackId'
+      ResourceType: CFN_STACK
+
 Outputs:
   ChatbotURL:
     Description: Web interface URL to interact with the chatbot

@@ -139,6 +139,24 @@ Resources:
         - Key: ParentStack
           Value: !Ref 'AWS::StackName'
 
+  # AppRegistry Application - visible in myApplications on the AWS Console
+  # Parent application that groups all NDX:Try scenarios
+  AppRegistryApplication:
+    Type: AWS::ServiceCatalogAppRegistry::Application
+    Properties:
+      Name: !Sub 'NDXTry_All_Scenarios_${AWS::AccountId}'
+      Description: 'NDX:Try - All scenarios deployed together for demonstrations and showcases'
+      Tags:
+        Project: ndx-try
+        Scenario: all-demo
+
+  AppRegistryAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt AppRegistryApplication.Id
+      Resource: !Ref 'AWS::StackId'
+      ResourceType: CFN_STACK
+
 Outputs:
   # ========================================================================
   # PRIMARY ENDPOINTS — user-facing URLs for each scenario

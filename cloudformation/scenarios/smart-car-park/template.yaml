@@ -756,6 +756,25 @@ Resources:
       TreatMissingData: breaching
       ActionsEnabled: false
 
+  # ============================================================
+  # AppRegistry Application - visible in myApplications on the AWS Console
+  # ============================================================
+  AppRegistryApplication:
+    Type: AWS::ServiceCatalogAppRegistry::Application
+    Properties:
+      Name: !Sub 'NDXTry_Smart_Car_Park_${AWS::AccountId}'
+      Description: 'NDX:Try - Real-time parking availability with IoT sensors and DynamoDB'
+      Tags:
+        Project: ndx-try
+        Scenario: smart-car-park
+
+  AppRegistryAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt AppRegistryApplication.Id
+      Resource: !Ref 'AWS::StackId'
+      ResourceType: CFN_STACK
+
 # ============================================================
 # Outputs
 # ============================================================

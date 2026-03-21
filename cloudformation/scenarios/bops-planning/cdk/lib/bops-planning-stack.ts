@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as appregistry from 'aws-cdk-lib/aws-servicecatalogappregistry';
 import { Construct, IConstruct } from 'constructs';
 import { CloudFrontConstruct } from './constructs/cloudfront';
 import { ComputeConstruct } from './constructs/compute';
@@ -43,6 +44,19 @@ export class BopsPlanningStack extends cdk.Stack {
     // Tags
     cdk.Tags.of(this).add('Project', 'ndx-try-aws-scenarios');
     cdk.Tags.of(this).add('Scenario', 'bops-planning');
+
+    // AppRegistry Application - visible in myApplications on the AWS Console
+    const appRegistryApp = new appregistry.CfnApplication(this, 'AppRegistryApplication', {
+      name: `NDXTry_BOPS_Planning_${this.account}`,
+      description: 'NDX:Try - Building Control Planning System',
+      tags: { Project: 'ndx-try', Scenario: 'bops-planning' },
+    });
+
+    new appregistry.CfnResourceAssociation(this, 'AppRegistryAssociation', {
+      application: appRegistryApp.attrId,
+      resource: this.stackId,
+      resourceType: 'CFN_STACK',
+    });
 
     // CloudFormation parameter for OS Maps API key (NoEcho)
     const osMapApiKeyParam = new cdk.CfnParameter(this, 'OSVectorTilesApiKey', {

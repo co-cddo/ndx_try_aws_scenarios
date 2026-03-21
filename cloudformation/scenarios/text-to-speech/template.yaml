@@ -603,6 +603,23 @@ Resources:
         - Key: Scenario
           Value: text-to-speech
 
+  # AppRegistry Application - visible in myApplications on the AWS Console
+  AppRegistryApplication:
+    Type: AWS::ServiceCatalogAppRegistry::Application
+    Properties:
+      Name: !Sub 'NDXTry_Text_to_Speech_${AWS::AccountId}'
+      Description: 'NDX:Try - Council document to speech conversion using Amazon Polly'
+      Tags:
+        Project: ndx-try
+        Scenario: text-to-speech
+
+  AppRegistryAssociation:
+    Type: AWS::ServiceCatalogAppRegistry::ResourceAssociation
+    Properties:
+      Application: !GetAtt AppRegistryApplication.Id
+      Resource: !Ref 'AWS::StackId'
+      ResourceType: CFN_STACK
+
 Outputs:
   ConvertURL:
     Description: Text-to-speech conversion API endpoint
