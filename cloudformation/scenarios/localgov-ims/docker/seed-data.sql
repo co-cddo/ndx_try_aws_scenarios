@@ -137,44 +137,6 @@ BEGIN
     PRINT '  Transactions already exist, skipping'
 END
 
--- 4. Additional staff users
-PRINT '=== Seeding staff users ==='
-
-DECLARE @newUid INT;
-
-IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'finance.officer')
-BEGIN
-    INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
-    VALUES ('finance.officer', 'Finance Officer', 0, 365, GETDATE(), 'S');
-    SET @newUid = SCOPE_IDENTITY();
-    INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)
-    VALUES (LOWER(NEWID()), 'finance@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'finance.officer');
-    INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details','Transaction.Create','Transfer');
-    PRINT '  Created finance.officer'
-END
-
-IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'cashier')
-BEGIN
-    INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
-    VALUES ('cashier', 'Cashier', 0, 365, GETDATE(), 'S');
-    SET @newUid = SCOPE_IDENTITY();
-    INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)
-    VALUES (LOWER(NEWID()), 'cashier@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'cashier');
-    INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details','Transaction.Create');
-    PRINT '  Created cashier'
-END
-
-IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'auditor')
-BEGIN
-    INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
-    VALUES ('auditor', 'Read-Only Auditor', 0, 365, GETDATE(), 'S');
-    SET @newUid = SCOPE_IDENTITY();
-    INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)
-    VALUES (LOWER(NEWID()), 'auditor@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'auditor');
-    INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details');
-    PRINT '  Created auditor'
-END
-
 -- 5. Fund group
 PRINT '=== Seeding fund groups ==='
 IF NOT EXISTS (SELECT 1 FROM FundGroups WHERE [Name] = 'All Revenue')
@@ -186,6 +148,60 @@ BEGIN
     PRINT '  Created All Revenue fund group'
 END
 
+COMMIT TRANSACTION;
+PRINT '=== Core seed data committed ==='
+
+-- =============================================================================
+-- 4. Additional staff users (separate transaction, non-fatal)
+-- Runs outside the main transaction so failures don't roll back core data.
+-- The DemoData admin user is always available even if this fails.
+-- =============================================================================
+PRINT '=== Seeding staff users ==='
+
+SET XACT_ABORT OFF;
+
+DECLARE @newUid INT;
+
+BEGIN TRY
+    IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'finance.officer')
+    BEGIN
+        INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
+        VALUES ('finance.officer', 'Finance Officer', 0, 365, GETDATE(), 'S');
+        SET @newUid = SCOPE_IDENTITY();
+        INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)
+        VALUES (LOWER(NEWID()), 'finance@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'finance.officer');
+        INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details','Transaction.Create','Transfer');
+        PRINT '  Created finance.officer'
+    END
+
+    IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'cashier')
+    BEGIN
+        INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
+        VALUES ('cashier', 'Cashier', 0, 365, GETDATE(), 'S');
+        SET @newUid = SCOPE_IDENTITY();
+        INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)
+        VALUES (LOWER(NEWID()), 'cashier@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'cashier');
+        INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details','Transaction.Create');
+        PRINT '  Created cashier'
+    END
+
+    IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'auditor')
+    BEGIN
+        INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)
+        VALUES ('auditor', 'Read-Only Auditor', 0, 365, GETDATE(), 'S');
+        SET @newUid = SCOPE_IDENTITY();
+        INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)
+        VALUES (LOWER(NEWID()), 'auditor@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'auditor');
+        INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details');
+        PRINT '  Created auditor'
+    END
+    PRINT '  Staff users seeded successfully'
+END TRY
+BEGIN CATCH
+    PRINT '  WARNING: Staff user seeding failed (non-fatal): ' + ERROR_MESSAGE()
+    PRINT '  DemoData users will still be available via admin login'
+END CATCH
+
 -- Summary
 PRINT '=== Seed data complete ==='
 DECLARE @cnt INT;
@@ -195,6 +211,4 @@ SELECT @cnt = COUNT(*) FROM AccountHolders; PRINT '  Account Holders: ' + CAST(@
 SELECT @cnt = COUNT(*) FROM ProcessedTransactions; PRINT '  Transactions: ' + CAST(@cnt AS VARCHAR);
 SELECT @cnt = COUNT(*) FROM Suspenses; PRINT '  Suspense Items: ' + CAST(@cnt AS VARCHAR);
 SELECT @cnt = COUNT(*) FROM Users WHERE UserId > 0; PRINT '  Users: ' + CAST(@cnt AS VARCHAR);
-
-COMMIT TRANSACTION;
-PRINT '=== Transaction committed ==='
+PRINT '=== All done ==='
