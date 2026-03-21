@@ -26,30 +26,11 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build the solution first (compiles all projects including libs).
-RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /t:Build /verbosity:minimal
-
-# The .sln maps Configuration=Live to Release for library projects (BusinessLogic,
-# DataAccess, Web), so their output is in bin\Release\. Web projects reference them
-# at bin\Live\. Copy Release -> Live to fix the reference paths.
-COPY fix-lib-paths.ps1 C:\fix-lib-paths.ps1
-RUN C:\fix-lib-paths.ps1
-
-# Publish each web project with FileSystem method. BuildProjectReferences=false
-# prevents re-building dependencies that lack a Live OutputPath.
-RUN msbuild src\PaymentPortal\PaymentPortal.csproj /p:Configuration=Live `
-    /p:BuildProjectReferences=false /p:DeployOnBuild=true `
-    /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\portal /verbosity:minimal
-RUN msbuild src\Admin\Admin.csproj /p:Configuration=Live `
-    /p:BuildProjectReferences=false /p:DeployOnBuild=true `
-    /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\admin /verbosity:minimal
-RUN msbuild src\Api\Api.csproj /p:Configuration=Live `
-    /p:BuildProjectReferences=false /p:DeployOnBuild=true `
-    /p:WebPublishMethod=FileSystem /p:publishUrl=C:\build\api /verbosity:minimal
-
-RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\portal\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
-    Write-Host "Admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\admin\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
-    Write-Host "Api: $((Get-ChildItem C:\build\api -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\api\bin -File -ErrorAction SilentlyContinue).Count) DLLs"
+# Build and extract: builds solution with Package method, then extracts from the
+# resulting .zip files in the SAME PowerShell session. Must be one RUN because
+# MSBuild's Package target cleans up PackageTmp and may delete zips between layers.
+COPY build-and-extract.ps1 C:\build-and-extract.ps1
+RUN C:\build-and-extract.ps1
 
 # --- Build hash-password.exe ---
 # Tiny .NET Framework 4.8 console app using Microsoft.AspNet.Identity.Core
