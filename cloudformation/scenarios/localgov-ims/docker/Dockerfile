@@ -26,16 +26,35 @@ RUN Invoke-WebRequest -Uri 'https://github.com/LocalGovIMS/localgov-ims/archive/
 # Restore NuGet packages (all from nuget.org — no GitHub Packages needed)
 RUN nuget restore src\LocalGovIms.sln
 
-# Build and package in one step: WebPublishMethod=Package creates PackageTmp dirs
-# under each web project. We must copy them in the SAME RUN command because the
-# Package method cleans up PackageTmp after creating zips — files won't survive
-# to the next Docker layer.
+# Build and package: WebPublishMethod=Package creates .zip Web Deploy packages
+# in each project's obj/Live/Package/ dir. PackageTmp is temporary and deleted
+# after zipping, so we extract from the .zip files instead. The zips contain a
+# nested path (Content/C_C/src/src/.../PackageTmp/) which we flatten.
 RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /p:DeployOnBuild=true `
-    /p:WebPublishMethod=Package /verbosity:minimal ; `
-    New-Item -ItemType Directory -Force -Path C:\build\portal, C:\build\admin, C:\build\api | Out-Null ; `
-    Copy-Item -Path 'src\PaymentPortal\obj\Live\Package\PackageTmp\*' -Destination C:\build\portal -Recurse -Force ; `
-    Copy-Item -Path 'src\Admin\obj\Live\Package\PackageTmp\*' -Destination C:\build\admin -Recurse -Force ; `
-    Copy-Item -Path 'src\Api\obj\Live\Package\PackageTmp\*' -Destination C:\build\api -Recurse -Force
+    /p:WebPublishMethod=Package /verbosity:minimal
+
+# Extract published output from the Web Deploy .zip packages.
+# The zips nest content under Content/C_C/src/src/<project>/obj/Live/Package/PackageTmp/
+RUN New-Item -ItemType Directory -Force -Path C:\build\portal, C:\build\admin, C:\build\api | Out-Null ; `
+    foreach ($proj in @(@{Name='PaymentPortal';Dest='portal'},@{Name='Admin';Dest='admin'},@{Name='Api';Dest='api'})) { `
+        $zip = "src\$($proj.Name)\obj\Live\Package\$($proj.Name).zip" ; `
+        $dest = "C:\build\$($proj.Dest)" ; `
+        if (Test-Path $zip) { `
+            $tmp = "C:\tmp_extract\$($proj.Name)" ; `
+            Expand-Archive -Path $zip -DestinationPath $tmp -Force ; `
+            $ptDir = Get-ChildItem -Path $tmp -Recurse -Directory -Filter 'PackageTmp' | Select-Object -First 1 ; `
+            if ($ptDir) { `
+                Copy-Item -Path "$($ptDir.FullName)\*" -Destination $dest -Recurse -Force ; `
+                Write-Host "$($proj.Name): extracted from zip PackageTmp" `
+            } else { `
+                Write-Host "WARNING: No PackageTmp in $zip, copying all content" ; `
+                Copy-Item -Path "$tmp\*" -Destination $dest -Recurse -Force `
+            } ; `
+            Remove-Item $tmp -Recurse -Force `
+        } else { `
+            Write-Host "WARNING: $zip not found" `
+        } `
+    }
 
 RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\portal\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
     Write-Host "Admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\admin\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
