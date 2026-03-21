@@ -32,17 +32,28 @@ RUN nuget restore src\LocalGovIms.sln
 RUN msbuild src\LocalGovIms.sln /p:Configuration=Live /p:DeployOnBuild=true `
     /p:WebPublishMethod=Package /verbosity:minimal
 
-# Copy each web project's PackageTmp output to separate directories for the runtime stage.
+# Copy each web project's PackageTmp output to separate directories.
+# List available PackageTmp dirs for debugging, then copy what exists.
 RUN New-Item -ItemType Directory -Force -Path C:\build\portal, C:\build\admin, C:\build\api | Out-Null ; `
-    Copy-Item -Path 'src\PaymentPortal\obj\Live\Package\PackageTmp\*' -Destination C:\build\portal -Recurse -Force ; `
-    Copy-Item -Path 'src\Admin\obj\Live\Package\PackageTmp\*' -Destination C:\build\admin -Recurse -Force ; `
-    Copy-Item -Path 'src\Api\obj\Live\Package\PackageTmp\*' -Destination C:\build\api -Recurse -Force
+    Write-Host 'Available PackageTmp dirs:' ; `
+    Get-ChildItem -Path src -Recurse -Directory -Filter PackageTmp -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $_" } ; `
+    $ptPortal = Get-Item 'src\PaymentPortal\obj\Live\Package\PackageTmp' -ErrorAction SilentlyContinue ; `
+    $ptAdmin = Get-Item 'src\Admin\obj\Live\Package\PackageTmp' -ErrorAction SilentlyContinue ; `
+    $ptApi = Get-Item 'src\Api\obj\Live\Package\PackageTmp' -ErrorAction SilentlyContinue ; `
+    if ($ptPortal) { Copy-Item -Path "$ptPortal\*" -Destination C:\build\portal -Recurse -Force } `
+    else { Write-Host 'WARNING: No PackageTmp for Portal' } ; `
+    if ($ptAdmin) { Copy-Item -Path "$ptAdmin\*" -Destination C:\build\admin -Recurse -Force } `
+    else { Write-Host 'WARNING: No PackageTmp for Admin, trying _PublishedWebsites' ; `
+        $pw = Get-Item 'src\Admin\bin\Live\_PublishedWebsites\Admin' -ErrorAction SilentlyContinue ; `
+        if ($pw) { Copy-Item -Path "$pw\*" -Destination C:\build\admin -Recurse -Force } `
+        else { Write-Host 'WARNING: No _PublishedWebsites either, using bin/Live' ; `
+            Copy-Item -Path 'src\Admin\bin\Live\*' -Destination C:\build\admin -Recurse -Force -ErrorAction SilentlyContinue } } ; `
+    if ($ptApi) { Copy-Item -Path "$ptApi\*" -Destination C:\build\api -Recurse -Force } `
+    else { Write-Host 'WARNING: No PackageTmp for Api' }
 
-RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files" ; `
-    Write-Host "Admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files" ; `
-    Write-Host "Api: $((Get-ChildItem C:\build\api -Recurse -File).Count) files" ; `
-    Write-Host "Portal bin: $((Get-ChildItem C:\build\portal\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
-    Write-Host "Admin bin: $((Get-ChildItem C:\build\admin\bin -File -ErrorAction SilentlyContinue).Count) DLLs"
+RUN Write-Host "Portal: $((Get-ChildItem C:\build\portal -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\portal\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
+    Write-Host "Admin: $((Get-ChildItem C:\build\admin -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\admin\bin -File -ErrorAction SilentlyContinue).Count) DLLs" ; `
+    Write-Host "Api: $((Get-ChildItem C:\build\api -Recurse -File).Count) files, bin: $((Get-ChildItem C:\build\api\bin -File -ErrorAction SilentlyContinue).Count) DLLs"
 
 # --- Build hash-password.exe ---
 # Tiny .NET Framework 4.8 console app using Microsoft.AspNet.Identity.Core
