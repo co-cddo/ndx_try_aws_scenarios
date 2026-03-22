@@ -1,118 +1,51 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 3: Suspense Management — LocalGov IMS Walkthrough"
-description: Find and resolve an unallocated payment in the suspense queue
+title: "Step 3: Manage Users and Roles — LocalGov IMS Walkthrough"
+description: View system users, understand role-based access, and explore the permissions model
 currentStep: 3
 totalSteps: 5
-timeEstimate: "4 minutes"
+timeEstimate: "3 minutes"
 scenarioId: localgov-ims
 ---
 
 {% set stepNumber = 3 %}
-{% set stepTitle = "An Unallocated Payment Arrives" %}
-{% set stepDescription = "Find an unallocated payment in the suspense queue and resolve it by allocating it to the correct account." %}
-{% set timeEstimate = "4 minutes" %}
+{% set stepTitle = "Manage Users and Roles" %}
+{% set stepDescription = "View the pre-configured users, understand how role-based access works, and explore the different permission levels available in LocalGov IMS." %}
+{% set timeEstimate = "3 minutes" %}
 {% set screenshotData = screenshots["localgov-ims"] %}
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 3 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
-  "Suspense queue shows unallocated payments awaiting action",
-  "You can view details of a suspense item including payment amount and source",
-  "The allocation workflow lets you match payments to accounts"
+  "You can see all 6 system users and their roles",
+  "You understand the difference between admin, finance, cashier, and auditor roles",
+  "You know how to create new users and assign permissions"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<h3 class="govuk-heading-m">Understanding suspense items</h3>
-
-<p class="govuk-body">
-  In council finance, a "suspense item" is a payment that has been received but cannot be automatically allocated to an account. This happens when:
-</p>
-
-<ul class="govuk-list govuk-list--bullet">
-  <li>A payment arrives with an incorrect or missing reference number</li>
-  <li>A bank transfer doesn't match any known account</li>
-  <li>A payment amount doesn't match any outstanding balance</li>
-  <li>A resident pays into the wrong fund</li>
-</ul>
-
-<p class="govuk-body">
-  Finance officers must review these items and manually allocate them to the correct accounts. This is one of the most time-consuming tasks in council income management.
-</p>
-
-<h3 class="govuk-heading-m">Review the suspense queue</h3>
+<h3 class="govuk-heading-m">View system users</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>
-    <strong>Navigate to suspense management</strong>
-    <p class="govuk-body">
-      From the admin portal, navigate to the suspense management section. You'll see a list of payments that need manual allocation.
-    </p>
+    Click <strong>Users</strong> in the left sidebar. You'll see 6 pre-configured users.
   </li>
-
   <li>
-    <strong>Review a suspense item</strong>
-    <p class="govuk-body">
-      Click on a suspense item to see its details:
-    </p>
+    The demo includes users with different roles:
     <ul class="govuk-list govuk-list--bullet">
-      <li><strong>Payment amount</strong> — how much was received</li>
-      <li><strong>Payment source</strong> — where the payment came from (bank transfer, card, etc.)</li>
-      <li><strong>Date received</strong> — when the payment arrived</li>
-      <li><strong>Reference provided</strong> — any reference the payer included</li>
-      <li><strong>Reason for suspense</strong> — why it couldn't be auto-allocated</li>
+      <li><strong>tester1/tester2</strong> — full admin access (all modules)</li>
+      <li><strong>finance.officer</strong> — can view/create transactions and transfers</li>
+      <li><strong>cashier</strong> — can view/create transactions (no transfers)</li>
+      <li><strong>auditor</strong> — read-only access to transactions</li>
     </ul>
   </li>
-
   <li>
-    <strong>Search for the matching account</strong>
-    <p class="govuk-body">
-      Use the reference or amount to search for potential matching accounts. The system may suggest likely matches based on the payment details.
-    </p>
+    Click <strong>View</strong> on any user to see their assigned roles and permissions.
   </li>
-
   <li>
-    <strong>Allocate the payment</strong>
-    <p class="govuk-body">
-      Once you've identified the correct account, allocate the payment. Select the account, confirm the allocation, and the payment will be moved from suspense to the account's transaction history.
-    </p>
+    Try <strong>Create user</strong> to see the user creation form — you can set display name, office code, and role assignments.
   </li>
 </ol>
 
 <div class="govuk-inset-text">
-  <strong>Why this matters:</strong> Unresolved suspense items represent money that hasn't been properly accounted for. Councils are required to keep suspense balances as low as possible for audit compliance. An efficient suspense management workflow directly impacts the accuracy of financial reporting and reduces the risk of audit findings.
+  <strong>Real-world context:</strong> In a live deployment, each council staff member would have their own account with permissions matching their job role — cashiers can take payments, finance officers can process transfers, and auditors can review but not modify records.
 </div>
-
-<h3 class="govuk-heading-m">Suspense in practice</h3>
-
-<table class="govuk-table">
-  <thead class="govuk-table__head">
-    <tr class="govuk-table__row">
-      <th class="govuk-table__header">Scenario</th>
-      <th class="govuk-table__header">Common cause</th>
-      <th class="govuk-table__header">Resolution</th>
-    </tr>
-  </thead>
-  <tbody class="govuk-table__body">
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Wrong reference</td>
-      <td class="govuk-table__cell">Resident types account number incorrectly</td>
-      <td class="govuk-table__cell">Search by name or address, allocate manually</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Overpayment</td>
-      <td class="govuk-table__cell">Payment exceeds outstanding balance</td>
-      <td class="govuk-table__cell">Allocate to account, credit remains on account</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Wrong fund</td>
-      <td class="govuk-table__cell">Council Tax payment sent to NNDR fund</td>
-      <td class="govuk-table__cell">Redirect to correct fund and account</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Unknown payer</td>
-      <td class="govuk-table__cell">Bank transfer with no identifying details</td>
-      <td class="govuk-table__cell">Contact payer or hold for investigation</td>
-    </tr>
-  </tbody>
-</table>

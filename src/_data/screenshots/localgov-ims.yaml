@@ -1,0 +1,104 @@
+scenario: localgov-ims
+scenarioTitle: "LocalGov IMS Income Management System"
+awsService: "Amazon EC2"
+totalSteps: 5
+
+steps:
+  - step: 1
+    title: "Log In to the Admin Portal"
+    screenshots:
+      - id: admin-login
+        filename: admin-login.png
+        alt: "LocalGov IMS admin login page with email and password fields"
+        caption: "The admin login page at your CloudFront Admin URL. Use the credentials from CloudFormation outputs."
+        width: 1440
+        height: 830
+
+      - id: admin-dashboard
+        filename: admin-dashboard.png
+        alt: "LocalGov IMS admin dashboard showing system overview with navigation sidebar"
+        caption: "After logging in, you see the admin dashboard with navigation to Transactions, Accounts, Settings, and more."
+        width: 1440
+        height: 830
+
+  - step: 2
+    title: "Explore Account Holders and Transactions"
+    screenshots:
+      - id: admin-accounts
+        filename: admin-accounts.png
+        alt: "Account holders list showing 40 seeded residents with names, addresses, postcodes and balances"
+        caption: "The Accounts page shows 40 pre-seeded account holders with realistic UK council data — names, addresses, postcodes, and outstanding balances."
+        width: 1440
+        height: 830
+
+      - id: admin-account-detail
+        filename: admin-account-detail.png
+        alt: "Account holder detail page showing Mr James Thompson at 12 High Street OX1 1AA with balance of 1580.00"
+        caption: "Click 'View' on any account to see full details including title, name, address, fund type, and current balance."
+        width: 1440
+        height: 830
+
+      - id: admin-transactions
+        filename: admin-transactions.png
+        alt: "Transactions list showing 500 seeded payments across multiple fund types with search filters"
+        caption: "The Transactions page shows 500 pre-seeded payments across fund types like Council Tax, Parking Fines, and Business Rates. Use the comprehensive search filters to find specific transactions."
+        width: 1440
+        height: 830
+
+  - step: 3
+    title: "Manage Users and Roles"
+    screenshots:
+      - id: admin-users
+        filename: admin-users.png
+        alt: "User management page showing 6 users including finance officer, cashier, and auditor roles"
+        caption: "The Users page shows all system users. The demo includes a finance officer, cashier, and read-only auditor with different permission levels."
+        width: 1440
+        height: 830
+
+  - step: 4
+    title: "Configure Fund Types and Settings"
+    screenshots:
+      - id: admin-funds
+        filename: admin-funds.png
+        alt: "Funds management page showing 19 fund types including Council Tax, Parking Fines, Business Rates"
+        caption: "The Funds page shows all configured fund types — Council Tax, Parking Fines, Business Rates, Housing Rents, and more. Each fund can have its own GOV.UK Pay API key."
+        width: 1440
+        height: 830
+
+      - id: admin-settings
+        filename: admin-settings.png
+        alt: "Settings page showing 15 configuration areas including Funds, MOP codes, Roles, and Payment integrations"
+        caption: "The Settings page provides access to all system configuration — fund management, payment method codes, import rules, roles, and GOV.UK Pay integration settings."
+        width: 1440
+        height: 830
+
+  - step: 5
+    title: "Test the Payment Portal"
+    screenshots:
+      - id: portal-home
+        filename: portal-home.png
+        alt: "Citizen-facing payment portal showing the payment form"
+        caption: "The citizen-facing Payment Portal where residents make payments. It integrates with GOV.UK Pay sandbox for test card payments."
+        width: 1440
+        height: 830
+
+console:
+  - id: cfn-stack
+    filename: aws-cfn-stack.png
+    alt: "AWS CloudFormation console showing the localgov-ims stack resources"
+    caption: "The CloudFormation stack creates all infrastructure — VPC, EC2, RDS SQL Server, ALB, and CloudFront distributions."
+
+  - id: ec2-instance
+    filename: aws-ec2-instance.png
+    alt: "AWS EC2 console showing the Windows Server 2022 instance running IIS"
+    caption: "The Windows Server 2022 EC2 instance runs three IIS sites — Portal, Admin, and API."
+
+  - id: rds-instance
+    filename: aws-rds-instance.png
+    alt: "AWS RDS console showing the SQL Server Express database instance"
+    caption: "RDS SQL Server Express hosts the IncomeManagement database with EF6 migrations applied automatically."
+
+  - id: cloudfront-distributions
+    filename: aws-cloudfront.png
+    alt: "AWS CloudFront console showing three distributions for Portal, Admin, and API"
+    caption: "Three CloudFront distributions provide HTTPS access to the Portal (port 80), Admin (port 8081), and API (port 8082)."

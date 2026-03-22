@@ -1,24 +1,24 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 1: A Citizen Pays Council Tax — LocalGov IMS Walkthrough"
-description: Use the payment portal and GOV.UK Pay sandbox to process a test Council Tax payment
+title: "Step 1: Log In to the Admin Portal — LocalGov IMS Walkthrough"
+description: Find your credentials in CloudFormation outputs and log in to the IMS admin dashboard
 currentStep: 1
 totalSteps: 5
-timeEstimate: "5 minutes"
+timeEstimate: "3 minutes"
 scenarioId: localgov-ims
 ---
 
 {% set stepNumber = 1 %}
-{% set stepTitle = "A Citizen Pays Their Council Tax" %}
-{% set stepDescription = "Use the payment portal to make a test Council Tax payment through the GOV.UK Pay sandbox." %}
-{% set timeEstimate = "5 minutes" %}
+{% set stepTitle = "Log In to the Admin Portal" %}
+{% set stepDescription = "Find your credentials in the CloudFormation outputs and log in to the LocalGov IMS admin dashboard." %}
+{% set timeEstimate = "3 minutes" %}
 {% set screenshotData = screenshots["localgov-ims"] %}
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 1 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
-  "CloudFormation stack shows CREATE_COMPLETE status",
-  "Payment portal loads and displays the account search page",
-  "A test card payment completes successfully through GOV.UK Pay"
+  "You can see the CloudFormation stack outputs with portal URLs and credentials",
+  "You're logged in to the admin dashboard as tester1@your-organisation.com",
+  "The dashboard shows the navigation sidebar with all IMS modules"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
@@ -27,129 +27,29 @@ scenarioId: localgov-ims
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>
-    <strong>Open the CloudFormation console</strong>
-    <p class="govuk-body">
-      Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console in us-east-1<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
-    </p>
+    <strong>Open the CloudFormation console</strong> in your sandbox account and find the <code>ndx-try-localgov-ims</code> stack.
   </li>
-
   <li>
-    <strong>Find your stack</strong>
-    <p class="govuk-body">
-      Look for a stack containing <code>localgov-ims</code> in the name.
-      The status should be <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span>
-    </p>
-  </li>
-
-  <li>
-    <strong>Go to the Outputs tab</strong>
-    <p class="govuk-body">Click the stack name, then select the <strong>Outputs</strong> tab. You'll see:</p>
-    <table class="govuk-table">
-      <thead class="govuk-table__head">
-        <tr class="govuk-table__row">
-          <th class="govuk-table__header">Output</th>
-          <th class="govuk-table__header">What it is</th>
-        </tr>
-      </thead>
-      <tbody class="govuk-table__body">
-        <tr class="govuk-table__row">
-          <td class="govuk-table__cell"><code>PaymentPortalUrl</code></td>
-          <td class="govuk-table__cell">The citizen-facing payment portal URL</td>
-        </tr>
-        <tr class="govuk-table__row">
-          <td class="govuk-table__cell"><code>AdminPortalUrl</code></td>
-          <td class="govuk-table__cell">The staff admin portal URL (for later steps)</td>
-        </tr>
-        <tr class="govuk-table__row">
-          <td class="govuk-table__cell"><code>AdminUsername</code></td>
-          <td class="govuk-table__cell">Admin login username</td>
-        </tr>
-        <tr class="govuk-table__row">
-          <td class="govuk-table__cell"><code>AdminPassword</code></td>
-          <td class="govuk-table__cell">Admin login password</td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
-</ol>
-
-<h3 class="govuk-heading-m">Make a test payment</h3>
-
-<ol class="govuk-list govuk-list--number govuk-list--spaced">
-  <li>
-    <strong>Open the payment portal</strong>
-    <p class="govuk-body">
-      Open the <code>PaymentPortalUrl</code> in a new tab. You'll see the citizen-facing payment page where residents can look up their account and make a payment.
-    </p>
-  </li>
-
-  <li>
-    <strong>Search for an account</strong>
-    <p class="govuk-body">
-      The seed data includes 200+ account holders. Try searching by:
-    </p>
+    <strong>Go to the Outputs tab</strong> — you'll find:
     <ul class="govuk-list govuk-list--bullet">
-      <li><strong>Account reference</strong> — try <code>CT-001</code> for a Council Tax account</li>
-      <li><strong>Name</strong> — try <code>Smith</code> to see matching residents</li>
+      <li><strong>AdminPortalUrl</strong> — the HTTPS URL for the admin interface</li>
+      <li><strong>PaymentPortalUrl</strong> — the HTTPS URL for the citizen payment portal</li>
+      <li><strong>AdminUsername</strong> — <code>admin</code> (but you'll log in with the email below)</li>
+      <li><strong>AdminPassword</strong> — the generated password for all users</li>
     </ul>
   </li>
-
   <li>
-    <strong>Select an account and enter a payment amount</strong>
-    <p class="govuk-body">
-      Select a Council Tax account from the results. You'll see the account balance and payment history. Enter a payment amount (for example, <code>150.00</code>) and click to proceed.
-    </p>
+    <strong>Open the Admin Portal URL</strong> in your browser. You'll see the login page.
   </li>
-
   <li>
-    <strong>Complete the GOV.UK Pay checkout</strong>
-    <p class="govuk-body">
-      You'll be redirected to the GOV.UK Pay sandbox. This is a real GOV.UK Pay test environment. Use these test card details:
-    </p>
-    <table class="govuk-table">
-      <thead class="govuk-table__head">
-        <tr class="govuk-table__row">
-          <th class="govuk-table__header">Field</th>
-          <th class="govuk-table__header">Value</th>
-        </tr>
-      </thead>
-      <tbody class="govuk-table__body">
-        <tr class="govuk-table__row">
-          <td class="govuk-table__cell">Card number</td>
-          <td class="govuk-table__cell"><code>4444333322221111</code></td>
-        </tr>
-        <tr class="govuk-table__row">
-          <td class="govuk-table__cell">Expiry date</td>
-          <td class="govuk-table__cell">Any future date (e.g. <code>01/30</code>)</td>
-        </tr>
-        <tr class="govuk-table__row">
-          <td class="govuk-table__cell">Name on card</td>
-          <td class="govuk-table__cell">Any name</td>
-        </tr>
-        <tr class="govuk-table__row">
-          <td class="govuk-table__cell">Card security code</td>
-          <td class="govuk-table__cell"><code>123</code></td>
-        </tr>
-        <tr class="govuk-table__row">
-          <td class="govuk-table__cell">Billing address</td>
-          <td class="govuk-table__cell">Any UK address</td>
-        </tr>
-        <tr class="govuk-table__row">
-          <td class="govuk-table__cell">Email</td>
-          <td class="govuk-table__cell">Any email address</td>
-        </tr>
-      </tbody>
-    </table>
-  </li>
-
-  <li>
-    <strong>Confirm payment success</strong>
-    <p class="govuk-body">
-      After completing the card details, you'll see the GOV.UK Pay confirmation page, then be redirected back to LocalGov IMS with a payment receipt. The transaction will now appear in the admin portal.
-    </p>
+    <strong>Log in</strong> with:
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Email:</strong> <code>tester1@your-organisation.com</code></li>
+      <li><strong>Password:</strong> the AdminPassword from CloudFormation outputs</li>
+    </ul>
   </li>
 </ol>
 
 <div class="govuk-inset-text">
-  <strong>What you're seeing:</strong> This is the same GOV.UK Pay integration used by hundreds of councils across the UK. The sandbox environment processes test payments identically to production — the only difference is no real money moves. <a href="https://www.payments.service.gov.uk/" class="govuk-link">Learn more about GOV.UK Pay</a>.
+  <strong>Tip:</strong> The system has several pre-configured users with different roles. You can also log in as <code>tester2@your-organisation.com</code> with the same password.
 </div>

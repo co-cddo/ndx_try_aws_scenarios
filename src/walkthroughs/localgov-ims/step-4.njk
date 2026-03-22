@@ -1,110 +1,67 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 4: End of Day Cashing Up — LocalGov IMS Walkthrough"
-description: Generate an eReturn to reconcile the day's transactions
+title: "Step 4: Configure Fund Types and Settings — LocalGov IMS Walkthrough"
+description: Explore fund management, payment methods, and system configuration
 currentStep: 4
 totalSteps: 5
-timeEstimate: "3 minutes"
+timeEstimate: "4 minutes"
 scenarioId: localgov-ims
 ---
 
 {% set stepNumber = 4 %}
-{% set stepTitle = "End of Day Cashing Up" %}
-{% set stepDescription = "Generate an eReturn to reconcile the day's transactions — the daily process every council finance team runs." %}
-{% set timeEstimate = "3 minutes" %}
+{% set stepTitle = "Configure Fund Types and Settings" %}
+{% set stepDescription = "Explore the system settings — fund types, payment method codes, import rules, and GOV.UK Pay integration configuration." %}
+{% set timeEstimate = "4 minutes" %}
 {% set screenshotData = screenshots["localgov-ims"] %}
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 4 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
-  "eReturns interface shows the day's transaction summary",
-  "Totals are broken down by payment method and fund",
-  "The eReturn can be generated and reviewed"
+  "You can see all 19 configured fund types (Council Tax, Parking Fines, Business Rates, etc.)",
+  "You understand how MOP codes map to payment methods",
+  "You've seen the GOV.UK Pay integration settings"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<h3 class="govuk-heading-m">Understanding eReturns</h3>
-
-<p class="govuk-body">
-  An eReturn is the electronic equivalent of "cashing up" at the end of the day. It summarises all payments received, broken down by payment method and fund, so that finance officers can verify that everything balances. This is a critical daily control in council income management.
-</p>
-
-<h3 class="govuk-heading-m">Generate an eReturn</h3>
+<h3 class="govuk-heading-m">Explore fund types</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>
-    <strong>Navigate to eReturns</strong>
-    <p class="govuk-body">
-      From the admin portal, navigate to the eReturns section. This is where you'll find the daily reconciliation tools.
-    </p>
+    Click <strong>Settings</strong> in the sidebar, then click <strong>Funds</strong>.
   </li>
-
   <li>
-    <strong>Select today's date</strong>
-    <p class="govuk-body">
-      Select the current date to generate an eReturn for today's transactions. You should see the payment you made in Step 1 included in the totals.
-    </p>
-  </li>
-
-  <li>
-    <strong>Review the breakdown</strong>
-    <p class="govuk-body">
-      The eReturn shows:
-    </p>
+    You'll see 19 pre-configured fund types, including:
     <ul class="govuk-list govuk-list--bullet">
-      <li><strong>Payment method totals</strong> — card payments, bank transfers, cash, cheques</li>
-      <li><strong>Fund totals</strong> — amounts allocated to each council fund</li>
-      <li><strong>Transaction count</strong> — number of individual transactions</li>
-      <li><strong>Suspense movements</strong> — items moved in or out of suspense</li>
+      <li>Council Tax, Business Rates, Housing Rents</li>
+      <li>Parking Fines, Fixed Penalty Notices</li>
+      <li>Building Control, Development Control</li>
+      <li>Library Charges, Market Stall Rental</li>
+      <li>HMO Premises Licence, Landlord Accreditation</li>
     </ul>
   </li>
-
   <li>
-    <strong>Generate the eReturn</strong>
-    <p class="govuk-body">
-      Click to generate the eReturn. This creates the official record for the day. In a production environment, this would feed into the council's general ledger and bank reconciliation processes.
-    </p>
+    Click <strong>View</strong> on any fund to see its metadata — including the GOV.UK Pay API key configured for payment processing.
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">Review system settings</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    Go back to <strong>Settings</strong> to see all 15 configuration areas:
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>MOP codes</strong> — payment methods (Cash, Card, Transfer, etc.)</li>
+      <li><strong>Payment integrations</strong> — GOV.UK Pay connection settings</li>
+      <li><strong>Roles</strong> — permission definitions for user access</li>
+      <li><strong>Import types</strong> — bank file import configurations</li>
+      <li><strong>VAT codes</strong> — tax rate mappings</li>
+    </ul>
+  </li>
+  <li>
+    Click <strong>Payment integrations</strong> to see the GOV.UK Pay integration endpoint configured with your CloudFront URL.
   </li>
 </ol>
 
 <div class="govuk-inset-text">
-  <strong>Why this matters:</strong> Daily eReturns are a key financial control. They ensure that all income received is properly accounted for and that the income management system balances with the bank. Any discrepancies flagged here are investigated immediately rather than discovered during month-end or audit.
+  <strong>Real-world context:</strong> Each council customises these settings for their specific income streams. Some councils manage 50+ fund types across multiple departments.
 </div>
-
-<h3 class="govuk-heading-m">The daily income cycle</h3>
-
-<p class="govuk-body">
-  The eReturn sits at the end of the daily income cycle:
-</p>
-
-<table class="govuk-table">
-  <thead class="govuk-table__head">
-    <tr class="govuk-table__row">
-      <th class="govuk-table__header">Time</th>
-      <th class="govuk-table__header">Activity</th>
-      <th class="govuk-table__header">System action</th>
-    </tr>
-  </thead>
-  <tbody class="govuk-table__body">
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">During the day</td>
-      <td class="govuk-table__cell">Payments received</td>
-      <td class="govuk-table__cell">Auto-allocated or sent to suspense</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">During the day</td>
-      <td class="govuk-table__cell">Suspense items resolved</td>
-      <td class="govuk-table__cell">Manually allocated to accounts</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">End of day</td>
-      <td class="govuk-table__cell">eReturn generated</td>
-      <td class="govuk-table__cell">Totals calculated and verified</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell">Next morning</td>
-      <td class="govuk-table__cell">Bank file imported</td>
-      <td class="govuk-table__cell">Bank statement matched against eReturn</td>
-    </tr>
-  </tbody>
-</table>

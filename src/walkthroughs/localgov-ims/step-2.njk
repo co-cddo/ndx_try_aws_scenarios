@@ -1,128 +1,62 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 2: Review Transactions — LocalGov IMS Walkthrough"
-description: Log into the admin portal to search accounts, view receipts, and browse transaction history
+title: "Step 2: Explore Accounts and Transactions — LocalGov IMS Walkthrough"
+description: Browse account holders, view transaction history, and search across council funds
 currentStep: 2
 totalSteps: 5
-timeEstimate: "4 minutes"
+timeEstimate: "5 minutes"
 scenarioId: localgov-ims
 ---
 
 {% set stepNumber = 2 %}
-{% set stepTitle = "A Finance Officer Reviews Transactions" %}
-{% set stepDescription = "Log into the admin portal to search accounts, view payment receipts, and browse the transaction history." %}
-{% set timeEstimate = "4 minutes" %}
+{% set stepTitle = "Explore Accounts and Transactions" %}
+{% set stepDescription = "Browse the pre-seeded account holders, view their details, and explore the transaction history across multiple council fund types." %}
+{% set timeEstimate = "5 minutes" %}
 {% set screenshotData = screenshots["localgov-ims"] %}
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 2 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
-  "Admin portal dashboard shows fund summaries and recent activity",
-  "Account search returns matching account holders",
-  "Transaction history shows the payment you made in Step 1"
+  "You can browse 40 account holders with names, addresses, and balances",
+  "You can view individual account details including fund type and payment history",
+  "You can search and filter 500 transactions by fund type, date, amount, and more"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<h3 class="govuk-heading-m">Log into the admin portal</h3>
+<h3 class="govuk-heading-m">Browse account holders</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>
-    <strong>Open the admin portal</strong>
-    <p class="govuk-body">
-      Open the <code>AdminPortalUrl</code> from the CloudFormation outputs in a new tab. Enter the <code>AdminUsername</code> and <code>AdminPassword</code> to log in.
-    </p>
+    Click <strong>Accounts</strong> in the left sidebar. You'll see 40 pre-seeded account holders across 2 pages.
   </li>
-
   <li>
-    <strong>Explore the dashboard</strong>
-    <p class="govuk-body">
-      The admin dashboard shows an overview of the system:
-    </p>
-    <ul class="govuk-list govuk-list--bullet">
-      <li><strong>Fund summaries</strong> — totals across the 10 council funds</li>
-      <li><strong>Recent transactions</strong> — the latest payments and adjustments</li>
-      <li><strong>Suspense items</strong> — payments awaiting allocation (you'll explore these in Step 3)</li>
-    </ul>
+    Each account shows the <strong>reference number</strong>, <strong>name</strong>, <strong>address</strong>, and <strong>current balance</strong> (in pounds sterling).
+  </li>
+  <li>
+    Try the <strong>search filters</strong> — search by account reference, surname, fund type, postcode, or address.
+  </li>
+  <li>
+    Click <strong>View</strong> on any account to see full details — title, name, address, fund name, period debit/credit, and creation date.
   </li>
 </ol>
 
-<h3 class="govuk-heading-m">Search for an account</h3>
+<h3 class="govuk-heading-m">Explore transactions</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>
-    <strong>Use the account search</strong>
-    <p class="govuk-body">
-      Navigate to the account search. Try searching for the same account you used in Step 1 (for example, <code>CT-001</code> or the account holder name).
-    </p>
+    Click <strong>Transactions</strong> in the sidebar. You'll see 500 pre-seeded transactions across 25 pages.
   </li>
-
   <li>
-    <strong>View the account details</strong>
-    <p class="govuk-body">
-      Click on an account to see its full details:
-    </p>
-    <ul class="govuk-list govuk-list--bullet">
-      <li><strong>Account holder</strong> — name, address, and contact details</li>
-      <li><strong>Fund allocation</strong> — which council fund this account belongs to</li>
-      <li><strong>Balance</strong> — current amount outstanding</li>
-      <li><strong>Transaction history</strong> — all payments, adjustments, and charges</li>
-    </ul>
+    Transactions span multiple <strong>fund types</strong> — Council Tax, Parking Fines, Business Rates, Benefit Overpayments, and more.
   </li>
-
   <li>
-    <strong>Find your payment from Step 1</strong>
-    <p class="govuk-body">
-      Scroll through the transaction history. You should see the payment you made via GOV.UK Pay in the previous step, with a GOV.UK Pay reference number and today's date.
-    </p>
+    Each transaction shows the <strong>date</strong>, <strong>method of payment (MOP)</strong>, <strong>receipt reference</strong>, <strong>fund type</strong>, <strong>account</strong>, <strong>narrative</strong>, and <strong>amount</strong>.
   </li>
-
   <li>
-    <strong>View a receipt</strong>
-    <p class="govuk-body">
-      Click on the transaction to view the full receipt details. This shows:
-    </p>
-    <ul class="govuk-list govuk-list--bullet">
-      <li><strong>Payment method</strong> — GOV.UK Pay card payment</li>
-      <li><strong>Amount</strong> — the payment amount</li>
-      <li><strong>Reference</strong> — the GOV.UK Pay transaction reference</li>
-      <li><strong>Timestamp</strong> — when the payment was processed</li>
-    </ul>
+    Use the comprehensive search filters — filter by fund type, MOP code, date range, amount, account reference, or narrative.
   </li>
 </ol>
-
-<h3 class="govuk-heading-m">Browse the seed data</h3>
-
-<p class="govuk-body">
-  The deployment includes comprehensive seed data to give you a realistic experience:
-</p>
-
-<table class="govuk-table">
-  <thead class="govuk-table__head">
-    <tr class="govuk-table__row">
-      <th class="govuk-table__header">Data</th>
-      <th class="govuk-table__header">Volume</th>
-      <th class="govuk-table__header">What it represents</th>
-    </tr>
-  </thead>
-  <tbody class="govuk-table__body">
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell"><strong>Account holders</strong></td>
-      <td class="govuk-table__cell">200+</td>
-      <td class="govuk-table__cell">Residents and businesses with accounts across multiple funds</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell"><strong>Transactions</strong></td>
-      <td class="govuk-table__cell">500+</td>
-      <td class="govuk-table__cell">Payments, charges, adjustments, and refunds over 12 months</td>
-    </tr>
-    <tr class="govuk-table__row">
-      <td class="govuk-table__cell"><strong>Funds</strong></td>
-      <td class="govuk-table__cell">10</td>
-      <td class="govuk-table__cell">Council Tax, NNDR, housing rents, sundry debts, and more</td>
-    </tr>
-  </tbody>
-</table>
 
 <div class="govuk-inset-text">
-  <strong>What you're seeing:</strong> This is the day-to-day view for council finance officers. The ability to quickly search accounts, verify payments, and track transaction history is essential for handling resident enquiries and maintaining accurate financial records.
+  <strong>Real-world context:</strong> In a live council deployment, these transactions would come from citizen payments via GOV.UK Pay, bank file imports, counter payments, and automated standing orders.
 </div>
