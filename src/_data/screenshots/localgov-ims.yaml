@@ -14,13 +14,6 @@ steps:
         width: 1440
         height: 830
 
-      - id: cfn-outputs
-        filename: aws-cfn-outputs.png
-        alt: "CloudFormation stack Outputs tab showing where to find AdminPortalUrl, PaymentPortalUrl, and AdminPassword"
-        caption: "Click the Outputs tab to find your AdminPortalUrl, PaymentPortalUrl, AdminUsername, and AdminPassword. Copy the Admin Portal URL and password to log in."
-        width: 1440
-        height: 830
-
       - id: admin-login
         filename: admin-login.png
         alt: "LocalGov IMS admin login page with email and password fields"
