@@ -15,6 +15,21 @@ Write-Host "============================================="
 Write-Host "  LocalGov IMS -- EC2 Setup"
 Write-Host "============================================="
 
+# Ensure nuget.org is configured as a package source (Windows Server default is empty)
+$nugetConfigPath = "$env:APPDATA\NuGet\NuGet.Config"
+if (-not (Test-Path $nugetConfigPath) -or -not (Select-String -Path $nugetConfigPath -Pattern 'nuget.org' -Quiet)) {
+    New-Item -ItemType Directory -Force -Path (Split-Path $nugetConfigPath) | Out-Null
+    @"
+<?xml version="1.0"?>
+<configuration>
+  <packageSources>
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+  </packageSources>
+</configuration>
+"@ | Set-Content $nugetConfigPath -Encoding UTF8
+    Write-Host "  Configured nuget.org package source"
+}
+
 # ADO.NET helper — go-sqlcmd has incompatible CLI syntax, so use .NET SqlClient directly
 function Invoke-Sql($query, $db = 'master') {
     $conn = New-Object System.Data.SqlClient.SqlConnection("Server=$dbHost;Database=$db;User Id=$dbUser;Password=$dbPassword;TrustServerCertificate=True")
