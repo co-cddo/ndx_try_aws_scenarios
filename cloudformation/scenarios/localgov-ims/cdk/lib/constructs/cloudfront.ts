@@ -30,13 +30,13 @@ export class CloudFrontConstruct extends Construct {
     });
     this.portalDomainName = portalDistribution.distributionDomainName;
 
-    // Admin Distribution (ALB port 8080)
+    // Admin Distribution (ALB port 81)
     const adminDistribution = new cloudfront.Distribution(this, 'AdminDistribution', {
       comment: 'LocalGov IMS Admin - HTTPS',
       defaultBehavior: {
         origin: new origins.LoadBalancerV2Origin(props.loadBalancer, {
           protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-          httpPort: 8080,
+          httpPort: 8081,
         }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
@@ -46,9 +46,9 @@ export class CloudFrontConstruct extends Construct {
     });
     this.adminDomainName = adminDistribution.distributionDomainName;
 
-    // GOV.UK Pay Distribution (ALB port 8082)
+    // Api/GOV.UK Pay Distribution (ALB port 82)
     const govukpayDistribution = new cloudfront.Distribution(this, 'GovUkPayDistribution', {
-      comment: 'LocalGov IMS GOV.UK Pay - HTTPS',
+      comment: 'LocalGov IMS Api/GOV.UK Pay - HTTPS',
       defaultBehavior: {
         origin: new origins.LoadBalancerV2Origin(props.loadBalancer, {
           protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,

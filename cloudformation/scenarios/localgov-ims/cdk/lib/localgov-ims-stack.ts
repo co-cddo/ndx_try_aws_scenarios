@@ -80,11 +80,11 @@ export class LocalGovImsStack extends cdk.Stack {
       securityGroup: networking.rdsSecurityGroup,
     });
 
-    // Compute (ECS, ALB)
+    // Compute (EC2, ALB)
     const compute = new ComputeConstruct(this, 'Compute', {
       vpc: networking.vpc,
       albSecurityGroup: networking.albSecurityGroup,
-      fargateSecurityGroup: networking.fargateSecurityGroup,
+      ec2SecurityGroup: networking.ec2SecurityGroup,
       databaseInstance: database.instance,
       databaseSecret: database.secret,
       referenceSaltSecret,
@@ -97,10 +97,12 @@ export class LocalGovImsStack extends cdk.Stack {
       loadBalancer: compute.loadBalancer,
     });
 
-    // Set URL environment variables now that CloudFront domains are known
-    compute.container.addEnvironment('PORTAL_URL', `https://${cdn.portalDomainName}`);
-    compute.container.addEnvironment('ADMIN_URL', `https://${cdn.adminDomainName}`);
-    compute.container.addEnvironment('GOVUKPAY_URL', `https://${cdn.govukpayDomainName}`);
+    // Inject CloudFront URLs into EC2 UserData (must be after CDN creation)
+    compute.configureUrls(
+      `https://${cdn.portalDomainName}`,
+      `https://${cdn.adminDomainName}`,
+      `https://${cdn.govukpayDomainName}`,
+    );
 
     // ==========================================================================
     // CloudFormation Outputs
@@ -126,13 +128,13 @@ export class LocalGovImsStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
-      description: 'CloudWatch Logs for IMS containers',
+      description: 'CloudWatch Logs for IMS',
       value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-ims/production')}`,
     });
 
     new cdk.CfnOutput(this, 'StackDescription', {
       description: 'Stack description',
-      value: 'LocalGov IMS Income Management System - Windows containers with GOV.UK Pay integration',
+      value: 'LocalGov IMS Income Management System - Windows EC2 with IIS and GOV.UK Pay integration',
     });
   }
 }

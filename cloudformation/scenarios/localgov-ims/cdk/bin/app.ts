@@ -8,7 +8,7 @@ const app = new cdk.App();
 const stack = new LocalGovImsStack(app, 'LocalGovImsStack', {
   // No env — produces environment-agnostic template using CloudFormation intrinsics
   // so the same template works in any account/region via StackSets
-  description: 'LocalGov IMS Income Management System - Windows containers on ECS Fargate with GOV.UK Pay integration',
+  description: 'LocalGov IMS Income Management System - Windows EC2 with IIS and GOV.UK Pay integration',
 });
 
 cdk.Aspects.of(stack).add(new IsbRoleNamingAspect());

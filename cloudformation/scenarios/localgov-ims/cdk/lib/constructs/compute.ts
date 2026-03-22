@@ -1,7 +1,9 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import * as elbv2_targets from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as rds from 'aws-cdk-lib/aws-rds';
@@ -11,7 +13,7 @@ import { Construct } from 'constructs';
 export interface ComputeConstructProps {
   readonly vpc: ec2.IVpc;
   readonly albSecurityGroup: ec2.ISecurityGroup;
-  readonly fargateSecurityGroup: ec2.ISecurityGroup;
+  readonly ec2SecurityGroup: ec2.ISecurityGroup;
   readonly databaseInstance: rds.DatabaseInstance;
   readonly databaseSecret: secretsmanager.ISecret;
   readonly referenceSaltSecret: secretsmanager.ISecret;
@@ -20,92 +22,80 @@ export interface ComputeConstructProps {
 }
 
 export class ComputeConstruct extends Construct {
-  public readonly cluster: ecs.Cluster;
   public readonly loadBalancer: elbv2.ApplicationLoadBalancer;
-  public readonly container: ecs.ContainerDefinition;
   public readonly loadBalancerDnsName: string;
+
+  private readonly _userData: ec2.UserData;
+  private readonly _instance: ec2.Instance;
+  private readonly _dbHost: string;
+  private readonly _dbPassword: string;
+  private readonly _referenceSalt: string;
+  private readonly _adminPassword: string;
+  private readonly _govukPayApiKey: string;
 
   constructor(scope: Construct, id: string, props: ComputeConstructProps) {
     super(scope, id);
 
-    this.cluster = new ecs.Cluster(this, 'Cluster', {
-      vpc: props.vpc,
-      clusterName: 'NdxIms-Cluster',
-    });
-
     // CloudWatch log group
-    const logGroup = new logs.LogGroup(this, 'LogGroup', {
+    new logs.LogGroup(this, 'LogGroup', {
       logGroupName: '/ndx-ims/production',
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    // IAM Roles — ISB SCP requires InnovationSandbox-ndx-* prefix
-    const executionRole = new iam.Role(this, 'ExecutionRole', {
-      roleName: 'InnovationSandbox-ndx-ims-exec',
-      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+    // IAM Role — ISB SCP requires InnovationSandbox-ndx-* prefix
+    const ec2Role = new iam.Role(this, 'Ec2Role', {
+      roleName: 'InnovationSandbox-ndx-ims-ec2',
+      assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchAgentServerPolicy'),
       ],
     });
-    props.databaseSecret.grantRead(executionRole);
+    props.databaseSecret.grantRead(ec2Role);
 
-    const taskRole = new iam.Role(this, 'TaskRole', {
-      roleName: 'InnovationSandbox-ndx-ims-task',
-      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-    });
-    taskRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ['logs:CreateLogStream', 'logs:PutLogEvents'],
-        resources: [logGroup.logGroupArn],
-      }),
-    );
-
-    // Task Definition — Windows Server 2022 Core on Fargate
-    const taskDef = new ecs.FargateTaskDefinition(this, 'TaskDef', {
-      cpu: 2048,
-      memoryLimitMiB: 4096,
-      executionRole,
-      taskRole,
-      runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.X86_64,
-        operatingSystemFamily: ecs.OperatingSystemFamily.WINDOWS_SERVER_2022_CORE,
-      },
-    });
-
-    // Resolve database connection details
-    const dbHost = props.databaseInstance.dbInstanceEndpointAddress;
-    const dbPassword = props.databaseSecret.secretValueFromJson('password').unsafeUnwrap();
-    const referenceSalt = props.referenceSaltSecret.secretValueFromJson('REFERENCE_SALT').unsafeUnwrap();
-    const adminPassword = props.adminPasswordSecret.secretValueFromJson('ADMIN_PASSWORD').unsafeUnwrap();
-
-    // Container
-    this.container = taskDef.addContainer('ims', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-localgov-ims:latest'),
-      logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'ims' }),
-      environment: {
-        DB_HOST: dbHost,
-        DB_USER: 'admin',
-        DB_PASSWORD: dbPassword,
-        REFERENCE_SALT: referenceSalt,
-        GOVUKPAY_API_KEY: props.govukPayApiKeyParam.valueAsString,
-        ADMIN_PASSWORD: adminPassword,
-      },
-      portMappings: [
-        { containerPort: 80, protocol: ecs.Protocol.TCP },
-        { containerPort: 81, protocol: ecs.Protocol.TCP },
-        { containerPort: 82, protocol: ecs.Protocol.TCP },
-        { containerPort: 83, protocol: ecs.Protocol.TCP },
+    // cfn-init needs CloudFormation API access to read metadata and signal
+    ec2Role.addToPolicy(new iam.PolicyStatement({
+      actions: [
+        'cloudformation:DescribeStackResource',
+        'cloudformation:SignalResource',
       ],
-      healthCheck: {
-        command: ['CMD', 'powershell', '-Command', '(Invoke-WebRequest -Uri http://localhost:80/health -UseBasicParsing).StatusCode -eq 200'],
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(10),
-        retries: 5,
-        startPeriod: cdk.Duration.seconds(300),
-      },
-      stopTimeout: cdk.Duration.seconds(120),
+      resources: ['*'],
+    }));
+
+    // Store CDK tokens for configureUrls()
+    this._dbHost = props.databaseInstance.dbInstanceEndpointAddress;
+    this._dbPassword = props.databaseSecret.secretValueFromJson('password').unsafeUnwrap();
+    this._referenceSalt = props.referenceSaltSecret.secretValueFromJson('REFERENCE_SALT').unsafeUnwrap();
+    this._adminPassword = props.adminPasswordSecret.secretValueFromJson('ADMIN_PASSWORD').unsafeUnwrap();
+    this._govukPayApiKey = props.govukPayApiKeyParam.valueAsString;
+
+    // UserData — commands added in configureUrls() after CDN is created
+    this._userData = ec2.UserData.forWindows();
+
+    // Windows Server 2022 Full (includes .NET Framework 4.8)
+    this._instance = new ec2.Instance(this, 'Server', {
+      vpc: props.vpc,
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.M5, ec2.InstanceSize.XLARGE),
+      machineImage: ec2.MachineImage.latestWindows(
+        ec2.WindowsVersion.WINDOWS_SERVER_2022_ENGLISH_FULL_BASE,
+      ),
+      securityGroup: props.ec2SecurityGroup,
+      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+      role: ec2Role,
+      userData: this._userData,
+      blockDevices: [{
+        deviceName: '/dev/sda1',
+        volume: ec2.BlockDeviceVolume.ebs(50, { volumeType: ec2.EbsDeviceVolumeType.GP3 }),
+      }],
     });
+    cdk.Tags.of(this._instance).add('Name', 'NdxIms-Server');
+
+    // CreationPolicy — CloudFormation waits for cfn-signal before proceeding
+    const cfnInstance = this._instance.node.defaultChild as ec2.CfnInstance;
+    cfnInstance.cfnOptions.creationPolicy = {
+      resourceSignal: { count: 1, timeout: 'PT45M' },
+    };
 
     // ALB
     this.loadBalancer = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
@@ -116,93 +106,92 @@ export class ComputeConstruct extends Construct {
     });
     this.loadBalancerDnsName = this.loadBalancer.loadBalancerDnsName;
 
-    // Fargate Service
-    const service = new ecs.FargateService(this, 'Service', {
-      cluster: this.cluster,
-      taskDefinition: taskDef,
-      desiredCount: 1,
-      securityGroups: [props.fargateSecurityGroup],
-      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
-      assignPublicIp: true,
-      enableExecuteCommand: true,
-      circuitBreaker: { rollback: true },
-      serviceName: 'NdxIms-Service',
-      healthCheckGracePeriod: cdk.Duration.minutes(15),
-    });
+    // 3 listeners → EC2 on ports 80 (Portal), 81 (Admin), 82 (Api)
+    const sites = [
+      { name: 'Portal', port: 80 },
+      { name: 'Admin', port: 8081 },
+      { name: 'Api', port: 8082 },
+    ];
 
-    // Listener port 80 → Target Group (container port 80) — Portal
-    const portalListener = this.loadBalancer.addListener('PortalHTTP', {
-      port: 80,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      defaultAction: elbv2.ListenerAction.fixedResponse(200, {
-        contentType: 'text/plain',
-        messageBody: 'OK',
-      }),
-    });
+    for (const site of sites) {
+      const listener = this.loadBalancer.addListener(`${site.name}HTTP`, {
+        port: site.port,
+        protocol: elbv2.ApplicationProtocol.HTTP,
+      });
 
-    portalListener.addTargets('PortalTarget', {
-      port: 80,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      targets: [service],
-      deregistrationDelay: cdk.Duration.seconds(30),
-      healthCheck: {
-        path: '/health',
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(10),
-        healthyThresholdCount: 2,
-        unhealthyThresholdCount: 5,
-        healthyHttpCodes: '200',
+      listener.addTargets(`${site.name}Target`, {
+        port: site.port,
+        protocol: elbv2.ApplicationProtocol.HTTP,
+        targets: [new elbv2_targets.InstanceIdTarget(this._instance.instanceId, site.port)],
+        deregistrationDelay: cdk.Duration.seconds(30),
+        healthCheck: {
+          path: '/health',
+          interval: cdk.Duration.seconds(30),
+          timeout: cdk.Duration.seconds(10),
+          healthyThresholdCount: 2,
+          unhealthyThresholdCount: 10,
+          healthyHttpCodes: '200',
+        },
+      });
+    }
+  }
+
+  /**
+   * Injects CloudFront URLs and builds the complete UserData.
+   * Uses cfn-init to provision setup.ps1 and seed-data.sql from template metadata.
+   * Must be called AFTER the CloudFront construct is created.
+   */
+  public configureUrls(portalUrl: string, adminUrl: string, govukpayUrl: string): void {
+    const cfnInstance = this._instance.node.defaultChild as ec2.CfnInstance;
+
+    // Read files at synth time — embedded in CloudFormation Init metadata
+    const setupScript = fs.readFileSync(
+      path.join(__dirname, '../../../scripts/setup.ps1'), 'utf-8',
+    );
+    const seedSql = fs.readFileSync(
+      path.join(__dirname, '../../../docker/seed-data.sql'), 'utf-8',
+    );
+
+    // Add CloudFormation::Init metadata — cfn-init provisions these files on the instance
+    cfnInstance.addMetadata('AWS::CloudFormation::Init', {
+      config: {
+        files: {
+          'C:\\setup\\setup.ps1': { content: setupScript },
+          'C:\\setup\\seed-data.sql': { content: seedSql },
+        },
       },
     });
 
-    // Listener port 8080 → Target Group (container port 81) — Admin
-    const adminListener = this.loadBalancer.addListener('AdminHTTP', {
-      port: 8080,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      defaultAction: elbv2.ListenerAction.fixedResponse(200, {
-        contentType: 'text/plain',
-        messageBody: 'OK',
-      }),
-    });
-
-    adminListener.addTargets('AdminTarget', {
-      port: 81,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      targets: [service],
-      deregistrationDelay: cdk.Duration.seconds(30),
-      healthCheck: {
-        path: '/health',
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(10),
-        healthyThresholdCount: 2,
-        unhealthyThresholdCount: 5,
-        healthyHttpCodes: '200',
-      },
-    });
-
-    // Listener port 8082 → Target Group (container port 83) — GOV.UK Pay
-    const govukPayListener = this.loadBalancer.addListener('GovUkPayHTTP', {
-      port: 8082,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      defaultAction: elbv2.ListenerAction.fixedResponse(200, {
-        contentType: 'text/plain',
-        messageBody: 'OK',
-      }),
-    });
-
-    govukPayListener.addTargets('GovUkPayTarget', {
-      port: 83,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      targets: [service],
-      deregistrationDelay: cdk.Duration.seconds(30),
-      healthCheck: {
-        path: '/health',
-        interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(10),
-        healthyThresholdCount: 2,
-        unhealthyThresholdCount: 10, // Higher threshold — Kestrel starts late
-        healthyHttpCodes: '200',
-      },
-    });
+    // UserData: call cfn-init, set variables, run setup, signal
+    this._userData.addCommands(
+      'New-Item -ItemType Directory -Force -Path C:\\setup | Out-Null',
+      '',
+      '# Provision files via cfn-init (reads CloudFormation::Init metadata)',
+      `& "C:\\Program Files\\Amazon\\cfn-bootstrap\\cfn-init.exe" -v --stack ${cdk.Aws.STACK_NAME} --resource ${cfnInstance.logicalId} --region ${cdk.Aws.REGION}`,
+      '',
+      '# Configuration variables (CloudFormation resolves at deploy time)',
+      `$dbHost = '${this._dbHost}'`,
+      `$dbPassword = '${this._dbPassword}'`,
+      `$dbUser = 'admin'`,
+      `$referenceSalt = '${this._referenceSalt}'`,
+      `$adminPassword = '${this._adminPassword}'`,
+      `$govukPayApiKey = '${this._govukPayApiKey}'`,
+      `$portalUrl = '${portalUrl}'`,
+      `$adminUrl = '${adminUrl}'`,
+      `$govukpayUrl = '${govukpayUrl}'`,
+      '',
+      '# Run setup',
+      '$setupExitCode = 0',
+      'try {',
+      '    $ErrorActionPreference = "Stop"',
+      '    & C:\\setup\\setup.ps1',
+      '} catch {',
+      '    Write-Host "SETUP FAILED: $_"',
+      '    $setupExitCode = 1',
+      '}',
+      '',
+      '# Signal CloudFormation',
+      `& "C:\\Program Files\\Amazon\\cfn-bootstrap\\cfn-signal.exe" -e $setupExitCode --stack ${cdk.Aws.STACK_NAME} --resource ${cfnInstance.logicalId} --region ${cdk.Aws.REGION}`,
+    );
   }
 }
