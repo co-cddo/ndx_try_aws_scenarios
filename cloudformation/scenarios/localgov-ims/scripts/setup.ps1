@@ -88,7 +88,8 @@ Write-Host "  IMS source: $imsDir"
 Write-Host "=== Step 4/12: Building IMS ==="
 
 $sln = (Get-ChildItem $imsDir -Filter "*.sln" -Recurse)[0].FullName
-& "$setupDir\nuget.exe" restore $sln
+$msbuildDir = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin"
+& "$setupDir\nuget.exe" restore $sln -MSBuildPath $msbuildDir
 if ($LASTEXITCODE -ne 0) { Write-Error "NuGet restore failed"; exit 1 }
 
 # Build entire solution — Configuration=Live maps to Release for class libs at solution level.
