@@ -64,10 +64,12 @@ export class ComputeConstruct extends Construct {
     }));
 
     // Store CDK tokens for configureUrls()
+    // NOTE: Pass secret ARNs (not values) — secrets are read at runtime via AWS PowerShell.
+    // unsafeUnwrap() produces {{resolve:secretsmanager:...}} dynamic refs that don't resolve in UserData.
     this._dbHost = props.databaseInstance.dbInstanceEndpointAddress;
-    this._dbPassword = props.databaseSecret.secretValueFromJson('password').unsafeUnwrap();
-    this._referenceSalt = props.referenceSaltSecret.secretValueFromJson('REFERENCE_SALT').unsafeUnwrap();
-    this._adminPassword = props.adminPasswordSecret.secretValueFromJson('ADMIN_PASSWORD').unsafeUnwrap();
+    this._dbPassword = props.databaseSecret.secretArn;
+    this._referenceSalt = props.referenceSaltSecret.secretArn;
+    this._adminPassword = props.adminPasswordSecret.secretArn;
     this._govukPayApiKey = props.govukPayApiKeyParam.valueAsString;
 
     // UserData — commands added in configureUrls() after CDN is created
@@ -169,12 +171,12 @@ export class ComputeConstruct extends Construct {
       '# Provision files via cfn-init (reads CloudFormation::Init metadata)',
       `& "C:\\Program Files\\Amazon\\cfn-bootstrap\\cfn-init.exe" -v --stack ${cdk.Aws.STACK_NAME} --resource ${cfnInstance.logicalId} --region ${cdk.Aws.REGION}`,
       '',
-      '# Configuration variables (CloudFormation resolves at deploy time)',
+      '# Read secrets from Secrets Manager at runtime (dynamic refs dont resolve in UserData)',
       `$dbHost = '${this._dbHost}'`,
-      `$dbPassword = '${this._dbPassword}'`,
       `$dbUser = 'admin'`,
-      `$referenceSalt = '${this._referenceSalt}'`,
-      `$adminPassword = '${this._adminPassword}'`,
+      `$dbPassword = ((Get-SECSecretValue -SecretId '${this._dbPassword}' -Region ${cdk.Aws.REGION}).SecretString | ConvertFrom-Json).password`,
+      `$referenceSalt = ((Get-SECSecretValue -SecretId '${this._referenceSalt}' -Region ${cdk.Aws.REGION}).SecretString | ConvertFrom-Json).REFERENCE_SALT`,
+      `$adminPassword = ((Get-SECSecretValue -SecretId '${this._adminPassword}' -Region ${cdk.Aws.REGION}).SecretString | ConvertFrom-Json).ADMIN_PASSWORD`,
       `$govukPayApiKey = '${this._govukPayApiKey}'`,
       `$portalUrl = '${portalUrl}'`,
       `$adminUrl = '${adminUrl}'`,
