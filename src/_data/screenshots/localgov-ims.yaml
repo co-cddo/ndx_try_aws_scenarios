@@ -7,6 +7,13 @@ steps:
   - step: 1
     title: "Log In to the Admin Portal"
     screenshots:
+      - id: cfn-stack
+        filename: aws-cfn-stack.png
+        alt: "AWS CloudFormation console showing the localgov-ims stack"
+        caption: "Find the ndx-try-localgov-ims stack in the CloudFormation console. The Outputs tab has your portal URLs and admin password."
+        width: 1440
+        height: 830
+
       - id: admin-login
         filename: admin-login.png
         alt: "LocalGov IMS admin login page with email and password fields"
@@ -79,6 +86,27 @@ steps:
         filename: portal-home.png
         alt: "Citizen-facing payment portal showing the payment form"
         caption: "The citizen-facing Payment Portal where residents make payments. It integrates with GOV.UK Pay sandbox for test card payments."
+        width: 1440
+        height: 830
+
+      - id: ec2-instance
+        filename: aws-ec2-instance.png
+        alt: "AWS EC2 console showing the NdxIms-Server Windows instance running with 3/3 status checks passed"
+        caption: "The Windows Server 2022 EC2 instance (m5.xlarge) runs three IIS sites — Portal on port 80, Admin on port 8081, and API on port 8082."
+        width: 1440
+        height: 830
+
+      - id: cloudfront-distributions
+        filename: aws-cloudfront.png
+        alt: "AWS CloudFront console showing three distributions for Portal, Admin, and API"
+        caption: "Three CloudFront distributions provide HTTPS termination. Each points to the ALB on a different origin port."
+        width: 1440
+        height: 830
+
+      - id: rds-instance
+        filename: aws-rds-instance.png
+        alt: "AWS RDS console showing the SQL Server Express database instance"
+        caption: "RDS SQL Server Express (db.t3.medium) hosts the IncomeManagement database with EF6 migrations applied automatically on first boot."
         width: 1440
         height: 830
 
