@@ -323,16 +323,15 @@ describe('LocalGovDrupalStack', () => {
     });
   });
 
-  test('Stack outputs AdminPassword from Secrets Manager', () => {
+  test('Stack outputs AdminPassword', () => {
     const app = new cdk.App();
     const stack = new LocalGovDrupalStack(app, 'TestStack', {
     });
 
     const template = Template.fromStack(stack);
 
-    // Verify AdminPassword output exists with Secrets Manager console link
     template.hasOutput('AdminPassword', {
-      Description: 'Drupal admin password (retrieve from Secrets Manager)',
+      Description: 'Admin password for login',
     });
   });
 
