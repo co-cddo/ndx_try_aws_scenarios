@@ -10,7 +10,14 @@ steps:
       - id: cfn-stack
         filename: aws-cfn-stack.png
         alt: "AWS CloudFormation console showing the localgov-ims stack"
-        caption: "Find the ndx-try-localgov-ims stack in the CloudFormation console. The Outputs tab has your portal URLs and admin password."
+        caption: "Find the ndx-try-localgov-ims stack in the CloudFormation console."
+        width: 1440
+        height: 830
+
+      - id: cfn-outputs
+        filename: aws-cfn-outputs.png
+        alt: "CloudFormation stack Outputs tab showing where to find AdminPortalUrl, PaymentPortalUrl, and AdminPassword"
+        caption: "Click the Outputs tab to find your AdminPortalUrl, PaymentPortalUrl, AdminUsername, and AdminPassword. Copy the Admin Portal URL and password to log in."
         width: 1440
         height: 830
 
