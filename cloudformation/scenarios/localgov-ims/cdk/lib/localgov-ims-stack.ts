@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import * as cdk from 'aws-cdk-lib';
+import * as appregistry from 'aws-cdk-lib/aws-servicecatalogappregistry';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct, IConstruct } from 'constructs';
@@ -37,6 +38,19 @@ export class LocalGovImsStack extends cdk.Stack {
 
     // Apply ISB role naming aspect — catches all hidden auto-generated roles
     cdk.Aspects.of(this).add(new IsbRoleNamingAspect());
+
+    // AppRegistry Application — visible in myApplications on the AWS Console
+    const appRegistryApp = new appregistry.CfnApplication(this, 'AppRegistryApplication', {
+      name: `NDXTry_LocalGov_IMS_${this.account}`,
+      description: 'NDX:Try - LocalGov IMS Income Management System',
+      tags: { Project: 'ndx-try', Scenario: 'localgov-ims' },
+    });
+
+    new appregistry.CfnResourceAssociation(this, 'AppRegistryAssociation', {
+      application: appRegistryApp.attrId,
+      resource: this.stackId,
+      resourceType: 'CFN_STACK',
+    });
 
     // Tags
     cdk.Tags.of(this).add('Project', 'ndx-try-aws-scenarios');
