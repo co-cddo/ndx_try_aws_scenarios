@@ -64,6 +64,10 @@ export class SimplyReadableStack extends cdk.Stack {
       },
     );
 
+    cdk.Tags.of(this).add("awsApplication", appRegistryApp.attrArn, {
+      excludeResourceTypes: ["AWS::ServiceCatalogAppRegistry::Application", "AWS::ServiceCatalogAppRegistry::ResourceAssociation"],
+    });
+
     // ========================================================================
     // SERVER ACCESS LOGGING BUCKET (same as upstream DocTranStack)
     // ========================================================================

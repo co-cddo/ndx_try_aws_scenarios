@@ -87,6 +87,10 @@ export class LocalGovDrupalStack extends cdk.Stack {
       resourceType: 'CFN_STACK',
     });
 
+    cdk.Tags.of(this).add('awsApplication', appRegistryApp.attrArn, {
+      excludeResourceTypes: ['AWS::ServiceCatalogAppRegistry::Application', 'AWS::ServiceCatalogAppRegistry::ResourceAssociation'],
+    });
+
     // Story 1.4 - Networking construct (security groups)
     const networking = new NetworkingConstruct(this, 'Networking', {
       deploymentMode,

@@ -66,6 +66,8 @@ Resources:
           Value: foi-redaction
         - Key: AutoCleanup
           Value: 'true'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # IAM Role for Lambda
   RedactionRole:
@@ -107,6 +109,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: foi-redaction
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # Lambda Function - FOI Redaction
   RedactionFunction:
@@ -736,6 +740,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: foi-redaction
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # Lambda Function URL
   RedactionFunctionUrl:
@@ -782,6 +788,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: foi-redaction
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # AppRegistry Application - visible in myApplications on the AWS Console
   AppRegistryApplication:

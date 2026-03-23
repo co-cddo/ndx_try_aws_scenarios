@@ -49,6 +49,8 @@ Resources:
           Value: council-chatbot
         - Key: ParentStack
           Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   FoiRedaction:
     Type: AWS::CloudFormation::Stack
@@ -64,6 +66,8 @@ Resources:
           Value: foi-redaction
         - Key: ParentStack
           Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   PlanningAi:
     Type: AWS::CloudFormation::Stack
@@ -79,6 +83,8 @@ Resources:
           Value: planning-ai
         - Key: ParentStack
           Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   QuicksightDashboard:
     Type: AWS::CloudFormation::Stack
@@ -94,6 +100,8 @@ Resources:
           Value: quicksight-dashboard
         - Key: ParentStack
           Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   SmartCarPark:
     Type: AWS::CloudFormation::Stack
@@ -109,6 +117,8 @@ Resources:
           Value: smart-car-park
         - Key: ParentStack
           Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   TextToSpeech:
     Type: AWS::CloudFormation::Stack
@@ -124,6 +134,8 @@ Resources:
           Value: text-to-speech
         - Key: ParentStack
           Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   LocalgovDrupal:
     Type: AWS::CloudFormation::Stack
@@ -138,6 +150,8 @@ Resources:
           Value: localgov-drupal
         - Key: ParentStack
           Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # AppRegistry Application - visible in myApplications on the AWS Console
   # Parent application that groups all NDX:Try scenarios

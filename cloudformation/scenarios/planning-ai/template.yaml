@@ -59,6 +59,8 @@ Resources:
           Value: planning-ai
         - Key: AutoCleanup
           Value: 'true'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # IAM Role for Lambda with Textract permissions
   PlanningAIRole:
@@ -111,6 +113,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: planning-ai
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # Lambda Function - Planning Document Analyzer with real Textract
   PlanningAnalyzerFunction:
@@ -1089,6 +1093,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: planning-ai
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # Lambda Function URL
   PlanningAnalyzerFunctionUrl:
@@ -1135,6 +1141,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: planning-ai
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # AppRegistry Application - visible in myApplications on the AWS Console
   AppRegistryApplication:

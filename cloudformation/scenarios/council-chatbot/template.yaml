@@ -51,6 +51,8 @@ Resources:
           Value: council-chatbot
         - Key: AutoCleanup
           Value: 'true'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # S3 Vectors storage for Knowledge Base embeddings
   KnowledgeBaseVectorBucket:
@@ -160,6 +162,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: council-chatbot
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # Guardrail Version
   CouncilGuardrailVersion:
@@ -231,6 +235,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: council-chatbot
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # Bedrock Knowledge Base with S3 Vectors storage
   CouncilKnowledgeBase:
@@ -253,6 +259,7 @@ Resources:
       Tags:
         Project: ndx-try
         Scenario: council-chatbot
+        awsApplication: !GetAtt AppRegistryApplication.Arn
 
   # S3 Data Source for Knowledge Base
   CouncilDataSource:
@@ -311,6 +318,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: council-chatbot
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # Seed Data Lambda Function
   SeedDataFunction:
@@ -1231,6 +1240,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: council-chatbot
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # Seed Data Custom Resource
   SeedData:
@@ -1288,6 +1299,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: council-chatbot
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # Lambda Function - Chatbot Handler (Amazon Nova Pro with Knowledge Base + Guardrails)
   ChatbotFunction:
@@ -1559,6 +1572,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: council-chatbot
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # Lambda Function URL
   ChatbotFunctionUrl:
@@ -1606,6 +1621,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: council-chatbot
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # AppRegistry Application - visible in myApplications on the AWS Console
   AppRegistryApplication:
