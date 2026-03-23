@@ -153,7 +153,7 @@ export class ComputeConstruct extends Construct {
       path.join(__dirname, '../../../scripts/setup.ps1'), 'utf-8',
     );
     const seedSql = fs.readFileSync(
-      path.join(__dirname, '../../../docker/seed-data.sql'), 'utf-8',
+      path.join(__dirname, '../../../scripts/seed-data.sql'), 'utf-8',
     );
 
     // Add CloudFormation::Init metadata — cfn-init provisions these files on the instance
