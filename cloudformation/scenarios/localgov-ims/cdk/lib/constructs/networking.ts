@@ -16,7 +16,7 @@ export class NetworkingConstruct extends Construct {
     // VPC: public-only subnets, 2 AZs, 0 NAT gateways
     this.vpc = new ec2.Vpc(this, 'Vpc', {
       vpcName: `${prefix}-VPC`,
-      maxAzs: 2,
+      maxAzs: 3,
       natGateways: 0,
       enableDnsSupport: true,
       enableDnsHostnames: true,

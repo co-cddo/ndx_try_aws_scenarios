@@ -80,7 +80,7 @@ export class ComputeConstruct extends Construct {
     // Windows Server 2022 Full (includes .NET Framework 4.8)
     this._instance = new ec2.Instance(this, 'Server', {
       vpc: props.vpc,
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.M5, ec2.InstanceSize.XLARGE),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.M5A, ec2.InstanceSize.XLARGE),
       machineImage: ec2.MachineImage.latestWindows(
         ec2.WindowsVersion.WINDOWS_SERVER_2022_ENGLISH_FULL_BASE,
       ),

@@ -1377,7 +1377,7 @@
         "ImageId": {
           "Ref": "SsmParameterValueawsserviceamiwindowslatestWindowsServer2022EnglishFullBaseC96584B6F00A464EAD1953AFF4B05118Parameter"
         },
-        "InstanceType": "m5.xlarge",
+        "InstanceType": "m5a.xlarge",
         "SecurityGroupIds": [
           {
             "Fn::GetAtt": [
