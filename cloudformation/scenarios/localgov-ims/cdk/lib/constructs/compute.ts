@@ -53,6 +53,8 @@ export class ComputeConstruct extends Construct {
       ],
     });
     props.databaseSecret.grantRead(ec2Role);
+    props.referenceSaltSecret.grantRead(ec2Role);
+    props.adminPasswordSecret.grantRead(ec2Role);
 
     // cfn-init needs CloudFormation API access to read metadata and signal
     ec2Role.addToPolicy(new iam.PolicyStatement({
@@ -182,11 +184,12 @@ export class ComputeConstruct extends Construct {
       `$adminUrl = '${adminUrl}'`,
       `$govukpayUrl = '${govukpayUrl}'`,
       '',
-      '# Run setup',
+      '# Run setup (ErrorActionPreference=Continue so native command stderr doesnt abort)',
       '$setupExitCode = 0',
+      '$ErrorActionPreference = "Continue"',
       'try {',
-      '    $ErrorActionPreference = "Stop"',
       '    & C:\\setup\\setup.ps1',
+      '    if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw "setup.ps1 exited with code $LASTEXITCODE" }',
       '} catch {',
       '    Write-Host "SETUP FAILED: $_"',
       '    $setupExitCode = 1',
