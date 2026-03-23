@@ -1784,17 +1784,15 @@
       "Value": "admin"
     },
     "AdminPassword": {
-      "Description": "IMS admin password",
+      "Description": "IMS admin password (click link, then Retrieve secret value)",
       "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "{{resolve:secretsmanager:",
-            {
+        "Fn::Sub": [
+          "https://${AWS::Region}.console.aws.amazon.com/secretsmanager/secret?name=${SecretArn}&region=${AWS::Region}",
+          {
+            "SecretArn": {
               "Ref": "AdminPasswordSecret47C701F9"
-            },
-            ":SecretString:ADMIN_PASSWORD::}}"
-          ]
+            }
+          }
         ]
       }
     },

@@ -141,8 +141,10 @@ export class LocalGovImsStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'AdminPassword', {
-      description: 'IMS admin password',
-      value: adminPasswordSecret.secretValueFromJson('ADMIN_PASSWORD').unsafeUnwrap(),
+      description: 'IMS admin password (click link, then Retrieve secret value)',
+      value: cdk.Fn.sub('https://${AWS::Region}.console.aws.amazon.com/secretsmanager/secret?name=${SecretArn}&region=${AWS::Region}', {
+        SecretArn: adminPasswordSecret.secretArn,
+      }),
     });
 
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
