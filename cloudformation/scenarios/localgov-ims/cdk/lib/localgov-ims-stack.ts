@@ -143,8 +143,8 @@ export class LocalGovImsStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'AdminUsername', {
-      description: 'IMS admin username',
-      value: 'admin',
+      description: 'IMS admin username (email)',
+      value: 'tester1@your-organisation.com',
     });
 
     // Lambda reads the password from Secrets Manager so it appears as plaintext

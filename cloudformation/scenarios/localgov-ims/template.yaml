@@ -2394,8 +2394,8 @@
       }
     },
     "AdminUsername": {
-      "Description": "IMS admin username",
-      "Value": "admin"
+      "Description": "IMS admin username (email)",
+      "Value": "tester1@your-organisation.com"
     },
     "AdminPassword": {
       "Description": "IMS admin password",
