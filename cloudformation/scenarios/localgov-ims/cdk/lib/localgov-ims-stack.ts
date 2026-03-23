@@ -52,6 +52,10 @@ export class LocalGovImsStack extends cdk.Stack {
       resourceType: 'CFN_STACK',
     });
 
+    cdk.Tags.of(this).add('awsApplication', appRegistryApp.attrArn, {
+      excludeResourceTypes: ['AWS::ServiceCatalogAppRegistry::Application', 'AWS::ServiceCatalogAppRegistry::ResourceAssociation'],
+    });
+
     // Tags
     cdk.Tags.of(this).add('Project', 'ndx-try-aws-scenarios');
     cdk.Tags.of(this).add('Scenario', 'localgov-ims');
