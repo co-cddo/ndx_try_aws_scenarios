@@ -189,15 +189,14 @@ export class IsbHubStack extends cdk.Stack {
         managedExecution: { Active: true },
         templateUrl: `https://${BLUEPRINTS_BUCKET_NAME}.s3.${BLUEPRINTS_BUCKET_REGION}.amazonaws.com/scenarios/${scenario.name}/template.yaml`,
         description: `${scenario.description} [${contentHash}]`,
+        // Forward parameters to StackSet if defined
+        ...(scenario.parameterKeys?.length ? {
+          parameters: scenario.parameterKeys.map(key => ({
+            parameterKey: key,
+            parameterValue: scenarioParamValues[key] ?? '',
+          })),
+        } : {}),
       };
-
-      // Forward parameters to StackSet if defined
-      if (scenario.parameterKeys?.length) {
-        stackSetProps.parameters = scenario.parameterKeys.map(key => ({
-          parameterKey: key,
-          parameterValue: scenarioParamValues[key] ?? '',
-        }));
-      }
 
       const stackSet = new cfn.CfnStackSet(this, `${pascalName}StackSet`, stackSetProps);
 
