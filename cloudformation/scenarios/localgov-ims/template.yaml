@@ -1730,6 +1730,151 @@
       "Metadata": {
         "aws:cdk:path": "LocalGovImsStack/CDN/GovUkPayDistribution/Resource"
       }
+    },
+    "ReadPasswordFnServiceRole4F6DCF71": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "RoleName": "InnovationSandbox-ndx-ReadPasswordFnServiceRoleResource-be3222c8",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::GetAtt": [
+                "AppRegistryApplication",
+                "Arn"
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/ReadPasswordFn/ServiceRole/Resource"
+      }
+    },
+    "ReadPasswordFnServiceRoleDefaultPolicy08DC0ECD": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "AdminPasswordSecret47C701F9"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "ReadPasswordFnServiceRoleDefaultPolicy08DC0ECD",
+        "Roles": [
+          {
+            "Ref": "ReadPasswordFnServiceRole4F6DCF71"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/ReadPasswordFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "ReadPasswordFnE86F0710": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": "import json, boto3, urllib.request\ndef handler(event, context):\n  resp = {\"Status\":\"SUCCESS\",\"PhysicalResourceId\":\"pw\",\"StackId\":event[\"StackId\"],\"RequestId\":event[\"RequestId\"],\"LogicalResourceId\":event[\"LogicalResourceId\"],\"Data\":{}}\n  try:\n    if event[\"RequestType\"] != \"Delete\":\n      s = boto3.client(\"secretsmanager\").get_secret_value(SecretId=event[\"ResourceProperties\"][\"SecretId\"])\n      resp[\"Data\"][\"Password\"] = json.loads(s[\"SecretString\"])[\"ADMIN_PASSWORD\"]\n  except Exception as e:\n    resp[\"Status\"] = \"FAILED\"\n    resp[\"Reason\"] = str(e)\n  urllib.request.urlopen(urllib.request.Request(event[\"ResponseURL\"], json.dumps(resp).encode(), {\"Content-Type\":\"application/json\"}, method=\"PUT\"))"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "ReadPasswordFnServiceRole4F6DCF71",
+            "Arn"
+          ]
+        },
+        "Runtime": "python3.12",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::GetAtt": [
+                "AppRegistryApplication",
+                "Arn"
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "Timeout": 30
+      },
+      "DependsOn": [
+        "ReadPasswordFnServiceRoleDefaultPolicy08DC0ECD",
+        "ReadPasswordFnServiceRole4F6DCF71"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/ReadPasswordFn/Resource"
+      }
+    },
+    "AdminPasswordValue": {
+      "Type": "AWS::CloudFormation::CustomResource",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "ReadPasswordFnE86F0710",
+            "Arn"
+          ]
+        },
+        "SecretId": {
+          "Ref": "AdminPasswordSecret47C701F9"
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/AdminPasswordValue/Default"
+      }
     }
   },
   "Parameters": {
@@ -1786,7 +1931,12 @@
     },
     "AdminPassword": {
       "Description": "IMS admin password",
-      "Value": "{{resolve:secretsmanager:ndx-ims-admin-password:SecretString:ADMIN_PASSWORD::}}"
+      "Value": {
+        "Fn::GetAtt": [
+          "AdminPasswordValue",
+          "Password"
+        ]
+      }
     },
     "CloudWatchLogsUrl": {
       "Description": "CloudWatch Logs for IMS",

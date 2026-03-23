@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import * as cdk from 'aws-cdk-lib';
 import * as appregistry from 'aws-cdk-lib/aws-servicecatalogappregistry';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct, IConstruct } from 'constructs';
 import { CloudFrontConstruct } from './constructs/cloudfront';
@@ -141,9 +142,37 @@ export class LocalGovImsStack extends cdk.Stack {
       value: 'admin',
     });
 
+    // Lambda reads the password from Secrets Manager so it appears as plaintext
+    // in Outputs (dynamic references like {{resolve:secretsmanager:...}} are not
+    // supported in CloudFormation stack outputs)
+    const readPasswordFn = new lambda.Function(this, 'ReadPasswordFn', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      handler: 'index.handler',
+      code: lambda.Code.fromInline([
+        'import json, boto3, urllib.request',
+        'def handler(event, context):',
+        '  resp = {"Status":"SUCCESS","PhysicalResourceId":"pw","StackId":event["StackId"],"RequestId":event["RequestId"],"LogicalResourceId":event["LogicalResourceId"],"Data":{}}',
+        '  try:',
+        '    if event["RequestType"] != "Delete":',
+        '      s = boto3.client("secretsmanager").get_secret_value(SecretId=event["ResourceProperties"]["SecretId"])',
+        '      resp["Data"]["Password"] = json.loads(s["SecretString"])["ADMIN_PASSWORD"]',
+        '  except Exception as e:',
+        '    resp["Status"] = "FAILED"',
+        '    resp["Reason"] = str(e)',
+        '  urllib.request.urlopen(urllib.request.Request(event["ResponseURL"], json.dumps(resp).encode(), {"Content-Type":"application/json"}, method="PUT"))',
+      ].join('\n')),
+      timeout: cdk.Duration.seconds(30),
+    });
+    adminPasswordSecret.grantRead(readPasswordFn);
+
+    const passwordResource = new cdk.CustomResource(this, 'AdminPasswordValue', {
+      serviceToken: readPasswordFn.functionArn,
+      properties: { SecretId: adminPasswordSecret.secretArn },
+    });
+
     new cdk.CfnOutput(this, 'AdminPassword', {
       description: 'IMS admin password',
-      value: '{{resolve:secretsmanager:ndx-ims-admin-password:SecretString:ADMIN_PASSWORD::}}',
+      value: passwordResource.getAttString('Password'),
     });
 
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
