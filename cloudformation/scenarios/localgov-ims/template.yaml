@@ -90,6 +90,7 @@
           "PasswordLength": 16,
           "SecretStringTemplate": "{}"
         },
+        "Name": "ndx-ims-admin-password",
         "Tags": [
           {
             "Key": "awsApplication",
@@ -1784,17 +1785,8 @@
       "Value": "admin"
     },
     "AdminPassword": {
-      "Description": "IMS admin password (click link, then Retrieve secret value)",
-      "Value": {
-        "Fn::Sub": [
-          "https://${AWS::Region}.console.aws.amazon.com/secretsmanager/secret?name=${SecretArn}&region=${AWS::Region}",
-          {
-            "SecretArn": {
-              "Ref": "AdminPasswordSecret47C701F9"
-            }
-          }
-        ]
-      }
+      "Description": "IMS admin password",
+      "Value": "{{resolve:secretsmanager:ndx-ims-admin-password:SecretString:ADMIN_PASSWORD::}}"
     },
     "CloudWatchLogsUrl": {
       "Description": "CloudWatch Logs for IMS",

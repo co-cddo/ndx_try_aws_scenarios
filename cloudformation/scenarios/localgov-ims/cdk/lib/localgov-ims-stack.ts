@@ -80,6 +80,7 @@ export class LocalGovImsStack extends cdk.Stack {
     });
 
     const adminPasswordSecret = new secretsmanager.Secret(this, 'AdminPasswordSecret', {
+      secretName: 'ndx-ims-admin-password',
       description: 'IMS admin password',
       generateSecretString: {
         secretStringTemplate: '{}',
@@ -141,10 +142,8 @@ export class LocalGovImsStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'AdminPassword', {
-      description: 'IMS admin password (click link, then Retrieve secret value)',
-      value: cdk.Fn.sub('https://${AWS::Region}.console.aws.amazon.com/secretsmanager/secret?name=${SecretArn}&region=${AWS::Region}', {
-        SecretArn: adminPasswordSecret.secretArn,
-      }),
+      description: 'IMS admin password',
+      value: '{{resolve:secretsmanager:ndx-ims-admin-password:SecretString:ADMIN_PASSWORD::}}',
     });
 
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
