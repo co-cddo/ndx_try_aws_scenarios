@@ -58,9 +58,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -95,9 +113,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -128,9 +164,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -177,9 +231,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -211,9 +283,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -295,9 +385,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -329,9 +437,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -395,9 +521,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -465,9 +609,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -576,9 +738,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -689,9 +869,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -752,9 +950,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -796,9 +1012,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -866,9 +1100,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -905,9 +1157,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -973,9 +1243,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -1105,9 +1393,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -1264,9 +1570,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -1328,9 +1652,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -1408,9 +1750,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -1488,9 +1848,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -1577,9 +1955,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -1644,9 +2040,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -1711,9 +2125,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -1765,9 +2197,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },
@@ -1832,9 +2282,27 @@
           {
             "Key": "awsApplication",
             "Value": {
-              "Fn::GetAtt": [
-                "AppRegistryApplication",
-                "Arn"
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
               ]
             }
           },

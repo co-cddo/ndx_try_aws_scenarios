@@ -53,7 +53,12 @@ export class LocalGovImsStack extends cdk.Stack {
       resourceType: 'CFN_STACK',
     });
 
-    cdk.Tags.of(this).add('awsApplication', appRegistryApp.attrArn, {
+    // myApplications expects the resource-groups ARN, not the servicecatalog ARN
+    const appTag = cdk.Fn.sub(
+      'arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}',
+      { AppName: appRegistryApp.name, AppId: appRegistryApp.attrId },
+    );
+    cdk.Tags.of(this).add('awsApplication', appTag, {
       excludeResourceTypes: ['AWS::ServiceCatalogAppRegistry::Application', 'AWS::ServiceCatalogAppRegistry::ResourceAssociation'],
     });
 
