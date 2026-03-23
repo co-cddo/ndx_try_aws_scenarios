@@ -58,6 +58,10 @@ export class BopsPlanningStack extends cdk.Stack {
       resourceType: 'CFN_STACK',
     });
 
+    cdk.Tags.of(this).add('awsApplication', appRegistryApp.attrArn, {
+      excludeResourceTypes: ['AWS::ServiceCatalogAppRegistry::Application', 'AWS::ServiceCatalogAppRegistry::ResourceAssociation'],
+    });
+
     // CloudFormation parameter for OS Maps API key (NoEcho)
     const osMapApiKeyParam = new cdk.CfnParameter(this, 'OSVectorTilesApiKey', {
       type: 'String',

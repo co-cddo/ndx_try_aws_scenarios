@@ -49,6 +49,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: smart-car-park
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # ============================================================
   # IAM Roles
@@ -92,6 +94,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: smart-car-park
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   ProcessorLambdaRole:
     Type: AWS::IAM::Role
@@ -137,6 +141,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: smart-car-park
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   DashboardLambdaRole:
     Type: AWS::IAM::Role
@@ -175,6 +181,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: smart-car-park
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # ============================================================
   # Log Groups (explicit to prevent orphans on delete)
@@ -280,6 +288,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: smart-car-park
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   SimulatorSchedule:
     Type: AWS::Events::Rule
@@ -390,6 +400,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: smart-car-park
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # IoT Core: Thing + Policy (declarative — simulator uses IAM, not certificates)
   IoTThing:
@@ -626,6 +638,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: smart-car-park
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   DashboardFunctionUrl:
     Type: AWS::Lambda::Url

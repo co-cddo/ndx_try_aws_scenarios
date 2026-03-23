@@ -55,6 +55,8 @@ Resources:
           Value: quicksight-dashboard
         - Key: AutoCleanup
           Value: 'true'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # ============================================================================
   # S3 BUCKET POLICY - ALLOW QUICKSIGHT ACCESS
@@ -120,6 +122,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # ============================================================================
   # DATA GENERATOR LAMBDA FUNCTION
@@ -389,6 +393,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # ============================================================================
   # CLOUDWATCH LOG GROUP
@@ -403,6 +409,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # ============================================================================
   # CUSTOM RESOURCE - TRIGGER DATA GENERATION
@@ -478,6 +486,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   QuickSightSetupFunction:
     Type: AWS::Lambda::Function
@@ -715,6 +725,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   QuickSightSetupLogGroup:
     Type: AWS::Logs::LogGroup
@@ -726,6 +738,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   QuickSightSetupTrigger:
     Type: AWS::CloudFormation::CustomResource
@@ -829,6 +843,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   QuickSightGroupSyncLogGroup:
     Type: AWS::Logs::LogGroup
@@ -899,6 +915,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # ============================================================================
   # QUICKSIGHT DATASOURCE - S3 MANIFEST (Story 25.2)
@@ -934,6 +952,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # ============================================================================
   # QUICKSIGHT DATASET - SPICE IMPORT (Story 25.3)
@@ -1017,6 +1037,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # ============================================================================
   # QUICKSIGHT DASHBOARD (Story 25.4)
@@ -1251,6 +1273,8 @@ Resources:
           Value: ndx-try
         - Key: Scenario
           Value: quicksight-dashboard
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
 
   # AppRegistry Application - visible in myApplications on the AWS Console
   AppRegistryApplication:
