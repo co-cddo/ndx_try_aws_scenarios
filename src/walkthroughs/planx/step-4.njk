@@ -1,0 +1,97 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Preview the Applicant Experience — PlanX Digital Planning Walkthrough"
+description: Use the preview to see what citizens experience when submitting a planning application
+currentStep: 4
+totalSteps: 5
+timeEstimate: "3 minutes"
+scenarioId: planx
+---
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Preview the Applicant Experience" %}
+{% set stepDescription = "Use the preview feature to experience the planning application journey exactly as a citizen would see it." %}
+{% set timeEstimate = "3 minutes" %}
+{% set screenshotData = screenshots["planx"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 4 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Preview shows the applicant-facing flow with GOV.UK-style design",
+  "Questions appear one at a time with clear guidance text",
+  "Answering questions routes you through the correct path"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Launch the preview</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the preview</strong>
+    <p class="govuk-body">
+      From the flow editor, click the <strong>Preview</strong> button (usually in the top toolbar). This opens a new tab showing the flow as an applicant would see it.
+    </p>
+  </li>
+
+  <li>
+    <strong>Start the application journey</strong>
+    <p class="govuk-body">
+      The preview shows the flow in the citizen-facing format. You'll see:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Council branding</strong> — the NDX Demo Council name and logo</li>
+      <li><strong>Clear question format</strong> — one question at a time, following GOV.UK design patterns</li>
+      <li><strong>Help text</strong> — guidance for each question to help applicants answer correctly</li>
+      <li><strong>Progress indication</strong> — showing where you are in the application</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Answer the questions</strong>
+    <p class="govuk-body">
+      Work through a few questions to see how the flow guides applicants. Try different answers to see how the routing works — for example, selecting different property types may lead to different follow-up questions.
+    </p>
+  </li>
+
+  <li>
+    <strong>Notice the data collection</strong>
+    <p class="govuk-body">
+      As you answer questions, PlanX collects structured planning data. Each answer maps to a planning data field (like <code>property.type</code> or <code>proposal.description</code>). This structured data is what makes digital planning submissions machine-readable.
+    </p>
+  </li>
+
+  <li>
+    <strong>Compare editor and preview</strong>
+    <p class="govuk-body">
+      Switch between the editor tab and the preview tab. Notice how the nodes in the editor correspond to the questions in the preview. Any changes you made in Step 3 will be reflected in the preview.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">How the editor and preview connect</h3>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th class="govuk-table__header">View</th>
+      <th class="govuk-table__header">Audience</th>
+      <th class="govuk-table__header">Purpose</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><strong>Flow editor</strong> (Step 3)</td>
+      <td class="govuk-table__cell">Service designers</td>
+      <td class="govuk-table__cell">Build and maintain planning application flows</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><strong>Preview</strong> (this step)</td>
+      <td class="govuk-table__cell">Citizens and applicants</td>
+      <td class="govuk-table__cell">Submit planning applications through guided questions</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text">
+  <strong>This is the citizen-facing side of <a href="https://www.planx.uk/" class="govuk-link">PlanX</a>:</strong> Applicants answer plain English questions instead of filling in complex PDF forms. The system works out which planning permission is needed, what documents to collect, and whether the application can be submitted digitally. Councils using PlanX report that applicants find the process clearer and submit more complete applications first time.
+</div>

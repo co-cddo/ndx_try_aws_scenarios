@@ -1,0 +1,152 @@
+---
+layout: layouts/walkthrough.njk
+title: PlanX Digital Planning Walkthrough
+description: Step-by-step guide to exploring the PlanX digital planning platform used by UK councils
+currentStep: 0
+totalSteps: 5
+scenarioId: planx
+---
+
+<h1 class="govuk-heading-xl">Try PlanX Digital Planning</h1>
+
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    15 to 20 minutes to experience PlanX
+  </h2>
+  <div class="govuk-panel__body">
+    Log in as a service designer, browse planning flows, edit a flow in the drag-and-drop editor, and explore the data layer.
+  </div>
+</div>
+
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you through <a href="https://www.planx.uk/" class="govuk-link">PlanX</a> as a service designer would use it.
+    You'll log in, browse planning flows, make an edit, and preview the applicant experience.
+    Perfect for planning managers, digital transformation leads, and anyone evaluating PlanX.
+  </p>
+</div>
+
+<p class="govuk-body">
+  <a href="https://www.planx.uk/" class="govuk-link">PlanX</a> is the open-source digital planning platform developed by <a href="https://opendigitalplanning.org/" class="govuk-link">Open Systems Lab</a> as part of the Open Digital Planning programme. It's used by 18+ UK councils including Lambeth, Southwark, Camden, and Buckinghamshire to create digital planning application flows that guide citizens through the submission process.
+</p>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this 15 to 20 minute walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Log in to PlanX</strong> — Find your credentials and access the PlanX editor (2 minutes)
+  </li>
+  <li>
+    <strong>Browse planning flows</strong> — See the NDX Demo Council team and explore householder and LDC flows (3 minutes)
+  </li>
+  <li>
+    <strong>Edit a flow</strong> — Open a flow, explore the drag-and-drop node editor, and make a change (5 minutes)
+  </li>
+  <li>
+    <strong>Preview the applicant experience</strong> — Use the preview to see what citizens see when they submit a planning application (3 minutes)
+  </li>
+  <li>
+    <strong>Explore the data layer</strong> — Open the Hasura console, browse tables, and see the GraphQL API (2 minutes)
+  </li>
+</ol>
+
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already requested the PlanX Digital Planning scenario via NDX:Try.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/planx/" class="govuk-link">Deploy the PlanX scenario</a> if you haven't already.
+    Deployment takes 10 to 15 minutes.
+  </p>
+
+  <div class="govuk-!-margin-top-4">
+    <h3 class="govuk-heading-s">Sample data check</h3>
+    {% include "components/sample-data-status.njk" %}
+  </div>
+
+  <div class="govuk-!-margin-top-4">
+    {% include "components/sample-data-panel.njk" %}
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For service managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How <a href="https://www.planx.uk/" class="govuk-link">PlanX</a> structures planning flows with a visual editor</li>
+      <li>How citizens experience the planning application journey</li>
+      <li>The flow editor's drag-and-drop interface for non-technical users</li>
+      <li>How flows map to planning policy and legislation</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical staff</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>ECS Fargate deployment with Aurora PostgreSQL</li>
+      <li>React/Vite editor with Node.js API and Hasura GraphQL</li>
+      <li>ShareDB real-time collaboration layer</li>
+      <li>CloudFront HTTPS with S3 static asset hosting</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What's included</h2>
+
+<p class="govuk-body">
+  Your deployment comes pre-loaded with:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>NDX Demo Council team</strong> with sample planning flows ready to explore</li>
+  <li><strong>Householder planning application flow</strong> — the most common planning application type</li>
+  <li><strong>Lawful Development Certificate flow</strong> — for proposed or existing development</li>
+  <li><strong>Drag-and-drop flow editor</strong> — create and modify flows without writing code</li>
+  <li><strong>Hasura GraphQL console</strong> — explore the data model and run queries</li>
+</ul>
+
+<p class="govuk-body">
+  <a href="https://www.planx.uk/" class="govuk-link">Learn more about PlanX on the Open Digital Planning website</a>
+</p>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/planx/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 15 to 20 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+</style>
