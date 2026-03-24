@@ -70,6 +70,30 @@ walkthroughs:
         description: "See the public-facing portal with maps and consultations"
         time: "4 minutes"
 
+  planx:
+    totalSteps: 5
+    url: "/walkthroughs/planx/"
+    title: "PlanX Digital Planning Walkthrough"
+    duration: "15 to 20 minutes"
+    hasWalkthrough: true
+    category: "planning"
+    steps:
+      - title: "Logged in to PlanX"
+        description: "Find your credentials and access the PlanX editor"
+        time: "2 minutes"
+      - title: "Planning flows browsed"
+        description: "Explore the NDX Demo Council team and its flows"
+        time: "3 minutes"
+      - title: "Flow edited"
+        description: "Open and edit a flow in the drag-and-drop node editor"
+        time: "5 minutes"
+      - title: "Applicant experience previewed"
+        description: "Use the preview to see the citizen-facing application journey"
+        time: "3 minutes"
+      - title: "Data layer explored"
+        description: "Browse Hasura console tables and the GraphQL API"
+        time: "2 minutes"
+
   council-chatbot:
     totalSteps: 5
     url: "/walkthroughs/council-chatbot/"

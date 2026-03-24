@@ -1,0 +1,193 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - PlanX Digital Planning"
+description: You've completed the PlanX Digital Planning walkthrough
+currentStep: 6
+totalSteps: 5
+scenarioId: planx
+---
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">
+    Walkthrough complete
+  </h1>
+  <div class="govuk-panel__body">
+    You've explored the PlanX digital planning platform used by UK councils
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  You've just experienced <a href="https://www.planx.uk/" class="govuk-link">PlanX</a> — the same platform used by 18+ councils including Lambeth, Southwark, Camden, and Buckinghamshire to create digital planning application services. In 15 to 20 minutes, you've seen what would take weeks of procurement and vendor demos.
+</p>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Visual flow editor
+    </h3>
+    <p class="govuk-body">
+      PlanX lets service designers build planning application flows using a drag-and-drop editor. No coding required. Each flow guides applicants through structured questions that map to planning data standards.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Service designers can create and update flows without developer support
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Citizen-centred design
+    </h3>
+    <p class="govuk-body">
+      Applicants answer plain English questions instead of filling in complex PDF forms. The system determines the right planning permission type, collects the right documents, and routes the application correctly.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: More complete applications submitted first time, fewer invalid submissions
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Structured data
+    </h3>
+    <p class="govuk-body">
+      Every answer maps to a planning data field, producing machine-readable application data. This enables automated validation, integration with back-office systems like BOPS, and data sharing across councils.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Automated processing, interoperability, and consistent data quality
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      Open source platform
+    </h3>
+    <p class="govuk-body">
+      PlanX is developed by <a href="https://opendigitalplanning.org/" class="govuk-link">Open Systems Lab</a> and freely available. Multiple councils share development costs and benefit from each other's improvements. The GraphQL API ensures data is accessible and integrable.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Zero licence costs, community-driven development, shared innovation
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">Production readiness</h2>
+
+<p class="govuk-body">
+  This demo runs the same codebase used in production by multiple UK councils. For a full deployment, you'd additionally want:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Feature</th>
+      <th scope="col" class="govuk-table__header">Demo status</th>
+      <th scope="col" class="govuk-table__header">Production requirement</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Custom domain</th>
+      <td class="govuk-table__cell">CloudFront URL</td>
+      <td class="govuk-table__cell">planx.yourcouncil.gov.uk</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">GOV.UK Pay</th>
+      <td class="govuk-table__cell">Disabled (demo)</td>
+      <td class="govuk-table__cell">Application fee collection</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">GOV.UK Notify</th>
+      <td class="govuk-table__cell">Disabled (demo)</td>
+      <td class="govuk-table__cell">Email confirmations and notifications</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">OS Maps</th>
+      <td class="govuk-table__cell">Basic tileset</td>
+      <td class="govuk-table__cell">Full Ordnance Survey integration for site selection</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Planning data</th>
+      <td class="govuk-table__cell">Sample flows</td>
+      <td class="govuk-table__cell">Council-specific flows, local policies, constraint data</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Back-office integration</th>
+      <td class="govuk-table__cell">Standalone</td>
+      <td class="govuk-table__cell">BOPS, Uniform, Idox, or other case management system</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Backup</th>
+      <td class="govuk-table__cell">Aurora automated (24hr sandbox)</td>
+      <td class="govuk-table__cell">Point-in-time recovery, cross-region replication</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>Good news:</strong> The core platform you've just tested is production-ready. The checklist items are about integrating PlanX into your council's existing infrastructure, local planning policies, and data — not rebuilding the system.
+  </p>
+</div>
+
+{% set scenarioId = "planx" %}
+{% set scenarioName = "PlanX Digital Planning" %}
+{% set totalSteps = 5 %}
+{% include "components/completion-next-steps.njk" %}
+
+{% include "components/cleanup-instructions.njk" %}
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Learn more about PlanX</h2>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="https://www.planx.uk/" class="govuk-link">PlanX</a> — the digital planning platform by Open Systems Lab</li>
+    <li><a href="https://opendigitalplanning.org/" class="govuk-link">Open Digital Planning</a> — the programme behind PlanX, BOPS, and other digital planning tools</li>
+    <li><a href="https://github.com/theopensystemslab/planx-new" class="govuk-link">PlanX on GitHub</a> — source code and documentation</li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Questions or feedback?</h2>
+
+  <p class="govuk-body">
+    We'd love to hear about your experience with this walkthrough:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .ndx-takeaway-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-takeaway-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,135 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 5: Explore the Data Layer — PlanX Digital Planning Walkthrough"
+description: Open the Hasura console to browse tables and explore the GraphQL API
+currentStep: 5
+totalSteps: 5
+timeEstimate: "2 minutes"
+scenarioId: planx
+---
+
+{% set stepNumber = 5 %}
+{% set stepTitle = "Explore the Data Layer" %}
+{% set stepDescription = "Open the Hasura GraphQL console to see how PlanX stores flow data, and run a sample query." %}
+{% set timeEstimate = "2 minutes" %}
+{% set screenshotData = screenshots["planx"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 5 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Hasura console opens and shows the PlanX database tables",
+  "You can browse the flows, teams, and sessions tables",
+  "GraphiQL interface is available to run GraphQL queries"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Access the Hasura console</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Find the Hasura credentials</strong>
+    <p class="govuk-body">
+      Go back to the <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console<span class="govuk-visually-hidden"> (opens in new tab)</span></a> and find these outputs:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><code>HasuraConsoleUrl</code> — the Hasura console URL</li>
+      <li><code>HasuraAdminSecretOutput</code> — the admin secret for authentication</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Open the Hasura console</strong>
+    <p class="govuk-body">
+      Open the <code>HasuraConsoleUrl</code> in a new tab. When prompted for the admin secret, enter the value from <code>HasuraAdminSecretOutput</code>.
+    </p>
+  </li>
+
+  <li>
+    <strong>Browse the database tables</strong>
+    <p class="govuk-body">
+      Click the <strong>Data</strong> tab in the Hasura console to see the PlanX database schema. Key tables include:
+    </p>
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th class="govuk-table__header">Table</th>
+          <th class="govuk-table__header">What it stores</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><code>flows</code></td>
+          <td class="govuk-table__cell">Planning application flow definitions (the node graphs you edited)</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><code>teams</code></td>
+          <td class="govuk-table__cell">Council teams and their settings</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><code>users</code></td>
+          <td class="govuk-table__cell">Editor users and their team memberships</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><code>sessions</code></td>
+          <td class="govuk-table__cell">Applicant sessions (data collected during a flow)</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><code>published_flows</code></td>
+          <td class="govuk-table__cell">Published versions of flows available to applicants</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+
+  <li>
+    <strong>Try the GraphQL API</strong>
+    <p class="govuk-body">
+      Click the <strong>API</strong> tab to open GraphiQL. Try a simple query to list the flows:
+    </p>
+    <pre class="ndx-code-block"><code>{
+  flows {
+    id
+    slug
+    team {
+      name
+    }
+    updated_at
+  }
+}</code></pre>
+    <p class="govuk-body">
+      Click the play button to run the query. You'll see the flows you browsed in Step 2, now as structured GraphQL data.
+    </p>
+  </li>
+
+  <li>
+    <strong>Understand the architecture</strong>
+    <p class="govuk-body">
+      Hasura sits between the PlanX application and the Aurora PostgreSQL database. It provides:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>GraphQL API</strong> — used by the React editor and the applicant-facing frontend</li>
+      <li><strong>Real-time subscriptions</strong> — for collaborative editing via ShareDB</li>
+      <li><strong>Role-based access control</strong> — different permissions for editors, admins, and public access</li>
+    </ul>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>Why this matters:</strong> The GraphQL API means PlanX data is accessible and interoperable. Councils can integrate PlanX with their existing back-office systems, reporting tools, and planning portals. The structured data model follows emerging planning data standards, making it easier to share data across local authorities.
+</div>
+
+<style>
+  .ndx-code-block {
+    background-color: #f3f2f1;
+    border: 2px solid #0b0c0c;
+    border-radius: 4px;
+    padding: 15px;
+    font-family: monospace;
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 15px 0;
+    overflow-x: auto;
+  }
+</style>
