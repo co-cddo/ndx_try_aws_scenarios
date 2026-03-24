@@ -1467,3 +1467,85 @@ scenarios:
         payback_months: 6
         disclaimer: "Figures are illustrative and based on published ODP programme outcomes. Actual savings depend on application volumes and current process efficiency."
       committee_language: "BOPS demonstrates how digital planning tools can reduce application processing time by 40%, saving an estimated £180,000 annually through automated validation, policy matching, and report generation."
+
+  - id: "minute"
+    name: "Minute AI"
+    headline: "AI-powered meeting transcription and minute generation"
+    bestFor: "Teams exploring AI tools for meeting productivity and record-keeping"
+    description: "Deploy Minute, an open-source AI tool built by i.AI (the UK Government's AI team), that transforms meeting recordings into structured, professional meeting minutes. Upload audio files, get automatic transcription via AWS Transcribe, then generate formatted minutes using Amazon Nova Pro via Amazon Bedrock. Includes multiple meeting templates (Cabinet, Planning Committee, General, and more), speaker identification, and a rich text editor for refining AI-generated output."
+    difficulty: "intermediate"
+    timeEstimate: "35 minutes"
+    primaryPersona: "service-manager"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "council-chatbot"
+      - "text-to-speech"
+    securitySummary: "NDX:Try session isolated - safe to experiment with full data protection"
+    skillsLearned:
+      - "Amazon Bedrock"
+      - "AWS Transcribe"
+      - "Amazon ECS Fargate"
+      - "Amazon Aurora"
+      - "Amazon SQS"
+    isMostPopular: false
+    featured: true
+    awsServices:
+      - "Amazon Bedrock"
+      - "AWS Transcribe"
+      - "Amazon ECS Fargate"
+      - "Amazon Aurora PostgreSQL"
+      - "Amazon SQS"
+      - "Amazon S3"
+      - "Amazon CloudFront"
+      - "AWS Cloud Map"
+    tags:
+      - "AI"
+      - "Meeting Minutes"
+      - "Transcription"
+      - "Productivity"
+    businessOutcomes:
+      - "Experience AI-powered meeting transcription and minute generation"
+      - "Evaluate how AI can reduce administrative overhead for meeting records"
+      - "Explore multiple minute templates for different meeting types"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "A meeting recording in MP3, WAV, or WebM format"
+    url: "/scenarios/minute/"
+    order: 10
+    status: "active"
+    deployment:
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-minute"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+      deploymentTime: "25 to 35 minutes"
+      deploymentPhases:
+        - "Creating VPC and networking (~30 seconds)"
+        - "Creating Aurora PostgreSQL database (~600 seconds)"
+        - "Creating SQS queues and S3 bucket (~30 seconds)"
+        - "Creating ECS Fargate services (~120 seconds)"
+        - "Creating CloudFront distribution (~300 seconds)"
+        - "Running database migrations (~30 seconds)"
+      outputs:
+        - name: "MinuteUrl"
+          description: "URL to access Minute AI"
+        - name: "BasicAuthUsername"
+          description: "Username for login"
+        - name: "BasicAuthPassword"
+          description: "Password for login (generated at deploy time)"
+        - name: "CloudWatchLogsUrl"
+          description: "CloudWatch Logs for monitoring"
+        - name: "DataBucketName"
+          description: "S3 bucket for audio data"
+    screenshots:
+      steps: []
+    success_metrics:
+      service_area: "Meeting Administration"
+      primary_metric: "Meeting minute production time"
+      baseline:
+        description: "Manual meeting minute production typically takes 2-4 hours per meeting"
+        value: 180
+        unit: "minutes per meeting"

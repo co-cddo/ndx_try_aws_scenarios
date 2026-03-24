@@ -1,0 +1,219 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 6: Edit and export - Minute AI Walkthrough"
+description: Use the AI editor, download, and explore templates
+currentStep: 6
+totalSteps: 6
+timeEstimate: "5 minutes"
+scenarioId: minute
+---
+
+{#
+  Step 6: Edit and export
+  - Click "AI Edit" to give instructions for changes
+  - Click "Edit Manually" for direct editing
+  - Click "Download" for a Word document
+  - Click "Copy" to copy to clipboard
+  - Explore the Templates page to create custom templates
+  - Rate the summary quality
+#}
+
+{% set stepNumber = 6 %}
+{% set stepTitle = "Edit and export" %}
+{% set stepDescription = "Refine the AI-generated minutes using the AI editor or manual editing, then export them as a Word document or copy to clipboard." %}
+{% set timeEstimate = "5 minutes" %}
+{% set expectedOutcomes = [
+  "You have used AI Edit to refine the minutes",
+  "You have explored the manual editing features",
+  "You know how to download minutes as a Word document",
+  "You have explored the Templates page"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">AI-powered editing</h3>
+
+<p class="govuk-body">
+  Minute AI includes an AI editing feature that lets you refine the generated minutes
+  using natural language instructions.
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Click "AI Edit"</strong>
+    <p class="govuk-body">
+      This opens a text box where you can give instructions for changes.
+    </p>
+  </li>
+
+  <li>
+    <strong>Give an instruction</strong>
+    <p class="govuk-body">
+      Type a natural language instruction, for example:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>"Make the executive summary shorter"</li>
+      <li>"Add more detail to the action items"</li>
+      <li>"Remove the section about budget discussion"</li>
+      <li>"Change the tone to be more formal"</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Review the changes</strong>
+    <p class="govuk-body">
+      Amazon Nova Pro will regenerate the affected sections based on your instruction.
+      Review the changes and repeat if needed.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">Manual editing</h3>
+
+<p class="govuk-body">
+  For direct control over the text, you can edit the minutes manually:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Click "Edit Manually"</strong>
+    <p class="govuk-body">
+      This enables the rich text editor, allowing you to directly modify the minutes.
+    </p>
+  </li>
+
+  <li>
+    <strong>Make your changes</strong>
+    <p class="govuk-body">
+      Use the editor to correct names, add context, fix any inaccuracies, or restructure sections.
+      The editor supports formatting such as headings, lists, and bold/italic text.
+    </p>
+  </li>
+
+  <li>
+    <strong>Save your edits</strong>
+    <p class="govuk-body">
+      Click "Save" to store your changes. The edited version becomes the current version of the minutes.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">Exporting your minutes</h3>
+
+<p class="govuk-body">
+  Once you are happy with the minutes, you have several export options:
+</p>
+
+<div class="ndx-export-grid">
+  <div class="ndx-export-card">
+    <h4 class="govuk-heading-s">Download</h4>
+    <p class="govuk-body-s govuk-!-margin-bottom-0">
+      Click <strong>"Download"</strong> to get a Word document (.docx) of the minutes, ready to share or archive.
+    </p>
+  </div>
+  <div class="ndx-export-card">
+    <h4 class="govuk-heading-s">Copy</h4>
+    <p class="govuk-body-s govuk-!-margin-bottom-0">
+      Click <strong>"Copy"</strong> to copy the minutes to your clipboard, ready to paste into an email, document, or collaboration tool.
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Exploring templates</h3>
+
+<p class="govuk-body">
+  Minute AI comes with several built-in meeting templates, and you can create your own:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Navigate to the Templates page</strong>
+    <p class="govuk-body">
+      Click <strong>"Templates"</strong> in the navigation to see all available templates.
+    </p>
+  </li>
+
+  <li>
+    <strong>Review built-in templates</strong>
+    <p class="govuk-body">
+      Browse the existing templates to see how they are structured. Each template defines
+      the sections and format of the generated minutes.
+    </p>
+  </li>
+
+  <li>
+    <strong>Create a custom template (optional)</strong>
+    <p class="govuk-body">
+      If you have a specific minute format your organisation uses, you can create a
+      custom template that matches it. The AI will then generate minutes following
+      your template's structure.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">Rate the quality</h3>
+
+<p class="govuk-body">
+  Minute AI includes a quality rating feature. After reviewing the generated minutes:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>Use the rating controls to indicate how accurate and useful the minutes are</li>
+  <li>This feedback helps improve the system over time</li>
+  <li>Consider how the quality compares to manually-written minutes</li>
+</ul>
+
+<h3 class="govuk-heading-m">What you have achieved</h3>
+
+<div class="ndx-achievement-summary">
+  <p class="govuk-body">
+    In this walkthrough, you have:
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Deployed a fully functional AI meeting minute tool built by i.AI</li>
+    <li>Uploaded a meeting recording and had it transcribed by AWS Transcribe</li>
+    <li>Generated structured meeting minutes using Amazon Nova Pro via Amazon Bedrock</li>
+    <li>Used AI-powered editing to refine the output</li>
+    <li>Explored multiple meeting templates</li>
+    <li>Exported minutes as a Word document</li>
+  </ul>
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>The time savings are significant.</strong> What traditionally takes 2 to 4 hours
+    of manual work per meeting can be reduced to minutes of review and editing time.
+  </p>
+</div>
+
+<div class="govuk-inset-text govuk-!-margin-top-6">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Next steps:</strong> Try uploading different types of recordings to see how the tool
+    handles various meeting formats. Explore the AWS Console to understand the underlying architecture --
+    check CloudWatch Logs, the SQS queues, and the ECS Fargate services that power Minute AI.
+  </p>
+</div>
+
+<style>
+  .ndx-export-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+  }
+
+  .ndx-export-card {
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-export-card h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+
+  .ndx-achievement-summary {
+    margin: 30px 0;
+    padding: 25px;
+    background-color: #f0f9f5;
+    border-left: 4px solid #00703c;
+  }
+</style>

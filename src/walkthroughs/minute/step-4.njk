@@ -1,0 +1,172 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: View the transcription - Minute AI Walkthrough"
+description: See the AI-generated transcript with speaker identification
+currentStep: 4
+totalSteps: 6
+timeEstimate: "3 minutes"
+scenarioId: minute
+---
+
+{#
+  Step 4: View the transcription
+  - Wait 5-10 minutes for transcription to complete
+  - The page auto-refreshes when ready
+  - Click the "Transcript" tab to see full transcript with speaker labels
+  - AWS Transcribe identifies different speakers automatically
+#}
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "View the transcription" %}
+{% set stepDescription = "Once AWS Transcribe has finished processing your recording, review the transcript with automatic speaker identification." %}
+{% set timeEstimate = "3 minutes" %}
+{% set expectedOutcomes = [
+  "Transcription has completed successfully",
+  "You can see the full transcript with speaker labels",
+  "You understand how AWS Transcribe identifies different speakers"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Waiting for transcription</h3>
+
+<p class="govuk-body">
+  After uploading your recording, AWS Transcribe processes the audio in the background.
+  The time depends on the length of your recording:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Recording length</th>
+      <th scope="col" class="govuk-table__header">Approximate processing time</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">5 minutes</td>
+      <td class="govuk-table__cell">2 to 3 minutes</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">15 minutes</td>
+      <td class="govuk-table__cell">4 to 6 minutes</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">30 minutes</td>
+      <td class="govuk-table__cell">5 to 10 minutes</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell">60 minutes</td>
+      <td class="govuk-table__cell">10 to 15 minutes</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>You can leave and come back.</strong> The transcription runs in the background
+    on AWS. You do not need to keep the browser tab open. When you return, the transcript
+    will be ready if processing has completed.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Viewing the transcript</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Check the meeting status</strong>
+    <p class="govuk-body">
+      Navigate to your meeting. The page will show the current status. When the transcription
+      is complete, the status will update automatically.
+    </p>
+  </li>
+
+  <li>
+    <strong>Click the "Transcript" tab</strong>
+    <p class="govuk-body">
+      Once transcription is complete, click the <strong>"Transcript"</strong> tab to see
+      the full text of your meeting recording.
+    </p>
+  </li>
+
+  <li>
+    <strong>Review speaker labels</strong>
+    <p class="govuk-body">
+      AWS Transcribe automatically identifies different speakers in the recording.
+      Each speaker is labelled (e.g. "Speaker 1", "Speaker 2") with their dialogue
+      grouped together.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">How speaker identification works</h3>
+
+<p class="govuk-body">
+  <a href="https://aws.amazon.com/transcribe/" class="govuk-link" target="_blank" rel="noopener noreferrer">AWS Transcribe<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+  uses machine learning to distinguish between different voices in an audio recording.
+  This is known as "speaker diarisation". The service:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Detects voice patterns</strong> -- identifies unique vocal characteristics for each participant</li>
+  <li><strong>Labels speakers consistently</strong> -- the same person gets the same label throughout the transcript</li>
+  <li><strong>Handles overlapping speech</strong> -- manages cases where people talk over each other</li>
+  <li><strong>Works with multiple speakers</strong> -- handles meetings with many participants</li>
+</ul>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Note:</strong> Speaker labels are generic ("Speaker 1", "Speaker 2") because
+    Transcribe cannot know participants' names. You can edit the transcript to add real names
+    if needed, which will improve the quality of the generated minutes.
+  </p>
+</div>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Transcription taking a long time
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the transcription seems stuck:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Long recordings (over 60 minutes) can take 15 to 20 minutes to process</li>
+      <li>Check the CloudWatch Logs URL from CloudFormation Outputs for any error messages</li>
+      <li>Try uploading a shorter recording (5 to 10 minutes) to verify the system is working</li>
+      <li>Refresh the page to check for status updates</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Poor transcription quality
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      Transcription quality depends on audio quality. For the best results:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Use recordings with clear audio and minimal background noise</li>
+      <li>Recordings where speakers take turns produce better results than those with lots of overlapping speech</li>
+      <li>Higher quality audio formats (WAV) may produce slightly better results than compressed formats (MP3)</li>
+      <li>Transcribe works best with English audio, though it supports many languages</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+</style>
