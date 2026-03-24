@@ -1,0 +1,73 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Explore Councils — Digital Planning Register Walkthrough"
+description: Browse the list of configured councils and understand the multi-council model
+currentStep: 2
+totalSteps: 4
+timeEstimate: "3 minutes"
+scenarioId: digital-planning-register
+---
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Explore Councils" %}
+{% set stepDescription = "Browse the list of configured councils to see how the register serves multiple local authorities from a single application." %}
+{% set timeEstimate = "3 minutes" %}
+{% set screenshotData = screenshots["digital-planning-register"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 2 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Council selection page shows multiple configured councils",
+  "Each council has its own dedicated section",
+  "Per-council routing is visible in the URL structure"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Understanding the multi-council model</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Browse the council list</strong>
+    <p class="govuk-body">
+      The homepage shows the councils configured in this register instance. Each council has its own data source — a BOPS API endpoint that provides planning application data.
+    </p>
+    <p class="govuk-body">
+      The register is pre-configured with 9 councils:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Barnet</li>
+      <li>Buckinghamshire</li>
+      <li>Camden</li>
+      <li>Gateshead</li>
+      <li>Lambeth</li>
+      <li>Medway</li>
+      <li>Newcastle</li>
+      <li>Southwark</li>
+      <li>South Gloucestershire</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Select a council</strong>
+    <p class="govuk-body">
+      Click on any council to enter their planning register. Notice the URL changes to include the council name — each council gets its own namespace (e.g., <code>/camden/</code>).
+    </p>
+  </li>
+
+  <li>
+    <strong>Understand the architecture</strong>
+    <p class="govuk-body">
+      Each council's data comes from their own BOPS API. The register is a <strong>read-only aggregation layer</strong> — it doesn't store any data itself. This means:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>No database to manage or back up</li>
+      <li>Data is always fresh from the source system</li>
+      <li>New councils can be added by configuring a new API endpoint</li>
+      <li>The register scales independently of the back-office systems</li>
+    </ul>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>One register, many councils:</strong> This is the key design principle. Rather than each council building their own public-facing register, they share a common application that connects to their individual BOPS back-office systems. This reduces duplication and ensures a consistent experience for residents.
+</div>

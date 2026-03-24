@@ -1,0 +1,27 @@
+{
+  "name": "digital-planning-register-cdk",
+  "version": "1.0.0",
+  "description": "Digital Planning Register on AWS - CDK Infrastructure",
+  "main": "dist/lib/digital-planning-register-stack.js",
+  "types": "dist/lib/digital-planning-register-stack.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.3.3",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.3",
+    "aws-cdk": "^2.1108.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.241.0",
+    "constructs": "^10.5.1",
+    "source-map-support": "^0.5.21"
+  }
+}
