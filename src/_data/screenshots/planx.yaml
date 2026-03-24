@@ -1,0 +1,79 @@
+# Screenshot data for PlanX Digital Planning scenario
+# Used by screenshot.njk component to display screenshots in walkthrough steps
+# Images stored in src/assets/images/screenshots/planx/
+
+scenario: planx
+scenarioTitle: "PlanX Digital Planning"
+awsService: "Amazon ECS"
+totalSteps: 5
+
+steps:
+  - step: 1
+    title: Find credentials and log in
+    screenshots:
+      - id: cfn-stacks-list
+        filename: planx-step-1-cfn-stacks-list-desktop.png
+        alt: CloudFormation console showing the PlanX stack with CREATE_COMPLETE status
+        viewport: desktop
+      - id: cfn-stack-outputs
+        filename: planx-step-1-cfn-stack-outputs-desktop.png
+        alt: CloudFormation Outputs tab showing PlanX URL, demo credentials, and Hasura console URL in plaintext
+        viewport: desktop
+      - id: demo-login
+        filename: planx-step-1-demo-login-desktop.png
+        alt: PlanX demo login page with NDX Try Demo badge, email pre-filled and password field
+        viewport: desktop
+
+  - step: 2
+    title: Browse planning flows
+    screenshots:
+      - id: select-team
+        filename: planx-step-2-select-team-desktop.png
+        alt: PlanX editor showing Select a team page with NDX Demo Council listed under My teams
+        viewport: desktop
+      - id: team-dashboard
+        filename: planx-step-2-team-dashboard-desktop.png
+        alt: NDX Demo Council team dashboard showing planning flows
+        viewport: desktop
+
+  - step: 3
+    title: Edit a flow
+    screenshots:
+      - id: flow-editor
+        filename: planx-step-3-flow-editor-desktop.png
+        alt: PlanX flow editor showing the node-based drag and drop interface for building planning application forms
+        viewport: desktop
+
+  - step: 4
+    title: Preview applicant experience
+    screenshots:
+      - id: preview
+        filename: planx-step-4-preview-desktop.png
+        alt: PlanX preview showing the citizen-facing planning application form
+        viewport: desktop
+
+  - step: 5
+    title: Explore the data layer
+    screenshots:
+      - id: hasura-login
+        filename: planx-step-5-hasura-login-desktop.png
+        alt: Hasura console login page with admin secret input field
+        viewport: desktop
+      - id: hasura-console
+        filename: planx-step-5-hasura-console-desktop.png
+        alt: Hasura GraphiQL explorer showing PlanX database schema with teams, flows, users and other tables
+        viewport: desktop
+
+console:
+  - id: ecs-clusters
+    filename: planx-console-ecs-clusters-desktop.png
+    alt: ECS console showing NdxPlanx-Cluster with four running Fargate services
+    viewport: desktop
+  - id: rds-databases
+    filename: planx-console-rds-databases-desktop.png
+    alt: RDS console showing Aurora PostgreSQL Serverless v2 cluster for PlanX
+    viewport: desktop
+  - id: cloudfront-distributions
+    filename: planx-console-cloudfront-distributions-desktop.png
+    alt: CloudFront console showing the PlanX distribution
+    viewport: desktop

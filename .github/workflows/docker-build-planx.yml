@@ -1,0 +1,269 @@
+# Build and publish PlanX container images to ghcr.io
+#
+# Builds four images in parallel:
+# - ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-hasura:latest
+# - ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-api:latest
+# - ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-sharedb:latest
+# - ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-editor:latest
+#
+# Each clones the upstream PlanX repo, applies overlay files, and builds.
+
+name: Build PlanX Container Images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudformation/scenarios/planx/docker/**'
+      - '.github/workflows/docker-build-planx.yml'
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/planx/docker/**'
+      - '.github/workflows/docker-build-planx.yml'
+  workflow_dispatch:
+    inputs:
+      push_image:
+        description: 'Push images to registry'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  PLANX_REPO: theopensystemslab/planx-new
+  PLANX_COMMIT: main
+
+jobs:
+  changes:
+    name: Check for Docker changes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    outputs:
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            docker:
+              - 'cloudformation/scenarios/planx/docker/**'
+              - '.github/workflows/docker-build-planx.yml'
+
+  build-hasura:
+    name: Build Hasura
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: |
+      always() &&
+      (needs.changes.result == 'skipped' || needs.changes.outputs.docker == 'true')
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Clone PlanX Hasura (sparse)
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/${{ env.PLANX_REPO }}.git planx-src
+          cd planx-src && git sparse-checkout set apps/hasura.planx.uk
+
+      - name: Prepare build context
+        run: |
+          mkdir -p build-ctx/migrations build-ctx/metadata build-ctx/seed
+          cp -r planx-src/apps/hasura.planx.uk/migrations/* build-ctx/migrations/
+          cp -r planx-src/apps/hasura.planx.uk/metadata/* build-ctx/metadata/
+          cp cloudformation/scenarios/planx/docker/hasura/seed/*.sql build-ctx/seed/
+          cp cloudformation/scenarios/planx/docker/hasura/Dockerfile build-ctx/
+          cp cloudformation/scenarios/planx/docker/hasura/entrypoint-wrapper.sh build-ctx/
+
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/co-cddo/ndx_try_aws_scenarios-planx-hasura
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: build-ctx
+          push: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=planx-hasura
+          cache-to: type=gha,mode=max,scope=planx-hasura
+          platforms: linux/amd64
+
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: |
+      always() &&
+      (needs.changes.result == 'skipped' || needs.changes.outputs.docker == 'true')
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Clone PlanX API
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/${{ env.PLANX_REPO }}.git planx-src
+          cd planx-src && git sparse-checkout set apps/api.planx.uk
+
+      - name: Apply overlay
+        run: |
+          cp cloudformation/scenarios/planx/docker/api/overlays/demo-auth.ts planx-src/apps/api.planx.uk/modules/auth/demo-auth.ts
+          bash cloudformation/scenarios/planx/docker/api/patch-demo-auth.sh planx-src/apps/api.planx.uk
+
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/co-cddo/ndx_try_aws_scenarios-planx-api
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: planx-src/apps/api.planx.uk
+          target: production
+          push: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=planx-api
+          cache-to: type=gha,mode=max,scope=planx-api
+          platforms: linux/amd64
+
+  build-sharedb:
+    name: Build ShareDB
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: |
+      always() &&
+      (needs.changes.result == 'skipped' || needs.changes.outputs.docker == 'true')
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Clone PlanX ShareDB
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/${{ env.PLANX_REPO }}.git planx-src
+          cd planx-src && git sparse-checkout set apps/sharedb.planx.uk
+
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/co-cddo/ndx_try_aws_scenarios-planx-sharedb
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: planx-src/apps/sharedb.planx.uk
+          target: production
+          push: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=planx-sharedb
+          cache-to: type=gha,mode=max,scope=planx-sharedb
+          platforms: linux/amd64
+
+  build-editor:
+    name: Build Editor
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: |
+      always() &&
+      (needs.changes.result == 'skipped' || needs.changes.outputs.docker == 'true')
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Clone PlanX Editor
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/${{ env.PLANX_REPO }}.git planx-src
+          cd planx-src && git sparse-checkout set apps/editor.planx.uk
+
+      - name: Prepare build context
+        run: |
+          mkdir -p build-ctx
+          cp -r planx-src/apps/editor.planx.uk build-ctx/planx-editor
+          cp cloudformation/scenarios/planx/docker/editor/nginx.conf build-ctx/
+          cp cloudformation/scenarios/planx/docker/editor/entrypoint.sh build-ctx/
+          cat > build-ctx/Dockerfile << 'DEOF'
+          FROM node:24.14.0-alpine AS build
+          RUN apk add --no-cache git
+          WORKDIR /app
+          RUN npm install -g pnpm@10.30.2
+          COPY planx-editor/ .
+          RUN pnpm install --recursive 2>/dev/null || pnpm install
+          ENV VITE_APP_API_URL=/api
+          ENV VITE_APP_HASURA_URL=/hasura/v1/graphql
+          ENV VITE_APP_HASURA_WEBSOCKET=wss://__PLANX_HOST__/hasura/v1/graphql
+          ENV VITE_APP_SHAREDB_URL=wss://__PLANX_HOST__/sharedb
+          ENV VITE_APP_ENV=production
+          ENV VITE_APP_AIRBRAKE_PROJECT_ID=0
+          ENV VITE_APP_AIRBRAKE_PROJECT_KEY=unused
+          RUN pnpm build
+          FROM nginx:1.27-alpine
+          COPY --from=build /app/build/ /usr/share/nginx/html/
+          COPY nginx.conf /etc/nginx/conf.d/default.conf
+          COPY entrypoint.sh /docker-entrypoint.d/99-planx-config.sh
+          RUN chmod +x /docker-entrypoint.d/99-planx-config.sh
+          EXPOSE 80
+          CMD ["nginx", "-g", "daemon off;"]
+          DEOF
+
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/co-cddo/ndx_try_aws_scenarios-planx-editor
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: build-ctx
+          push: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=planx-editor
+          cache-to: type=gha,mode=max,scope=planx-editor
+          platforms: linux/amd64
