@@ -1,0 +1,136 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Log in to Minute AI - Minute AI Walkthrough"
+description: Access the Minute AI interface and explore the dashboard
+currentStep: 2
+totalSteps: 6
+timeEstimate: "2 minutes"
+scenarioId: minute
+---
+
+{#
+  Step 2: Log in to Minute AI
+  - Open the MinuteUrl in a new browser tab
+  - Enter the username and password from CloudFormation Outputs
+  - Explore the Minute AI homepage with "New meeting" button
+#}
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Log in to Minute AI" %}
+{% set stepDescription = "Open Minute AI in your browser and log in with the credentials from CloudFormation." %}
+{% set timeEstimate = "2 minutes" %}
+{% set expectedOutcomes = [
+  "You have opened the MinuteUrl in a new browser tab",
+  "You have logged in with BasicAuthUsername and BasicAuthPassword",
+  "You can see the Minute AI homepage with the New meeting button"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Opening Minute AI</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the MinuteUrl</strong>
+    <p class="govuk-body">
+      Click the <strong>MinuteUrl</strong> link from CloudFormation Outputs, or paste it into a new browser tab.
+    </p>
+  </li>
+
+  <li>
+    <strong>Enter your credentials</strong>
+    <p class="govuk-body">
+      When prompted with the browser's authentication dialog, enter the <strong>BasicAuthUsername</strong>
+      and <strong>BasicAuthPassword</strong> from the CloudFormation Outputs tab.
+    </p>
+  </li>
+
+  <li>
+    <strong>View the homepage</strong>
+    <p class="govuk-body">
+      After logging in, you will see the Minute AI homepage.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">What you should see</h3>
+
+<p class="govuk-body">
+  After logging in, you should see:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>The Minute AI homepage with a clean, modern interface</li>
+  <li>A prominent <strong>"New meeting"</strong> button</li>
+  <li>A list of any existing meetings (empty on first use)</li>
+  <li>Navigation options including Templates</li>
+</ul>
+
+{# Screenshot: Minute AI homepage #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/minute/screenshots/minute-homepage-desktop.png"
+       alt="Minute AI homepage showing the dashboard with a New meeting button and clean modern interface"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The Minute AI homepage after logging in -- click "New meeting" to get started
+  </figcaption>
+</figure>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>About Minute:</strong> Minute was built by
+    <a href="https://ai.gov.uk/" class="govuk-link" target="_blank" rel="noopener noreferrer">i.AI<span class="govuk-visually-hidden"> (opens in new tab)</span></a>,
+    the Incubator for AI within the UK Government. It is open source and designed for
+    public sector use. The tool uses AWS Transcribe for speech-to-text and Amazon Nova Pro
+    via Amazon Bedrock for minute generation.
+  </p>
+</div>
+
+{# Troubleshooting section #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Site not loading
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If Minute AI does not load:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Wait 2 to 3 minutes after stack completion -- CloudFront may need time to propagate</li>
+      <li>Check the CloudFormation "Events" tab for any errors</li>
+      <li>Try refreshing the page</li>
+      <li>Check you are using the correct URL from the Outputs tab</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Login not working
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If you cannot log in:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Double-check you copied the entire password (no trailing spaces)</li>
+      <li>Passwords are case-sensitive</li>
+      <li>Make sure you are using the BasicAuthUsername and BasicAuthPassword from Outputs</li>
+      <li>Try using a private/incognito window if cached credentials are interfering</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+</style>

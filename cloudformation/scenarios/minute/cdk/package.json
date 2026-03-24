@@ -1,0 +1,27 @@
+{
+  "name": "minute-cdk",
+  "version": "1.0.0",
+  "description": "Minute AI - Meeting Transcription & Minuting on AWS",
+  "main": "dist/lib/minute-stack.js",
+  "types": "dist/lib/minute-stack.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.5.0",
+    "jest": "^30.3.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.3",
+    "aws-cdk": "^2.1111.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.243.0",
+    "constructs": "^10.5.1",
+    "source-map-support": "^0.5.21"
+  }
+}

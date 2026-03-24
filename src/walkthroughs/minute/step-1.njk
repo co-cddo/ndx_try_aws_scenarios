@@ -1,0 +1,167 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 1: Get your credentials - Minute AI Walkthrough"
+description: Find your Minute AI URL and login credentials from CloudFormation
+currentStep: 1
+totalSteps: 6
+timeEstimate: "2 minutes"
+scenarioId: minute
+---
+
+{#
+  Step 1: Get your credentials
+  - Navigate to CloudFormation in AWS Console
+  - Find the MinuteStack
+  - Click the Outputs tab
+  - Copy MinuteUrl, BasicAuthUsername, BasicAuthPassword
+#}
+
+{% set stepNumber = 1 %}
+{% set stepTitle = "Get your credentials" %}
+{% set stepDescription = "Navigate to CloudFormation in the AWS Console and copy your Minute AI URL and login credentials." %}
+{% set timeEstimate = "2 minutes" %}
+{% set expectedOutcomes = [
+  "CloudFormation stack shows CREATE_COMPLETE status",
+  "You have copied the MinuteUrl, BasicAuthUsername, and BasicAuthPassword",
+  "You know the CloudWatch Logs URL for monitoring"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Navigating to CloudFormation</h3>
+
+<p class="govuk-body">
+  From the AWS Console homepage, find CloudFormation in the "Recently visited" section
+  or by searching for "CloudFormation" in the search bar.
+</p>
+
+<h3 class="govuk-heading-m">Finding your credentials</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the CloudFormation console</strong>
+    <p class="govuk-body">
+      Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console in us-east-1 (N. Virginia)<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+    </p>
+  </li>
+
+  <li>
+    <strong>Find your stack</strong>
+    <p class="govuk-body">
+      Look for a stack named <code>MinuteStack</code> or starting with <code>ndx-try-minute</code>
+    </p>
+    <p class="govuk-body">
+      The status should be <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span>
+    </p>
+    <div class="govuk-warning-text govuk-!-margin-top-2">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-visually-hidden">Warning</span>
+        If the status shows CREATE_IN_PROGRESS, the deployment is still running.
+        This scenario takes 25 to 35 minutes to deploy fully.
+      </strong>
+    </div>
+
+    <div class="govuk-inset-text">
+      <p class="govuk-body govuk-!-margin-bottom-0">
+        <strong>This is normal.</strong> Minute AI provisions an Aurora PostgreSQL database, ECS Fargate services, and a CloudFront distribution.
+        While you wait, watch the <strong>Events</strong> tab to see resources being created in real-time.
+      </p>
+    </div>
+
+    {# Screenshot: CloudFormation stacks list #}
+    <figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-2">
+      <img src="/assets/images/walkthroughs/minute/screenshots/cloudformation-stacks-list-desktop.png"
+           alt="CloudFormation console showing the Stacks list with MinuteStack and CREATE_COMPLETE status"
+           class="ndx-screenshot__image">
+      <figcaption class="ndx-screenshot__caption govuk-body-s">
+        The CloudFormation Stacks list showing MinuteStack with CREATE_COMPLETE status
+      </figcaption>
+    </figure>
+  </li>
+
+  <li>
+    <strong>Go to the "Outputs" tab</strong>
+    <p class="govuk-body">
+      Click on your stack name, then select the "Outputs" tab
+    </p>
+  </li>
+
+  <li>
+    <strong>Copy these three values</strong>
+    <div class="ndx-credentials-list">
+      <p class="govuk-body">
+        <strong>MinuteUrl:</strong> The URL to access Minute AI<br>
+        <code>https://[random-id].cloudfront.net</code>
+      </p>
+      <p class="govuk-body">
+        <strong>BasicAuthUsername:</strong> The username for login
+      </p>
+      <p class="govuk-body">
+        <strong>BasicAuthPassword:</strong> Auto-generated secure password
+      </p>
+    </div>
+  </li>
+</ol>
+
+{# Screenshot: CloudFormation Outputs tab #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/minute/screenshots/cloudformation-outputs-desktop.png"
+       alt="AWS CloudFormation console showing the Outputs tab with MinuteUrl, BasicAuthUsername, BasicAuthPassword, CloudWatchLogsUrl, and DataBucketName values"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The CloudFormation Outputs tab shows your Minute AI URL and login credentials
+  </figcaption>
+</figure>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Tip:</strong> If you deployed from the NDX:Try scenario page,
+    your credentials may also be shown in the Credentials Card on that page.
+  </p>
+</div>
+
+{# Troubleshooting section #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Stack still in progress
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the stack shows CREATE_IN_PROGRESS:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>The Aurora PostgreSQL database takes approximately 10 minutes to create</li>
+      <li>The CloudFront distribution takes approximately 5 minutes to create</li>
+      <li>Watch the Events tab for progress updates</li>
+      <li>Total deployment time is typically 25 to 35 minutes</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-credentials-list {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-credentials-list p {
+    margin-bottom: 10px;
+  }
+
+  .ndx-credentials-list p:last-child {
+    margin-bottom: 0;
+  }
+</style>

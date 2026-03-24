@@ -1,0 +1,224 @@
+---
+layout: layouts/walkthrough.njk
+title: Minute AI Walkthrough
+description: Step-by-step guide to transcribing meetings and generating AI-powered minutes with Minute AI
+currentStep: 0
+totalSteps: 6
+scenarioId: minute
+---
+
+{#
+  Walkthrough Landing Page
+  - Value proposition for meeting productivity
+  - Prerequisites and deployment check
+  - Overview of what users will learn
+#}
+
+<h1 class="govuk-heading-xl">Explore Minute AI</h1>
+
+{# Get walkthrough data for dynamic content #}
+{% set walkthroughData = walkthroughs.walkthroughs["minute"] %}
+
+{# Value proposition - using duration from YAML #}
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    {{ walkthroughData.duration }} to see AI-powered meeting minutes
+  </h2>
+  <div class="govuk-panel__body">
+    Built by i.AI (the UK Government's AI team) and open-sourced for public sector use.
+    Upload a meeting recording, get a transcript, and generate structured minutes automatically.
+  </div>
+</div>
+
+{# Technical reassurance #}
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">Built by i.AI, open source, and ready to try</strong>
+  <p class="govuk-body">
+    Minute is developed by the Incubator for AI (i.AI), the UK Government's central AI team.
+    It uses AWS Transcribe for speech-to-text and Amazon Nova Pro via Amazon Bedrock to generate
+    structured meeting minutes from transcripts. The tool includes multiple meeting templates,
+    speaker identification, and a rich text editor for refining output.
+  </p>
+</div>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this {{ walkthroughData.duration }} walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  {% for step in walkthroughData.steps %}
+  <li>
+    <strong>{{ step.title }}</strong>{% if step.description %} -- {{ step.description }}{% endif %}{% if step.time %} ({{ step.time }}){% endif %}
+  </li>
+  {% endfor %}
+</ol>
+
+{# Prerequisites #}
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already requested the Minute AI scenario via NDX:Try.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/minute/" class="govuk-link">Deploy the Minute AI scenario</a> if you haven't already.
+  </p>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      Deployment takes 25 to 35 minutes. This provisions an Aurora PostgreSQL database, ECS Fargate services, and CloudFront distribution.
+    </strong>
+  </div>
+
+  <details class="govuk-details govuk-!-margin-bottom-4">
+    <summary class="govuk-details__summary">
+      <span class="govuk-details__summary-text">Why does deployment take this long?</span>
+    </summary>
+    <div class="govuk-details__text">
+      <p class="govuk-body">Minute AI provisions enterprise-grade infrastructure:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Aurora PostgreSQL database</strong> -- stores meetings, transcripts, and generated minutes</li>
+        <li><strong>ECS Fargate services</strong> -- runs the web application and background workers</li>
+        <li><strong>SQS queues</strong> -- manages transcription and minute generation jobs</li>
+        <li><strong>CloudFront distribution</strong> -- provides secure HTTPS access</li>
+        <li><strong>S3 bucket</strong> -- stores uploaded audio files</li>
+      </ul>
+      <p class="govuk-body govuk-!-margin-bottom-0">
+        The wait is worth it -- you get a fully functional AI meeting minute tool to evaluate.
+      </p>
+    </div>
+  </details>
+
+  <div class="govuk-inset-text">
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      <strong>While you wait:</strong> Explore the CloudFormation Events tab to watch resources being created.
+      You can also browse other areas of the AWS Console -- deployment continues in the background.
+    </p>
+  </div>
+
+  <h3 class="govuk-heading-s">You'll need</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>Your CloudFormation stack to show <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span></li>
+    <li>The <strong>MinuteUrl</strong> from your stack's Outputs tab</li>
+    <li>The <strong>BasicAuthUsername</strong> and <strong>BasicAuthPassword</strong> from Outputs</li>
+    <li>A meeting recording in MP3, WAV, or WebM format (any short recording will work)</li>
+  </ul>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For service managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How AI can automate meeting minute production</li>
+      <li>Multiple meeting templates for different contexts</li>
+      <li>The time savings compared to manual minute-taking</li>
+      <li>How to edit and refine AI-generated output</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical teams</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How AWS Transcribe handles speech-to-text</li>
+      <li>How Amazon Bedrock generates structured minutes</li>
+      <li>ECS Fargate container architecture</li>
+      <li>SQS-based job queue processing</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">Key capabilities</h2>
+
+<div class="govuk-grid-row ndx-content-types-preview">
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-content-type-card">
+      <h3 class="govuk-heading-s">Transcription</h3>
+      <p class="govuk-body-s">
+        Automatic speech-to-text with speaker identification via AWS Transcribe
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-content-type-card">
+      <h3 class="govuk-heading-s">Minute Generation</h3>
+      <p class="govuk-body-s">
+        Structured minutes with action items, decisions, and summaries via Amazon Nova Pro
+      </p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-content-type-card">
+      <h3 class="govuk-heading-s">Meeting Templates</h3>
+      <p class="govuk-body-s">
+        Cabinet, Planning Committee, General, and custom templates
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/minute/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately {{ walkthroughData.duration }}
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-content-types-preview {
+    margin-top: 20px;
+  }
+
+  .ndx-content-type-card {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-content-type-card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-content-type-card p {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-content-type-card {
+      margin-bottom: 15px;
+    }
+  }
+</style>
