@@ -1,0 +1,148 @@
+---
+layout: layouts/walkthrough.njk
+title: Digital Planning Register Walkthrough
+description: Step-by-step guide to exploring the Digital Planning Register used by UK councils
+currentStep: 0
+totalSteps: 4
+scenarioId: digital-planning-register
+---
+
+<h1 class="govuk-heading-xl">Try the Digital Planning Register</h1>
+
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    10 minutes to explore the register
+  </h2>
+  <div class="govuk-panel__body">
+    Browse councils, search planning applications, and see what residents experience.
+  </div>
+</div>
+
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you through the <a href="https://github.com/tpximpact/digital-planning-register" class="govuk-link">Digital Planning Register</a> as a resident would use it.
+    You'll browse councils, search planning applications, and explore application details.
+    Perfect for planning managers, digital transformation leads, and anyone evaluating public planning registers.
+  </p>
+</div>
+
+<p class="govuk-body">
+  The <a href="https://github.com/tpximpact/digital-planning-register" class="govuk-link">Digital Planning Register</a> is an open-source Next.js application built by <a href="https://www.tpximpact.com/" class="govuk-link">TPXimpact</a> as part of the <a href="https://opendigitalplanning.org/" class="govuk-link">Open Digital Planning</a> ecosystem. It provides a unified, accessible interface for residents to search and view planning applications, connecting to council BOPS (Back Office Planning System) APIs.
+</p>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this 10-minute walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Access the register</strong> — Find the URL from CloudFormation outputs and open it (2 minutes)
+  </li>
+  <li>
+    <strong>Explore councils</strong> — Browse the list of configured councils and understand the multi-council model (3 minutes)
+  </li>
+  <li>
+    <strong>Search applications</strong> — Search for planning applications and explore application details (3 minutes)
+  </li>
+  <li>
+    <strong>Review the architecture</strong> — Understand the AWS infrastructure and how it connects to BOPS (2 minutes)
+  </li>
+</ol>
+
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already requested the Digital Planning Register scenario via NDX:Try.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/digital-planning-register/" class="govuk-link">Deploy the Digital Planning Register scenario</a> if you haven't already.
+    Deployment takes 8 to 12 minutes.
+  </p>
+
+  <div class="govuk-!-margin-top-4">
+    <h3 class="govuk-heading-s">Sample data check</h3>
+    {% include "components/sample-data-status.njk" %}
+  </div>
+
+  <div class="govuk-!-margin-top-4">
+    {% include "components/sample-data-panel.njk" %}
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For planning managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How residents search and view planning applications</li>
+      <li>Multi-council aggregation in a single register</li>
+      <li>GOV.UK Design System accessibility patterns</li>
+      <li>How the register connects to BOPS back-office systems</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical staff</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>ECS Fargate deployment for Next.js applications</li>
+      <li>CloudFront HTTPS termination pattern</li>
+      <li>Stateless container architecture (no database)</li>
+      <li>API aggregation patterns</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What's included</h2>
+
+<p class="govuk-body">
+  Your deployment includes:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>The full Digital Planning Register</strong> — the same application used by UK councils</li>
+  <li><strong>9 council configurations</strong> — Barnet, Buckinghamshire, Camden, Gateshead, Lambeth, Medway, Newcastle, Southwark, South Gloucestershire</li>
+  <li><strong>GOV.UK Design System</strong> — fully accessible, WCAG 2.2 AA compliant interface</li>
+  <li><strong>CloudFront HTTPS</strong> — secure access via AWS-managed TLS certificate</li>
+</ul>
+
+<p class="govuk-body">
+  <a href="https://github.com/tpximpact/digital-planning-register" class="govuk-link">View the source code on GitHub</a>
+</p>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/digital-planning-register/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 10 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+</style>

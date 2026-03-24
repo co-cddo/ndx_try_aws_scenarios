@@ -1,0 +1,212 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - Digital Planning Register"
+description: You've completed the Digital Planning Register walkthrough
+currentStep: 5
+totalSteps: 4
+scenarioId: digital-planning-register
+---
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">
+    Walkthrough complete
+  </h1>
+  <div class="govuk-panel__body">
+    You've explored the Digital Planning Register used by UK councils
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  You've just experienced the <a href="https://github.com/tpximpact/digital-planning-register" class="govuk-link">Digital Planning Register</a> — the same open-source application used by councils like Camden, Lambeth, and Southwark to give residents transparent access to planning applications. In 10 minutes, you've seen what would take weeks of procurement and evaluation.
+</p>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f50d;</span>
+      Public transparency
+    </h3>
+    <p class="govuk-body">
+      Residents can search and view planning applications instantly, without creating accounts or navigating complex council websites. Consultation dates, documents, and decisions are all in one place.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Fewer FOI requests, reduced phone enquiries, better public engagement
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f3db;</span>
+      Multi-council design
+    </h3>
+    <p class="govuk-body">
+      One register serves multiple councils. Each council maintains their own BOPS back-office, but residents get a consistent, familiar experience across all participating authorities.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Shared development costs, consistent UX, faster adoption
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x267b;</span>
+      Stateless simplicity
+    </h3>
+    <p class="govuk-body">
+      No database, no cache, no file storage. The register reads everything from BOPS APIs. This makes deployment simple, scaling easy, and maintenance minimal. Nothing to back up, nothing to migrate.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Low operational overhead, easy disaster recovery, zero data management
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f527;</span>
+      GOV.UK Design System
+    </h3>
+    <p class="govuk-body">
+      Built with the GOV.UK Design System, ensuring WCAG 2.2 AA accessibility. Every component has been user-tested, and the patterns are familiar to anyone who's used a government service.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Accessible by default, trusted design patterns, no UX research needed
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">Production readiness</h2>
+
+<p class="govuk-body">
+  This demo runs the same codebase used by live councils. For a full deployment, you'd additionally want:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Feature</th>
+      <th scope="col" class="govuk-table__header">Demo status</th>
+      <th scope="col" class="govuk-table__header">Production requirement</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Custom domain</th>
+      <td class="govuk-table__cell">CloudFront URL</td>
+      <td class="govuk-table__cell">planning.yourcouncil.gov.uk</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">BOPS API</th>
+      <td class="govuk-table__cell">External council APIs</td>
+      <td class="govuk-table__cell">Your own BOPS instance API</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">OS Maps</th>
+      <td class="govuk-table__cell">Optional API key</td>
+      <td class="govuk-table__cell">Full OS Vector Tiles integration</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Auto-scaling</th>
+      <td class="govuk-table__cell">Single task</td>
+      <td class="govuk-table__cell">ECS auto-scaling based on traffic</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Monitoring</th>
+      <td class="govuk-table__cell">CloudWatch Logs</td>
+      <td class="govuk-table__cell">CloudWatch Alarms, dashboards, SNS alerts</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>Good news:</strong> Because the register is stateless, the path from demo to production is straightforward — it's mostly about connecting it to your own BOPS API and configuring a custom domain. The application itself is production-ready.
+  </p>
+</div>
+
+{% set scenarioId = "digital-planning-register" %}
+{% set scenarioName = "Digital Planning Register" %}
+{% set totalSteps = 4 %}
+{% include "components/completion-next-steps.njk" %}
+
+{% include "components/cleanup-instructions.njk" %}
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Learn more</h2>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="https://github.com/tpximpact/digital-planning-register" class="govuk-link">Digital Planning Register on GitHub</a> — source code and documentation</li>
+    <li><a href="https://opendigitalplanning.org/" class="govuk-link">Open Digital Planning</a> — the programme behind the register, BOPS, PlanX, and other tools</li>
+    <li><a href="https://www.tpximpact.com/" class="govuk-link">TPXimpact</a> — the developers behind the register</li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Related scenarios</h2>
+
+  <p class="govuk-body">
+    Want to see the back-office system that powers the register?
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/scenarios/bops-planning/" class="govuk-link">Back Office Planning System (BOPS)</a> — deploy the full case management system with sample applications</li>
+    <li><a href="/scenarios/planning-ai/" class="govuk-link">Planning AI</a> — see how AI can assist with planning document analysis</li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Questions or feedback?</h2>
+
+  <p class="govuk-body">
+    We'd love to hear about your experience with this walkthrough:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .ndx-takeaway-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ndx-takeaway-card__icon {
+    font-size: 32px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-takeaway-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-takeaway-card h3 {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

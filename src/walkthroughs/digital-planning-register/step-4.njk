@@ -1,0 +1,126 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Review the Architecture — Digital Planning Register Walkthrough"
+description: Understand the AWS infrastructure and how the register connects to BOPS
+currentStep: 4
+totalSteps: 4
+timeEstimate: "2 minutes"
+scenarioId: digital-planning-register
+---
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Review the Architecture" %}
+{% set stepDescription = "Explore the AWS infrastructure behind the register and understand how it fits into the Open Digital Planning ecosystem." %}
+{% set timeEstimate = "2 minutes" %}
+{% set screenshotData = screenshots["digital-planning-register"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 4 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "ECS cluster shows the running Fargate task",
+  "CloudWatch Logs shows application request logs",
+  "You understand how the components connect"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Explore the AWS infrastructure</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Check the ECS cluster</strong>
+    <p class="govuk-body">
+      Open the <code>ECSClusterUrl</code> from the CloudFormation outputs. You'll see:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>NdxDpr-Web service</strong> — one running task (the Next.js application)</li>
+      <li><strong>Task definition</strong> — 0.5 vCPU, 1 GB memory (Next.js is lightweight)</li>
+      <li><strong>Public IP</strong> — the Fargate task has a public IP for ALB health checks</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>View the logs</strong>
+    <p class="govuk-body">
+      Open the <code>CloudWatchLogsUrl</code> to see application logs. You'll see Next.js server-side rendering logs showing:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Page requests and API calls to council BOPS endpoints</li>
+      <li>ISR (Incremental Static Regeneration) cache revalidations</li>
+      <li>Any errors from API connectivity</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Understand the architecture</strong>
+    <p class="govuk-body">
+      The deployment is intentionally simple:
+    </p>
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th class="govuk-table__header">Component</th>
+          <th class="govuk-table__header">AWS Service</th>
+          <th class="govuk-table__header">Purpose</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Application</strong></td>
+          <td class="govuk-table__cell">ECS Fargate</td>
+          <td class="govuk-table__cell">Runs the Next.js Docker container</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Load Balancer</strong></td>
+          <td class="govuk-table__cell">ALB</td>
+          <td class="govuk-table__cell">Routes traffic and health checks</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>HTTPS</strong></td>
+          <td class="govuk-table__cell">CloudFront</td>
+          <td class="govuk-table__cell">TLS termination and caching</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Networking</strong></td>
+          <td class="govuk-table__cell">VPC</td>
+          <td class="govuk-table__cell">Isolated network with public subnets</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Logging</strong></td>
+          <td class="govuk-table__cell">CloudWatch</td>
+          <td class="govuk-table__cell">Container logs and monitoring</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="govuk-body">
+      Notice what's <strong>not</strong> here: no database, no Redis, no S3. The register is a stateless application that reads from external BOPS APIs. This makes it simple to deploy, scale, and maintain.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">How it connects to BOPS</h3>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th class="govuk-table__header">System</th>
+      <th class="govuk-table__header">Role</th>
+      <th class="govuk-table__header">NDX:Try scenario</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><strong>BOPS</strong></td>
+      <td class="govuk-table__cell">Back-office case management for planning officers</td>
+      <td class="govuk-table__cell"><a href="/scenarios/bops-planning/" class="govuk-link">Back Office Planning System</a></td>
+    </tr>
+    <tr class="govuk-table__row">
+      <td class="govuk-table__cell"><strong>Digital Planning Register</strong></td>
+      <td class="govuk-table__cell">Public-facing register for residents</td>
+      <td class="govuk-table__cell"><a href="/scenarios/digital-planning-register/" class="govuk-link">This scenario</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text">
+  <strong>Stateless by design:</strong> The register deliberately has no database. All planning data lives in the council's BOPS system. The register is a read-only view that can be deployed, scaled, or replaced without affecting any data. This separation of concerns is a key architectural principle.
+</div>

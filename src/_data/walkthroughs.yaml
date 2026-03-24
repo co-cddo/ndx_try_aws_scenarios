@@ -197,3 +197,24 @@ walkthroughs:
       - title: "Architecture understood"
         description: "Learn how 12 AWS services work together to power the tool"
         time: "7 minutes"
+
+  digital-planning-register:
+    totalSteps: 4
+    url: "/walkthroughs/digital-planning-register/"
+    title: "Digital Planning Register Walkthrough"
+    duration: "10 minutes"
+    hasWalkthrough: true
+    category: "planning"
+    steps:
+      - title: "Register accessed"
+        description: "Find the URL from CloudFormation outputs and open the register"
+        time: "2 minutes"
+      - title: "Councils explored"
+        description: "Browse the list of configured councils and understand the multi-council model"
+        time: "3 minutes"
+      - title: "Applications searched"
+        description: "Search for planning applications and explore application details"
+        time: "3 minutes"
+      - title: "Architecture reviewed"
+        description: "Understand the AWS infrastructure and how it connects to BOPS"
+        time: "2 minutes"
