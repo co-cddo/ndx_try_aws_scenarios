@@ -1549,3 +1549,4 @@ scenarios:
         description: "Manual meeting minute production typically takes 2-4 hours per meeting"
         value: 180
         unit: "minutes per meeting"
+        source: "UK Government administrative efficiency benchmarks"
