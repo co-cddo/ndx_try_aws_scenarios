@@ -1467,3 +1467,99 @@ scenarios:
         payback_months: 6
         disclaimer: "Figures are illustrative and based on published ODP programme outcomes. Actual savings depend on application volumes and current process efficiency."
       committee_language: "BOPS demonstrates how digital planning tools can reduce application processing time by 40%, saving an estimated £180,000 annually through automated validation, policy matching, and report generation."
+
+  - id: "digital-planning-register"
+    name: "Digital Planning Register"
+    headline: "Public planning application register used by UK councils"
+    bestFor: "Councils evaluating transparent public planning registers"
+    description: "Deploy the Digital Planning Register — the open-source public-facing application from TPXimpact that lets residents search and view planning applications across councils. Built with Next.js and the GOV.UK Design System, it aggregates data from BOPS (Back Office Planning System) APIs to provide a unified, accessible view of planning activity. Currently used by 9 UK councils including Camden, Lambeth, and Southwark."
+    difficulty: "beginner"
+    timeEstimate: "10 minutes"
+    primaryPersona: "service-manager"
+    gcloud_search_term: "Digital Planning Register open planning public"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "bops-planning"
+      - "planning-ai"
+    securitySummary: "Read-only application in isolated sandbox. No citizen data stored. All data fetched from external APIs."
+    skillsLearned:
+      - "Container orchestration with ECS Fargate"
+      - "CloudFront HTTPS distribution"
+      - "Next.js deployment on AWS"
+      - "GOV.UK Design System applications"
+    isMostPopular: false
+    featured: false
+    awsServices:
+      - "Amazon ECS"
+      - "Amazon CloudFront"
+      - "Elastic Load Balancing"
+      - "Amazon CloudWatch"
+    tags:
+      - "Planning"
+      - "Digital Transformation"
+      - "Open Source"
+      - "Next.js"
+      - "UK Councils"
+      - "GOV.UK"
+    businessOutcomes:
+      - "Experience a modern public planning register"
+      - "See how residents search and track planning applications"
+      - "Explore GOV.UK Design System accessibility patterns"
+      - "Understand the Open Digital Planning ecosystem"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "No technical expertise required"
+    url: "/scenarios/digital-planning-register/"
+    order: 11
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/digital-planning-register/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/digital-planning-register/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-digital-planning-register"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "digital-planning-register"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+      deploymentTime: "8 to 12 minutes"
+      deploymentPhases:
+        - "Creating VPC and networking (~30 seconds)"
+        - "Creating ECS Fargate service and ALB (~3 minutes)"
+        - "Creating CloudFront distribution (~5 minutes)"
+        - "Container health check passing (~2 minutes)"
+      outputs:
+        - name: "RegisterUrl"
+          description: "Digital Planning Register URL (HTTPS)"
+        - name: "CloudWatchLogsUrl"
+          description: "CloudWatch Logs"
+        - name: "ECSClusterUrl"
+          description: "ECS Cluster console link"
+    screenshots:
+      steps: []
+    success_metrics:
+      service_area: "Planning Transparency & Public Engagement"
+      primary_metric: "Resident access to planning information"
+      baseline:
+        description: "Public planning searches require visiting individual council websites or making FOI requests"
+        value: 15
+        unit: "minutes average search time"
+        source: "Local Government Association Digital Survey 2024"
+      projection:
+        description: "Unified register provides instant search across all applications"
+        value: 2
+        unit: "minutes average search time"
+        reduction_percent: 87
+      roi:
+        annual_savings: 45000
+        calculation: "Based on reduced FOI requests (~200/year at £45 each), reduced phone enquiries (~1,500/year at £8 each), and staff time savings"
+        payback_months: 3
+        disclaimer: "Figures are illustrative. Actual savings depend on council size, application volumes, and current digital maturity."
+      committee_language: "The Digital Planning Register provides residents with instant access to planning applications, reducing FOI requests and phone enquiries while improving transparency and public engagement."

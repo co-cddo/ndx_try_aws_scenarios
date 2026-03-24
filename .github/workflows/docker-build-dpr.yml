@@ -1,0 +1,103 @@
+# Build and publish Digital Planning Register container image to ghcr.io
+#
+# Builds from the upstream tpximpact/digital-planning-register repository.
+#
+# Triggers on:
+# - Manual workflow_dispatch (with optional version tag)
+# - Weekly schedule (to pick up upstream updates)
+#
+# Produces:
+# - ghcr.io/[org]/ndx_try_aws_scenarios-dpr:latest
+# - ghcr.io/[org]/ndx_try_aws_scenarios-dpr:sha-<commit>
+
+name: Build Digital Planning Register Container
+
+on:
+  schedule:
+    # Weekly on Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      upstream_ref:
+        description: 'Upstream git ref to build (branch, tag, or commit SHA)'
+        required: false
+        default: 'main'
+        type: string
+      push_image:
+        description: 'Push image to registry'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: co-cddo/ndx_try_aws_scenarios-dpr
+  UPSTREAM_REPO: tpximpact/digital-planning-register
+
+jobs:
+  build:
+    name: Build and Push Container
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Determine upstream ref
+        id: ref
+        run: |
+          REF="${{ github.event.inputs.upstream_ref || 'main' }}"
+          echo "ref=$REF" >> $GITHUB_OUTPUT
+
+      - name: Checkout upstream repository
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ env.UPSTREAM_REPO }}
+          ref: ${{ steps.ref.outputs.ref }}
+
+      - name: Get upstream commit SHA
+        id: sha
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=sha-${{ steps.sha.outputs.sha }}
+            type=raw,value=upstream-${{ steps.ref.outputs.ref }},enable=${{ steps.ref.outputs.ref != 'main' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Output image details
+        run: |
+          echo "## Digital Planning Register Image Built" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Upstream:** ${{ env.UPSTREAM_REPO }}@${{ steps.sha.outputs.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Registry:** ${{ env.REGISTRY }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** ${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags:**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
