@@ -1,0 +1,107 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Edit a Flow — PlanX Digital Planning Walkthrough"
+description: Open a planning flow and explore the drag-and-drop node editor
+currentStep: 3
+totalSteps: 5
+timeEstimate: "5 minutes"
+scenarioId: planx
+---
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Edit a Flow" %}
+{% set stepDescription = "Open a planning flow in the editor, explore the drag-and-drop node interface, and make a change." %}
+{% set timeEstimate = "5 minutes" %}
+{% set screenshotData = screenshots["planx"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 3 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Flow editor shows the node graph with connected question nodes",
+  "You can click on a node to see its configuration",
+  "You can drag nodes to rearrange the flow"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Open the flow editor</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open a flow</strong>
+    <p class="govuk-body">
+      From the team dashboard, click on the <strong>Householder planning application</strong> flow (or whichever flow you'd like to explore). This opens the flow editor.
+    </p>
+  </li>
+
+  <li>
+    <strong>Understand the node graph</strong>
+    <p class="govuk-body">
+      The editor displays the flow as a graph of connected nodes. Each node represents a step in the applicant's journey:
+    </p>
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th class="govuk-table__header">Node type</th>
+          <th class="govuk-table__header">What it does</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Question</strong></td>
+          <td class="govuk-table__cell">Asks the applicant a question with multiple choice answers</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Notice</strong></td>
+          <td class="govuk-table__cell">Displays information to the applicant without requiring input</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Checklist</strong></td>
+          <td class="govuk-table__cell">Lets the applicant select multiple options from a list</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Text input</strong></td>
+          <td class="govuk-table__cell">Collects free text from the applicant</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>File upload</strong></td>
+          <td class="govuk-table__cell">Collects documents such as plans or supporting evidence</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><strong>Calculate</strong></td>
+          <td class="govuk-table__cell">Runs logic to determine the next step based on answers</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+
+  <li>
+    <strong>Click on a node</strong>
+    <p class="govuk-body">
+      Click on any node in the graph to see its configuration panel on the right. You'll see:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Title</strong> — the question or notice text shown to applicants</li>
+      <li><strong>Description</strong> — help text or guidance for the applicant</li>
+      <li><strong>Data field</strong> — the planning data field this question maps to</li>
+      <li><strong>Options</strong> — for question nodes, the available answers and where each leads</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Try editing a node</strong>
+    <p class="govuk-body">
+      Click on a question node and try changing its title text or description. Changes save automatically. This is how service designers maintain flows — updating question wording, adding guidance, or adjusting routing logic.
+    </p>
+  </li>
+
+  <li>
+    <strong>Explore the node connections</strong>
+    <p class="govuk-body">
+      Follow the lines connecting nodes to see how different answers route applicants through different paths. For example, a question about property type might send householders down one path and commercial applicants down another.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>This is the core of <a href="https://www.planx.uk/" class="govuk-link">PlanX</a>:</strong> Service designers use this visual editor to build planning application flows without writing code. Each node maps to planning data standards, so the collected information is structured and machine-readable. This means applications can be automatically validated and routed to the right back-office system.
+</div>

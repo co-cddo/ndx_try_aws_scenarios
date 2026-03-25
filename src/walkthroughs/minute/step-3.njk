@@ -1,0 +1,243 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Upload a meeting recording - Minute AI Walkthrough"
+description: Upload an audio file and choose a minute template
+currentStep: 3
+totalSteps: 6
+timeEstimate: "3 minutes"
+scenarioId: minute
+---
+
+{#
+  Step 3: Upload a meeting recording
+  - Click "New meeting" then "Upload a file"
+  - Choose or drag an audio file (MP3, WAV, or WebM)
+  - Select a template (General is the default)
+  - Click "Upload"
+  - See "Transcription being processed"
+#}
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Upload a meeting recording" %}
+{% set stepDescription = "Upload an audio file of a meeting and select a template for the minutes you want to generate." %}
+{% set timeEstimate = "3 minutes" %}
+{% set expectedOutcomes = [
+  "You have uploaded a meeting recording",
+  "You have selected a meeting template",
+  "The transcription job has started processing"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Creating a new meeting</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Click "New meeting"</strong>
+    <p class="govuk-body">
+      From the Minute AI homepage, click the <strong>"New meeting"</strong> button.
+    </p>
+  </li>
+
+  <li>
+    <strong>Click "Upload a file"</strong>
+    <p class="govuk-body">
+      Select the option to upload a recording file from your computer.
+    </p>
+  </li>
+
+  <li>
+    <strong>Choose your audio file</strong>
+    <p class="govuk-body">
+      Select or drag and drop a meeting recording. Supported formats:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>MP3</strong> -- most common recording format</li>
+      <li><strong>WAV</strong> -- uncompressed audio</li>
+      <li><strong>WebM</strong> -- common for browser-based recordings</li>
+    </ul>
+    <p class="govuk-body">
+      Files can be up to 5GB in size. For this walkthrough, a short recording (5 to 15 minutes) works best.
+    </p>
+  </li>
+
+  <li>
+    <strong>Select a template</strong>
+    <p class="govuk-body">
+      Choose a meeting template that matches your recording. Available templates include:
+    </p>
+
+    <div class="ndx-template-grid">
+      <div class="ndx-template-card">
+        <h4 class="govuk-heading-s">General</h4>
+        <p class="govuk-body-s govuk-!-margin-bottom-0">
+          Default template suitable for most meetings. Produces an overview, discussion points, decisions, and action items.
+        </p>
+      </div>
+      <div class="ndx-template-card">
+        <h4 class="govuk-heading-s">Cabinet</h4>
+        <p class="govuk-body-s govuk-!-margin-bottom-0">
+          Formal cabinet meeting format with motions, votes, and ministerial responsibilities.
+        </p>
+      </div>
+      <div class="ndx-template-card">
+        <h4 class="govuk-heading-s">Planning Committee</h4>
+        <p class="govuk-body-s govuk-!-margin-bottom-0">
+          Planning committee format with application references, officer recommendations, and committee decisions.
+        </p>
+      </div>
+    </div>
+
+    <p class="govuk-body">
+      If you are unsure, select <strong>"General"</strong> -- it works well for any type of meeting.
+    </p>
+  </li>
+
+  <li>
+    <strong>Click "Upload"</strong>
+    <p class="govuk-body">
+      The file will be uploaded to S3 and a transcription job will start automatically.
+      You will see the status change to <strong>"Transcription being processed"</strong>.
+    </p>
+  </li>
+</ol>
+
+{# Screenshot: Upload page #}
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/walkthroughs/minute/screenshots/minute-upload-desktop.png"
+       alt="Minute AI upload page showing the file upload area, template selector with General selected, and Upload button"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    Upload your audio file and select a meeting template
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">What happens next</h3>
+
+<p class="govuk-body">
+  After uploading, Minute AI sends the audio file to
+  <a href="https://aws.amazon.com/transcribe/" class="govuk-link" target="_blank" rel="noopener noreferrer">AWS Transcribe<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+  for speech-to-text conversion. The processing pipeline works like this:
+</p>
+
+<div class="ndx-ai-pipeline">
+  <div class="ndx-ai-pipeline__step">
+    <span class="ndx-ai-pipeline__number">1</span>
+    <div>
+      <strong>Audio upload to S3</strong>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">The recording is stored securely in an S3 bucket</p>
+    </div>
+  </div>
+  <div class="ndx-ai-pipeline__step">
+    <span class="ndx-ai-pipeline__number">2</span>
+    <div>
+      <strong>Transcription via AWS Transcribe</strong>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">Speech is converted to text with automatic speaker identification</p>
+    </div>
+  </div>
+  <div class="ndx-ai-pipeline__step">
+    <span class="ndx-ai-pipeline__number">3</span>
+    <div>
+      <strong>SQS job queue</strong>
+      <p class="govuk-body-s govuk-!-margin-bottom-0">A background worker picks up the completed transcript for processing</p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    <strong>Timing:</strong> Transcription typically takes 5 to 10 minutes for a 30-minute recording.
+    Shorter recordings process faster. You can leave the page and come back -- the transcription
+    continues in the background.
+  </p>
+</div>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Upload fails
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If the upload fails:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check that your file is in MP3, WAV, or WebM format</li>
+      <li>Ensure the file is under 5GB</li>
+      <li>Try a shorter recording if a long one is failing</li>
+      <li>Check your network connection -- large files may take time to upload</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 15px 0;
+  }
+
+  .ndx-template-card {
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-template-card h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+
+  .ndx-ai-pipeline {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-ai-pipeline__step {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #b1b4b6;
+  }
+
+  .ndx-ai-pipeline__step:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .ndx-ai-pipeline__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background-color: #1d70b8;
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-template-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

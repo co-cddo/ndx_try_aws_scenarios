@@ -1,0 +1,83 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Search Applications — Digital Planning Register Walkthrough"
+description: Search for planning applications and explore application details
+currentStep: 3
+totalSteps: 4
+timeEstimate: "3 minutes"
+scenarioId: digital-planning-register
+---
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Search Planning Applications" %}
+{% set stepDescription = "Search for planning applications within a council and explore the details of individual applications." %}
+{% set timeEstimate = "3 minutes" %}
+{% set screenshotData = screenshots["digital-planning-register"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 3 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Search returns a list of planning applications",
+  "Application detail pages show address, description, and status",
+  "Map views show application locations where available"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Searching and browsing applications</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Use the search</strong>
+    <p class="govuk-body">
+      From a council page, use the search to find planning applications. You can search by:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Address or location</strong> — street name, postcode, or area</li>
+      <li><strong>Reference number</strong> — the BOPS application reference</li>
+      <li><strong>Description</strong> — keywords from the proposal description</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Browse application results</strong>
+    <p class="govuk-body">
+      Search results show a summary of each application:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Reference number</strong> and application type</li>
+      <li><strong>Site address</strong></li>
+      <li><strong>Description</strong> of the proposed development</li>
+      <li><strong>Status</strong> — current stage in the planning process</li>
+      <li><strong>Decision</strong> — outcome if determined</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Open an application</strong>
+    <p class="govuk-body">
+      Click on any application to see its full details. The detail page includes:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Site boundary map</strong> — showing the application location with boundary</li>
+      <li><strong>Application timeline</strong> — key dates from submission to decision</li>
+      <li><strong>Documents</strong> — plans, drawings, and supporting documents</li>
+      <li><strong>Consultation details</strong> — public comment periods and responses</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Check the map view</strong>
+    <p class="govuk-body">
+      Where Ordnance Survey map data is available, applications are plotted on an interactive map showing:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Pin locations for each application</li>
+      <li>Red line site boundary polygons</li>
+      <li>Surrounding area context</li>
+    </ul>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>This is what residents see:</strong> The register is designed for non-technical users. The GOV.UK Design System ensures consistent, accessible patterns that meet WCAG 2.2 AA standards. Every interaction has been designed and tested with real users.
+</div>

@@ -1,0 +1,47 @@
+# Screenshot data for Minute AI scenario
+# Used by screenshot.njk component to display locally-stored screenshots
+# Local path: /assets/images/screenshots/minute/
+
+scenario: minute
+scenarioTitle: "Minute AI"
+awsService: "Amazon Bedrock, AWS Transcribe"
+totalSteps: 6
+
+# Step-specific screenshots
+steps:
+  - step: 1
+    title: "Get your credentials"
+    screenshots:
+      - id: cloudformation-stacks-list
+        filename: cloudformation-stacks-list-desktop.png
+        alt: "CloudFormation Stacks page showing the Minute AI stack with CREATE_COMPLETE status"
+        caption: "Your stack should show CREATE_COMPLETE status in the us-east-1 region"
+        width: 1200
+        height: 963
+
+      - id: cloudformation-outputs
+        filename: cloudformation-outputs-desktop.png
+        alt: "CloudFormation Outputs tab showing MinuteUrl, BasicAuthUsername, BasicAuthPassword, CloudWatchLogsUrl, and DataBucketName values"
+        caption: "Copy the MinuteUrl, BasicAuthUsername, and BasicAuthPassword from the Outputs tab"
+        width: 1200
+        height: 963
+
+  - step: 2
+    title: "Log in to Minute AI"
+    screenshots:
+      - id: minute-homepage
+        filename: minute-homepage-desktop.png
+        alt: "Minute AI homepage showing the dashboard with a New meeting button and navigation sidebar"
+        caption: "The Minute AI homepage after logging in with your credentials"
+        width: 1200
+        height: 963
+
+  - step: 3
+    title: "Upload a meeting recording"
+    screenshots:
+      - id: minute-upload
+        filename: minute-upload-desktop.png
+        alt: "Minute AI upload page showing file upload area, template selector, and Upload button"
+        caption: "Upload an audio file and select a meeting template"
+        width: 1200
+        height: 963

@@ -1591,3 +1591,319 @@ scenarios:
         payback_months: 3
         disclaimer: "Figures are illustrative and based on typical UK council income management operations. Actual savings depend on transaction volumes and current process efficiency."
       committee_language: "LocalGov IMS demonstrates how open-source income management with GOV.UK Pay integration can reduce reconciliation time by 75% and save an estimated £45,000 annually through automated payment matching and suspense resolution."
+  - id: "digital-planning-register"
+    name: "Digital Planning Register"
+    headline: "Public planning application register used by UK councils"
+    bestFor: "Councils evaluating transparent public planning registers"
+    description: "Deploy the Digital Planning Register — the open-source public-facing application from TPXimpact that lets residents search and view planning applications across councils. Built with Next.js and the GOV.UK Design System, it aggregates data from BOPS (Back Office Planning System) APIs to provide a unified, accessible view of planning activity. Currently used by 9 UK councils including Camden, Lambeth, and Southwark."
+    difficulty: "beginner"
+    timeEstimate: "10 minutes"
+    primaryPersona: "service-manager"
+    gcloud_search_term: "Digital Planning Register open planning public"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "bops-planning"
+      - "planning-ai"
+    securitySummary: "Read-only application in isolated sandbox. No citizen data stored. All data fetched from external APIs."
+    skillsLearned:
+      - "Container orchestration with ECS Fargate"
+      - "CloudFront HTTPS distribution"
+      - "Next.js deployment on AWS"
+      - "GOV.UK Design System applications"
+    isMostPopular: false
+    featured: false
+    awsServices:
+      - "Amazon ECS"
+      - "Amazon CloudFront"
+      - "Elastic Load Balancing"
+      - "Amazon CloudWatch"
+    tags:
+      - "Planning"
+      - "Digital Transformation"
+      - "Open Source"
+      - "Next.js"
+      - "UK Councils"
+      - "GOV.UK"
+    businessOutcomes:
+      - "Experience a modern public planning register"
+      - "See how residents search and track planning applications"
+      - "Explore GOV.UK Design System accessibility patterns"
+      - "Understand the Open Digital Planning ecosystem"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "No technical expertise required"
+    url: "/scenarios/digital-planning-register/"
+    order: 11
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/digital-planning-register/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/digital-planning-register/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-digital-planning-register"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "digital-planning-register"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+      deploymentTime: "8 to 12 minutes"
+      deploymentPhases:
+        - "Creating VPC and networking (~30 seconds)"
+        - "Creating ECS Fargate service and ALB (~3 minutes)"
+        - "Creating CloudFront distribution (~5 minutes)"
+        - "Container health check passing (~2 minutes)"
+      outputs:
+        - name: "RegisterUrl"
+          description: "Digital Planning Register URL (HTTPS)"
+        - name: "CloudWatchLogsUrl"
+          description: "CloudWatch Logs"
+        - name: "ECSClusterUrl"
+          description: "ECS Cluster console link"
+    screenshots:
+      steps: []
+    success_metrics:
+      service_area: "Planning Transparency & Public Engagement"
+      primary_metric: "Resident access to planning information"
+      baseline:
+        description: "Public planning searches require visiting individual council websites or making FOI requests"
+        value: 15
+        unit: "minutes average search time"
+        source: "Local Government Association Digital Survey 2024"
+      projection:
+        description: "Unified register provides instant search across all applications"
+        value: 2
+        unit: "minutes average search time"
+        reduction_percent: 87
+      roi:
+        annual_savings: 45000
+        calculation: "Based on reduced FOI requests (~200/year at £45 each), reduced phone enquiries (~1,500/year at £8 each), and staff time savings"
+        payback_months: 3
+        disclaimer: "Figures are illustrative. Actual savings depend on council size, application volumes, and current digital maturity."
+      committee_language: "The Digital Planning Register provides residents with instant access to planning applications, reducing FOI requests and phone enquiries while improving transparency and public engagement."
+  - id: "planx"
+    name: "PlanX Digital Planning"
+    headline: "Create digital planning application flows with the open-source platform used by 18+ UK councils"
+    bestFor: "Planning departments creating citizen-facing digital planning services"
+    description: "Deploy the PlanX digital planning platform — the open-source tool by Open Systems Lab used by 18+ UK councils including Lambeth, Southwark, Camden, and Buckinghamshire. Service designers build planning application flows in a visual editor, and citizens use them to submit structured, machine-readable planning applications."
+    difficulty: "intermediate"
+    timeEstimate: "15 to 20 minutes"
+    primaryPersona: "service-manager"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "bops-planning"
+      - "planning-ai"
+    securitySummary: "Sample data only in isolated sandbox. All secrets auto-generated. No real citizen data."
+    skillsLearned:
+      - "Digital planning service design"
+      - "Container orchestration with ECS Fargate"
+      - "Aurora PostgreSQL with Hasura GraphQL"
+      - "React/Vite application deployment on AWS"
+    isMostPopular: false
+    featured: false
+    awsServices:
+      - "Amazon ECS"
+      - "Amazon Aurora"
+      - "Amazon S3"
+      - "Amazon CloudFront"
+      - "Elastic Load Balancing"
+    tags:
+      - "Planning"
+      - "Digital Transformation"
+      - "Open Source"
+      - "UK Councils"
+      - "PlanX"
+    businessOutcomes:
+      - "Experience visual flow editing for planning application services"
+      - "See how citizens interact with digital planning applications"
+      - "Explore structured planning data and the GraphQL API"
+      - "Understand the Open Digital Planning ecosystem"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "No technical expertise required"
+    url: "/scenarios/planx/"
+    order: 12
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/planx/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/planx/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-planx"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "planx"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+      deploymentTime: "10 to 15 minutes"
+      deploymentPhases:
+        - "Creating VPC, networking, and security groups (~30 seconds)"
+        - "Creating Aurora PostgreSQL database (~5 minutes)"
+        - "Creating ECS Fargate services and CloudFront (~3 minutes)"
+        - "Running database migrations and seed data (~2 minutes)"
+      outputs:
+        - name: "PlanXUrl"
+          description: "PlanX editor URL (HTTPS)"
+        - name: "PlanXLoginUrl"
+          description: "PlanX login page"
+        - name: "DemoUsername"
+          description: "Demo user email address"
+        - name: "DemoPassword"
+          description: "Demo user password"
+        - name: "HasuraConsoleUrl"
+          description: "Hasura GraphQL console URL"
+        - name: "HasuraAdminSecretOutput"
+          description: "Hasura admin secret for console access"
+    screenshots:
+      steps:
+        - stepNumber: 1
+          image: "/assets/images/screenshots/planx/planx-step-1-cfn-stack-outputs-desktop.png"
+          alt: "CloudFormation Outputs showing PlanX URL, demo credentials, and Hasura console URL"
+          annotation: "Find your PlanX URL, demo login credentials, and Hasura admin secret in the stack Outputs tab"
+        - stepNumber: 2
+          image: "/assets/images/screenshots/planx/planx-step-2-select-team-desktop.png"
+          alt: "PlanX editor showing NDX Demo Council in the team selector"
+          annotation: "After logging in, select NDX Demo Council to see the team's planning flows"
+        - stepNumber: 3
+          image: "/assets/images/screenshots/planx/planx-step-3-flow-editor-desktop.png"
+          alt: "PlanX visual flow editor showing drag-and-drop nodes for building planning applications"
+          annotation: "The flow editor lets service designers build planning application forms using drag-and-drop nodes"
+        - stepNumber: 4
+          image: "/assets/images/screenshots/planx/planx-step-4-preview-desktop.png"
+          alt: "PlanX preview showing the citizen-facing planning application form"
+          annotation: "Preview shows exactly what citizens see when filling in a planning application"
+        - stepNumber: 5
+          image: "/assets/images/screenshots/planx/planx-step-5-hasura-console-desktop.png"
+          alt: "Hasura GraphiQL explorer showing PlanX database schema"
+          annotation: "The Hasura console lets you explore the GraphQL API and query planning data directly"
+        - stepNumber: 6
+          image: "/assets/images/screenshots/planx/planx-console-ecs-clusters-desktop.png"
+          alt: "ECS console showing 4 running Fargate services for PlanX"
+          annotation: "Four ECS Fargate services power PlanX: Editor, API, Hasura, and ShareDB"
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/planx"
+      cloudformationPath: "cloudformation/scenarios/planx"
+      description: "CDK infrastructure for PlanX deployment on AWS with ECS Fargate, Aurora PostgreSQL, Hasura GraphQL, and CloudFront"
+    success_metrics:
+      service_area: "Planning & Digital Services"
+      primary_metric: "Planning application submission quality"
+      baseline:
+        description: "Paper and PDF planning applications average 40% invalid submission rate requiring rework"
+        value: 40
+        unit: "percent invalid submissions"
+        source: "ODP Programme research 2023"
+      projection:
+        description: "PlanX councils report structured digital submissions reduce invalid applications by 80%"
+        value: 8
+        reduction_percent: 80
+      roi:
+        annual_savings: 120000
+        calculation: "Based on ODP programme figures: 80% reduction in invalid submissions across ~2,000 applications/year at average rework cost of £75/application"
+        payback_months: 4
+        disclaimer: "Figures are illustrative and based on published ODP programme outcomes. Actual savings depend on application volumes, current rejection rates, and process efficiency."
+      committee_language: "PlanX demonstrates how digital planning application flows can reduce invalid submissions by 80%, saving an estimated £120,000 annually through structured data collection and automated validation."
+  - id: "minute"
+    name: "Minute AI"
+    headline: "AI-powered meeting transcription and minute generation"
+    bestFor: "Teams exploring AI tools for meeting productivity and record-keeping"
+    description: "Deploy Minute, an open-source AI tool built by i.AI (the UK Government's AI team), that transforms meeting recordings into structured, professional meeting minutes. Upload audio files, get automatic transcription via AWS Transcribe, then generate formatted minutes using Amazon Nova Pro via Amazon Bedrock. Includes multiple meeting templates (Cabinet, Planning Committee, General, and more), speaker identification, and a rich text editor for refining AI-generated output."
+    difficulty: "intermediate"
+    timeEstimate: "35 minutes"
+    primaryPersona: "service-manager"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "council-chatbot"
+      - "text-to-speech"
+    securitySummary: "NDX:Try session isolated - safe to experiment with full data protection"
+    skillsLearned:
+      - "Amazon Bedrock"
+      - "AWS Transcribe"
+      - "Amazon ECS Fargate"
+      - "Amazon Aurora"
+      - "Amazon SQS"
+    isMostPopular: false
+    featured: true
+    awsServices:
+      - "Amazon Bedrock"
+      - "AWS Transcribe"
+      - "Amazon ECS Fargate"
+      - "Amazon Aurora PostgreSQL"
+      - "Amazon SQS"
+      - "Amazon S3"
+      - "Amazon CloudFront"
+      - "AWS Cloud Map"
+    tags:
+      - "AI"
+      - "Meeting Minutes"
+      - "Transcription"
+      - "Productivity"
+    businessOutcomes:
+      - "Experience AI-powered meeting transcription and minute generation"
+      - "Evaluate how AI can reduce administrative overhead for meeting records"
+      - "Explore multiple minute templates for different meeting types"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "A meeting recording in MP3, WAV, or WebM format"
+    url: "/scenarios/minute/"
+    order: 10
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-isb-blueprints-568672915267.s3.us-east-1.amazonaws.com/scenarios/minute/template.yaml"
+      templateS3Url: "s3://ndx-try-isb-blueprints-568672915267/scenarios/minute/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-minute"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+      deploymentTime: "25 to 35 minutes"
+      deploymentPhases:
+        - "Creating VPC and networking (~30 seconds)"
+        - "Creating Aurora PostgreSQL database (~600 seconds)"
+        - "Creating SQS queues and S3 bucket (~30 seconds)"
+        - "Creating ECS Fargate services (~120 seconds)"
+        - "Creating CloudFront distribution (~300 seconds)"
+        - "Running database migrations (~30 seconds)"
+      outputs:
+        - name: "MinuteUrl"
+          description: "URL to access Minute AI"
+        - name: "BasicAuthUsername"
+          description: "Username for login"
+        - name: "BasicAuthPassword"
+          description: "Password for login (generated at deploy time)"
+        - name: "CloudWatchLogsUrl"
+          description: "CloudWatch Logs for monitoring"
+        - name: "DataBucketName"
+          description: "S3 bucket for audio data"
+    screenshots:
+      steps: []
+    success_metrics:
+      service_area: "Meeting Administration"
+      primary_metric: "Meeting minute production time"
+      baseline:
+        description: "Manual meeting minute production typically takes 2-4 hours per meeting"
+        value: 180
+        unit: "minutes per meeting"
+        source: "UK Government administrative efficiency benchmarks"
+      projection:
+        description: "AI-powered transcription and minute generation time"
+        value: 15
+        reduction_percent: 92
+      roi:
+        annual_savings: 48000
+        calculation: "Based on 200 meetings/year × 2.75 hours saved × £87/hour average officer cost"
+        payback_months: 1
+        disclaimer: "Figures are illustrative based on LGA pilot findings showing ~1 hour saved per 60-minute meeting. Actual savings depend on meeting volume and current processes."
+      committee_language: "Minute AI, built by i.AI, reduced meeting minute production time by over 90% in pilot evaluations across 25 councils, with transcription costs under £0.50 per meeting. Now available to try free through NDX:Try."

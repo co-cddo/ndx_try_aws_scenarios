@@ -1,0 +1,71 @@
+# Screenshot data for Digital Planning Register scenario
+# Used by screenshot.njk component to display screenshots in walkthrough steps
+# Images stored in src/assets/images/screenshots/digital-planning-register/
+
+scenario: digital-planning-register
+scenarioTitle: "Digital Planning Register"
+awsService: "Amazon ECS"
+totalSteps: 4
+
+# Step-specific screenshots
+steps:
+  - step: 1
+    title: "Access the Register"
+    screenshots:
+      - id: cfn-stacks-list
+        filename: 01-cfn-stacks-list.png
+        alt: "CloudFormation console showing digital-planning-register stack with UPDATE_COMPLETE status"
+        caption: "Find your digital-planning-register stack in the CloudFormation console"
+        width: 1024
+        height: 1024
+
+      - id: cfn-stack-outputs
+        filename: 02-cfn-stack-outputs.png
+        alt: "CloudFormation Outputs tab showing RegisterUrl, CloudWatchLogsUrl, and ECSClusterUrl"
+        caption: "The Outputs tab shows the register URL and console links"
+        width: 1024
+        height: 1024
+
+  - step: 2
+    title: "Explore Councils"
+    screenshots:
+      - id: homepage-council-selection
+        filename: 04-homepage-council-selection.png
+        alt: "Digital Planning Register homepage showing council selection with Public Council 1, Public Council 2, and Public overwritten options"
+        caption: "The homepage lets residents select their council to start browsing planning applications"
+        width: 1024
+        height: 900
+
+  - step: 3
+    title: "Search Planning Applications"
+    screenshots:
+      - id: council-applications
+        filename: 05-council-applications.png
+        alt: "Public Council 1 page showing search bar, quick filters, and recently published planning applications with references, addresses, and statuses"
+        caption: "The council page shows search, filters, and recently published applications"
+        width: 1024
+        height: 1024
+
+      - id: application-detail
+        filename: 06-application-detail.png
+        alt: "Application detail page showing OS Maps boundary, address, status (Appeal decided), application type, council decision (Refused), appeal decision (Allowed), progress timeline, and table of contents"
+        caption: "Application detail shows the full planning history including map, decisions, progress, documents, and comments"
+        width: 1024
+        height: 1024
+
+  - step: 4
+    title: "Review the Architecture"
+    screenshots:
+      - id: ecs-cluster
+        filename: 03-aws-ecs-cluster.png
+        alt: "ECS console showing NdxDpr-Cluster with 1 active service, 1 running task, and NdxDpr-Web Fargate service"
+        caption: "ECS Fargate cluster running the Digital Planning Register — a single lightweight container"
+        width: 1024
+        height: 1024
+
+# AWS Console screenshots (not step-specific, for exploration/architecture tours)
+console:
+  - id: ecs-cluster
+    filename: 03-aws-ecs-cluster.png
+    alt: "ECS console showing NdxDpr-Cluster with 1 active service and 1 running Fargate task"
+    caption: "ECS Fargate cluster running the Next.js application"

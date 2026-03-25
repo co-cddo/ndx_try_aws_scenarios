@@ -31,6 +31,7 @@ const SCENARIOS: ScenarioConfig[] = [
   { name: 'localgov-drupal', description: 'NDX:Try LocalGov Drupal - AI-enhanced CMS for UK councils' },
   { name: 'simply-readable', description: 'NDX:Try Simply Readable - Document Translation & Easy Read, built by Swindon Borough Council' },
   { name: 'localgov-ims', description: 'NDX:Try LocalGov IMS - Income Management System with GOV.UK Pay', parameterKeys: ['GovUkPayApiKey'] },
+  { name: 'minute', description: 'Minute AI - Meeting transcription and AI-powered minute generation' },
   { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 7 scenarios as nested stacks' },
 ];
 

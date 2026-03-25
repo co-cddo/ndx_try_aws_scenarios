@@ -1,0 +1,70 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Browse Planning Flows — PlanX Digital Planning Walkthrough"
+description: Explore the NDX Demo Council team and its planning application flows
+currentStep: 2
+totalSteps: 5
+timeEstimate: "3 minutes"
+scenarioId: planx
+---
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Browse Planning Flows" %}
+{% set stepDescription = "Explore the NDX Demo Council team to see how PlanX organises planning application flows by type." %}
+{% set timeEstimate = "3 minutes" %}
+{% set screenshotData = screenshots["planx"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 2 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "NDX Demo Council team is visible in the editor dashboard",
+  "Householder and LDC planning flows are listed",
+  "Each flow shows its current status and last edited date"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Explore the team dashboard</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>NDX Demo Council team</strong>
+    <p class="govuk-body">
+      After logging in, you'll see the <strong>NDX Demo Council</strong> team. This is a sample council set up to demonstrate PlanX's capabilities. In production, each council has its own team with its own set of flows.
+    </p>
+  </li>
+
+  <li>
+    <strong>Browse the planning flows</strong>
+    <p class="govuk-body">
+      The team dashboard lists the available planning flows. You should see flows for common planning application types:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Householder planning application</strong> — the most common type, covering extensions, loft conversions, and outbuildings</li>
+      <li><strong>Lawful Development Certificate</strong> — for confirming whether proposed or existing development is lawful</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Understand the flow structure</strong>
+    <p class="govuk-body">
+      Each flow in PlanX is a structured journey that guides an applicant through a series of questions. The questions determine:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>What type of planning permission is needed</li>
+      <li>What information and documents to collect</li>
+      <li>Which planning policies and constraints apply</li>
+      <li>Whether the application can be submitted digitally</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Check flow status</strong>
+    <p class="govuk-body">
+      Each flow shows its status. In the demo, flows are ready to edit and preview. In production, flows go through a review and publishing workflow before they're available to applicants.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>What you're seeing:</strong> This is the same editor interface used by councils like Lambeth, Southwark, and Camden to manage their digital planning services. Service designers create and maintain flows that thousands of citizens use to submit planning applications each year. <a href="https://www.planx.uk/" class="govuk-link">Learn more about PlanX</a>.
+</div>
