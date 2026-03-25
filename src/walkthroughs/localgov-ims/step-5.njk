@@ -1,0 +1,86 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 5: Test the Payment Portal — LocalGov IMS Walkthrough"
+description: Visit the citizen-facing payment portal and see how GOV.UK Pay integration works
+currentStep: 5
+totalSteps: 5
+timeEstimate: "3 minutes"
+scenarioId: localgov-ims
+---
+
+{% set stepNumber = 5 %}
+{% set stepTitle = "Test the Payment Portal" %}
+{% set stepDescription = "Visit the citizen-facing payment portal to see how residents interact with the system, and explore the GOV.UK Pay sandbox integration." %}
+{% set timeEstimate = "3 minutes" %}
+{% set screenshotData = screenshots["localgov-ims"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 5 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "You can access the citizen-facing payment portal via its CloudFront URL",
+  "You understand how the portal integrates with GOV.UK Pay for card payments",
+  "You've seen the complete end-to-end payment flow"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Visit the payment portal</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    Find the <strong>PaymentPortalUrl</strong> in your CloudFormation stack outputs.
+  </li>
+  <li>
+    Open it in your browser. The portal is the <strong>citizen-facing</strong> interface where residents make payments.
+  </li>
+  <li>
+    The portal requires a <strong>valid payment reference</strong> to display the payment form. Without one, you'll see a "Payment Error" page — this is expected behaviour (citizens receive payment references in their council letters).
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">Understanding the payment flow</h3>
+
+<p class="govuk-body">
+  In a live deployment, the payment flow works like this:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    A citizen receives a <strong>council tax bill</strong> with a payment reference and a link to the payment portal.
+  </li>
+  <li>
+    They visit the portal, enter their reference, and the system looks up their account and balance.
+  </li>
+  <li>
+    The portal redirects to <strong>GOV.UK Pay</strong> where the citizen enters their card details (using the GOV.UK Pay sandbox in this demo).
+  </li>
+  <li>
+    GOV.UK Pay processes the payment and redirects back to the portal with a confirmation.
+  </li>
+  <li>
+    The IMS API records the transaction, updates the account balance, and the payment appears in the <strong>admin Transactions</strong> list.
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>GOV.UK Pay sandbox:</strong> This demo uses the GOV.UK Pay sandbox environment. In production, councils connect their live GOV.UK Pay account with real payment processing. The sandbox allows testing the full flow with test card numbers.
+</div>
+
+<h3 class="govuk-heading-m">Explore the architecture</h3>
+
+<p class="govuk-body">
+  The deployment consists of:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Windows Server 2022 EC2</strong> (m5.xlarge) running IIS with three sites — Portal, Admin, and API</li>
+  <li><strong>RDS SQL Server Express</strong> hosting the IncomeManagement database with EF6 migrations</li>
+  <li><strong>Application Load Balancer</strong> routing traffic to ports 80 (Portal), 8081 (Admin), and 8082 (API)</li>
+  <li><strong>Three CloudFront distributions</strong> providing HTTPS termination for each interface</li>
+  <li><strong>GOV.UK Pay sandbox</strong> API integration for card payment processing</li>
+</ul>
+
+<p class="govuk-body govuk-!-margin-top-6">
+  <a href="/walkthroughs/localgov-ims/complete/" class="govuk-link govuk-link--no-visited-state">
+    Complete the walkthrough →
+  </a>
+</p>

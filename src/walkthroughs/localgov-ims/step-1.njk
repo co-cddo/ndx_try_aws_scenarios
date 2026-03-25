@@ -1,0 +1,55 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 1: Log In to the Admin Portal — LocalGov IMS Walkthrough"
+description: Find your credentials in CloudFormation outputs and log in to the IMS admin dashboard
+currentStep: 1
+totalSteps: 5
+timeEstimate: "3 minutes"
+scenarioId: localgov-ims
+---
+
+{% set stepNumber = 1 %}
+{% set stepTitle = "Log In to the Admin Portal" %}
+{% set stepDescription = "Find your credentials in the CloudFormation outputs and log in to the LocalGov IMS admin dashboard." %}
+{% set timeEstimate = "3 minutes" %}
+{% set screenshotData = screenshots["localgov-ims"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 1 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "You can see the CloudFormation stack outputs with portal URLs and credentials",
+  "You're logged in to the admin dashboard as tester1@your-organisation.com",
+  "The dashboard shows the navigation sidebar with all IMS modules"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Find your login credentials</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the CloudFormation console</strong> in your sandbox account and find the <code>ndx-try-localgov-ims</code> stack.
+  </li>
+  <li>
+    <strong>Go to the Outputs tab</strong> — you'll find:
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>AdminPortalUrl</strong> — the HTTPS URL for the admin interface</li>
+      <li><strong>PaymentPortalUrl</strong> — the HTTPS URL for the citizen payment portal</li>
+      <li><strong>AdminUsername</strong> — <code>admin</code> (but you'll log in with the email below)</li>
+      <li><strong>AdminPassword</strong> — the generated password for all users</li>
+    </ul>
+  </li>
+  <li>
+    <strong>Open the Admin Portal URL</strong> in your browser. You'll see the login page.
+  </li>
+  <li>
+    <strong>Log in</strong> with:
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Email:</strong> <code>tester1@your-organisation.com</code></li>
+      <li><strong>Password:</strong> the AdminPassword from CloudFormation outputs</li>
+    </ul>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>Tip:</strong> The system has several pre-configured users with different roles. You can also log in as <code>tester2@your-organisation.com</code> with the same password.
+</div>

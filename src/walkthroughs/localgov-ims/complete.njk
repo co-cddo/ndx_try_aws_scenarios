@@ -1,0 +1,203 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - LocalGov IMS"
+description: You've completed the LocalGov IMS income management system walkthrough
+currentStep: 6
+totalSteps: 5
+scenarioId: localgov-ims
+---
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">
+    Walkthrough complete
+  </h1>
+  <div class="govuk-panel__body">
+    You've explored the LocalGov IMS income management system with GOV.UK Pay
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  You've just experienced <a href="https://localgovims.digital" class="govuk-link">LocalGov IMS</a> — an open-source income management system designed for UK councils. In 20 minutes, you've seen the full income cycle: citizen payments, transaction management, suspense resolution, daily reconciliation, and bank file processing.
+</p>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f4b3;</span>
+      GOV.UK Pay integration
+    </h3>
+    <p class="govuk-body">
+      LocalGov IMS integrates directly with GOV.UK Pay, the government's shared payment platform. Citizens pay securely through a familiar, accessible interface. Payments flow automatically into the income management system with full audit trails.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Reduced payment processing costs, PCI DSS compliance handled by GOV.UK Pay
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f50d;</span>
+      Efficient suspense management
+    </h3>
+    <p class="govuk-body">
+      Unallocated payments are flagged immediately and presented in a clear workflow. Finance officers can search, match, and allocate payments quickly, keeping suspense balances low and audit-ready.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Reduced suspense balances, faster resolution, audit compliance
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f4ca;</span>
+      Daily reconciliation
+    </h3>
+    <p class="govuk-body">
+      eReturns provide a daily snapshot of all income received, broken down by payment method and fund. This is the foundation of accurate financial reporting and ensures that no income is lost or misallocated.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Accurate financial reporting, daily controls, reduced audit risk
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f3e6;</span>
+      Bank reconciliation
+    </h3>
+    <p class="govuk-body">
+      Automated bank file import and matching means that reconciliation — traditionally one of the most labour-intensive finance tasks — can be completed in minutes rather than hours.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Hours saved per week on reconciliation, fewer manual errors
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">Production readiness</h2>
+
+<p class="govuk-body">
+  This demo runs the same codebase that can be used in production. For a full deployment, you'd additionally want:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Feature</th>
+      <th scope="col" class="govuk-table__header">Demo status</th>
+      <th scope="col" class="govuk-table__header">Production requirement</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Custom domain</th>
+      <td class="govuk-table__cell">CloudFront URL</td>
+      <td class="govuk-table__cell">payments.yourcouncil.gov.uk</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">GOV.UK Pay</th>
+      <td class="govuk-table__cell">Sandbox API key</td>
+      <td class="govuk-table__cell">Live API key with real payment processing</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Database</th>
+      <td class="govuk-table__cell">SQL Server Express (RDS)</td>
+      <td class="govuk-table__cell">SQL Server Standard or Enterprise with Multi-AZ</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Data migration</th>
+      <td class="govuk-table__cell">200+ sample accounts</td>
+      <td class="govuk-table__cell">Import from existing income management system</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Backup</th>
+      <td class="govuk-table__cell">RDS automated (24hr sandbox)</td>
+      <td class="govuk-table__cell">Point-in-time recovery, cross-region backup</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Integrations</th>
+      <td class="govuk-table__cell">GOV.UK Pay only</td>
+      <td class="govuk-table__cell">Council Tax system, NNDR, housing, general ledger</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>Good news:</strong> The core platform you've just tested handles the essential income management workflows. The production checklist items are about integrating it into your council's existing financial infrastructure and data, not rebuilding the system.
+  </p>
+</div>
+
+{% set scenarioId = "localgov-ims" %}
+{% set scenarioName = "LocalGov IMS" %}
+{% set totalSteps = 5 %}
+{% include "components/completion-next-steps.njk" %}
+
+{% include "components/cleanup-instructions.njk" %}
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Learn more about LocalGov IMS</h2>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="https://localgovims.digital" class="govuk-link">LocalGov IMS</a> — full details on the project website</li>
+    <li><a href="https://www.payments.service.gov.uk/" class="govuk-link">GOV.UK Pay</a> — the government's shared payment platform</li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Questions or feedback?</h2>
+
+  <p class="govuk-body">
+    We'd love to hear about your experience with this walkthrough:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .ndx-takeaway-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ndx-takeaway-card__icon {
+    font-size: 32px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-takeaway-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-takeaway-card h3 {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

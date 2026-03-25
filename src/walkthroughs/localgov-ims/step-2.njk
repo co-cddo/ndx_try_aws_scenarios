@@ -1,0 +1,62 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Explore Accounts and Transactions — LocalGov IMS Walkthrough"
+description: Browse account holders, view transaction history, and search across council funds
+currentStep: 2
+totalSteps: 5
+timeEstimate: "5 minutes"
+scenarioId: localgov-ims
+---
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Explore Accounts and Transactions" %}
+{% set stepDescription = "Browse the pre-seeded account holders, view their details, and explore the transaction history across multiple council fund types." %}
+{% set timeEstimate = "5 minutes" %}
+{% set screenshotData = screenshots["localgov-ims"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 2 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "You can browse 40 account holders with names, addresses, and balances",
+  "You can view individual account details including fund type and payment history",
+  "You can search and filter 500 transactions by fund type, date, amount, and more"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Browse account holders</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    Click <strong>Accounts</strong> in the left sidebar. You'll see 40 pre-seeded account holders across 2 pages.
+  </li>
+  <li>
+    Each account shows the <strong>reference number</strong>, <strong>name</strong>, <strong>address</strong>, and <strong>current balance</strong> (in pounds sterling).
+  </li>
+  <li>
+    Try the <strong>search filters</strong> — search by account reference, surname, fund type, postcode, or address.
+  </li>
+  <li>
+    Click <strong>View</strong> on any account to see full details — title, name, address, fund name, period debit/credit, and creation date.
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">Explore transactions</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    Click <strong>Transactions</strong> in the sidebar. You'll see 500 pre-seeded transactions across 25 pages.
+  </li>
+  <li>
+    Transactions span multiple <strong>fund types</strong> — Council Tax, Parking Fines, Business Rates, Benefit Overpayments, and more.
+  </li>
+  <li>
+    Each transaction shows the <strong>date</strong>, <strong>method of payment (MOP)</strong>, <strong>receipt reference</strong>, <strong>fund type</strong>, <strong>account</strong>, <strong>narrative</strong>, and <strong>amount</strong>.
+  </li>
+  <li>
+    Use the comprehensive search filters — filter by fund type, MOP code, date range, amount, account reference, or narrative.
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>Real-world context:</strong> In a live council deployment, these transactions would come from citizen payments via GOV.UK Pay, bank file imports, counter payments, and automated standing orders.
+</div>

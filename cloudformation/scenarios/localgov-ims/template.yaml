@@ -1,0 +1,2700 @@
+# Auto-generated from CDK synthesis. Do not edit.
+{
+  "Description": "LocalGov IMS Income Management System - Windows EC2 with IIS and GOV.UK Pay integration",
+  "Resources": {
+    "AppRegistryApplication": {
+      "Type": "AWS::ServiceCatalogAppRegistry::Application",
+      "Properties": {
+        "Description": "NDX:Try - LocalGov IMS Income Management System",
+        "Name": {
+          "Fn::Join": [
+            "",
+            [
+              "NDXTry_LocalGov_IMS_",
+              {
+                "Ref": "AWS::AccountId"
+              }
+            ]
+          ]
+        },
+        "Tags": {
+          "Project": "ndx-try-aws-scenarios",
+          "Scenario": "localgov-ims"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/AppRegistryApplication"
+      }
+    },
+    "AppRegistryAssociation": {
+      "Type": "AWS::ServiceCatalogAppRegistry::ResourceAssociation",
+      "Properties": {
+        "Application": {
+          "Fn::GetAtt": [
+            "AppRegistryApplication",
+            "Id"
+          ]
+        },
+        "Resource": {
+          "Ref": "AWS::StackId"
+        },
+        "ResourceType": "CFN_STACK"
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/AppRegistryAssociation"
+      }
+    },
+    "ReferenceSaltSecretBF23774F": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "IMS payment reference salt",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "REFERENCE_SALT",
+          "PasswordLength": 32,
+          "SecretStringTemplate": "{}"
+        },
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/ReferenceSaltSecret/Resource"
+      }
+    },
+    "AdminPasswordSecret47C701F9": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "IMS admin password",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "ADMIN_PASSWORD",
+          "PasswordLength": 16,
+          "SecretStringTemplate": "{}"
+        },
+        "Name": "ndx-ims-admin-password",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/AdminPasswordSecret/Resource"
+      }
+    },
+    "NetworkingVpc6B5E6F44": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "NdxIms-VPC"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/Resource"
+      }
+    },
+    "NetworkingVpcPublicSubnet1Subnet918289EE": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.0.0.0/24",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "LocalGovImsStack/Networking/Vpc/PublicSubnet1"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/PublicSubnet1/Subnet"
+      }
+    },
+    "NetworkingVpcPublicSubnet1RouteTable8FB3C18A": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "LocalGovImsStack/Networking/Vpc/PublicSubnet1"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/PublicSubnet1/RouteTable"
+      }
+    },
+    "NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "NetworkingVpcPublicSubnet1RouteTable8FB3C18A"
+        },
+        "SubnetId": {
+          "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/PublicSubnet1/RouteTableAssociation"
+      }
+    },
+    "NetworkingVpcPublicSubnet1DefaultRoute80C01FA6": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "NetworkingVpcIGW21218DAB"
+        },
+        "RouteTableId": {
+          "Ref": "NetworkingVpcPublicSubnet1RouteTable8FB3C18A"
+        }
+      },
+      "DependsOn": [
+        "NetworkingVpcVPCGW12E561D8"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/PublicSubnet1/DefaultRoute"
+      }
+    },
+    "NetworkingVpcPublicSubnet2Subnet9D9E5AFB": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "CidrBlock": "10.0.1.0/24",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "LocalGovImsStack/Networking/Vpc/PublicSubnet2"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/PublicSubnet2/Subnet"
+      }
+    },
+    "NetworkingVpcPublicSubnet2RouteTable22886677": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "LocalGovImsStack/Networking/Vpc/PublicSubnet2"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/PublicSubnet2/RouteTable"
+      }
+    },
+    "NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "NetworkingVpcPublicSubnet2RouteTable22886677"
+        },
+        "SubnetId": {
+          "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/PublicSubnet2/RouteTableAssociation"
+      }
+    },
+    "NetworkingVpcPublicSubnet2DefaultRouteDF98F60F": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "NetworkingVpcIGW21218DAB"
+        },
+        "RouteTableId": {
+          "Ref": "NetworkingVpcPublicSubnet2RouteTable22886677"
+        }
+      },
+      "DependsOn": [
+        "NetworkingVpcVPCGW12E561D8"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/PublicSubnet2/DefaultRoute"
+      }
+    },
+    "NetworkingVpcIGW21218DAB": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "NdxIms-VPC"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/IGW"
+      }
+    },
+    "NetworkingVpcVPCGW12E561D8": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "NetworkingVpcIGW21218DAB"
+        },
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Vpc/VPCGW"
+      }
+    },
+    "NetworkingAlbSecurityGroup5ADC578E": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "ALB security group for LocalGov IMS",
+        "GroupName": "NdxIms-ALB-SG",
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow HTTP from internet (Portal)",
+            "FromPort": 80,
+            "IpProtocol": "tcp",
+            "ToPort": 80
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow HTTP:8081 from internet (Admin)",
+            "FromPort": 8081,
+            "IpProtocol": "tcp",
+            "ToPort": 8081
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow HTTP:8082 from internet (Api)",
+            "FromPort": 8082,
+            "IpProtocol": "tcp",
+            "ToPort": 8082
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/AlbSecurityGroup/Resource"
+      }
+    },
+    "NetworkingAlbSecurityGrouptoLocalGovImsStackNetworkingEc2SecurityGroupBF39AA4D80F614261D": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "Description": "Allow HTTP:80 to EC2 (Portal)",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingEc2SecurityGroup8078F069",
+            "GroupId"
+          ]
+        },
+        "FromPort": 80,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAlbSecurityGroup5ADC578E",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 80
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/AlbSecurityGroup/to LocalGovImsStackNetworkingEc2SecurityGroupBF39AA4D:80"
+      }
+    },
+    "NetworkingAlbSecurityGrouptoLocalGovImsStackNetworkingEc2SecurityGroupBF39AA4D8081158FFB77": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "Description": "Allow HTTP:8081 to EC2 (Admin)",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingEc2SecurityGroup8078F069",
+            "GroupId"
+          ]
+        },
+        "FromPort": 8081,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAlbSecurityGroup5ADC578E",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 8081
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/AlbSecurityGroup/to LocalGovImsStackNetworkingEc2SecurityGroupBF39AA4D:8081"
+      }
+    },
+    "NetworkingAlbSecurityGrouptoLocalGovImsStackNetworkingEc2SecurityGroupBF39AA4D80822CDFCF36": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "Description": "Allow HTTP:8082 to EC2 (Api)",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingEc2SecurityGroup8078F069",
+            "GroupId"
+          ]
+        },
+        "FromPort": 8082,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAlbSecurityGroup5ADC578E",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 8082
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/AlbSecurityGroup/to LocalGovImsStackNetworkingEc2SecurityGroupBF39AA4D:8082"
+      }
+    },
+    "NetworkingEc2SecurityGroup8078F069": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "EC2 instance security group for LocalGov IMS",
+        "GroupName": "NdxIms-EC2-SG",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Ec2SecurityGroup/Resource"
+      }
+    },
+    "NetworkingEc2SecurityGroupfromLocalGovImsStackNetworkingAlbSecurityGroup0D66808980DDD6A094": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "Allow HTTP:80 from ALB (Portal)",
+        "FromPort": 80,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingEc2SecurityGroup8078F069",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAlbSecurityGroup5ADC578E",
+            "GroupId"
+          ]
+        },
+        "ToPort": 80
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Ec2SecurityGroup/from LocalGovImsStackNetworkingAlbSecurityGroup0D668089:80"
+      }
+    },
+    "NetworkingEc2SecurityGroupfromLocalGovImsStackNetworkingAlbSecurityGroup0D6680898081025374DC": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "Allow HTTP:8081 from ALB (Admin)",
+        "FromPort": 8081,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingEc2SecurityGroup8078F069",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAlbSecurityGroup5ADC578E",
+            "GroupId"
+          ]
+        },
+        "ToPort": 8081
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Ec2SecurityGroup/from LocalGovImsStackNetworkingAlbSecurityGroup0D668089:8081"
+      }
+    },
+    "NetworkingEc2SecurityGroupfromLocalGovImsStackNetworkingAlbSecurityGroup0D66808980820DF31DEC": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "Allow HTTP:8082 from ALB (Api)",
+        "FromPort": 8082,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingEc2SecurityGroup8078F069",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingAlbSecurityGroup5ADC578E",
+            "GroupId"
+          ]
+        },
+        "ToPort": 8082
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/Ec2SecurityGroup/from LocalGovImsStackNetworkingAlbSecurityGroup0D668089:8082"
+      }
+    },
+    "NetworkingRdsSecurityGroupE7B624B5": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "RDS SQL Server security group for LocalGov IMS",
+        "GroupName": "NdxIms-RDS-SG",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "255.255.255.255/32",
+            "Description": "Disallow all traffic",
+            "FromPort": 252,
+            "IpProtocol": "icmp",
+            "ToPort": 86
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/RdsSecurityGroup/Resource"
+      }
+    },
+    "NetworkingRdsSecurityGroupfromLocalGovImsStackNetworkingEc2SecurityGroupBF39AA4D1433E42FEE03": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "Allow SQL Server from EC2",
+        "FromPort": 1433,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "NetworkingRdsSecurityGroupE7B624B5",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "NetworkingEc2SecurityGroup8078F069",
+            "GroupId"
+          ]
+        },
+        "ToPort": 1433
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Networking/RdsSecurityGroup/from LocalGovImsStackNetworkingEc2SecurityGroupBF39AA4D:1433"
+      }
+    },
+    "DatabaseSqlServerSubnetGroup678A64AC": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "Subnet group for SqlServer database",
+        "SubnetIds": [
+          {
+            "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
+          },
+          {
+            "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Database/SqlServer/SubnetGroup/Default"
+      }
+    },
+    "LocalGovImsStackDatabaseSqlServerSecret7CC0726Be508873c601c33bbc4e8c0ce1f60dd6e": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": {
+          "Fn::Join": [
+            "",
+            [
+              "Generated by the CDK for stack: ",
+              {
+                "Ref": "AWS::StackName"
+              }
+            ]
+          ]
+        },
+        "GenerateSecretString": {
+          "ExcludeCharacters": "' \"\\/@#%:<>?[]^`{|}$&()+,;=~",
+          "GenerateStringKey": "password",
+          "PasswordLength": 30,
+          "SecretStringTemplate": "{\"username\":\"admin\"}"
+        },
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Database/SqlServer/Secret/Resource"
+      }
+    },
+    "DatabaseSqlServerSecretAttachmentB1DEF38C": {
+      "Type": "AWS::SecretsManager::SecretTargetAttachment",
+      "Properties": {
+        "SecretId": {
+          "Ref": "LocalGovImsStackDatabaseSqlServerSecret7CC0726Be508873c601c33bbc4e8c0ce1f60dd6e"
+        },
+        "TargetId": {
+          "Ref": "DatabaseSqlServerEA975539"
+        },
+        "TargetType": "AWS::RDS::DBInstance"
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Database/SqlServer/Secret/Attachment/Resource"
+      }
+    },
+    "DatabaseSqlServerEA975539": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "AllocatedStorage": "20",
+        "BackupRetentionPeriod": 1,
+        "CopyTagsToSnapshot": true,
+        "DBInstanceClass": "db.t3.medium",
+        "DBSubnetGroupName": {
+          "Ref": "DatabaseSqlServerSubnetGroup678A64AC"
+        },
+        "DeletionProtection": false,
+        "Engine": "sqlserver-ex",
+        "EngineVersion": "16.00",
+        "MasterUserPassword": {
+          "Fn::Join": [
+            "",
+            [
+              "{{resolve:secretsmanager:",
+              {
+                "Ref": "LocalGovImsStackDatabaseSqlServerSecret7CC0726Be508873c601c33bbc4e8c0ce1f60dd6e"
+              },
+              ":SecretString:password::}}"
+            ]
+          ]
+        },
+        "MasterUsername": "admin",
+        "MaxAllocatedStorage": 50,
+        "PubliclyAccessible": false,
+        "StorageType": "gp2",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "VPCSecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "NetworkingRdsSecurityGroupE7B624B5",
+              "GroupId"
+            ]
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Database/SqlServer/Resource"
+      }
+    },
+    "ComputeLogGroup1A40385B": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/ndx-ims/production",
+        "RetentionInDays": 7,
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/LogGroup/Resource"
+      }
+    },
+    "ComputeEc2RoleB3EBEEC8": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/AmazonSSMManagedInstanceCore"
+              ]
+            ]
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/CloudWatchAgentServerPolicy"
+              ]
+            ]
+          }
+        ],
+        "RoleName": "InnovationSandbox-ndx-ims-ec2",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/Ec2Role/Resource"
+      }
+    },
+    "ComputeEc2RoleDefaultPolicy0D81FF53": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "DatabaseSqlServerSecretAttachmentB1DEF38C"
+              }
+            },
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "ReferenceSaltSecretBF23774F"
+              }
+            },
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "AdminPasswordSecret47C701F9"
+              }
+            },
+            {
+              "Action": [
+                "cloudformation:DescribeStackResource",
+                "cloudformation:SignalResource"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "ComputeEc2RoleDefaultPolicy0D81FF53",
+        "Roles": [
+          {
+            "Ref": "ComputeEc2RoleB3EBEEC8"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/Ec2Role/DefaultPolicy/Resource"
+      }
+    },
+    "ComputeServerInstanceProfileFA728170": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "ComputeEc2RoleB3EBEEC8"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/Server/InstanceProfile"
+      }
+    },
+    "ComputeServerBF6B7851": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "VolumeSize": 50,
+              "VolumeType": "gp3"
+            }
+          }
+        ],
+        "IamInstanceProfile": {
+          "Ref": "ComputeServerInstanceProfileFA728170"
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiwindowslatestWindowsServer2022EnglishFullBaseC96584B6F00A464EAD1953AFF4B05118Parameter"
+        },
+        "InstanceType": "m5a.xlarge",
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "NetworkingEc2SecurityGroup8078F069",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetId": {
+          "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
+        },
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "NdxIms-Server"
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "<powershell>New-Item -ItemType Directory -Force -Path C:\\setup | Out-Null\n\n# Provision files via cfn-init (reads CloudFormation::Init metadata)\n& \"C:\\Program Files\\Amazon\\cfn-bootstrap\\cfn-init.exe\" -v --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --resource ComputeServerBF6B7851 --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n\n# Read secrets from Secrets Manager at runtime (dynamic refs dont resolve in UserData)\n$dbHost = '",
+                {
+                  "Fn::GetAtt": [
+                    "DatabaseSqlServerEA975539",
+                    "Endpoint.Address"
+                  ]
+                },
+                "'\n$dbUser = 'admin'\n$dbPassword = ((Get-SECSecretValue -SecretId '",
+                {
+                  "Ref": "DatabaseSqlServerSecretAttachmentB1DEF38C"
+                },
+                "' -Region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ").SecretString | ConvertFrom-Json).password\n$referenceSalt = ((Get-SECSecretValue -SecretId '",
+                {
+                  "Ref": "ReferenceSaltSecretBF23774F"
+                },
+                "' -Region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ").SecretString | ConvertFrom-Json).REFERENCE_SALT\n$adminPassword = ((Get-SECSecretValue -SecretId '",
+                {
+                  "Ref": "AdminPasswordSecret47C701F9"
+                },
+                "' -Region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ").SecretString | ConvertFrom-Json).ADMIN_PASSWORD\n$govukPayApiKey = '",
+                {
+                  "Ref": "GovUkPayApiKey"
+                },
+                "'\n$portalUrl = 'https://",
+                {
+                  "Fn::GetAtt": [
+                    "CDNPortalDistribution21FC41F2",
+                    "DomainName"
+                  ]
+                },
+                "'\n$adminUrl = 'https://",
+                {
+                  "Fn::GetAtt": [
+                    "CDNAdminDistributionC60AA7C2",
+                    "DomainName"
+                  ]
+                },
+                "'\n$govukpayUrl = 'https://",
+                {
+                  "Fn::GetAtt": [
+                    "CDNGovUkPayDistribution0EFD596D",
+                    "DomainName"
+                  ]
+                },
+                "'\n\n# Run setup (ErrorActionPreference=Continue so native command stderr doesnt abort)\n$setupExitCode = 0\n$ErrorActionPreference = \"Continue\"\ntry {\n    & C:\\setup\\setup.ps1\n    if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw \"setup.ps1 exited with code $LASTEXITCODE\" }\n} catch {\n    Write-Host \"SETUP FAILED: $_\"\n    $setupExitCode = 1\n}\n\n# Signal CloudFormation\n& \"C:\\Program Files\\Amazon\\cfn-bootstrap\\cfn-signal.exe\" -e $setupExitCode --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --resource ComputeServerBF6B7851 --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "</powershell>"
+              ]
+            ]
+          }
+        }
+      },
+      "DependsOn": [
+        "ComputeEc2RoleDefaultPolicy0D81FF53",
+        "ComputeEc2RoleB3EBEEC8"
+      ],
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Count": 1,
+          "Timeout": "PT45M"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/Server/Resource",
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "files": {
+              "C:\\setup\\setup.ps1": {
+                "content": "# =============================================================================\n# LocalGov IMS -- EC2 Setup Script\n# =============================================================================\n# Variables must be set before running this script:\n#   $dbHost, $dbPassword, $dbUser, $referenceSalt, $adminPassword,\n#   $govukPayApiKey, $portalUrl, $adminUrl, $govukpayUrl\n# Seed data SQL must be at: C:\\setup\\seed-data.sql\n# =============================================================================\n\n$ErrorActionPreference = \"Stop\"\n[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12\n$setupDir = \"C:\\setup\"\n\nWrite-Host \"=============================================\"\nWrite-Host \"  LocalGov IMS -- EC2 Setup\"\nWrite-Host \"=============================================\"\n\n# Ensure nuget.org is configured as a package source (Windows Server default is empty)\n$nugetConfigPath = \"$env:APPDATA\\NuGet\\NuGet.Config\"\nif (-not (Test-Path $nugetConfigPath) -or -not (Select-String -Path $nugetConfigPath -Pattern 'nuget.org' -Quiet)) {\n    New-Item -ItemType Directory -Force -Path (Split-Path $nugetConfigPath) | Out-Null\n    @\"\n<?xml version=\"1.0\"?>\n<configuration>\n  <packageSources>\n    <add key=\"nuget.org\" value=\"https://api.nuget.org/v3/index.json\" />\n  </packageSources>\n</configuration>\n\"@ | Set-Content $nugetConfigPath -Encoding UTF8\n    Write-Host \"  Configured nuget.org package source\"\n}\n\n# ADO.NET helper — go-sqlcmd has incompatible CLI syntax, so use .NET SqlClient directly\nfunction Invoke-Sql($query, $db = 'master') {\n    $conn = New-Object System.Data.SqlClient.SqlConnection(\"Server=$dbHost;Database=$db;User Id=$dbUser;Password=$dbPassword;TrustServerCertificate=True\")\n    $conn.Open()\n    $cmd = $conn.CreateCommand()\n    $cmd.CommandText = $query\n    $cmd.CommandTimeout = 120\n    try { return $cmd.ExecuteNonQuery() } finally { $conn.Close() }\n}\n\nfunction Invoke-SqlScalar($query, $db = 'master') {\n    $conn = New-Object System.Data.SqlClient.SqlConnection(\"Server=$dbHost;Database=$db;User Id=$dbUser;Password=$dbPassword;TrustServerCertificate=True\")\n    $conn.Open()\n    $cmd = $conn.CreateCommand()\n    $cmd.CommandText = $query\n    try { return $cmd.ExecuteScalar() } finally { $conn.Close() }\n}\n\n# =============================================================================\n# Step 1/12: Install IIS + ASP.NET 4.8\n# =============================================================================\nWrite-Host \"=== Step 1/12: Installing IIS and ASP.NET ===\"\nInstall-WindowsFeature Web-Server, Web-Asp-Net45, Web-ISAPI-Ext, Web-ISAPI-Filter, Web-Net-Ext45, Web-Mgmt-Console, NET-Framework-45-ASPNET -IncludeManagementTools\nWrite-Host \"  IIS installed\"\n\n# =============================================================================\n# Step 2/12: Download and install tools\n# =============================================================================\nWrite-Host \"=== Step 2/12: Installing build tools ===\"\n\n# NuGet CLI\nInvoke-WebRequest \"https://dist.nuget.org/win-x86-commandline/latest/nuget.exe\" -OutFile \"$setupDir\\nuget.exe\" -UseBasicParsing\nWrite-Host \"  NuGet CLI downloaded\"\n\n# SqlServer PowerShell module (for Invoke-Sqlcmd — used for seed SQL with :setvar)\nInstall-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction SilentlyContinue\nInstall-Module SqlServer -Force -AllowClobber -ErrorAction SilentlyContinue\nWrite-Host \"  SqlServer module installed\"\n\n# VS Build Tools 2022 (WebBuildTools + .NET 4.8.1 targeting pack)\nWrite-Host \"  Installing VS Build Tools 2022 (this takes several minutes)...\"\nInvoke-WebRequest \"https://aka.ms/vs/17/release/vs_buildtools.exe\" -OutFile \"$setupDir\\vs_buildtools.exe\" -UseBasicParsing\n$proc = Start-Process \"$setupDir\\vs_buildtools.exe\" -Wait -PassThru -ArgumentList `\n    '--quiet', '--wait', '--norestart', '--nocache', `\n    '--add', 'Microsoft.VisualStudio.Workload.WebBuildTools', `\n    '--add', 'Microsoft.VisualStudio.Component.WebDeploy', `\n    '--add', 'Microsoft.Net.Component.4.8.1.TargetingPack', `\n    '--add', 'Microsoft.Net.Component.4.8.1.SDK'\nif ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {\n    Write-Error \"VS Build Tools install failed (exit $($proc.ExitCode))\"\n    exit 1\n}\nWrite-Host \"  VS Build Tools installed\"\n\n$msbuild = \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe\"\nif (-not (Test-Path $msbuild)) { Write-Error \"MSBuild not found at $msbuild\"; exit 1 }\n\n# =============================================================================\n# Step 3/12: Download source code\n# =============================================================================\nWrite-Host \"=== Step 3/12: Downloading source code ===\"\n\nInvoke-WebRequest \"https://github.com/LocalGovIMS/localgov-ims/archive/refs/heads/main.zip\" -OutFile \"$setupDir\\ims.zip\" -UseBasicParsing\nExpand-Archive \"$setupDir\\ims.zip\" -DestinationPath \"$setupDir\" -Force\n$imsDir = (Get-ChildItem \"$setupDir\\localgov-ims-*\" -Directory)[0].FullName\nWrite-Host \"  IMS source: $imsDir\"\n\n# =============================================================================\n# Step 4/12: Build IMS (.NET Framework 4.8.1)\n# =============================================================================\nWrite-Host \"=== Step 4/12: Building IMS ===\"\n\n$sln = (Get-ChildItem $imsDir -Filter \"*.sln\" -Recurse)[0].FullName\n# NuGet warns \"Error reading msbuild project information\" but packages.config restore works fine\n& \"$setupDir\\nuget.exe\" restore $sln\nWrite-Host \"  NuGet restore done (exit code: $LASTEXITCODE)\"\n\n# Build entire solution — Configuration=Live maps to Release for class libs at solution level.\n# Test projects may fail (assembly conflicts) but web apps build fine.\n& $msbuild $sln /p:Configuration=Live /verbosity:minimal /m\n$srcBase = Join-Path $imsDir \"src\"\nforeach ($app in @('PaymentPortal', 'Admin', 'Api')) {\n    $bin = Join-Path $srcBase \"$app\\bin\"\n    if (-not (Test-Path $bin) -or (Get-ChildItem \"$bin\\*.dll\" -ErrorAction SilentlyContinue).Count -eq 0) {\n        Write-Error \"$app did not build (no DLLs in $bin)\"; exit 1\n    }\n}\nWrite-Host \"  Build complete (web apps verified)\"\n\n# =============================================================================\n# Step 5/12: Deploy to IIS directories\n# =============================================================================\nWrite-Host \"=== Step 5/12: Deploying to IIS ===\"\n\n$srcBase = Join-Path $imsDir \"src\"\n$apps = @{ portal = 'PaymentPortal'; admin = 'Admin'; api = 'Api' }\n\nforeach ($entry in $apps.GetEnumerator()) {\n    $src = Join-Path $srcBase $entry.Value\n    $dest = \"C:\\inetpub\\$($entry.Key)\"\n    New-Item -ItemType Directory -Force -Path $dest | Out-Null\n    robocopy $src $dest /E /XD obj packages node_modules Properties .git /XF *.cs *.csproj *.csproj.user *.sln /NFL /NDL /NJH /NJS /NP\n    if ($LASTEXITCODE -ge 8) { Write-Error \"robocopy failed for $($entry.Value)\"; exit 1 }\n    Write-Host \"  Deployed $($entry.Value) -> $dest\"\n}\n\n# =============================================================================\n# Step 6/12: Configure IIS -- 3 sites on ports 80/8081/8082\n# =============================================================================\nWrite-Host \"=== Step 6/12: Configuring IIS ===\"\n\n$appcmd = \"$env:windir\\system32\\inetsrv\\appcmd.exe\"\n& $appcmd delete site \"Default Web Site\" 2>$null\n\n$sites = @(\n    @{ Name = 'Portal'; Port = 80; Path = 'portal' }\n    @{ Name = 'Admin';  Port = 8081; Path = 'admin' }\n    @{ Name = 'Api';    Port = 8082; Path = 'api' }\n)\n\nforeach ($site in $sites) {\n    $pool = \"IMS$($site.Name)\"\n    $name = \"IMS$($site.Name)\"\n    & $appcmd add apppool /name:$pool\n    & $appcmd set apppool /apppool.name:$pool /managedRuntimeVersion:v4.0 /managedPipelineMode:Integrated /enable32BitAppOnWin64:false\n    & $appcmd add site /name:$name /physicalPath:\"C:\\inetpub\\$($site.Path)\" /bindings:\"http/*:$($site.Port):\"\n    if ($LASTEXITCODE -ne 0) { Write-Error \"Failed to create site $name\"; exit 1 }\n    & $appcmd set app \"$name/\" /applicationPool:$pool\n    Set-Content -Path \"C:\\inetpub\\$($site.Path)\\health\" -Value \"OK\" -Force\n    Write-Host \"  $name on port $($site.Port)\"\n}\n\n# MIME mapping for extensionless /health\n& $appcmd set config /section:staticContent /+\"[fileExtension='.',mimeType='text/plain']\" 2>$null\n\n# Uploads directory (required by IMS)\nNew-Item -ItemType Directory -Force -Path \"C:\\Uploads\" | Out-Null\n\n# Windows Firewall — allow ALB health checks on non-standard ports\nNew-NetFirewallRule -DisplayName \"IMS Admin 8081\" -Direction Inbound -LocalPort 8081 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue\nNew-NetFirewallRule -DisplayName \"IMS Api 8082\" -Direction Inbound -LocalPort 8082 -Protocol TCP -Action Allow -ErrorAction SilentlyContinue\n\n# Start IIS\nStart-Service W3SVC -ErrorAction SilentlyContinue\nWrite-Host \"  IIS started\"\n\n# =============================================================================\n# Step 7/12: Patch Web.config files\n# =============================================================================\nWrite-Host \"=== Step 7/12: Patching Web.config ===\"\n\n$connStr = \"Server=$dbHost;Database=IncomeManagement;User Id=$dbUser;Password=$dbPassword;TrustServerCertificate=True\"\n\nforeach ($app in @('portal', 'admin', 'api')) {\n    $webConfig = \"C:\\inetpub\\$app\\Web.config\"\n    if (-not (Test-Path $webConfig)) { Write-Host \"  WARNING: $webConfig not found\"; continue }\n\n    [xml]$doc = Get-Content $webConfig\n\n    # IncomeDb connection string\n    $node = $doc.configuration.connectionStrings.add | Where-Object { $_.name -eq 'IncomeDb' }\n    if ($node) { $node.connectionString = $connStr }\n\n    # DefaultConnection for ASP.NET Identity (Admin login requires this)\n    $dc = $doc.configuration.connectionStrings.add | Where-Object { $_.name -eq 'DefaultConnection' }\n    if (-not $dc) {\n        $newConn = $doc.CreateElement('add')\n        $newConn.SetAttribute('name', 'DefaultConnection')\n        $newConn.SetAttribute('connectionString', $connStr)\n        $newConn.SetAttribute('providerName', 'System.Data.SqlClient')\n        $doc.configuration.connectionStrings.AppendChild($newConn) | Out-Null\n    } else {\n        $dc.connectionString = $connStr\n    }\n\n    # appSettings\n    $settings = $doc.configuration.appSettings.add\n    if ($settings) {\n        foreach ($s in $settings) {\n            switch ($s.key) {\n                'ReferenceSalt'     { $s.value = $referenceSalt }\n                'Environment'       { $s.value = 'Demo' }\n                'PortalPaymentsURL' { $s.value = $portalUrl }\n            }\n        }\n    }\n\n    $doc.Save($webConfig)\n    Write-Host \"  Patched $app\"\n}\n\n# Recycle app pools to pick up config changes\nforeach ($pool in @('IMSPortal', 'IMSAdmin', 'IMSApi')) {\n    & $appcmd recycle apppool /apppool.name:$pool 2>$null\n}\nWrite-Host \"  App pools recycled\"\n\n# =============================================================================\n# Step 8/12: Wait for RDS + create database\n# =============================================================================\nWrite-Host \"=== Step 8/12: Waiting for RDS ===\"\n\nfor ($i = 1; $i -le 60; $i++) {\n    $r = Test-NetConnection -ComputerName $dbHost -Port 1433 -WarningAction SilentlyContinue\n    if ($r.TcpTestSucceeded) { Write-Host \"  RDS reachable (attempt $i)\"; break }\n    if ($i -eq 60) { Write-Error \"RDS not reachable after 5 min\"; exit 1 }\n    Start-Sleep 5\n}\n\nInvoke-Sql \"IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'IncomeManagement') CREATE DATABASE IncomeManagement\"\nWrite-Host \"  IncomeManagement DB ready\"\n\n# =============================================================================\n# Step 9/12: Trigger EF6 migrations\n# =============================================================================\nWrite-Host \"=== Step 9/12: Running EF6 migrations ===\"\n\n& $appcmd recycle apppool /apppool.name:IMSPortal 2>$null\n\n$migrated = $false\nfor ($i = 1; $i -le 40; $i++) {\n    try {\n        $r = Invoke-WebRequest -Uri http://localhost:80/ -UseBasicParsing -TimeoutSec 30\n        if ($r.StatusCode -eq 200) {\n            Write-Host \"  Migration complete (attempt $i)\"\n            $migrated = $true\n            break\n        }\n    } catch {\n        $msg = $_.Exception.Message\n        if ($msg.Length -gt 150) { $msg = $msg.Substring(0, 150) + \"...\" }\n        Write-Host \"  Attempt $i/40: $msg\"\n    }\n    Start-Sleep 15\n}\nif (-not $migrated) { Write-Error \"EF6 migration failed after 10 min\"; exit 1 }\n\n# =============================================================================\n# Step 10/12: Seed data\n# =============================================================================\nWrite-Host \"=== Step 10/12: Seeding data ===\"\n\n$marker = Invoke-SqlScalar \"SELECT 1 FROM sys.tables WHERE name='_SeedComplete'\" 'IncomeManagement'\nif ($marker -ne 1) {\n    # Use Invoke-Sqlcmd for seed SQL (supports :setvar syntax)\n    Invoke-Sqlcmd -ServerInstance $dbHost -Username $dbUser -Password $dbPassword -Database IncomeManagement -InputFile C:\\setup\\seed-data.sql -Variable \"GOVUKPAY_API_KEY=$govukPayApiKey\" -TrustServerCertificate\n    Invoke-Sql \"CREATE TABLE dbo._SeedComplete (SeededAt DATETIME DEFAULT GETDATE()); INSERT INTO _SeedComplete DEFAULT VALUES\" 'IncomeManagement'\n    Invoke-Sql \"UPDATE PaymentIntegrations SET BaseUri='$govukpayUrl'\" 'IncomeManagement'\n    Write-Host \"  Seed data loaded\"\n} else {\n    Write-Host \"  Already seeded, skipping\"\n}\n\n# =============================================================================\n# Step 11/12: Set admin password\n# =============================================================================\nWrite-Host \"=== Step 11/12: Setting admin password ===\"\n\n# ASP.NET Identity v2 password hasher (PBKDF2-HMACSHA1, 1000 iterations)\nfunction New-IdentityPasswordHash($pw) {\n    $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()\n    $salt = New-Object byte[] 16\n    $rng.GetBytes($salt)\n    $derived = (New-Object System.Security.Cryptography.Rfc2898DeriveBytes($pw, $salt, 1000)).GetBytes(32)\n    $out = New-Object byte[] 49\n    [Array]::Copy($salt, 0, $out, 1, 16)\n    [Array]::Copy($derived, 0, $out, 17, 32)\n    [Convert]::ToBase64String($out)\n}\n\n$hash = New-IdentityPasswordHash $adminPassword\nInvoke-Sql \"UPDATE AspNetUsers SET PasswordHash='$hash'\" 'IncomeManagement'\nWrite-Host \"  Admin password set\"\n\n# =============================================================================\n# Step 12/12: Verify\n# =============================================================================\nWrite-Host \"=== Step 12/12: Verifying ===\"\n$funds = Invoke-SqlScalar \"SELECT COUNT(*) FROM Funds WHERE Disabled = 0\" 'IncomeManagement'\n$accounts = Invoke-SqlScalar \"SELECT COUNT(*) FROM AccountHolders\" 'IncomeManagement'\n$txns = Invoke-SqlScalar \"SELECT COUNT(*) FROM ProcessedTransactions\" 'IncomeManagement'\nWrite-Host \"  Funds: $funds, Accounts: $accounts, Transactions: $txns\"\n\nWrite-Host \"=============================================\"\nWrite-Host \"  LocalGov IMS setup complete!\"\nWrite-Host \"  Portal: http://localhost:80\"\nWrite-Host \"  Admin:  http://localhost:8081\"\nWrite-Host \"  API:    http://localhost:8082\"\nWrite-Host \"=============================================\"\n"
+              },
+              "C:\\setup\\seed-data.sql": {
+                "content": "-- =============================================================================\n-- LocalGov IMS -- Custom Seed Data (runs AFTER EF6 DemoData.sql)\n-- =============================================================================\n\n:setvar GOVUKPAY_API_KEY \"NOT_SET\"\n\nSET NOCOUNT ON;\nSET XACT_ABORT ON;\nBEGIN TRANSACTION;\n\nPRINT '=== LocalGov IMS Custom Seed Data ==='\n\n-- 1. GOV.UK Pay API key for all enabled funds\nPRINT '=== Setting GOV.UK Pay API keys ==='\n\nDECLARE @govPayKeyId INT;\nSELECT @govPayKeyId = Id FROM MetadataKeys WHERE [Name] = 'GovUkPay.Api.Key';\nIF @govPayKeyId IS NULL\nBEGIN\n    INSERT INTO MetadataKeys ([Name], [Description], SystemType, EntityType)\n    VALUES ('GovUkPay.Api.Key', 'GOV.UK Pay API key for this fund', 0, 2);\n    SET @govPayKeyId = SCOPE_IDENTITY();\nEND\n\nINSERT INTO FundMetadata (MetadataKeyId, Value, FundCode)\nSELECT @govPayKeyId, '$(GOVUKPAY_API_KEY)', f.FundCode\nFROM Funds f\nWHERE f.Disabled = 0\n  AND NOT EXISTS (SELECT 1 FROM FundMetadata fm WHERE fm.FundCode = f.FundCode AND fm.MetadataKeyId = @govPayKeyId);\nPRINT '  GOV.UK Pay API keys set'\n\n-- 2. Account holders -- use actual fund codes from the database\nPRINT '=== Seeding account holders ==='\n\nDECLARE @sysUser INT = 0;\nDECLARE @now DATETIME = GETDATE();\n\n-- Get the first fund code that exists in the database\nDECLARE @firstFund VARCHAR(5);\nSELECT TOP 1 @firstFund = FundCode FROM Funds WHERE Disabled = 0 ORDER BY FundCode;\nPRINT '  Using fund code: ' + ISNULL(@firstFund, 'NONE');\n\nIF @firstFund IS NOT NULL AND NOT EXISTS (SELECT 1 FROM AccountHolders WHERE AccountReference LIKE 'AH%')\nBEGIN\n    DECLARE @j INT = 1;\n    DECLARE @names TABLE (Idx INT IDENTITY, Title VARCHAR(10), Forename VARCHAR(50), Surname VARCHAR(50), Addr1 VARCHAR(60), Postcode VARCHAR(10));\n    INSERT INTO @names VALUES\n    ('Mr','James','Thompson','12 High Street','OX1 1AA'),('Mrs','Sarah','Williams','34 Church Lane','CT1 2BB'),\n    ('Ms','Emma','Johnson','56 Oak Road','GU1 3CC'),('Mr','David','Brown','78 Mill Lane','SO1 4DD'),\n    ('Mrs','Lisa','Davies','90 Station Road','CM1 5EE'),('Mr','Robert','Wilson','11 Park Avenue','RG1 6FF'),\n    ('Ms','Helen','Taylor','23 King Street','EX1 7GG'),('Mr','Michael','Anderson','45 Queens Road','NR1 8HH'),\n    ('Mrs','Claire','Thomas','67 Bridge Street','IP1 9JJ'),('Mr','Andrew','Jackson','89 Market Place','DT1 1KK'),\n    ('Ms','Rachel','White','10 Victoria Road','SN1 2LL'),('Mr','Peter','Harris','22 Albert Street','BA1 3MM'),\n    ('Mrs','Karen','Martin','44 George Lane','SY1 4NN'),('Mr','Steven','Clark','66 William Road','NG1 5PP'),\n    ('Ms','Angela','Lewis','88 Elizabeth Way','LE1 6QQ'),('Mr','Mark','Walker','15 Edward Close','CV1 7RR'),\n    ('Mrs','Julie','Hall','27 Charles Ave','GL1 8SS'),('Mr','Paul','Allen','39 Henry Lane','ST1 9TT'),\n    ('Ms','Nicola','Young','51 Mary Street','CB1 1UU'),('Mr','Simon','King','63 Anne Road','LN1 2VV');\n\n    DECLARE @nCount INT;\n    SELECT @nCount = COUNT(*) FROM @names;\n\n    -- Create account holders using actual fund codes from the database\n    DECLARE @funds TABLE (Idx INT IDENTITY, FundCode VARCHAR(5));\n    INSERT INTO @funds (FundCode) SELECT TOP 10 FundCode FROM Funds WHERE Disabled = 0 ORDER BY FundCode;\n    DECLARE @fTotal INT;\n    SELECT @fTotal = COUNT(*) FROM @funds;\n\n    WHILE @j <= 40\n    BEGIN\n        DECLARE @ref VARCHAR(30) = 'AH' + RIGHT('000000' + CAST(@j AS VARCHAR), 6);\n        DECLARE @fIdx INT = (@j % @fTotal) + 1;\n        DECLARE @nIdx INT = (@j % @nCount) + 1;\n        DECLARE @fund VARCHAR(5);\n        SELECT @fund = FundCode FROM @funds WHERE Idx = @fIdx;\n\n        DECLARE @t VARCHAR(10), @fn VARCHAR(50), @sn VARCHAR(50), @a1 VARCHAR(60), @pc VARCHAR(10);\n        SELECT @t=Title, @fn=Forename, @sn=Surname, @a1=Addr1, @pc=Postcode FROM @names WHERE Idx = @nIdx;\n\n        INSERT INTO AccountHolders (AccountReference, FundCode, Title, Forename, Surname, AddressLine1, Postcode, CurrentBalance, PeriodDebit, PeriodCredit, RecordType, CreatedAt, CreatedByUserId)\n        VALUES (@ref, @fund, @t, @fn, @sn, @a1, @pc, CAST(100 + (@j * 37 % 1700) AS DECIMAL(18,2)), 0, 0, 'D', @now, @sysUser);\n\n        SET @j = @j + 1;\n    END\n    PRINT '  Inserted 40 account holders'\nEND\nELSE IF @firstFund IS NULL\nBEGIN\n    PRINT '  WARNING: No funds found in database, skipping account holders'\nEND\nELSE\nBEGIN\n    PRINT '  Account holders already exist, skipping'\nEND\n\n-- 3. Processed transactions (simple loop)\nPRINT '=== Seeding processed transactions ==='\n\nIF (SELECT COUNT(*) FROM ProcessedTransactions) < 50\nBEGIN\n    DECLARE @i INT = 1;\n    DECLARE @fundCodes TABLE (Idx INT IDENTITY, FundCode VARCHAR(5));\n    INSERT INTO @fundCodes (FundCode) SELECT TOP 10 FundCode FROM Funds WHERE Disabled = 0 ORDER BY FundCode;\n    DECLARE @fCount INT;\n    SELECT @fCount = COUNT(*) FROM @fundCodes;\n\n    DECLARE @mopCodes TABLE (Idx INT IDENTITY, MopCode VARCHAR(5));\n    INSERT INTO @mopCodes (MopCode) SELECT TOP 5 MopCode FROM Mops WHERE Disabled = 0 ORDER BY MopCode;\n    DECLARE @mCount INT;\n    SELECT @mCount = COUNT(*) FROM @mopCodes;\n\n    WHILE @i <= 500\n    BEGIN\n        DECLARE @fc VARCHAR(5), @mc VARCHAR(5);\n        SELECT @fc = FundCode FROM @fundCodes WHERE Idx = (@i % @fCount) + 1;\n        SELECT @mc = MopCode FROM @mopCodes WHERE Idx = (@i % @mCount) + 1;\n\n        INSERT INTO ProcessedTransactions (\n            TransactionReference, InternalReference, OfficeCode, EntryDate, TransactionDate,\n            AccountReference, UserCode, FundCode, MopCode, Amount, VatAmount, VatCode,\n            Narrative, VatRate, ReceiptIssued)\n        VALUES (\n            LOWER(NEWID()), LOWER(NEWID()), 'S',\n            DATEADD(MINUTE, -@i * 250, GETDATE()),\n            DATEADD(MINUTE, -@i * 250, GETDATE()),\n            ISNULL((SELECT TOP 1 AccountReference FROM AccountHolders WHERE FundCode = @fc), 'AH000001'),\n            1, @fc, @mc,\n            CAST(10 + (@i * 7 % 190) AS DECIMAL(18,2)),\n            0, ISNULL((SELECT TOP 1 VatCode FROM Vat WHERE Disabled = 0), 'E0'),\n            'Payment received', 0, 0);\n\n        SET @i = @i + 1;\n    END\n    PRINT '  Inserted 500 transactions'\nEND\nELSE\nBEGIN\n    PRINT '  Transactions already exist, skipping'\nEND\n\n-- 5. Fund group\nPRINT '=== Seeding fund groups ==='\nIF NOT EXISTS (SELECT 1 FROM FundGroups WHERE [Name] = 'All Revenue')\nBEGIN\n    INSERT INTO FundGroups ([Name]) VALUES ('All Revenue');\n    DECLARE @fgId INT = SCOPE_IDENTITY();\n    INSERT INTO FundGroupFunds (FundGroupId, FundCode)\n    SELECT @fgId, FundCode FROM Funds WHERE Disabled = 0;\n    PRINT '  Created All Revenue fund group'\nEND\n\nCOMMIT TRANSACTION;\nPRINT '=== Core seed data committed ==='\n\n-- =============================================================================\n-- 4. Additional staff users (separate transaction, non-fatal)\n-- Runs outside the main transaction so failures don't roll back core data.\n-- The DemoData admin user is always available even if this fails.\n-- =============================================================================\nPRINT '=== Seeding staff users ==='\n\nSET XACT_ABORT OFF;\n\nDECLARE @newUid INT;\n\nBEGIN TRY\n    IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'finance.officer')\n    BEGIN\n        INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)\n        VALUES ('finance.officer', 'Finance Officer', 0, 365, GETDATE(), 'S');\n        SET @newUid = SCOPE_IDENTITY();\n        INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)\n        VALUES (LOWER(NEWID()), 'finance@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'finance.officer');\n        INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details','Transaction.Create','Transfer');\n        PRINT '  Created finance.officer'\n    END\n\n    IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'cashier')\n    BEGIN\n        INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)\n        VALUES ('cashier', 'Cashier', 0, 365, GETDATE(), 'S');\n        SET @newUid = SCOPE_IDENTITY();\n        INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)\n        VALUES (LOWER(NEWID()), 'cashier@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'cashier');\n        INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details','Transaction.Create');\n        PRINT '  Created cashier'\n    END\n\n    IF NOT EXISTS (SELECT 1 FROM Users WHERE UserName = 'auditor')\n    BEGIN\n        INSERT INTO Users (UserName, DisplayName, Disabled, ExpiryDays, CreatedAt, OfficeCode)\n        VALUES ('auditor', 'Read-Only Auditor', 0, 365, GETDATE(), 'S');\n        SET @newUid = SCOPE_IDENTITY();\n        INSERT INTO AspNetUsers (Id, Email, EmailConfirmed, PasswordHash, SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, UserName)\n        VALUES (LOWER(NEWID()), 'auditor@demo.local', 1, '', NEWID(), 0, 0, 0, 0, 'auditor');\n        INSERT INTO UserRoles (UserId, RoleId) SELECT @newUid, RoleId FROM Roles WHERE [Name] IN ('Transaction.List','Transaction.Details');\n        PRINT '  Created auditor'\n    END\n    PRINT '  Staff users seeded successfully'\nEND TRY\nBEGIN CATCH\n    PRINT '  WARNING: Staff user seeding failed (non-fatal): ' + ERROR_MESSAGE()\n    PRINT '  DemoData users will still be available via admin login'\nEND CATCH\n\n-- Summary\nPRINT '=== Seed data complete ==='\nDECLARE @cnt INT;\nSELECT @cnt = COUNT(*) FROM Funds WHERE Disabled = 0; PRINT '  Funds: ' + CAST(@cnt AS VARCHAR);\nSELECT @cnt = COUNT(*) FROM Mops WHERE Disabled = 0; PRINT '  MOPs: ' + CAST(@cnt AS VARCHAR);\nSELECT @cnt = COUNT(*) FROM AccountHolders; PRINT '  Account Holders: ' + CAST(@cnt AS VARCHAR);\nSELECT @cnt = COUNT(*) FROM ProcessedTransactions; PRINT '  Transactions: ' + CAST(@cnt AS VARCHAR);\nSELECT @cnt = COUNT(*) FROM Suspenses; PRINT '  Suspense Items: ' + CAST(@cnt AS VARCHAR);\nSELECT @cnt = COUNT(*) FROM Users WHERE UserId > 0; PRINT '  Users: ' + CAST(@cnt AS VARCHAR);\nPRINT '=== All done ==='\n"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ComputeALB00A47009": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "LoadBalancerAttributes": [
+          {
+            "Key": "deletion_protection.enabled",
+            "Value": "false"
+          }
+        ],
+        "Name": "NdxIms-ALB",
+        "Scheme": "internet-facing",
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "NetworkingAlbSecurityGroup5ADC578E",
+              "GroupId"
+            ]
+          }
+        ],
+        "Subnets": [
+          {
+            "Ref": "NetworkingVpcPublicSubnet1Subnet918289EE"
+          },
+          {
+            "Ref": "NetworkingVpcPublicSubnet2Subnet9D9E5AFB"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "Type": "application"
+      },
+      "DependsOn": [
+        "NetworkingVpcPublicSubnet1DefaultRoute80C01FA6",
+        "NetworkingVpcPublicSubnet1RouteTableAssociationD13830EA",
+        "NetworkingVpcPublicSubnet2DefaultRouteDF98F60F",
+        "NetworkingVpcPublicSubnet2RouteTableAssociation2D4CEA06"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/ALB/Resource"
+      }
+    },
+    "ComputeALBPortalHTTP795F23F1": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "ComputeALBPortalHTTPPortalTargetGroup6777CAC1"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "ComputeALB00A47009"
+        },
+        "Port": 80,
+        "Protocol": "HTTP"
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/ALB/PortalHTTP/Resource"
+      }
+    },
+    "ComputeALBPortalHTTPPortalTargetGroup6777CAC1": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/health",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 2,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "30"
+          },
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false"
+          }
+        ],
+        "TargetType": "instance",
+        "Targets": [
+          {
+            "Id": {
+              "Ref": "ComputeServerBF6B7851"
+            },
+            "Port": 80
+          }
+        ],
+        "UnhealthyThresholdCount": 10,
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/ALB/PortalHTTP/PortalTargetGroup/Resource"
+      }
+    },
+    "ComputeALBAdminHTTPAB8AEE83": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "ComputeALBAdminHTTPAdminTargetGroupD99475BC"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "ComputeALB00A47009"
+        },
+        "Port": 8081,
+        "Protocol": "HTTP"
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/ALB/AdminHTTP/Resource"
+      }
+    },
+    "ComputeALBAdminHTTPAdminTargetGroupD99475BC": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/health",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 2,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 8081,
+        "Protocol": "HTTP",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "30"
+          },
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false"
+          }
+        ],
+        "TargetType": "instance",
+        "Targets": [
+          {
+            "Id": {
+              "Ref": "ComputeServerBF6B7851"
+            },
+            "Port": 8081
+          }
+        ],
+        "UnhealthyThresholdCount": 10,
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/ALB/AdminHTTP/AdminTargetGroup/Resource"
+      }
+    },
+    "ComputeALBApiHTTPC42F63E8": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "ComputeALBApiHTTPApiTargetGroup719A61A9"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "ComputeALB00A47009"
+        },
+        "Port": 8082,
+        "Protocol": "HTTP"
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/ALB/ApiHTTP/Resource"
+      }
+    },
+    "ComputeALBApiHTTPApiTargetGroup719A61A9": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/health",
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 2,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 8082,
+        "Protocol": "HTTP",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "30"
+          },
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false"
+          }
+        ],
+        "TargetType": "instance",
+        "Targets": [
+          {
+            "Id": {
+              "Ref": "ComputeServerBF6B7851"
+            },
+            "Port": 8082
+          }
+        ],
+        "UnhealthyThresholdCount": 10,
+        "VpcId": {
+          "Ref": "NetworkingVpc6B5E6F44"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/Compute/ALB/ApiHTTP/ApiTargetGroup/Resource"
+      }
+    },
+    "CDNPortalDistribution21FC41F2": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Comment": "LocalGov IMS Portal - HTTPS",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS",
+              "PUT",
+              "PATCH",
+              "POST",
+              "DELETE"
+            ],
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "Compress": true,
+            "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+            "TargetOriginId": "LocalGovImsStackCDNPortalDistributionOrigin17A087B8D",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "CustomOriginConfig": {
+                "OriginProtocolPolicy": "http-only",
+                "OriginSSLProtocols": [
+                  "TLSv1.2"
+                ]
+              },
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "ComputeALB00A47009",
+                  "DNSName"
+                ]
+              },
+              "Id": "LocalGovImsStackCDNPortalDistributionOrigin17A087B8D"
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/CDN/PortalDistribution/Resource"
+      }
+    },
+    "CDNAdminDistributionC60AA7C2": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Comment": "LocalGov IMS Admin - HTTPS",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS",
+              "PUT",
+              "PATCH",
+              "POST",
+              "DELETE"
+            ],
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "Compress": true,
+            "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+            "TargetOriginId": "LocalGovImsStackCDNAdminDistributionOrigin1E0CDD238",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "CustomOriginConfig": {
+                "HTTPPort": 8081,
+                "OriginProtocolPolicy": "http-only",
+                "OriginSSLProtocols": [
+                  "TLSv1.2"
+                ]
+              },
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "ComputeALB00A47009",
+                  "DNSName"
+                ]
+              },
+              "Id": "LocalGovImsStackCDNAdminDistributionOrigin1E0CDD238"
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/CDN/AdminDistribution/Resource"
+      }
+    },
+    "CDNGovUkPayDistribution0EFD596D": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Comment": "LocalGov IMS Api/GOV.UK Pay - HTTPS",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS",
+              "PUT",
+              "PATCH",
+              "POST",
+              "DELETE"
+            ],
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "Compress": true,
+            "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+            "TargetOriginId": "LocalGovImsStackCDNGovUkPayDistributionOrigin1F94EAB20",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "CustomOriginConfig": {
+                "HTTPPort": 8082,
+                "OriginProtocolPolicy": "http-only",
+                "OriginSSLProtocols": [
+                  "TLSv1.2"
+                ]
+              },
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "ComputeALB00A47009",
+                  "DNSName"
+                ]
+              },
+              "Id": "LocalGovImsStackCDNGovUkPayDistributionOrigin1F94EAB20"
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/CDN/GovUkPayDistribution/Resource"
+      }
+    },
+    "ReadPasswordFnServiceRole4F6DCF71": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "RoleName": "InnovationSandbox-ndx-ReadPasswordFnServiceRoleResource-be3222c8",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/ReadPasswordFn/ServiceRole/Resource"
+      }
+    },
+    "ReadPasswordFnServiceRoleDefaultPolicy08DC0ECD": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "AdminPasswordSecret47C701F9"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "ReadPasswordFnServiceRoleDefaultPolicy08DC0ECD",
+        "Roles": [
+          {
+            "Ref": "ReadPasswordFnServiceRole4F6DCF71"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/ReadPasswordFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "ReadPasswordFnE86F0710": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": "import json, boto3, urllib.request\ndef handler(event, context):\n  resp = {\"Status\":\"SUCCESS\",\"PhysicalResourceId\":\"pw\",\"StackId\":event[\"StackId\"],\"RequestId\":event[\"RequestId\"],\"LogicalResourceId\":event[\"LogicalResourceId\"],\"Data\":{}}\n  try:\n    if event[\"RequestType\"] != \"Delete\":\n      s = boto3.client(\"secretsmanager\").get_secret_value(SecretId=event[\"ResourceProperties\"][\"SecretId\"])\n      resp[\"Data\"][\"Password\"] = json.loads(s[\"SecretString\"])[\"ADMIN_PASSWORD\"]\n  except Exception as e:\n    resp[\"Status\"] = \"FAILED\"\n    resp[\"Reason\"] = str(e)\n  urllib.request.urlopen(urllib.request.Request(event[\"ResponseURL\"], json.dumps(resp).encode(), {\"Content-Type\":\"application/json\"}, method=\"PUT\"))"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "ReadPasswordFnServiceRole4F6DCF71",
+            "Arn"
+          ]
+        },
+        "Runtime": "python3.12",
+        "Tags": [
+          {
+            "Key": "awsApplication",
+            "Value": {
+              "Fn::Sub": [
+                "arn:aws:resource-groups:${AWS::Region}:${AWS::AccountId}:group/${AppName}/${AppId}",
+                {
+                  "AppName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "NDXTry_LocalGov_IMS_",
+                        {
+                          "Ref": "AWS::AccountId"
+                        }
+                      ]
+                    ]
+                  },
+                  "AppId": {
+                    "Fn::GetAtt": [
+                      "AppRegistryApplication",
+                      "Id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Key": "Project",
+            "Value": "ndx-try-aws-scenarios"
+          },
+          {
+            "Key": "Scenario",
+            "Value": "localgov-ims"
+          }
+        ],
+        "Timeout": 30
+      },
+      "DependsOn": [
+        "ReadPasswordFnServiceRoleDefaultPolicy08DC0ECD",
+        "ReadPasswordFnServiceRole4F6DCF71"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/ReadPasswordFn/Resource"
+      }
+    },
+    "AdminPasswordValue": {
+      "Type": "AWS::CloudFormation::CustomResource",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "ReadPasswordFnE86F0710",
+            "Arn"
+          ]
+        },
+        "SecretId": {
+          "Ref": "AdminPasswordSecret47C701F9"
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "LocalGovImsStack/AdminPasswordValue/Default"
+      }
+    }
+  },
+  "Parameters": {
+    "GovUkPayApiKey": {
+      "Type": "String",
+      "Description": "GOV.UK Pay sandbox API key (required for payment processing)",
+      "MinLength": 1,
+      "NoEcho": true
+    },
+    "SsmParameterValueawsserviceamiwindowslatestWindowsServer2022EnglishFullBaseC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Default": "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base"
+    }
+  },
+  "Outputs": {
+    "AdminPortalUrl": {
+      "Description": "IMS Admin Portal login URL",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "CDNAdminDistributionC60AA7C2",
+                "DomainName"
+              ]
+            },
+            "/Account/Login"
+          ]
+        ]
+      }
+    },
+    "PaymentPortalUrl": {
+      "Description": "IMS Payment Portal URL",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "CDNPortalDistribution21FC41F2",
+                "DomainName"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "AdminUsername": {
+      "Description": "IMS admin username (email)",
+      "Value": "tester1@your-organisation.com"
+    },
+    "AdminPassword": {
+      "Description": "IMS admin password",
+      "Value": {
+        "Fn::GetAtt": [
+          "AdminPasswordValue",
+          "Password"
+        ]
+      }
+    },
+    "CloudWatchLogsUrl": {
+      "Description": "CloudWatch Logs for IMS",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".console.aws.amazon.com/cloudwatch/home?region=",
+            {
+              "Ref": "AWS::Region"
+            },
+            "#logsV2:log-groups/log-group/%2Fndx-ims%2Fproduction"
+          ]
+        ]
+      }
+    },
+    "StackDescription": {
+      "Description": "Stack description",
+      "Value": "LocalGov IMS Income Management System - Windows EC2 with IIS and GOV.UK Pay integration"
+    }
+  },
+  "Conditions": {
+    "CDKMetadataAvailable": {
+      "Fn::Or": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "af-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-3"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-4"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-northwest-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-2"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "il-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "sa-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-1"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AWS::Region"
+            },
+            "us-west-2"
+          ]
+        }
+      ]
+    }
+  },
+  "Rules": {}
+}

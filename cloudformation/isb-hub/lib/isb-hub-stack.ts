@@ -14,7 +14,14 @@ const BLUEPRINTS_BUCKET_NAME = `ndx-try-isb-blueprints-${HUB_ACCOUNT}`;
 const BLUEPRINTS_BUCKET_REGION = 'us-east-1';
 const GITHUB_REPO = 'co-cddo/ndx_try_aws_scenarios';
 const DEPLOY_ROLE_NAME = 'isb-hub-github-actions-deploy';
-const SCENARIOS = [
+interface ScenarioConfig {
+  name: string;
+  description: string;
+  /** Optional parameters passed to the StackSet (and through to stack instances) */
+  parameterKeys?: string[];
+}
+
+const SCENARIOS: ScenarioConfig[] = [
   { name: 'council-chatbot', description: 'NDX:Try Council Chatbot - AI-powered resident Q&A assistant' },
   { name: 'foi-redaction', description: 'NDX:Try FOI Redaction - Automated sensitive data redaction for FOI requests' },
   { name: 'planning-ai', description: 'NDX:Try Planning Application AI - Intelligent document analysis for planning decisions' },
@@ -23,6 +30,7 @@ const SCENARIOS = [
   { name: 'text-to-speech', description: 'NDX:Try Text to Speech - Accessibility audio generation using Amazon Polly' },
   { name: 'localgov-drupal', description: 'NDX:Try LocalGov Drupal - AI-enhanced CMS for UK councils' },
   { name: 'simply-readable', description: 'NDX:Try Simply Readable - Document Translation & Easy Read, built by Swindon Borough Council' },
+  { name: 'localgov-ims', description: 'NDX:Try LocalGov IMS - Income Management System with GOV.UK Pay', parameterKeys: ['GovUkPayApiKey'] },
   { name: 'minute', description: 'Minute AI - Meeting transcription and AI-powered minute generation' },
   { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 7 scenarios as nested stacks' },
 ];
@@ -30,6 +38,21 @@ const SCENARIOS = [
 export class IsbHubStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    // ========================================================================
+    // SCENARIO PARAMETERS — secrets injected at deploy time, forwarded to StackSets
+    // ========================================================================
+    const govUkPayApiKey = new cdk.CfnParameter(this, 'GovUkPayApiKey', {
+      type: 'String',
+      noEcho: true,
+      default: '',
+      description: 'GOV.UK Pay sandbox API key (for localgov-ims scenario)',
+    });
+
+    // Map of parameter keys to their CfnParameter values
+    const scenarioParamValues: Record<string, string> = {
+      GovUkPayApiKey: govUkPayApiKey.valueAsString,
+    };
 
     // ========================================================================
     // S3 BUCKET (imported — already exists in us-east-1)
@@ -158,7 +181,7 @@ export class IsbHubStack extends cdk.Stack {
       const templateContent = fs.readFileSync(templatePath, 'utf8');
       const contentHash = crypto.createHash('sha256').update(templateContent).digest('hex').substring(0, 16);
 
-      const stackSet = new cfn.CfnStackSet(this, `${pascalName}StackSet`, {
+      const stackSetProps: cfn.CfnStackSetProps = {
         stackSetName: `ndx-try-${scenario.name}`,
         permissionModel: 'SELF_MANAGED',
         administrationRoleArn: `arn:aws:iam::${HUB_ACCOUNT}:role/InnovationSandbox-${ISB_NAMESPACE}-IntermediateRole`,
@@ -167,7 +190,16 @@ export class IsbHubStack extends cdk.Stack {
         managedExecution: { Active: true },
         templateUrl: `https://${BLUEPRINTS_BUCKET_NAME}.s3.${BLUEPRINTS_BUCKET_REGION}.amazonaws.com/scenarios/${scenario.name}/template.yaml`,
         description: `${scenario.description} [${contentHash}]`,
-      });
+        // Forward parameters to StackSet if defined
+        ...(scenario.parameterKeys?.length ? {
+          parameters: scenario.parameterKeys.map(key => ({
+            parameterKey: key,
+            parameterValue: scenarioParamValues[key] ?? '',
+          })),
+        } : {}),
+      };
+
+      const stackSet = new cfn.CfnStackSet(this, `${pascalName}StackSet`, stackSetProps);
 
       // Ensure template is uploaded before StackSet references it
       stackSet.node.addDependency(deployments[scenario.name]);

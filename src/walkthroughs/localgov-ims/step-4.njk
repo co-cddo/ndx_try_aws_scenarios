@@ -1,0 +1,67 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Configure Fund Types and Settings — LocalGov IMS Walkthrough"
+description: Explore fund management, payment methods, and system configuration
+currentStep: 4
+totalSteps: 5
+timeEstimate: "4 minutes"
+scenarioId: localgov-ims
+---
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Configure Fund Types and Settings" %}
+{% set stepDescription = "Explore the system settings — fund types, payment method codes, import rules, and GOV.UK Pay integration configuration." %}
+{% set timeEstimate = "4 minutes" %}
+{% set screenshotData = screenshots["localgov-ims"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 4 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "You can see all 19 configured fund types (Council Tax, Parking Fines, Business Rates, etc.)",
+  "You understand how MOP codes map to payment methods",
+  "You've seen the GOV.UK Pay integration settings"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Explore fund types</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    Click <strong>Settings</strong> in the sidebar, then click <strong>Funds</strong>.
+  </li>
+  <li>
+    You'll see 19 pre-configured fund types, including:
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Council Tax, Business Rates, Housing Rents</li>
+      <li>Parking Fines, Fixed Penalty Notices</li>
+      <li>Building Control, Development Control</li>
+      <li>Library Charges, Market Stall Rental</li>
+      <li>HMO Premises Licence, Landlord Accreditation</li>
+    </ul>
+  </li>
+  <li>
+    Click <strong>View</strong> on any fund to see its metadata — including the GOV.UK Pay API key configured for payment processing.
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">Review system settings</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    Go back to <strong>Settings</strong> to see all 15 configuration areas:
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>MOP codes</strong> — payment methods (Cash, Card, Transfer, etc.)</li>
+      <li><strong>Payment integrations</strong> — GOV.UK Pay connection settings</li>
+      <li><strong>Roles</strong> — permission definitions for user access</li>
+      <li><strong>Import types</strong> — bank file import configurations</li>
+      <li><strong>VAT codes</strong> — tax rate mappings</li>
+    </ul>
+  </li>
+  <li>
+    Click <strong>Payment integrations</strong> to see the GOV.UK Pay integration endpoint configured with your CloudFront URL.
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>Real-world context:</strong> Each council customises these settings for their specific income streams. Some councils manage 50+ fund types across multiple departments.
+</div>

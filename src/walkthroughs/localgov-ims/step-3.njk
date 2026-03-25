@@ -1,0 +1,51 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Manage Users and Roles — LocalGov IMS Walkthrough"
+description: View system users, understand role-based access, and explore the permissions model
+currentStep: 3
+totalSteps: 5
+timeEstimate: "3 minutes"
+scenarioId: localgov-ims
+---
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Manage Users and Roles" %}
+{% set stepDescription = "View the pre-configured users, understand how role-based access works, and explore the different permission levels available in LocalGov IMS." %}
+{% set timeEstimate = "3 minutes" %}
+{% set screenshotData = screenshots["localgov-ims"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 3 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "You can see all 6 system users and their roles",
+  "You understand the difference between admin, finance, cashier, and auditor roles",
+  "You know how to create new users and assign permissions"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">View system users</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    Click <strong>Users</strong> in the left sidebar. You'll see 6 pre-configured users.
+  </li>
+  <li>
+    The demo includes users with different roles:
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>tester1/tester2</strong> — full admin access (all modules)</li>
+      <li><strong>finance.officer</strong> — can view/create transactions and transfers</li>
+      <li><strong>cashier</strong> — can view/create transactions (no transfers)</li>
+      <li><strong>auditor</strong> — read-only access to transactions</li>
+    </ul>
+  </li>
+  <li>
+    Click <strong>View</strong> on any user to see their assigned roles and permissions.
+  </li>
+  <li>
+    Try <strong>Create user</strong> to see the user creation form — you can set display name, office code, and role assignments.
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>Real-world context:</strong> In a live deployment, each council staff member would have their own account with permissions matching their job role — cashiers can take payments, finance officers can process transfers, and auditors can review but not modify records.
+</div>
