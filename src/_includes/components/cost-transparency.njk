@@ -5,7 +5,6 @@
   - Estimated cost range and maximum guarantee
   - "How costs work" explanation
   - Per-service cost breakdown
-  - Auto-cleanup timing
 
   Required variables:
     - scenarioData: The scenario object from scenarios.yaml
@@ -43,8 +42,7 @@
       <ul class="govuk-list govuk-list--bullet">
         <li><strong>Pay-per-use</strong> - You only pay for what you use during the evaluation window</li>
         <li><strong>Short evaluation period</strong> - Costs accrue only during your ~15 to 30 minute hands-on time</li>
-        <li><strong>Automatic cleanup</strong> - Resources are automatically deleted after 24 hours, stopping all charges</li>
-        <li><strong>No ongoing costs</strong> - Once resources are deleted, no further charges apply</li>
+        <li><strong>No ongoing costs</strong> - Once your session ends, no further charges apply</li>
       </ul>
       <p class="govuk-body govuk-!-margin-bottom-0">
         <strong>Maximum guarantee:</strong> Even with extended usage, costs should not exceed {{ scenarioData.maximumCost }}.
@@ -81,11 +79,6 @@
           {% endfor %}
         </tbody>
       </table>
-      {% if scenarioData.deployment.costBreakdown.autoCleanup %}
-      <p class="govuk-body-s govuk-!-margin-bottom-0">
-        <strong>Auto-cleanup:</strong> {{ scenarioData.deployment.costBreakdown.autoCleanup }}
-      </p>
-      {% endif %}
     </div>
   </details>
   {% endif %}

@@ -190,17 +190,6 @@ Use this checklist to maintain cost control:
 - [AWS Free Tier](https://aws.amazon.com/free/) - Eligible services and limits
 - [AWS Cost Anomaly Detection](https://aws.amazon.com/aws-cost-management/aws-cost-anomaly-detection/) - Automated cost monitoring
 
-## Cleanup After Evaluation
-
-**Important**: To avoid ongoing costs, delete CloudFormation stacks when evaluation is complete:
-
-1. Navigate to **CloudFormation** > **Stacks**
-2. Select your NDX:Try stack
-3. Click **Delete**
-4. Confirm deletion
-5. Wait 5-10 minutes for all resources to be removed
-6. Verify in Cost Explorer that costs stop accruing
-
 ## Questions?
 
 For questions about cost tracking or optimization, please [contact us](/contact/).
