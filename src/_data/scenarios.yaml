@@ -1738,6 +1738,8 @@ scenarios:
     order: 10
     status: "active"
     deployment:
+      templateUrl: "https://ndx-try-isb-blueprints-568672915267.s3.us-east-1.amazonaws.com/scenarios/minute/template.yaml"
+      templateS3Url: "s3://ndx-try-isb-blueprints-568672915267/scenarios/minute/template.yaml"
       region: "us-east-1"
       stackNamePrefix: "ndx-try-minute"
       capabilities:
