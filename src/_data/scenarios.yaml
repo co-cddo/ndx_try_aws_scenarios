@@ -1772,3 +1772,13 @@ scenarios:
         value: 180
         unit: "minutes per meeting"
         source: "UK Government administrative efficiency benchmarks"
+      projection:
+        description: "AI-powered transcription and minute generation time"
+        value: 15
+        reduction_percent: 92
+      roi:
+        annual_savings: 48000
+        calculation: "Based on 200 meetings/year × 2.75 hours saved × £87/hour average officer cost"
+        payback_months: 1
+        disclaimer: "Figures are illustrative based on LGA pilot findings showing ~1 hour saved per 60-minute meeting. Actual savings depend on meeting volume and current processes."
+      committee_language: "Minute AI, built by i.AI, reduced meeting minute production time by over 90% in pilot evaluations across 25 councils, with transcription costs under £0.50 per meeting. Now available to try free through NDX:Try."
