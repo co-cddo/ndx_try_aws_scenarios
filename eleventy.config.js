@@ -99,18 +99,25 @@ export default function(eleventyConfig) {
     const colors = {
       'ai': 'blue',
       'iot': 'green',
-      'analytics': 'purple'
+      'analytics': 'purple',
+      'planning': 'orange',
+      'accessibility': 'teal',
+      'finance': 'turquoise'
     };
     return colors[category?.toLowerCase()] || 'grey';
   });
 
   // Map scenario to category based on tags (Story 14.1)
   eleventyConfig.addFilter('scenarioCategory', (scenario) => {
-    if (!scenario || !scenario.tags) return 'ai';
+    if (!scenario || !scenario.tags) return 'other';
     const tags = scenario.tags.map(t => t.toLowerCase());
+    if (tags.includes('ai')) return 'ai';
     if (tags.includes('iot')) return 'iot';
     if (tags.includes('analytics')) return 'analytics';
-    return 'ai'; // Default for AI, Chatbot, Document Processing, etc.
+    if (tags.includes('planning')) return 'planning';
+    if (tags.includes('accessibility')) return 'accessibility';
+    if (tags.includes('finance')) return 'finance';
+    return 'other';
   });
 
   // Get walkthrough step count for a scenario (Story 14.1)

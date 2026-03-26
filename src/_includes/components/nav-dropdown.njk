@@ -130,6 +130,28 @@
           </ul>
         </div>
 
+        {# Planning Category #}
+        <div class="ndx-nav__dropdown-group">
+          <span class="ndx-nav__dropdown-group-label">Planning</span>
+          <ul class="ndx-nav__dropdown-list">
+            {% for scenario in scenarios.scenarios %}
+              {% if not scenario.hidden %}
+                {% set category = scenario | scenarioCategory %}
+                {% if category == 'planning' %}
+                  <li role="none">
+                    <a href="/walkthroughs/{{ scenario.id }}/"
+                       class="ndx-nav__dropdown-link"
+                       role="menuitem">
+                      <span class="ndx-nav__dropdown-title">{{ scenario.name }}</span>
+                      <span class="ndx-nav__dropdown-desc">{{ scenario.timeEstimate }} walkthrough</span>
+                    </a>
+                  </li>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
         {# Analytics Category #}
         <div class="ndx-nav__dropdown-group">
           <span class="ndx-nav__dropdown-group-label">Analytics</span>
@@ -138,6 +160,50 @@
               {% if not scenario.hidden %}
                 {% set category = scenario | scenarioCategory %}
                 {% if category == 'analytics' %}
+                  <li role="none">
+                    <a href="/walkthroughs/{{ scenario.id }}/"
+                       class="ndx-nav__dropdown-link"
+                       role="menuitem">
+                      <span class="ndx-nav__dropdown-title">{{ scenario.name }}</span>
+                      <span class="ndx-nav__dropdown-desc">{{ scenario.timeEstimate }} walkthrough</span>
+                    </a>
+                  </li>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+        {# Accessibility Category #}
+        <div class="ndx-nav__dropdown-group">
+          <span class="ndx-nav__dropdown-group-label">Accessibility</span>
+          <ul class="ndx-nav__dropdown-list">
+            {% for scenario in scenarios.scenarios %}
+              {% if not scenario.hidden %}
+                {% set category = scenario | scenarioCategory %}
+                {% if category == 'accessibility' %}
+                  <li role="none">
+                    <a href="/walkthroughs/{{ scenario.id }}/"
+                       class="ndx-nav__dropdown-link"
+                       role="menuitem">
+                      <span class="ndx-nav__dropdown-title">{{ scenario.name }}</span>
+                      <span class="ndx-nav__dropdown-desc">{{ scenario.timeEstimate }} walkthrough</span>
+                    </a>
+                  </li>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+        {# Finance Category #}
+        <div class="ndx-nav__dropdown-group">
+          <span class="ndx-nav__dropdown-group-label">Finance</span>
+          <ul class="ndx-nav__dropdown-list">
+            {% for scenario in scenarios.scenarios %}
+              {% if not scenario.hidden %}
+                {% set category = scenario | scenarioCategory %}
+                {% if category == 'finance' %}
                   <li role="none">
                     <a href="/walkthroughs/{{ scenario.id }}/"
                        class="ndx-nav__dropdown-link"

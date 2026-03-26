@@ -2711,6 +2711,21 @@ body {
   color: #ffffff;
 }
 
+.ndx-nav__dropdown-tag--planning {
+  background-color: #f47738;
+  color: #ffffff;
+}
+
+.ndx-nav__dropdown-tag--accessibility {
+  background-color: #5694ca;
+  color: #ffffff;
+}
+
+.ndx-nav__dropdown-tag--finance {
+  background-color: #28a197;
+  color: #ffffff;
+}
+
 /* Category group in Walkthroughs dropdown */
 .ndx-nav__dropdown-group {
   border-bottom: 1px solid #b1b4b6;
