@@ -341,7 +341,7 @@ scenarios:
         - "UK G-Cloud 14"
       data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
-      data_handling: "Sample data only in sandbox (US us-east-1 region); auto-deletes after 24 hours; no real citizen data processed; AWS shared responsibility model applies"
+      data_handling: "Sample data only in sandbox (US us-east-1 region); no real citizen data processed; AWS shared responsibility model applies"
 
     # TCO Projection (Story 4-4 - Finance Evidence Pack)
     tco_projection:
@@ -473,7 +473,7 @@ scenarios:
         - "UK G-Cloud 14"
       data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
-      data_handling: "Sample data only in sandbox (US us-east-1 region); auto-deletes after 24 hours; no real citizen data processed; AWS shared responsibility model"
+      data_handling: "Sample data only in sandbox (US us-east-1 region); no real citizen data processed; AWS shared responsibility model"
 
     # TCO Projection (Story 4-4 - Finance Evidence Pack)
     tco_projection:
@@ -611,7 +611,7 @@ scenarios:
         - "UK G-Cloud 14"
       data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest, TLS 1.3 in transit"
-      data_handling: "Synthetic data only in sandbox (US us-east-1 region); auto-deletes after 24 hours; no real citizen data processed; AWS shared responsibility model"
+      data_handling: "Synthetic data only in sandbox (US us-east-1 region); no real citizen data processed; AWS shared responsibility model"
 
     # TCO Projection (Story 4-4 - Finance Evidence Pack)
     tco_projection:
@@ -1339,7 +1339,7 @@ scenarios:
         - "NCSC Cloud Security Principles"
       data_residency: "US (us-east-1 N. Virginia region)"
       encryption: "AES-256 at rest (S3, DynamoDB), TLS 1.2+ in transit"
-      data_handling: "Documents processed in-region, identity-scoped S3 storage, no data retained after session cleanup"
+      data_handling: "Documents processed in-region, identity-scoped S3 storage, no data retained after session"
     tco_projection:
       year_1:
         aws_services: 2400
@@ -1566,7 +1566,6 @@ scenarios:
           - name: "3x CloudFront distributions"
             cost: "~$0/day"
             note: "Minimal traffic"
-        autoCleanup: "ISB terminates lease and runs AWS Nuke"
     screenshots:
       steps: []
     sourceCode:

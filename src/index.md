@@ -29,7 +29,7 @@ description: Try AWS Before You Buy - Zero-cost evaluation platform for UK local
   <div class="govuk-width-container">
     <p class="ndx-safety-banner__text">
       <span class="ndx-safety-banner__icon">&#128274;</span>
-      <strong>NDX:Try:</strong> Your evaluation is completely isolated from production systems. Automatic cleanup when you're done.
+      <strong>NDX:Try:</strong> Your evaluation is completely isolated from production systems.
     </p>
   </div>
 </div>

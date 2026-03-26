@@ -6,7 +6,6 @@
   Features (AC-2.5.1, AC-2.5.2):
     - "Screenshot Walkthrough" heading
     - Gallery component with annotated screenshots
-    - "Coming Soon" placeholder state for scenarios without screenshots
     - Positioned after video section, before deployment section
 
   Requires scenarioData with screenshots metadata:
@@ -43,7 +42,6 @@
           <li><strong>Deployment Complete</strong> - Success notification and access details</li>
           <li><strong>Key Interaction</strong> - The "wow moment" demonstrating the scenario's value</li>
           <li><strong>Results</strong> - Outputs and what you achieved</li>
-          <li><strong>Cleanup</strong> - How resources auto-delete after 24 hours</li>
         </ol>
       </div>
     </details>
@@ -51,19 +49,6 @@
 </div>
 
 {% elif scenarioData and scenarioData.screenshots %}
-{# Coming soon placeholder - screenshots metadata exists but no steps yet #}
-<div class="ndx-screenshot-walkthrough ndx-screenshot-walkthrough--coming-soon" id="screenshot-walkthrough">
-  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
-
-  <h2 class="govuk-heading-l">Screenshot walkthrough</h2>
-
-  <div class="govuk-inset-text">
-    <p><strong>Screenshots coming soon</strong></p>
-    <p>We're preparing annotated screenshots for this scenario. In the meantime, you can:</p>
-    <ul class="govuk-list govuk-list--bullet">
-      <li><a href="/contact/" class="govuk-link">Contact us</a> for more information</li>
-      <li>Deploy the scenario and follow the step-by-step guide below</li>
-    </ul>
-  </div>
+<div class="ndx-screenshot-walkthrough" id="screenshot-walkthrough" hidden>
 </div>
 {% endif %}

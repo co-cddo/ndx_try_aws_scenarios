@@ -151,7 +151,7 @@ parallelEntry:
 # Stale session handling (AC-10)
 staleSession:
   title: "Your demo environment has expired"
-  message: "CloudFormation stacks auto-delete after 90 minutes. You can re-deploy or continue with screenshots."
+  message: "Your demo environment has expired. You can re-deploy or continue with screenshots."
   redeployText: "Re-deploy Demo"
   screenshotsText: "Continue with Screenshots"
   icon: "clock"

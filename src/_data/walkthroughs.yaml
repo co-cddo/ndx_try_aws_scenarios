@@ -5,7 +5,7 @@
 
 walkthroughs:
   localgov-drupal:
-    totalSteps: 12
+    totalSteps: 11
     url: "/walkthroughs/localgov-drupal/"
     title: "LocalGov Drupal Walkthrough"
     duration: "40 minutes"
@@ -44,9 +44,6 @@ walkthroughs:
         time: "3 minutes"
       - title: "Translate this Page explored"
         description: "Try the content translation accessibility feature"
-        time: "3 minutes"
-      - title: "Cleanup prepared"
-        description: "Know how to delete your stack when finished"
         time: "3 minutes"
 
   bops-planning:

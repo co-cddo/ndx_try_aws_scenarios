@@ -27,7 +27,6 @@ messaging:
     - "No cloud expertise required"
     - "Deploy in 15 minutes"
     - "Zero cost to try"
-    - "Automatic cleanup when you're done"
   safetyMessage: "Isolated NDX:Try session - Your evaluation is completely separate from production systems"
 
 # External links
@@ -61,6 +60,6 @@ features:
 contentGuidance:
   - "Grant permission to try - 'You're not the first, you won't be the last'"
   - "Reduce imposter syndrome - 'No AWS expertise required'"
-  - "Promise safety - 'Isolated sandbox, automatic cleanup, capped cost'"
+  - "Promise safety - 'Isolated sandbox, capped cost'"
   - "Respect time - '15 minutes to decide, not 15 hours'"
   - "Enable sharing - 'Easy to forward to your team/leadership'"

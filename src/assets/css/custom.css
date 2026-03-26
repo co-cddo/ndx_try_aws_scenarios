@@ -1229,12 +1229,6 @@ body {
   margin-top: 30px;
 }
 
-/* Coming soon state */
-.ndx-screenshot-walkthrough--coming-soon .govuk-inset-text {
-  border-left-color: #ffdd00;
-  background-color: #fff7e6;
-}
-
 /* Screenshot Gallery Container */
 .ndx-screenshot-gallery {
   margin-top: 20px;
@@ -2714,6 +2708,21 @@ body {
 
 .ndx-nav__dropdown-tag--analytics {
   background-color: #4c2c92;
+  color: #ffffff;
+}
+
+.ndx-nav__dropdown-tag--planning {
+  background-color: #f47738;
+  color: #ffffff;
+}
+
+.ndx-nav__dropdown-tag--accessibility {
+  background-color: #5694ca;
+  color: #ffffff;
+}
+
+.ndx-nav__dropdown-tag--finance {
+  background-color: #28a197;
   color: #ffffff;
 }
 

@@ -9,7 +9,7 @@ description: Step-by-step guides for exploring AWS scenarios in your NDX:Try ses
 
   Central hub listing all 6 scenarios with preview cards
   - Responsive grid layout (3 columns desktop, 2 tablet, 1 mobile)
-  - Category filter buttons (All, AI, IoT, Analytics)
+  - Category filter buttons (All, AI, Planning, IoT, Analytics, Accessibility, Finance)
   - Search functionality
   - Time estimates per scenario
 
@@ -21,10 +21,13 @@ description: Step-by-step guides for exploring AWS scenarios in your NDX:Try ses
 
 {# Define category filter configuration #}
 {% set categories = [
-  { id: 'all', label: 'All', count: 6 },
-  { id: 'ai', label: 'AI', count: 4 },
+  { id: 'all', label: 'All', count: 13 },
+  { id: 'ai', label: 'AI', count: 6 },
+  { id: 'planning', label: 'Planning', count: 3 },
   { id: 'iot', label: 'IoT', count: 1 },
-  { id: 'analytics', label: 'Analytics', count: 1 }
+  { id: 'analytics', label: 'Analytics', count: 1 },
+  { id: 'accessibility', label: 'Accessibility', count: 1 },
+  { id: 'finance', label: 'Finance', count: 1 }
 ] %}
 
 {# Breadcrumbs - Story 14.6 #}
@@ -42,7 +45,7 @@ description: Step-by-step guides for exploring AWS scenarios in your NDX:Try ses
 {# Key benefits panel #}
 <div class="govuk-inset-text govuk-!-margin-bottom-6">
   <p class="govuk-body">
-    <strong>No technical expertise required.</strong> Our walkthroughs guide you through each step with clear instructions and screenshots. All scenarios use sample data and automatically clean up after 24 hours.
+    <strong>No technical expertise required.</strong> Our walkthroughs guide you through each step with clear instructions and screenshots. All scenarios use sample data.
   </p>
 </div>
 
@@ -468,7 +471,7 @@ description: Step-by-step guides for exploring AWS scenarios in your NDX:Try ses
       const categoryParam = url.searchParams.get('category');
       const searchParam = url.searchParams.get('q');
 
-      if (categoryParam && ['all', 'ai', 'iot', 'analytics'].includes(categoryParam)) {
+      if (categoryParam && ['all', 'ai', 'iot', 'analytics', 'planning', 'accessibility', 'finance'].includes(categoryParam)) {
         activeFilter = categoryParam;
         filterButtons.forEach(function(btn) {
           const isActive = btn.dataset.filter === activeFilter;
