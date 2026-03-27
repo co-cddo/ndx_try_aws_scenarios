@@ -1,0 +1,186 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Report a Problem - FixMyStreet Walkthrough"
+description: Submit a new problem report as a citizen with location and category
+currentStep: 3
+totalSteps: 6
+timeEstimate: "4 minutes"
+scenarioId: fixmystreet
+---
+
+{#
+  Step 3: Report a Problem
+  - Click "Report a problem" on the homepage
+  - Enter a Camden postcode and pick a location
+  - Select a category
+  - Fill in details and submit
+#}
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Report a Problem" %}
+{% set stepDescription = "Experience the citizen reporting flow. You will place a pin on the map, choose a category, and submit a problem report." %}
+{% set timeEstimate = "4 minutes" %}
+{% set expectedOutcomes = [
+  "You have placed a pin on the map at your chosen location",
+  "You selected a category such as Potholes or Street Lighting",
+  "Your report was submitted successfully with a confirmation message"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">How to report a problem</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Start a new report</strong>
+    <p class="govuk-body">
+      From the FixMyStreet homepage, enter a Camden postcode (e.g., <code>NW1 8QE</code>) in the search box.
+      The map view will load. Click on the map at the location where you want to report a problem, or click the
+      <strong>"Report a problem here"</strong> button.
+    </p>
+  </li>
+
+  <li>
+    <strong>Place your pin on the map</strong>
+    <p class="govuk-body">
+      Click the exact spot on the map where the problem is. A green pin will appear.
+      You can drag it to adjust the position. The address will update automatically.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body">
+        <strong>Tip:</strong> Zoom in for a more precise location. In a real deployment, citizens would
+        report the exact spot of a pothole or broken streetlight.
+      </p>
+    </div>
+  </li>
+
+  <li>
+    <strong>Select a category</strong>
+    <p class="govuk-body">
+      Choose the type of problem from the category list. Available categories include:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Potholes</strong> — Road surface defects</li>
+      <li><strong>Street Lighting</strong> — Broken or flickering lights</li>
+      <li><strong>Graffiti</strong> — Unwanted markings on public property</li>
+      <li><strong>Fly-tipping</strong> — Illegally dumped waste</li>
+      <li><strong>Pavements/Footpaths</strong> — Damaged or obstructed paths</li>
+      <li><strong>Road Signs</strong> — Missing or damaged signage</li>
+      <li><strong>Other</strong> — Anything not covered above</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Fill in the report details</strong>
+    <p class="govuk-body">
+      Enter a title and description for your report. For example:
+    </p>
+    <div class="ndx-example-report">
+      <p class="govuk-body">
+        <strong>Title:</strong> Large pothole on Euston Road near bus stop
+      </p>
+      <p class="govuk-body">
+        <strong>Description:</strong> There is a large pothole approximately 30cm wide on the westbound
+        carriageway of Euston Road, just before the bus stop outside the British Library.
+        It is deep enough to damage vehicle tyres and is filling with water when it rains.
+      </p>
+    </div>
+  </li>
+
+  <li>
+    <strong>Provide your details</strong>
+    <p class="govuk-body">
+      Enter a name and email address. For the demo, you can use any email — no verification
+      is required in the sandbox environment.
+    </p>
+  </li>
+
+  <li>
+    <strong>Submit the report</strong>
+    <p class="govuk-body">
+      Click <strong>"Submit"</strong>. You will see a confirmation page with your report reference number.
+    </p>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">What happens after submission</h3>
+
+<p class="govuk-body">
+  In a production deployment, submitting a report would:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>Send the report to the council's street services team</li>
+  <li>Auto-categorise and route to the correct department</li>
+  <li>Send a confirmation email to the citizen</li>
+  <li>Add the report to the public map for other residents to see</li>
+  <li>Trigger notifications to relevant council officers</li>
+</ul>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>What to notice:</strong> The reporting flow takes under 2 minutes for a citizen.
+    Compare this with a phone call to the council (average 15 minutes including hold time)
+    or trying to find the right form on the council website.
+  </p>
+</div>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Cannot place a pin on the map
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If clicking the map does not place a pin:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Make sure you have searched for a postcode first — the map needs to be centred on an area</li>
+      <li>Try clicking directly on a road or pavement, not on a building</li>
+      <li>If the map is unresponsive, try refreshing the page</li>
+      <li>Ensure your browser zoom is at 100% — extreme zoom levels can affect click positioning</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Report submission fails
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If the report does not submit:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check all required fields are filled in (title, description, name, email)</li>
+      <li>Make sure you have selected a category</li>
+      <li>Try a shorter description if the form appears to hang</li>
+      <li>Check the Fargate service is still running in the ECS console</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-example-report {
+    margin: 15px 0;
+    padding: 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-example-report p {
+    margin-bottom: 10px;
+  }
+
+  .ndx-example-report p:last-child {
+    margin-bottom: 0;
+  }
+</style>

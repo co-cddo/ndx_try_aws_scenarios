@@ -32,6 +32,7 @@ const SCENARIOS: ScenarioConfig[] = [
   { name: 'simply-readable', description: 'NDX:Try Simply Readable - Document Translation & Easy Read, built by Swindon Borough Council' },
   { name: 'localgov-ims', description: 'NDX:Try LocalGov IMS - Income Management System with GOV.UK Pay', parameterKeys: ['GovUkPayApiKey'] },
   { name: 'minute', description: 'Minute AI - Meeting transcription and AI-powered minute generation' },
+  { name: 'fixmystreet', description: 'NDX:Try FixMyStreet - Citizen problem reporting platform for UK councils' },
   { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 7 scenarios as nested stacks' },
 ];
 

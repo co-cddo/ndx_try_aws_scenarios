@@ -1,0 +1,175 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 5: Use the Admin Panel - FixMyStreet Walkthrough"
+description: Browse the admin dashboard showing report statistics and management tools
+currentStep: 5
+totalSteps: 6
+timeEstimate: "3 minutes"
+scenarioId: fixmystreet
+---
+
+{#
+  Step 5: Use the Admin Panel
+  - Navigate to /admin
+  - Browse statistics and report overview
+  - View individual reports from admin perspective
+  - Understand categories and assignment
+#}
+
+{% set stepNumber = 5 %}
+{% set stepTitle = "Use the Admin Panel" %}
+{% set stepDescription = "Explore the FixMyStreet admin panel to see report statistics, manage categories, and understand the administrative capabilities available to council teams." %}
+{% set timeEstimate = "3 minutes" %}
+{% set expectedOutcomes = [
+  "You can access the /admin panel and see the dashboard",
+  "You understand how reports are categorised and tracked",
+  "You have explored the administrative tools available to council officers"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Access the admin panel</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Navigate to the admin panel</strong>
+    <p class="govuk-body">
+      Add <code>/admin</code> to your FixMyStreet URL (e.g., <code>https://[your-url].cloudfront.net/admin</code>).
+      You must be signed in with the admin credentials from Step 1.
+    </p>
+  </li>
+
+  <li>
+    <strong>View the admin dashboard</strong>
+    <p class="govuk-body">
+      The admin dashboard shows an overview of the system including:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Total number of reports and their status breakdown</li>
+      <li>Recent reports requiring attention</li>
+      <li>System configuration and council settings</li>
+    </ul>
+  </li>
+
+  <li>
+    <strong>Browse reports from the admin view</strong>
+    <p class="govuk-body">
+      Click on <strong>"Reports"</strong> in the admin navigation to see all reports in a searchable,
+      sortable table. This view is designed for council officers who need to manage a high volume
+      of reports efficiently.
+    </p>
+  </li>
+</ol>
+
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/screenshots/fixmystreet/step-5-admin-panel.png"
+       alt="FixMyStreet admin panel showing summary statistics, search functionality, body details, and a reports table"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The admin panel dashboard with summary, search, council body details, and reports table
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">What to explore in the admin panel</h3>
+
+<div class="ndx-admin-features">
+  <div class="ndx-admin-feature">
+    <h4 class="govuk-heading-s">Report management</h4>
+    <p class="govuk-body-s">
+      View individual reports with full details including location data, citizen information,
+      category, and complete update history. Council officers can change status, reassign
+      categories, and add internal notes that are not visible to the public.
+    </p>
+  </div>
+
+  <div class="ndx-admin-feature">
+    <h4 class="govuk-heading-s">Category configuration</h4>
+    <p class="govuk-body-s">
+      See how report categories are configured. In a production deployment, councils can
+      customise categories to match their service structure, set up auto-routing rules,
+      and configure response templates for common issues.
+    </p>
+  </div>
+
+  <div class="ndx-admin-feature">
+    <h4 class="govuk-heading-s">User management</h4>
+    <p class="govuk-body-s">
+      Browse the list of registered users. The demo includes 15 simulated citizen accounts
+      who have created the 260 demo reports. In production, this would show real residents
+      and their reporting history.
+    </p>
+  </div>
+
+  <div class="ndx-admin-feature">
+    <h4 class="govuk-heading-s">Council body settings</h4>
+    <p class="govuk-body-s">
+      View the NDX Demo Council configuration including contact details, area boundaries,
+      and service settings. Multi-tier councils (e.g., district and county) can configure
+      report routing based on category and location.
+    </p>
+  </div>
+</div>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>What to notice:</strong> The admin panel separates operational report management
+    from system configuration. Service teams use the council dashboard (Step 4) for day-to-day
+    work, while the admin panel is used for system setup and oversight.
+  </p>
+</div>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Cannot access /admin
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If you see "access denied" or a blank page at /admin:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Make sure you are signed in with the admin credentials, not a regular citizen account</li>
+      <li>Try signing out and back in again</li>
+      <li>Check the URL is correct — it should be <code>/admin</code> not <code>/admin/</code> with a trailing slash on some configurations</li>
+      <li>Clear your browser cache and try again in a private/incognito window</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-admin-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-admin-feature {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-admin-feature h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-admin-feature p {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-admin-features {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

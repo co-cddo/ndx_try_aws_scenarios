@@ -1,0 +1,200 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Explore the Citizen View - FixMyStreet Walkthrough"
+description: Browse the map, search by postcode, and view existing reports
+currentStep: 2
+totalSteps: 6
+timeEstimate: "3 minutes"
+scenarioId: fixmystreet
+---
+
+{#
+  Step 2: Explore the Citizen View
+  - Visit the FixMyStreet homepage
+  - Enter a Camden postcode
+  - Browse the map with existing reports
+  - Click on a report to see details
+#}
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Explore the Citizen View" %}
+{% set stepDescription = "See FixMyStreet from a resident's perspective. Search by postcode, browse the map, and read existing reports with citizen comments." %}
+{% set timeEstimate = "3 minutes" %}
+{% set expectedOutcomes = [
+  "Map view loads showing pins for existing reports in Camden",
+  "You can click on a report pin and see its full details",
+  "You understand how citizens browse and discover problems in their area"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Search by postcode</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Go to the FixMyStreet homepage</strong>
+    <p class="govuk-body">
+      Open the FixMyStreet URL from Step 1 in your browser.
+    </p>
+  </li>
+
+  <li>
+    <strong>Enter a Camden postcode</strong>
+    <p class="govuk-body">
+      Type <code>NW1 8QE</code> into the search box and press Enter. This is a central Camden postcode near Euston.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body">
+        <strong>Other postcodes to try:</strong> <code>WC1H 9JQ</code> (King's Cross), <code>NW3 2PP</code> (Hampstead), or <code>WC1E 6BT</code> (Bloomsbury).
+      </p>
+    </div>
+
+    <figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+      <img src="/assets/images/screenshots/fixmystreet/step-2-homepage.png"
+           alt="FixMyStreet homepage with postcode search box and statistics showing 46 reports, 65 fixed, and 150 updates"
+           class="ndx-screenshot__image">
+      <figcaption class="ndx-screenshot__caption govuk-body-s">
+        The FixMyStreet homepage with postcode search and live statistics
+      </figcaption>
+    </figure>
+  </li>
+
+  <li>
+    <strong>Browse the map</strong>
+    <p class="govuk-body">
+      You will see an OpenStreetMap view centred on your postcode. Coloured pins mark existing reports. The demo includes 260 reports spread across Camden.
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Green pins are fixed or resolved reports</li>
+      <li>Red/yellow pins are open or in progress</li>
+      <li>Zoom in and out to see more or fewer reports</li>
+      <li>Pan around the map to explore different areas</li>
+    </ul>
+
+    <figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+      <img src="/assets/images/screenshots/fixmystreet/step-2-map-view.png"
+           alt="Map view showing yellow report pins spread across the Camden area"
+           class="ndx-screenshot__image">
+      <figcaption class="ndx-screenshot__caption govuk-body-s">
+        The map view with report pins across Camden — zoom and pan to explore different areas
+      </figcaption>
+    </figure>
+  </li>
+
+  <li>
+    <strong>Click on a report pin</strong>
+    <p class="govuk-body">
+      Click any pin on the map to see a summary. Then click the report title to open the full details page.
+    </p>
+
+    <figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+      <img src="/assets/images/screenshots/fixmystreet/step-2-report-detail.png"
+           alt="Individual report detail page showing the report title, description, map pin location, and an update comment"
+           class="ndx-screenshot__image">
+      <figcaption class="ndx-screenshot__caption govuk-body-s">
+        A report detail page with title, description, location, and citizen updates
+      </figcaption>
+    </figure>
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">What to notice on a report page</h3>
+
+<p class="govuk-body">
+  When you open a report, look for these elements:
+</p>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h4 class="govuk-heading-s">Report details</h4>
+      <ul class="govuk-list govuk-list--bullet govuk-body-s">
+        <li>Title and description of the problem</li>
+        <li>Category (Potholes, Street Lighting, etc.)</li>
+        <li>Exact location on a map</li>
+        <li>Date reported and current status</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h4 class="govuk-heading-s">Citizen interaction</h4>
+      <ul class="govuk-list govuk-list--bullet govuk-body-s">
+        <li>Updates from the citizen who reported it</li>
+        <li>Council responses and status changes</li>
+        <li>Other residents confirming the problem</li>
+        <li>Photo evidence where provided</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>What to notice:</strong> The demo data includes realistic report lifecycle — from initial report through council acknowledgement to resolution. Some reports have multiple updates showing the conversation between citizen and council.
+  </p>
+</div>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Map not loading or no pins showing
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If the map is blank or no pins appear:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Check your browser allows JavaScript — the map requires it</li>
+      <li>Try a different Camden postcode (the demo data is concentrated in Camden)</li>
+      <li>Zoom out to see a wider area — pins may be outside the current view</li>
+      <li>Refresh the page if the map tiles fail to load</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Postcode not found
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If you get a "postcode not found" error:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Make sure you are entering a valid UK postcode</li>
+      <li>The demo is configured for the Camden area — use London postcodes starting with NW, WC, or N</li>
+      <li>Try entering just the first part of the postcode (e.g., <code>NW1</code>)</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-feature-highlight {
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    min-height: 160px;
+  }
+
+  .ndx-feature-highlight h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-feature-highlight {
+      min-height: auto;
+    }
+  }
+</style>

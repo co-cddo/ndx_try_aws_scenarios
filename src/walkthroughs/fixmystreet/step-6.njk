@@ -1,0 +1,257 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 6: Understand the Architecture - FixMyStreet Walkthrough"
+description: Review the AWS infrastructure powering the FixMyStreet platform
+currentStep: 6
+totalSteps: 6
+timeEstimate: "2 minutes"
+scenarioId: fixmystreet
+---
+
+{#
+  Step 6: Understand the Architecture
+  - Review deployed AWS resources
+  - CloudFront, ALB, Fargate, Aurora, EFS, memcached
+  - Understand why each component is used
+#}
+
+{% set stepNumber = 6 %}
+{% set stepTitle = "Understand the Architecture" %}
+{% set stepDescription = "Review the AWS services powering FixMyStreet. Understand how CloudFront, Fargate, Aurora PostgreSQL, and EFS work together to deliver a production-ready platform." %}
+{% set timeEstimate = "2 minutes" %}
+{% set expectedOutcomes = [
+  "You understand which AWS services power each part of the platform",
+  "You can explain the architecture to a technical colleague",
+  "You understand the benefits of managed services for this workload"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Architecture overview</h3>
+
+<p class="govuk-body">
+  The FixMyStreet deployment uses six AWS services working together. Open the
+  <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+  and click on your stack's <strong>"Resources"</strong> tab to see everything that was created.
+</p>
+
+<div class="ndx-architecture-grid">
+  <div class="ndx-architecture-card">
+    <h4 class="govuk-heading-s">
+      Amazon CloudFront
+    </h4>
+    <p class="govuk-body-s"><strong>Role:</strong> HTTPS termination and content delivery</p>
+    <p class="govuk-body-s">
+      CloudFront provides the HTTPS endpoint that citizens access. It caches static assets
+      (CSS, JavaScript, images) at edge locations for fast loading, and forwards dynamic
+      requests to the Application Load Balancer.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> Citizens get fast page loads and secure connections
+      without configuring SSL certificates or a CDN separately.
+    </p>
+  </div>
+
+  <div class="ndx-architecture-card">
+    <h4 class="govuk-heading-s">
+      Application Load Balancer
+    </h4>
+    <p class="govuk-body-s"><strong>Role:</strong> Traffic distribution and health checks</p>
+    <p class="govuk-body-s">
+      The ALB routes incoming requests from CloudFront to healthy Fargate containers.
+      It performs regular health checks and automatically removes unhealthy containers
+      from the rotation.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> High availability without manual intervention.
+      If a container fails, traffic is automatically routed to healthy ones.
+    </p>
+  </div>
+
+  <div class="ndx-architecture-card">
+    <h4 class="govuk-heading-s">
+      AWS Fargate (ECS)
+    </h4>
+    <p class="govuk-body-s"><strong>Role:</strong> Running the FixMyStreet application</p>
+    <p class="govuk-body-s">
+      Three Fargate containers run the FixMyStreet Perl application. Fargate manages the
+      underlying compute — no EC2 instances to patch or maintain. The containers include
+      the web server, application code, and cron jobs for scheduled tasks.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> No servers to manage. Containers start in seconds,
+      scale automatically, and you only pay for the compute time used.
+    </p>
+
+    <figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+      <img src="/assets/images/screenshots/fixmystreet/step-6-ecs-service.png"
+           alt="ECS Service health page showing Active status, 1 running task, and nginx:80 target registered as healthy"
+           class="ndx-screenshot__image">
+      <figcaption class="ndx-screenshot__caption govuk-body-s">
+        The ECS Service showing active status with a healthy running task
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="ndx-architecture-card">
+    <h4 class="govuk-heading-s">
+      Amazon Aurora PostgreSQL
+    </h4>
+    <p class="govuk-body-s"><strong>Role:</strong> Database with PostGIS geospatial support</p>
+    <p class="govuk-body-s">
+      Aurora PostgreSQL stores all reports, users, and configuration data. The PostGIS extension
+      enables geospatial queries — finding reports near a location, calculating distances,
+      and powering the map views that are central to FixMyStreet.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> Managed database with automatic backups, patching,
+      and failover. PostGIS enables the spatial features that make FixMyStreet effective.
+    </p>
+  </div>
+
+  <div class="ndx-architecture-card">
+    <h4 class="govuk-heading-s">
+      Amazon EFS
+    </h4>
+    <p class="govuk-body-s"><strong>Role:</strong> Shared file storage for photos and uploads</p>
+    <p class="govuk-body-s">
+      EFS provides a shared file system that all Fargate containers can access simultaneously.
+      When citizens upload photos with their reports, the images are stored on EFS so any
+      container can serve them.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> Persistent storage that survives container restarts
+      and scales automatically. No need to manage disk volumes.
+    </p>
+  </div>
+
+  <div class="ndx-architecture-card">
+    <h4 class="govuk-heading-s">
+      ElastiCache (Memcached)
+    </h4>
+    <p class="govuk-body-s"><strong>Role:</strong> In-memory caching for performance</p>
+    <p class="govuk-body-s">
+      Memcached caches frequently accessed data like report listings, map tile queries,
+      and session data. This reduces database load and speeds up page rendering,
+      especially for popular map views with many reports.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f;">
+      <strong>Why it matters:</strong> Fast response times even under heavy load.
+      Caching is critical for a public-facing service where hundreds of residents
+      may be browsing the map simultaneously.
+    </p>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">How the components connect</h3>
+
+<p class="govuk-body">
+  The request flow for a citizen viewing the map works like this:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Citizen's browser</strong> makes an HTTPS request to the CloudFront URL
+  </li>
+  <li>
+    <strong>CloudFront</strong> serves cached static assets directly, and forwards dynamic requests to the ALB
+  </li>
+  <li>
+    <strong>ALB</strong> routes the request to one of the three healthy Fargate containers
+  </li>
+  <li>
+    <strong>Fargate container</strong> checks Memcached for cached data; if not cached, queries Aurora PostgreSQL
+  </li>
+  <li>
+    <strong>Aurora PostgreSQL</strong> runs a PostGIS spatial query to find nearby reports
+  </li>
+  <li>
+    <strong>Response</strong> flows back through ALB and CloudFront to the citizen's browser
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m govuk-!-margin-top-6">Production considerations</h3>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Feature</th>
+      <th scope="col" class="govuk-table__header">Demo</th>
+      <th scope="col" class="govuk-table__header">Production</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Domain</th>
+      <td class="govuk-table__cell">CloudFront URL</td>
+      <td class="govuk-table__cell">fixmystreet.yourcouncil.gov.uk</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Database</th>
+      <td class="govuk-table__cell">Aurora single instance</td>
+      <td class="govuk-table__cell">Aurora multi-AZ with read replicas</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Containers</th>
+      <td class="govuk-table__cell">3 Fargate tasks</td>
+      <td class="govuk-table__cell">Auto-scaling based on traffic</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Email</th>
+      <td class="govuk-table__cell">Disabled in sandbox</td>
+      <td class="govuk-table__cell">Amazon SES for citizen notifications</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Monitoring</th>
+      <td class="govuk-table__cell">CloudWatch Logs</td>
+      <td class="govuk-table__cell">CloudWatch dashboards, alarms, and X-Ray tracing</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Backups</th>
+      <td class="govuk-table__cell">Aurora automatic</td>
+      <td class="govuk-table__cell">Cross-region backups, point-in-time recovery</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Good news:</strong> The core architecture you have just explored is production-ready.
+    Moving to production primarily involves adding a custom domain, enabling email notifications,
+    and configuring auto-scaling — all configuration, not redevelopment.
+  </p>
+</div>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-architecture-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+
+  .ndx-architecture-card {
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-architecture-card h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-architecture-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
