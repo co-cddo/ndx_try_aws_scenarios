@@ -1,0 +1,208 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: View the Council Dashboard - FixMyStreet Walkthrough"
+description: Sign in as council admin and browse all reports on the map
+currentStep: 4
+totalSteps: 6
+timeEstimate: "3 minutes"
+scenarioId: fixmystreet
+---
+
+{#
+  Step 4: View the Council Dashboard
+  - Sign in with council admin credentials
+  - Navigate to /reports/NDX+Demo+Council
+  - Filter by category and status
+  - Click individual reports
+#}
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "View the Council Dashboard" %}
+{% set stepDescription = "Sign in as a council officer and see all citizen reports on a map. Filter by category and status to understand the council's operational view." %}
+{% set timeEstimate = "3 minutes" %}
+{% set expectedOutcomes = [
+  "You are signed in as the council admin user",
+  "You can see all 260+ reports displayed on the council map view",
+  "You understand how the council views and filters reports by category and status"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Sign in as council admin</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Go to the sign-in page</strong>
+    <p class="govuk-body">
+      Click <strong>"Sign in"</strong> in the top-right corner of the FixMyStreet homepage,
+      or navigate directly to <code>/auth</code> on your FixMyStreet URL.
+    </p>
+  </li>
+
+  <li>
+    <strong>Enter your admin credentials</strong>
+    <p class="govuk-body">
+      Use the <strong>AdminUsername</strong> and <strong>AdminPassword</strong> from Step 1
+      (the CloudFormation Outputs tab).
+    </p>
+  </li>
+
+  <li>
+    <strong>Navigate to the council reports view</strong>
+    <p class="govuk-body">
+      Once signed in, navigate to <code>/reports/NDX+Demo+Council</code> on your FixMyStreet URL.
+      This shows all reports submitted to the NDX Demo Council on a single map view.
+    </p>
+    <div class="govuk-inset-text">
+      <p class="govuk-body">
+        <strong>Tip:</strong> You can also reach this page by clicking "All reports" in the navigation,
+        then selecting the council area.
+      </p>
+    </div>
+  </li>
+</ol>
+
+<figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+  <img src="/assets/images/screenshots/fixmystreet/step-4-council-reports.png"
+       alt="NDX Demo Council reports page showing a map with report pins and a list of reports with categories and statuses"
+       class="ndx-screenshot__image">
+  <figcaption class="ndx-screenshot__caption govuk-body-s">
+    The council reports page with map overview and filterable report list
+  </figcaption>
+</figure>
+
+<h3 class="govuk-heading-m">Explore the council view</h3>
+
+<p class="govuk-body">
+  The council reports page gives you an operational overview of all citizen reports. Try these actions:
+</p>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h4 class="govuk-heading-s">Filter by category</h4>
+      <p class="govuk-body-s">
+        Use the category filter to show only specific types of reports. For example,
+        filter to "Potholes" to see all road surface issues on the map at once.
+        This is how a highways team would triage their workload.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h4 class="govuk-heading-s">Filter by status</h4>
+      <p class="govuk-body-s">
+        Switch between "Open", "In progress", and "Fixed" to see reports at different
+        stages. This helps councils understand their backlog and resolution rates.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h4 class="govuk-heading-s">View report details</h4>
+      <p class="govuk-body-s">
+        Click on any report in the list or on the map to see full details.
+        As a council officer, you will see additional options for updating
+        the status and adding internal notes.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <div class="ndx-feature-highlight">
+      <h4 class="govuk-heading-s">Spot patterns</h4>
+      <p class="govuk-body-s">
+        Look at the map for clusters of reports. Areas with many pins may indicate
+        a systemic issue (e.g., a road that needs resurfacing) rather than individual
+        problems. This spatial view is powerful for resource planning.
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 class="govuk-heading-m">Update a report status</h3>
+
+<p class="govuk-body">
+  As a signed-in council admin, you can update the status of any report:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open any report</strong> by clicking on it from the map or list view.
+  </li>
+  <li>
+    <strong>Scroll down</strong> to the update section below the report details.
+  </li>
+  <li>
+    <strong>Change the status</strong> using the dropdown (e.g., from "Open" to "In progress" or "Fixed").
+  </li>
+  <li>
+    <strong>Add a public update</strong> — type a message that the citizen will see, such as
+    "We have scheduled this pothole for repair next week."
+  </li>
+  <li>
+    <strong>Submit the update</strong> — the report status will change and the citizen would
+    receive an email notification in a production deployment.
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>What to notice:</strong> The council dashboard turns citizen reports into actionable
+    work items. The spatial view, filtering, and status tracking give councils real-time
+    visibility into street issues across their entire area.
+  </p>
+</div>
+
+{# Troubleshooting #}
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Troubleshooting: Cannot sign in with admin credentials
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If the admin credentials do not work:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Double-check the username and password from the CloudFormation Outputs tab</li>
+      <li>Passwords are case-sensitive — copy and paste to avoid errors</li>
+      <li>Make sure you are using the admin email, not a citizen account</li>
+      <li>Try clearing your browser cookies for the site and signing in again</li>
+    </ul>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+
+  .ndx-feature-highlight {
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    min-height: 160px;
+  }
+
+  .ndx-feature-highlight h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .ndx-feature-highlight p {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-feature-highlight {
+      min-height: auto;
+    }
+  }
+</style>

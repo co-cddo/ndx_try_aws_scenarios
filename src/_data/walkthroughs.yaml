@@ -265,3 +265,30 @@ walkthroughs:
       - title: "Edit and export"
         description: "Use the AI editor, download, and explore templates"
         time: "5 minutes"
+
+  fixmystreet:
+    totalSteps: 6
+    url: "/walkthroughs/fixmystreet/"
+    title: "FixMyStreet Walkthrough"
+    duration: "20 minutes"
+    hasWalkthrough: true
+    category: "citizen-engagement"
+    steps:
+      - title: "Credentials found"
+        description: "Find your FixMyStreet URL and admin credentials from CloudFormation"
+        time: "2 minutes"
+      - title: "Citizen view explored"
+        description: "Browse the map, search by postcode, and view existing reports"
+        time: "3 minutes"
+      - title: "Problem reported"
+        description: "Submit a new problem report as a citizen with location and category"
+        time: "4 minutes"
+      - title: "Council dashboard reviewed"
+        description: "Sign in as council admin and browse all reports on the map"
+        time: "3 minutes"
+      - title: "Admin panel explored"
+        description: "Use the admin panel to view statistics and manage reports"
+        time: "3 minutes"
+      - title: "Architecture understood"
+        description: "Review the AWS infrastructure powering the platform"
+        time: "2 minutes"

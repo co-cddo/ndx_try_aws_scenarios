@@ -11,6 +11,7 @@ on:
       - 'cloudformation/scenarios/simply-readable/cdk/**'
       - 'cloudformation/scenarios/simply-readable/scripts/**'
       - 'cloudformation/scenarios/minute/cdk/**'
+      - 'cloudformation/scenarios/fixmystreet/cdk/**'
       - 'cloudformation/isb-hub/**'
   workflow_dispatch:
 
@@ -292,8 +293,64 @@ jobs:
           path: cloudformation/scenarios/minute/template.yaml
           retention-days: 1
 
+  synth-fixmystreet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: cloudformation/scenarios/fixmystreet/cdk/package-lock.json
+
+      - name: Build and synth fixmystreet CDK
+        working-directory: cloudformation/scenarios/fixmystreet/cdk
+        run: |
+          npm ci
+          npm run build
+          npx cdk synth
+
+      - name: Strip bootstrap cruft and validate template
+        working-directory: cloudformation/scenarios/fixmystreet/cdk
+        run: |
+          node -e "
+            const fs = require('fs');
+            const t = JSON.parse(fs.readFileSync('../cdk.out/FixMyStreetStack.template.json', 'utf8'));
+            delete t.Parameters?.BootstrapVersion;
+            delete t.Resources?.CDKMetadata;
+            delete t.Rules?.CheckBootstrapVersion;
+            const str = JSON.stringify(t);
+            const errors = [];
+            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
+              errors.push('Template contains CDK bootstrap/asset dependencies');
+            }
+            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
+            if (deletionPolicies) {
+              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
+            }
+            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
+            if (size > 400000) {
+              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
+            }
+            if (errors.length > 0) {
+              errors.forEach(e => console.error('ERROR: ' + e));
+              process.exit(1);
+            }
+            // Write JSON content to .yaml — CloudFormation accepts both formats regardless of extension
+            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
+            fs.writeFileSync('../template.yaml', content);
+            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
+          "
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fixmystreet-template
+          path: cloudformation/scenarios/fixmystreet/template.yaml
+          retention-days: 1
+
   deploy:
-    needs: [synth-localgov-drupal, synth-localgov-ims, synth-simply-readable, synth-minute]
+    needs: [synth-localgov-drupal, synth-localgov-ims, synth-simply-readable, synth-minute, synth-fixmystreet]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -312,6 +369,11 @@ jobs:
         with:
           name: minute-template
           path: cloudformation/scenarios/minute
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: fixmystreet-template
+          path: cloudformation/scenarios/fixmystreet
 
       - uses: actions/download-artifact@v8
         with:

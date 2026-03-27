@@ -1,0 +1,196 @@
+---
+layout: layouts/walkthrough.njk
+title: FixMyStreet Walkthrough
+description: Step-by-step guide to exploring the FixMyStreet citizen problem reporting platform
+currentStep: 0
+totalSteps: 6
+scenarioId: fixmystreet
+---
+
+{#
+  Walkthrough Landing Page
+  FixMyStreet citizen problem reporting platform
+#}
+
+<h1 class="govuk-heading-xl">Try FixMyStreet</h1>
+
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    See how a citizen reporting platform works in 20 minutes
+  </h2>
+  <div class="govuk-panel__body">
+    Experience FixMyStreet with 260 realistic demo reports across Camden. Report a problem, explore the council dashboard, and understand the architecture.
+  </div>
+</div>
+
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough guides you step-by-step through the citizen and council experience.
+    You will browse a map, submit a report, and explore an admin dashboard.
+    Perfect for service managers, councillors, and anyone evaluating citizen engagement tools.
+  </p>
+</div>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">
+  In this 20-minute walkthrough, you'll:
+</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Find your credentials</strong> - Get the FixMyStreet URL and admin login from CloudFormation (2 minutes)
+  </li>
+  <li>
+    <strong>Explore the citizen view</strong> - Browse the map, search by postcode, and view existing reports (3 minutes)
+  </li>
+  <li>
+    <strong>Report a problem</strong> - Submit a new report as a citizen with location, category, and description (4 minutes)
+  </li>
+  <li>
+    <strong>View the council dashboard</strong> - Sign in as council admin and see all reports on a map (3 minutes)
+  </li>
+  <li>
+    <strong>Explore the admin panel</strong> - Browse report statistics and manage reports from the admin perspective (3 minutes)
+  </li>
+  <li>
+    <strong>Understand the architecture</strong> - Review the AWS infrastructure powering the platform (2 minutes)
+  </li>
+</ol>
+
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already deployed the FixMyStreet scenario via NDX:Try.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/fixmystreet/" class="govuk-link">Deploy the FixMyStreet scenario</a> if you haven't already.
+    Deployment takes 15 to 20 minutes.
+  </p>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For service managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How residents report problems to their council</li>
+      <li>The council dashboard for managing and prioritising reports</li>
+      <li>How categories and statuses help triage street issues</li>
+      <li>Potential for reducing phone-based reporting</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical staff</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Container-based architecture on AWS Fargate</li>
+      <li>PostgreSQL with PostGIS for geospatial data</li>
+      <li>CloudFront for HTTPS and global caching</li>
+      <li>EFS for persistent photo storage</li>
+      <li>OpenStreetMap integration for mapping</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What's included in the demo</h2>
+
+<div class="govuk-grid-row ndx-demo-data-preview">
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-demo-stat">
+      <span class="ndx-demo-stat__number">260</span>
+      <span class="ndx-demo-stat__label">Demo reports</span>
+      <p class="govuk-body-s">Realistic problem reports across Camden including potholes, streetlights, graffiti, and more</p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-demo-stat">
+      <span class="ndx-demo-stat__number">150</span>
+      <span class="ndx-demo-stat__label">Updates</span>
+      <p class="govuk-body-s">Citizen comments and council responses showing the full report lifecycle</p>
+    </div>
+  </div>
+  <div class="govuk-grid-column-one-third">
+    <div class="ndx-demo-stat">
+      <span class="ndx-demo-stat__number">15</span>
+      <span class="ndx-demo-stat__label">Citizen users</span>
+      <p class="govuk-body-s">Simulated residents who have reported problems and left updates</p>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/fixmystreet/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 20 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop {
+    margin-bottom: 30px;
+  }
+
+  .ndx-walkthrough-reassurance {
+    border-left-color: #00703c;
+  }
+
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+
+  .ndx-demo-data-preview {
+    margin-top: 20px;
+  }
+
+  .ndx-demo-stat {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+    text-align: center;
+  }
+
+  .ndx-demo-stat__number {
+    display: block;
+    font-size: 48px;
+    font-weight: 700;
+    color: #1d70b8;
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+
+  .ndx-demo-stat__label {
+    display: block;
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .ndx-demo-stat p {
+    text-align: left;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-demo-stat__number {
+      font-size: 36px;
+    }
+  }
+</style>

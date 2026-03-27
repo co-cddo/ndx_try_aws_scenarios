@@ -1,0 +1,155 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - FixMyStreet"
+description: You've completed the FixMyStreet walkthrough
+currentStep: 6
+totalSteps: 6
+scenarioId: fixmystreet
+---
+
+{#
+  Completion Page
+  - Key takeaways summary
+  - Generate Evidence Pack link
+  - Try Another Scenario link
+#}
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">
+    Walkthrough complete
+  </h1>
+  <div class="govuk-panel__body">
+    You've explored a citizen problem reporting platform for UK councils
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  Congratulations! You have experienced FixMyStreet from both the citizen and council perspectives.
+  In 20 minutes, you have seen how residents report problems, how councils manage them, and the
+  AWS architecture that powers it all.
+</p>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">📍</span>
+      Citizen engagement
+    </h3>
+    <p class="govuk-body">
+      FixMyStreet makes it easy for residents to report problems in under 2 minutes.
+      Map-based reporting with categories and photos gives councils precise, actionable
+      information without lengthy phone calls.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Residents get a simple, accessible way to report issues 24/7
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">📊</span>
+      Council efficiency
+    </h3>
+    <p class="govuk-body">
+      The council dashboard and admin panel turn citizen reports into structured work items.
+      Spatial views help identify patterns, category filters enable triage, and status
+      tracking provides accountability.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Councils can manage street issues efficiently with real-time visibility
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">🔓</span>
+      Open source value
+    </h3>
+    <p class="govuk-body">
+      FixMyStreet is built on proven open-source technology maintained by mySociety
+      and used by thousands of councils worldwide. No vendor lock-in, transparent code,
+      and a large community contributing improvements.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Proven technology with no licensing costs and full customisation freedom
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">☁️</span>
+      Cloud-native architecture
+    </h3>
+    <p class="govuk-body">
+      Running on AWS Fargate, Aurora PostgreSQL, EFS, and CloudFront means no servers
+      to maintain. Managed services handle patching, backups, scaling, and availability
+      automatically.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: Production-ready infrastructure with no operational overhead
+    </p>
+  </div>
+</div>
+
+{% set scenarioId = "fixmystreet" %}
+{% set scenarioName = "FixMyStreet" %}
+{% set totalSteps = 6 %}
+{% include "components/completion-next-steps.njk" %}
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Questions or feedback?</h2>
+
+  <p class="govuk-body">
+    We'd love to hear about your experience with this walkthrough:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .ndx-takeaway-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ndx-takeaway-card__icon {
+    font-size: 32px;
+  }
+
+  @media (max-width: 640px) {
+    .ndx-takeaway-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ndx-takeaway-card h3 {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
