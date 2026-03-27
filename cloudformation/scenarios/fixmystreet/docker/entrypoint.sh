@@ -72,47 +72,11 @@ su fms -c "bin/update-schema --commit" 2>&1 || echo "Schema update completed (ma
 chmod 0775 "$FMS_ROOT/upload_dir" 2>/dev/null || true
 su fms -c "mkdir -p '$FMS_ROOT/upload_dir/.cache'" 2>/dev/null || true
 
-# Create admin user if ADMIN_PASSWORD is set
-# We create a superuser first (for full admin access), then also create a regular
-# council admin user that bypasses the 2FA requirement superusers have.
+# Create superuser (doesn't need the body to exist)
 if [ -n "${ADMIN_PASSWORD:-}" ]; then
   ADMIN_EMAIL="${ADMIN_EMAIL:-admin@example.org}"
   echo "Creating superuser: $ADMIN_EMAIL"
   su fms -c "bin/createsuperuser '$ADMIN_EMAIL' '$ADMIN_PASSWORD'" 2>&1 || echo "Superuser may already exist"
-
-  # Create a council admin user using FMS Perl framework for proper password hashing
-  COUNCIL_ADMIN_EMAIL="council-admin@example.org"
-  echo "Creating council admin: $COUNCIL_ADMIN_EMAIL"
-  cd "$FMS_ROOT"
-  # Write the Perl script to a temp file — inject credentials directly (not via env)
-  # because su fms -c does not preserve environment variables
-  cat > /tmp/create-council-admin.pl <<PERLSCRIPT
-use FixMyStreet::App;
-my \$email = '$COUNCIL_ADMIN_EMAIL';
-my \$password = '$ADMIN_PASSWORD';
-my \$body = FixMyStreet::App->model("DB::Body")->find({name => "NDX Demo Council"});
-die "No body found" unless \$body;
-my \$user = FixMyStreet::App->model("DB::User")->find_or_new({email => \$email});
-\$user->name("NDX Demo Admin");
-\$user->from_body(\$body->id);
-\$user->is_superuser(1);
-if (\$user->in_storage) {
-  \$user->update({password => \$password});
-} else {
-  \$user->insert;
-  \$user->update({password => \$password});
-}
-for my \$perm (qw(moderate report_edit report_edit_category report_edit_priority
-                  report_inspect report_instruct contribute_as_another_user
-                  contribute_as_body user_edit user_manage_permissions
-                  template_edit responsepriority_edit category_edit)) {
-  \$user->user_body_permissions->find_or_create({body_id => \$body->id, permission_type => \$perm});
-}
-print "Council admin created with " . \$user->user_body_permissions->count . " permissions\\n";
-PERLSCRIPT
-
-  su fms -c "cd $FMS_ROOT && perl -I$FMS_ROOT/local/lib/perl5 -I$FMS_ROOT/commonlib/perllib -I$FMS_ROOT/perllib /tmp/create-council-admin.pl" 2>&1 || echo "Council admin creation may have failed"
-  rm -f /tmp/create-council-admin.pl
 fi
 
 # Seed demo data using FMS Perl framework
@@ -410,6 +374,39 @@ else
   mkdir -p "$FMS_ROOT/../data"
   chown fms:fms "$FMS_ROOT/../data"
   su fms -c "cd $FMS_ROOT && bin/update-all-reports" 2>&1 || true
+fi
+
+# Create council admin user AFTER seed (body must exist first)
+if [ -n "${ADMIN_PASSWORD:-}" ]; then
+  COUNCIL_ADMIN_EMAIL="council-admin@example.org"
+  echo "Creating council admin: $COUNCIL_ADMIN_EMAIL"
+  cd "$FMS_ROOT"
+  cat > /tmp/create-council-admin.pl <<PERLSCRIPT
+use FixMyStreet::App;
+my \$email = '$COUNCIL_ADMIN_EMAIL';
+my \$password = '$ADMIN_PASSWORD';
+my \$body = FixMyStreet::App->model("DB::Body")->find({name => "NDX Demo Council"});
+die "No body found - seed must run first" unless \$body;
+my \$user = FixMyStreet::App->model("DB::User")->find_or_new({email => \$email});
+\$user->name("NDX Demo Admin");
+\$user->from_body(\$body->id);
+\$user->is_superuser(1);
+if (\$user->in_storage) {
+  \$user->update({password => \$password});
+} else {
+  \$user->insert;
+  \$user->update({password => \$password});
+}
+for my \$perm (qw(moderate report_edit report_edit_category report_edit_priority
+                  report_inspect report_instruct contribute_as_another_user
+                  contribute_as_body user_edit user_manage_permissions
+                  template_edit responsepriority_edit category_edit)) {
+  \$user->user_body_permissions->find_or_create({body_id => \$body->id, permission_type => \$perm});
+}
+print "Council admin created with " . \$user->user_body_permissions->count . " permissions\\n";
+PERLSCRIPT
+  su fms -c "cd $FMS_ROOT && perl -I$FMS_ROOT/local/lib/perl5 -I$FMS_ROOT/commonlib/perllib -I$FMS_ROOT/perllib /tmp/create-council-admin.pl" 2>&1 || echo "Council admin creation may have failed"
+  rm -f /tmp/create-council-admin.pl
 fi
 
 echo "=== Starting FixMyStreet via supervisord ==="
