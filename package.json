@@ -51,7 +51,7 @@
     "@playwright/test": "^1.58.2",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
-    "axios": "^1.13.6",
+    "axios": "^1.15.0",
     "http-server": "^14.1.1",
     "js-yaml": "^4.1.0",
     "pa11y-ci": "^4.1.0",
