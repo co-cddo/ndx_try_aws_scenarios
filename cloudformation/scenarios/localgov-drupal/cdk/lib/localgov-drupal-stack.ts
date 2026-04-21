@@ -160,7 +160,7 @@ export class LocalGovDrupalStack extends cdk.Stack {
     }));
 
     const readSecretFn = new cdk.aws_lambda.Function(this, 'ReadSecretFn', {
-      runtime: cdk.aws_lambda.Runtime.NODEJS_20_X,
+      runtime: cdk.aws_lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       role: readSecretRole,
       timeout: cdk.Duration.seconds(30),

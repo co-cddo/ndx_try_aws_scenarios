@@ -120,6 +120,17 @@ COPY docker/config/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 COPY docker/config/drupal.settings.php /var/www/drupal/web/sites/default/settings.php
 COPY docker/config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# MariaDB client (used by init probes + drush sql:query) now verifies server
+# certs by default and does not trust the Amazon RDS CA bundle. Traffic stays
+# inside the VPC to the Aurora Serverless endpoint, so skip cert verification
+# rather than shipping the RDS CA bundle. PHP PDO (used by Drupal itself) has
+# its own TLS stack and is unaffected.
+RUN mkdir -p /etc/my.cnf.d /root \
+    && printf '[client]\nssl-verify-server-cert=OFF\n' > /etc/my.cnf.d/rds-ssl.cnf \
+    && printf '[client]\nssl-verify-server-cert=OFF\n' > /root/.my.cnf \
+    && chmod 644 /etc/my.cnf.d/rds-ssl.cnf \
+    && chmod 600 /root/.my.cnf
+
 # Copy entrypoint and scripts
 COPY docker/entrypoint.sh /entrypoint.sh
 COPY docker/scripts/ /scripts/

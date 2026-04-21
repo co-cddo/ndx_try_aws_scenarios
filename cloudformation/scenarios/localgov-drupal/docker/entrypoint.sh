@@ -3,6 +3,7 @@
 # Handles initialization, PHP-FPM, and Nginx startup
 
 set -e
+set -o pipefail 2>/dev/null || true
 
 echo "=== LocalGov Drupal Container Starting ==="
 echo "Deployment Mode: ${DEPLOYMENT_MODE:-production}"
@@ -53,7 +54,21 @@ if [ "${SKIP_INIT:-false}" != "true" ]; then
         INIT_LOG_FILE="/var/www/drupal/web/init-log.txt"
         touch "$INIT_LOG_FILE"
         chmod 644 "$INIT_LOG_FILE"
+        # Run init script; propagate its exit code through `tee` so a failure
+        # causes the container to exit and ECS to restart the task (by which
+        # time Aurora Serverless v2 will usually be warm).
+        set +e
         /scripts/init-drupal.sh 2>&1 | tee "$INIT_LOG_FILE"
+        init_status=$?
+        set -e
+        if [ "$init_status" -ne 0 ]; then
+            echo "ERROR: Drupal initialization failed with exit code $init_status"
+            echo "Exiting so ECS can restart the task."
+            # Stop the pre-warmed services so the container actually exits.
+            nginx -s quit 2>/dev/null || true
+            pkill php-fpm 2>/dev/null || true
+            exit "$init_status"
+        fi
     fi
 fi
 

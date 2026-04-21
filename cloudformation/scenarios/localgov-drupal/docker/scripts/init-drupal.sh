@@ -10,7 +10,7 @@ set -e
 INIT_MARKER="/var/www/drupal/sites/default/.installed"
 STATUS_FILE="/var/www/drupal/web/init-status.html"
 DRUPAL_ROOT="/var/www/drupal"
-MAX_DB_RETRIES=60
+MAX_DB_RETRIES=180
 DB_RETRY_INTERVAL=5
 
 # Default values
@@ -251,7 +251,7 @@ wait_for_database() {
 
     local retry=0
     while [ $retry -lt $MAX_DB_RETRIES ]; do
-        if mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASSWORD" -e "SELECT 1" >/dev/null 2>&1; then
+        if mysql --connect-timeout=3 -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASSWORD" -e "SELECT 1" >/dev/null 2>&1; then
             log "Database is available"
             return 0
         fi
