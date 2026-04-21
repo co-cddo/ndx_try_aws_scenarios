@@ -92,13 +92,11 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: cloudformation/scenarios/localgov-ims/cdk/package-lock.json
 
       - name: Build and synth localgov-ims CDK
         working-directory: cloudformation/scenarios/localgov-ims/cdk
         run: |
-          npm ci
+          npm install
           npm run build
           npx cdk synth
 
@@ -246,13 +244,11 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: cloudformation/scenarios/minute/cdk/package-lock.json
 
       - name: Build minute CDK
         working-directory: cloudformation/scenarios/minute/cdk
         run: |
-          npm ci
+          npm install
           npx cdk synth
 
       - name: Strip bootstrap cruft and validate template
