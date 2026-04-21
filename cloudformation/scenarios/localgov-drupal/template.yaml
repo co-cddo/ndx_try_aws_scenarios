@@ -444,7 +444,7 @@ Resources:
             - Ref: DatabaseDbSecret1098DC6E
             - :SecretString:username::}}
       ServerlessV2ScalingConfiguration:
-        MaxCapacity: 2
+        MaxCapacity: 8
         MinCapacity: 0.5
       StorageEncrypted: true
       Tags:
