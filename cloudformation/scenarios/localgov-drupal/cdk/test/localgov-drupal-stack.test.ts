@@ -131,7 +131,7 @@ describe('LocalGovDrupalStack', () => {
       EngineVersion: Match.stringLikeRegexp('8.0'),
       ServerlessV2ScalingConfiguration: {
         MinCapacity: 0.5,
-        MaxCapacity: 2,
+        MaxCapacity: 8,
       },
       DatabaseName: 'drupal',
       StorageEncrypted: true,
