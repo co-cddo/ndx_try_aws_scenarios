@@ -85,7 +85,11 @@ export class DatabaseConstruct extends Construct {
         version: rds.AuroraMysqlEngineVersion.VER_3_04_0,
       }),
       serverlessV2MinCapacity: 0.5, // Minimum ACU (scale-to-zero capable)
-      serverlessV2MaxCapacity: 2, // Maximum ACU for demo workloads
+      // Drupal first-boot module install (localgov: ~33 modules) saturates the
+      // writer; at the previous cap of 2 ACU it took >10 minutes. 8 ACU keeps
+      // steady-state cost the same (scales back to min when idle) but gives
+      // headroom for the init burst.
+      serverlessV2MaxCapacity: 8,
       vpc: props.vpc,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PUBLIC, // Default VPC has public subnets only
