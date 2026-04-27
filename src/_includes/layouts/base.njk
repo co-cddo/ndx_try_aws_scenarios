@@ -116,6 +116,16 @@
 
 {% block footer %}
   {{ appFooter(options.footer) }}
+  {% if build.shortSha %}
+  <div class="govuk-width-container ndx-build-info">
+    <p class="govuk-body-s govuk-!-margin-top-4 govuk-!-margin-bottom-4">
+      Build:
+      <a class="govuk-link" href="{{ build.commitUrl }}" rel="noopener">
+        <code>{{ build.shortSha }}</code>
+      </a>
+    </p>
+  </div>
+  {% endif %}
 {% endblock %}
 
 {% block bodyEnd %}
