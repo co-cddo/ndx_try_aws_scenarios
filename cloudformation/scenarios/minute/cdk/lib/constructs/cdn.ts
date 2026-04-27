@@ -27,7 +27,7 @@ export class CdnConstruct extends Construct {
     });
 
     const passwordGenFn = new lambda.Function(this, 'PasswordGenFn', {
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       role: passwordGenRole,
       timeout: cdk.Duration.seconds(30),

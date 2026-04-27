@@ -1137,7 +1137,7 @@ Resources:
         Fn::GetAtt:
           - ReadSecretRole630BE8B4
           - Arn
-      Runtime: nodejs20.x
+      Runtime: nodejs22.x
       Tags:
         - Key: CouncilTheme
           Value: random

@@ -50,7 +50,7 @@ export class StorageConstruct extends Construct {
     );
 
     const emptyBucketFn = new lambda.Function(this, 'EmptyBucketFn', {
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       role: emptyBucketRole,
       timeout: cdk.Duration.minutes(5),

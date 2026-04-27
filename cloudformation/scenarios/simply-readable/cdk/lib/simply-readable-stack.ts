@@ -214,7 +214,7 @@ export class SimplyReadableStack extends cdk.Stack {
     );
 
     const setPasswordFn = new lambda.CfnFunction(this, "SetPasswordFn", {
-      runtime: "nodejs20.x",
+      runtime: "nodejs22.x",
       handler: "index.handler",
       role: setPasswordRole.roleArn,
       timeout: 30,
@@ -279,7 +279,7 @@ export class SimplyReadableStack extends cdk.Stack {
     );
 
     const seedFn = new lambda.CfnFunction(this, "IsbSeedFn", {
-      runtime: "nodejs20.x",
+      runtime: "nodejs22.x",
       handler: "index.handler",
       role: seedRole.roleArn,
       timeout: 120,
@@ -367,7 +367,7 @@ export class SimplyReadableStack extends cdk.Stack {
     );
 
     const deployFn = new lambda.CfnFunction(this, "WebDeployFn", {
-      runtime: "nodejs20.x",
+      runtime: "nodejs22.x",
       handler: "index.handler",
       role: deployRole.roleArn,
       timeout: 300,
@@ -458,7 +458,7 @@ export class SimplyReadableStack extends cdk.Stack {
     );
 
     const emptyBucketFn = new lambda.Function(this, "EmptyBucketFn", {
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       handler: "index.handler",
       role: emptyBucketRole,
       timeout: cdk.Duration.minutes(5),
