@@ -10,20 +10,14 @@ Our platform effectiveness is measured through four key metrics, tracked via Goo
 
 ### Primary Metric: Informed Decision Rate
 
-<dl class="govuk-summary-list">
-  <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key">Definition</dt>
-    <dd class="govuk-summary-list__value">Percentage of users who reach a clear decision (proceed or not proceed) after completing a scenario evaluation</dd>
-  </div>
-  <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key">Formula</dt>
-    <dd class="govuk-summary-list__value"><code>(pathway_selected[proceed] + pathway_selected[not_now]) / total pathway_selected × 100</code></dd>
-  </div>
-  <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key">Target</dt>
-    <dd class="govuk-summary-list__value">65-80%</dd>
-  </div>
-</dl>
+Definition
+: Percentage of users who reach a clear decision (proceed or not proceed) after completing a scenario evaluation
+
+Formula
+: `(pathway_selected[proceed] + pathway_selected[not_now]) / total pathway_selected × 100`
+
+Target
+: 65-80%
 
 ### Secondary Metrics
 

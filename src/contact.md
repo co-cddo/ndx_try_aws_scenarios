@@ -62,7 +62,7 @@ Email: [ndx@dsit.gov.uk](mailto:ndx@dsit.gov.uk)
 
 Join the conversation on the cross-government Slack:
 
-- <a href="https://ukgovernmentdigital.slack.com/archives/C075C8GTP7D" class="govuk-link" target="_blank" rel="noopener noreferrer">#national-digital-exchange<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+- [#national-digital-exchange](https://ukgovernmentdigital.slack.com/archives/C075C8GTP7D)
 
 ## Follow our progress
 

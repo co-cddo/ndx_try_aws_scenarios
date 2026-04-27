@@ -255,6 +255,52 @@ export default function(eleventyConfig) {
     }
   });
 
+  // External links: open in new tab with screen-reader hint, unless the
+  // anchor already specifies a target. Internal links (relative, anchor-only,
+  // mailto/tel, or matching the configured site host) are left alone.
+  const siteHost = (() => {
+    try {
+      return new URL(process.env.GITHUB_PAGES_URL || 'http://localhost:8080').hostname;
+    } catch {
+      return '';
+    }
+  })();
+  const internalHosts = new Set(
+    [siteHost, 'localhost', '127.0.0.1', 'aws.try.ndx.digital.cabinet-office.gov.uk'].filter(Boolean)
+  );
+  const NEW_TAB_HINT = '<span class="govuk-visually-hidden"> (opens in new tab)</span>';
+
+  eleventyConfig.addTransform('externalLinks', function (content) {
+    if (!this.page.outputPath || !this.page.outputPath.endsWith('.html')) {
+      return content;
+    }
+    return content.replace(
+      /<a\b([^>]*?)>([\s\S]*?)<\/a>/gi,
+      (match, attrs, inner) => {
+        if (/\btarget\s*=/i.test(attrs)) return match;
+        const hrefMatch = attrs.match(/\bhref\s*=\s*(["'])([^"']+)\1/i);
+        if (!hrefMatch) return match;
+        const href = hrefMatch[2];
+        if (!/^https?:\/\//i.test(href)) return match;
+        let url;
+        try {
+          url = new URL(href);
+        } catch {
+          return match;
+        }
+        if (internalHosts.has(url.hostname)) return match;
+        const newAttrs =
+          attrs +
+          ' target="_blank"' +
+          (/\brel\s*=/i.test(attrs) ? '' : ' rel="noopener noreferrer"');
+        const newInner = /opens\s+in\s+new\s+tab/i.test(inner)
+          ? inner
+          : `${inner}${NEW_TAB_HINT}`;
+        return `<a${newAttrs}>${newInner}</a>`;
+      }
+    );
+  });
+
   // Watch targets for development
   eleventyConfig.addWatchTarget('src/assets/');
 
