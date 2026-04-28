@@ -292,3 +292,24 @@ walkthroughs:
       - title: "Architecture understood"
         description: "Review the AWS infrastructure powering the platform"
         time: "2 minutes"
+
+  paperless-ngx:
+    totalSteps: 4
+    url: "/walkthroughs/paperless-ngx/"
+    title: "Paperless-ngx with AI Walkthrough"
+    duration: "15 minutes"
+    hasWalkthrough: true
+    category: "ai"
+    steps:
+      - title: "Signed in to Paperless-ngx"
+        description: "Find your URL and admin password from the stack outputs and access the dashboard"
+        time: "2 minutes"
+      - title: "AI-classified archive browsed"
+        description: "See how Bedrock Nova Pro has tagged, titled, classified and extracted correspondents from 36 sample parish documents"
+        time: "5 minutes"
+      - title: "Document opened and searched"
+        description: "Drop into a single document to see the OCR'd content, then run a full-text search"
+        time: "3 minutes"
+      - title: "Chatted with the archive"
+        description: "Ask plain-English questions and watch Bedrock Knowledge Base return answers with citations and Guardrails redact PII"
+        time: "5 minutes"
