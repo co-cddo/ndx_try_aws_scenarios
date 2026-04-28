@@ -11,6 +11,18 @@ steps:
   - step: 1
     title: "Sign in and see the dashboard"
     screenshots:
+      - id: cloudformation-outputs
+        filename: step-1-cloudformation-outputs.png
+        alt: "CloudFormation Outputs tab showing PaperlessUrl, ChatUrl, AdminUsername, AdminPassword, ArchiveBucket, ChatLambdaUrl and CloudWatchLogsUrl outputs"
+        caption: "Find PaperlessUrl, AdminUsername, AdminPassword and CloudWatchLogsUrl in the CloudFormation Outputs tab"
+        width: 1920
+        height: 1080
+      - id: cloudwatch-logs
+        filename: step-1-cloudwatch-logs.png
+        alt: "CloudWatch Logs group /ndx-paperless-ngx/production with four log streams: paperless, gotenberg, init and tika"
+        caption: "All four containers (paperless, gotenberg, tika, init) write to a single CloudWatch log group — useful when troubleshooting the consumer pipeline"
+        width: 1920
+        height: 1080
       - id: login
         filename: 01-login.png
         alt: "Paperless-ngx login screen with the green 'Please sign in' panel and username/password fields"
@@ -83,6 +95,24 @@ steps:
         caption: "The model retrieves relevant documents from the archive, cites them, and Bedrock Guardrails anonymise names and addresses in the response (you can see the {ADDRESS} placeholders)"
         width: 1280
         height: 800
+      - id: bedrock-kb-overview
+        filename: step-4-bedrock-kb-overview.png
+        alt: "Amazon Bedrock Knowledge Base console showing ndx-try-paperless-kb-us-east-1 with status Available and a single S3 data source pointing at the paperless-archive bucket"
+        caption: "The chat is backed by an S3 Vectors Knowledge Base — the data source is the same archive bucket that holds the Paperless documents"
+        width: 1920
+        height: 1080
+      - id: bedrock-guardrails
+        filename: step-4-bedrock-guardrails.png
+        alt: "Bedrock Guardrails Working draft showing harmful-category content filters for Hate, Insults, Sexual, Violence and Misconduct, all High strength with action BLOCK on prompts and responses"
+        caption: "The guardrail blocks the standard harmful-content categories at high strength on both prompts and responses"
+        width: 1920
+        height: 1080
+      - id: bedrock-guardrails-pii
+        filename: step-4-bedrock-guardrails-pii.png
+        alt: "Bedrock Guardrails PII filters showing NAME, EMAIL, PHONE and ADDRESS masked on output, plus UK_NATIONAL_INSURANCE_NUMBER, UK_NATIONAL_HEALTH_SERVICE_NUMBER and CREDIT_DEBIT_CARD_NUMBER blocked"
+        caption: "Names, emails, phone numbers and addresses are masked in responses — that's where the {ADDRESS} placeholders come from. UK NINO, NHS numbers and card numbers are blocked outright."
+        width: 1920
+        height: 1080
 
 # Console screenshots reserved for the future explore section
 console: []
