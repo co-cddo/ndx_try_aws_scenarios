@@ -8,6 +8,7 @@ configured Guardrail applied.
 import base64
 import json
 import os
+import re
 from typing import Any
 
 import boto3
@@ -110,17 +111,50 @@ def handler(event: dict[str, Any], _ctx: Any) -> dict[str, Any]:
     except Exception as e:  # noqa: BLE001
         return _resp(502, {"error": "bedrock call failed", "detail": str(e)})
 
-    citations = []
+    base = PAPERLESS_URL.rstrip("/")
+    citations: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
     for citation in result.get("citations", []) or []:
         for ref in citation.get("retrievedReferences", []) or []:
             loc = ref.get("location", {})
             s3loc = loc.get("s3Location", {})
-            uri = s3loc.get("uri")
-            if uri:
-                citations.append(uri)
+            uri = s3loc.get("uri") or ""
+            fname = uri.rsplit("/", 1)[-1]
+            if not fname.endswith(".txt"):
+                continue
+            doc_id = fname[:-4]
+            if not doc_id.isdigit() or doc_id in seen_ids:
+                continue
+            seen_ids.add(doc_id)
+            chunk_text = (ref.get("content") or {}).get("text", "") or ""
+            title = ""
+            # Bedrock KB collapses whitespace in chunks, so the file's
+            # first-line "# Title" heading + "Paperless ID: N" run together
+            # on a single line. Pull everything before "Paperless ID:".
+            m = re.search(r"#?\s*(.+?)\s+Paperless ID:\s*\d+", chunk_text)
+            if m:
+                title = m.group(1).strip()
+            else:
+                for line in chunk_text.splitlines():
+                    stripped = line.strip()
+                    if stripped.startswith("# "):
+                        title = stripped[2:].strip()
+                        break
+            if not title:
+                title = f"Document #{doc_id}"
+            if len(title) > 120:
+                title = title[:117].rstrip() + "..."
+            href = f"{base}/documents/{doc_id}/" if base else f"/documents/{doc_id}/"
+            citations.append({"id": doc_id, "title": title, "url": href, "uri": uri})
+
+    answer_text = result.get("output", {}).get("text", "")
+    # Nova Pro embeds raw citation markers like %[1]% in the generated text.
+    # We render Sources separately, so strip these so they don't show up as
+    # broken artefacts in the rendered answer.
+    answer_text = re.sub(r"[ \t]*%\[\d+(?:,\s*\d+)*\]%[ \t]*", "", answer_text).strip()
 
     return _resp(200, {
-        "answer": result.get("output", {}).get("text", ""),
+        "answer": answer_text,
         "sessionId": result.get("sessionId"),
         "citations": citations,
     })

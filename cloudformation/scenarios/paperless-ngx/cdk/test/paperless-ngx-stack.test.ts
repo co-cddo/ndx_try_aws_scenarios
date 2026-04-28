@@ -11,16 +11,16 @@ describe('PaperlessNgxStack', () => {
     template = Template.fromStack(stack);
   });
 
-  test('creates Aurora Postgres cluster', () => {
-    template.resourceCountIs('AWS::RDS::DBCluster', 1);
+  test('creates RDS Postgres instance', () => {
+    template.resourceCountIs('AWS::RDS::DBInstance', 1);
   });
 
   test('creates ElastiCache Redis', () => {
     template.resourceCountIs('AWS::ElastiCache::CacheCluster', 1);
   });
 
-  test('creates EFS file system', () => {
-    template.resourceCountIs('AWS::EFS::FileSystem', 1);
+  test('creates S3 Files file system', () => {
+    template.resourceCountIs('AWS::S3Files::FileSystem', 1);
   });
 
   test('creates Bedrock Knowledge Base', () => {
