@@ -1,0 +1,75 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Open a document and search — Paperless-ngx Walkthrough"
+description: Drop into a single document, see its OCR'd content, then run a full-text search
+currentStep: 3
+totalSteps: 4
+timeEstimate: "3 minutes"
+scenarioId: paperless-ngx
+---
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Open a document and search" %}
+{% set stepDescription = "See how OCR, Tika and Gotenberg made every document searchable, then try a keyword search." %}
+{% set timeEstimate = "3 minutes" %}
+{% set screenshotData = screenshots["paperless-ngx"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 3 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Single document detail shows the OCR'd text alongside the original",
+  "Document notes panel shows the AI-generated summary",
+  "Full-text search returns matches across the AI metadata and OCR'd content"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">What to try</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open a document</strong>
+    <p class="govuk-body">
+      From the Documents view, click any card — try one of the .eml emails (Highways East or the WREN grant decision are good) or one of the planning notice PDFs.
+    </p>
+  </li>
+
+  <li>
+    <strong>Look at the Content tab</strong>
+    <p class="govuk-body">
+      The right-hand pane shows the document's OCR'd content. For PDFs this is Tesseract output. For .docx and .odt it's been converted via Gotenberg first. For .eml files it's the body extracted by Apache Tika. All three pipelines feed the same searchable text store.
+    </p>
+  </li>
+
+  <li>
+    <strong>Look at the Notes tab</strong>
+    <p class="govuk-body">
+      The notes panel shows the AI-generated 1-2 sentence summary that the post-consume hook stored against the document. Useful when a clerk wants to scan an inbox at a glance.
+    </p>
+  </li>
+
+  <li>
+    <strong>Look at the Details tab</strong>
+    <p class="govuk-body">
+      You'll see the AI-rewritten title, the AI-extracted correspondent, the AI-classified document type, and the AI tags — all editable if you want to override Bedrock's choices.
+    </p>
+  </li>
+
+  <li>
+    <strong>Search the archive</strong>
+    <p class="govuk-body">
+      Use the search bar at the top. Try <code>planning</code> to find every document mentioning planning. Try <code>Mill Lane</code> — Paperless full-text-searches the OCR'd content, so this hits the body of the planning notice for The Old Forge. Try <code>WREN grant</code> — this picks up the email confirming the grant award.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>The OCR pipeline:</strong>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>Tesseract</strong> — OCRs scanned PDFs and image-only PDFs in the main Paperless container.</li>
+    <li><strong>Apache Tika</strong> — runs as a sidecar on <code>localhost:9998</code>; extracts content from .eml, .odt, .rtf and dozens of other formats.</li>
+    <li><strong>Gotenberg</strong> — runs as a sidecar on <code>localhost:3000</code>; converts .docx and other Office formats to PDF before they reach Tesseract.</li>
+  </ul>
+  <p class="govuk-body">
+    All three sidecars are in the same ECS task, talking via localhost — there's no service-discovery DNS, no extra network surface, and they all scale together.
+  </p>
+</div>

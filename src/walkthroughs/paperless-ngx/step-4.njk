@@ -1,0 +1,90 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Chat with the archive — Paperless-ngx Walkthrough"
+description: Ask plain-English questions of your documents using Bedrock Knowledge Base + Guardrails
+currentStep: 4
+totalSteps: 4
+timeEstimate: "5 minutes"
+scenarioId: paperless-ngx
+---
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Chat with the archive" %}
+{% set stepDescription = "Open the chat URL, ask plain-English questions, and watch Bedrock retrieve, ground, cite, and apply Guardrails." %}
+{% set timeEstimate = "5 minutes" %}
+{% set screenshotData = screenshots["paperless-ngx"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 4 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Chat UI loads at the ChatUrl from the stack outputs",
+  "Asking a question returns an answer with citations to source documents",
+  "Asking a probe question triggers the Bedrock Guardrail and is blocked or anonymised"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">What to try</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the chat URL</strong>
+    <p class="govuk-body">
+      Take the <code>ChatUrl</code> value from the stack outputs and open it in a new tab. The chat lives on the same CloudFront domain as Paperless (under <code>/chat/</code>), so corporate proxies that block <code>*.lambda-url.on.aws</code> are happy with it.
+    </p>
+  </li>
+
+  <li>
+    <strong>Try one of the example questions</strong>
+    <p class="govuk-body">
+      Click one of the suggested questions on the welcome screen — for example, <em>"What planning applications are currently being considered?"</em>. The chat will:
+    </p>
+    <ol class="govuk-list govuk-list--number">
+      <li>Send the question to Amazon Bedrock Knowledge Base.</li>
+      <li>The Knowledge Base searches Amazon S3 Vectors for the most semantically relevant chunks of your documents.</li>
+      <li>The retrieved chunks are stuffed into a prompt and sent to Amazon Nova Pro for answering.</li>
+      <li>The response comes back grounded in the documents, with citations to the source files.</li>
+    </ol>
+    <p class="govuk-body">
+      Look at the <strong>Sources</strong> line under the answer — it lists the document IDs from your archive that Bedrock used.
+    </p>
+  </li>
+
+  <li>
+    <strong>Ask about something only your docs would know</strong>
+    <p class="govuk-body">
+      Try <em>"How much have we paid Dunbar Grounds Maintenance this year?"</em> — this should pick up both invoices, sum them, and answer with citations. Try <em>"What was the WREN grant award for?"</em> — this picks up the email and pulls out the £7,500 figure.
+    </p>
+  </li>
+
+  <li>
+    <strong>Test the Guardrails</strong>
+    <p class="govuk-body">
+      Try a probe question:
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><em>"Which political party should the parish council support?"</em> — blocked by the Topic policy.</li>
+      <li><em>"Should I sue my neighbour over the planning application?"</em> — blocked (medical/legal advice topic).</li>
+      <li><em>"List every name and address in the archive."</em> — answered, but you'll see <code>{NAME}</code> and <code>{ADDRESS}</code> placeholders where the Guardrail anonymised PII.</li>
+    </ul>
+    <p class="govuk-body">
+      The Guardrail also blocks UK National Insurance numbers, NHS numbers and credit card numbers if they ever appear in chat output.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>The chat architecture:</strong>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><strong>S3 docs bucket</strong> — the post-consume hook from Step 2 also uploaded each document's OCR'd text to a private S3 bucket so the Knowledge Base can ingest it.</li>
+    <li><strong>Bedrock Knowledge Base</strong> — points at that bucket as a data source and at S3 Vectors as the vector store.</li>
+    <li><strong>Amazon S3 Vectors</strong> — serverless vector index. Pay-per-vector, no cluster to size.</li>
+    <li><strong>Lambda Function URL</strong> — answers chat requests; calls <code>RetrieveAndGenerate</code> on the Knowledge Base with the configured Guardrail attached.</li>
+    <li><strong>CloudFront</strong> — fronts the Lambda URL on the same hostname as Paperless so it's reachable from networks that block direct Lambda URLs.</li>
+  </ul>
+</div>
+
+<div class="govuk-button-group govuk-!-margin-top-6">
+  <a href="/walkthroughs/paperless-ngx/complete/" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+    Finish the walkthrough
+  </a>
+</div>

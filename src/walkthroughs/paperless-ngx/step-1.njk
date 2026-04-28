@@ -1,0 +1,131 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 1: Sign in — Paperless-ngx Walkthrough"
+description: Find your URL and admin password from the stack outputs and sign in to Paperless-ngx
+currentStep: 1
+totalSteps: 4
+timeEstimate: "2 minutes"
+scenarioId: paperless-ngx
+---
+
+{% set stepNumber = 1 %}
+{% set stepTitle = "Sign in and see the dashboard" %}
+{% set stepDescription = "Find your Paperless URL and admin password from the CloudFormation outputs, then sign in." %}
+{% set timeEstimate = "2 minutes" %}
+{% set screenshotData = screenshots["paperless-ngx"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 1 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "CloudFormation stack shows CREATE_COMPLETE status",
+  "PaperlessUrl, AdminUsername and AdminPassword outputs are visible",
+  "You can sign in and see the Paperless-ngx dashboard"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">How to find your URL and credentials</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the CloudFormation console</strong>
+    <p class="govuk-body">
+      Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation in us-east-1<span class="govuk-visually-hidden"> (opens in new tab)</span></a>.
+    </p>
+  </li>
+
+  <li>
+    <strong>Find your stack</strong>
+    <p class="govuk-body">
+      Look for a stack with <code>paperless-ngx</code> in the name. The status should be <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span>.
+    </p>
+  </li>
+
+  <li>
+    <strong>Open the Outputs tab</strong>
+    <p class="govuk-body">Click the stack name, then select the <strong>Outputs</strong> tab. You'll see:</p>
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th class="govuk-table__header">Output</th>
+          <th class="govuk-table__header">What it is</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><code>PaperlessUrl</code></td>
+          <td class="govuk-table__cell">CloudFront HTTPS URL for the Paperless-ngx UI</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><code>ChatUrl</code></td>
+          <td class="govuk-table__cell">Chat-with-archive URL — you'll use this in Step 4</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><code>AdminUsername</code></td>
+          <td class="govuk-table__cell"><code>admin</code></td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><code>AdminPassword</code></td>
+          <td class="govuk-table__cell">A 16-character password (shown in plain text)</td>
+        </tr>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><code>CloudWatchLogsUrl</code></td>
+          <td class="govuk-table__cell">Direct link to logs for paperless / tika / gotenberg / init containers</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+
+  <li>
+    <strong>Sign in</strong>
+    <p class="govuk-body">
+      Open the <code>PaperlessUrl</code> in a new tab. Enter <code>admin</code> and the value from <code>AdminPassword</code>.
+    </p>
+    <p class="govuk-body">
+      You'll land on the dashboard, with the inbox tag and a few saved views down the left.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>What's already happening behind the scenes:</strong> the init container generated 36 sample parish documents and dropped them into the EFS <code>consume</code> folder. Paperless's consumer is OCR'ing each one (Tesseract for PDFs, Apache Tika for emails, Gotenberg for .docx and .odt), and the post-consume hook is calling Amazon Nova Pro to title, tag and classify each document. Most documents will be fully classified within 2 to 3 minutes of stack completion.
+</div>
+
+<details class="govuk-details govuk-!-margin-top-6">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">Troubleshooting: dashboard is empty</span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">If the dashboard shows no documents yet:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>The consumer pipeline takes a few seconds per document — give it 2 to 3 minutes after stack completion.</li>
+      <li>Click <strong>Documents</strong> in the left nav to see them appear as they're processed.</li>
+      <li>Check the <code>CloudWatchLogsUrl</code> output and look at the <code>paperless</code> stream prefix for any consumer errors.</li>
+    </ul>
+  </div>
+</details>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">Troubleshooting: AdminPassword shows {{ "{{resolve:secretsmanager:..." }}}}</span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      If <code>AdminPassword</code> in the Outputs tab shows a literal string like <code>{{ "{{resolve:secretsmanager:..." }}}}</code> rather than the password value, fetch it directly from Secrets Manager:
+    </p>
+    <ol class="govuk-list govuk-list--number">
+      <li>Open the Secrets Manager console in us-east-1.</li>
+      <li>Find the secret with <code>AdminPasswordSecret</code> in the name.</li>
+      <li>Click <strong>Retrieve secret value</strong> — the password is the value of the <code>ADMIN_PASSWORD</code> key.</li>
+    </ol>
+  </div>
+</details>
+
+<style>
+  code {
+    background-color: #f3f2f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+</style>

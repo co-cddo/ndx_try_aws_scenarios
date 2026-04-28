@@ -596,7 +596,7 @@
             "description": "AI features available in this scenario for explore page (Story 6.2)",
             "items": {
               "type": "object",
-              "required": ["id", "name", "description", "category", "drupalPath", "status"],
+              "required": ["id", "name", "description", "category", "status"],
               "properties": {
                 "id": {
                   "type": "string",
@@ -612,12 +612,12 @@
                 "description": {
                   "type": "string",
                   "minLength": 20,
-                  "maxLength": 200,
+                  "maxLength": 400,
                   "description": "Brief description of what the feature does"
                 },
                 "icon": {
                   "type": "string",
-                  "enum": ["edit", "simplify", "image", "speaker", "translate", "document", "council"],
+                  "enum": ["edit", "simplify", "image", "speaker", "translate", "document", "council", "tag", "user", "chatbot"],
                   "description": "Icon identifier for the feature card"
                 },
                 "category": {
@@ -635,7 +635,15 @@
                 },
                 "drupalPath": {
                   "type": "string",
-                  "description": "Drupal admin path for deep linking (e.g., '/admin/content')"
+                  "description": "Drupal admin path for deep linking (e.g., '/admin/content'). Optional; use appPath for non-Drupal scenarios."
+                },
+                "appPath": {
+                  "type": "string",
+                  "description": "Application-specific path for deep linking into the deployed scenario UI"
+                },
+                "paperlessPath": {
+                  "type": "string",
+                  "description": "Paperless-ngx UI path for deep linking (e.g., '/documents')"
                 },
                 "awsService": {
                   "type": "string",

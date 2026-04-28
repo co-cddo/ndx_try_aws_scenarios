@@ -1,0 +1,188 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough complete — Paperless-ngx with AI"
+description: You've completed the Paperless-ngx with AI walkthrough
+currentStep: 5
+totalSteps: 4
+scenarioId: paperless-ngx
+---
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">Walkthrough complete</h1>
+  <div class="govuk-panel__body">
+    You've explored a working AI-classified document archive on AWS
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  You've just put 36 parish documents through an OCR + Bedrock classification pipeline, browsed the archive Bedrock built, and asked the documents plain-English questions. In 15 minutes you've seen what would otherwise be a multi-vendor procurement involving an EDMS, an OCR engine and an AI provider.
+</p>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f4c4;</span>
+      Open-source, env-var configured
+    </h3>
+    <p class="govuk-body">
+      Upstream Paperless-ngx is fully configured by environment variables — no fork, no patch, no licence. The same image you'd download for your home server runs unchanged on Fargate.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: zero licence cost, no vendor lock-in, an active community of tens of thousands.
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f9e0;</span>
+      AI applied at the right layer
+    </h3>
+    <p class="govuk-body">
+      Bedrock isn't replacing OCR or replacing search — it's enriching the metadata Paperless already has. Title, tags, document type, correspondent, summary. Everything else (the search box, the inbox tag, the document detail view) is the upstream UI that Paperless users already know.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: AI where it adds value, conventional UI everywhere else.
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f50d;</span>
+      Retrieval-augmented chat with citations
+    </h3>
+    <p class="govuk-body">
+      Every chat answer is grounded in the documents you've actually consumed and cites them by source. The Knowledge Base + S3 Vectors + Guardrails stack is fully managed — there's no vector DB cluster to size, no embedding pipeline to maintain, no separate moderation system.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: trustworthy answers, FOI-defensible, no hallucinated content.
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f6e1;&#xfe0f;</span>
+      Guardrails as a first-class control
+    </h3>
+    <p class="govuk-body">
+      Bedrock Guardrails block political opinion, medical and legal advice, and anonymise UK PII (names, addresses, phone, email, NI numbers, NHS numbers, payment cards) at the answer layer — before the response leaves AWS, regardless of what the model would otherwise say.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: defensible PII handling, consistent content safety across every chat.
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">Production readiness</h2>
+
+<p class="govuk-body">
+  This demo runs the same upstream image used in production by tens of thousands of households and small organisations. For a council deployment you'd additionally want:
+</p>
+
+<table class="govuk-table">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Feature</th>
+      <th scope="col" class="govuk-table__header">Demo status</th>
+      <th scope="col" class="govuk-table__header">Production requirement</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Authentication</th>
+      <td class="govuk-table__cell">Built-in admin user</td>
+      <td class="govuk-table__cell">SSO via SAML or OIDC, MFA</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Custom domain</th>
+      <td class="govuk-table__cell">CloudFront URL</td>
+      <td class="govuk-table__cell">archive.yourcouncil.gov.uk + ACM certificate</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Document ingestion</th>
+      <td class="govuk-table__cell">36 sample parish documents</td>
+      <td class="govuk-table__cell">IMAP scrape, scanner-direct upload, batch import</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Backup & retention</th>
+      <td class="govuk-table__cell">Aurora 1-day automated</td>
+      <td class="govuk-table__cell">Point-in-time recovery, retention policy aligned with statutory requirements</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Audit log</th>
+      <td class="govuk-table__cell">CloudWatch Logs</td>
+      <td class="govuk-table__cell">Centralised SIEM, immutable logging, FOI-defensible record</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Bedrock cost controls</th>
+      <td class="govuk-table__cell">Per-document classification</td>
+      <td class="govuk-table__cell">Budget alerts, model usage caps, on-prem fallback for sensitive content</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Guardrails</th>
+      <td class="govuk-table__cell">Default content / topic / PII set</td>
+      <td class="govuk-table__cell">Topic and word lists tuned to your council's policies</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="govuk-inset-text govuk-!-margin-top-4">
+  <p class="govuk-body">
+    <strong>The point isn't that this scenario is production-ready out of the box.</strong> The point is that the heavy lifting — OCR, classification, RAG, Guardrails, multi-format conversion — is already done. The bits left are integration with your council's identity, network, retention rules and procurement framework.
+  </p>
+</div>
+
+{% set scenarioId = "paperless-ngx" %}
+{% set scenarioName = "Paperless-ngx with AI" %}
+{% set totalSteps = 4 %}
+{% include "components/completion-next-steps.njk" %}
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Learn more</h2>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="https://docs.paperless-ngx.com/" class="govuk-link">Paperless-ngx documentation</a> — full upstream docs</li>
+    <li><a href="https://github.com/paperless-ngx/paperless-ngx" class="govuk-link">Paperless-ngx on GitHub</a> — 40,000+ stars, GPL-3.0</li>
+    <li><a href="https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html" class="govuk-link">Amazon Bedrock Knowledge Bases</a></li>
+    <li><a href="https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html" class="govuk-link">Amazon Bedrock Guardrails</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <h2 class="govuk-heading-m">Questions or feedback?</h2>
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a href="/contact/" class="govuk-link">Contact the NDX:Try team</a></li>
+  </ul>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <p class="govuk-body">
+    <a href="/" class="govuk-link govuk-link--no-visited-state">Return to homepage</a>
+  </p>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+  .ndx-takeaway-card {
+    padding: 25px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #00703c;
+  }
+  .ndx-takeaway-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ndx-takeaway-card__icon { font-size: 32px; }
+  @media (max-width: 640px) {
+    .ndx-takeaway-grid { grid-template-columns: 1fr; }
+    .ndx-takeaway-card h3 { flex-direction: column; align-items: flex-start; }
+  }
+</style>
