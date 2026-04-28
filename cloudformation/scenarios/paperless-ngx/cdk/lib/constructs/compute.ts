@@ -20,7 +20,7 @@ export interface ComputeConstructProps {
   readonly vpc: ec2.IVpc;
   readonly albSecurityGroup: ec2.ISecurityGroup;
   readonly fargateSecurityGroup: ec2.ISecurityGroup;
-  readonly databaseCluster: rds.DatabaseCluster;
+  readonly databaseInstance: rds.DatabaseInstance;
   readonly databaseSecret: secretsmanager.ISecret;
   readonly redisUrl: string;
   /** S3 Files file system ARN (or fs-id). */
@@ -182,8 +182,8 @@ export class ComputeConstruct extends Construct {
       ],
     });
 
-    const dbHost = props.databaseCluster.clusterEndpoint.hostname;
-    const dbPort = cdk.Token.asString(props.databaseCluster.clusterEndpoint.port);
+    const dbHost = props.databaseInstance.instanceEndpoint.hostname;
+    const dbPort = cdk.Token.asString(props.databaseInstance.instanceEndpoint.port);
     const dbUser = props.databaseSecret.secretValueFromJson('username').unsafeUnwrap();
     const dbPass = props.databaseSecret.secretValueFromJson('password').unsafeUnwrap();
 
@@ -329,12 +329,12 @@ cat >/tmp/sample-docs-gen.py <<'${GEN}'
 ${sampleDocsGenPy}
 ${GEN}
 echo "[init] Seeding sample docs (v3 marker — S3 Files refactor)"
-if [ ! -f /efs/consume/.seeded-v3 ]; then
-  rm -f /efs/consume/.seeded /efs/consume/.seeded-v2
+if [ ! -f /efs/consume/.seeded-v4 ]; then
+  rm -f /efs/consume/.seeded /efs/consume/.seeded-v2 /efs/consume/.seeded-v3
   python3 /tmp/sample-docs-gen.py
-  touch /efs/consume/.seeded-v3
+  touch /efs/consume/.seeded-v4
 else
-  echo "[init] /efs/consume/.seeded-v3 present, skipping sample docs"
+  echo "[init] /efs/consume/.seeded-v4 present, skipping sample docs"
 fi
 echo "[init] Done"
 `;

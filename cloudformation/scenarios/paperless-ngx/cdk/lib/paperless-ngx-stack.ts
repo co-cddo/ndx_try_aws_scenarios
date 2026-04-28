@@ -124,7 +124,7 @@ export class PaperlessNgxStack extends cdk.Stack {
       vpc: networking.vpc,
       albSecurityGroup: networking.albSecurityGroup,
       fargateSecurityGroup: networking.fargateSecurityGroup,
-      databaseCluster: database.cluster,
+      databaseInstance: database.instance,
       databaseSecret: database.secret,
       redisUrl: redis.redisUrl,
       fileSystemArn: storage.fileSystemArn,
