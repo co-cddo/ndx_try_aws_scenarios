@@ -314,9 +314,11 @@ mkdir -p /efs/scripts /efs/kb
 cat >/efs/scripts/post-consume.sh <<'WRAPSH'
 #!/bin/sh
 set -eu
-if [ ! -f /scripts/.deps-installed ]; then
+# Verify deps are importable in *this* container. We can't rely on a marker
+# file on the shared file system because the marker survives container
+# replacements but the installed packages don't (they live in container fs).
+if ! /usr/local/bin/python3 -c "import boto3, requests" 2>/dev/null; then
   /usr/local/bin/pip install --quiet --no-cache-dir boto3 requests >/dev/null 2>&1 || true
-  touch /scripts/.deps-installed
 fi
 exec /usr/local/bin/python3 /scripts/post-consume.py "$@"
 WRAPSH
