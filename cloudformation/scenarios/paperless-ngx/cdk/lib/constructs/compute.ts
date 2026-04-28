@@ -162,7 +162,7 @@ export class ComputeConstruct extends Construct {
     );
 
     const tikaContainer = this.taskDefinition.addContainer('tika', {
-      image: ecs.ContainerImage.fromRegistry('docker.io/apache/tika:latest-full'),
+      image: ecs.ContainerImage.fromRegistry('docker.io/apache/tika:latest'),
       essential: true,
       logging: ecs.LogDrivers.awsLogs({ logGroup: this.logGroup, streamPrefix: 'tika' }),
       portMappings: [{ containerPort: 9998, protocol: ecs.Protocol.TCP }],
