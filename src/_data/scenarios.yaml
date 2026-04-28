@@ -2026,3 +2026,230 @@ scenarios:
         training: 500
         support: 1200
         total: 6500
+
+  - id: "paperless-ngx"
+    name: "Paperless-ngx with AI"
+    headline: "Searchable document archive with OCR and Bedrock-powered AI classification"
+    bestFor: "Parish clerks, principal authority records teams, and any office drowning in scanned paper"
+    description: "Deploy Paperless-ngx, the open-source searchable document archive. Every PDF, .docx, .odt or .eml is OCR'd via Tesseract, Apache Tika and Gotenberg. Bedrock Nova Pro then auto-tags, rewrites titles, classifies the type, extracts correspondents and summarises. A chat UI uses Bedrock Knowledge Base over S3 Vectors with Guardrails for safe Q&A over your archive."
+    difficulty: "intermediate"
+    timeEstimate: "30 minutes"
+    primaryPersona: "service-manager"
+    gcloud_search_term: "Paperless-ngx document management OCR archive"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "localgov-drupal"
+      - "council-chatbot"
+      - "foi-redaction"
+    securitySummary: "NDX:Try session isolated - safe to experiment with sample parish documents only"
+    skillsLearned:
+      - "Amazon Bedrock"
+      - "Amazon Bedrock Knowledge Base"
+      - "Amazon Bedrock Guardrails"
+      - "Amazon S3 Vectors"
+      - "AWS Fargate"
+      - "Amazon Aurora PostgreSQL"
+      - "Amazon ElastiCache"
+      - "Amazon EFS"
+    isMostPopular: false
+    featured: true
+    awsServices:
+      - "Amazon Bedrock"
+      - "Amazon Bedrock Knowledge Base"
+      - "Amazon Bedrock Guardrails"
+      - "Amazon S3 Vectors"
+      - "AWS Lambda"
+      - "AWS Fargate"
+      - "Amazon Aurora PostgreSQL"
+      - "Amazon ElastiCache"
+      - "Amazon EFS"
+      - "Amazon CloudFront"
+    tags:
+      - "AI"
+      - "Document Management"
+      - "OCR"
+      - "Knowledge Base"
+      - "Open Source"
+      - "Parish"
+      - "Records Management"
+    businessOutcomes:
+      - "Replace a wall of filing cabinets with a searchable digital archive"
+      - "See the OCR + AI classification pipeline run on real parish-style paperwork"
+      - "Try chat-with-archive to ask plain-English questions of your filing"
+      - "Evaluate Bedrock Guardrails on a realistic UK PII-rich workload"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "Amazon Bedrock model access for Nova Pro and Titan Embed (default ISB allow-list)"
+      - "No technical expertise required"
+    url: "/scenarios/paperless-ngx/"
+    order: 14
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/paperless-ngx/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/paperless-ngx/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-paperless-ngx"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "paperless-ngx"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+        - "CAPABILITY_AUTO_EXPAND"
+      deploymentTime: "25 to 30 minutes"
+      deploymentPhases:
+        - "Creating VPC and networking (~30 seconds)"
+        - "Creating Aurora Serverless v2 PostgreSQL (~360 seconds)"
+        - "Creating ElastiCache Redis (~360 seconds)"
+        - "Creating EFS file system with 5 access points (~60 seconds)"
+        - "Creating S3 Vectors bucket and index (~60 seconds)"
+        - "Creating Bedrock Knowledge Base, Guardrails, and IAM (~180 seconds)"
+        - "Creating Fargate task with 4 containers (paperless + tika + gotenberg + init) (~120 seconds)"
+        - "Creating CloudFront distribution (~300 seconds)"
+        - "Init container generates 6 sample parish documents (~30 seconds)"
+        - "First-pass OCR + Bedrock enrichment of sample docs (~120 seconds)"
+      outputs:
+        - name: "PaperlessUrl"
+          description: "URL to access the Paperless-ngx archive"
+        - name: "ChatUrl"
+          description: "URL of the chat-with-archive Lambda interface"
+        - name: "AdminUsername"
+          description: "Paperless admin username"
+        - name: "AdminPassword"
+          description: "Paperless admin password"
+        - name: "CloudWatchLogsUrl"
+          description: "CloudWatch Logs for monitoring all containers"
+        - name: "DocsBucket"
+          description: "S3 bucket holding OCR text for Knowledge Base ingestion"
+    screenshots:
+      steps: []
+    aiFeatures:
+      - id: "auto-tagging"
+        name: "AI Auto-Tagging"
+        description: "Every document consumed by Paperless is classified into a tag taxonomy (planning, invoice, minutes, agenda, correspondence, audit) by Amazon Nova Pro. Tags are created automatically as needed."
+        icon: "tag"
+        category: "content"
+        categoryLabel: "Content"
+        timeEstimate: "Automatic on consume"
+        paperlessPath: "/documents"
+        awsService: "Amazon Bedrock (Nova Pro)"
+        status: "available"
+        statusLabel: "Available"
+        order: 1
+      - id: "title-rewriting"
+        name: "AI Title Rewriting"
+        description: "Replaces opaque scanner-generated filenames with short, human-readable, searchable titles. \"scan_20260427_001.pdf\" becomes \"Council Tax Reminder Q3 2026\"."
+        icon: "edit"
+        category: "content"
+        categoryLabel: "Content"
+        timeEstimate: "Automatic on consume"
+        paperlessPath: "/documents"
+        awsService: "Amazon Bedrock (Nova Pro)"
+        status: "available"
+        statusLabel: "Available"
+        order: 2
+      - id: "doc-type-classification"
+        name: "AI Document Type Classification"
+        description: "Classifies each document as Letter, Invoice, Minutes, Planning Notice, Agenda, Report or Receipt and creates the type record in Paperless on first use."
+        icon: "document"
+        category: "content"
+        categoryLabel: "Content"
+        timeEstimate: "Automatic on consume"
+        paperlessPath: "/documents"
+        awsService: "Amazon Bedrock (Nova Pro)"
+        status: "available"
+        statusLabel: "Available"
+        order: 3
+      - id: "correspondent-extraction"
+        name: "AI Correspondent Extraction"
+        description: "Pulls the sender or issuing body out of the OCR text and links it to the document, creating the correspondent record if it doesn't already exist."
+        icon: "user"
+        category: "content"
+        categoryLabel: "Content"
+        timeEstimate: "Automatic on consume"
+        paperlessPath: "/correspondents"
+        awsService: "Amazon Bedrock (Nova Pro)"
+        status: "available"
+        statusLabel: "Available"
+        order: 4
+      - id: "summary"
+        name: "AI 2-Sentence Summary"
+        description: "Generates a plain-English 1-2 sentence summary of every document and stores it as a note on the document, so a clerk can scan their inbox in seconds."
+        icon: "simplify"
+        category: "content"
+        categoryLabel: "Content"
+        timeEstimate: "Automatic on consume"
+        paperlessPath: "/documents"
+        awsService: "Amazon Bedrock (Nova Pro)"
+        status: "available"
+        statusLabel: "Available"
+        order: 5
+      - id: "chat-with-archive"
+        name: "Chat with the Archive"
+        description: "A separate vanilla-JS chat UI backed by Amazon Bedrock Knowledge Base over Amazon S3 Vectors. Ask plain-English questions like \"what planning applications are open?\" and the model retrieves relevant documents from the archive, with citations. Bedrock Guardrails block political opinion, medical/legal advice, and PII attempts."
+        icon: "chatbot"
+        category: "generation"
+        categoryLabel: "Generation"
+        timeEstimate: "Try it any time"
+        paperlessPath: "/documents"
+        awsService: "Amazon Bedrock Knowledge Base + Guardrails"
+        status: "available"
+        statusLabel: "Available"
+        order: 6
+    success_metrics:
+      service_area: "Records Management & Document Discovery"
+      primary_metric: "Time to find a specific document"
+      baseline:
+        description: "Manual filing cabinet retrieval averages 8 minutes per document (search + retrieval + refile)"
+        value: 8
+        unit: "minutes per document"
+        source: "Parish clerk time-and-motion observations"
+      projection:
+        description: "OCR + AI classification + full-text search reduces retrieval time by 95%"
+        value: 0.4
+        reduction_percent: 95
+      roi:
+        annual_savings: 24000
+        calculation: "1,500 retrievals/year × 7.6 min saved × £35/hour × (clerk + members combined) ≈ £24,000 annual savings"
+        payback_months: 3
+        disclaimer: "Illustrative projection based on a small-to-medium parish council. Actual savings depend on archive size, retrieval frequency, and current filing practice."
+      committee_language: "Paperless-ngx with AI auto-classification cuts document retrieval time from 8 minutes to under 30 seconds, saving £24,000 annually while making historic decisions and correspondence instantly findable for FOI requests and audit."
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "US (us-east-1 N. Virginia region)"
+      encryption: "AES-256 at rest, TLS 1.3 in transit"
+      data_handling: "Sample parish documents only in sandbox; AWS shared responsibility model. Bedrock Guardrails anonymise names, emails, addresses, phone numbers and block UK NI numbers, NHS numbers and card numbers in chat."
+    tco_projection:
+      year_1:
+        aws_services: 3800
+        integration: 4000
+        training: 1500
+        support: 1200
+        total: 10500
+      year_2:
+        aws_services: 4100
+        integration: 0
+        training: 500
+        support: 1200
+        total: 5800
+      year_3:
+        aws_services: 4400
+        integration: 0
+        training: 500
+        support: 1200
+        total: 6100
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/paperless-ngx"
+      cloudformationPath: "cloudformation/scenarios/paperless-ngx"
+      appCodePath: "cloudformation/scenarios/paperless-ngx/cdk"
+      description: "AWS CDK project that deploys upstream Paperless-ngx on Fargate with Aurora, ElastiCache, EFS, and adds Bedrock-powered classification and chat-with-archive."

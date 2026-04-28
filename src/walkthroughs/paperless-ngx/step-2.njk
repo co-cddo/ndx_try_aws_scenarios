@@ -1,0 +1,74 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 2: Browse the AI-classified archive — Paperless-ngx Walkthrough"
+description: See how Amazon Nova Pro has tagged, titled, classified and extracted correspondents
+currentStep: 2
+totalSteps: 4
+timeEstimate: "5 minutes"
+scenarioId: paperless-ngx
+---
+
+{% set stepNumber = 2 %}
+{% set stepTitle = "Browse the AI-classified archive" %}
+{% set stepDescription = "Open the Documents view and see how Bedrock has classified every document — titles, tags, types, correspondents, summaries." %}
+{% set timeEstimate = "5 minutes" %}
+{% set screenshotData = screenshots["paperless-ngx"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 2 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Documents tab shows ~36 sample parish documents with AI-rewritten titles",
+  "Tags page shows AI-generated tags (planning, invoice, minutes, audit, …)",
+  "Document types page shows seven AI-assigned types",
+  "Correspondents page lists the senders Bedrock pulled out of the OCR'd text"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">What to look for</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the Documents view</strong>
+    <p class="govuk-body">
+      Click <strong>Documents</strong> in the left nav. You should see ~36 cards, each one a sample parish document — planning notices, invoices, council minutes, agendas, correspondence, audit returns. Notice the <strong>title</strong> on each card: it's not the original filename like <code>scan_24-01234-FUL.pdf</code>, it's a human-readable summary like <em>"Planning Notice 24/01234/FUL: Single-storey rear extension at The Old Forge"</em>. That's Amazon Nova Pro running on every consume.
+    </p>
+  </li>
+
+  <li>
+    <strong>Look at the tags</strong>
+    <p class="govuk-body">
+      Each card shows a few coloured tag chips. Click <strong>Tags</strong> in the left nav to see the full taxonomy that Bedrock built: <em>planning</em>, <em>invoice</em>, <em>minutes</em>, <em>agenda</em>, <em>correspondence</em>, <em>audit</em>, <em>asset register</em>, and so on. The tag count column shows how many documents Bedrock assigned each tag to.
+    </p>
+    <p class="govuk-body">
+      This taxonomy was not pre-loaded — it grew organically as each document was classified. New documents either join an existing tag or trigger a new one.
+    </p>
+  </li>
+
+  <li>
+    <strong>Look at document types</strong>
+    <p class="govuk-body">
+      Click <strong>Document Types</strong>. You'll see seven types — <em>Letter</em>, <em>Invoice</em>, <em>Minutes</em>, <em>Planning Notice</em>, <em>Agenda</em>, <em>Report</em>, <em>Receipt</em> — with counts. Bedrock chose one type per document.
+    </p>
+  </li>
+
+  <li>
+    <strong>Look at correspondents</strong>
+    <p class="govuk-body">
+      Click <strong>Correspondents</strong>. The list of senders has been pulled out of each document's OCR'd text and linked back to the originating document. You'll see <em>Anglia Water Services Limited</em>, <em>Dunbar Grounds Maintenance Limited</em>, <em>Highways East — Footways Team</em>, <em>Information Commissioner's Office</em>, <em>Meadowbrook Parish Council</em>, and so on.
+    </p>
+    <p class="govuk-body">
+      Each one was extracted from free text and turned into a structured record by Nova Pro on first sight.
+    </p>
+  </li>
+
+  <li>
+    <strong>Filter the documents</strong>
+    <p class="govuk-body">
+      Back on the Documents view, click a tag chip to filter — <em>invoice</em> shows you all eight invoices, <em>planning</em> brings up the dozen planning notices. Multiple filters compose; this is the raw search surface that the chat in Step 4 sits on top of.
+    </p>
+  </li>
+</ol>
+
+<div class="govuk-inset-text">
+  <strong>What you're seeing:</strong> upstream Paperless-ngx has the <em>structure</em> for tags, document types, correspondents and titles, but populates them by hand or with a brittle pattern-matching classifier. This scenario plugs Amazon Nova Pro into the post-consume hook so every document is classified by a model that has actually read it. The cost per document is fractions of a cent.
+</div>

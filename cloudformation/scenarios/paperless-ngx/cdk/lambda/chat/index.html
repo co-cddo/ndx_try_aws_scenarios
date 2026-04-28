@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chat with the Paperless archive</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --panel: #ffffff;
+    --ink: #0b0c0c;
+    --muted: #505a5f;
+    --accent: #1d70b8;
+    --accent-dark: #003078;
+    --user-bubble: #1d70b8;
+    --bot-bubble: #f3f2f1;
+    --border: #b1b4b6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 "GDS Transport", Arial, sans-serif; background: var(--bg); color: var(--ink); }
+  header { background: var(--accent-dark); color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+  header a { color: #fff; text-decoration: underline; font-size: 0.9rem; }
+  main { max-width: 760px; margin: 24px auto; padding: 0 16px; display: grid; grid-template-rows: 1fr auto; gap: 16px; height: calc(100vh - 110px); }
+  #log { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; overflow-y: auto; }
+  .msg { margin: 0 0 12px; padding: 10px 14px; border-radius: 8px; max-width: 85%; white-space: pre-wrap; word-wrap: break-word; }
+  .msg.user { background: var(--user-bubble); color: #fff; margin-left: auto; }
+  .msg.bot { background: var(--bot-bubble); color: var(--ink); }
+  .msg.bot.error { background: #fef0f0; color: #b10e1e; }
+  .citations { font-size: 0.85rem; color: var(--muted); margin-top: 6px; }
+  form { display: flex; gap: 8px; }
+  textarea { flex: 1; resize: vertical; min-height: 48px; padding: 10px; border: 2px solid var(--ink); border-radius: 4px; font: inherit; }
+  button { background: #00703c; color: #fff; border: 0; padding: 10px 18px; border-radius: 4px; font: inherit; cursor: pointer; }
+  button:hover { background: #005a30; }
+  button:disabled { background: #999; cursor: progress; }
+  .hint { color: var(--muted); font-size: 0.85rem; }
+  .examples { padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+  .examples li button { background: #fff; color: var(--accent-dark); border: 1px solid var(--accent); padding: 4px 10px; font-size: 0.85rem; border-radius: 16px; cursor: pointer; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Chat with the Paperless archive</h1>
+  <a href="__PAPERLESS_URL__" target="_blank" rel="noopener">Open Paperless &raquo;</a>
+</header>
+<main>
+  <div id="log" aria-live="polite">
+    <div class="msg bot">
+      Hi. I can answer questions about the documents stored in this Paperless archive.
+      Try asking about planning notices, invoices, parish council minutes, or correspondence with the highways team.
+      All answers are grounded in the documents you've uploaded; if I can't find an answer I'll say so.
+      <ul class="examples" id="examples">
+        <li><button data-q="What planning applications are currently being considered?">What planning applications are currently being considered?</button></li>
+        <li><button data-q="How much did the parish council spend on grounds maintenance this quarter?">Grounds maintenance spend this quarter?</button></li>
+        <li><button data-q="What was decided about the recreation ground play equipment?">Decision on play equipment?</button></li>
+      </ul>
+    </div>
+  </div>
+  <form id="form">
+    <textarea id="q" placeholder="Ask a question about the archive..." required></textarea>
+    <button id="send" type="submit">Ask</button>
+  </form>
+  <p class="hint">Powered by Amazon Bedrock Knowledge Base with S3 Vectors and Guardrails. Documents are scanned with Tesseract OCR; classification, titling and summaries use Amazon Nova Pro.</p>
+</main>
+<script>
+  const log = document.getElementById('log');
+  const form = document.getElementById('form');
+  const q = document.getElementById('q');
+  const send = document.getElementById('send');
+  let sessionId = null;
+
+  function addMsg(role, text, citations) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.textContent = text;
+    if (citations && citations.length) {
+      const c = document.createElement('div');
+      c.className = 'citations';
+      c.textContent = 'Sources: ' + citations.map(u => u.split('/').pop()).join(', ');
+      div.appendChild(c);
+    }
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    return div;
+  }
+
+  async function ask(question) {
+    addMsg('user', question);
+    q.value = '';
+    send.disabled = true;
+    const pending = addMsg('bot', 'Thinking...');
+    try {
+      const r = await fetch(window.location.pathname, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, sessionId }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      pending.remove();
+      addMsg('bot', data.answer || '(no answer)', data.citations);
+      if (data.sessionId) sessionId = data.sessionId;
+    } catch (e) {
+      pending.remove();
+      const m = addMsg('bot', 'Sorry, something went wrong: ' + e.message);
+      m.classList.add('error');
+    } finally {
+      send.disabled = false;
+      q.focus();
+    }
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const text = q.value.trim();
+    if (text) ask(text);
+  });
+
+  document.getElementById('examples').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-q]');
+    if (btn) ask(btn.dataset.q);
+  });
+
+  q.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      form.requestSubmit();
+    }
+  });
+
+  q.focus();
+</script>
+</body>
+</html>

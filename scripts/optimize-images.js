@@ -62,7 +62,8 @@ const CONFIG = {
     'foi-redaction',
     'smart-car-park',
     'text-to-speech',
-    'quicksight-dashboard'
+    'quicksight-dashboard',
+    'paperless-ngx'
   ]
 };
 

@@ -1,0 +1,123 @@
+---
+layout: layouts/walkthrough.njk
+title: Paperless-ngx with AI Walkthrough
+description: Step-by-step guide to a searchable, AI-classified parish document archive on AWS
+currentStep: 0
+totalSteps: 4
+scenarioId: paperless-ngx
+---
+
+<h1 class="govuk-heading-xl">Try Paperless-ngx with AI</h1>
+
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    15 minutes to see your filing cabinet, searchable
+  </h2>
+  <div class="govuk-panel__body">
+    Sign in to a working Paperless-ngx archive, see how Amazon Bedrock has tagged and titled every document, then ask plain-English questions of the archive.
+  </div>
+</div>
+
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
+  <p class="govuk-body">
+    This walkthrough takes you through <a href="https://docs.paperless-ngx.com/" class="govuk-link">Paperless-ngx</a> as a parish clerk or council records officer would use it. You'll sign in, browse documents that Amazon Bedrock has already classified, search the OCR'd text, and chat with your archive. Perfect for clerks, records managers, FOI officers, and digital transformation leads.
+  </p>
+</div>
+
+<p class="govuk-body">
+  <a href="https://docs.paperless-ngx.com/" class="govuk-link">Paperless-ngx</a> is the open-source document archive trusted by tens of thousands of households and organisations. This NDX:Try scenario lifts the upstream Docker stack onto AWS Fargate (Django + Postgres + Redis + Apache Tika + Gotenberg) and adds Amazon Bedrock on top, so every document that lands in the consume folder is OCR'd, auto-titled, auto-tagged, classified, the correspondent extracted, and a 1-2 sentence summary stored against it. A separate chat UI lets you ask questions of the archive using Amazon Bedrock Knowledge Base over Amazon S3 Vectors with Bedrock Guardrails for content safety and PII anonymisation.
+</p>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">In this 15-minute walkthrough, you'll:</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Sign in to Paperless-ngx</strong> — Find your URL and admin password from the stack outputs and access the dashboard (2 minutes)
+  </li>
+  <li>
+    <strong>Browse the AI-classified archive</strong> — See how Amazon Nova Pro has tagged, titled, classified and extracted correspondents from 36 sample parish documents (5 minutes)
+  </li>
+  <li>
+    <strong>Open a document and search</strong> — Drop into a single document to see the OCR'd content, then run a full-text search (3 minutes)
+  </li>
+  <li>
+    <strong>Chat with the archive</strong> — Ask plain-English questions of the documents and watch Bedrock Knowledge Base return answers with citations and Guardrails redact PII (5 minutes)
+  </li>
+</ol>
+
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already requested the Paperless-ngx with AI scenario via NDX:Try.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/paperless-ngx/" class="govuk-link">Deploy the Paperless-ngx scenario</a> if you haven't already. Deployment takes about 25 minutes (Aurora Serverless, ElastiCache, Bedrock Knowledge Base and CloudFront all provision in parallel).
+  </p>
+
+  <div class="govuk-!-margin-top-4">
+    <h3 class="govuk-heading-s">Sample data check</h3>
+    {% include "components/sample-data-status.njk" %}
+  </div>
+
+  <div class="govuk-!-margin-top-4">
+    {% include "components/sample-data-panel.njk" %}
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For records officers and clerks</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>What an AI-classified document archive looks like in practice</li>
+      <li>How OCR + AI tagging change retrieval time vs. a paper filing cabinet</li>
+      <li>How chat-with-archive supports FOI requests and audit</li>
+      <li>How PII anonymisation can be applied at the answer layer</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical staff</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>The Paperless-ngx post-consume hook pattern with Amazon Nova Pro</li>
+      <li>Amazon Bedrock Knowledge Base over Amazon S3 Vectors</li>
+      <li>Bedrock Guardrails (content / topic / PII filters)</li>
+      <li>Multi-container Fargate (Django + Tika + Gotenberg sidecars)</li>
+      <li>How an upstream image is configured entirely via env vars (no fork)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/paperless-ngx/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 15 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop { margin-bottom: 30px; }
+  .ndx-walkthrough-reassurance { border-left-color: #00703c; }
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+</style>
