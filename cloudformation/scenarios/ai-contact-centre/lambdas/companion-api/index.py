@@ -68,6 +68,10 @@ def lambda_handler(event, context):
     cors = _cors_headers(origin)
 
     if method == "OPTIONS":
+        # Reject forged-origin preflight explicitly so browsers and security
+        # smoke tests see a hard 403 (not just an empty Access-Control-Allow-Origin).
+        if origin and not ALLOWED_ORIGIN_PATTERN.match(origin):
+            return _resp(403, {"error": "origin_not_allowed"}, cors)
         return _resp(204, "", cors)
 
     try:
