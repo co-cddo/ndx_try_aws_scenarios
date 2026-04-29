@@ -109,16 +109,23 @@ def _describe_with_validation(image_bytes: bytes, mime: str) -> Dict[str, Any]:
     return {"status": "describe_unavailable", "reason": "schema_validation_failed"}
 
 
+SCHEMA_DESCRIPTION = (
+    'Schema: {"object_class": string in [bin, fly_tip, damp, parked_vehicle, '
+    'broken_paving, missed_collection, other], "condition": short string '
+    'describing what is wrong, "severity": string in [low, medium, high, '
+    'urgent], "suggested_council_action": short string with a one-sentence '
+    'triage suggestion, "confidence": number 0..1, "secondary_observations": '
+    'optional array of strings}.'
+)
+
+
 def _build_prompt(strengthened: bool) -> str:
     base = (
         "You are a UK local-government environmental-health triage assistant. "
         "A resident has sent a photo via WhatsApp to their council. Describe "
-        "what is in the photo as a single JSON object matching this schema:\n\n"
-        f"{SCHEMA_JSON}\n\n"
-        "object_class enum: bin, fly_tip, damp, parked_vehicle, broken_paving, missed_collection, other.\n"
-        "severity enum: low, medium, high, urgent.\n"
-        "confidence: 0.0 to 1.0.\n"
-        "Output ONLY the JSON object."
+        "what is in the photo as a single JSON object matching this schema.\n\n"
+        f"{SCHEMA_DESCRIPTION}\n\n"
+        "Output ONLY the JSON object. No markdown fences, no preamble."
     )
     if strengthened:
         base += (
@@ -206,15 +213,23 @@ def _converge_on_case(sender_phone: str, structured: Dict[str, Any]) -> Dict[str
 
 
 def _search_open_case_by_phone(phone: str) -> Optional[Tuple[str, str]]:
-    cutoff_ms = int((time.time() - SEARCH_WINDOW_SECONDS) * 1000)
+    """Look up the matching custom field UUID for customer_phone_number, then
+    SearchCases on equalTo. Returns (case_id, etag) or None."""
+    try:
+        flds = cases.list_fields(domainId=CASES_DOMAIN_ID).get("fields", [])
+        phone_field_id = next(
+            (f["fieldId"] for f in flds if f.get("name") == "customer_phone_number"),
+            "customer_phone_number",
+        )
+    except ClientError as exc:
+        logger.warning("list_fields failed: %s", exc)
+        phone_field_id = "customer_phone_number"
+
     try:
         resp = cases.search_cases(
             domainId=CASES_DOMAIN_ID,
             filter={
-                "andAll": [
-                    {"field": {"id": "customer_phone_number", "value": {"stringValue": phone}}},
-                    {"field": {"id": "status", "value": {"stringValue": "open"}}},
-                ]
+                "field": {"equalTo": {"id": phone_field_id, "value": {"stringValue": phone}}}
             },
             sorts=[{"fieldId": "last_updated_datetime", "sortOrder": "Desc"}],
             maxResults=1,
@@ -224,12 +239,7 @@ def _search_open_case_by_phone(phone: str) -> Optional[Tuple[str, str]]:
         return None
 
     for c in resp.get("cases", []):
-        case_id = c["caseId"]
-        last_updated = c.get("fields", {}).get("last_updated_datetime", 0)
-        if isinstance(last_updated, (int, float)) and last_updated * 1000 < cutoff_ms:
-            continue
-        etag = c.get("tags", {}).get("etag") or c.get("templateId", "")
-        return case_id, etag
+        return c["caseId"], ""
     return None
 
 
@@ -243,35 +253,66 @@ def _get_case(case_id: str) -> Optional[Tuple[str, str]]:
     return case_id, etag
 
 
+_field_id_cache: Dict[str, str] = {}
+
+
+def _field_id(name: str) -> str:
+    """Resolve Custom-namespace Cases field name to UUID (built-ins keep stable IDs)."""
+    if not name or name in _field_id_cache:
+        return _field_id_cache.get(name, name)
+    try:
+        for f in cases.list_fields(domainId=CASES_DOMAIN_ID).get("fields", []):
+            _field_id_cache[f["name"]] = f["fieldId"]
+    except ClientError as exc:
+        logger.warning("list_fields failed: %s", exc)
+    return _field_id_cache.get(name, name)
+
+
 def _update_case(case_id: str, etag: str, structured: Dict[str, Any]) -> None:
     cases.update_case(
         domainId=CASES_DOMAIN_ID,
         caseId=case_id,
-        fields=_fields_from_structured(structured) + [
-            {"id": "multimodal_summary", "value": {"stringValue": json.dumps(structured)[:1024]}},
+        fields=[
+            {"id": _field_id("intent_category"), "value": {"stringValue": structured.get("object_class", "other")}},
+            {"id": _field_id("severity"), "value": {"stringValue": structured.get("severity", "low")}},
+            {"id": _field_id("multimodal_summary"), "value": {"stringValue": json.dumps(structured)[:1024]}},
         ],
     )
 
 
 def _create_case(sender_phone: str, structured: Dict[str, Any]) -> str:
+    profile_id = _get_or_create_profile(sender_phone)
+    fields = [
+        {"id": "title", "value": {"stringValue": f"WhatsApp photo: {structured.get('object_class', 'unknown')}"}},
+        {"id": _field_id("customer_phone_number"), "value": {"stringValue": sender_phone}},
+        {"id": _field_id("intent_category"), "value": {"stringValue": structured.get("object_class", "other")}},
+        {"id": _field_id("multimodal_summary"), "value": {"stringValue": json.dumps(structured)[:1024]}},
+    ]
+    if profile_id:
+        fields.insert(0, {"id": "customer_id", "value": {"stringValue":
+            f"arn:aws:profile:us-east-1:{os.environ.get('AWS_ACCOUNT_ID','714412037090')}:domains/{os.environ.get('PROFILES_DOMAIN','')}/profiles/{profile_id}"
+        }})
     resp = cases.create_case(
-        domainId=CASES_DOMAIN_ID,
-        templateId=CASES_TEMPLATE_ID,
-        fields=[
-            {"id": "title", "value": {"stringValue": f"WhatsApp photo: {structured.get('object_class', 'unknown')}"}},
-            {"id": "customer_phone_number", "value": {"stringValue": sender_phone}},
-            {"id": "intent_category", "value": {"stringValue": structured.get("object_class", "other")}},
-            {"id": "multimodal_summary", "value": {"stringValue": json.dumps(structured)[:1024]}},
-        ],
+        domainId=CASES_DOMAIN_ID, templateId=CASES_TEMPLATE_ID, fields=fields,
     )
     return resp["caseId"]
 
 
-def _fields_from_structured(structured: Dict[str, Any]) -> list:
-    return [
-        {"id": "intent_category", "value": {"stringValue": structured.get("object_class", "other")}},
-        {"id": "severity", "value": {"stringValue": structured.get("severity", "low")}},
-    ]
+def _get_or_create_profile(phone: str) -> str:
+    domain = os.environ.get("PROFILES_DOMAIN", "")
+    if not domain:
+        return ""
+    try:
+        profiles = boto3.client("customer-profiles")
+        s = profiles.search_profiles(DomainName=domain, KeyName="_phone", Values=[phone])
+        items = s.get("Items", [])
+        if items:
+            return items[0]["ProfileId"]
+        c = profiles.create_profile(DomainName=domain, PhoneNumber=phone, PartyType="INDIVIDUAL")
+        return c.get("ProfileId", "")
+    except Exception as exc:
+        logger.warning("profile create-or-get failed: %s", exc)
+        return ""
 
 
 def _is_etag_conflict(exc: ClientError) -> bool:
