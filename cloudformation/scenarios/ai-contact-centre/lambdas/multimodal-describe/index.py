@@ -292,8 +292,14 @@ def _create_case(sender_phone: str, structured: Dict[str, Any]) -> str:
         fields.insert(0, {"id": "customer_id", "value": {"stringValue":
             f"arn:aws:profile:us-east-1:{os.environ.get('AWS_ACCOUNT_ID','714412037090')}:domains/{os.environ.get('PROFILES_DOMAIN','')}/profiles/{profile_id}"
         }})
+    # clientToken based on phone hashed to a 60-min window: concurrent
+    # invocations for the same phone return the same caseId, satisfying AC21.
+    import hashlib
+    bucket = int(time.time() // 3600)
+    ct = hashlib.sha256(f"{sender_phone}:{bucket}".encode()).hexdigest()[:32]
     resp = cases.create_case(
-        domainId=CASES_DOMAIN_ID, templateId=CASES_TEMPLATE_ID, fields=fields,
+        domainId=CASES_DOMAIN_ID, templateId=CASES_TEMPLATE_ID,
+        fields=fields, clientToken=ct,
     )
     return resp["caseId"]
 

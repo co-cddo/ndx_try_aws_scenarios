@@ -7,7 +7,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
-import { ConnectCasesClient, SearchCasesCommand } from "@aws-sdk/client-connectcases";
+import { ConnectCasesClient, SearchCasesCommand, ListFieldsCommand } from "@aws-sdk/client-connectcases";
 
 const REGION = process.env.AWS_REGION || "us-east-1";
 const FUNCTION_NAME = process.env.AICC_MULTIMODAL_FN;
@@ -39,17 +39,15 @@ describe("AC21, concurrent submissions converge on one case", {
 
     // SearchCases independently confirms exactly one open case.
     await new Promise(r => setTimeout(r, 1500));
+    const fields = await cases.send(new ListFieldsCommand({ domainId: CASES_DOMAIN_ID }));
+    const phoneFieldId = (fields.fields || []).find(f => f.name === "customer_phone_number")?.fieldId
+                         || "customer_phone_number";
     const search = await cases.send(new SearchCasesCommand({
       domainId: CASES_DOMAIN_ID,
-      filter: {
-        andAll: [
-          { field: { id: "customer_phone_number", value: { stringValue: phone } } },
-          { field: { id: "status", value: { stringValue: "open" } } },
-        ],
-      },
+      filter: { field: { equalTo: { id: phoneFieldId, value: { stringValue: phone } } } },
       maxResults: 5,
     }));
     assert.equal((search.cases || []).length, 1,
-                 `expected exactly one open case for ${phone}, got ${(search.cases || []).length}`);
+                 `expected exactly one case for ${phone}, got ${(search.cases || []).length}`);
   });
 });
