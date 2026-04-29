@@ -91,6 +91,8 @@ def lambda_handler(event, context):
             return _chat_start(event, cors)
         if path == "/api/ask" and method == "POST":
             return _ask(event, cors)
+        if path == "/api/climax" and method == "POST":
+            return _climax(event, cors)
         return _resp(404, {"error": "not_found", "path": path}, cors)
     except Exception as exc:
         logger.exception("companion-api error: %s", exc)
@@ -409,6 +411,58 @@ def _rag_answer(utterance: str) -> Dict[str, Any]:
     if intervened or not text:
         text = "I cannot help with that one directly. A council officer will follow up."
     return {"text": text, "intervened": intervened, "citations": cites[:3]}
+
+
+def _climax(event, cors):
+    """Return the spec's climax readback for a phone:
+    'I've reviewed your photo; <action>; reference <ref>.'
+    Requires that an open Case exists for the phone with multimodal_summary set."""
+    body = json.loads(event.get("body") or "{}")
+    phone = body.get("sender_phone") or ""
+    if not phone or not CASES_DOMAIN_ID:
+        return _resp(400, {"error": "sender_phone required"}, cors)
+    phone_field_id = _field_id("customer_phone_number")
+    try:
+        s = cases_client.search_cases(
+            domainId=CASES_DOMAIN_ID,
+            filter={"field": {"equalTo": {"id": phone_field_id, "value": {"stringValue": phone}}}},
+            sorts=[{"fieldId": "last_updated_datetime", "sortOrder": "Desc"}],
+            maxResults=1,
+        )
+    except Exception as exc:
+        logger.warning("search_cases failed: %s", exc)
+        return _resp(500, {"error": "search_failed"}, cors)
+    cs = s.get("cases", [])
+    if not cs:
+        return _resp(404, {"error": "no open case for that phone"}, cors)
+    cid = cs[0]["caseId"]
+    g = cases_client.get_case(
+        domainId=CASES_DOMAIN_ID, caseId=cid,
+        fields=[
+            {"id": "reference_number"},
+            {"id": _field_id("multimodal_summary")},
+            {"id": _field_id("intent_category")},
+        ],
+    )
+    by_id = {f.get("id"): next(iter((f.get("value") or {}).values()), None) for f in g.get("fields", [])}
+    multimodal = by_id.get(_field_id("multimodal_summary")) or ""
+    intent = by_id.get(_field_id("intent_category")) or "issue"
+    ref = by_id.get("reference_number") or ""
+    action = ""
+    if multimodal:
+        try:
+            ms = json.loads(multimodal)
+            action = ms.get("suggested_council_action", "")
+        except Exception:
+            pass
+    if action and ref:
+        line = f"I've reviewed your photo; {action.rstrip('.')}; reference {ref}."
+    elif ref:
+        line = f"Your enquiry about {intent} has reference {ref}; a council officer will be in touch."
+    else:
+        line = "We have logged your enquiry; a council officer will be in touch."
+    return _resp(200, {"line": line, "case_id": cid, "reference_number": ref,
+                       "has_photo": bool(multimodal)}, cors)
 
 
 def _chat_start(event, cors):
