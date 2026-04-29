@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MultimodalImageDescription",
+  "description": "Structured output from Bedrock Nova Pro multimodal describe call. The Lambda validates against this schema; on first failure it retries once with a strengthened prompt; on second failure it returns describe_unavailable.",
+  "type": "object",
+  "required": ["object_class", "condition", "severity", "suggested_council_action", "confidence"],
+  "additionalProperties": false,
+  "properties": {
+    "object_class": {
+      "type": "string",
+      "enum": ["bin", "fly_tip", "damp", "parked_vehicle", "broken_paving", "missed_collection", "other"]
+    },
+    "condition": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "severity": { "type": "string", "enum": ["low", "medium", "high", "urgent"] },
+    "suggested_council_action": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "secondary_observations": { "type": "array", "items": { "type": "string" } }
+  }
+}

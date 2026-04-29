@@ -1,0 +1,14 @@
+{
+  "task_id": "0.3",
+  "purpose": "Bedrock Nova Pro multimodal describe schema-fit measurements against the prompt template",
+  "measurement_date": null,
+  "model_id": "amazon.nova-pro-v1:0",
+  "fixture_count": 0,
+  "first_call_pass_rate": null,
+  "retry_call_pass_rate": null,
+  "describe_unavailable_count": null,
+  "p50_ms": null,
+  "p95_ms": null,
+  "p99_ms": null,
+  "notes": "PENDING_SPIKE_RUN, see spikes/multimodal-prompt-template.md for fixture set and runner steps."
+}

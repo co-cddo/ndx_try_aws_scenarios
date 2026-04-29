@@ -53,3 +53,11 @@ package-lock.json
 
 # Generated CloudFormation templates
 cloudformation/scenarios/*/template.yaml
+
+# AI Contact Centre — Lambda build artefacts (re-bundled by sam package on deploy)
+cloudformation/scenarios/ai-contact-centre/packaged.yaml
+cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/fpdf/
+cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/fpdf2-*.dist-info/
+cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/defusedxml/
+cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/defusedxml-*.dist-info/
+cloudformation/scenarios/ai-contact-centre/lambdas/seed-kb/documents/

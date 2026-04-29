@@ -1,0 +1,80 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 1: Dial in, AI Contact Centre Walkthrough"
+description: Call the +44 800 number from your sandbox and walk a happy-path bin-collection script
+currentStep: 1
+totalSteps: 7
+timeEstimate: "5 minutes"
+scenarioId: ai-contact-centre
+---
+
+{% set stepNumber = 1 %}
+{% set stepTitle = "Dial the council you just built" %}
+{% set stepDescription = "Call the +44 800 number from your phone, hear the en_GB Polly Neural greeting, walk a happy-path bin-collection script, and watch the bot read back a reference number." %}
+{% set timeEstimate = "5 minutes" %}
+{% set screenshotData = screenshots["ai-contact-centre"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 1 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "PstnNumber stack output is visible in CloudFormation",
+  "You hear a Polly Neural en-GB greeting on dial",
+  "You can walk a bin-collection script and hear a reference number read back",
+  "Connect Cases shows a single open case for your phone number"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<div class="ndx-phone-card">
+  <p class="govuk-body govuk-!-font-weight-bold">Call the council you just built. Right now.</p>
+  <p class="ndx-phone-number">{{ '{{' }} PstnNumber {{ '}}' }}</p>
+  <p class="govuk-body-s">From any UK phone, landline or mobile.</p>
+</div>
+
+<div class="govuk-inset-text">
+  <strong>This demo is in English.</strong> We explore the Welsh-language gaps and what AWS would need to build for Welsh-speaking residents in <a href="/walkthroughs/ai-contact-centre/step-7/" class="govuk-link">Step 7</a>.
+</div>
+
+<h3 class="govuk-heading-m">How to find your number</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>
+    <strong>Open the CloudFormation console</strong> in us-east-1 and find your <code>ndx-try-ai-contact-centre-*</code> stack.
+  </li>
+  <li>
+    <strong>Open the Outputs tab</strong>. The <code>PstnNumber</code> output is your claimed +44 800 toll-free number.
+  </li>
+  <li>
+    <strong>Open the companion SPA</strong> at the <code>CompanionUrl</code> output and add <code>?step=1</code> to the URL. The left and middle panes brighten; the WhatsApp simulator on the right is dimmed for now.
+  </li>
+</ol>
+
+<h3 class="govuk-heading-m">The happy-path script</h3>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">Dial the number, then say something like:</p>
+  <p class="govuk-body govuk-!-font-style-italic">
+    "Hi, I'm calling about my bin collection. The bin lorry didn't come on Tuesday and there's bags piling up outside number 12 on the close. Can someone please come and clear them?"
+  </p>
+</div>
+
+<p class="govuk-body">As you talk, watch the left pane: each utterance arrives as a transcript segment with a sentiment chip and a timestamp. PII like your name, address, and phone number is replaced with <code>{NAME}</code>, <code>{ADDRESS}</code> and <code>{PHONE}</code> placeholders before any persistence, Contact Lens redacts at the Connect instance level.</p>
+
+<p class="govuk-body">In the middle pane, a Connect Case appears, fields populating live: <code>customer_phone_number</code>, <code>address</code>, <code>intent_category</code>, <code>intents[]</code>. The bot reads back a six-character reference number ("Your reference is ABC-123. Environmental services will be in touch within two working days.") and ends the call.</p>
+
+<style>
+  .ndx-phone-card {
+    background: #1d70b8;
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+    margin: 30px 0;
+    border-radius: 8px;
+  }
+  .ndx-phone-number {
+    font-size: 64px;
+    font-weight: 700;
+    font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+    margin: 15px 0;
+    letter-spacing: 2px;
+  }
+</style>

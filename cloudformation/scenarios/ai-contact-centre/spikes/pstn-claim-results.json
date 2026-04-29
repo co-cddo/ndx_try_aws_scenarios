@@ -1,0 +1,14 @@
+{
+  "task_id": "0.1",
+  "purpose": "Per-lease +44 800 PSTN claim repeatability and AWS::Connect::PhoneNumber.TargetArn association behaviour",
+  "measurement_date": "2026-04-28",
+  "account": "714412037090",
+  "attempts": 1,
+  "successes": 1,
+  "failure_reasons": [],
+  "claimed_number": "+448008203946",
+  "target_arn_outcome": "TargetArn binding via AWS::Connect::PhoneNumber works directly. The PhoneNumber resource (with TargetArn=ConnectInstance.Arn, Type=TOLL_FREE, CountryCode=GB) succeeded on first attempt. A separate AssociatePhoneNumberContactFlow custom resource is still required to bind the number to a specific contact flow (Phase 9.4).",
+  "deletion_policy": "Retain",
+  "post_lease_cleanup": "isb close-account is mandatory; the number remains attached to the AWS account after stack delete. Verified by reading the DeletionPolicy on the resource.",
+  "notes": "Single attempt, single account. To establish repeatability, this should be re-run across at least 5 fresh pool accounts before NDX:Try goes live with this scenario on the public portal. As a single-attempt result, this proves it CAN work but not that it ALWAYS works."
+}

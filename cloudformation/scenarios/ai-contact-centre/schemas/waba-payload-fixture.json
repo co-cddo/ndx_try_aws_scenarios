@@ -1,0 +1,35 @@
+{
+  "$comment": "Sample AWS End User Messaging Social Lambda invocation payload, simulating an inbound WhatsApp message with media. Used by tests/waba-fixture-replay (13.12) to verify the multimodal Lambda handles a real WABA payload identically to the simulator path.",
+  "Records": [
+    {
+      "EventVersion": "1.0",
+      "EventSource": "aws:social-messaging",
+      "EventSubject": "MessageReceived",
+      "MessageMetadata": {
+        "WhatsAppBusinessAccountId": "waba-12345-sample",
+        "PhoneNumberId": "44800000000",
+        "WhatsAppMessageId": "wamid.HBgLNDQ3NzAwOTAwMTIzFQIAEhggMUQyMzQ1Njc4OUFCQ0RFRgA=",
+        "Timestamp": "2026-04-28T09:15:32Z",
+        "From": "+447700900123",
+        "To": "+44800000000"
+      },
+      "MessageContent": {
+        "MessageType": "image",
+        "Image": {
+          "MimeType": "image/jpeg",
+          "Sha256": "3c3e8a9f4b0d8f2e1c0a9b8e7d6c5b4a3e2d1c0b9a8f7e6d5c4b3a2e1d0c9b8a",
+          "MediaId": "media-fixture-bin-overflow",
+          "Caption": "Overflowing bin on the corner"
+        }
+      },
+      "Customer": {
+        "Profile": {
+          "Name": "Resident-Caller-Sample"
+        },
+        "WhatsAppId": "447700900123"
+      },
+      "$mediaSourceForFixture": "fixtures/bin-overflow.jpg",
+      "$comment_for_lambda": "Multimodal Lambda must accept this payload shape, fetch the image (in fixture mode, from local fixture S3 key), call Bedrock multimodal describe, and follow the cross-channel single-Case orchestration steps in Task 6.2."
+    }
+  ]
+}

@@ -2253,3 +2253,157 @@ scenarios:
       cloudformationPath: "cloudformation/scenarios/paperless-ngx"
       appCodePath: "cloudformation/scenarios/paperless-ngx/cdk"
       description: "AWS CDK project that deploys upstream Paperless-ngx on Fargate with Aurora, ElastiCache, EFS, and adds Bedrock-powered classification and chat-with-archive."
+
+  - id: "ai-contact-centre"
+    name: "AI Contact Centre (Council Reception)"
+    headline: "Dial a real UK +44 800 number, watch one case capture voice and WhatsApp together"
+    bestFor: "Demonstrating Amazon Connect with the AWS AI stack to council CIOs and Customer Services directors"
+    description: "Provisions a full Amazon Connect instance with a claimed UK toll-free number, Lex v2 (en_GB), Bedrock Knowledge Base + Guardrails, multimodal photo describe, Connect Cases and Customer Profiles, plus a companion three-pane SPA. Two demonstrable journeys: distress + multi-intent triage on a real PSTN call, and cross-channel single-case unification when the resident later sends a photo on WhatsApp. Climax line: I've reviewed your photo; environmental health will visit Wednesday, ref ABC123."
+    difficulty: "advanced"
+    timeEstimate: "30 minutes"
+    primaryPersona: "service-manager"
+    gcloud_search_term: "contact centre AI voice local government"
+    secondaryPersonas:
+      - "technical"
+      - "leadership"
+    relatedScenarios:
+      - "council-chatbot"
+      - "fixmystreet"
+      - "text-to-speech"
+    securitySummary: "NDX:Try session isolated. Contact Lens redacts PII at the Connect instance level; only redacted segments persist in DynamoDB and the share PDF."
+    skillsLearned:
+      - "Amazon Connect"
+      - "Amazon Lex v2"
+      - "Amazon Bedrock"
+      - "Amazon Bedrock Knowledge Base"
+      - "Amazon Bedrock Guardrails"
+      - "Amazon Polly Neural"
+      - "Amazon Connect Cases"
+      - "Amazon Customer Profiles"
+      - "Amazon Connect Contact Lens"
+      - "AWS WAF"
+    isMostPopular: false
+    featured: true
+    awsServices:
+      - "Amazon Connect"
+      - "Amazon Lex"
+      - "Amazon Bedrock"
+      - "Amazon Polly"
+      - "Amazon Connect Cases"
+      - "Amazon Connect Contact Lens"
+      - "Amazon Customer Profiles"
+      - "Amazon Kinesis Data Streams"
+      - "AWS WAF"
+      - "AWS Lambda"
+      - "Amazon CloudFront"
+      - "Amazon S3"
+    tags:
+      - "AI"
+      - "Voice"
+      - "Contact Centre"
+      - "Multimodal"
+      - "WhatsApp"
+      - "RAG"
+      - "Cross-channel"
+      - "UK Councils"
+    businessOutcomes:
+      - "Show CIOs how Amazon Connect plus the AWS AI stack handles distressed multi-intent callers without a human"
+      - "Demonstrate cross-channel unification: one resident, one case, voice + photo on the same ticket"
+      - "Surface the Welsh-language gap as a procurement leverage point with AWS Technical Account Managers"
+    prerequisites:
+      - "AWS account (provided via NDX:Try)"
+      - "Bedrock model access enabled for amazon.titan-embed-text-v2:0 and amazon.nova-pro-v1:0 (one-click in Bedrock console)"
+      - "A working phone to dial the claimed +44 800 number for the manual smoke"
+    url: "/scenarios/ai-contact-centre/"
+    order: 15
+    status: "active"
+    deployment:
+      templateUrl: "https://ndx-try-templates-us-east-1.s3.us-east-1.amazonaws.com/scenarios/ai-contact-centre/template.yaml"
+      templateS3Url: "s3://ndx-try-templates-us-east-1/scenarios/ai-contact-centre/template.yaml"
+      region: "us-east-1"
+      stackNamePrefix: "ndx-try-ai-contact-centre"
+      parameters:
+        - name: "Environment"
+          value: "sandbox"
+          description: "Deployment environment (NDX:Try session)"
+      tags:
+        - key: "Project"
+          value: "ndx-try"
+        - key: "Scenario"
+          value: "ai-contact-centre"
+        - key: "AutoCleanup"
+          value: "true"
+      capabilities:
+        - "CAPABILITY_IAM"
+        - "CAPABILITY_NAMED_IAM"
+        - "CAPABILITY_AUTO_EXPAND"
+      deploymentTime: "30 to 60 minutes"
+      deploymentPhases:
+        - "Bedrock KB ingestion (~10 to 15 minutes — Bedrock cold start)"
+        - "Connect instance reaching ACTIVE (~3 to 5 minutes — polled by custom resource)"
+        - "Claiming +44 800 PSTN number (~2 minutes)"
+        - "Lex bot build (~3 minutes — AutoBuildBotLocales: true)"
+        - "ConnectCases domain + fields + layout + template (~2 minutes)"
+        - "Customer Profiles wiring + IntegrationAssociations (~2 minutes)"
+        - "Contact flows + phone-number-to-flow custom resource (~1 minute)"
+        - "Companion SPA + CloudFront + WAF (~5 minutes)"
+        - "Deploy-time verification Lambda (Bedrock + KB + Customer Profiles assertions)"
+      outputs:
+        - name: "PstnNumber"
+          description: "The +44 800 number claimed for this session — call it from any UK phone"
+        - name: "CompanionUrl"
+          description: "Three-pane CloudFront SPA showing live transcript, Connect Case, and the WhatsApp simulator"
+        - name: "ConnectInstanceId"
+          description: "Use this with the AWS console for live agent monitoring (no agents are configured by default)"
+    screenshots:
+      steps: []
+    success_metrics:
+      service_area: "Contact centre"
+      primary_metric: "Average handle time for multi-intent calls"
+      baseline:
+        description: "Multi-intent calls average 9 minutes with a human agent (intake + transfer + repeated context)"
+        value: 9
+        unit: "minutes per call"
+        source: "LGA Contact centre Survey 2023"
+      projection:
+        description: "AI triage handles 60% of multi-intent calls end-to-end without transfer"
+        value: 4
+        reduction_percent: 56
+      roi:
+        annual_savings: 180000
+        calculation: "12,000 multi-intent calls/year × 5 minutes saved × £30/hour fully-loaded agent cost ≈ £180,000 annual saving"
+        payback_months: 4
+        disclaimer: "Illustrative projection based on a medium-sized UK council contact centre. Actual savings depend on call mix, escalation rates, and integration with downstream council systems."
+      committee_language: "AI Contact Centre with cross-channel case unification cuts multi-intent call handling time by 56% while opening one case for voice and WhatsApp together, saving £180,000 annually and improving resident satisfaction for distressed callers."
+    security_posture:
+      certifications:
+        - "ISO 27001"
+        - "SOC 2 Type II"
+        - "Cyber Essentials Plus"
+        - "UK G-Cloud 14"
+      data_residency: "US (us-east-1 N. Virginia region). UK data sovereignty is not a blocker for this NDX:Try sandbox demo."
+      encryption: "AES-256 at rest, TLS 1.3 in transit. Contact Lens redacts PII before any persistence."
+      data_handling: "Sample fictional council data only. Caller PII is redacted by Contact Lens at the Connect instance level; only redacted segments persist in DynamoDB and the share PDF. No raw call audio is stored."
+    tco_projection:
+      year_1:
+        aws_services: 18000
+        integration: 25000
+        training: 4000
+        support: 6000
+        total: 53000
+      year_2:
+        aws_services: 19500
+        integration: 0
+        training: 1500
+        support: 6000
+        total: 27000
+      year_3:
+        aws_services: 21000
+        integration: 0
+        training: 1500
+        support: 6000
+        total: 28500
+    sourceCode:
+      repoUrl: "https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/ai-contact-centre"
+      cloudformationPath: "cloudformation/scenarios/ai-contact-centre"
+      description: "CloudFormation template that deploys Amazon Connect with a claimed UK toll-free number, Lex v2 (en_GB), Bedrock KB + Guardrails, multimodal Bedrock photo describe, Connect Cases, Customer Profiles, Contact Lens streaming with PII redaction, and a CloudFront-fronted companion SPA."

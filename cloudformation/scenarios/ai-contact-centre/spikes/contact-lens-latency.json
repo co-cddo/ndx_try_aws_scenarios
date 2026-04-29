@@ -1,0 +1,10 @@
+{
+  "task_id": "0.4",
+  "purpose": "End-to-end Contact Lens streaming latency: caller utterance → redacted segment in DynamoDB",
+  "measurement_date": null,
+  "p50_ms": null,
+  "p95_ms": null,
+  "p99_ms": null,
+  "sample_size": 0,
+  "notes": "PENDING_SPIKE_RUN. Drive 30+ utterances via StartChatContact (or PSTN if available), measure timestamp delta from utterance receipt at Connect to ContactLensCache DDB write. AC8b targets ≤4s p95; AC8a is informational and reads p95 from this file at walkthrough render time."
+}

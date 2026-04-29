@@ -1,0 +1,71 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 6: Bring your own WhatsApp + cleanup, AI Contact Centre Walkthrough"
+description: Read the BYO-WABA Lambda code path, then tear the stack down with isb close-account
+currentStep: 6
+totalSteps: 7
+timeEstimate: "4 minutes"
+scenarioId: ai-contact-centre
+---
+
+{% set stepNumber = 6 %}
+{% set stepTitle = "Bring your own WhatsApp Business Account, then clean up" %}
+{% set stepDescription = "The simulator and a real WhatsApp Business Account both call the same multimodal Lambda. We document the exact API call you'd make to wire your own WABA. Then tear the stack down with isb close-account so the next user can claim their own number." %}
+{% set timeEstimate = "4 minutes" %}
+{% set screenshotData = screenshots["ai-contact-centre"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 6 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "You can read the IAM policy snippet and exact API call for BYO-WABA wiring",
+  "The CloudFormation stack deletes cleanly",
+  "isb close-account releases the +44 800 number back to AWS pool inventory",
+  "Share-PDF presigned URLs remain valid 24h after teardown, do not share publicly"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Bring your own WABA</h3>
+
+<p class="govuk-body">If you already have a registered WhatsApp Business Account (WABA) on Meta, you can wire it to the same multimodal Lambda the simulator calls. The exact API call:</p>
+
+<pre class="govuk-body"><code>aws social-messaging put-whats-app-business-account-event-destinations \
+  --waba-id arn:aws:social-messaging:us-east-1:&lt;account&gt;:phone-number-id-&lt;your-waba&gt; \
+  --event-destinations '[{
+    "EventDestinationLambdaConfiguration": {
+      "EventDestinationLambdaArn": "&lt;MultimodalDescribeLambdaArn&gt;"
+    }
+  }]'</code></pre>
+
+<p class="govuk-body">The Lambda already exercises both code paths, the simulator route AND the WABA payload fixture (<code>schemas/waba-payload-fixture.json</code>), so wiring a real WABA is a one-call change.</p>
+
+<h3 class="govuk-heading-m">IAM policy snippet</h3>
+
+<pre class="govuk-body"><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": { "Service": "social-messaging.amazonaws.com" },
+      "Action": "lambda:InvokeFunction",
+      "Resource": "&lt;MultimodalDescribeLambdaArn&gt;"
+    }
+  ]
+}</code></pre>
+
+<h3 class="govuk-heading-m">Cleanup, important</h3>
+
+<div class="govuk-warning-text">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Important</span>
+    The +44 800 phone number is retained on stack delete. You MUST run <code>isb close-account</code> after, not just <code>isb terminate</code>, otherwise the pool account's 30-day Connect cap will block the next lease user.
+  </strong>
+</div>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>Check no active Connect contacts: <code>aws connect get-current-metric-data --instance-id &lt;id&gt; --filters Channels=VOICE --groupings ROUTING_PROFILE --current-metrics Name=CONTACTS_IN_QUEUE,Unit=COUNT</code></li>
+  <li>Delete the stack: <code>aws cloudformation delete-stack --stack-name ndx-try-ai-contact-centre-... --profile NDX/SandboxAdmin --region us-east-1</code></li>
+  <li>Wait for <code>DELETE_COMPLETE</code>.</li>
+  <li><strong>Run <code>isb close-account &lt;account-id&gt;</code></strong>, the phone number is only released on pool account closure.</li>
+  <li>Note: any share-PDF presigned URLs you generated remain valid for up to 24 hours. Do not share them publicly.</li>
+</ol>

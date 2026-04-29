@@ -1,0 +1,118 @@
+{
+  "$comment": "Connect ContactFlow JSON for the AI Contact Centre main inbound flow. Loaded into the AWS::Connect::ContactFlow resource via Fn::Sub in template.yaml. Substitution variables: ${LexBotAliasArn}, ${RagFulfilmentArn}, ${MultiIntentArn}, ${MultimodalArn}, ${MaxIntentsPerTurn}.",
+  "Version": "2019-10-30",
+  "StartAction": "Welcome",
+  "Metadata": {
+    "entryPointPosition": { "x": 20, "y": 20 },
+    "ActionMetadata": {},
+    "Annotations": [],
+    "name": "ndx-try-aicc-main-flow",
+    "description": "Main inbound flow: greet, lookup case-by-phone, multi-intent triage, RAG fulfilment, Polly readback, climax line on dial-back."
+  },
+  "Actions": [
+    {
+      "Identifier": "Welcome",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "Welcome to Aldershire District Council. I'm an AI assistant. This call may be recorded for quality and training. How can I help?"
+      },
+      "Transitions": { "NextAction": "LookupExistingCase" }
+    },
+    {
+      "Identifier": "LookupExistingCase",
+      "Type": "InvokeLambdaFunction",
+      "Parameters": {
+        "LambdaFunctionARN": "${MultimodalArn}",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "operation": "search_open_case",
+          "sender_phone": "$.CustomerEndpoint.Address"
+        }
+      },
+      "Transitions": {
+        "NextAction": "CheckExistingCase",
+        "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "MultiIntentTriage" }]
+      }
+    },
+    {
+      "Identifier": "CheckExistingCase",
+      "Type": "Compare",
+      "Parameters": {
+        "ComparisonValue": "$.External.case_id"
+      },
+      "Conditions": [
+        {
+          "NextAction": "ReadbackClimax",
+          "Condition": {
+            "Operator": "TextContains",
+            "Operands": ["$.External.case_id", "case-"]
+          }
+        }
+      ],
+      "Transitions": { "NextAction": "MultiIntentTriage" }
+    },
+    {
+      "Identifier": "ReadbackClimax",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "SSML": "<speak>I've reviewed your photo; environmental health will visit Wednesday, reference <say-as interpret-as='spell-out'>$.External.ref_number</say-as>.</speak>"
+      },
+      "Transitions": { "NextAction": "EndOfClimax" }
+    },
+    {
+      "Identifier": "EndOfClimax",
+      "Type": "DisconnectParticipant",
+      "Transitions": {}
+    },
+    {
+      "Identifier": "MultiIntentTriage",
+      "Type": "InvokeLambdaFunction",
+      "Parameters": {
+        "LambdaFunctionARN": "${MultiIntentArn}",
+        "InvocationTimeLimitSeconds": "8"
+      },
+      "Transitions": {
+        "NextAction": "ConnectToBotForRag",
+        "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "ConnectToBotForRag" }]
+      }
+    },
+    {
+      "Identifier": "ConnectToBotForRag",
+      "Type": "ConnectParticipantWithLexBot",
+      "Parameters": {
+        "Text": "What would you like help with first?",
+        "LexV2Bot": { "AliasArn": "${LexBotAliasArn}" },
+        "TimeLimit": "60"
+      },
+      "Transitions": {
+        "NextAction": "InvokeRag",
+        "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "PolitelyEnd" }]
+      }
+    },
+    {
+      "Identifier": "InvokeRag",
+      "Type": "InvokeLambdaFunction",
+      "Parameters": {
+        "LambdaFunctionARN": "${RagFulfilmentArn}",
+        "InvocationTimeLimitSeconds": "10"
+      },
+      "Transitions": {
+        "NextAction": "AcknowledgeAndEnd",
+        "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "PolitelyEnd" }]
+      }
+    },
+    {
+      "Identifier": "AcknowledgeAndEnd",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "Thank you. We've logged a case for you. A council officer will be in touch within two working days. Goodbye."
+      },
+      "Transitions": { "NextAction": "PolitelyEnd" }
+    },
+    {
+      "Identifier": "PolitelyEnd",
+      "Type": "DisconnectParticipant",
+      "Transitions": {}
+    }
+  ]
+}

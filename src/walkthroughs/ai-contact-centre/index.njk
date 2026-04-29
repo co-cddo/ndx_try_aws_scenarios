@@ -1,0 +1,84 @@
+---
+layout: layouts/walkthrough.njk
+title: AI Contact Centre Walkthrough
+description: Step-by-step guide to a working AI council reception that handles distressed multi-intent callers and unifies voice + WhatsApp on one case
+currentStep: 0
+totalSteps: 7
+scenarioId: ai-contact-centre
+---
+
+<h1 class="govuk-heading-xl">Try the AI Contact Centre (Council Reception)</h1>
+
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    30 minutes to dial a real council and watch one case capture both your call and your photo
+  </h2>
+  <div class="govuk-panel__body">
+    Dial the +44 800 number provisioned in your sandbox, watch a multi-intent triage cap at four issues, send a photo on the WhatsApp simulator, then dial back and hear: "I've reviewed your photo; environmental health will visit Wednesday, ref ABC123."
+  </div>
+</div>
+
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">This demo is in English.</strong>
+  <p class="govuk-body">
+    We explore the Welsh-language gaps and what AWS would need to build for Welsh-speaking residents in <a href="/walkthroughs/ai-contact-centre/step-7/" class="govuk-link">Step 7</a>. The procurement-leverage page is the keepsake.
+  </p>
+</div>
+
+<p class="govuk-body">
+  This scenario provisions a full Amazon Connect contact centre with a real UK +44 800 toll-free number, an en_GB Lex bot, Bedrock Knowledge Base + Guardrails, multimodal photo describe, Connect Cases, Customer Profiles, Contact Lens with PII redaction, a Kinesis stream of redacted segments, a CloudFront-fronted three-pane companion SPA, and AWS WAF. Two demonstrable journeys: distress + multi-intent triage on a real PSTN call, and cross-channel single-case unification when the resident later sends a photo on WhatsApp.
+</p>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">In this 30-minute walkthrough, you'll:</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li><strong>Dial in</strong>, call the +44 800 number from your phone, walk a happy-path bin script, hear Polly read back a reference (5 minutes)</li>
+  <li><strong>Distress + multi-intent</strong>, play a layered distressing script and watch the bot cap at 4 intents (5 minutes)</li>
+  <li><strong>WhatsApp simulator</strong>, attach a photo, watch Bedrock describe it (4 minutes)</li>
+  <li><strong>One case, two channels (the climax)</strong>, dial back and hear "I've reviewed your photo; environmental health will visit Wednesday, ref ABC123." (5 minutes)</li>
+  <li><strong>Sentiment + safeguarding</strong>, inspect the redacted transcript pane (4 minutes)</li>
+  <li><strong>BYO WhatsApp + cleanup</strong>, read the BYO-WABA path, tear down with isb close-account (4 minutes)</li>
+  <li><strong>What we'd need from AWS to make this Welsh-ready</strong>, the keepsake (3 minutes)</li>
+</ol>
+
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already requested the AI Contact Centre scenario via NDX:Try and enabled Bedrock model access for amazon.titan-embed-text-v2:0 and amazon.nova-pro-v1:0.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/ai-contact-centre/" class="govuk-link">Deploy the AI Contact Centre scenario</a> if you haven't already. Deployment takes 30 to 60 minutes, Bedrock KB ingestion is the long pole. You'll also need a working phone to dial the number for Step 1.
+  </p>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/ai-contact-centre/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 30 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop { margin-bottom: 30px; }
+  .ndx-walkthrough-reassurance { border-left-color: #00703c; }
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+</style>

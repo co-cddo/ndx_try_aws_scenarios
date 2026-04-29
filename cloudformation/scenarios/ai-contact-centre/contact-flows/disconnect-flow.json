@@ -1,0 +1,27 @@
+{
+  "$comment": "Disconnect / error contact flow. Plays a brief apology and disconnects.",
+  "Version": "2019-10-30",
+  "StartAction": "ErrorMessage",
+  "Metadata": {
+    "entryPointPosition": { "x": 20, "y": 20 },
+    "ActionMetadata": {},
+    "Annotations": [],
+    "name": "ndx-try-aicc-disconnect-flow",
+    "description": "Plays an apology and disconnects on contact-flow error or session end."
+  },
+  "Actions": [
+    {
+      "Identifier": "ErrorMessage",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "Sorry, something has gone wrong. We've logged the issue. Please call back in a few minutes, or visit aldershire.gov.uk to report online. Goodbye."
+      },
+      "Transitions": { "NextAction": "End" }
+    },
+    {
+      "Identifier": "End",
+      "Type": "DisconnectParticipant",
+      "Transitions": {}
+    }
+  ]
+}

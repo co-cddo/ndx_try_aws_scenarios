@@ -313,3 +313,33 @@ walkthroughs:
       - title: "Chatted with the archive"
         description: "Ask plain-English questions and watch Bedrock Knowledge Base return answers with citations and Guardrails redact PII"
         time: "5 minutes"
+
+  ai-contact-centre:
+    totalSteps: 7
+    url: "/walkthroughs/ai-contact-centre/"
+    title: "AI Contact Centre Walkthrough"
+    duration: "30 minutes"
+    hasWalkthrough: true
+    category: "ai"
+    steps:
+      - title: "Dialled the council and heard a Polly readback"
+        description: "Call the +44 800 number from your sandbox and walk a happy-path bin-collection script. The bot reads back a reference number in a Polly Neural en-GB voice."
+        time: "5 minutes"
+      - title: "Distress and multi-intent triage observed"
+        description: "Play (or speak live) a layered distressing script. Watch the multi-intent decomposer cap at 4 intents and Bedrock Guardrails block hallucinated legal advice."
+        time: "5 minutes"
+      - title: "WhatsApp-simulator photo sent"
+        description: "Open the simulator panel, attach a photo of a bin, and watch Bedrock Nova Pro return a structured description as a chat bubble."
+        time: "4 minutes"
+      - title: "One case, two channels (the climax)"
+        description: "Dial back. The bot says: I've reviewed your photo; environmental health will visit Wednesday, ref ABC123. Connect Cases shows a single ticket with both the call transcript and the photo."
+        time: "5 minutes"
+      - title: "Sentiment and safeguarding deep-dive"
+        description: "Inspect the live transcript pane. PII appears as {NAME} {ADDRESS} {PHONE} placeholders; sentiment chips colour green to red as distress rises."
+        time: "4 minutes"
+      - title: "Bring your own WhatsApp + cleanup"
+        description: "Read the BYO-WABA Lambda code path. Tear the stack down. Run isb close-account so the next user can claim their own number."
+        time: "4 minutes"
+      - title: "What we'd need from AWS to make this Welsh-ready"
+        description: "The keepsake. ONS data on Welsh-speaking residents, a three-column table of AWS gaps, and the four questions to put to your AWS Technical Account Manager."
+        time: "3 minutes"
