@@ -55,7 +55,26 @@ SYSTEM_PROMPT = (
 
 def lambda_handler(event, context):
     utterance = _extract_utterance(event)
-    logger.info("decompose utterance len=%d", len(utterance))
+    intent_name = (event.get("sessionState") or {}).get("intent", {}).get("name", "")
+    logger.info("decompose utterance len=%d intent=%s invocationSource=%s",
+                len(utterance), intent_name, event.get("invocationSource", "n/a"))
+
+    if not utterance:
+        return _close_lex_response(event, {"intents": [], "requires_safeguarding_review": False, "truncated_intents": []})
+
+    # Fast path: when Lex confidently matched a single intent, skip the Bedrock decomposer.
+    # We just record the transcript and return. Saves ~3s for typical single-intent queries.
+    # Only run the decomposer when Lex fell back (which is when multi-intent climax phrases land).
+    # Special case: a matched Safeguarding intent must surface the safeguarding flag so the
+    # contact flow can route to the agent queue or callback path; we don't need Bedrock for that.
+    if intent_name == "Safeguarding":
+        return _close_lex_response(event, {
+            "intents": [{"intent_name": "Safeguarding", "confidence": 1.0}],
+            "requires_safeguarding_review": True,
+            "truncated_intents": [],
+        })
+    if intent_name and intent_name not in ("FallbackIntent", "MultiIntentTriage"):
+        return _close_lex_response(event, {"intents": [], "requires_safeguarding_review": False, "truncated_intents": []})
 
     decomposed = _decompose(utterance)
     decomposed = _enforce_cap(decomposed)
@@ -63,9 +82,27 @@ def lambda_handler(event, context):
 
 
 def _extract_utterance(event) -> str:
-    if "inputTranscript" in event:
-        return event["inputTranscript"] or ""
+    if isinstance(event, dict) and "inputTranscript" in event:
+        return (event.get("inputTranscript") or "").strip()
     return (event.get("utterance") or "").strip()
+
+
+def _close_lex_response(event, decomposed):
+    """For Lex code-hook events, return a Close intent so the flow returns to Connect."""
+    if "sessionState" not in event:
+        return {"decomposed": decomposed, "summary": ""}
+    existing = event["sessionState"].get("sessionAttributes") or {}
+    existing["decomposed_intents_json"] = json.dumps(decomposed)
+    existing["lex_input_transcript"] = event.get("inputTranscript") or ""
+    intent_name = (event.get("sessionState") or {}).get("intent", {}).get("name", "FallbackIntent")
+    return {
+        "sessionState": {
+            "dialogAction": {"type": "Close"},
+            "intent": {"name": intent_name, "state": "Fulfilled"},
+            "sessionAttributes": existing,
+        },
+        "messages": [],
+    }
 
 
 def _decompose(utterance: str) -> Dict[str, Any]:
@@ -145,15 +182,18 @@ def _to_lex_response(event, decomposed: Dict[str, Any]):
         "primary_intent": primary,
         "safeguarding_flag": "true" if decomposed.get("requires_safeguarding_review") else "false",
         "truncated_intents_csv": ",".join(truncated),
+        "lex_input_transcript": event.get("inputTranscript") or "",
     }
     if "sessionState" in event:
         existing = event["sessionState"].get("sessionAttributes") or {}
         existing.update(session_attrs)
+        intent_name = (event.get("sessionState") or {}).get("intent", {}).get("name", "FallbackIntent")
         return {
             "sessionState": {
-                "dialogAction": {"type": "ElicitIntent"},
+                "dialogAction": {"type": "Close"},
+                "intent": {"name": intent_name, "state": "Fulfilled"},
                 "sessionAttributes": existing,
             },
-            "messages": [{"contentType": "PlainText", "content": "\n".join(summary_lines)}],
+            "messages": [],
         }
     return {"decomposed": decomposed, "summary": "\n".join(summary_lines)}

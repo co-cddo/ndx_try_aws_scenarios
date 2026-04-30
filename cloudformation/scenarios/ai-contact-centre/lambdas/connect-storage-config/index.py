@@ -5,6 +5,7 @@ that the AWS::Connect::InstanceStorageConfig CFN type doesn't yet support
 
 import json
 import logging
+import time
 import urllib.request
 
 import boto3
@@ -41,12 +42,7 @@ def handler(event, context):
 
         if request_type in ("Create", "Update"):
             cfg = _build_storage_config(storage_config)
-            resp = connect.associate_instance_storage_config(
-                InstanceId=instance_id,
-                ResourceType=resource_type,
-                StorageConfig=cfg,
-            )
-            assoc_id = resp["AssociationId"]
+            assoc_id = _associate_with_retry(instance_id, resource_type, cfg)
             return _send(event, context, "SUCCESS",
                          {"AssociationId": assoc_id},
                          physical_id=assoc_id)
@@ -57,6 +53,28 @@ def handler(event, context):
                      physical_id=physical_id)
     except Exception as exc:
         return _send(event, context, "FAILED", {}, reason=str(exc), physical_id=physical_id)
+
+
+def _associate_with_retry(instance_id, resource_type, cfg, attempts=8, delay=4):
+    last_exc = None
+    for i in range(attempts):
+        try:
+            resp = connect.associate_instance_storage_config(
+                InstanceId=instance_id,
+                ResourceType=resource_type,
+                StorageConfig=cfg,
+            )
+            return resp["AssociationId"]
+        except ClientError as exc:
+            code = exc.response.get("Error", {}).get("Code", "")
+            msg = exc.response.get("Error", {}).get("Message", "")
+            if code == "ResourceNotFoundException" and "bucket" in msg.lower():
+                logger.info("S3 not visible to Connect yet (try %d/%d): %s", i + 1, attempts, msg)
+                last_exc = exc
+                time.sleep(delay)
+                continue
+            raise
+    raise last_exc
 
 
 def _build_storage_config(props_storage_config):

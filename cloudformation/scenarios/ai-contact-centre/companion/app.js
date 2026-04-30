@@ -3,9 +3,15 @@
   "use strict";
 
   const params = new URLSearchParams(window.location.search);
-  const step = params.get("step") || "1";
-  document.body.setAttribute("data-step", step);
-  document.getElementById("step-indicator").textContent = step;
+  const initialStep = params.get("step") || "1";
+  let currentStep = parseInt(initialStep, 10) || 1;
+  function setStep(n) {
+    if (n === currentStep || n < currentStep) return;
+    currentStep = n;
+    document.body.setAttribute("data-step", String(n));
+    document.getElementById("step-indicator").textContent = String(n);
+  }
+  setStep(currentStep);
 
   const senderPhoneInput = document.getElementById("sender-phone");
   const senderPhoneError = document.getElementById("sender-phone-error");
@@ -16,7 +22,6 @@
   const transcriptStatus = document.getElementById("transcript-status");
   const caseBody = document.getElementById("case-body");
   const caseStatus = document.getElementById("case-status");
-  const copyShareButton = document.getElementById("copy-share");
   const simulatorForm = document.getElementById("simulator-form");
 
   const PHONE_RE = /^(\+44|0)[1-9]\d{9}$/;
@@ -47,7 +52,13 @@
 
   senderPhoneInput.addEventListener("blur", validateSenderPhone);
   senderPhoneInput.addEventListener("input", validateSenderPhone);
-  imageInput.addEventListener("change", validateSenderPhone);
+  imageInput.addEventListener("change", () => {
+    const fname = document.getElementById("image-filename");
+    if (fname) fname.textContent = imageInput.files && imageInput.files[0] ? imageInput.files[0].name : "No file chosen";
+    validateSenderPhone();
+  });
+  const imagePickBtn = document.getElementById("image-pick-btn");
+  if (imagePickBtn) imagePickBtn.addEventListener("click", () => imageInput.click());
 
   simulatorForm.addEventListener("submit", async (ev) => {
     ev.preventDefault();
@@ -95,7 +106,12 @@
         body: JSON.stringify({ image_s3_key: presign.key, sender_phone: phone }),
       });
       const data = await sendResp.json();
-      appendBubble({ kind: "structured", text: JSON.stringify(data, null, 2) });
+      if (data.status === "declined") {
+        const sd = data.structured_description || {};
+        appendBubble({ kind: "plain", text: `That doesn't look like something the council can help with. ${sd.suggested_council_action || ""}`.trim() });
+      } else {
+        appendBubble({ kind: "structured", text: JSON.stringify(data, null, 2) });
+      }
     } catch (e) {
       appendBubble({ kind: "plain", text: `Multimodal call failed: ${e}` });
     } finally {
@@ -112,17 +128,6 @@
     bubbles.appendChild(div);
     bubbles.scrollTop = bubbles.scrollHeight;
   }
-
-  copyShareButton.addEventListener("click", () => {
-    const phone = senderPhoneInput.value || "+44 800";
-    const text = `I just demoed an AI Contact Centre on AWS for Aldershire DC. The bot received my call about a missed bin collection, then a photo I sent on WhatsApp, and connected them into one case. Reference: ABC-123. Tech: Amazon Connect, Lex, Bedrock, Connect Cases. Try it: ${window.location.origin}`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(() => {
-        copyShareButton.textContent = "Copied!";
-        setTimeout(() => (copyShareButton.textContent = "Copy share text"), 2000);
-      });
-    }
-  });
 
   // === Chat (left pane) ===
   const chatForm = document.getElementById("chat-form");
@@ -155,39 +160,219 @@
   }
 
   const chatSendBtn = document.getElementById("chat-send");
+  let connectChatSession = null;
+  let chatSessionPromise = null;
+  let firstBotMessageReceived = false;
+  const pendingMessages = [];
+  if (chatSendBtn) chatSendBtn.disabled = true;
+
+  function startChatSessionEarly() {
+    if (chatSessionPromise) return chatSessionPromise;
+    chatSessionPromise = (async () => {
+      const phoneVal = senderPhoneInput.value || "+447700900123";
+      const startResp = await fetch(`${API_BASE}/chat/start`, {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ display_name: phoneVal }),
+      });
+      const start = await startResp.json();
+      if (!start.ParticipantToken) throw new Error(start.error || "chat_start_failed");
+      if (!window.connect || !window.connect.ChatSession) throw new Error("chatjs_not_loaded");
+      const session = window.connect.ChatSession.create({
+        chatDetails: {
+          contactId: start.ContactId,
+          participantId: start.ParticipantId,
+          participantToken: start.ParticipantToken,
+        },
+        type: "CUSTOMER",
+        options: { region: "us-east-1" },
+      });
+      await session.connect();
+      transcriptStatus.textContent = "Connecting bot…";
+      session.onMessage(({ data }) => {
+        if (data.ContentType !== "text/plain" || data.ParticipantRole === "CUSTOMER") return;
+        appendSegment(data.ParticipantRole || "SYSTEM", data.Content);
+        if (!firstBotMessageReceived) {
+          firstBotMessageReceived = true;
+          if (chatSendBtn) chatSendBtn.disabled = false;
+          transcriptStatus.textContent = "Ready";
+          while (pendingMessages.length) {
+            const queued = pendingMessages.shift();
+            session.sendMessage({ contentType: "text/plain", message: queued }).catch(() => {});
+          }
+        }
+        setStep(3);
+        if (/connecting you|case (number|reference)|callback|will be in touch/i.test(data.Content)) setStep(5);
+      });
+      session.onTyping(() => { transcriptStatus.textContent = "Bot typing…"; });
+      session.onEnded(() => { connectChatSession = null; chatSessionPromise = null; transcriptStatus.textContent = "Chat ended"; });
+      connectChatSession = session;
+      return session;
+    })();
+    return chatSessionPromise;
+  }
+
+  startChatSessionEarly().catch((e) => {
+    appendSegment("SYSTEM", "Chat connect error: " + (e && e.message ? e.message : e));
+    transcriptStatus.textContent = "Error";
+  });
+
   async function submitChat(ev) {
       if (ev) ev.preventDefault();
       const text = chatInput.value.trim();
       if (!text) return;
       chatInput.value = "";
       appendSegment("CUSTOMER", text);
-      transcriptStatus.textContent = "Thinking...";
+      setStep(2);
+      if (!firstBotMessageReceived) {
+        pendingMessages.push(text);
+        transcriptStatus.textContent = "Waiting for bot…";
+        return;
+      }
       try {
-        const phoneVal = senderPhoneInput.value || "+447700900123";
-        const r = await fetch(`${API_BASE}/ask`, {
-          method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ utterance: text, session_id: sessionId, sender_phone: phoneVal }),
-        });
-        const data = await r.json();
-        if (data.case_id) {
-          activeCaseId = data.case_id;
-          caseStatus.textContent = `Case ${data.case_id.slice(0,8).toUpperCase()}`;
-          pollCase(activeCaseId);
-        }
-        if (data.mode === "multi_intent") {
-          appendMultiIntentSummary(data);
-        } else {
-          const meta = `intent ${data.intent} (${(data.intent_confidence||0).toFixed(2)})${data.guardrail_intervened?" · guardrail":""}`;
-          appendSegment("SYSTEM", data.answer || "(no answer)", meta);
-        }
-        transcriptStatus.textContent = "Ready";
+        const session = await startChatSessionEarly();
+        transcriptStatus.textContent = "Sending…";
+        await session.sendMessage({ contentType: "text/plain", message: text });
+        transcriptStatus.textContent = "Sent";
       } catch (e) {
-        appendSegment("SYSTEM", "Error: " + e);
+        appendSegment("SYSTEM", "Chat error: " + (e && e.message ? e.message : e));
         transcriptStatus.textContent = "Error";
       }
   }
   if (chatSendBtn) chatSendBtn.addEventListener("click", submitChat);
   if (chatInput) chatInput.addEventListener("keydown", (ev) => { if (ev.key === "Enter") submitChat(ev); });
+
+  // === WebRTC voice/video/screen-share via Chime SDK ===
+  const webrtcCallBtn = document.getElementById("webrtc-call");
+  const webrtcVideoBtn = document.getElementById("webrtc-video");
+  const webrtcScreenBtn = document.getElementById("webrtc-screen");
+  const webrtcEndBtn = document.getElementById("webrtc-end");
+  const webrtcStatus = document.getElementById("webrtc-status");
+  const chimeAudio = document.getElementById("chime-audio");
+  const chimeTiles = document.getElementById("chime-video-tiles");
+  let chimeSession = null;
+  let chimeContactId = null;
+  let videoOn = false;
+  let screenSharing = false;
+
+  function setWebrtcStatus(s) { if (webrtcStatus) webrtcStatus.textContent = s; }
+
+  async function startWebCall() {
+    if (chimeSession) return;
+    setWebrtcStatus("starting…");
+    webrtcCallBtn.disabled = true;
+    try {
+      const phoneVal = senderPhoneInput.value || "+447700900126";
+      const r = await fetch(`${API_BASE}/web-call/start`, {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ display_name: phoneVal }),
+      });
+      const data = await r.json();
+      if (!data.Meeting || !data.Attendee) throw new Error(data.message || data.error || "no meeting");
+      chimeContactId = data.ContactId;
+      setWebrtcStatus("loading SDK…");
+      const ChimeSDK = await import("https://esm.sh/amazon-chime-sdk-js@3");
+      const logger = new ChimeSDK.ConsoleLogger("aicc-chime", ChimeSDK.LogLevel.WARN);
+      const deviceController = new ChimeSDK.DefaultDeviceController(logger);
+      const config = new ChimeSDK.MeetingSessionConfiguration(data.Meeting, data.Attendee);
+      const session = new ChimeSDK.DefaultMeetingSession(config, logger, deviceController);
+      const audioInputs = await session.audioVideo.listAudioInputDevices();
+      if (audioInputs.length) await session.audioVideo.startAudioInput(audioInputs[0].deviceId);
+      await session.audioVideo.bindAudioElement(chimeAudio);
+      session.audioVideo.addObserver({
+        audioVideoDidStart: () => { setWebrtcStatus("call connected"); setStep(3); },
+        audioVideoDidStop: (sessionStatus) => {
+          setWebrtcStatus("");
+          chimeSession = null; chimeContactId = null; videoOn = false; screenSharing = false;
+          webrtcCallBtn.disabled = false; webrtcCallBtn.style.display = "";
+          webrtcVideoBtn.style.display = "none"; webrtcVideoBtn.textContent = "Add video";
+          webrtcScreenBtn.style.display = "none"; webrtcScreenBtn.textContent = "Share screen";
+          webrtcEndBtn.style.display = "none";
+          chimeTiles.innerHTML = "";
+        },
+        videoTileDidUpdate: (tile) => { renderChimeTile(session, tile); },
+        videoTileWasRemoved: (tileId) => { removeChimeTile(tileId); },
+      });
+      session.audioVideo.start();
+      chimeSession = session;
+      webrtcCallBtn.style.display = "none";
+      webrtcVideoBtn.style.display = "";
+      webrtcScreenBtn.style.display = "";
+      webrtcEndBtn.style.display = "";
+    } catch (e) {
+      setWebrtcStatus("error: " + (e && e.message ? e.message : e));
+      webrtcCallBtn.disabled = false;
+    }
+  }
+
+  async function toggleVideo() {
+    if (!chimeSession) return;
+    if (!videoOn) {
+      const cams = await chimeSession.audioVideo.listVideoInputDevices();
+      if (!cams.length) { setWebrtcStatus("no camera"); return; }
+      await chimeSession.audioVideo.startVideoInput(cams[0].deviceId);
+      chimeSession.audioVideo.startLocalVideoTile();
+      videoOn = true;
+      webrtcVideoBtn.textContent = "Stop video";
+    } else {
+      chimeSession.audioVideo.stopLocalVideoTile();
+      await chimeSession.audioVideo.stopVideoInput();
+      videoOn = false;
+      webrtcVideoBtn.textContent = "Add video";
+    }
+  }
+
+  async function toggleScreenShare() {
+    if (!chimeSession) return;
+    if (!screenSharing) {
+      try {
+        await chimeSession.audioVideo.startContentShareFromScreenCapture();
+        screenSharing = true;
+        webrtcScreenBtn.textContent = "Stop sharing";
+        setStep(4);
+      } catch (e) {
+        setWebrtcStatus("share denied");
+      }
+    } else {
+      chimeSession.audioVideo.stopContentShare();
+      screenSharing = false;
+      webrtcScreenBtn.textContent = "Share screen";
+    }
+  }
+
+  function renderChimeTile(session, tile) {
+    if (!tile.boundAttendeeId) return;
+    let video = document.getElementById(`tile-${tile.tileId}`);
+    if (!video) {
+      video = document.createElement("video");
+      video.id = `tile-${tile.tileId}`;
+      video.autoplay = true; video.playsInline = true;
+      video.style.width = tile.isContent ? "320px" : "180px";
+      video.style.height = tile.isContent ? "180px" : "135px";
+      video.style.background = "#000"; video.style.borderRadius = "4px";
+      const label = document.createElement("div");
+      label.style.cssText = "font-size:11px; color:#6f777b; text-align:center;";
+      label.textContent = tile.isContent ? "screen" : (tile.localTile ? "you" : "remote");
+      const wrap = document.createElement("div");
+      wrap.id = `tile-wrap-${tile.tileId}`;
+      wrap.appendChild(video); wrap.appendChild(label);
+      chimeTiles.appendChild(wrap);
+    }
+    session.audioVideo.bindVideoElement(tile.tileId, video);
+  }
+  function removeChimeTile(tileId) {
+    const w = document.getElementById(`tile-wrap-${tileId}`);
+    if (w) w.remove();
+  }
+
+  async function endWebCall() {
+    if (!chimeSession) return;
+    chimeSession.audioVideo.stop();
+  }
+
+  if (webrtcCallBtn) webrtcCallBtn.addEventListener("click", startWebCall);
+  if (webrtcVideoBtn) webrtcVideoBtn.addEventListener("click", toggleVideo);
+  if (webrtcScreenBtn) webrtcScreenBtn.addEventListener("click", toggleScreenShare);
+  if (webrtcEndBtn) webrtcEndBtn.addEventListener("click", endWebCall);
 
   // === Polling: case ===
   const contactId = params.get("contact_id");
@@ -224,6 +409,10 @@
       `;
       transcriptBody.appendChild(div);
     });
+    if (segments.length >= 2) setStep(3);
+    if (segments.length >= 4) setStep(4);
+    const joined = segments.map(s => (s.transcript || "").toLowerCase()).join(" ");
+    if (/connecting you|case (number|reference)|callback|will be in touch/i.test(joined)) setStep(5);
   }
 
   async function pollCase(cid) {

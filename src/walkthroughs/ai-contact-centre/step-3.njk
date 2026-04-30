@@ -1,25 +1,25 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 3: Send a photo on WhatsApp, AI Contact Centre Walkthrough"
-description: Open the WhatsApp simulator panel, attach a photo, and watch Bedrock describe it
+title: "Step 3: Send a photo - AI Contact Centre Walkthrough"
+description: Open the photo upload simulator, attach a photo, and watch the bot describe it
 currentStep: 3
-totalSteps: 7
+totalSteps: 5
 timeEstimate: "4 minutes"
 scenarioId: ai-contact-centre
 ---
 
 {% set stepNumber = 3 %}
-{% set stepTitle = "Send a photo on the WhatsApp simulator" %}
-{% set stepDescription = "Open the WhatsApp simulator panel in the companion SPA. Attach a photo of an overflowing bin. Watch Bedrock Nova Pro return a structured description as a chat bubble in seconds." %}
+{% set stepTitle = "Send a photo through the simulator" %}
+{% set stepDescription = "Open the photo upload simulator pane in the companion web app. Attach a photo of an overflowing bin. Watch Bedrock Nova Pro return a structured description as a chat bubble in seconds." %}
 {% set timeEstimate = "4 minutes" %}
 {% set screenshotData = screenshots["ai-contact-centre"] %}
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 3 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
-  "The WhatsApp simulator pane is bright; left and middle panes are dimmed",
-  "Sender phone validates against UK E.164 / 0-prefix format",
-  "The image uploads directly to S3 via presigned PUT (bypasses CloudFront)",
-  "A staged sequence of bubbles appears: Photo received → Analysing → Looking up → structured JSON",
+  "The photo upload simulator pane is bright; left and middle panes are dimmed",
+  "Your phone number validates against the UK E.164 or 0-prefix format",
+  "The image uploads directly to S3 using a presigned URL",
+  "A staged sequence of bubbles appears: photo received, analysing, looking up, structured description",
   "Connect Cases gains a new attachment summary on your existing case"
 ] %}
 
@@ -28,10 +28,10 @@ scenarioId: ai-contact-centre
 <h3 class="govuk-heading-m">Open the simulator panel</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
-  <li>Open the companion SPA at the <code>CompanionUrl</code> output, add <code>?step=3</code> to the URL.</li>
-  <li>The right-hand WhatsApp simulator pane brightens; left and middle dim.</li>
-  <li>In the sender-phone field, enter the same number you dialled from in Step 1. Format: UK E.164 (<code>+44</code> followed by 10 digits) or local (<code>0</code> followed by 10 digits). Helper text: "Use the same number you dialled from in Step 1. Cases looks up open tickets by phone."</li>
-  <li>Click "Attach photo". Choose any photo of a bin, fly-tip, or pothole. (The repository includes <a href="https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/ai-contact-centre/spikes/multimodal-fixtures" class="govuk-link">test fixtures</a> if you need one.)</li>
+  <li>Open the companion web app at the <code>CompanionUrl</code> output and add <code>?step=3</code> to the URL.</li>
+  <li>The right-hand photo upload simulator pane brightens; the left and middle panes dim.</li>
+  <li>In the sender-phone field, enter the same number you dialled from in Step 1. Use UK E.164 (<code>+44</code> followed by 10 digits) or local format (<code>0</code> followed by 10 digits). Cases looks up open tickets by phone number.</li>
+  <li>Click "Attach photo" and choose any photo of a bin, fly-tip, or pothole. The repository includes <a href="https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/ai-contact-centre/spikes/multimodal-fixtures" class="govuk-link">test fixtures</a> if you need one.</li>
   <li>Click "Send".</li>
 </ol>
 
@@ -40,10 +40,10 @@ scenarioId: ai-contact-centre
 <p class="govuk-body">A staged sequence of chat bubbles appears in the simulator pane:</p>
 
 <ul class="govuk-list govuk-list--bullet">
-  <li><strong>~1s:</strong> "Photo received. Sender ID: {your phone}"</li>
-  <li><strong>~3s:</strong> "Analysing image with Amazon Bedrock…" (with a bin emoji shimmer animation)</li>
-  <li><strong>~6s:</strong> "Looking up your case in Connect Cases…"</li>
-  <li><strong>~10s:</strong> A structured JSON bubble, <code>object_class</code>, <code>condition</code>, <code>severity</code>, <code>suggested_council_action</code>, <code>confidence</code>, plus optional <code>secondary_observations</code>.</li>
+  <li><strong>~1 second:</strong> "Photo received. Sender ID: {your phone}"</li>
+  <li><strong>~3 seconds:</strong> "Analysing image with Amazon Bedrock…" with a shimmer animation</li>
+  <li><strong>~6 seconds:</strong> "Looking up your case in Connect Cases…"</li>
+  <li><strong>~10 seconds:</strong> A structured response with <code>object_class</code>, <code>condition</code>, <code>severity</code>, <code>suggested_council_action</code>, <code>confidence</code>, and optional <code>secondary_observations</code></li>
 </ul>
 
-<p class="govuk-body">Behind the scenes, the SPA calls <code>POST /api/upload-presign</code> on the companion API (Lambda Function URL with <code>AuthType: AWS_IAM</code>, signed via SigV4 from CloudFront's OAC). The presigned URL contains the bucket host and region natively, so the SPA needs no separate config. The browser PUTs the image directly to S3, bypassing CloudFront's multipart upload constraints. Then the SPA calls <code>POST /api/simulator/send</code> with the S3 key + sender phone, and the multimodal Lambda owns the cross-channel orchestration end-to-end.</p>
+<p class="govuk-body">Behind the scenes, the web app calls <code>POST /api/upload-presign</code> on the companion API. The browser uploads the image directly to S3 using a presigned URL. Then the web app calls <code>POST /api/simulator/send</code> with the S3 key and your phone number, and a Lambda function handles the cross-channel link to your existing case.</p>

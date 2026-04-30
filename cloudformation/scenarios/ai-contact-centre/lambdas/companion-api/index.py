@@ -17,6 +17,7 @@ import uuid
 from typing import Any, Dict
 
 import boto3
+from botocore.exceptions import ClientError
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -89,6 +90,8 @@ def lambda_handler(event, context):
             return _share_pdf(event, cors)
         if path == "/api/chat/start" and method == "POST":
             return _chat_start(event, cors)
+        if path == "/api/web-call/start" and method == "POST":
+            return _web_call_start(event, cors)
         if path == "/api/ask" and method == "POST":
             return _ask(event, cors)
         if path == "/api/climax" and method == "POST":
@@ -463,6 +466,35 @@ def _climax(event, cors):
         line = "We have logged your enquiry; a council officer will be in touch."
     return _resp(200, {"line": line, "case_id": cid, "reference_number": ref,
                        "has_photo": bool(multimodal)}, cors)
+
+
+def _web_call_start(event, cors):
+    """Create a Connect WebRTC contact (browser voice/video). Returns Chime SDK
+    Meeting + Attendee so the frontend (using amazon-chime-sdk-js) can join."""
+    body = json.loads(event.get("body") or "{}")
+    display_name = (body.get("display_name") or "resident")[:32]
+    if not CONNECT_INSTANCE_ID or not CONNECT_CONTACT_FLOW_ID:
+        return _resp(500, {"error": "web_call_not_configured"}, cors)
+    try:
+        resp = connect.start_web_rtc_contact(
+            InstanceId=CONNECT_INSTANCE_ID,
+            ContactFlowId=CONNECT_CONTACT_FLOW_ID,
+            ParticipantDetails={"DisplayName": display_name},
+            AllowedCapabilities={
+                "Customer": {"Video": "SEND", "ScreenShare": "SEND"},
+                "Agent": {"Video": "SEND", "ScreenShare": "SEND"},
+            },
+        )
+    except ClientError as exc:
+        logger.exception("StartWebRTCContact failed: %s", exc)
+        return _resp(500, {"error": "start_web_rtc_failed", "message": str(exc)}, cors)
+    cd = resp.get("ConnectionData") or {}
+    return _resp(200, {
+        "ContactId": resp.get("ContactId"),
+        "ParticipantId": resp.get("ParticipantId"),
+        "Meeting": cd.get("Meeting"),
+        "Attendee": cd.get("Attendee"),
+    }, cors)
 
 
 def _chat_start(event, cors):

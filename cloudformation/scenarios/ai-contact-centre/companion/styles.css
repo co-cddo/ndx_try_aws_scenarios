@@ -207,16 +207,7 @@ body {
   color: var(--ndx-blue);
 }
 
-/* Step-driven dimming */
-body[data-step="1"] [data-pane="simulator"],
-body[data-step="2"] [data-pane="simulator"] { opacity: var(--ndx-dim); }
-
-body[data-step="3"] [data-pane="transcript"],
-body[data-step="3"] [data-pane="case"]      { opacity: var(--ndx-dim); }
-
-body[data-step="5"] [data-pane="simulator"] { opacity: var(--ndx-dim); }
-
+/* Step-driven dimming — only after explicit step >=6 (final/end) and only if a step query param was passed.
+   Default is no dimming so all panes work from the start. */
 body[data-step="6"] .ndx-pane,
 body[data-step="7"] .ndx-pane               { opacity: var(--ndx-dim); }
-
-body[data-step="4"] .ndx-pane               { opacity: 1; }

@@ -1,48 +1,48 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 4: One case, two channels (the climax), AI Contact Centre Walkthrough"
+title: "Step 4: One case, two channels - AI Contact Centre Walkthrough"
 description: Dial back. Hear the bot say "I've reviewed your photo; environmental health will visit Wednesday, ref ABC123."
 currentStep: 4
-totalSteps: 7
+totalSteps: 5
 timeEstimate: "5 minutes"
 scenarioId: ai-contact-centre
 ---
 
 {% set stepNumber = 4 %}
-{% set stepTitle = "One case, two channels, the climax" %}
+{% set stepTitle = "One case, two channels (the headline moment)" %}
 {% set stepDescription = "Dial the council number again. The bot recognises your phone, looks up your open case, finds the photo you sent, and reads back a single sentence: I've reviewed your photo; environmental health will visit Wednesday, ref ABC123." %}
 {% set timeEstimate = "5 minutes" %}
 {% set screenshotData = screenshots["ai-contact-centre"] %}
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 4 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
-  "The bot opens with the climax line acknowledging both your call and your photo",
-  "All three companion panes brighten, the climax moment",
+  "The bot opens with a single sentence acknowledging both your call and your photo",
+  "All three companion panes brighten",
   "Connect Cases shows one ticket with both transcript segments and the photo attachment",
-  "Customer Profiles binds the +44 caller to the same identity across channels"
+  "Customer Profiles links your phone number to the same identity across channels"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<blockquote class="govuk-body govuk-!-font-size-36 ndx-climax">
+<blockquote class="govuk-body govuk-!-font-size-36 ndx-headline-moment">
   "I've reviewed your photo; environmental health will visit Wednesday, ref ABC123."
 </blockquote>
 
-<p class="govuk-body">That sentence is the climax this scenario exists to demonstrate. It's what a council CIO will remember and what a Director of Customer Services will photograph for their CIO.</p>
+<p class="govuk-body">That single sentence is the headline moment this scenario exists to demonstrate. It's what a council CIO will remember and what a Director of Customer Services will photograph for their own CIO.</p>
 
 <h3 class="govuk-heading-m">What to do</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
-  <li>Open the companion SPA, add <code>?step=4</code> to the URL. <strong>All three panes brighten.</strong></li>
-  <li>From the same phone you dialled from in Step 1, dial the +44 800 number again.</li>
+  <li>Open the companion web app and add <code>?step=4</code> to the URL. <strong>All three panes brighten.</strong></li>
+  <li>From the same phone you used in Step 1, dial the real UK number again.</li>
   <li>Listen.</li>
 </ol>
 
 <h3 class="govuk-heading-m">What's happening</h3>
 
-<p class="govuk-body">When the call lands, the contact flow calls <code>cases:SearchCases</code> filtered by <code>customer_phone_number == sender_phone</code> AND <code>status: open</code> AND <code>lastUpdated > now() - 1h</code>. It finds your existing case (the one Step 1 created and Step 3 updated with the photo description). It reads back a single sentence assembled from the case's structured fields and the multimodal description.</p>
+<p class="govuk-body">When the call lands, the contact flow searches Connect Cases for an open case linked to your phone number, updated within the last hour. It finds the case Step 1 created and Step 3 updated with the photo description. The bot then reads back a single sentence assembled from the case fields and the photo description.</p>
 
-<p class="govuk-body">All three panes are bright now: live transcript on the left (your dial-back acknowledged), Connect Case in the middle (one ticket, no duplicates), and the WhatsApp simulator on the right showing your earlier photo attachment.</p>
+<p class="govuk-body">All three panes are bright now: the live transcript on the left shows your dial-back, the Connect Case in the middle shows one ticket with no duplicates, and the photo upload simulator on the right shows your earlier photo attachment.</p>
 
 <h3 class="govuk-heading-m">Take it home</h3>
 
@@ -56,12 +56,12 @@ scenarioId: ai-contact-centre
 
 <div class="govuk-inset-text">
   <p class="govuk-body govuk-!-font-style-italic">
-    "I just demoed an AI Contact Centre on AWS for {Council Name}. The bot received my call about {primary_intent}, then a photo I sent on WhatsApp, and connected them into one case. Reference: {ref_number}. Tech: Amazon Connect, Lex, Bedrock, Connect Cases. Try it: {LeaseUrl}"
+    "I just demoed an AI Contact Centre on AWS for {Council Name}. The bot took my call about {primary_intent}, then a photo I sent through the simulator, and joined them onto one case. Reference: {ref_number}. Built on Amazon Connect, Lex, Bedrock, and Connect Cases. Try it: {LeaseUrl}"
   </p>
 </div>
 
 <style>
-  .ndx-climax {
+  .ndx-headline-moment {
     background: #fff8e1;
     border-left: 6px solid #f0a020;
     padding: 24px 28px;

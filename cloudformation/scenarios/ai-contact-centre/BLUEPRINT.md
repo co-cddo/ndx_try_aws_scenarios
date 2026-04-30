@@ -66,25 +66,57 @@ The seed Lambda will start the ingestion job once the KB and DataSource are CREA
 
 ## Deploy
 
-This template is >51KB. Use `--s3-bucket` to upload via the templates bucket:
+Three-step sequence. CFN can't put docs in S3 *before* the bucket exists, so we deploy the empty stack first, sync the corpus, then bump `CorpusVersion` to re-fire ingestion + Wisdom upload custom resources.
 
 ```bash
+ACCOUNT=$(aws sts get-caller-identity --query Account --output text --profile NDX/SandboxAdmin)
+STAGING="ndx-try-aicc-staging-${ACCOUNT}-us-east-1"
+
+# 1) Stage and create stack (empty S3 doc bucket).
+aws s3 mb s3://${STAGING} --profile NDX/SandboxAdmin --region us-east-1 || true
 sam package \
   --template-file template.yaml \
-  --s3-bucket ndx-try-templates-us-east-1 \
+  --s3-bucket ${STAGING} \
   --s3-prefix scenarios/ai-contact-centre \
   --output-template-file packaged.yaml \
   --profile NDX/SandboxAdmin --region us-east-1
-
+aws s3 cp packaged.yaml s3://${STAGING}/scenarios/ai-contact-centre/packaged.yaml --profile NDX/SandboxAdmin
 aws cloudformation create-stack \
-  --stack-name ndx-try-ai-contact-centre-${USER} \
-  --template-body file://packaged.yaml \
+  --stack-name ndx-try-ai-contact-centre \
+  --template-url https://${STAGING}.s3.amazonaws.com/scenarios/ai-contact-centre/packaged.yaml \
   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-  --disable-rollback \
+  --parameters ParameterKey=CorpusVersion,ParameterValue=v1 \
+  --profile NDX/SandboxAdmin --region us-east-1
+aws cloudformation wait stack-create-complete --stack-name ndx-try-ai-contact-centre --profile NDX/SandboxAdmin --region us-east-1
+
+# 2) Sync the 380+ doc corpus into the KB source bucket.
+aws s3 sync ./documents/ s3://ndx-try-aicc-kb-${ACCOUNT}-us-east-1/ --include "*.md" --profile NDX/SandboxAdmin
+
+# 3) Bump CorpusVersion so SeedKbInvocation + WisdomContentUploader re-fire and pick up the new docs.
+aws cloudformation update-stack \
+  --stack-name ndx-try-ai-contact-centre \
+  --use-previous-template \
+  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+  --parameters ParameterKey=CorpusVersion,ParameterValue=v$(date +%s) \
   --profile NDX/SandboxAdmin --region us-east-1
 ```
 
-`--disable-rollback` lets you SSM in and fix forward on CREATE_FAILED via `update-stack --disable-rollback` rather than tear down. (Use `--disable-rollback` not `--on-failure DO_NOTHING`: the latter blocks subsequent update-stack calls.)
+### Post-deploy human steps
+
+- **Create an agent user** in the Connect console for CCP login (Username, soft phone, BasicQueue routing profile, Agent security profile). The `Custom::ConnectBootstrap` resource has already added `CustomerProfiles.View/Edit`, `Cases.View/Create/Edit`, `Wisdom.View`, `ContentManagement.View`, `QConnectAIAgents.View`, `QConnectAIPrompts.View` to the auto-created `Agent` security profile.
+- **(Optional) Open UK mobile outbound** by raising an AWS Support case ("calling permission for Amazon Connect") for the 447 prefix. UK landlines and US numbers work without this.
+
+### Iterating
+
+If you change the doc corpus and want both KBs to refresh:
+```bash
+aws s3 sync ./documents/ s3://ndx-try-aicc-kb-${ACCOUNT}-us-east-1/ --delete --profile NDX/SandboxAdmin
+aws cloudformation update-stack \
+  --stack-name ndx-try-ai-contact-centre --use-previous-template \
+  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+  --parameters ParameterKey=CorpusVersion,ParameterValue=v$(date +%s) \
+  --profile NDX/SandboxAdmin --region us-east-1
+```
 
 ## Itemized cost expectations
 
@@ -196,7 +228,7 @@ Spike file staleness check at CI start (Task 13.1) warns if any spike `measureme
 - **AssociateInstanceStorageConfig requires `iam:PutRolePolicy` on Connect's service-linked role** (Connect grants Kinesis access to its SLR via inline policy update).
 - **Customer Profiles needs a customer-managed CMK** with `kms:GenerateDataKey` granted to `profile.amazonaws.com`. The AWS-managed `alias/aws/profile` doesn't auto-create on first domain.
 - **fpdf2 ≥ 2.7.9 needs fontTools + Pillow + defusedxml bundled** in the Lambda zip. Don't use `--no-deps`.
-- **For chat contacts, ConnectParticipantWithLexBot followed by InvokeLambdaFunction has issues** — `$.Lex.InputTranscript` JSONPath doesn't reliably resolve. Bypass: have the SPA call a `/api/ask` Lambda directly that does Lex + RAG + Cases in one place. See chat.html.
+- **For chat contacts, ConnectParticipantWithLexBot followed by InvokeLambdaFunction has issues** — `$.Lex.InputTranscript` JSONPath doesn't reliably resolve. Bypass: have the SPA call a `/api/ask` Lambda directly that does Lex + RAG + Cases in one place. See `companion/app.js`.
 
 ## See also
 

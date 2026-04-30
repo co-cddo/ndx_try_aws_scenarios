@@ -1,9 +1,9 @@
 ---
 layout: layouts/walkthrough.njk
 title: AI Contact Centre Walkthrough
-description: Step-by-step guide to a working AI council reception that handles distressed multi-intent callers and unifies voice + WhatsApp on one case
+description: Step-by-step guide to a working AI council reception that triages distressed multi-intent callers and links a phone call to a photo upload on one case
 currentStep: 0
-totalSteps: 7
+totalSteps: 5
 scenarioId: ai-contact-centre
 ---
 
@@ -11,36 +11,34 @@ scenarioId: ai-contact-centre
 
 <div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
   <h2 class="govuk-panel__title">
-    30 minutes to dial a real council and watch one case capture both your call and your photo
+    23 minutes to dial a real council and watch one case capture both your call and your photo
   </h2>
   <div class="govuk-panel__body">
-    Dial the +44 800 number provisioned in your sandbox, watch a multi-intent triage cap at four issues, send a photo on the WhatsApp simulator, then dial back and hear: "I've reviewed your photo; environmental health will visit Wednesday, ref ABC123."
+    Call a real UK number from your own phone. Walk a happy-path script. Send a photo through the in-browser photo upload simulator. Then dial back and hear the bot read: "I've reviewed your photo; environmental health will visit Wednesday, ref ABC123."
   </div>
 </div>
 
 <div class="govuk-inset-text ndx-walkthrough-reassurance">
-  <strong class="govuk-!-font-size-24">This demo is in English.</strong>
+  <strong class="govuk-!-font-size-24">No technical knowledge required</strong>
   <p class="govuk-body">
-    We explore the Welsh-language gaps and what AWS would need to build for Welsh-speaking residents in <a href="/walkthroughs/ai-contact-centre/step-7/" class="govuk-link">Step 7</a>. The procurement-leverage page is the keepsake.
+    This walkthrough guides you through a working AI contact centre as a resident would experience it. You will dial a real phone number, send a photo, and watch one case form across both channels. Perfect for council CIOs, customer services directors, contact centre managers, and anyone evaluating AI for resident-facing services.
   </p>
 </div>
 
 <p class="govuk-body">
-  This scenario provisions a full Amazon Connect contact centre with a real UK +44 800 toll-free number, an en_GB Lex bot, Bedrock Knowledge Base + Guardrails, multimodal photo describe, Connect Cases, Customer Profiles, Contact Lens with PII redaction, a Kinesis stream of redacted segments, a CloudFront-fronted three-pane companion SPA, and AWS WAF. Two demonstrable journeys: distress + multi-intent triage on a real PSTN call, and cross-channel single-case unification when the resident later sends a photo on WhatsApp.
+  Your sandbox provisions a full Amazon Connect contact centre with a real UK phone number you call from your own mobile or landline. It includes a Lex bot, a Bedrock Knowledge Base with Guardrails, a multi-intent decomposer, multimodal photo description, Connect Cases, Customer Profiles, and Contact Lens with PII redaction. A companion web app lets you watch the live transcript, the case being built, and the photo upload simulator side by side.
 </p>
 
 <h2 class="govuk-heading-l">What you'll do</h2>
 
-<p class="govuk-body-l">In this 30-minute walkthrough, you'll:</p>
+<p class="govuk-body-l">In this 23-minute walkthrough, you'll:</p>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
-  <li><strong>Dial in</strong>, call the +44 800 number from your phone, walk a happy-path bin script, hear Polly read back a reference (5 minutes)</li>
-  <li><strong>Distress + multi-intent</strong>, play a layered distressing script and watch the bot cap at 4 intents (5 minutes)</li>
-  <li><strong>WhatsApp simulator</strong>, attach a photo, watch Bedrock describe it (4 minutes)</li>
-  <li><strong>One case, two channels (the climax)</strong>, dial back and hear "I've reviewed your photo; environmental health will visit Wednesday, ref ABC123." (5 minutes)</li>
-  <li><strong>Sentiment + safeguarding</strong>, inspect the redacted transcript pane (4 minutes)</li>
-  <li><strong>BYO WhatsApp + cleanup</strong>, read the BYO-WABA path, tear down with isb close-account (4 minutes)</li>
-  <li><strong>What we'd need from AWS to make this Welsh-ready</strong>, the keepsake (3 minutes)</li>
+  <li><strong>Dial in</strong>, call the real UK number from your own phone, walk a happy-path bin-collection script, and hear the bot read back a reference number (5 minutes)</li>
+  <li><strong>Try a multi-intent distressed call</strong>, play a layered script that mentions five different issues, and watch the bot triage the top four (5 minutes)</li>
+  <li><strong>Send a photo</strong>, attach a photo using the in-browser photo upload simulator and watch the bot describe it (4 minutes)</li>
+  <li><strong>One case, two channels (the headline moment)</strong>, dial back and hear the bot link your call and your photo to a single case (5 minutes)</li>
+  <li><strong>Inspect sentiment and safeguarding</strong>, look at the redacted transcript and the safeguarding flag (4 minutes)</li>
 </ol>
 
 <div class="ndx-walkthrough-prerequisites">
@@ -55,8 +53,33 @@ scenarioId: ai-contact-centre
   </div>
 
   <p class="govuk-body">
-    <a href="/scenarios/ai-contact-centre/" class="govuk-link">Deploy the AI Contact Centre scenario</a> if you haven't already. Deployment takes 30 to 60 minutes, Bedrock KB ingestion is the long pole. You'll also need a working phone to dial the number for Step 1.
+    <a href="/scenarios/ai-contact-centre/" class="govuk-link">Deploy the AI Contact Centre scenario</a> if you haven't already. Deployment takes 30 to 60 minutes; Bedrock Knowledge Base ingestion is the long pole. You'll also need a working phone to dial the number in Step 1.
   </p>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For service managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How residents would experience an AI-led reception line</li>
+      <li>How the bot handles distressed callers raising several issues at once</li>
+      <li>How a single case captures voice, chat, and photo together</li>
+      <li>How sentiment and safeguarding signals route the right callers to a human</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical staff</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Amazon Connect with a claimed UK PSTN number, Lex v2, and Bedrock</li>
+      <li>Multi-intent decomposition with Bedrock Nova Pro</li>
+      <li>Multimodal photo description with Bedrock Nova Pro vision</li>
+      <li>Connect Cases, Customer Profiles, and cross-channel case unification</li>
+      <li>Contact Lens with PII redaction at the Connect instance level</li>
+    </ul>
+  </div>
 </div>
 
 <div class="govuk-!-margin-top-8">
@@ -68,7 +91,7 @@ scenarioId: ai-contact-centre
   </a>
 
   <p class="govuk-body-s govuk-!-margin-top-2">
-    Takes approximately 30 minutes
+    Takes approximately 23 minutes
   </p>
 </div>
 

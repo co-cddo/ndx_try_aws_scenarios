@@ -1,0 +1,120 @@
+---
+layout: layouts/exploration
+title: "Explore - AI Contact Centre"
+description: "Hands-on activities to take the AI Contact Centre demo further"
+scenarioId: ai-contact-centre
+eleventyNavigation:
+  key: ai-contact-centre-explore
+  parent: ai-contact-centre-walkthrough
+  title: Explore Further
+---
+
+{% set scenarioId = "ai-contact-centre" %}
+{% set explorationData = exploration[scenarioId] %}
+{% set activities = explorationData.activities %}
+{% set personas = explorationData.personas %}
+
+<section class="ndx-explore-intro" aria-labelledby="explore-intro-heading">
+  <h2 class="govuk-heading-l" id="explore-intro-heading">Explore further</h2>
+
+  <p class="govuk-body-l">
+    You've finished the walkthrough. These activities take you further: try different channels into the same contact centre, see the architecture behind the scenes, and weigh up what your council would need before going to production.
+  </p>
+
+  <div class="govuk-inset-text">
+    <strong>Safe to explore:</strong> the sandbox is yours. Everything here is designed for experimentation. Nothing you do can break it.
+  </div>
+</section>
+
+<section class="ndx-persona-selection" aria-labelledby="persona-heading">
+  <h2 class="govuk-heading-m" id="persona-heading">Choose your path</h2>
+
+  <div class="govuk-grid-row">
+    {% for key, persona in personas %}
+      <div class="govuk-grid-column-one-half">
+        <div class="ndx-persona-card" data-persona="{{ persona.id }}">
+          <h3 class="govuk-heading-s">{{ persona.title }}</h3>
+          <p class="govuk-body-s">{{ persona.description }}</p>
+          <p class="govuk-body-s"><strong>Time:</strong> {{ persona.time_estimate }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section aria-labelledby="experiments-heading">
+  <h2 class="govuk-heading-l" id="experiments-heading">Experiments to try</h2>
+  {% for activity in activities %}
+    {% if activity.category == "experiments" %}
+      <details class="govuk-details" data-module="govuk-details">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">
+            {{ activity.title }} <span class="govuk-body-s">({{ activity.time_estimate }})</span>
+          </span>
+        </summary>
+        <div class="govuk-details__text">
+          <p class="govuk-body"><strong>What you'll learn:</strong> {{ activity.learning }}</p>
+          <ol class="govuk-list govuk-list--number">
+            {% for step in activity.steps %}
+              <li><strong>{{ step.title }}.</strong> {{ step.action }}</li>
+            {% endfor %}
+          </ol>
+          {% if activity.expected_outcome %}
+            <p class="govuk-body"><strong>You should see:</strong> {{ activity.expected_outcome }}</p>
+          {% endif %}
+          {% if activity.what_to_observe %}
+            <p class="govuk-body"><strong>Watch for:</strong></p>
+            <ul class="govuk-list govuk-list--bullet">
+              {% for w in activity.what_to_observe %}<li>{{ w }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </details>
+    {% endif %}
+  {% endfor %}
+</section>
+
+<section aria-labelledby="arch-heading">
+  <h2 class="govuk-heading-l" id="arch-heading">Architecture tours</h2>
+  {% for activity in activities %}
+    {% if activity.category == "architecture" %}
+      <details class="govuk-details" data-module="govuk-details">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">
+            {{ activity.title }} <span class="govuk-body-s">({{ activity.time_estimate }})</span>
+          </span>
+        </summary>
+        <div class="govuk-details__text">
+          <p class="govuk-body"><strong>What you'll learn:</strong> {{ activity.learning }}</p>
+          <ol class="govuk-list govuk-list--number">
+            {% for step in activity.steps %}
+              <li><strong>{{ step.title }}.</strong> {{ step.description or step.action }}</li>
+            {% endfor %}
+          </ol>
+        </div>
+      </details>
+    {% endif %}
+  {% endfor %}
+</section>
+
+<section aria-labelledby="prod-heading">
+  <h2 class="govuk-heading-l" id="prod-heading">Production considerations</h2>
+  {% for activity in activities %}
+    {% if activity.category == "limits" %}
+      <details class="govuk-details" data-module="govuk-details">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">
+            {{ activity.title }} <span class="govuk-body-s">({{ activity.time_estimate }})</span>
+          </span>
+        </summary>
+        <div class="govuk-details__text">
+          <p class="govuk-body">{{ activity.consideration }}</p>
+          <p class="govuk-body"><strong>Before going to production, check:</strong></p>
+          <ul class="govuk-list govuk-list--bullet">
+            {% for c in activity.production_check %}<li>{{ c }}</li>{% endfor %}
+          </ul>
+        </div>
+      </details>
+    {% endif %}
+  {% endfor %}
+</section>

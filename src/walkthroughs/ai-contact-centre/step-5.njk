@@ -1,24 +1,24 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 5: Sentiment and safeguarding deep-dive, AI Contact Centre Walkthrough"
+title: "Step 5: Sentiment and safeguarding deep-dive - AI Contact Centre Walkthrough"
 description: Inspect the live transcript pane to see how Contact Lens redacts PII and tracks sentiment
 currentStep: 5
-totalSteps: 7
+totalSteps: 5
 timeEstimate: "4 minutes"
 scenarioId: ai-contact-centre
 ---
 
 {% set stepNumber = 5 %}
 {% set stepTitle = "Sentiment and safeguarding deep-dive" %}
-{% set stepDescription = "Inspect the live transcript pane in detail. PII appears as {NAME}, {ADDRESS}, {PHONE} placeholders; sentiment chips colour green to red; the safeguarding flag is set when distress is sustained." %}
+{% set stepDescription = "Inspect the live transcript pane in detail. Personal details appear as {NAME}, {ADDRESS}, and {PHONE} placeholders. Sentiment chips colour green to red. The safeguarding flag is set when distress is sustained." %}
 {% set timeEstimate = "4 minutes" %}
 {% set screenshotData = screenshots["ai-contact-centre"] %}
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 5 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
-  "Every PII token in the transcript appears as {NAME}, {ADDRESS}, {PHONE} or {EMAIL}",
+  "Every personal detail in the transcript appears as {NAME}, {ADDRESS}, {PHONE}, or {EMAIL}",
   "Sentiment chips on each segment match the Contact Lens analytic output",
-  "DynamoDB ContactLensCache contains only redacted segments, no raw PII",
+  "The DynamoDB ContactLensCache table contains only redacted segments, no raw PII",
   "The Connect Case shows safeguarding_flag: true when distress was sustained"
 ] %}
 
@@ -26,17 +26,17 @@ scenarioId: ai-contact-centre
 
 <h3 class="govuk-heading-m">How redaction works</h3>
 
-<p class="govuk-body">Contact Lens is configured at the Connect instance level with <code>Attributes.Redaction.Enabled: true</code> and <code>RedactionOutput: REDACTED_AND_ORIGINAL</code>. Both segments are emitted to Kinesis. The consumer Lambda <strong>reads only <code>RedactedSegment</code> and writes only that</strong> to DynamoDB. <code>OriginalSegment</code> is ignored entirely.</p>
+<p class="govuk-body">Contact Lens is configured at the Connect instance level with <code>Attributes.Redaction.Enabled: true</code> and <code>RedactionOutput: REDACTED_AND_ORIGINAL</code>. Both segments are sent to Kinesis. The consumer Lambda <strong>reads only <code>RedactedSegment</code> and writes only that</strong> to DynamoDB. <code>OriginalSegment</code> is ignored entirely.</p>
 
-<p class="govuk-body">Contact Lens emits placeholders in <code>[NAME_1]</code>, <code>[ADDRESS_2]</code> form. The consumer Lambda transforms these to the documented <code>{NAME}</code>, <code>{ADDRESS}</code> form via a regex <code>r"\[([A-Z_]+)_\d+\]"</code> → <code>"{$1}"</code>, so the SPA renders consistent placeholder shapes regardless of how many distinct entities Contact Lens detects in a single segment.</p>
+<p class="govuk-body">Contact Lens emits placeholders like <code>[NAME_1]</code> and <code>[ADDRESS_2]</code>. The consumer Lambda transforms these to the documented <code>{NAME}</code> and <code>{ADDRESS}</code> form, so the web app shows consistent placeholders no matter how many distinct entities Contact Lens detects in a single segment.</p>
 
 <h3 class="govuk-heading-m">What to inspect</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
-  <li>Open the companion SPA, add <code>?step=5</code> to the URL.</li>
-  <li>Scroll the left pane. Each segment has a sentiment chip, green for neutral, amber for moderate distress, red for high distress.</li>
-  <li>Click any segment. The PII tokens (your name, your address, your phone) appear as monospace placeholders. There is no fallback path that exposes the original.</li>
-  <li>Open the AWS console, find the <code>ContactLensCache</code> DynamoDB table, browse a few items. You will not find any of your real personal details verbatim. The PII residue test (<code>tests/pii-residue.test.mjs</code>) asserts this in CI.</li>
+  <li>Open the companion web app and add <code>?step=5</code> to the URL.</li>
+  <li>Scroll the left pane. Each segment has a sentiment chip: green for neutral, amber for moderate distress, red for high distress.</li>
+  <li>Click any segment. Personal details (your name, address, phone) appear as monospace placeholders. There is no fallback path that exposes the original.</li>
+  <li>Open the AWS console, find the <code>ContactLensCache</code> DynamoDB table, and browse a few items. You will not find any of your real personal details. The PII residue test (<code>tests/pii-residue.test.mjs</code>) checks this in CI.</li>
 </ol>
 
-<p class="govuk-body">If your call in Step 2 sustained distress for more than two minutes, the Connect Case in the middle pane shows <code>safeguarding_flag: true</code> with a red badge. In a real council deployment this would route the case to a safeguarding-trained agent.</p>
+<p class="govuk-body">If your call in Step 2 sustained distress for more than two minutes, the Connect Case in the middle pane shows <code>safeguarding_flag: true</code> with a red badge. In a real council deployment, this would route the case to a safeguarding-trained agent.</p>

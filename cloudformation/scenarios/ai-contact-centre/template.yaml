@@ -1,0 +1,2162 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  NDX:Try - AI Contact Centre (Council Reception)
+  Amazon Connect with claimed UK +44 800 toll-free, Lex v2 (en_GB), Bedrock KB
+  + Guardrails, multimodal photo describe, Connect Cases, Customer Profiles,
+  Contact Lens with PII redaction, Kinesis stream, three-pane companion SPA,
+  CloudFront + WAF.
+  Version: 0.1.0 (initial draft per tech-spec-ai-contact-centre.md)
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: { default: Scenario Configuration }
+        Parameters: [Environment]
+      - Label: { default: Bedrock model selection }
+        Parameters: [GenerationModelId, EmbeddingModelId]
+      - Label: { default: Companion SPA }
+        Parameters: [SpaSourceBucket, SpaSourcePrefix]
+      - Label: { default: Phone number country }
+        Parameters: [PhoneNumberCountryCode, PhoneNumberType]
+
+Parameters:
+  Environment:
+    Type: String
+    Default: sandbox
+    AllowedValues: [sandbox, development, production]
+  GenerationModelId:
+    Type: String
+    Default: amazon.nova-pro-v1:0
+    Description: Bedrock model ID for generation, multimodal describe, multi-intent
+  EmbeddingModelId:
+    Type: String
+    Default: amazon.titan-embed-text-v2:0
+    Description: Bedrock embedding model for KB
+  PhoneNumberCountryCode:
+    Type: String
+    Default: GB
+  PhoneNumberType:
+    Type: String
+    Default: DID
+    AllowedValues: [TOLL_FREE, DID]
+    Description: Default DID — toll-free GB numbers historically had unreliable inbound routing from UK mobile networks.
+  MaxIntentsPerTurn:
+    Type: Number
+    Default: 4
+  CorpusVersion:
+    Type: String
+    Default: v1
+    Description: |
+      Bump on every redeploy that changes the documents/ tree to force Bedrock
+      KB re-ingestion AND Wisdom (Q in Connect) content re-upload. CFN custom
+      resources only fire on Update if at least one property changes.
+  CouncilName:
+    Type: String
+    Default: Aldershire
+    Description: |
+      Council name shown on the bespoke agent-workspace application
+      ("NDX:Try {CouncilName}") and used to brand the agent dashboard page.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    MemorySize: 512
+    Timeout: 30
+    Architectures: [x86_64]
+    Tracing: Active
+    Environment:
+      Variables:
+        LOG_LEVEL: INFO
+
+Resources:
+
+  # ============================================================
+  # PHASE 3: Bedrock KB (S3 Vectors + KB + Guardrail)
+  # ============================================================
+  KbSourceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-try-aicc-kb-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration: { Status: Enabled }
+      Tags:
+        - { Key: Project, Value: ndx-try }
+        - { Key: Scenario, Value: ai-contact-centre }
+        - { Key: AutoCleanup, Value: 'true' }
+
+  KbVectorBucket:
+    Type: AWS::S3Vectors::VectorBucket
+    DeletionPolicy: Delete
+    Properties:
+      VectorBucketName: !Sub 'ndx-try-aicc-vec-${AWS::AccountId}-${AWS::Region}'
+
+  KbVectorIndex:
+    Type: AWS::S3Vectors::Index
+    DeletionPolicy: Delete
+    DependsOn: KbVectorBucket
+    Properties:
+      VectorBucketName: !Sub 'ndx-try-aicc-vec-${AWS::AccountId}-${AWS::Region}'
+      IndexName: aicc-kb-index-v3
+      DataType: float32
+      Dimension: 1024
+      DistanceMetric: cosine
+      MetadataConfiguration:
+        NonFilterableMetadataKeys: [AMAZON_BEDROCK_TEXT_CHUNK, AMAZON_BEDROCK_METADATA]
+
+  KbRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'InnovationSandbox-ndx-aicc-kb-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: bedrock.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: kb-permissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [bedrock:InvokeModel]
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${EmbeddingModelId}'
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${GenerationModelId}'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt KbSourceBucket.Arn
+                  - !Sub '${KbSourceBucket.Arn}/*'
+              - Effect: Allow
+                Action: [s3vectors:*]
+                Resource: '*'
+
+  KnowledgeBase:
+    Type: AWS::Bedrock::KnowledgeBase
+    Properties:
+      Name: !Sub 'ndx-try-aicc-kb-v3-${AWS::Region}'
+      Description: AI Contact Centre KB, Aldershire DC services (en_GB)
+      RoleArn: !GetAtt KbRole.Arn
+      KnowledgeBaseConfiguration:
+        Type: VECTOR
+        VectorKnowledgeBaseConfiguration:
+          EmbeddingModelArn: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${EmbeddingModelId}'
+      StorageConfiguration:
+        Type: S3_VECTORS
+        S3VectorsConfiguration:
+          IndexArn: !GetAtt KbVectorIndex.IndexArn
+
+  KnowledgeBaseDataSource:
+    Type: AWS::Bedrock::DataSource
+    Properties:
+      KnowledgeBaseId: !Ref KnowledgeBase
+      Name: aicc-source
+      DataSourceConfiguration:
+        Type: S3
+        S3Configuration:
+          BucketArn: !GetAtt KbSourceBucket.Arn
+
+  Guardrail:
+    Type: AWS::Bedrock::Guardrail
+    Properties:
+      Name: !Sub 'ndx-try-aicc-guardrail-${AWS::Region}'
+      Description: Contact-centre AI Guardrail (council services)
+      BlockedInputMessaging: I can't help with that one. Let me get a colleague to call you back.
+      BlockedOutputsMessaging: I can't give that kind of advice. A council officer will follow up.
+      ContentPolicyConfig:
+        FiltersConfig:
+          - { Type: HATE,         InputStrength: HIGH, OutputStrength: HIGH }
+          - { Type: VIOLENCE,     InputStrength: HIGH, OutputStrength: HIGH }
+          - { Type: SEXUAL,       InputStrength: HIGH, OutputStrength: HIGH }
+          - { Type: INSULTS,      InputStrength: MEDIUM, OutputStrength: HIGH }
+          - { Type: MISCONDUCT,   InputStrength: HIGH, OutputStrength: HIGH }
+          - { Type: PROMPT_ATTACK, InputStrength: HIGH, OutputStrength: NONE }
+      SensitiveInformationPolicyConfig:
+        PiiEntitiesConfig:
+          - { Type: NAME, Action: ANONYMIZE }
+          - { Type: ADDRESS, Action: ANONYMIZE }
+          - { Type: PHONE, Action: ANONYMIZE }
+          - { Type: EMAIL, Action: ANONYMIZE }
+          - { Type: UK_NATIONAL_INSURANCE_NUMBER, Action: BLOCK }
+          - { Type: UK_NATIONAL_HEALTH_SERVICE_NUMBER, Action: BLOCK }
+          - { Type: CREDIT_DEBIT_CARD_NUMBER, Action: BLOCK }
+      TopicPolicyConfig:
+        TopicsConfig:
+          - Name: LegalAdvice
+            Definition: Specific legal advice such as advising a resident to sue, claim compensation, or pursue a tribunal action against the council.
+            Type: DENY
+            Examples:
+              - "What grounds do I have to sue?"
+              - "Am I entitled to compensation under the law?"
+              - "Should I take this to a tribunal?"
+          - Name: MedicalAdvice
+            Definition: Specific medical advice or medication suggestions.
+            Type: DENY
+            Examples:
+              - "What painkiller should I take?"
+              - "Diagnose this rash for me"
+
+  # ============================================================
+  # PHASE 4: Connect instance + PSTN
+  # ============================================================
+  ConnectInstance:
+    Type: AWS::Connect::Instance
+    Properties:
+      InstanceAlias: !Sub 'ndx-try-aicc-${AWS::AccountId}'
+      IdentityManagementType: CONNECT_MANAGED
+      Attributes:
+        InboundCalls: true
+        OutboundCalls: true
+        ContactLens: true
+        ContactflowLogs: true
+        EarlyMedia: true
+        AutoResolveBestVoices: true
+
+  ConnectInstanceActiveWaitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-connect-active-wait-${AWS::Region}'
+      CodeUri: lambdas/connect-instance-active-wait/
+      Handler: index.handler
+      Timeout: 360
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [connect:DescribeInstance]
+              Resource: '*'
+      Role: !GetAtt CustomResourceLambdaRole.Arn
+
+  ConnectInstanceActiveWait:
+    Type: Custom::ConnectInstanceActiveWait
+    Properties:
+      ServiceToken: !GetAtt ConnectInstanceActiveWaitFunction.Arn
+      InstanceId: !Ref ConnectInstance
+
+  GeoNumber:
+    Type: AWS::Connect::PhoneNumber
+    Properties:
+      TargetArn: !GetAtt ConnectInstance.Arn
+      Type: DID
+      CountryCode: GB
+      Description: !Sub 'ndx-try-aicc inbound DID (${AWS::StackName})'
+
+  # ============================================================
+  # PHASE 5: Lex bot
+  # ============================================================
+  LexBotRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'InnovationSandbox-ndx-aicc-lex-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lex.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: lex-polly
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [polly:SynthesizeSpeech]
+                Resource: '*'
+
+  LexBot:
+    Type: AWS::Lex::Bot
+    Properties:
+      Name: !Sub 'ndx-try-aicc-bot-${AWS::Region}'
+      Description: AI Contact Centre, Aldershire DC reception
+      DataPrivacy: { ChildDirected: false }
+      IdleSessionTTLInSeconds: 300
+      AutoBuildBotLocales: true
+      RoleArn: !GetAtt LexBotRole.Arn
+      BotLocales:
+        - LocaleId: en_US
+          NluConfidenceThreshold: 0.4
+          VoiceSettings: { VoiceId: Joanna, Engine: neural }
+          Intents:
+            - Name: WelcomeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Hello" }
+                - { Utterance: "Hi" }
+                - { Utterance: "Good morning" }
+            - Name: BinCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "When is my bin collection day" }
+                - { Utterance: "What day do I put my bins out" }
+                - { Utterance: "When are my bins collected" }
+                - { Utterance: "What day are my bins emptied" }
+                - { Utterance: "Bin day" }
+            - Name: MissedCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "My bins haven't been collected" }
+                - { Utterance: "The bin lorry didn't come this week" }
+                - { Utterance: "Missed collection" }
+                - { Utterance: "My bin was not emptied" }
+                - { Utterance: "Bins were not picked up" }
+                - { Utterance: "Refuse collection missed" }
+            - Name: FlyTip
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "There's fly tipping" }
+                - { Utterance: "Someone's dumped rubbish" }
+                - { Utterance: "Rubbish has been dumped" }
+                - { Utterance: "Fly tip on the corner" }
+                - { Utterance: "Mattress dumped on the street" }
+                - { Utterance: "I want to report fly tipping" }
+                - { Utterance: "I'd like to report fly tipping" }
+                - { Utterance: "Want to report fly tipping" }
+                - { Utterance: "Report fly tipping" }
+                - { Utterance: "Reporting fly tipping" }
+                - { Utterance: "I need to report fly tipping" }
+                - { Utterance: "There's been some fly tipping" }
+                - { Utterance: "Someone has been fly tipping" }
+                - { Utterance: "I want to report some fly tipping" }
+                - { Utterance: "Illegal dumping" }
+                - { Utterance: "There is illegal dumping" }
+                - { Utterance: "Someone dumped a sofa" }
+                - { Utterance: "Sofa dumped on the street" }
+                - { Utterance: "Pile of rubbish" }
+            - Name: PotholeReport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "There's a pothole" }
+                - { Utterance: "Pothole on the road" }
+                - { Utterance: "Damaged road surface" }
+            - Name: BrokenPaving
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "The pavement is broken" }
+                - { Utterance: "Broken paving slab" }
+                - { Utterance: "Pavement is damaged" }
+            - Name: ParkedVehicle
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "There's a car parked across my driveway" }
+                - { Utterance: "Someone is blocking my drive" }
+                - { Utterance: "Car parked illegally" }
+            - Name: DampMould
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "There's damp in my home" }
+                - { Utterance: "Mould on the wall" }
+                - { Utterance: "Damp coming through my ceiling" }
+                - { Utterance: "Black mould in the bathroom" }
+                - { Utterance: "Wet patch on the wall" }
+            - Name: AntiSocialBehaviour
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Anti social behaviour" }
+                - { Utterance: "My neighbour has been shouting" }
+                - { Utterance: "Loud music every night" }
+                - { Utterance: "ASB problem" }
+                - { Utterance: "Threatening behaviour from neighbour" }
+            - Name: Safeguarding
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "I'm worried about a vulnerable person" }
+                - { Utterance: "I think someone is being abused" }
+                - { Utterance: "I don't know what to do" }
+                - { Utterance: "I'm at the end of my tether" }
+                - { Utterance: "Concerned about a vulnerable adult" }
+            - Name: CouncilTax
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Council tax" }
+                - { Utterance: "I can't afford to pay my council tax" }
+                - { Utterance: "I am struggling to pay my council tax" }
+                - { Utterance: "Question about my council tax bill" }
+                - { Utterance: "Council tax is too high" }
+                - { Utterance: "Council tax enforcement" }
+            - Name: BenefitsSupport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Housing benefit" }
+                - { Utterance: "Council Tax Reduction" }
+                - { Utterance: "Benefits help" }
+                - { Utterance: "I want to apply for benefits" }
+            - Name: PlanningEnquiry
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Planning permission" }
+                - { Utterance: "Planning application" }
+                - { Utterance: "Do I need planning permission" }
+                - { Utterance: "Building extension" }
+            - Name: MultiIntentTriage
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "I have multiple things" }
+                - { Utterance: "Several issues" }
+            - Name: GoodbyeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "No" }
+                - { Utterance: "No thanks" }
+                - { Utterance: "No thank you" }
+                - { Utterance: "That is all" }
+                - { Utterance: "Nothing else" }
+                - { Utterance: "Goodbye" }
+                - { Utterance: "Bye" }
+                - { Utterance: "Thanks bye" }
+                - { Utterance: "I'm done" }
+                - { Utterance: "All done" }
+            - Name: FallbackIntent
+              ParentIntentSignature: AMAZON.FallbackIntent
+              FulfillmentCodeHook: { Enabled: true }
+
+  LexBotVersionV6:
+    Type: AWS::Lex::BotVersion
+    Properties:
+      BotId: !Ref LexBot
+      BotVersionLocaleSpecification:
+        - LocaleId: en_US
+          BotVersionLocaleDetails: { SourceBotVersion: DRAFT }
+
+  LexBotAlias:
+    Type: AWS::Lex::BotAlias
+    Properties:
+      BotId: !Ref LexBot
+      BotAliasName: prod
+      BotVersion: !GetAtt LexBotVersionV6.BotVersion
+      BotAliasLocaleSettings:
+        - LocaleId: en_US
+          BotAliasLocaleSetting:
+            Enabled: true
+            CodeHookSpecification:
+              LambdaCodeHook:
+                LambdaArn: !GetAtt MultiIntentFunction.Arn
+                CodeHookInterfaceVersion: '1.0'
+
+  # ============================================================
+  # PHASE 6: Lambda functions (one role hub, then per-function)
+  # ============================================================
+  CustomResourceLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'InnovationSandbox-ndx-aicc-cr-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - { Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: cr-broad
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - connect:*
+                  - bedrock:*
+                  - bedrock-agent:*
+                  - bedrock-agent-runtime:*
+                  - customer-profiles:*
+                  # AWS IAM uses 'profile:' prefix for Customer Profiles actions,
+                  # not 'customer-profiles:'. Both are needed defensively.
+                  - profile:*
+                  - cases:*
+                  - cases-domain:*
+                  - wisdom:*
+                  - qconnect:*
+                  # AssociateInstanceStorageConfig validates the caller has
+                  # access to the resource being attached.
+                  - kinesis:DescribeStream
+                  - kinesis:DescribeStreamSummary
+                  - kinesis:PutRecord
+                  - kinesis:PutRecords
+                  - kinesis:GetShardIterator
+                  - kinesis:GetRecords
+                  - kinesis:ListShards
+                Resource: '*'
+              - Effect: Allow
+                # AssociateInstanceStorageConfig grants the Connect service-linked
+                # role access to the Kinesis stream by adding an inline policy.
+                Action:
+                  - iam:PutRolePolicy
+                  - iam:DeleteRolePolicy
+                  - iam:CreateServiceLinkedRole
+                Resource:
+                  - !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/connect.amazonaws.com/*'
+              - Effect: Allow
+                Action: [s3:PutBucketCors, s3:GetBucketCors]
+                Resource: !Sub 'arn:aws:s3:::ndx-try-aicc-uploads-${AWS::AccountId}-${AWS::Region}'
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketVersions
+                  - s3:DeleteObjectVersion
+                Resource:
+                  - !Sub 'arn:aws:s3:::ndx-try-aicc-kb-${AWS::AccountId}-${AWS::Region}'
+                  - !Sub 'arn:aws:s3:::ndx-try-aicc-kb-${AWS::AccountId}-${AWS::Region}/*'
+              # Customer Profiles encrypts ObjectType data with this CMK; the
+              # PutProfileObjectType call from connect-bootstrap fails without it.
+              - Effect: Allow
+                Action:
+                  - kms:GenerateDataKey
+                  - kms:GenerateDataKeyWithoutPlaintext
+                  - kms:Decrypt
+                  - kms:DescribeKey
+                  - kms:Encrypt
+                  - kms:CreateGrant
+                Resource: !GetAtt CustomerProfilesKey.Arn
+
+  CommonLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'InnovationSandbox-ndx-aicc-fn-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - { Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: fn-permissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                  - bedrock:Retrieve
+                  - bedrock:RetrieveAndGenerate
+                  - bedrock:ApplyGuardrail
+                  - bedrock-agent-runtime:Retrieve
+                  - bedrock-agent-runtime:RetrieveAndGenerate
+                Resource: '*'
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject]
+                Resource:
+                  - !Sub '${UploadBucket.Arn}/*'
+                  - !Sub '${ShareBucket.Arn}/*'
+              - Effect: Allow
+                Action: [s3:ListBucket]
+                Resource:
+                  - !GetAtt UploadBucket.Arn
+                  - !GetAtt ShareBucket.Arn
+              - Effect: Allow
+                Action: [cases:*, profile:*, customer-profiles:*]
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - connect:StartChatContact
+                  - connect:StartOutboundVoiceContact
+                  - connect:StartWebRTCContact
+                  - connect:StopContact
+                  - connect:DescribeContact
+                  - connect:DescribePhoneNumber
+                  - connect:GetCurrentMetricData
+                  - connect:DescribeQueue
+                Resource: '*'
+              - Effect: Allow
+                Action: [lex:RecognizeText, lex:RecognizeUtterance]
+                Resource: '*'
+              - Effect: Allow
+                Action: [kms:GenerateDataKey, kms:Decrypt, kms:DescribeKey]
+                Resource: !GetAtt CustomerProfilesKey.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:Query, dynamodb:UpdateItem]
+                Resource: !GetAtt ContactLensCacheTable.Arn
+              - Effect: Allow
+                Action: [lambda:InvokeFunction]
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - kinesis:GetRecords
+                  - kinesis:GetShardIterator
+                  - kinesis:DescribeStream
+                  - kinesis:DescribeStreamSummary
+                  - kinesis:ListShards
+                  - kinesis:SubscribeToShard
+                Resource: !GetAtt ContactLensStream.Arn
+              - Effect: Allow
+                Action: [sqs:SendMessage]
+                Resource: !GetAtt ContactLensDlq.Arn
+
+  RagFulfilmentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-rag-${AWS::Region}'
+      CodeUri: lambdas/rag-fulfilment/
+      Handler: index.lambda_handler
+      Timeout: 25
+      MemorySize: 1024
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          KB_ID: !Ref KnowledgeBase
+          GUARDRAIL_ID: !Ref Guardrail
+          MODEL_ARN: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-lite-v1:0'
+          DDB_TABLE_NAME: !Ref ContactLensCacheTable
+          MULTI_INTENT_FN_NAME: !Ref MultiIntentFunction
+          CASES_DOMAIN_ID: !Ref CasesDomain
+
+  MultiIntentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-multi-intent-${AWS::Region}'
+      CodeUri: lambdas/multi-intent-decomposer/
+      Handler: index.lambda_handler
+      Timeout: 15
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment: { Variables: { MULTI_INTENT_MODEL_ID: !Ref GenerationModelId } }
+
+  MultiIntentLexInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt MultiIntentFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: lex.amazonaws.com
+      SourceArn: !Sub 'arn:aws:lex:${AWS::Region}:${AWS::AccountId}:bot-alias/*'
+
+  MultimodalDescribeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-multimodal-${AWS::Region}'
+      CodeUri: lambdas/multimodal-describe/
+      Handler: index.lambda_handler
+      Timeout: 30
+      MemorySize: 1024
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          MULTIMODAL_MODEL_ID: !Ref GenerationModelId
+          CASES_DOMAIN_ID: !Ref CasesDomain
+          CASES_TEMPLATE_ID: !GetAtt CasesTemplate.TemplateId
+          IMAGE_BUCKET: !Ref UploadBucket
+          PROFILES_DOMAIN: !Ref CustomerProfilesDomain
+          DDB_TABLE_NAME: !Ref ContactLensCacheTable
+
+  CompanionApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-companion-api-${AWS::Region}'
+      CodeUri: lambdas/companion-api/
+      Handler: index.lambda_handler
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          UPLOAD_BUCKET: !Ref UploadBucket
+          MULTIMODAL_LAMBDA_ARN: !GetAtt MultimodalDescribeFunction.Arn
+          MULTI_INTENT_LAMBDA_ARN: !GetAtt MultiIntentFunction.Arn
+          SHARE_PDF_LAMBDA_ARN: !GetAtt SharePdfFunction.Arn
+          CASES_DOMAIN_ID: !Ref CasesDomain
+          DDB_TABLE_NAME: !Ref ContactLensCacheTable
+          CONNECT_INSTANCE_ID: !Ref ConnectInstance
+          CONNECT_CONTACT_FLOW_ID: !Ref MainContactFlow
+          CASES_TEMPLATE_ID: !GetAtt CasesTemplate.TemplateId
+          PROFILES_DOMAIN: !Ref CustomerProfilesDomain
+          LEX_BOT_ID: !Ref LexBot
+          LEX_BOT_ALIAS_ID: !GetAtt LexBotAlias.BotAliasId
+          KB_ID: !Ref KnowledgeBase
+          GUARDRAIL_ID: !Ref Guardrail
+          GENERATION_MODEL_ARN: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${GenerationModelId}'
+          # Static CloudFront wildcard, the CDN-specific domain check happens in
+          # the Lambda via regex on request origin. Avoids a circular dependency
+          # between CompanionApiFunction -> Cdn -> CompanionApiFunctionUrl.
+          ALLOWED_ORIGIN_PATTERN: '^https:\/\/[a-z0-9]+\.cloudfront\.net$'
+      FunctionUrlConfig:
+        # AuthType: NONE because CloudFront OAC for Lambda Function URLs has a
+        # signing-mismatch bug on POST + body requests as of 2026-04. We rely on
+        # CloudFront's path-based routing + AWS WAF rate limiting + the Lambda's
+        # internal CORS check (ALLOWED_ORIGIN_PATTERN) for protection.
+        # No URL-level CORS: the Lambda handles OPTIONS preflights itself, so a
+        # forged origin gets a hard 403 instead of an auto-200 from the URL layer.
+        AuthType: NONE
+        InvokeMode: BUFFERED
+
+  ContactLensConsumerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-contact-lens-consumer-${AWS::Region}'
+      CodeUri: lambdas/contact-lens-consumer/
+      Handler: index.lambda_handler
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment: { Variables: { DDB_TABLE_NAME: !Ref ContactLensCacheTable, TTL_SECONDS: '1800' } }
+      Events:
+        ContactLensStream:
+          Type: Kinesis
+          Properties:
+            Stream: !GetAtt ContactLensStream.Arn
+            BatchSize: 100
+            MaximumBatchingWindowInSeconds: 1
+            StartingPosition: LATEST
+            MaximumRetryAttempts: 2
+            BisectBatchOnFunctionError: true
+            FunctionResponseTypes: [ReportBatchItemFailures]
+            DestinationConfig:
+              OnFailure: { Destination: !GetAtt ContactLensDlq.Arn }
+
+  PhoneFlowAssocFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-phone-flow-assoc-${AWS::Region}'
+      CodeUri: lambdas/phone-number-flow-association/
+      Handler: index.handler
+      Role: !GetAtt CustomResourceLambdaRole.Arn
+
+  SharePdfFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-share-pdf-${AWS::Region}'
+      CodeUri: lambdas/share-pdf-builder/
+      Handler: index.lambda_handler
+      MemorySize: 1024
+      Timeout: 60
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          DDB_TABLE_NAME: !Ref ContactLensCacheTable
+          SHARE_BUCKET: !Ref ShareBucket
+          SHARE_PRESIGN_TTL: '86400'
+          CASES_DOMAIN_ID: !Ref CasesDomain
+      # Uses fpdf2 (pure Python) bundled into the Lambda zip via requirements.txt.
+
+  DeployTimeVerificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-deploy-verify-${AWS::Region}'
+      CodeUri: lambdas/deploy-time-verification/
+      Handler: index.handler
+      Role: !GetAtt CustomResourceLambdaRole.Arn
+
+  SeedKbFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-seed-kb-${AWS::Region}'
+      CodeUri: lambdas/seed-kb/
+      Handler: index.handler
+      Timeout: 900
+      Role: !GetAtt CustomResourceLambdaRole.Arn
+
+  SeedKbInvocation:
+    Type: Custom::SeedKb
+    DependsOn: KnowledgeBaseDataSource
+    Properties:
+      ServiceToken: !GetAtt SeedKbFunction.Arn
+      KnowledgeBaseId: !Ref KnowledgeBase
+      DataSourceId: !GetAtt KnowledgeBaseDataSource.DataSourceId
+      KbSourceBucket: !Ref KbSourceBucket
+      # Forcing field: bumped via CorpusVersion parameter after `aws s3 sync` so
+      # CFN re-fires this custom resource and the seed Lambda re-ingests.
+      CorpusVersion: !Ref CorpusVersion
+
+  # ============================================================
+  # PHASE 7: Customer Profiles + ConnectCases
+  # ============================================================
+  # Connect-Customer Profiles binding is auto-discovery: when the
+  # CustomerProfiles::Domain exists in the same account+region as the Connect
+  # instance, the contact flow can call customer-profiles:SearchProfiles
+  # directly from Lambda. No explicit association resource is required (no
+  # IntegrationType: CUSTOMER_PROFILES exists on Connect::IntegrationAssociation).
+  # Phase 0.6 spike output: spikes/customer-profiles-wiring.md.
+  CustomerProfilesKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Customer-managed CMK for AI Contact Centre Customer Profiles domain
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - { Sid: AllowAccountRoot, Effect: Allow,
+              Principal: { AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root' },
+              Action: 'kms:*', Resource: '*' }
+          - { Sid: AllowCustomerProfiles, Effect: Allow,
+              Principal: { Service: profile.amazonaws.com },
+              Action: ['kms:Encrypt', 'kms:Decrypt', 'kms:GenerateDataKey*', 'kms:DescribeKey', 'kms:CreateGrant'],
+              Resource: '*' }
+
+  CustomerProfilesDomain:
+    Type: AWS::CustomerProfiles::Domain
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      DomainName: !Sub 'ndx-try-aicc-${AWS::AccountId}'
+      DefaultExpirationDays: 30
+      DefaultEncryptionKey: !GetAtt CustomerProfilesKey.Arn
+
+  # AWS::ConnectCases::* CFN types are not available in this region/account.
+  # Use a Custom resource Lambda that calls the connectcases API.
+  ConnectCasesResourcesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-cases-cr-${AWS::Region}'
+      CodeUri: lambdas/connect-cases-resources/
+      Handler: index.handler
+      Timeout: 60
+      Role: !GetAtt CustomResourceLambdaRole.Arn
+
+  CasesDomain:
+    Type: Custom::CasesDomain
+    DependsOn: CustomerProfilesDomain
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Domain
+      Name: !Sub 'ndx-try-aicc-${AWS::AccountId}'
+
+  CasesFieldPhone:
+    Type: Custom::CasesField
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Field
+      DomainId: !Ref CasesDomain
+      Name: customer_phone_number
+      Type: Text
+      Description: Caller's phone in E.164
+
+  CasesFieldAddress:
+    Type: Custom::CasesField
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Field
+      DomainId: !Ref CasesDomain
+      Name: address
+      Type: Text
+      Description: Address (placeholder-redacted)
+
+  CasesFieldIntentCategory:
+    Type: Custom::CasesField
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Field
+      DomainId: !Ref CasesDomain
+      Name: intent_category
+      Type: Text
+
+  CasesFieldIntents:
+    Type: Custom::CasesField
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Field
+      DomainId: !Ref CasesDomain
+      Name: intents
+      Type: Text
+
+  CasesFieldSafeguardingFlag:
+    Type: Custom::CasesField
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Field
+      DomainId: !Ref CasesDomain
+      Name: safeguarding_flag
+      Type: Boolean
+
+  CasesFieldMultimodalSummary:
+    Type: Custom::CasesField
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Field
+      DomainId: !Ref CasesDomain
+      Name: multimodal_summary
+      Type: Text
+
+  CasesFieldAttachmentsSummary:
+    Type: Custom::CasesField
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Field
+      DomainId: !Ref CasesDomain
+      Name: attachments_summary
+      Type: Text
+
+  CasesFieldSeverity:
+    Type: Custom::CasesField
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Field
+      DomainId: !Ref CasesDomain
+      Name: severity
+      Type: Text
+
+  CasesLayout:
+    Type: Custom::CasesLayout
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Layout
+      DomainId: !Ref CasesDomain
+      Name: aicc-default-layout
+      ContentJson: !Sub
+        - '{"basic":{"topPanel":{"sections":[{"fieldGroup":{"name":"header","fields":[{"id":"${PhoneId}"},{"id":"${IntentCatId}"},{"id":"${SgFlagId}"}]}}]},"moreInfo":{"sections":[{"fieldGroup":{"name":"details","fields":[{"id":"${AddressId}"},{"id":"${IntentsId}"},{"id":"${MultiSummaryId}"},{"id":"${SeverityId}"},{"id":"${AttachSumId}"}]}}]}}}'
+        - PhoneId:        !GetAtt CasesFieldPhone.FieldId
+          IntentCatId:    !GetAtt CasesFieldIntentCategory.FieldId
+          SgFlagId:       !GetAtt CasesFieldSafeguardingFlag.FieldId
+          AddressId:      !GetAtt CasesFieldAddress.FieldId
+          IntentsId:      !GetAtt CasesFieldIntents.FieldId
+          MultiSummaryId: !GetAtt CasesFieldMultimodalSummary.FieldId
+          SeverityId:     !GetAtt CasesFieldSeverity.FieldId
+          AttachSumId:    !GetAtt CasesFieldAttachmentsSummary.FieldId
+
+  CasesTemplate:
+    Type: Custom::CasesTemplate
+    Properties:
+      ServiceToken: !GetAtt ConnectCasesResourcesFunction.Arn
+      Kind: Template
+      DomainId: !Ref CasesDomain
+      Name: aicc-default-template
+      LayoutId: !GetAtt CasesLayout.LayoutId
+      RequiredFieldIds:
+        - !GetAtt CasesFieldPhone.FieldId
+
+  # ============================================================
+  # PHASE 8: IntegrationAssociations
+  # ============================================================
+  IaLexBot:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: [ConnectInstanceActiveWait, LexBotAlias]
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: LEX_BOT
+      IntegrationArn: !GetAtt LexBotAlias.Arn
+
+  IaRagFn:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: LAMBDA_FUNCTION
+      IntegrationArn: !GetAtt RagFulfilmentFunction.Arn
+
+  IaMultiIntentFn:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: LAMBDA_FUNCTION
+      IntegrationArn: !GetAtt MultiIntentFunction.Arn
+
+  IaMultimodalFn:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: LAMBDA_FUNCTION
+      IntegrationArn: !GetAtt MultimodalDescribeFunction.Arn
+
+  IaOutboundCallbackFn:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: LAMBDA_FUNCTION
+      IntegrationArn: !GetAtt OutboundCallbackFunction.Arn
+
+  IaLandlineCallbackFn:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: LAMBDA_FUNCTION
+      IntegrationArn: !GetAtt LandlineCallbackFunction.Arn
+
+  IaProfileBuilderTriggerFn:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: LAMBDA_FUNCTION
+      IntegrationArn: !GetAtt ProfileBuilderTriggerFunction.Arn
+
+  IaPhotoWatcherFn:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: LAMBDA_FUNCTION
+      IntegrationArn: !GetAtt PhotoWatcherFunction.Arn
+
+
+  IaCasesDomain:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: [ConnectInstanceActiveWait, CasesDomain]
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: CASES_DOMAIN
+      IntegrationArn: !GetAtt CasesDomain.DomainArn
+
+  CouncilWorkspaceApp:
+    Type: AWS::AppIntegrations::Application
+    Properties:
+      # Name pattern doesn't allow `:`; the colon-form lives in the agent UI
+      # title bar instead (rendered client-side from the council querystring).
+      Name: !Sub 'NDX-Try ${CouncilName}'
+      Description: !Sub 'Bespoke agent-workspace app branded for ${CouncilName} (NDX:Try demo)'
+      Namespace: !Sub 'ndxtry${AWS::AccountId}'
+      ApplicationSourceConfig:
+        ExternalUrlConfig:
+          AccessUrl: !Sub
+            - 'https://${Domain}/agent.html?council=${CouncilName}'
+            - Domain: !GetAtt Cdn.DomainName
+          ApprovedOrigins:
+            - !Sub
+              - 'https://${Domain}'
+              - Domain: !GetAtt Cdn.DomainName
+      Permissions:
+        - User.Details.View
+
+  IaCouncilWorkspaceApp:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: [ConnectInstanceActiveWait, CouncilWorkspaceApp]
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: APPLICATION
+      IntegrationArn: !GetAtt CouncilWorkspaceApp.ApplicationArn
+
+  # ============================================================
+  # PHASE 9: Contact flows
+  # ============================================================
+  MainContactFlow:
+    Type: AWS::Connect::ContactFlow
+    DependsOn: [IaLexBot, IaRagFn, IaMultiIntentFn, IaMultimodalFn, IaCasesDomain, IaOutboundCallbackFn, IaLandlineCallbackFn, IaProfileBuilderTriggerFn, IaPhotoWatcherFn, HoldMusicPromptLookup]
+    Properties:
+      InstanceArn: !GetAtt ConnectInstance.Arn
+      Name: ndx-try-aicc-main-flow
+      Type: CONTACT_FLOW
+      Content: !Sub
+        - |
+          {
+            "Version": "2019-10-30",
+            "StartAction": "Enable flow logging",
+          "Metadata": {
+            "entryPointPosition": { "x": 20, "y": 20 },
+            "ActionMetadata": {
+              "Enable flow logging": { "isFriendlyName": true, "position": { "x": 20, "y": 80 } },
+              "Enable call recording": { "isFriendlyName": true, "position": { "x": 340, "y": 80 } },
+              "Build customer profile async": { "isFriendlyName": true, "position": { "x": 660, "y": 80 } },
+              "Set en GB language": { "isFriendlyName": true, "position": { "x": 980, "y": 80 } },
+              "Set Amy en GB voice": { "isFriendlyName": true, "position": { "x": 1300, "y": 80 } },
+              "Greet and get intent via Lex": { "isFriendlyName": true, "position": { "x": 1620, "y": 80 } },
+              "Bedrock RAG fulfilment": { "isFriendlyName": true, "position": { "x": 1940, "y": 80 } },
+              "Should disconnect": { "isFriendlyName": true, "position": { "x": 2260, "y": 80 } },
+              "Awaiting photo upload": { "isFriendlyName": true, "position": { "x": 2580, "y": 80 } },
+              "Tell caller to use simulator": { "isFriendlyName": true, "position": { "x": 2580, "y": 280 } },
+              "Hold music poll 1 of 3": { "isFriendlyName": true, "position": { "x": 2580, "y": 480 } },
+              "Poll for photo 1 of 3": { "isFriendlyName": true, "position": { "x": 2580, "y": 680 } },
+              "Photo received 1 of 3": { "isFriendlyName": true, "position": { "x": 2580, "y": 880 } },
+              "Hold music poll 2 of 3": { "isFriendlyName": true, "position": { "x": 2580, "y": 1080 } },
+              "Poll for photo 2 of 3": { "isFriendlyName": true, "position": { "x": 2580, "y": 1280 } },
+              "Photo received 2 of 3": { "isFriendlyName": true, "position": { "x": 2580, "y": 1480 } },
+              "Hold music poll 3 of 3": { "isFriendlyName": true, "position": { "x": 2580, "y": 1680 } },
+              "Poll for photo 3 of 3": { "isFriendlyName": true, "position": { "x": 2580, "y": 1880 } },
+              "Photo received 3 of 3": { "isFriendlyName": true, "position": { "x": 2580, "y": 2080 } },
+              "Read back photo case": { "isFriendlyName": true, "position": { "x": 2580, "y": 2280 } },
+              "Photo timeout message": { "isFriendlyName": true, "position": { "x": 2900, "y": 2280 } },
+              "Safeguarding flag set": { "isFriendlyName": true, "position": { "x": 2900, "y": 80 } },
+              "Acknowledge urgent intent": { "isFriendlyName": true, "position": { "x": 2900, "y": 280 } },
+              "Set basic queue": { "isFriendlyName": true, "position": { "x": 2900, "y": 480 } },
+              "Any agent available": { "isFriendlyName": true, "position": { "x": 2900, "y": 680 } },
+              "Tell caller transferring": { "isFriendlyName": true, "position": { "x": 3220, "y": 680 } },
+              "Transfer to queue": { "isFriendlyName": true, "position": { "x": 3220, "y": 880 } },
+              "Needs landline fallback": { "isFriendlyName": true, "position": { "x": 2900, "y": 880 } },
+              "Ask for landline number": { "isFriendlyName": true, "position": { "x": 2900, "y": 1080 } },
+              "Trigger landline callback": { "isFriendlyName": true, "position": { "x": 2900, "y": 1280 } },
+              "Promise callback": { "isFriendlyName": true, "position": { "x": 3220, "y": 1080 } },
+              "Trigger outbound callback": { "isFriendlyName": true, "position": { "x": 3220, "y": 1280 } },
+              "Read back answer": { "isFriendlyName": true, "position": { "x": 3540, "y": 1280 } },
+              "Speak and re listen via Lex": { "isFriendlyName": true, "position": { "x": 3220, "y": 80 } },
+              "Fallback acknowledgement": { "isFriendlyName": true, "position": { "x": 1940, "y": 280 } },
+              "Goodbye message": { "isFriendlyName": true, "position": { "x": 3540, "y": 80 } },
+              "Disconnect": { "isFriendlyName": true, "position": { "x": 3860, "y": 80 } }
+            }
+          },
+            "Actions": [
+              {
+                "Identifier": "Enable flow logging",
+                "Type": "UpdateFlowLoggingBehavior",
+                "Parameters": { "FlowLoggingBehavior": "Enabled" },
+                "Transitions": { "NextAction": "Enable call recording" }
+              },
+              {
+                "Identifier": "Enable call recording",
+                "Type": "UpdateContactRecordingAndAnalyticsBehavior",
+                "Parameters": {
+                  "VoiceBehavior": {
+                    "VoiceRecordingBehavior": {
+                      "RecordedParticipants": ["Customer", "Agent"],
+                      "IVRRecordingBehavior": "Enabled"
+                    },
+                    "VoiceAnalyticsBehavior": {
+                      "Enabled": "True",
+                      "AnalyticsLanguage": "en-GB",
+                      "ConversationalAnalyticsRedactionConfiguration": {
+                        "Enabled": "True",
+                        "RedactionResults": "RedactedAndOriginal",
+                        "RedactionMaskMode": "EntityType"
+                      },
+                      "AnalyticsModes": ["RealTime"]
+                    }
+                  }
+                },
+                "Transitions": {
+                  "NextAction": "Build customer profile async",
+                  "Errors": [
+                    { "ErrorType": "NoMatchingError", "NextAction": "Build customer profile async" },
+                    { "ErrorType": "ChannelMismatch", "NextAction": "Build customer profile async" }
+                  ]
+                }
+              },
+              {
+                "Identifier": "Build customer profile async",
+                "Type": "InvokeLambdaFunction",
+                "Parameters": {
+                  "LambdaFunctionARN": "${ProfileBuilderTriggerArn}",
+                  "InvocationTimeLimitSeconds": "5"
+                },
+                "Transitions": {
+                  "NextAction": "Set en GB language",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Set en GB language" }]
+                }
+              },
+              {
+                "Identifier": "Set en GB language",
+                "Type": "UpdateContactAttributes",
+                "Parameters": {
+                  "Attributes": { "LanguageCode": "en_US" },
+                  "TargetContact": "Current"
+                },
+                "Transitions": {
+                  "NextAction": "Set Amy en GB voice",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Set Amy en GB voice" }]
+                }
+              },
+              {
+                "Identifier": "Set Amy en GB voice",
+                "Type": "UpdateContactTextToSpeechVoice",
+                "Parameters": { "TextToSpeechEngine": "neural", "TextToSpeechVoice": "Amy" },
+                "Transitions": {
+                  "NextAction": "Greet and get intent via Lex",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Greet and get intent via Lex" }]
+                }
+              },
+              {
+                "Identifier": "Greet and get intent via Lex",
+                "Type": "ConnectParticipantWithLexBot",
+                "Parameters": {
+                  "Text": "Hello, you've reached Aldershire District Council. This is an NDX:Try session. What can I help with?",
+                  "LexV2Bot": { "AliasArn": "${LexBotAliasArn}" }
+                },
+                "Transitions": {
+                  "NextAction": "Bedrock RAG fulfilment",
+                  "Errors": [
+                    { "ErrorType": "NoMatchingError", "NextAction": "Bedrock RAG fulfilment" },
+                    { "ErrorType": "NoMatchingCondition", "NextAction": "Bedrock RAG fulfilment" }
+                  ]
+                }
+              },
+              {
+                "Identifier": "Bedrock RAG fulfilment",
+                "Type": "InvokeLambdaFunction",
+                "Parameters": {
+                  "LambdaFunctionARN": "${RagArn}",
+                  "InvocationTimeLimitSeconds": "8",
+                  "LambdaInvocationAttributes": {
+                    "user_utterance": "$.Lex.SessionAttributes.lex_input_transcript",
+                    "matched_intent": "$.Lex.IntentName",
+                    "decomposed_json": "$.Lex.SessionAttributes.decomposed_intents_json",
+                    "safeguarding": "$.Lex.SessionAttributes.safeguarding_flag"
+                  }
+                },
+                "Transitions": {
+                  "NextAction": "Should disconnect",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Fallback acknowledgement" }]
+                }
+              },
+              {
+                "Identifier": "Should disconnect",
+                "Type": "Compare",
+                "Parameters": { "ComparisonValue": "$.External.should_disconnect" },
+                "Transitions": {
+                  "NextAction": "Awaiting photo upload",
+                  "Conditions": [
+                    {
+                      "NextAction": "Read back answer",
+                      "Condition": { "Operator": "Equals", "Operands": ["true"] }
+                    }
+                  ],
+                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Awaiting photo upload" }]
+                }
+              },
+              {
+                "Identifier": "Awaiting photo upload",
+                "Type": "Compare",
+                "Parameters": { "ComparisonValue": "$.External.awaits_photo" },
+                "Transitions": {
+                  "NextAction": "Safeguarding flag set",
+                  "Conditions": [
+                    {
+                      "NextAction": "Tell caller to use simulator",
+                      "Condition": { "Operator": "Equals", "Operands": ["true"] }
+                    }
+                  ],
+                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Safeguarding flag set" }]
+                }
+              },
+              {
+                "Identifier": "Tell caller to use simulator",
+                "Type": "MessageParticipant",
+                "Parameters": { "Text": "$.External.answer" },
+                "Transitions": { "NextAction": "Hold music poll 1 of 3" }
+              },
+              {
+                "Identifier": "Hold music poll 1 of 3",
+                "Type": "MessageParticipant",
+                "Parameters": { "PromptId": "${HoldMusicPromptArn}" },
+                "Transitions": {
+                  "NextAction": "Poll for photo 1 of 3",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Poll for photo 1 of 3" }]
+                }
+              },
+              {
+                "Identifier": "Poll for photo 1 of 3",
+                "Type": "InvokeLambdaFunction",
+                "Parameters": {
+                  "LambdaFunctionARN": "${PhotoWatcherArn}",
+                  "InvocationTimeLimitSeconds": "8",
+                  "LambdaInvocationAttributes": {
+                    "customer_phone": "$.CustomerEndpoint.Address"
+                  }
+                },
+                "Transitions": {
+                  "NextAction": "Photo received 1 of 3",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Hold music poll 2 of 3" }]
+                }
+              },
+              {
+                "Identifier": "Photo received 1 of 3",
+                "Type": "Compare",
+                "Parameters": { "ComparisonValue": "$.External.found" },
+                "Transitions": {
+                  "NextAction": "Hold music poll 2 of 3",
+                  "Conditions": [
+                    {
+                      "NextAction": "Read back photo case",
+                      "Condition": { "Operator": "Equals", "Operands": ["true"] }
+                    }
+                  ],
+                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Hold music poll 2 of 3" }]
+                }
+              },
+              {
+                "Identifier": "Hold music poll 2 of 3",
+                "Type": "MessageParticipant",
+                "Parameters": { "PromptId": "${HoldMusicPromptArn}" },
+                "Transitions": {
+                  "NextAction": "Poll for photo 2 of 3",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Poll for photo 2 of 3" }]
+                }
+              },
+              {
+                "Identifier": "Poll for photo 2 of 3",
+                "Type": "InvokeLambdaFunction",
+                "Parameters": {
+                  "LambdaFunctionARN": "${PhotoWatcherArn}",
+                  "InvocationTimeLimitSeconds": "8",
+                  "LambdaInvocationAttributes": {
+                    "customer_phone": "$.CustomerEndpoint.Address"
+                  }
+                },
+                "Transitions": {
+                  "NextAction": "Photo received 2 of 3",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Hold music poll 3 of 3" }]
+                }
+              },
+              {
+                "Identifier": "Photo received 2 of 3",
+                "Type": "Compare",
+                "Parameters": { "ComparisonValue": "$.External.found" },
+                "Transitions": {
+                  "NextAction": "Hold music poll 3 of 3",
+                  "Conditions": [
+                    {
+                      "NextAction": "Read back photo case",
+                      "Condition": { "Operator": "Equals", "Operands": ["true"] }
+                    }
+                  ],
+                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Hold music poll 3 of 3" }]
+                }
+              },
+              {
+                "Identifier": "Hold music poll 3 of 3",
+                "Type": "MessageParticipant",
+                "Parameters": { "PromptId": "${HoldMusicPromptArn}" },
+                "Transitions": {
+                  "NextAction": "Poll for photo 3 of 3",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Poll for photo 3 of 3" }]
+                }
+              },
+              {
+                "Identifier": "Poll for photo 3 of 3",
+                "Type": "InvokeLambdaFunction",
+                "Parameters": {
+                  "LambdaFunctionARN": "${PhotoWatcherArn}",
+                  "InvocationTimeLimitSeconds": "8",
+                  "LambdaInvocationAttributes": {
+                    "customer_phone": "$.CustomerEndpoint.Address"
+                  }
+                },
+                "Transitions": {
+                  "NextAction": "Photo received 3 of 3",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Photo timeout message" }]
+                }
+              },
+              {
+                "Identifier": "Photo received 3 of 3",
+                "Type": "Compare",
+                "Parameters": { "ComparisonValue": "$.External.found" },
+                "Transitions": {
+                  "NextAction": "Photo timeout message",
+                  "Conditions": [
+                    {
+                      "NextAction": "Read back photo case",
+                      "Condition": { "Operator": "Equals", "Operands": ["true"] }
+                    }
+                  ],
+                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Photo timeout message" }]
+                }
+              },
+              {
+                "Identifier": "Read back photo case",
+                "Type": "MessageParticipant",
+                "Parameters": { "Text": "$.External.acknowledgement" },
+                "Transitions": { "NextAction": "Goodbye message" }
+              },
+              {
+                "Identifier": "Photo timeout message",
+                "Type": "MessageParticipant",
+                "Parameters": { "Text": "I haven't received a photo yet. If you send one through the simulator later, I'll attach it to a case and a colleague will follow up. Thanks for calling." },
+                "Transitions": { "NextAction": "Disconnect" }
+              },
+              {
+                "Identifier": "Safeguarding flag set",
+                "Type": "Compare",
+                "Parameters": { "ComparisonValue": "$.External.safeguarding" },
+                "Transitions": {
+                  "NextAction": "Speak and re listen via Lex",
+                  "Conditions": [
+                    {
+                      "NextAction": "Acknowledge urgent intent",
+                      "Condition": { "Operator": "Equals", "Operands": ["true"] }
+                    }
+                  ],
+                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Speak and re listen via Lex" }]
+                }
+              },
+              {
+                "Identifier": "Acknowledge urgent intent",
+                "Type": "MessageParticipant",
+                "Parameters": { "Text": "$.External.answer" },
+                "Transitions": { "NextAction": "Set basic queue" }
+              },
+              {
+                "Identifier": "Set basic queue",
+                "Type": "UpdateContactTargetQueue",
+                "Parameters": { "QueueId": "${BasicQueueArn}" },
+                "Transitions": {
+                  "NextAction": "Any agent available",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Needs landline fallback" }]
+                }
+              },
+              {
+                "Identifier": "Any agent available",
+                "Type": "CheckMetricData",
+                "Parameters": { "MetricType": "NumberOfAgentsAvailable" },
+                "Transitions": {
+                  "NextAction": "Needs landline fallback",
+                  "Conditions": [
+                    {
+                      "NextAction": "Tell caller transferring",
+                      "Condition": { "Operator": "NumberGreaterThan", "Operands": ["0"] }
+                    }
+                  ],
+                  "Errors": [
+                    { "ErrorType": "NoMatchingError", "NextAction": "Needs landline fallback" },
+                    { "ErrorType": "NoMatchingCondition", "NextAction": "Needs landline fallback" }
+                  ]
+                }
+              },
+              {
+                "Identifier": "Tell caller transferring",
+                "Type": "MessageParticipant",
+                "Parameters": { "Text": "Connecting you to a council officer now." },
+                "Transitions": { "NextAction": "Transfer to queue" }
+              },
+              {
+                "Identifier": "Transfer to queue",
+                "Type": "TransferContactToQueue",
+                "Parameters": {},
+                "Transitions": {
+                  "NextAction": "Disconnect",
+                  "Errors": [
+                    { "ErrorType": "NoMatchingError", "NextAction": "Needs landline fallback" },
+                    { "ErrorType": "QueueAtCapacity", "NextAction": "Needs landline fallback" }
+                  ]
+                }
+              },
+              {
+                "Identifier": "Needs landline fallback",
+                "Type": "Compare",
+                "Parameters": { "ComparisonValue": "$.External.needs_landline" },
+                "Transitions": {
+                  "NextAction": "Promise callback",
+                  "Conditions": [
+                    {
+                      "NextAction": "Ask for landline number",
+                      "Condition": { "Operator": "Equals", "Operands": ["true"] }
+                    }
+                  ],
+                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Promise callback" }]
+                }
+              },
+              {
+                "Identifier": "Ask for landline number",
+                "Type": "ConnectParticipantWithLexBot",
+                "Parameters": {
+                  "Text": "We're temporarily unable to call mobile phones back. What's a landline number we can ring you on instead?",
+                  "LexV2Bot": { "AliasArn": "${LexBotAliasArn}" }
+                },
+                "Transitions": {
+                  "NextAction": "Trigger landline callback",
+                  "Errors": [
+                    { "ErrorType": "NoMatchingError", "NextAction": "Read back answer" },
+                    { "ErrorType": "NoMatchingCondition", "NextAction": "Trigger landline callback" }
+                  ]
+                }
+              },
+              {
+                "Identifier": "Trigger landline callback",
+                "Type": "InvokeLambdaFunction",
+                "Parameters": {
+                  "LambdaFunctionARN": "${LandlineCallbackArn}",
+                  "InvocationTimeLimitSeconds": "8",
+                  "LambdaInvocationAttributes": {
+                    "user_utterance": "$.Lex.SessionAttributes.lex_input_transcript"
+                  }
+                },
+                "Transitions": {
+                  "NextAction": "Read back answer",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Read back answer" }]
+                }
+              },
+              {
+                "Identifier": "Promise callback",
+                "Type": "MessageParticipant",
+                "Parameters": { "Text": "A safeguarding-trained colleague will call you back on this number within the next four hours." },
+                "Transitions": { "NextAction": "Trigger outbound callback" }
+              },
+              {
+                "Identifier": "Trigger outbound callback",
+                "Type": "InvokeLambdaFunction",
+                "Parameters": {
+                  "LambdaFunctionARN": "${OutboundCallbackArn}",
+                  "InvocationTimeLimitSeconds": "3"
+                },
+                "Transitions": {
+                  "NextAction": "Disconnect",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Disconnect" }]
+                }
+              },
+              {
+                "Identifier": "Read back answer",
+                "Type": "MessageParticipant",
+                "Parameters": { "Text": "$.External.answer" },
+                "Transitions": { "NextAction": "Disconnect" }
+              },
+              {
+                "Identifier": "Speak and re listen via Lex",
+                "Type": "ConnectParticipantWithLexBot",
+                "Parameters": {
+                  "Text": "$.External.prompt",
+                  "LexV2Bot": { "AliasArn": "${LexBotAliasArn}" }
+                },
+                "Transitions": {
+                  "NextAction": "Bedrock RAG fulfilment",
+                  "Conditions": [
+                    {
+                      "NextAction": "Goodbye message",
+                      "Condition": {
+                        "Operator": "Equals",
+                        "Operands": ["GoodbyeIntent"]
+                      }
+                    }
+                  ],
+                  "Errors": [
+                    { "ErrorType": "NoMatchingError", "NextAction": "Goodbye message" },
+                    { "ErrorType": "NoMatchingCondition", "NextAction": "Bedrock RAG fulfilment" }
+                  ]
+                }
+              },
+              {
+                "Identifier": "Fallback acknowledgement",
+                "Type": "MessageParticipant",
+                "Parameters": { "Text": "Thank you. I have logged your enquiry and a council officer will be in touch within two working days." },
+                "Transitions": { "NextAction": "Goodbye message" }
+              },
+              {
+                "Identifier": "Goodbye message",
+                "Type": "MessageParticipant",
+                "Parameters": { "Text": "Thanks for calling Aldershire District Council. Goodbye." },
+                "Transitions": { "NextAction": "Disconnect" }
+              },
+              {
+                "Identifier": "Disconnect",
+                "Type": "DisconnectParticipant",
+                "Parameters": {},
+                "Transitions": {}
+              }
+            ]
+          }
+        - LexBotAliasArn: !GetAtt LexBotAlias.Arn
+          RagArn: !GetAtt RagFulfilmentFunction.Arn
+          OutboundCallbackArn: !GetAtt OutboundCallbackFunction.Arn
+          LandlineCallbackArn: !GetAtt LandlineCallbackFunction.Arn
+          BasicQueueArn: !Sub
+            - 'arn:aws:connect:${AWS::Region}:${AWS::AccountId}:instance/${InstanceGuid}/queue/6c5c3ee4-e30b-4d0f-8fa5-0eb4e23ce62a'
+            - InstanceGuid: !Select [1, !Split ['/', !GetAtt ConnectInstance.Arn]]
+          ProfileBuilderTriggerArn: !GetAtt ProfileBuilderTriggerFunction.Arn
+          PhotoWatcherArn: !GetAtt PhotoWatcherFunction.Arn
+          HoldMusicPromptArn: !GetAtt HoldMusicPromptLookup.Arn
+
+  DisconnectContactFlow:
+    Type: AWS::Connect::ContactFlow
+    Properties:
+      InstanceArn: !GetAtt ConnectInstance.Arn
+      Name: ndx-try-aicc-disconnect-flow
+      Type: CONTACT_FLOW
+      Content: |
+        {
+          "Version": "2019-10-30",
+          "StartAction": "Apologise for fault",
+        "Metadata": {
+          "entryPointPosition": { "x": 20, "y": 20 },
+          "ActionMetadata": {
+            "Apologise for fault": { "isFriendlyName": true, "position": { "x": 20, "y": 80 } },
+            "Disconnect on error": { "isFriendlyName": true, "position": { "x": 340, "y": 80 } }
+          }
+        },
+          "Actions": [
+            {
+              "Identifier": "Apologise for fault",
+              "Type": "MessageParticipant",
+              "Parameters": { "Text": "Sorry, something has gone wrong. Goodbye." },
+              "Transitions": { "NextAction": "Disconnect on error" }
+            },
+            {
+              "Identifier": "Disconnect on error",
+              "Type": "DisconnectParticipant",
+              "Parameters": {},
+              "Transitions": {}
+            }
+          ]
+        }
+
+  CallbackSimulationFlow:
+    Type: AWS::Connect::ContactFlow
+    Properties:
+      InstanceArn: !GetAtt ConnectInstance.Arn
+      Name: ndx-try-aicc-callback-simulation
+      Type: CONTACT_FLOW
+      Content: |
+        {
+          "Version": "2019-10-30",
+          "StartAction": "Set Amy en GB voice",
+        "Metadata": {
+          "entryPointPosition": { "x": 20, "y": 20 },
+          "ActionMetadata": {
+            "Set Amy en GB voice": { "isFriendlyName": true, "position": { "x": 20, "y": 80 } },
+            "Speak callback message": { "isFriendlyName": true, "position": { "x": 340, "y": 80 } },
+            "Disconnect": { "isFriendlyName": true, "position": { "x": 660, "y": 80 } }
+          }
+        },
+          "Actions": [
+            {
+              "Identifier": "Set Amy en GB voice",
+              "Type": "UpdateContactTextToSpeechVoice",
+              "Parameters": { "TextToSpeechEngine": "neural", "TextToSpeechVoice": "Amy" },
+              "Transitions": { "NextAction": "Speak callback message", "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Speak callback message" }] }
+            },
+            {
+              "Identifier": "Speak callback message",
+              "Type": "MessageParticipant",
+              "Parameters": { "Text": "Hello, this is Aldershire District Council calling you back. This is a simulation of what a callback from a real human could be like. If you log into the agent workspace, you can accept these calls there. Thanks for using NDX:Try. Goodbye." },
+              "Transitions": { "NextAction": "Disconnect" }
+            },
+            {
+              "Identifier": "Disconnect",
+              "Type": "DisconnectParticipant",
+              "Parameters": {},
+              "Transitions": {}
+            }
+          ]
+        }
+
+  PhotoWatcherFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-photo-watcher-${AWS::Region}'
+      CodeUri: lambdas/photo-watcher/
+      Handler: index.lambda_handler
+      # Long-poll: holds the line while caller uses the simulator. Contact-flow
+      # InvokeLambda action caps at 8s per call so we set Lambda timeout slightly
+      # above that to allow internal poll loops + Connect-side retries.
+      Timeout: 9
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          DDB_TABLE_NAME: !Ref ContactLensCacheTable
+
+  OutboundCallbackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-outbound-callback-${AWS::Region}'
+      CodeUri: lambdas/outbound-callback/
+      Handler: index.lambda_handler
+      Timeout: 15
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          INSTANCE_ID: !Ref ConnectInstance
+          CALLBACK_FLOW_ID: !Ref CallbackSimulationFlow
+          SOURCE_PHONE_NUMBER: !GetAtt GeoNumber.Address
+
+  LandlineCallbackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-landline-callback-${AWS::Region}'
+      CodeUri: lambdas/landline-callback/
+      Handler: index.lambda_handler
+      Timeout: 15
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          OUTBOUND_FN_NAME: !Ref OutboundCallbackFunction
+
+  ProfileBuilderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-profile-builder-${AWS::Region}'
+      CodeUri: lambdas/profile-builder/
+      Handler: index.lambda_handler
+      Timeout: 90
+      MemorySize: 1024
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          CUSTOMER_PROFILES_DOMAIN: !Ref CustomerProfilesDomain
+          PROFILE_MODEL_ID: !Ref GenerationModelId
+          CASES_DOMAIN_ID: !Ref CasesDomain
+          CASES_TEMPLATE_ID: !Ref CasesTemplate
+
+  ProfileBuilderTriggerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-profile-trigger-${AWS::Region}'
+      CodeUri: lambdas/profile-builder-trigger/
+      Handler: index.lambda_handler
+      Timeout: 6
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          CUSTOMER_PROFILES_DOMAIN: !Ref CustomerProfilesDomain
+          PROFILE_BUILDER_FN: !Ref ProfileBuilderFunction
+
+  # ============================================================
+  # PHASE 12: Q in Connect (Wisdom) Assistant + KB
+  # ============================================================
+  WisdomAssistant:
+    Type: AWS::Wisdom::Assistant
+    Properties:
+      Name: !Sub 'ndx-try-aicc-assistant-${AWS::Region}'
+      Type: AGENT
+      Description: Aldershire DC AI agent assist (Q in Connect)
+
+  WisdomKnowledgeBase:
+    Type: AWS::Wisdom::KnowledgeBase
+    Properties:
+      Name: !Sub 'ndx-try-aicc-qkb-${AWS::Region}'
+      KnowledgeBaseType: CUSTOM
+      Description: Aldershire DC service docs for live agent suggestions
+
+  WisdomAssistantAssociation:
+    Type: AWS::Wisdom::AssistantAssociation
+    Properties:
+      AssistantId: !GetAtt WisdomAssistant.AssistantId
+      AssociationType: KNOWLEDGE_BASE
+      Association:
+        KnowledgeBaseId: !GetAtt WisdomKnowledgeBase.KnowledgeBaseId
+
+  WisdomAnswerAgent:
+    Type: AWS::Wisdom::AIAgent
+    DependsOn: WisdomAssistantAssociation
+    Properties:
+      AssistantId: !GetAtt WisdomAssistant.AssistantId
+      Name: !Sub 'ndx-try-aicc-answer-agent-${AWS::Region}'
+      Type: ANSWER_RECOMMENDATION
+      Description: Answer generation agent over the Aldershire DC KB
+      Configuration:
+        AnswerRecommendationAIAgentConfiguration:
+          AssociationConfigurations:
+            - AssociationType: KNOWLEDGE_BASE
+              AssociationId: !GetAtt WisdomKnowledgeBase.KnowledgeBaseId
+
+  IaWisdomAssistant:
+    Type: Custom::ConnectBootstrap
+    DependsOn: [ConnectInstanceActiveWait, WisdomAssistant, ConnectBootstrapFunction]
+    Properties:
+      ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
+      Action: ConnectIntegrationAssociation
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: WISDOM_ASSISTANT
+      IntegrationArn: !GetAtt WisdomAssistant.AssistantArn
+
+  IaWisdomKnowledgeBase:
+    Type: Custom::ConnectBootstrap
+    DependsOn: [ConnectInstanceActiveWait, WisdomKnowledgeBase, ConnectBootstrapFunction]
+    Properties:
+      ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
+      Action: ConnectIntegrationAssociation
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: WISDOM_KNOWLEDGE_BASE
+      IntegrationArn: !GetAtt WisdomKnowledgeBase.KnowledgeBaseArn
+
+  # ============================================================
+  # PHASE 13: Connect / Wisdom / CP bootstrap (custom resources)
+  # ============================================================
+  ConnectBootstrapFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-connect-bootstrap-${AWS::Region}'
+      CodeUri: lambdas/connect-bootstrap/
+      Handler: index.handler
+      Timeout: 600
+      MemorySize: 512
+      Role: !GetAtt CustomResourceLambdaRole.Arn
+
+  AgentSecurityProfilePermissions:
+    Type: Custom::ConnectBootstrap
+    DependsOn: [ConnectInstanceActiveWait, IaWisdomAssistant, IaWisdomKnowledgeBase, IaCustomerProfilesIntegration, IaCouncilWorkspaceApp]
+    Properties:
+      ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
+      Action: AgentSecurityProfilePermissions
+      InstanceId: !Ref ConnectInstance
+      SecurityProfileName: Agent
+      Permissions:
+        - BasicAgentAccess
+        - OutboundCallAccess
+        - OutboundEmail.Create
+        - CustomerProfiles.View
+        - CustomerProfiles.Edit
+        - Cases.View
+        - Cases.Create
+        - Cases.Edit
+        - Wisdom.View
+        - ContentManagement.View
+        - QConnectAIAgents.View
+        - QConnectAIPrompts.View
+      # Application-level permissions on a security profile use a different
+      # permission vocabulary than the Application's own declared Permissions.
+      # IntegrationAssociation alone exposes the app in the agent workspace
+      # for users with BasicAgentAccess, which is sufficient for this demo.
+
+  HoldMusicPromptLookup:
+    Type: Custom::ConnectBootstrap
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
+      Action: LookupPrompt
+      InstanceId: !Ref ConnectInstance
+      # AWS auto-creates this on every fresh Connect instance (queue music).
+      PromptName: CustomerQueue.wav
+
+  CustomerProfilesNoInferredObjectType:
+    Type: Custom::ConnectBootstrap
+    DependsOn: [CustomerProfilesDomain, ConnectBootstrapFunction]
+    Properties:
+      ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
+      Action: CustomerProfilesObjectType
+      DomainName: !Ref CustomerProfilesDomain
+      TemplateId: CTR-NoInferred
+      ObjectTypeName: CTRNoInferred
+
+  IaCustomerProfilesIntegration:
+    Type: Custom::ConnectBootstrap
+    DependsOn: [ConnectInstanceActiveWait, CustomerProfilesDomain]
+    Properties:
+      ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
+      Action: CustomerProfilesPutIntegration
+      DomainName: !Ref CustomerProfilesDomain
+      InstanceArn: !GetAtt ConnectInstance.Arn
+      # The CCP / Agent Workspace Customer Profiles widget specifically requires
+      # ObjectTypeName=CTR — anything else surfaces "feature hasn't been set up
+      # for your organization" in the agent UI. Duplicate-prevention happens in
+      # ProfileBuilder Lambda's _upsert_profile: it search_profiles by _phone
+      # first, then updates the existing one rather than creating a second.
+      # CTR fires post-call so by then the rich profile already exists.
+      ObjectTypeName: CTR
+
+  WisdomContentUploader:
+    Type: Custom::ConnectBootstrap
+    DependsOn: [WisdomKnowledgeBase, KbSourceBucket]
+    Properties:
+      ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
+      Action: WisdomContentUpload
+      KnowledgeBaseId: !GetAtt WisdomKnowledgeBase.KnowledgeBaseId
+      SourceBucket: !Ref KbSourceBucket
+      SourcePrefix: ''
+      # CorpusVersion is a forcing field: bump it after every `aws s3 sync documents/`
+      # so this custom resource re-fires and the Lambda picks up new docs.
+      CorpusVersion: !Ref CorpusVersion
+
+  WisdomDefaultAnswerAgent:
+    Type: Custom::ConnectBootstrap
+    DependsOn: [WisdomAnswerAgent, ConnectBootstrapFunction]
+    Properties:
+      ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
+      Action: WisdomDefaultAIAgent
+      AssistantId: !GetAtt WisdomAssistant.AssistantId
+      AIAgentId: !GetAtt WisdomAnswerAgent.AIAgentId
+      AIAgentType: ANSWER_RECOMMENDATION
+
+  GeoFlowAssoc:
+    Type: Custom::PhoneFlowAssoc
+    DependsOn: [GeoNumber, MainContactFlow]
+    Properties:
+      ServiceToken: !GetAtt PhoneFlowAssocFunction.Arn
+      PhoneNumberId: !Ref GeoNumber
+      InstanceId: !Ref ConnectInstance
+      ContactFlowId: !Ref MainContactFlow
+
+  # ============================================================
+  # PHASE 10: Contact Lens streaming
+  # ============================================================
+  ContactLensStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub 'ndx-try-aicc-cl-${AWS::Region}'
+      ShardCount: 1
+      RetentionPeriodHours: 24
+      StreamEncryption:
+        EncryptionType: KMS
+        KeyId: alias/aws/kinesis
+
+  ContactLensDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub 'ndx-try-aicc-cl-dlq-${AWS::Region}'
+      MessageRetentionPeriod: 1209600
+      KmsMasterKeyId: alias/aws/sqs
+
+  ContactLensDlqAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'ndx-try-aicc-cl-dlq-depth-${AWS::Region}'
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 3
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - { Name: QueueName, Value: !GetAtt ContactLensDlq.QueueName }
+      TreatMissingData: notBreaching
+
+  # AWS::Connect::InstanceStorageConfig.ResourceType doesn't include
+  # REAL_TIME_CONTACT_ANALYSIS_SEGMENTS in CFN (the connect API supports it).
+  # Use a custom resource that calls AssociateInstanceStorageConfig directly.
+  ConnectStorageConfigFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-storage-cr-${AWS::Region}'
+      CodeUri: lambdas/connect-storage-config/
+      Handler: index.handler
+      Timeout: 60
+      Role: !GetAtt CustomResourceLambdaRole.Arn
+
+  ConnectKinesisStreamConfig:
+    Type: Custom::ConnectStorageConfig
+    DependsOn: [ConnectInstanceActiveWait, ContactLensStream]
+    Properties:
+      ServiceToken: !GetAtt ConnectStorageConfigFunction.Arn
+      InstanceId: !Ref ConnectInstance
+      ResourceType: REAL_TIME_CONTACT_ANALYSIS_SEGMENTS
+      StorageConfig:
+        StorageType: KINESIS_STREAM
+        KinesisStreamConfig: { StreamArn: !GetAtt ContactLensStream.Arn }
+
+  RecordingsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-try-aicc-recordings-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 } }]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - { Id: ExpireRecordings, Status: Enabled, ExpirationInDays: 7 }
+
+  RecordingsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref RecordingsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowConnectServicePut
+            Effect: Allow
+            Principal: { Service: connect.amazonaws.com }
+            Action: [s3:PutObject, s3:PutObjectAcl, s3:GetBucketLocation]
+            Resource:
+              - !Sub '${RecordingsBucket.Arn}/*'
+              - !GetAtt RecordingsBucket.Arn
+            Condition:
+              StringEquals: { 'aws:SourceAccount': !Ref 'AWS::AccountId' }
+              ArnEquals: { 'aws:SourceArn': !GetAtt ConnectInstance.Arn }
+
+  ConnectCallRecordingStorage:
+    Type: AWS::Connect::InstanceStorageConfig
+    DependsOn: [ConnectInstanceActiveWait, RecordingsBucket, RecordingsBucketPolicy]
+    Properties:
+      InstanceArn: !GetAtt ConnectInstance.Arn
+      ResourceType: CALL_RECORDINGS
+      StorageType: S3
+      S3Config:
+        BucketName: !Ref RecordingsBucket
+        BucketPrefix: recordings
+
+  ContactLensCacheTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'ndx-try-aicc-contact-lens-cache-${AWS::Region}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: contactId,        AttributeType: S }
+        - { AttributeName: segmentTimestamp, AttributeType: N }
+      KeySchema:
+        - { AttributeName: contactId,        KeyType: HASH }
+        - { AttributeName: segmentTimestamp, KeyType: RANGE }
+      TimeToLiveSpecification: { AttributeName: ttl, Enabled: true }
+      SSESpecification: { SSEEnabled: true }
+
+  # ============================================================
+  # PHASE 11: Companion UI hosting + WAF
+  # ============================================================
+  SpaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-try-aicc-spa-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 } }]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-try-aicc-uploads-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 } }]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - { Id: ExpireUploads, Status: Enabled, ExpirationInDays: 1, Prefix: uploads/ }
+      CorsConfiguration:
+        CorsRules:
+          # AllowedOrigins is static (CloudFront wildcard) to avoid circular
+          # dependency on Cdn. The Companion API Lambda re-validates the origin
+          # at runtime against the same CloudFront pattern.
+          - AllowedHeaders: ["*"]
+            AllowedMethods: [GET, PUT]
+            AllowedOrigins: ["https://*.cloudfront.net"]
+            ExposedHeaders: [ETag]
+            MaxAge: 3000
+
+  ShareBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'ndx-try-aicc-share-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 } }]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - { Id: ExpireSharePdfs, Status: Enabled, ExpirationInDays: 1, Prefix: share-pdfs/ }
+
+  Oac:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub 'ndx-try-aicc-oac-${AWS::AccountId}'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  OacFunctionUrl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub 'ndx-try-aicc-oac-fn-${AWS::AccountId}'
+        OriginAccessControlOriginType: lambda
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  WebAcl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub 'ndx-try-aicc-waf-${AWS::AccountId}'
+      Scope: CLOUDFRONT
+      DefaultAction: { Allow: {} }
+      VisibilityConfig: { CloudWatchMetricsEnabled: true, MetricName: aicc-acl, SampledRequestsEnabled: true }
+      Rules:
+        - Name: AWS-AWSManagedRulesCommonRuleSet
+          Priority: 0
+          OverrideAction: { None: {} }
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          VisibilityConfig: { CloudWatchMetricsEnabled: true, MetricName: aicc-common, SampledRequestsEnabled: true }
+        - Name: RateLimit
+          Priority: 1
+          Action: { Block: {} }
+          Statement:
+            RateBasedStatement:
+              Limit: 1000
+              EvaluationWindowSec: 300
+              AggregateKeyType: IP
+          VisibilityConfig: { CloudWatchMetricsEnabled: true, MetricName: aicc-rate, SampledRequestsEnabled: true }
+
+  Cdn:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        WebACLId: !GetAtt WebAcl.Arn
+        PriceClass: PriceClass_100
+        HttpVersion: http2
+        Origins:
+          - Id: spa
+            DomainName: !GetAtt SpaBucket.RegionalDomainName
+            S3OriginConfig: { OriginAccessIdentity: '' }
+            OriginAccessControlId: !GetAtt Oac.Id
+          - Id: api
+            DomainName: !Select [2, !Split ['/', !GetAtt CompanionApiFunctionUrl.FunctionUrl]]
+            CustomOriginConfig: { OriginProtocolPolicy: https-only, OriginSSLProtocols: [TLSv1.2] }
+            OriginAccessControlId: !GetAtt OacFunctionUrl.Id
+        DefaultCacheBehavior:
+          TargetOriginId: spa
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD]
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
+        CacheBehaviors:
+          - PathPattern: /api/*
+            TargetOriginId: api
+            ViewerProtocolPolicy: https-only
+            AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # CachingDisabled
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac # AllViewerExceptHostHeader
+
+  SpaBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SpaBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: { Service: cloudfront.amazonaws.com }
+            Action: s3:GetObject
+            Resource: !Sub '${SpaBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${Cdn}'
+
+  # CompanionApiFunctionUrl is created implicitly by SAM via FunctionUrlConfig
+  # on CompanionApiFunction (logical ID: CompanionApiFunctionUrl).
+
+  CorsPinnerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-cors-pinner-${AWS::Region}'
+      CodeUri: lambdas/cors-pinner/
+      Handler: index.handler
+      Timeout: 30
+      Role: !GetAtt CustomResourceLambdaRole.Arn
+
+  UploadBucketCors:
+    Type: Custom::CorsPinner
+    DependsOn: [UploadBucket, Cdn]
+    Properties:
+      ServiceToken: !GetAtt CorsPinnerFunction.Arn
+      Bucket: !Ref UploadBucket
+      CdnDomain: !GetAtt Cdn.DomainName
+
+  # ============================================================
+  # AC18 deploy-time verification
+  # ============================================================
+  DeployVerification:
+    Type: Custom::DeployTimeVerification
+    DependsOn:
+      - SeedKbInvocation
+      - CustomerProfilesDomain
+      - IaCasesDomain
+    Properties:
+      ServiceToken: !GetAtt DeployTimeVerificationFunction.Arn
+      ModelId: !Ref GenerationModelId
+      KnowledgeBaseId: !Ref KnowledgeBase
+      CustomerProfilesDomain: !Ref CustomerProfilesDomain
+      ConnectInstanceId: !Ref ConnectInstance
+
+Outputs:
+  CompanionUrl:
+    Description: CloudFront URL for the three-pane companion SPA
+    Value: !Sub 'https://${Cdn.DomainName}'
+  ConnectInstanceId:
+    Description: Connect instance ID (use for AWS console live monitoring)
+    Value: !Ref ConnectInstance
+  PstnNumber:
+    Description: Inbound PSTN geographic DID number (+44 20...)
+    Value: !GetAtt GeoNumber.Address
+  PstnNumberId:
+    Description: Connect DID PhoneNumber resource ID (for console linkage)
+    Value: !Ref GeoNumber
+  KnowledgeBaseId:
+    Description: Bedrock Knowledge Base ID
+    Value: !Ref KnowledgeBase
+  CasesDomainId:
+    Description: Connect Cases domain ID
+    Value: !Ref CasesDomain
+  KbSourceBucket:
+    Description: S3 bucket where KB documents must be staged via aws s3 sync
+    Value: !Ref KbSourceBucket

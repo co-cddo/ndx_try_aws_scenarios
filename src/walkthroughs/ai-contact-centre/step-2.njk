@@ -1,24 +1,24 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 2: Distress and multi-intent triage, AI Contact Centre Walkthrough"
-description: Play a layered distressing script and watch the multi-intent decomposer cap at 4 intents
+title: "Step 2: Distress and multi-intent triage - AI Contact Centre Walkthrough"
+description: Play a layered distressing script and watch the bot triage the top four intents
 currentStep: 2
-totalSteps: 7
+totalSteps: 5
 timeEstimate: "5 minutes"
 scenarioId: ai-contact-centre
 ---
 
 {% set stepNumber = 2 %}
 {% set stepTitle = "Distress and multi-intent triage" %}
-{% set stepDescription = "Play (or speak live) a layered distressing script that mentions five different issues. Watch the bot cap at the top four by confidence, acknowledge each, and hold the fifth for a follow-up turn." %}
+{% set stepDescription = "Play (or speak live) a layered distressing script that mentions five different issues. Watch the bot pick the top four by confidence, acknowledge each by name, and offer a follow-up for the fifth." %}
 {% set timeEstimate = "5 minutes" %}
 {% set screenshotData = screenshots["ai-contact-centre"] %}
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 2 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
   "Sentiment chips climb from green to amber to red as distress rises",
-  "The decomposer extracts five intents and the contact flow caps at four",
-  "Polly acknowledges each of the four intents by name",
+  "The decomposer extracts five intents and the bot caps at four",
+  "The bot acknowledges each of the four intents by name",
   "The bot offers a follow-up question for the fifth issue",
   "Bedrock Guardrails block any hallucinated legal advice"
 ] %}
@@ -29,7 +29,7 @@ scenarioId: ai-contact-centre
   <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
   <strong class="govuk-warning-text__text">
     <span class="govuk-visually-hidden">Content warning</span>
-    This step demonstrates how AI handles a distressed caller. The audio you can play is a fictional script. It is not based on any real call. If you find this content distressing, <a href="/walkthroughs/ai-contact-centre/step-3/" class="govuk-link">skip to Step 3</a>.
+    This step shows how the bot handles a distressed caller. The audio is a fictional script. It is not based on any real call. If you find this content distressing, <a href="/walkthroughs/ai-contact-centre/step-3/" class="govuk-link">skip to Step 3</a>.
   </strong>
 </div>
 
@@ -42,20 +42,23 @@ scenarioId: ai-contact-centre
 <h3 class="govuk-heading-m">The layered distressing script</h3>
 
 <div class="govuk-inset-text">
-  <p class="govuk-body">Either play <code>audio/distress-script-en_GB.mp3</code> down the phone, or read it aloud yourself:</p>
+  <p class="govuk-body">Play this recording down the phone to the bot, or read it aloud yourself:</p>
   <p class="govuk-body govuk-!-font-style-italic">
     "Look, I don't know what to do anymore. The bins haven't been collected for three weeks, there's damp coming through my bedroom ceiling, my downstairs neighbour is shouting at all hours and the kids are scared, the council tax letter is threatening enforcement, and now there's a car parked across my driveway so I can't get out for work. Please. I'm at the end of my tether."
   </p>
-  <p class="govuk-body-s"><a href="https://github.com/co-cddo/ndx_try_aws_scenarios/raw/main/cloudformation/scenarios/ai-contact-centre/audio/distress-script-en_GB.mp3" class="govuk-link">Download the audio file</a></p>
+  <audio controls preload="metadata" style="width: 100%;">
+    <source src="/assets/audio/ai-contact-centre/distress-script-en_GB.m4a" type="audio/mp4">
+    Your browser does not support the audio element.
+  </audio>
 </div>
 
 <h3 class="govuk-heading-m">What to watch for</h3>
 
 <ul class="govuk-list govuk-list--bullet">
-  <li>The decomposer Lambda calls Bedrock to extract five distinct intents: <code>MissedCollection</code>, <code>DampMould</code>, <code>AntiSocialBehaviour</code>, <code>CouncilTax</code>, <code>ParkedVehicle</code>.</li>
-  <li>The cap of four kicks in. The flow plays: "I've heard several issues; let me focus on the top four first." The fifth (<code>truncated_intents[]</code>) is held for a follow-up turn.</li>
+  <li>The decomposer Lambda calls Bedrock to extract five distinct intents: <code>MissedCollection</code>, <code>DampMould</code>, <code>AntiSocialBehaviour</code>, <code>CouncilTax</code>, and <code>ParkedVehicle</code>.</li>
+  <li>The cap of four kicks in. The bot says: "I've heard several issues. Let me focus on the top four first." The fifth (<code>truncated_intents[]</code>) is held for a follow-up turn.</li>
   <li>The sentiment chip turns red. The Connect Case includes <code>safeguarding_flag: true</code>.</li>
   <li>If you ask the bot whether you can sue the council, Bedrock Guardrails block the response and redirect you to a human.</li>
 </ul>
 
-<p class="govuk-body">Add <code>?step=2</code> to the companion SPA URL while you call so the right pane stays dimmed and your attention is on the live transcript and Connect Case.</p>
+<p class="govuk-body">Add <code>?step=2</code> to the companion web app URL while you call. The right pane stays dimmed and your attention stays on the live transcript and the Connect Case.</p>

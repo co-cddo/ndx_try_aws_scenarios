@@ -12,7 +12,7 @@
     <div class="ndx-header__step">
       <span class="ndx-header__step-label">Walkthrough step</span>
       <span class="ndx-header__step-value" id="step-indicator">1</span>
-      <span class="ndx-header__step-of">of 7</span>
+      <span class="ndx-header__step-of">of 5</span>
     </div>
   </header>
 
@@ -33,6 +33,15 @@
         <input type="text" id="chat-input" placeholder="One issue, or several joined with 'and'..." autocomplete="off" style="flex:1; padding:8px; border:2px solid var(--ndx-text); border-radius:4px; font:inherit;">
         <button type="button" class="ndx-button ndx-button--primary" id="chat-send" style="margin:0; padding:8px 14px;">Ask</button>
       </div>
+      <div id="webrtc-toolbar" style="padding: 6px 16px; border-top: 1px solid var(--ndx-grey-2); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 12px;">
+        <button type="button" class="ndx-button ndx-button--secondary" id="webrtc-call" style="margin:0; padding:4px 10px; font-size:12px;">Call via browser</button>
+        <button type="button" class="ndx-button ndx-button--secondary" id="webrtc-video" style="margin:0; padding:4px 10px; font-size:12px; display:none;">Add video</button>
+        <button type="button" class="ndx-button ndx-button--secondary" id="webrtc-screen" style="margin:0; padding:4px 10px; font-size:12px; display:none;">Share screen</button>
+        <button type="button" class="ndx-button ndx-button--secondary" id="webrtc-end" style="margin:0; padding:4px 10px; font-size:12px; display:none;">End call</button>
+        <span id="webrtc-status" style="color: #6f777b;"></span>
+      </div>
+      <audio id="chime-audio" autoplay style="display:none;"></audio>
+      <div id="chime-video-tiles" style="display:flex; gap:8px; padding:0 16px; flex-wrap:wrap;"></div>
     </section>
 
     <section class="ndx-pane ndx-pane--case" data-pane="case">
@@ -47,7 +56,7 @@
 
     <aside class="ndx-pane ndx-pane--simulator" data-pane="simulator">
       <header class="ndx-pane__header">
-        <h2>WhatsApp simulator</h2>
+        <h2>WhatsApp/iMessage/RCS simulator</h2>
         <span class="ndx-pane__badge">Step 3 onwards</span>
       </header>
       <div class="ndx-pane__body">
@@ -57,8 +66,12 @@
           <input type="tel" id="sender-phone" name="sender_phone" autocomplete="tel" placeholder="07700 900123">
           <p class="ndx-form__error" id="sender-phone-error" hidden>Please enter a UK phone number (e.g., 07700 900123).</p>
 
-          <label class="ndx-form__label" for="image-input">Photo</label>
-          <input type="file" id="image-input" accept="image/jpeg,image/png">
+          <label class="ndx-form__label">Photo</label>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+            <button type="button" class="ndx-button ndx-button--secondary" id="image-pick-btn" style="margin:0; padding:8px 14px; cursor:pointer;">Choose photo</button>
+            <span id="image-filename" style="font-size:13px; color:#565656;">No file chosen</span>
+          </div>
+          <input type="file" id="image-input" accept="image/jpeg,image/png" style="position:absolute; left:-9999px; width:1px; height:1px; opacity:0;">
 
           <button type="submit" id="send-button" class="ndx-button ndx-button--primary" disabled>Send</button>
         </form>
@@ -68,11 +81,8 @@
     </aside>
   </main>
 
-  <footer class="ndx-footer">
-    <button type="button" class="ndx-button ndx-button--secondary" id="copy-share">Copy share text</button>
-    <a class="ndx-link" href="https://github.com/co-cddo/ndx_try_aws_scenarios/tree/main/cloudformation/scenarios/ai-contact-centre" target="_blank" rel="noopener">View on GitHub</a>
-  </footer>
 
+  <script src="https://unpkg.com/amazon-connect-chatjs@2.1.0/dist/amazon-connect-chat.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

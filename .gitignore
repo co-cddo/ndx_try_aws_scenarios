@@ -53,11 +53,20 @@ package-lock.json
 
 # Generated CloudFormation templates
 cloudformation/scenarios/*/template.yaml
+# Whitelist scenarios where template.yaml is hand-authored (not CDK-generated)
+!cloudformation/scenarios/ai-contact-centre/template.yaml
 
 # AI Contact Centre — Lambda build artefacts (re-bundled by sam package on deploy)
+cloudformation/scenarios/ai-contact-centre/.aws-sam/
 cloudformation/scenarios/ai-contact-centre/packaged.yaml
 cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/fpdf/
 cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/fpdf2-*.dist-info/
 cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/defusedxml/
 cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/defusedxml-*.dist-info/
+cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/PIL/
+cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/pillow-*.dist-info/
+cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/fontTools/
+cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/fonttools-*.dist-info/
+cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/bin/
+cloudformation/scenarios/ai-contact-centre/lambdas/share-pdf-builder/share/
 cloudformation/scenarios/ai-contact-centre/lambdas/seed-kb/documents/

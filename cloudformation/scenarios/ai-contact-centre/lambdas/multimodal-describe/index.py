@@ -32,15 +32,18 @@ CASES_DOMAIN_ID = os.environ["CASES_DOMAIN_ID"]
 CASES_TEMPLATE_ID = os.environ["CASES_TEMPLATE_ID"]
 IMAGE_BUCKET = os.environ["IMAGE_BUCKET"]
 SCHEMA_JSON = os.environ.get("MULTIMODAL_SCHEMA_JSON", "{}")
+DDB_TABLE_NAME = os.environ.get("DDB_TABLE_NAME", "")
 SEARCH_WINDOW_SECONDS = 3600
+PHOTO_PENDING_TTL = 600  # 10 minutes
 
 s3 = boto3.client("s3")
 bedrock_runtime = boto3.client("bedrock-runtime")
 cases = boto3.client("connectcases")
+ddb = boto3.resource("dynamodb")
 
 ALLOWED_OBJECT_CLASSES = {
     "bin", "fly_tip", "damp", "parked_vehicle", "broken_paving",
-    "missed_collection", "other",
+    "missed_collection", "other", "not_a_council_issue",
 }
 ALLOWED_SEVERITY = {"low", "medium", "high", "urgent"}
 
@@ -56,13 +59,67 @@ def lambda_handler(event, context):
     if structured.get("status") == "describe_unavailable":
         return structured
 
+    if structured.get("object_class") == "not_a_council_issue":
+        return {
+            "status": "declined",
+            "reason": "not_a_council_issue",
+            "structured_description": structured,
+        }
+
     case_outcome = _converge_on_case(sender_phone, structured)
+    _write_photo_pending(sender_phone, case_outcome["case_id"], structured)
     return {
         "status": "ok",
         "case_id": case_outcome["case_id"],
         "case_action": case_outcome["action"],
         "structured_description": structured,
     }
+
+
+def _write_photo_pending(phone: str, case_id: str, structured: Dict[str, Any]) -> None:
+    """Record a recent-photo marker keyed on phone, so the photo-watcher Lambda
+    invoked from a live PSTN contact flow can pick it up and read back the
+    summary + case reference."""
+    if not DDB_TABLE_NAME or not phone:
+        return
+    case_number = _fetch_case_number(case_id)
+    try:
+        table = ddb.Table(DDB_TABLE_NAME)
+        now_ms = int(time.time() * 1000)
+        table.put_item(Item={
+            "contactId": f"photo#{phone}",
+            "segmentTimestamp": now_ms,
+            "case_id": case_id or "",
+            "case_number": case_number,
+            "object_class": structured.get("object_class", ""),
+            "condition": (structured.get("condition") or "")[:200],
+            "severity": structured.get("severity", ""),
+            "ttl": int(time.time()) + PHOTO_PENDING_TTL,
+        })
+    except ClientError as exc:
+        logger.warning("photo_pending DDB write failed: %s", exc)
+
+
+def _fetch_case_number(case_id: str) -> str:
+    """Connect Cases auto-assigns a short human-readable `case_number` system
+    field (e.g. "1042") at creation. The agent UI shows that, not the UUID, so
+    we read it back over the phone instead of the internal caseId prefix."""
+    if not case_id:
+        return ""
+    try:
+        resp = cases.get_case(
+            domainId=CASES_DOMAIN_ID,
+            caseId=case_id,
+            fields=[{"id": "case_number"}],
+        )
+        for f in resp.get("fields") or []:
+            if f.get("id") == "case_number":
+                v = (f.get("value") or {})
+                # case_number can come back as stringValue or doubleValue depending on field type
+                return str(v.get("stringValue") or v.get("doubleValue") or "").split(".")[0]
+    except ClientError as exc:
+        logger.warning("get_case for case_number failed: %s", exc)
+    return ""
 
 
 def _normalise_event(event) -> Dict[str, Any]:
@@ -111,11 +168,11 @@ def _describe_with_validation(image_bytes: bytes, mime: str) -> Dict[str, Any]:
 
 SCHEMA_DESCRIPTION = (
     'Schema: {"object_class": string in [bin, fly_tip, damp, parked_vehicle, '
-    'broken_paving, missed_collection, other], "condition": short string '
-    'describing what is wrong, "severity": string in [low, medium, high, '
-    'urgent], "suggested_council_action": short string with a one-sentence '
-    'triage suggestion, "confidence": number 0..1, "secondary_observations": '
-    'optional array of strings}.'
+    'broken_paving, missed_collection, other, not_a_council_issue], '
+    '"condition": short string describing what is wrong, "severity": string '
+    'in [low, medium, high, urgent], "suggested_council_action": short string '
+    'with a one-sentence triage suggestion, "confidence": number 0..1, '
+    '"secondary_observations": optional array of strings}.'
 )
 
 
@@ -125,6 +182,13 @@ def _build_prompt(strengthened: bool) -> str:
         "A resident has sent a photo via WhatsApp to their council. Describe "
         "what is in the photo as a single JSON object matching this schema.\n\n"
         f"{SCHEMA_DESCRIPTION}\n\n"
+        "If the photo shows something a council would not act on (e.g. a "
+        "person, a pet, a selfie, indoor decor, food, screenshots, a meme, "
+        "anything unrelated to streets/housing/waste/environment), set "
+        'object_class to "not_a_council_issue", severity to "low", '
+        "suggested_council_action to a one-sentence polite decline, and "
+        "confidence to your honest read. Do not force a council category for "
+        "non-council photos.\n\n"
         "Output ONLY the JSON object. No markdown fences, no preamble."
     )
     if strengthened:
