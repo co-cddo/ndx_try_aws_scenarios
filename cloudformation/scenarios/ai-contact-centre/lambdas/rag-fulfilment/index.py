@@ -505,18 +505,29 @@ def _rag(query: str, lang: str = "en") -> Optional[str]:
 
 
 def _extract_utterance(event: Dict[str, Any]) -> str:
+    """Pull the caller's utterance for this turn.
+
+    Prefer Lex's `lex_input_transcript` (passed in via the flow's
+    `user_utterance` Lambda invocation attribute) because it's a per-turn
+    value that always reflects what the caller just said.
+
+    `transcribe_transcript` is set once on turn 1 by the language-detect
+    Lambda and stays stale for the rest of the call. It's only useful as
+    a fallback when Lex has nothing -- e.g. an empty turn-1 transcript on
+    a non-English caller before the locale switch. Using it preferentially
+    causes a postcode-loop bug where every subsequent turn reads the same
+    turn-1 transcript."""
     if isinstance(event, dict) and "Details" in event:
         params = event.get("Details", {}).get("Parameters", {}) or {}
-        # Prefer the clean Transcribe transcript over Lex's locale-locked
-        # output when language-detect has run (which produces a much better
-        # transcript for non-English audio).
+        if "user_utterance" in params:
+            user = (params["user_utterance"] or "").strip()
+            if user:
+                return user
         transcribe = (params.get("transcribe_transcript") or "").strip()
         if transcribe:
             return transcribe
-        if "user_utterance" in params:
-            return (params["user_utterance"] or "").strip()
         attrs = event.get("Details", {}).get("ContactData", {}).get("Attributes", {}) or {}
-        for k in ("TranscribeTranscript", "user_utterance", "InputTranscript"):
+        for k in ("user_utterance", "InputTranscript", "TranscribeTranscript"):
             if k in attrs and attrs[k]:
                 return attrs[k].strip()
     return (event.get("inputTranscript") or "").strip()
