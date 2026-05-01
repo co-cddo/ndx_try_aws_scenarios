@@ -2258,7 +2258,7 @@ scenarios:
     name: "AI Contact Centre (Council Reception)"
     headline: "Dial a real UK phone number and watch one case capture both your call and your photo"
     bestFor: "Demonstrating Amazon Connect with the AWS AI stack to council CIOs and Customer Services directors"
-    description: "Deploy a full Amazon Connect instance with a real UK phone number, Lex v2 (en-GB), Bedrock Knowledge Base and Guardrails, multimodal photo description, Connect Cases, Customer Profiles, and a three-pane companion web app. Two journeys to try: a distressed multi-intent call on a real phone line, and cross-channel case unification when the resident later sends a photo through the in-browser photo upload simulator. The headline moment: 'I've reviewed your photo; environmental health will visit Wednesday, ref ABC123.'"
+    description: "Deploy a full Amazon Connect instance with a real UK phone number, Lex v2 (en-GB) for transcription, Bedrock Knowledge Base and Guardrails, multimodal photo description, Connect Cases, Customer Profiles, and a three-pane companion web app. Auto-detects the caller's language and replies in English, Italian, French, German, Spanish, Polish, Welsh, or Romanian via Polly (with documented quality caveats for Welsh and Romanian). Two journeys to try: a distressed multi-intent call on a real phone line, and cross-channel case unification when the resident later sends a photo through the in-browser photo upload simulator. The headline moment: 'I've reviewed your photo; environmental health will visit Wednesday, ref ABC123.'"
     difficulty: "advanced"
     timeEstimate: "23 minutes"
     primaryPersona: "service-manager"

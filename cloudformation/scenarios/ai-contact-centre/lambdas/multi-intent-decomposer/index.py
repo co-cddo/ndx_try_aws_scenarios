@@ -56,8 +56,8 @@ SYSTEM_PROMPT = (
 def lambda_handler(event, context):
     utterance = _extract_utterance(event)
     intent_name = (event.get("sessionState") or {}).get("intent", {}).get("name", "")
-    logger.info("decompose utterance len=%d intent=%s invocationSource=%s",
-                len(utterance), intent_name, event.get("invocationSource", "n/a"))
+    logger.info("decompose utterance=%r intent=%s invocationSource=%s",
+                utterance[:300], intent_name, event.get("invocationSource", "n/a"))
 
     if not utterance:
         return _close_lex_response(event, {"intents": [], "requires_safeguarding_review": False, "truncated_intents": []})

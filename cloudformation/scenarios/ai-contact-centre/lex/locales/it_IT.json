@@ -1,0 +1,112 @@
+{
+  "WelcomeIntent": [
+    "Ciao",
+    "Ehi",
+    "Buongiorno"
+  ],
+  "BinCollection": [
+    "Quando viene ritirato il mio bidone della spazzatura",
+    "Che giorno devo mettere fuori i miei bidoni",
+    "Quando vengono ritirati i miei bidoni",
+    "Che giorno vengono svuotati i miei bidoni",
+    "Giorno della raccolta"
+  ],
+  "MissedCollection": [
+    "I miei bidoni non sono stati raccolti",
+    "Il camion della spazzatura non è passato questa settimana",
+    "Raccolta mancata",
+    "Il mio bidone non è stato svuotato",
+    "I bidoni non sono stati ritirati",
+    "La raccolta dei rifiuti è saltata"
+  ],
+  "FlyTip": [
+    "C'è un abbandono di rifiuti",
+    "Qualcuno ha scaricato dei rifiuti",
+    "Sono stati scaricati dei rifiuti",
+    "Abbandono di rifiuti all'angolo",
+    "Materasso scaricato per strada",
+    "Voglio segnalare un abbandono di rifiuti",
+    "Vorrei segnalare un abbandono di rifiuti",
+    "Segnala un abbandono di rifiuti",
+    "Sto segnalando un abbandono di rifiuti",
+    "Devo segnalare un abbandono di rifiuti",
+    "C'è stato un abbandono di rifiuti",
+    "Qualcuno ha abbandonato dei rifiuti",
+    "Abbandono illegale di rifiuti",
+    "C'è un abbandono illegale di rifiuti",
+    "Qualcuno ha scaricato un divano",
+    "Divano scaricato per strada",
+    "Pila di rifiuti"
+  ],
+  "PotholeReport": [
+    "C'è un buco sulla strada",
+    "Buca sulla strada",
+    "Fondo stradale danneggiato"
+  ],
+  "BrokenPaving": [
+    "Il marciapiede è rotto",
+    "Lastra del marciapiede rotta",
+    "Il marciapiede è danneggiato"
+  ],
+  "ParkedVehicle": [
+    "C'è un'auto parcheggiata davanti al mio vialetto",
+    "Qualcuno mi sta bloccando l'accesso",
+    "Auto parcheggiata in modo illegale"
+  ],
+  "DampMould": [
+    "C'è umidità nella mia casa",
+    "Muffa sul muro",
+    "Umidità che filtra dal mio soffitto",
+    "Muffa nera nel bagno",
+    "Macchia bagnata sul muro"
+  ],
+  "AntiSocialBehaviour": [
+    "Comportamento antisociale",
+    "Il mio vicino sta gridando",
+    "Musica ad alto volume ogni notte",
+    "Problema di comportamento antisociale",
+    "Comportamento minaccioso del vicino"
+  ],
+  "Safeguarding": [
+    "Sono preoccupato per una persona vulnerabile",
+    "Penso che qualcuno stia subendo abusi",
+    "Non so cosa fare",
+    "Sono allo stremo",
+    "Sono preoccupato per un adulto vulnerabile"
+  ],
+  "CouncilTax": [
+    "Imposta comunale",
+    "Non posso permettermi di pagare l'imposta comunale",
+    "Sto avendo difficoltà a pagare l'imposta comunale",
+    "Domanda sulla mia bolletta dell'imposta comunale",
+    "L'imposta comunale è troppo alta",
+    "Esecuzione dell'imposta comunale"
+  ],
+  "BenefitsSupport": [
+    "Beneficio abitativo",
+    "Riduzione della tassa comunale",
+    "Aiuto con i sussidi",
+    "Voglio fare domanda per i sussidi"
+  ],
+  "PlanningEnquiry": [
+    "Permesso di costruire",
+    "Domanda di pianificazione",
+    "Ho bisogno del permesso di costruire?",
+    "Ampliamento dell'edificio"
+  ],
+  "MultiIntentTriage": [
+    "Ho diverse cose",
+    "Diversi problemi"
+  ],
+  "GoodbyeIntent": [
+    "No",
+    "No, grazie",
+    "No, grazie mille",
+    "Questo è tutto",
+    "Niente altro",
+    "Arrivederci",
+    "Grazie, arrivederci",
+    "Ho finito",
+    "Tutto fatto"
+  ]
+}

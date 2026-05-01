@@ -28,6 +28,65 @@
   const PHONE_STORAGE_KEY = "ndx_try_aicc_sender_phone";
   const API_BASE = window.NDX_API_BASE || "/api";
 
+  // Localised UI labels for the eight supported languages. The chat content
+  // itself is translated server-side; these are just the surface controls.
+  const LABELS = {
+    en: { ready: "Ready", noCase: "No case yet", typing: "Bot typing…", waiting: "Waiting for bot…", send: "Ask", chooseFile: "Choose photo", noFile: "No file chosen", sender: "Sender phone", placeholder: "One issue, or several joined with 'and'..." },
+    it: { ready: "Pronto", noCase: "Nessun caso ancora", typing: "Il bot sta scrivendo…", waiting: "In attesa del bot…", send: "Invia", chooseFile: "Scegli foto", noFile: "Nessun file selezionato", sender: "Telefono mittente", placeholder: "Un problema, o più uniti da 'e'..." },
+    fr: { ready: "Prêt", noCase: "Aucun dossier", typing: "Le bot écrit…", waiting: "En attente du bot…", send: "Envoyer", chooseFile: "Choisir une photo", noFile: "Aucun fichier choisi", sender: "Téléphone expéditeur", placeholder: "Un problème, ou plusieurs liés par 'et'..." },
+    de: { ready: "Bereit", noCase: "Noch kein Fall", typing: "Bot schreibt…", waiting: "Warte auf Bot…", send: "Senden", chooseFile: "Foto auswählen", noFile: "Keine Datei ausgewählt", sender: "Absender-Telefon", placeholder: "Ein Anliegen, oder mehrere mit 'und' verbunden..." },
+    es: { ready: "Listo", noCase: "Sin caso aún", typing: "El bot escribe…", waiting: "Esperando al bot…", send: "Enviar", chooseFile: "Elegir foto", noFile: "Ningún archivo elegido", sender: "Teléfono remitente", placeholder: "Un problema, o varios unidos por 'y'..." },
+    pl: { ready: "Gotowe", noCase: "Brak sprawy", typing: "Bot pisze…", waiting: "Czekam na bota…", send: "Wyślij", chooseFile: "Wybierz zdjęcie", noFile: "Nie wybrano pliku", sender: "Telefon nadawcy", placeholder: "Jedna sprawa lub kilka połączonych słowem 'i'..." },
+    cy: { ready: "Barod", noCase: "Dim achos eto", typing: "Bot yn teipio…", waiting: "Yn aros am y bot…", send: "Anfon", chooseFile: "Dewis llun", noFile: "Heb ddewis ffeil", sender: "Ffôn anfonwr", placeholder: "Un mater, neu sawl un wedi'u huno gan 'a'..." },
+    ro: { ready: "Gata", noCase: "Niciun caz încă", typing: "Botul scrie…", waiting: "Aștept botul…", send: "Trimite", chooseFile: "Alege poza", noFile: "Niciun fișier ales", sender: "Telefon expeditor", placeholder: "O problemă, sau mai multe unite cu 'și'..." },
+  };
+
+  let currentLang = "en";
+  // Quick client-side language hint used for the badge and to send `language`
+  // along with API calls. Server still re-detects, but a hint speeds up turn 1.
+  function guessLanguage(text) {
+    if (!text) return "en";
+    const t = text.toLowerCase();
+    if (/[ąćęłńóśźż]/.test(t)) return "pl";
+    if (/(sbwriel|cyngor|pryd mae|rwy'n|llanfair|noson dda)/.test(t)) return "cy";
+    if (/[ăâîșț]/.test(t) || /(mulțumesc|bună|gunoi|primărie)/.test(t)) return "ro";
+    if (/[äöüß]/.test(t) || /(guten tag|müll|bürger|stadt)/.test(t)) return "de";
+    if (/[ñ¿¡]/.test(t) || /(hola|gracias|basura|ayuntamiento)/.test(t)) return "es";
+    if (/(buongiorno|spazzatura|comune|grazie)/.test(t)) return "it";
+    if (/[àâçéèêëîïôùûüÿœ]/.test(t) || /(bonjour|merci|ordures|mairie)/.test(t)) return "fr";
+    return "en";
+  }
+  function setLanguage(code) {
+    if (!LABELS[code]) code = "en";
+    currentLang = code;
+    const indicator = document.getElementById("lang-indicator");
+    const value = document.getElementById("lang-value");
+    if (indicator) indicator.hidden = false;
+    if (value) value.textContent = code.toUpperCase();
+    applyLabels(code);
+  }
+  function applyLabels(code) {
+    const L = LABELS[code] || LABELS.en;
+    const transcriptStatusEl = document.getElementById("transcript-status");
+    const caseStatusEl = document.getElementById("case-status");
+    const sendBtn = document.getElementById("chat-send");
+    const chatInputEl = document.getElementById("chat-input");
+    const pickBtn = document.getElementById("image-pick-btn");
+    const fname = document.getElementById("image-filename");
+    if (transcriptStatusEl && /^(ready|pronto|prêt|bereit|listo|gotowe|barod|gata)$/i.test(transcriptStatusEl.textContent.trim())) {
+      transcriptStatusEl.textContent = L.ready;
+    }
+    if (caseStatusEl && /^(no case yet|nessun caso|aucun|noch kein|sin caso|brak|dim achos|niciun caz)/i.test(caseStatusEl.textContent.trim())) {
+      caseStatusEl.textContent = L.noCase;
+    }
+    if (sendBtn && !sendBtn.disabled) sendBtn.textContent = L.send;
+    if (chatInputEl) chatInputEl.placeholder = L.placeholder;
+    if (pickBtn) pickBtn.textContent = L.chooseFile;
+    if (fname && /^(no file|nessun file|aucun fichier|keine datei|ningún archivo|nie wybrano|heb ddewis|niciun fișier)/i.test(fname.textContent.trim())) {
+      fname.textContent = L.noFile;
+    }
+  }
+
   const fromQuery = params.get("phone");
   const persisted = localStorage.getItem(PHONE_STORAGE_KEY);
   if (fromQuery && PHONE_RE.test(fromQuery)) {
@@ -103,7 +162,7 @@
       const sendResp = await fetch(`${API_BASE}/simulator/send`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ image_s3_key: presign.key, sender_phone: phone }),
+        body: JSON.stringify({ image_s3_key: presign.key, sender_phone: phone, language: currentLang }),
       });
       const data = await sendResp.json();
       if (data.status === "declined") {
@@ -223,9 +282,15 @@
       chatInput.value = "";
       appendSegment("CUSTOMER", text);
       setStep(2);
+      // Hint UI language from the user's first non-empty message. Server still
+      // does authoritative detection on its side.
+      if (currentLang === "en") {
+        const guess = guessLanguage(text);
+        if (guess !== "en") setLanguage(guess);
+      }
       if (!firstBotMessageReceived) {
         pendingMessages.push(text);
-        transcriptStatus.textContent = "Waiting for bot…";
+        transcriptStatus.textContent = LABELS[currentLang].waiting;
         return;
       }
       try {

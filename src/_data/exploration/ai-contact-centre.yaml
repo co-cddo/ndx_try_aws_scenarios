@@ -134,6 +134,29 @@ activities:
       - "No fly-tip false positive"
       - "The Connect Case panel stays empty for that upload"
 
+  - id: exp-multilingual
+    title: "Call (or chat) in another language"
+    category: experiments
+    time_estimate: "4 minutes"
+    learning: "The bot auto-detects the caller's language from the first reply and switches voice + answers to match. English, Italian, French, German, Spanish, and Polish run end-to-end through Polly neural voices and the same Aldershire knowledge base. Welsh and Romanian use Polly standard voices and Bedrock-only intent classification (no Lex)."
+    steps:
+      - title: "Dial the council number"
+        action: "Call the real UK number from the stack outputs."
+      - title: "Hear the English greeting"
+        action: "The greeting stays English because the bot doesn't know your language yet."
+      - title: "Reply in your language"
+        action: "Try Italian: 'Quando passa il netturbino?' Or Polish: 'Kiedy odbiór śmieci?' Or Welsh: 'Pryd mae'r sbwriel yn cael ei gasglu?'"
+      - title: "Listen to the response"
+        action: "The voice switches to the appropriate Polly voice (Bianca, Ola, Gwyneth, etc.) and the answer is in your language, drawn from the same knowledge base."
+      - title: "Try the chat too"
+        action: "Open the companion app and type a question in Polish or Spanish; the bot replies in the same language and the LANG badge in the header shows the detected code."
+    expected_outcome: "Two channels (voice + chat) work in eight languages, with documented quality caveats for Welsh, Romanian, and Polish."
+    what_to_observe:
+      - "First English greeting then language switch from turn two onwards"
+      - "Bedrock answers stay grounded in the English Aldershire knowledge base"
+      - "Welsh and Romanian sound robotic because Polly only has standard voices for them"
+      - "Polish transcripts show PII unredacted (Contact Lens limitation)"
+
   - id: exp-bespoke-app
     title: "Open the bespoke council dashboard in the agent workspace"
     category: experiments

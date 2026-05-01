@@ -419,12 +419,685 @@ Resources:
               ParentIntentSignature: AMAZON.FallbackIntent
               FulfillmentCodeHook: { Enabled: true }
 
-  LexBotVersionV6:
+        - LocaleId: it_IT
+          NluConfidenceThreshold: 0.4
+          VoiceSettings: { VoiceId: Bianca, Engine: neural }
+          Intents:
+            - Name: WelcomeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Ciao" }
+                - { Utterance: "Ehi" }
+                - { Utterance: "Buongiorno" }
+            - Name: BinCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Quando viene ritirato il mio bidone della spazzatura" }
+                - { Utterance: "Che giorno devo mettere fuori i miei bidoni" }
+                - { Utterance: "Quando vengono ritirati i miei bidoni" }
+                - { Utterance: "Che giorno vengono svuotati i miei bidoni" }
+                - { Utterance: "Giorno della raccolta" }
+            - Name: MissedCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "I miei bidoni non sono stati raccolti" }
+                - { Utterance: "Il camion della spazzatura non è passato questa settimana" }
+                - { Utterance: "Raccolta mancata" }
+                - { Utterance: "Il mio bidone non è stato svuotato" }
+                - { Utterance: "I bidoni non sono stati ritirati" }
+                - { Utterance: "La raccolta dei rifiuti è saltata" }
+            - Name: FlyTip
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "C'è un abbandono di rifiuti" }
+                - { Utterance: "Qualcuno ha scaricato dei rifiuti" }
+                - { Utterance: "Sono stati scaricati dei rifiuti" }
+                - { Utterance: "Abbandono di rifiuti all'angolo" }
+                - { Utterance: "Materasso scaricato per strada" }
+                - { Utterance: "Voglio segnalare un abbandono di rifiuti" }
+                - { Utterance: "Vorrei segnalare un abbandono di rifiuti" }
+                - { Utterance: "Segnala un abbandono di rifiuti" }
+                - { Utterance: "Sto segnalando un abbandono di rifiuti" }
+                - { Utterance: "Devo segnalare un abbandono di rifiuti" }
+                - { Utterance: "C'è stato un abbandono di rifiuti" }
+                - { Utterance: "Qualcuno ha abbandonato dei rifiuti" }
+                - { Utterance: "Abbandono illegale di rifiuti" }
+                - { Utterance: "C'è un abbandono illegale di rifiuti" }
+                - { Utterance: "Qualcuno ha scaricato un divano" }
+                - { Utterance: "Divano scaricato per strada" }
+                - { Utterance: "Pila di rifiuti" }
+            - Name: PotholeReport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "C'è un buco sulla strada" }
+                - { Utterance: "Buca sulla strada" }
+                - { Utterance: "Fondo stradale danneggiato" }
+            - Name: BrokenPaving
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Il marciapiede è rotto" }
+                - { Utterance: "Lastra del marciapiede rotta" }
+                - { Utterance: "Il marciapiede è danneggiato" }
+            - Name: ParkedVehicle
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "C'è un'auto parcheggiata davanti al mio vialetto" }
+                - { Utterance: "Qualcuno mi sta bloccando l'accesso" }
+                - { Utterance: "Auto parcheggiata in modo illegale" }
+            - Name: DampMould
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "C'è umidità nella mia casa" }
+                - { Utterance: "Muffa sul muro" }
+                - { Utterance: "Umidità che filtra dal mio soffitto" }
+                - { Utterance: "Muffa nera nel bagno" }
+                - { Utterance: "Macchia bagnata sul muro" }
+            - Name: AntiSocialBehaviour
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Comportamento antisociale" }
+                - { Utterance: "Il mio vicino sta gridando" }
+                - { Utterance: "Musica ad alto volume ogni notte" }
+                - { Utterance: "Problema di comportamento antisociale" }
+                - { Utterance: "Comportamento minaccioso del vicino" }
+            - Name: Safeguarding
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Sono preoccupato per una persona vulnerabile" }
+                - { Utterance: "Penso che qualcuno stia subendo abusi" }
+                - { Utterance: "Non so cosa fare" }
+                - { Utterance: "Sono allo stremo" }
+                - { Utterance: "Sono preoccupato per un adulto vulnerabile" }
+            - Name: CouncilTax
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Imposta comunale" }
+                - { Utterance: "Non posso permettermi di pagare l'imposta comunale" }
+                - { Utterance: "Sto avendo difficoltà a pagare l'imposta comunale" }
+                - { Utterance: "Domanda sulla mia bolletta dell'imposta comunale" }
+                - { Utterance: "L'imposta comunale è troppo alta" }
+                - { Utterance: "Esecuzione dell'imposta comunale" }
+            - Name: BenefitsSupport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Beneficio abitativo" }
+                - { Utterance: "Riduzione della tassa comunale" }
+                - { Utterance: "Aiuto con i sussidi" }
+                - { Utterance: "Voglio fare domanda per i sussidi" }
+            - Name: PlanningEnquiry
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Permesso di costruire" }
+                - { Utterance: "Domanda di pianificazione" }
+                - { Utterance: "Ho bisogno del permesso di costruire?" }
+                - { Utterance: "Ampliamento dell'edificio" }
+            - Name: MultiIntentTriage
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Ho diverse cose" }
+                - { Utterance: "Diversi problemi" }
+            - Name: GoodbyeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "No" }
+                - { Utterance: "No, grazie" }
+                - { Utterance: "No, grazie mille" }
+                - { Utterance: "Questo è tutto" }
+                - { Utterance: "Niente altro" }
+                - { Utterance: "Arrivederci" }
+                - { Utterance: "Grazie, arrivederci" }
+                - { Utterance: "Ho finito" }
+                - { Utterance: "Tutto fatto" }
+            - Name: FallbackIntent
+              ParentIntentSignature: AMAZON.FallbackIntent
+              FulfillmentCodeHook: { Enabled: true }
+        - LocaleId: fr_FR
+          NluConfidenceThreshold: 0.4
+          VoiceSettings: { VoiceId: Lea, Engine: neural }
+          Intents:
+            - Name: WelcomeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Bonjour" }
+                - { Utterance: "Salut" }
+                - { Utterance: "Bonjour, comment ça va?" }
+            - Name: BinCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Quand est-ce que je dois sortir mes poubelles" }
+                - { Utterance: "Quel jour je mets mes poubelles dehors" }
+                - { Utterance: "Quand est-ce que mes poubelles sont ramassées" }
+                - { Utterance: "Quel jour mes poubelles sont vidées" }
+                - { Utterance: "Jour de collecte des ordures" }
+            - Name: MissedCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Mes poubelles n'ont pas été ramassées" }
+                - { Utterance: "Le camion de collecte des ordures n'est pas passé cette semaine" }
+                - { Utterance: "Collecte manquée" }
+                - { Utterance: "Ma poubelle n'a pas été vidée" }
+                - { Utterance: "Les poubelles n'ont pas été ramassées" }
+                - { Utterance: "La collecte des ordures a été manquée" }
+            - Name: FlyTip
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Il y a du dépôt sauvage" }
+                - { Utterance: "Quelqu'un a jeté des déchets" }
+                - { Utterance: "Des déchets ont été jetés" }
+                - { Utterance: "Dépôt sauvage au coin de la rue" }
+                - { Utterance: "Un matelas jeté dans la rue" }
+                - { Utterance: "Je veux signaler un dépôt sauvage" }
+                - { Utterance: "J'aimerais signaler un dépôt sauvage" }
+                - { Utterance: "Signaler un dépôt sauvage" }
+                - { Utterance: "Je signale un dépôt sauvage" }
+                - { Utterance: "Je dois signaler un dépôt sauvage" }
+                - { Utterance: "Il y a eu du dépôt sauvage" }
+                - { Utterance: "Quelqu'un a fait du dépôt sauvage" }
+                - { Utterance: "Je veux signaler du dépôt sauvage" }
+                - { Utterance: "Dépôt illégal" }
+                - { Utterance: "Il y a un dépôt illégal" }
+                - { Utterance: "Quelqu'un a jeté un canapé" }
+                - { Utterance: "Un canapé jeté dans la rue" }
+                - { Utterance: "Une pile de déchets" }
+            - Name: PotholeReport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Il y a un nid-de-poule" }
+                - { Utterance: "Un nid-de-poule sur la route" }
+                - { Utterance: "Surface de la route endommagée" }
+            - Name: BrokenPaving
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Le trottoir est cassé" }
+                - { Utterance: "Dalle de trottoir cassée" }
+                - { Utterance: "Le trottoir est endommagé" }
+            - Name: ParkedVehicle
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Il y a une voiture garée devant mon entrée de garage" }
+                - { Utterance: "Quelqu'un m'a bloqué l'accès" }
+                - { Utterance: "Voiture garée illégalement" }
+            - Name: DampMould
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Il y a de l'humidité chez moi" }
+                - { Utterance: "De la moisissure sur le mur" }
+                - { Utterance: "De l'humidité qui passe à travers mon plafond" }
+                - { Utterance: "De la moisissure noire dans la salle de bain" }
+                - { Utterance: "Une zone humide sur le mur" }
+            - Name: AntiSocialBehaviour
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Comportement antisocial" }
+                - { Utterance: "Mon voisin a été en train de crier" }
+                - { Utterance: "De la musique forte tous les soirs" }
+                - { Utterance: "Problème de comportement antisocial" }
+                - { Utterance: "Comportement menaçant de mon voisin" }
+            - Name: Safeguarding
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Je m'inquiète pour une personne vulnérable" }
+                - { Utterance: "Je pense que quelqu'un est maltraité" }
+                - { Utterance: "Je ne sais pas quoi faire" }
+                - { Utterance: "J'en ai marre" }
+                - { Utterance: "Inquiet pour un adulte vulnérable" }
+            - Name: CouncilTax
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Taxe communale" }
+                - { Utterance: "Je ne peux pas me permettre de payer ma taxe communale" }
+                - { Utterance: "J'ai du mal à payer ma taxe communale" }
+                - { Utterance: "Question concernant ma facture de taxe communale" }
+                - { Utterance: "La taxe communale est trop élevée" }
+                - { Utterance: "Application de la taxe communale" }
+            - Name: BenefitsSupport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Aide au logement" }
+                - { Utterance: "Réduction de la taxe d'habitation" }
+                - { Utterance: "Aide pour les allocations" }
+                - { Utterance: "Je veux demander des allocations" }
+            - Name: PlanningEnquiry
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Autorisation de construire" }
+                - { Utterance: "Demande de permis de construire" }
+                - { Utterance: "Ai-je besoin d'une autorisation de construire" }
+                - { Utterance: "Extension de bâtiment" }
+            - Name: MultiIntentTriage
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "J'ai plusieurs choses à signaler" }
+                - { Utterance: "Plusieurs problèmes à aborder" }
+            - Name: GoodbyeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Non" }
+                - { Utterance: "Non merci" }
+                - { Utterance: "Non merci, merci" }
+                - { Utterance: "C'est tout" }
+                - { Utterance: "Rien d'autre" }
+                - { Utterance: "Au revoir" }
+                - { Utterance: "Merci, au revoir" }
+                - { Utterance: "C'est fini" }
+                - { Utterance: "Tout est fini" }
+            - Name: FallbackIntent
+              ParentIntentSignature: AMAZON.FallbackIntent
+              FulfillmentCodeHook: { Enabled: true }
+        - LocaleId: de_DE
+          NluConfidenceThreshold: 0.4
+          VoiceSettings: { VoiceId: Vicki, Engine: neural }
+          Intents:
+            - Name: WelcomeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Hallo" }
+                - { Utterance: "Hi" }
+                - { Utterance: "Guten Morgen" }
+            - Name: BinCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Wann ist mein Müllabfuhrtag" }
+                - { Utterance: "An welchem Tag stelle ich meine Mülltonnen raus" }
+                - { Utterance: "Wann werden meine Mülltonnen abgeholt" }
+                - { Utterance: "An welchem Tag werden meine Mülltonnen geleert" }
+                - { Utterance: "Müllabfuhrtag" }
+            - Name: MissedCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Meine Mülltonnen wurden nicht abgeholt" }
+                - { Utterance: "Der Müllwagen ist diese Woche nicht gekommen" }
+                - { Utterance: "Abholung verpasst" }
+                - { Utterance: "Meine Mülltonne wurde nicht geleert" }
+                - { Utterance: "Die Mülltonnen wurden nicht abgeholt" }
+                - { Utterance: "Abfallsammlung verpasst" }
+            - Name: FlyTip
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Es gibt illegales Müllentsorgen" }
+                - { Utterance: "Jemand hat Müll illegal abgeladen" }
+                - { Utterance: "Müll wurde illegal abgeladen" }
+                - { Utterance: "Illegale Müllentsorgung an der Ecke" }
+                - { Utterance: "Matratze auf der Straße abgeladen" }
+                - { Utterance: "Ich möchte illegales Müllentsorgen melden" }
+                - { Utterance: "Will illegales Müllentsorgen melden" }
+                - { Utterance: "Illegales Müllentsorgen melden" }
+                - { Utterance: "Ich melde illegales Müllentsorgen" }
+                - { Utterance: "Ich muss illegales Müllentsorgen melden" }
+                - { Utterance: "Es gab illegales Müllentsorgen" }
+                - { Utterance: "Jemand hat illegal Müll abgeladen" }
+                - { Utterance: "Illegale Müllentsorgung" }
+                - { Utterance: "Es gibt illegale Müllentsorgung" }
+                - { Utterance: "Jemand hat ein Sofa illegal abgeladen" }
+                - { Utterance: "Sofa auf der Straße abgeladen" }
+                - { Utterance: "Haufen Müll" }
+            - Name: PotholeReport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Da ist ein Schlagloch" }
+                - { Utterance: "Schlagloch auf der Straße" }
+                - { Utterance: "Beschädigte Straßenoberfläche" }
+            - Name: BrokenPaving
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Der Bürgersteig ist kaputt" }
+                - { Utterance: "Ein Gehwegstein ist gebrochen" }
+                - { Utterance: "Der Gehweg ist beschädigt" }
+            - Name: ParkedVehicle
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Da steht ein Auto quer auf meiner Einfahrt" }
+                - { Utterance: "Jemand blockiert meine Einfahrt" }
+                - { Utterance: "Illegal geparktes Auto" }
+            - Name: DampMould
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Bei mir zu Hause ist es feucht" }
+                - { Utterance: "Schimmel an der Wand" }
+                - { Utterance: "Feuchtigkeit kommt durch meine Decke" }
+                - { Utterance: "Schwarzer Schimmel im Badezimmer" }
+                - { Utterance: "Nasser Fleck an der Wand" }
+            - Name: AntiSocialBehaviour
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Antisoziales Verhalten" }
+                - { Utterance: "Mein Nachbar hat rumgeschrien" }
+                - { Utterance: "Jede Nacht laute Musik" }
+                - { Utterance: "Problem mit antisozialem Verhalten" }
+                - { Utterance: "Bedrohungsverhalten vom Nachbarn" }
+            - Name: Safeguarding
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Ich mache mir Sorgen um eine schutzbedürftige Person" }
+                - { Utterance: "Ich glaube, dass jemand misshandelt wird" }
+                - { Utterance: "Ich weiß nicht, was ich tun soll" }
+                - { Utterance: "Ich bin am Ende meiner Kräfte" }
+                - { Utterance: "Besorgt um einen schutzbedürftigen Erwachsenen" }
+            - Name: CouncilTax
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Gemeindesteuer" }
+                - { Utterance: "Ich kann mir die Gemeindesteuer nicht leisten" }
+                - { Utterance: "Ich habe Schwierigkeiten, meine Gemeindesteuer zu zahlen" }
+                - { Utterance: "Frage zu meiner Gemeindesteuerrechnung" }
+                - { Utterance: "Die Gemeindesteuer ist zu hoch" }
+                - { Utterance: "Gemeindesteuervollstreckung" }
+            - Name: BenefitsSupport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Wohngeld" }
+                - { Utterance: "Reduzierung der Gemeindesteuer" }
+                - { Utterance: "Hilfe bei Leistungen" }
+                - { Utterance: "Ich möchte Leistungen beantragen" }
+            - Name: PlanningEnquiry
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Genehmigung für die Planung" }
+                - { Utterance: "Planungsantrag" }
+                - { Utterance: "Benötige ich eine Genehmigung für die Planung" }
+                - { Utterance: "Gebäudeerweiterung" }
+            - Name: MultiIntentTriage
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Ich habe mehrere Dinge" }
+                - { Utterance: "Mehrere Probleme" }
+            - Name: GoodbyeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Nein" }
+                - { Utterance: "Nein, danke" }
+                - { Utterance: "Nein, danke schön" }
+                - { Utterance: "Das war's" }
+                - { Utterance: "Nichts weiter" }
+                - { Utterance: "Tschüss" }
+                - { Utterance: "Bye" }
+                - { Utterance: "Danke, Tschüss" }
+                - { Utterance: "Ich bin fertig" }
+                - { Utterance: "Alles erledigt" }
+            - Name: FallbackIntent
+              ParentIntentSignature: AMAZON.FallbackIntent
+              FulfillmentCodeHook: { Enabled: true }
+        - LocaleId: es_ES
+          NluConfidenceThreshold: 0.4
+          VoiceSettings: { VoiceId: Lucia, Engine: neural }
+          Intents:
+            - Name: WelcomeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Hola" }
+                - { Utterance: "Eh" }
+                - { Utterance: "Buenos días" }
+            - Name: BinCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "¿Cuándo es el día de recogida de mi contenedor?" }
+                - { Utterance: "¿Qué día salgo con mis contenedores?" }
+                - { Utterance: "¿Cuándo recogen mis contenedores?" }
+                - { Utterance: "¿Qué día vacían mis contenedores?" }
+                - { Utterance: "Día de la basura" }
+            - Name: MissedCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Mis contenedores no han sido recogidos" }
+                - { Utterance: "El camión de la basura no vino esta semana" }
+                - { Utterance: "Recogida perdida" }
+                - { Utterance: "Mi contenedor no fue vaciado" }
+                - { Utterance: "No recogieron los contenedores" }
+                - { Utterance: "La recogida de basuras se perdió" }
+            - Name: FlyTip
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Hay un vertido ilegal" }
+                - { Utterance: "Alguien ha tirado basura" }
+                - { Utterance: "Han tirado basura" }
+                - { Utterance: "Vertido en la esquina" }
+                - { Utterance: "Un colchón tirado en la calle" }
+                - { Utterance: "Quiero denunciar un vertido ilegal" }
+                - { Utterance: "Me gustaría denunciar un vertido ilegal" }
+                - { Utterance: "Denunciar un vertido ilegal" }
+                - { Utterance: "Estoy denunciando un vertido ilegal" }
+                - { Utterance: "Necesito denunciar un vertido ilegal" }
+                - { Utterance: "Ha habido algún vertido ilegal" }
+                - { Utterance: "Alguien ha estado vertiendo basura" }
+                - { Utterance: "Vertido ilegal" }
+                - { Utterance: "Hay vertido ilegal" }
+                - { Utterance: "Alguien ha tirado un sofá" }
+                - { Utterance: "Un sofá tirado en la calle" }
+                - { Utterance: "Pila de basura" }
+            - Name: PotholeReport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Hay un bache" }
+                - { Utterance: "Bache en la carretera" }
+                - { Utterance: "Superficie de la carretera dañada" }
+            - Name: BrokenPaving
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "El pavimento está roto" }
+                - { Utterance: "Hay una losa del pavimento rota" }
+                - { Utterance: "El pavimento está dañado" }
+            - Name: ParkedVehicle
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Hay un coche aparcado en mi entrada" }
+                - { Utterance: "Alguien está bloqueando mi acceso" }
+                - { Utterance: "Coche aparcado ilegalmente" }
+            - Name: DampMould
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Hay humedad en mi casa" }
+                - { Utterance: "Moho en la pared" }
+                - { Utterance: "Humedad que sale por el techo" }
+                - { Utterance: "Moho negro en el baño" }
+                - { Utterance: "Mancha húmeda en la pared" }
+            - Name: AntiSocialBehaviour
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Comportamiento antisocial" }
+                - { Utterance: "Mi vecino ha estado gritando" }
+                - { Utterance: "Música alta todas las noches" }
+                - { Utterance: "Problema de comportamiento antisocial" }
+                - { Utterance: "Comportamiento amenazante del vecino" }
+            - Name: Safeguarding
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Estoy preocupado por una persona vulnerable" }
+                - { Utterance: "Creo que alguien está siendo abusado" }
+                - { Utterance: "No sé qué hacer" }
+                - { Utterance: "Estoy al límite" }
+                - { Utterance: "Preocupado por un adulto vulnerable" }
+            - Name: CouncilTax
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Impuesto municipal" }
+                - { Utterance: "No puedo pagar mi impuesto municipal" }
+                - { Utterance: "Estoy teniendo dificultades para pagar mi impuesto municipal" }
+                - { Utterance: "Tengo una pregunta sobre mi factura del impuesto municipal" }
+                - { Utterance: "El impuesto municipal es demasiado alto" }
+                - { Utterance: "Ejecución del impuesto municipal" }
+            - Name: BenefitsSupport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Beneficios de vivienda" }
+                - { Utterance: "Reducción del Impuesto Municipal" }
+                - { Utterance: "Ayuda con las prestaciones" }
+                - { Utterance: "Quiero solicitar las prestaciones" }
+            - Name: PlanningEnquiry
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Permiso de planificación" }
+                - { Utterance: "Solicitud de planificación" }
+                - { Utterance: "¿Necesito permiso de planificación?" }
+                - { Utterance: "Extensión de edificio" }
+            - Name: MultiIntentTriage
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Tengo varias cosas" }
+                - { Utterance: "Varios problemas" }
+            - Name: GoodbyeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "No" }
+                - { Utterance: "No, gracias" }
+                - { Utterance: "Eso es todo" }
+                - { Utterance: "Nada más" }
+                - { Utterance: "Adiós" }
+                - { Utterance: "Chau" }
+                - { Utterance: "Gracias, adiós" }
+                - { Utterance: "He terminado" }
+                - { Utterance: "Todo listo" }
+            - Name: FallbackIntent
+              ParentIntentSignature: AMAZON.FallbackIntent
+              FulfillmentCodeHook: { Enabled: true }
+        - LocaleId: pl_PL
+          NluConfidenceThreshold: 0.4
+          VoiceSettings: { VoiceId: Ola, Engine: neural }
+          Intents:
+            - Name: WelcomeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Cześć" }
+                - { Utterance: "Hej" }
+                - { Utterance: "Dzień dobry" }
+            - Name: BinCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Kiedy jest mój dzień zbiórki śmieci" }
+                - { Utterance: "Którego dnia wystawiam śmieci" }
+                - { Utterance: "Kiedy są zabierane moje śmieci" }
+                - { Utterance: "Którego dnia opróżniane są moje śmieci" }
+                - { Utterance: "Dzień śmieci" }
+            - Name: MissedCollection
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Moje śmieci nie zostały odniesione" }
+                - { Utterance: "Śmieciarka nie przyjechała w tym tygodniu" }
+                - { Utterance: "Przegapiona odbiórka" }
+                - { Utterance: "Mój kosz na śmieci nie został opróżniony" }
+                - { Utterance: "Śmieci nie zostały odniesione" }
+                - { Utterance: "Odbiór śmieci przegapiony" }
+            - Name: FlyTip
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Jest zaleganie śmieci" }
+                - { Utterance: "Ktoś wylał śmieci" }
+                - { Utterance: "Śmieci zostały wyrzucone" }
+                - { Utterance: "Zaleganie śmieci na rogu" }
+                - { Utterance: "Wyrzucono materac na ulicy" }
+                - { Utterance: "Chcę zgłosić zaleganie śmieci" }
+                - { Utterance: "Chciałbym zgłosić zaleganie śmieci" }
+                - { Utterance: "Zgłosić zaleganie śmieci" }
+                - { Utterance: "Zgłaszam zaleganie śmieci" }
+                - { Utterance: "Muszę zgłosić zaleganie śmieci" }
+                - { Utterance: "Było zaleganie śmieci" }
+                - { Utterance: "Ktoś zalega śmieci" }
+                - { Utterance: "Nielegalne zaleganie" }
+                - { Utterance: "Jest nielegalne zaleganie" }
+                - { Utterance: "Ktoś wylał sofę" }
+                - { Utterance: "Sofa wylana na ulicy" }
+                - { Utterance: "Stos śmieci" }
+            - Name: PotholeReport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Jest dziura na drodze" }
+                - { Utterance: "Dziura na drodze" }
+                - { Utterance: "Uszkodzona nawierzchnia drogi" }
+            - Name: BrokenPaving
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Ulica jest rozbita" }
+                - { Utterance: "Pęknięta płyta chodnikowa" }
+                - { Utterance: "Chodnik jest uszkodzony" }
+            - Name: ParkedVehicle
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Jest jakiś samochód zaparkowany na mojej podjeździe" }
+                - { Utterance: "Ktoś mi zablokował wjazd" }
+                - { Utterance: "Samochód zaparkowany nielegalnie" }
+            - Name: DampMould
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "W moim domu jest wilgoć" }
+                - { Utterance: "Pleśń na ścianie" }
+                - { Utterance: "Wilgoć przedostaje się przez mój sufit" }
+                - { Utterance: "Czarna pleśń w łazience" }
+                - { Utterance: "Mokra plama na ścianie" }
+            - Name: AntiSocialBehaviour
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Zachowanie antyspołeczne" }
+                - { Utterance: "Mój sąsiad krzyczy" }
+                - { Utterance: "Głośna muzyka co noc" }
+                - { Utterance: "Problem z zachowaniem antyspołecznym" }
+                - { Utterance: "Groźne zachowanie sąsiada" }
+            - Name: Safeguarding
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Martwię się o osobę bezradną" }
+                - { Utterance: "Myślę, że ktoś jest wykorzystywany" }
+                - { Utterance: "Nie wiem, co robić" }
+                - { Utterance: "Doszło mi do głowy" }
+                - { Utterance: "Martwię się o bezradnego dorosłego" }
+            - Name: CouncilTax
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Podatek komunalny" }
+                - { Utterance: "Nie mogę sobie pozwolić na zapłatę podatku komunalnego" }
+                - { Utterance: "Trudno mi zapłacić podatek komunalny" }
+                - { Utterance: "Pytanie dotyczące mojego rachunku za podatek komunalny" }
+                - { Utterance: "Podatek komunalny jest zbyt wysoki" }
+                - { Utterance: "Egzekucja podatku komunalnego" }
+            - Name: BenefitsSupport
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Zasiłek mieszkaniowy" }
+                - { Utterance: "Zmniejszenie podatku komunalnego" }
+                - { Utterance: "Pomoc z zasiłkami" }
+                - { Utterance: "Chcę ubiegać się o zasiłki" }
+            - Name: PlanningEnquiry
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Zezwolenie na budowę" }
+                - { Utterance: "Wniosek o zezwolenie na budowę" }
+                - { Utterance: "Czy potrzebuję pozwolenia na budowę" }
+                - { Utterance: "Rozbudowa budynku" }
+            - Name: MultiIntentTriage
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Mam kilka rzeczy" }
+                - { Utterance: "Kilka problemów" }
+            - Name: GoodbyeIntent
+              FulfillmentCodeHook: { Enabled: true }
+              SampleUtterances:
+                - { Utterance: "Nie" }
+                - { Utterance: "Nie, dziękuję" }
+                - { Utterance: "Nie, dziękuję bardzo" }
+                - { Utterance: "To wszystko" }
+                - { Utterance: "Nic więcej" }
+                - { Utterance: "Do widzenia" }
+                - { Utterance: "Pa" }
+                - { Utterance: "Dziękuję, do widzenia" }
+                - { Utterance: "Skończyłem" }
+                - { Utterance: "Wszystko skończone" }
+            - Name: FallbackIntent
+              ParentIntentSignature: AMAZON.FallbackIntent
+              FulfillmentCodeHook: { Enabled: true }
+  LexBotVersionV8:
     Type: AWS::Lex::BotVersion
     Properties:
       BotId: !Ref LexBot
       BotVersionLocaleSpecification:
         - LocaleId: en_US
+          BotVersionLocaleDetails: { SourceBotVersion: DRAFT }
+        - LocaleId: it_IT
+          BotVersionLocaleDetails: { SourceBotVersion: DRAFT }
+        - LocaleId: fr_FR
+          BotVersionLocaleDetails: { SourceBotVersion: DRAFT }
+        - LocaleId: de_DE
+          BotVersionLocaleDetails: { SourceBotVersion: DRAFT }
+        - LocaleId: es_ES
+          BotVersionLocaleDetails: { SourceBotVersion: DRAFT }
+        - LocaleId: pl_PL
           BotVersionLocaleDetails: { SourceBotVersion: DRAFT }
 
   LexBotAlias:
@@ -432,9 +1105,44 @@ Resources:
     Properties:
       BotId: !Ref LexBot
       BotAliasName: prod
-      BotVersion: !GetAtt LexBotVersionV6.BotVersion
+      BotVersion: !GetAtt LexBotVersionV8.BotVersion
       BotAliasLocaleSettings:
         - LocaleId: en_US
+          BotAliasLocaleSetting:
+            Enabled: true
+            CodeHookSpecification:
+              LambdaCodeHook:
+                LambdaArn: !GetAtt MultiIntentFunction.Arn
+                CodeHookInterfaceVersion: '1.0'
+        - LocaleId: it_IT
+          BotAliasLocaleSetting:
+            Enabled: true
+            CodeHookSpecification:
+              LambdaCodeHook:
+                LambdaArn: !GetAtt MultiIntentFunction.Arn
+                CodeHookInterfaceVersion: '1.0'
+        - LocaleId: fr_FR
+          BotAliasLocaleSetting:
+            Enabled: true
+            CodeHookSpecification:
+              LambdaCodeHook:
+                LambdaArn: !GetAtt MultiIntentFunction.Arn
+                CodeHookInterfaceVersion: '1.0'
+        - LocaleId: de_DE
+          BotAliasLocaleSetting:
+            Enabled: true
+            CodeHookSpecification:
+              LambdaCodeHook:
+                LambdaArn: !GetAtt MultiIntentFunction.Arn
+                CodeHookInterfaceVersion: '1.0'
+        - LocaleId: es_ES
+          BotAliasLocaleSetting:
+            Enabled: true
+            CodeHookSpecification:
+              LambdaCodeHook:
+                LambdaArn: !GetAtt MultiIntentFunction.Arn
+                CodeHookInterfaceVersion: '1.0'
+        - LocaleId: pl_PL
           BotAliasLocaleSetting:
             Enabled: true
             CodeHookSpecification:
@@ -567,9 +1275,23 @@ Resources:
                   - connect:DescribePhoneNumber
                   - connect:GetCurrentMetricData
                   - connect:DescribeQueue
+                  - connect:UpdateContactAttributes
+                  - connect:GetContactAttributes
                 Resource: '*'
               - Effect: Allow
                 Action: [lex:RecognizeText, lex:RecognizeUtterance]
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - kinesisvideo:GetDataEndpoint
+                  - kinesisvideo:DescribeStream
+                  - kinesisvideo:GetMedia
+                  - kinesis-video-media:GetMedia
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - transcribe:StartStreamTranscription
+                  - transcribe:StartStreamTranscriptionWebSocket
                 Resource: '*'
               - Effect: Allow
                 Action: [kms:GenerateDataKey, kms:Decrypt, kms:DescribeKey]
@@ -610,6 +1332,7 @@ Resources:
           DDB_TABLE_NAME: !Ref ContactLensCacheTable
           MULTI_INTENT_FN_NAME: !Ref MultiIntentFunction
           CASES_DOMAIN_ID: !Ref CasesDomain
+          CONNECT_INSTANCE_ID: !Ref ConnectInstance
 
   MultiIntentFunction:
     Type: AWS::Serverless::Function
@@ -620,6 +1343,37 @@ Resources:
       Timeout: 15
       Role: !GetAtt CommonLambdaRole.Arn
       Environment: { Variables: { MULTI_INTENT_MODEL_ID: !Ref GenerationModelId } }
+
+  LocalizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-localizer-${AWS::Region}'
+      CodeUri: lambdas/localizer/
+      Handler: index.lambda_handler
+      Timeout: 8
+      MemorySize: 256
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          MODEL_ARN: !Sub 'arn:aws:bedrock:${AWS::Region}::foundation-model/${GenerationModelId}'
+
+  LanguageDetectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-language-detect-${AWS::Region}'
+      CodeUri: lambdas/language-detect/
+      Handler: index.lambda_handler
+      # Two execution modes (see index.py docstring): the synchronous
+      # orchestrator path returns in well under a second; the async worker
+      # path takes up to ~14s because Transcribe streaming runs at 1x
+      # real-time on the server side and we cap audio at 12s. Set timeout
+      # generously so worker invocations always finish.
+      Timeout: 60
+      MemorySize: 512
+      Role: !GetAtt CommonLambdaRole.Arn
+      Environment:
+        Variables:
+          CONNECT_INSTANCE_ID: !Ref ConnectInstance
 
   MultiIntentLexInvokePermission:
     Type: AWS::Lambda::Permission
@@ -982,6 +1736,22 @@ Resources:
       IntegrationType: LAMBDA_FUNCTION
       IntegrationArn: !GetAtt PhotoWatcherFunction.Arn
 
+  IaLocalizerFn:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: LAMBDA_FUNCTION
+      IntegrationArn: !GetAtt LocalizerFunction.Arn
+
+  IaLanguageDetectFn:
+    Type: AWS::Connect::IntegrationAssociation
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      InstanceId: !Ref ConnectInstance
+      IntegrationType: LAMBDA_FUNCTION
+      IntegrationArn: !GetAtt LanguageDetectFunction.Arn
+
 
   IaCasesDomain:
     Type: AWS::Connect::IntegrationAssociation
@@ -1024,7 +1794,7 @@ Resources:
   # ============================================================
   MainContactFlow:
     Type: AWS::Connect::ContactFlow
-    DependsOn: [IaLexBot, IaRagFn, IaMultiIntentFn, IaMultimodalFn, IaCasesDomain, IaOutboundCallbackFn, IaLandlineCallbackFn, IaProfileBuilderTriggerFn, IaPhotoWatcherFn, HoldMusicPromptLookup]
+    DependsOn: [IaLexBot, IaRagFn, IaMultiIntentFn, IaMultimodalFn, IaCasesDomain, IaOutboundCallbackFn, IaLandlineCallbackFn, IaProfileBuilderTriggerFn, IaPhotoWatcherFn, IaLocalizerFn, HoldMusicPromptLookup]
     Properties:
       InstanceArn: !GetAtt ConnectInstance.Arn
       Name: ndx-try-aicc-main-flow
@@ -1073,7 +1843,18 @@ Resources:
               "Speak and re listen via Lex": { "isFriendlyName": true, "position": { "x": 3220, "y": 80 } },
               "Fallback acknowledgement": { "isFriendlyName": true, "position": { "x": 1940, "y": 280 } },
               "Goodbye message": { "isFriendlyName": true, "position": { "x": 3540, "y": 80 } },
-              "Disconnect": { "isFriendlyName": true, "position": { "x": 3860, "y": 80 } }
+              "Disconnect": { "isFriendlyName": true, "position": { "x": 3860, "y": 80 } },
+              "Apply caller voice": { "isFriendlyName": true, "position": { "x": 2260, "y": -120 } },
+              "Set Lex locale": { "isFriendlyName": true, "position": { "x": 2260, "y": -340 } },
+              "Start customer media stream": { "isFriendlyName": true, "position": { "x": 1480, "y": 80 } },
+              "Detect language": { "isFriendlyName": true, "position": { "x": 1820, "y": 80 } },
+              "Stop customer media stream": { "isFriendlyName": true, "position": { "x": 2120, "y": 80 } },
+              "Get photo timeout text": { "isFriendlyName": true, "position": { "x": 2900, "y": 2080 } },
+              "Get transferring text": { "isFriendlyName": true, "position": { "x": 3540, "y": 680 } },
+              "Get promise callback text": { "isFriendlyName": true, "position": { "x": 3540, "y": 1080 } },
+              "Get goodbye text": { "isFriendlyName": true, "position": { "x": 3540, "y": -120 } },
+              "Get fallback ack text": { "isFriendlyName": true, "position": { "x": 1940, "y": 80 } },
+              "Get ask landline text": { "isFriendlyName": true, "position": { "x": 3220, "y": 1080 } }
             }
           },
             "Actions": [
@@ -1141,6 +1922,21 @@ Resources:
                 "Type": "UpdateContactTextToSpeechVoice",
                 "Parameters": { "TextToSpeechEngine": "neural", "TextToSpeechVoice": "Amy" },
                 "Transitions": {
+                  "NextAction": "Start customer media stream",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Start customer media stream" }]
+                }
+              },
+              {
+                "Identifier": "Start customer media stream",
+                "Type": "UpdateContactMediaStreamingBehavior",
+                "Parameters": {
+                  "MediaStreamingState": "Enabled",
+                  "MediaStreamType": "Audio",
+                  "Participants": [
+                    { "ParticipantType": "Customer", "MediaDirections": ["From"] }
+                  ]
+                },
+                "Transitions": {
                   "NextAction": "Greet and get intent via Lex",
                   "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Greet and get intent via Lex" }]
                 }
@@ -1153,11 +1949,38 @@ Resources:
                   "LexV2Bot": { "AliasArn": "${LexBotAliasArn}" }
                 },
                 "Transitions": {
-                  "NextAction": "Bedrock RAG fulfilment",
+                  "NextAction": "Detect language",
                   "Errors": [
-                    { "ErrorType": "NoMatchingError", "NextAction": "Bedrock RAG fulfilment" },
-                    { "ErrorType": "NoMatchingCondition", "NextAction": "Bedrock RAG fulfilment" }
+                    { "ErrorType": "NoMatchingError", "NextAction": "Detect language" },
+                    { "ErrorType": "NoMatchingCondition", "NextAction": "Detect language" }
                   ]
+                }
+              },
+              {
+                "Identifier": "Detect language",
+                "Type": "InvokeLambdaFunction",
+                "Parameters": {
+                  "LambdaFunctionARN": "${LanguageDetectArn}",
+                  "InvocationTimeLimitSeconds": "8"
+                },
+                "Transitions": {
+                  "NextAction": "Stop customer media stream",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Stop customer media stream" }]
+                }
+              },
+              {
+                "Identifier": "Stop customer media stream",
+                "Type": "UpdateContactMediaStreamingBehavior",
+                "Parameters": {
+                  "MediaStreamingState": "Disabled",
+                  "MediaStreamType": "Audio",
+                  "Participants": [
+                    { "ParticipantType": "Customer", "MediaDirections": ["From"] }
+                  ]
+                },
+                "Transitions": {
+                  "NextAction": "Bedrock RAG fulfilment",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Bedrock RAG fulfilment" }]
                 }
               },
               {
@@ -1170,12 +1993,37 @@ Resources:
                     "user_utterance": "$.Lex.SessionAttributes.lex_input_transcript",
                     "matched_intent": "$.Lex.IntentName",
                     "decomposed_json": "$.Lex.SessionAttributes.decomposed_intents_json",
-                    "safeguarding": "$.Lex.SessionAttributes.safeguarding_flag"
+                    "safeguarding": "$.Lex.SessionAttributes.safeguarding_flag",
+                    "transcribe_transcript": "$.Attributes.TranscribeTranscript"
                   }
                 },
                 "Transitions": {
+                  "NextAction": "Apply caller voice",
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Get fallback ack text" }]
+                }
+              },
+              {
+              "Identifier": "Apply caller voice",
+              "Type": "UpdateContactTextToSpeechVoice",
+              "Parameters": {
+              "TextToSpeechEngine": "$.Attributes.PollyEngine",
+              "TextToSpeechVoice": "$.Attributes.PollyVoice"
+              },
+              "Transitions": {
+              "NextAction": "Set Lex locale",
+              "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Set Lex locale" }]
+              }
+              },
+              {
+                "Identifier": "Set Lex locale",
+                "Type": "UpdateContactData",
+                "Parameters": {
+                  "LanguageCode": "$.Attributes.PollyLanguage",
+                  "TargetContact": "Current"
+                },
+                "Transitions": {
                   "NextAction": "Should disconnect",
-                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Fallback acknowledgement" }]
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Should disconnect" }]
                 }
               },
               {
@@ -1313,7 +2161,7 @@ Resources:
                 },
                 "Transitions": {
                   "NextAction": "Photo received 3 of 3",
-                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Photo timeout message" }]
+                  "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Get photo timeout text" }]
                 }
               },
               {
@@ -1321,26 +2169,42 @@ Resources:
                 "Type": "Compare",
                 "Parameters": { "ComparisonValue": "$.External.found" },
                 "Transitions": {
-                  "NextAction": "Photo timeout message",
+                  "NextAction": "Get photo timeout text",
                   "Conditions": [
                     {
                       "NextAction": "Read back photo case",
                       "Condition": { "Operator": "Equals", "Operands": ["true"] }
                     }
                   ],
-                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Photo timeout message" }]
+                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Get photo timeout text" }]
                 }
               },
               {
                 "Identifier": "Read back photo case",
                 "Type": "MessageParticipant",
                 "Parameters": { "Text": "$.External.acknowledgement" },
-                "Transitions": { "NextAction": "Goodbye message" }
+                "Transitions": { "NextAction": "Get goodbye text" }
+              },
+              {
+              "Identifier": "Get photo timeout text",
+              "Type": "InvokeLambdaFunction",
+              "Parameters": {
+              "LambdaFunctionARN": "${LocalizerArn}",
+              "InvocationTimeLimitSeconds": "5",
+              "LambdaInvocationAttributes": {
+              "key": "photo_timeout",
+              "language": "$.Attributes.LanguageCode"
+              }
+              },
+              "Transitions": {
+              "NextAction": "Photo timeout message",
+              "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Photo timeout message" }]
+              }
               },
               {
                 "Identifier": "Photo timeout message",
                 "Type": "MessageParticipant",
-                "Parameters": { "Text": "I haven't received a photo yet. If you send one through the simulator later, I'll attach it to a case and a colleague will follow up. Thanks for calling." },
+                "Parameters": { "Text": "$.External.text" },
                 "Transitions": { "NextAction": "Disconnect" }
               },
               {
@@ -1381,7 +2245,7 @@ Resources:
                   "NextAction": "Needs landline fallback",
                   "Conditions": [
                     {
-                      "NextAction": "Tell caller transferring",
+                      "NextAction": "Get transferring text",
                       "Condition": { "Operator": "NumberGreaterThan", "Operands": ["0"] }
                     }
                   ],
@@ -1392,9 +2256,25 @@ Resources:
                 }
               },
               {
+              "Identifier": "Get transferring text",
+              "Type": "InvokeLambdaFunction",
+              "Parameters": {
+              "LambdaFunctionARN": "${LocalizerArn}",
+              "InvocationTimeLimitSeconds": "5",
+              "LambdaInvocationAttributes": {
+              "key": "transferring",
+              "language": "$.Attributes.LanguageCode"
+              }
+              },
+              "Transitions": {
+              "NextAction": "Tell caller transferring",
+              "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Tell caller transferring" }]
+              }
+              },
+              {
                 "Identifier": "Tell caller transferring",
                 "Type": "MessageParticipant",
-                "Parameters": { "Text": "Connecting you to a council officer now." },
+                "Parameters": { "Text": "$.External.text" },
                 "Transitions": { "NextAction": "Transfer to queue" }
               },
               {
@@ -1414,21 +2294,37 @@ Resources:
                 "Type": "Compare",
                 "Parameters": { "ComparisonValue": "$.External.needs_landline" },
                 "Transitions": {
-                  "NextAction": "Promise callback",
+                  "NextAction": "Get promise callback text",
                   "Conditions": [
                     {
-                      "NextAction": "Ask for landline number",
+                      "NextAction": "Get ask landline text",
                       "Condition": { "Operator": "Equals", "Operands": ["true"] }
                     }
                   ],
-                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Promise callback" }]
+                  "Errors": [{ "ErrorType": "NoMatchingCondition", "NextAction": "Get promise callback text" }]
                 }
+              },
+              {
+              "Identifier": "Get ask landline text",
+              "Type": "InvokeLambdaFunction",
+              "Parameters": {
+              "LambdaFunctionARN": "${LocalizerArn}",
+              "InvocationTimeLimitSeconds": "5",
+              "LambdaInvocationAttributes": {
+              "key": "ask_landline",
+              "language": "$.Attributes.LanguageCode"
+              }
+              },
+              "Transitions": {
+              "NextAction": "Ask for landline number",
+              "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Ask for landline number" }]
+              }
               },
               {
                 "Identifier": "Ask for landline number",
                 "Type": "ConnectParticipantWithLexBot",
                 "Parameters": {
-                  "Text": "We're temporarily unable to call mobile phones back. What's a landline number we can ring you on instead?",
+                  "Text": "$.External.text",
                   "LexV2Bot": { "AliasArn": "${LexBotAliasArn}" }
                 },
                 "Transitions": {
@@ -1455,9 +2351,25 @@ Resources:
                 }
               },
               {
+              "Identifier": "Get promise callback text",
+              "Type": "InvokeLambdaFunction",
+              "Parameters": {
+              "LambdaFunctionARN": "${LocalizerArn}",
+              "InvocationTimeLimitSeconds": "5",
+              "LambdaInvocationAttributes": {
+              "key": "promise_callback",
+              "language": "$.Attributes.LanguageCode"
+              }
+              },
+              "Transitions": {
+              "NextAction": "Promise callback",
+              "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Promise callback" }]
+              }
+              },
+              {
                 "Identifier": "Promise callback",
                 "Type": "MessageParticipant",
-                "Parameters": { "Text": "A safeguarding-trained colleague will call you back on this number within the next four hours." },
+                "Parameters": { "Text": "$.External.text" },
                 "Transitions": { "NextAction": "Trigger outbound callback" }
               },
               {
@@ -1489,7 +2401,7 @@ Resources:
                   "NextAction": "Bedrock RAG fulfilment",
                   "Conditions": [
                     {
-                      "NextAction": "Goodbye message",
+                      "NextAction": "Get goodbye text",
                       "Condition": {
                         "Operator": "Equals",
                         "Operands": ["GoodbyeIntent"]
@@ -1497,21 +2409,53 @@ Resources:
                     }
                   ],
                   "Errors": [
-                    { "ErrorType": "NoMatchingError", "NextAction": "Goodbye message" },
+                    { "ErrorType": "NoMatchingError", "NextAction": "Get goodbye text" },
                     { "ErrorType": "NoMatchingCondition", "NextAction": "Bedrock RAG fulfilment" }
                   ]
                 }
               },
               {
+              "Identifier": "Get fallback ack text",
+              "Type": "InvokeLambdaFunction",
+              "Parameters": {
+              "LambdaFunctionARN": "${LocalizerArn}",
+              "InvocationTimeLimitSeconds": "5",
+              "LambdaInvocationAttributes": {
+              "key": "fallback_ack",
+              "language": "$.Attributes.LanguageCode"
+              }
+              },
+              "Transitions": {
+              "NextAction": "Fallback acknowledgement",
+              "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Fallback acknowledgement" }]
+              }
+              },
+              {
                 "Identifier": "Fallback acknowledgement",
                 "Type": "MessageParticipant",
-                "Parameters": { "Text": "Thank you. I have logged your enquiry and a council officer will be in touch within two working days." },
-                "Transitions": { "NextAction": "Goodbye message" }
+                "Parameters": { "Text": "$.External.text" },
+                "Transitions": { "NextAction": "Get goodbye text" }
+              },
+              {
+              "Identifier": "Get goodbye text",
+              "Type": "InvokeLambdaFunction",
+              "Parameters": {
+              "LambdaFunctionARN": "${LocalizerArn}",
+              "InvocationTimeLimitSeconds": "5",
+              "LambdaInvocationAttributes": {
+              "key": "goodbye",
+              "language": "$.Attributes.LanguageCode"
+              }
+              },
+              "Transitions": {
+              "NextAction": "Goodbye message",
+              "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Goodbye message" }]
+              }
               },
               {
                 "Identifier": "Goodbye message",
                 "Type": "MessageParticipant",
-                "Parameters": { "Text": "Thanks for calling Aldershire District Council. Goodbye." },
+                "Parameters": { "Text": "$.External.text" },
                 "Transitions": { "NextAction": "Disconnect" }
               },
               {
@@ -1523,6 +2467,8 @@ Resources:
             ]
           }
         - LexBotAliasArn: !GetAtt LexBotAlias.Arn
+          LocalizerArn: !GetAtt LocalizerFunction.Arn
+          LanguageDetectArn: !GetAtt LanguageDetectFunction.Arn
           RagArn: !GetAtt RagFulfilmentFunction.Arn
           OutboundCallbackArn: !GetAtt OutboundCallbackFunction.Arn
           LandlineCallbackArn: !GetAtt LandlineCallbackFunction.Arn
@@ -1539,32 +2485,82 @@ Resources:
       InstanceArn: !GetAtt ConnectInstance.Arn
       Name: ndx-try-aicc-disconnect-flow
       Type: CONTACT_FLOW
-      Content: |
-        {
-          "Version": "2019-10-30",
-          "StartAction": "Apologise for fault",
-        "Metadata": {
-          "entryPointPosition": { "x": 20, "y": 20 },
-          "ActionMetadata": {
-            "Apologise for fault": { "isFriendlyName": true, "position": { "x": 20, "y": 80 } },
-            "Disconnect on error": { "isFriendlyName": true, "position": { "x": 340, "y": 80 } }
-          }
-        },
-          "Actions": [
-            {
-              "Identifier": "Apologise for fault",
-              "Type": "MessageParticipant",
-              "Parameters": { "Text": "Sorry, something has gone wrong. Goodbye." },
-              "Transitions": { "NextAction": "Disconnect on error" }
+      Content: !Sub
+        - |
+          {
+            "Version": "2019-10-30",
+            "StartAction": "Apologise for fault",
+            "Metadata": {
+              "entryPointPosition": {
+                "x": 20,
+                "y": 20
+              },
+              "ActionMetadata": {
+                "Apologise for fault": {
+                  "isFriendlyName": true,
+                  "position": {
+                    "x": 20,
+                    "y": 80
+                  }
+                },
+                "Disconnect on error": {
+                  "isFriendlyName": true,
+                  "position": {
+                    "x": 340,
+                    "y": 80
+                  }
+                },
+                "Get apology text": {
+                  "isFriendlyName": true,
+                  "position": {
+                    "x": -220,
+                    "y": 80
+                  }
+                }
+              }
             },
-            {
-              "Identifier": "Disconnect on error",
-              "Type": "DisconnectParticipant",
-              "Parameters": {},
-              "Transitions": {}
-            }
-          ]
-        }
+            "Actions": [
+              {
+                "Identifier": "Get apology text",
+                "Type": "InvokeLambdaFunction",
+                "Parameters": {
+                  "LambdaFunctionARN": "${LocalizerArn}",
+                  "InvocationTimeLimitSeconds": "5",
+                  "LambdaInvocationAttributes": {
+                    "key": "disconnect_apology",
+                    "language": "$.Attributes.LanguageCode"
+                  }
+                },
+                "Transitions": {
+                  "NextAction": "Apologise for fault",
+                  "Errors": [
+                    {
+                      "ErrorType": "NoMatchingError",
+                      "NextAction": "Apologise for fault"
+                    }
+                  ]
+                }
+              },
+              {
+                "Identifier": "Apologise for fault",
+                "Type": "MessageParticipant",
+                "Parameters": {
+                  "Text": "$.External.text"
+                },
+                "Transitions": {
+                  "NextAction": "Disconnect on error"
+                }
+              },
+              {
+                "Identifier": "Disconnect on error",
+                "Type": "DisconnectParticipant",
+                "Parameters": {},
+                "Transitions": {}
+              }
+            ]
+          }
+        
+        - LocalizerArn: !GetAtt LocalizerFunction.Arn
 
   CallbackSimulationFlow:
     Type: AWS::Connect::ContactFlow
@@ -1572,39 +2568,105 @@ Resources:
       InstanceArn: !GetAtt ConnectInstance.Arn
       Name: ndx-try-aicc-callback-simulation
       Type: CONTACT_FLOW
-      Content: |
-        {
-          "Version": "2019-10-30",
-          "StartAction": "Set Amy en GB voice",
-        "Metadata": {
-          "entryPointPosition": { "x": 20, "y": 20 },
-          "ActionMetadata": {
-            "Set Amy en GB voice": { "isFriendlyName": true, "position": { "x": 20, "y": 80 } },
-            "Speak callback message": { "isFriendlyName": true, "position": { "x": 340, "y": 80 } },
-            "Disconnect": { "isFriendlyName": true, "position": { "x": 660, "y": 80 } }
+      Content: !Sub
+        - |
+          {
+            "Version": "2019-10-30",
+            "StartAction": "Set Amy en GB voice",
+            "Metadata": {
+              "entryPointPosition": {
+                "x": 20,
+                "y": 20
+              },
+              "ActionMetadata": {
+                "Set Amy en GB voice": {
+                  "isFriendlyName": true,
+                  "position": {
+                    "x": 20,
+                    "y": 80
+                  }
+                },
+                "Speak callback message": {
+                  "isFriendlyName": true,
+                  "position": {
+                    "x": 340,
+                    "y": 80
+                  }
+                },
+                "Disconnect": {
+                  "isFriendlyName": true,
+                  "position": {
+                    "x": 660,
+                    "y": 80
+                  }
+                },
+                "Get callback simulation text": {
+                  "isFriendlyName": true,
+                  "position": {
+                    "x": -220,
+                    "y": 80
+                  }
+                }
+              }
+            },
+            "Actions": [
+              {
+                "Identifier": "Set Amy en GB voice",
+                "Type": "UpdateContactTextToSpeechVoice",
+                "Parameters": {
+                  "TextToSpeechEngine": "neural",
+                  "TextToSpeechVoice": "Amy"
+                },
+                "Transitions": {
+                  "NextAction": "Get callback simulation text",
+                  "Errors": [
+                    {
+                      "ErrorType": "NoMatchingError",
+                      "NextAction": "Get callback simulation text"
+                    }
+                  ]
+                }
+              },
+              {
+                "Identifier": "Get callback simulation text",
+                "Type": "InvokeLambdaFunction",
+                "Parameters": {
+                  "LambdaFunctionARN": "${LocalizerArn}",
+                  "InvocationTimeLimitSeconds": "5",
+                  "LambdaInvocationAttributes": {
+                    "key": "callback_simulation",
+                    "language": "$.Attributes.LanguageCode"
+                  }
+                },
+                "Transitions": {
+                  "NextAction": "Speak callback message",
+                  "Errors": [
+                    {
+                      "ErrorType": "NoMatchingError",
+                      "NextAction": "Speak callback message"
+                    }
+                  ]
+                }
+              },
+              {
+                "Identifier": "Speak callback message",
+                "Type": "MessageParticipant",
+                "Parameters": {
+                  "Text": "$.External.text"
+                },
+                "Transitions": {
+                  "NextAction": "Disconnect"
+                }
+              },
+              {
+                "Identifier": "Disconnect",
+                "Type": "DisconnectParticipant",
+                "Parameters": {},
+                "Transitions": {}
+              }
+            ]
           }
-        },
-          "Actions": [
-            {
-              "Identifier": "Set Amy en GB voice",
-              "Type": "UpdateContactTextToSpeechVoice",
-              "Parameters": { "TextToSpeechEngine": "neural", "TextToSpeechVoice": "Amy" },
-              "Transitions": { "NextAction": "Speak callback message", "Errors": [{ "ErrorType": "NoMatchingError", "NextAction": "Speak callback message" }] }
-            },
-            {
-              "Identifier": "Speak callback message",
-              "Type": "MessageParticipant",
-              "Parameters": { "Text": "Hello, this is Aldershire District Council calling you back. This is a simulation of what a callback from a real human could be like. If you log into the agent workspace, you can accept these calls there. Thanks for using NDX:Try. Goodbye." },
-              "Transitions": { "NextAction": "Disconnect" }
-            },
-            {
-              "Identifier": "Disconnect",
-              "Type": "DisconnectParticipant",
-              "Parameters": {},
-              "Transitions": {}
-            }
-          ]
-        }
+        - LocalizerArn: !GetAtt LocalizerFunction.Arn
 
   PhotoWatcherFunction:
     Type: AWS::Serverless::Function
@@ -1943,6 +3005,28 @@ Resources:
       S3Config:
         BucketName: !Ref RecordingsBucket
         BucketPrefix: recordings
+
+  # Real-time customer audio is streamed into KVS while a call is in
+  # progress. The language-detect Lambda reads from the per-contact stream
+  # during turn 1 so we can run Transcribe with IdentifyLanguage and tell what
+  # language the caller is speaking (Lex's ASR is locale-locked and produces
+  # phonetic-English nonsense for non-English audio, so the en_US Lex
+  # transcript can't be used for language detection on its own).
+  #
+  # Connect creates one KVS stream per contact under the configured Prefix.
+  ConnectMediaStreamsStorage:
+    Type: AWS::Connect::InstanceStorageConfig
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      InstanceArn: !GetAtt ConnectInstance.Arn
+      ResourceType: MEDIA_STREAMS
+      StorageType: KINESIS_VIDEO_STREAM
+      KinesisVideoStreamConfig:
+        Prefix: ndx-try-aicc
+        RetentionPeriodHours: 24
+        EncryptionConfig:
+          EncryptionType: KMS
+          KeyId: alias/aws/kinesisvideo
 
   ContactLensCacheTable:
     Type: AWS::DynamoDB::Table

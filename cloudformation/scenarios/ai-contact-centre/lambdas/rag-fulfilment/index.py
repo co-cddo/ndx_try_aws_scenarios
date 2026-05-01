@@ -42,11 +42,53 @@ GUARDRAIL_VERSION = os.environ.get("GUARDRAIL_VERSION", "DRAFT")
 MODEL_ARN = os.environ["MODEL_ARN"]
 DDB_TABLE_NAME = os.environ.get("DDB_TABLE_NAME", "")
 MULTI_INTENT_FN_NAME = os.environ.get("MULTI_INTENT_FN_NAME", "")
+INSTANCE_ID = os.environ.get("CONNECT_INSTANCE_ID", "")
 
 bedrock_agent = boto3.client("bedrock-agent-runtime")
+bedrock_runtime = boto3.client("bedrock-runtime")
+connect = boto3.client("connect")
 ddb = boto3.resource("dynamodb")
 lambda_client = boto3.client("lambda")
 _table = ddb.Table(DDB_TABLE_NAME) if DDB_TABLE_NAME else None
+
+VOICE_BY_LANG = {
+    "en": ("Amy",     "neural"),
+    "it": ("Bianca",  "neural"),
+    "fr": ("Lea",     "neural"),
+    "de": ("Vicki",   "neural"),
+    "es": ("Lucia",   "neural"),
+    "pl": ("Ola",     "neural"),
+    "cy": ("Gwyneth", "standard"),
+    "ro": ("Carmen",  "standard"),
+}
+
+# BCP-47 language codes used by Connect's system $.LanguageCode attribute,
+# which it consults to pick the matching Lex locale on each
+# ConnectParticipantWithLexBot call. We set this via an UpdateContactData
+# block in the contact flow (see "Set Lex locale" action). For Welsh and
+# Romanian, Lex has no locale, so we keep en_US transcription -- the bot
+# still answers in target language because rag-fulfilment generates its
+# response in that language.
+LEX_LOCALE_BY_LANG = {
+    "en": "en-US",
+    "it": "it-IT",
+    "fr": "fr-FR",
+    "de": "de-DE",
+    "es": "es-ES",
+    "pl": "pl-PL",
+    "cy": "en-US",
+    "ro": "en-US",
+}
+
+LANGUAGE_NAME = {
+    "en": "English", "it": "Italian", "fr": "French", "de": "German",
+    "es": "Spanish", "pl": "Polish", "cy": "Welsh", "ro": "Romanian",
+}
+
+# Cache (english_text, lang) -> translated text. Persists for the warm-pool
+# lifetime of the Lambda. Each cold start pays one Bedrock call per fixed
+# string per non-English language.
+_TRANSLATION_CACHE: Dict[tuple, str] = {}
 
 
 def lambda_handler(event, context):
@@ -62,13 +104,19 @@ def lambda_handler(event, context):
     transcript = _extract_utterance(event)
     decomposed = _extract_decomposed_from_event(event)
 
+    # Detect (or read existing) caller language. First turn: Bedrock detects from
+    # the (possibly-noisy en_GB-Lex) transcript and we persist the choice via
+    # connect.update_contact_attributes. Subsequent turns just read the attribute.
+    lang, lang_first_set = _resolve_language(event, contact_id, transcript)
+
     # Goodbye detection: any short transcript matching "no"/"nope"/"goodbye"/"bye" etc.
     # Lex's GoodbyeIntent doesn't always fire on bare "no"; we shortcut here so the flow
     # can route to the disconnect action without running RAG.
     if _looks_like_goodbye(transcript, matched_intent):
         return _respond(event, is_contact_flow,
                         "Thanks for calling Aldershire District Council. Goodbye.",
-                        fulfilled=True, intervened=False, should_disconnect=True)
+                        fulfilled=True, intervened=False, should_disconnect=True,
+                        lang=lang, lang_first_set=lang_first_set)
     # Contact Lens DDB poll disabled: doesn't fire for IVR-only contacts (no agent participant).
     # Lex's fulfillment hook now stores the spoken transcript in session attributes, surfaced via
     # $.Lex.SessionAttributes.lex_input_transcript -> user_utterance param.
@@ -85,19 +133,21 @@ def lambda_handler(event, context):
                     transcript_word_count, transcript)
         return _respond(event, is_contact_flow,
                         "Sorry, I didn't quite catch that. Could you say it again?",
-                        fulfilled=False, intervened=False)
+                        fulfilled=False, intervened=False,
+                        lang=lang, lang_first_set=lang_first_set)
 
     if not transcript and matched_intent:
         transcript = _synthesise_query(matched_intent)
         logger.info("falling back to synthesised query: %r", transcript)
 
-    logger.info("RAG fulfilment: contact_id=%s transcript_len=%d intent=%s preDecomposed=%s",
-                contact_id, len(transcript), matched_intent,
+    logger.info("RAG fulfilment: contact_id=%s lang=%s transcript=%r intent=%s preDecomposed=%s",
+                contact_id, lang, transcript[:200], matched_intent,
                 bool(decomposed and decomposed.get("intents")))
 
     if not transcript:
         return _respond(event, is_contact_flow, "Sorry, I didn't quite catch that. Could you say it again?",
-                        fulfilled=False, intervened=False)
+                        fulfilled=False, intervened=False,
+                        lang=lang, lang_first_set=lang_first_set)
 
     if not decomposed and MULTI_INTENT_FN_NAME:
         decomposed = _try_decompose(transcript)
@@ -109,7 +159,8 @@ def lambda_handler(event, context):
         return _respond(event, is_contact_flow, answer,
                         fulfilled=True, intervened=False,
                         decomposed=decomposed,
-                        needs_landline=safeguarding and _is_uk_mobile(customer_phone))
+                        needs_landline=safeguarding and _is_uk_mobile(customer_phone),
+                        lang=lang, lang_first_set=lang_first_set)
 
     # FlyTip on a voice call: we'd normally ask the caller to send a photo via
     # WhatsApp or SMS, but PSTN-out is blocked in the sandbox. Direct them to
@@ -129,7 +180,8 @@ def lambda_handler(event, context):
                         "picture. I'll hold while you do that.",
                         fulfilled=True, intervened=False,
                         decomposed=decomposed,
-                        awaits_photo=True)
+                        awaits_photo=True,
+                        lang=lang, lang_first_set=lang_first_set)
 
     # Single-intent path. If the decomposer flagged safeguarding, return a SHORT
     # acknowledgement only. The contact flow decides whether to transfer to an
@@ -142,14 +194,121 @@ def lambda_handler(event, context):
                         "Thank you for telling me. I've flagged this as urgent.",
                         fulfilled=True, intervened=False,
                         decomposed=decomposed,
-                        needs_landline=is_mobile)
+                        needs_landline=is_mobile,
+                        lang=lang, lang_first_set=lang_first_set)
 
-    answer = _rag(transcript)
+    answer = _rag(transcript, lang)
     if answer is None:
         return _respond(event, is_contact_flow,
                         "I cannot help with that one directly, but I will get a colleague to call you back.",
-                        fulfilled=False, intervened=True)
-    return _respond(event, is_contact_flow, answer, fulfilled=True, intervened=False)
+                        fulfilled=False, intervened=True,
+                        lang=lang, lang_first_set=lang_first_set)
+    # _rag already returns the answer in the target language; skip _respond's translation.
+    return _respond(event, is_contact_flow, answer, fulfilled=True, intervened=False,
+                    lang=lang, lang_first_set=lang_first_set, already_localized=True)
+
+
+def _resolve_language(event, contact_id: str, transcript: str) -> tuple:
+    """Read existing LanguageCode attribute, or detect from the first transcript.
+    Returns (lang_code, is_first_detection). When first detected, persist via
+    connect.update_contact_attributes so subsequent flow blocks (and the
+    Apply caller voice block) can read $.Attributes.LanguageCode/PollyVoice."""
+    if not (isinstance(event, dict) and "Details" in event):
+        return "en", False
+    attrs = event.get("Details", {}).get("ContactData", {}).get("Attributes", {}) or {}
+    existing = (attrs.get("LanguageCode") or "").strip().lower()
+    if existing in VOICE_BY_LANG:
+        return existing, False
+    # First turn: detect from transcript. If transcript missing, assume English
+    # (the flow's seed greeting is English; caller hasn't spoken yet).
+    if not transcript:
+        return "en", False
+    lang = _detect_language(transcript)
+    if INSTANCE_ID and contact_id:
+        voice, engine = VOICE_BY_LANG.get(lang, ("Amy", "neural"))
+        polly_language = LEX_LOCALE_BY_LANG.get(lang, "en-US")
+        try:
+            connect.update_contact_attributes(
+                InstanceId=INSTANCE_ID,
+                InitialContactId=contact_id,
+                Attributes={
+                    "LanguageCode": lang,
+                    "PollyVoice": voice,
+                    "PollyEngine": engine,
+                    "PollyLanguage": polly_language,
+                },
+            )
+        except Exception:
+            logger.exception("update_contact_attributes failed for contact %s", contact_id)
+    return lang, True
+
+
+def _detect_language(transcript: str) -> str:
+    """Best-effort language ID via Bedrock Nova. The input transcript was
+    produced by an en_US Lex/Transcribe pipe, so non-English speech often
+    arrives as phonetic English-sounding nonsense. Lean on that: ask the model
+    to consider whether the transcript looks like real English vs. gibberish
+    that hints at another language."""
+    if not transcript or len(transcript.strip()) < 2:
+        return "en"
+    prompt = (
+        "You are classifying the language of a short caller utterance. The "
+        "audio was transcribed by an English (en_US) speech-to-text engine, "
+        "so non-English speech usually arrives as broken/phonetic English "
+        "(\"chow comma sty\" for Italian \"ciao come stai\"). Look for: real "
+        "English semantics (likely en), or non-English diacritics, real "
+        "non-English words, OR phonetic gibberish that doesn't form a coherent "
+        "English sentence (likely a non-English language).\n\n"
+        "Reply with EXACTLY one two-letter code from: en, it, fr, de, es, pl, "
+        "cy, ro. No explanation. If the transcript clearly states real English "
+        "words in coherent order, reply en. Otherwise pick the most likely "
+        "non-English option based on phonetic clues or vocabulary.\n\n"
+        f"Transcript: \"{transcript.strip()}\""
+    )
+    try:
+        resp = bedrock_runtime.converse(
+            modelId=MODEL_ARN,
+            messages=[{"role": "user", "content": [{"text": prompt}]}],
+            inferenceConfig={"maxTokens": 8, "temperature": 0.0},
+        )
+        out = resp["output"]["message"]["content"][0]["text"].strip().lower()
+        code = re.sub(r"[^a-z]", "", out)[:2]
+        result = code if code in VOICE_BY_LANG else "en"
+        logger.info("language detect: %r -> %s (raw %r)", transcript[:120], result, out[:30])
+        return result
+    except Exception:
+        logger.exception("language detect failed for transcript=%r", transcript[:120])
+        return "en"
+
+
+def _localize_text(text: str, lang: str) -> str:
+    """Translate fixed English strings to target language via Bedrock, with cache."""
+    if lang == "en" or not text:
+        return text
+    cache_key = (text, lang)
+    if cache_key in _TRANSLATION_CACHE:
+        return _TRANSLATION_CACHE[cache_key]
+    target = LANGUAGE_NAME.get(lang, "English")
+    prompt = (
+        f"Translate the following English text into natural spoken {target}. "
+        f"This will be read aloud by a council switchboard, so keep it warm and "
+        f"clear. Return only the translation, no quotes, no preamble.\n\n"
+        f"English: {text}"
+    )
+    try:
+        resp = bedrock_runtime.converse(
+            modelId=MODEL_ARN,
+            messages=[{"role": "user", "content": [{"text": prompt}]}],
+            inferenceConfig={"maxTokens": 600, "temperature": 0.1},
+        )
+        out = resp["output"]["message"]["content"][0]["text"].strip()
+        if (out.startswith('"') and out.endswith('"')) or (out.startswith("'") and out.endswith("'")):
+            out = out[1:-1].strip()
+        _TRANSLATION_CACHE[cache_key] = out
+        return out
+    except Exception:
+        logger.exception("translation failed for lang=%s", lang)
+        return text
 
 
 def _read_contact_lens_transcript(contact_id: str, max_wait_seconds: float = 1.5) -> str:
@@ -279,7 +438,13 @@ def _spell(n: int) -> str:
     return ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight"][n] if 0 <= n < 9 else str(n)
 
 
-def _rag(query: str) -> Optional[str]:
+def _rag(query: str, lang: str = "en") -> Optional[str]:
+    target_language = LANGUAGE_NAME.get(lang, "English")
+    language_clause = (
+        ""
+        if lang == "en"
+        else f"\n- Reply ONLY in {target_language}. Do not switch language mid-sentence."
+    )
     voice_prompt_template = (
         "You are an Aldershire District Council phone assistant. Answer the caller using "
         "the search results below. Reply in 1-2 short, conversational sentences. "
@@ -292,7 +457,8 @@ def _rag(query: str) -> Optional[str]:
         "- If the caller gives ANY postcode-shaped input (real or demo), pick one of the "
         "  collection schedules from the search results and answer with that day. This is "
         "  a council demo so do not reject the postcode as out-of-area; just pick any "
-        "  schedule from search results and give it as the answer.\n\n"
+        "  schedule from search results and give it as the answer."
+        f"{language_clause}\n\n"
         "Search results:\n$search_results$\n\n"
         "Caller said: $query$\n\n"
         "Answer:"
@@ -341,10 +507,16 @@ def _rag(query: str) -> Optional[str]:
 def _extract_utterance(event: Dict[str, Any]) -> str:
     if isinstance(event, dict) and "Details" in event:
         params = event.get("Details", {}).get("Parameters", {}) or {}
+        # Prefer the clean Transcribe transcript over Lex's locale-locked
+        # output when language-detect has run (which produces a much better
+        # transcript for non-English audio).
+        transcribe = (params.get("transcribe_transcript") or "").strip()
+        if transcribe:
+            return transcribe
         if "user_utterance" in params:
             return (params["user_utterance"] or "").strip()
         attrs = event.get("Details", {}).get("ContactData", {}).get("Attributes", {}) or {}
-        for k in ("user_utterance", "InputTranscript"):
+        for k in ("TranscribeTranscript", "user_utterance", "InputTranscript"):
             if k in attrs and attrs[k]:
                 return attrs[k].strip()
     return (event.get("inputTranscript") or "").strip()
@@ -443,8 +615,15 @@ def _trim_for_polly(text: str, max_chars: int = 700) -> str:
 
 def _respond(event, is_contact_flow: bool, message: str, *, fulfilled: bool, intervened: bool,
              decomposed: Optional[Dict[str, Any]] = None, should_disconnect: bool = False,
-             needs_landline: bool = False, awaits_photo: bool = False):
+             needs_landline: bool = False, awaits_photo: bool = False,
+             lang: str = "en", lang_first_set: bool = False,
+             already_localized: bool = False):
     if is_contact_flow:
+        # Translate the static English message into the caller's language unless
+        # the caller is already speaking English or _rag has produced a localized
+        # answer directly. The closing "Anything else?" follow-up is also localized.
+        if lang != "en" and not already_localized:
+            message = _localize_text(message, lang)
         # Build the prompt the flow should play. If the bot's reply already ends with
         # a question mark (e.g. "What's your postcode?"), don't tack "Anything else?"
         # on the end — that confuses the caller. Same for disconnect-bound responses,
@@ -455,7 +634,9 @@ def _respond(event, is_contact_flow: bool, message: str, *, fulfilled: bool, int
         if should_disconnect or ends_with_question or needs_landline or awaits_photo:
             prompt = message
         else:
-            prompt = f"{message} Anything else?"
+            anything_else = _localize_text("Anything else?", lang) if lang != "en" else "Anything else?"
+            prompt = f"{message} {anything_else}"
+        voice, engine = VOICE_BY_LANG.get(lang, ("Amy", "neural"))
         out = {
             "answer": message,
             "prompt": prompt,
@@ -464,6 +645,10 @@ def _respond(event, is_contact_flow: bool, message: str, *, fulfilled: bool, int
             "should_disconnect": "true" if should_disconnect else "false",
             "needs_landline": "true" if needs_landline else "false",
             "awaits_photo": "true" if awaits_photo else "false",
+            "language_code": lang,
+            "polly_voice": voice,
+            "polly_engine": engine,
+            "language_first_set": "true" if lang_first_set else "false",
         }
         if decomposed:
             out["intent_count"] = str(len(decomposed.get("intents") or []))

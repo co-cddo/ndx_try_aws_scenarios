@@ -43,9 +43,80 @@ ALLOWED_ORIGIN_PATTERN = re.compile(
 connect = boto3.client("connect")
 lex = boto3.client("lexv2-runtime")
 bedrock_agent = boto3.client("bedrock-agent-runtime")
+bedrock_runtime = boto3.client("bedrock-runtime")
 lambda_client = boto3.client("lambda")
 cases_client = boto3.client("connectcases")
 profiles_client = boto3.client("customer-profiles")
+
+LANGUAGE_NAME = {
+    "en": "English", "it": "Italian", "fr": "French", "de": "German",
+    "es": "Spanish", "pl": "Polish", "cy": "Welsh", "ro": "Romanian",
+}
+_TRANSLATION_CACHE: Dict[tuple, str] = {}
+
+
+def _detect_language(text: str) -> str:
+    """Best-effort language ID for chat utterances. Returns ISO 639-1 code from
+    the supported set, or 'en' when ambiguous or empty."""
+    if not text or len(text.strip()) < 2:
+        return "en"
+    if not GENERATION_MODEL_ARN:
+        return "en"
+    prompt = (
+        "Identify the language of this chat message. Reply with exactly one of "
+        "these two-letter codes and nothing else: en, it, fr, de, es, pl, cy, ro. "
+        "If ambiguous or clearly English, reply en.\n\n"
+        f"Message: {text.strip()}"
+    )
+    try:
+        resp = bedrock_runtime.converse(
+            modelId=GENERATION_MODEL_ARN,
+            messages=[{"role": "user", "content": [{"text": prompt}]}],
+            inferenceConfig={"maxTokens": 8, "temperature": 0.0},
+        )
+        out = resp["output"]["message"]["content"][0]["text"].strip().lower()
+        code = re.sub(r"[^a-z]", "", out)[:2]
+        return code if code in LANGUAGE_NAME else "en"
+    except Exception:
+        logger.exception("language detect failed")
+        return "en"
+
+
+def _localize_text(text: str, lang: str) -> str:
+    if lang == "en" or not text or not GENERATION_MODEL_ARN:
+        return text
+    cache_key = (text, lang)
+    if cache_key in _TRANSLATION_CACHE:
+        return _TRANSLATION_CACHE[cache_key]
+    target = LANGUAGE_NAME.get(lang, "English")
+    prompt = (
+        f"Translate the following English text into natural conversational {target}. "
+        f"Preserve any numbers, references and proper nouns exactly. "
+        f"Return only the translation, no preamble.\n\n"
+        f"English: {text}"
+    )
+    try:
+        resp = bedrock_runtime.converse(
+            modelId=GENERATION_MODEL_ARN,
+            messages=[{"role": "user", "content": [{"text": prompt}]}],
+            inferenceConfig={"maxTokens": 600, "temperature": 0.1},
+        )
+        out = resp["output"]["message"]["content"][0]["text"].strip()
+        if (out.startswith('"') and out.endswith('"')) or (out.startswith("'") and out.endswith("'")):
+            out = out[1:-1].strip()
+        _TRANSLATION_CACHE[cache_key] = out
+        return out
+    except Exception:
+        logger.exception("companion-api translation failed for lang=%s", lang)
+        return text
+
+
+def _normalise_lang(raw) -> str:
+    if not raw:
+        return "en"
+    code = str(raw).strip().lower()
+    code = re.split(r"[_\-]", code, maxsplit=1)[0]
+    return code if code in LANGUAGE_NAME else "en"
 LEX_BOT_ID = os.environ.get("LEX_BOT_ID", "")
 LEX_BOT_ALIAS_ID = os.environ.get("LEX_BOT_ALIAS_ID", "")
 LEX_LOCALE_ID = "en_GB"
@@ -143,6 +214,7 @@ def _simulator_send(event, cors):
     sender_phone = body.get("sender_phone")
     if not image_key or not sender_phone:
         return _resp(400, {"error": "image_s3_key and sender_phone required"}, cors)
+    lang = _normalise_lang(body.get("language"))
     resp = lambda_client.invoke(
         FunctionName=MULTIMODAL_LAMBDA_ARN,
         InvocationType="RequestResponse",
@@ -152,6 +224,16 @@ def _simulator_send(event, cors):
         }).encode(),
     )
     payload = json.loads(resp["Payload"].read())
+    # Translate the user-facing fields in the structured response so the chat
+    # bubble appears in the resident's language.
+    if lang != "en" and isinstance(payload, dict):
+        sd = payload.get("structured_description") or {}
+        if isinstance(sd, dict):
+            for field in ("condition", "suggested_council_action"):
+                if sd.get(field):
+                    sd[field] = _localize_text(sd[field], lang)
+            payload["structured_description"] = sd
+        payload["language"] = lang
     return _resp(200, payload, cors)
 
 
@@ -215,6 +297,12 @@ def _ask(event, cors):
     if not utterance:
         return _resp(400, {"error": "utterance required"}, cors)
 
+    # Language: prefer client-supplied (cached from a previous detection in the
+    # same SPA session), otherwise auto-detect from the utterance.
+    lang = _normalise_lang(body.get("language"))
+    if not body.get("language"):
+        lang = _detect_language(utterance)
+
     # Always run Lex (single-intent classifier).
     intent_name = "GeneralEnquiry"
     intent_confidence = 0.0
@@ -238,7 +326,7 @@ def _ask(event, cors):
         # Multi-intent path: RAG each, open one Case capturing all intents.
         per_intent_answers = []
         for i in decomposed["intents"][:4]:
-            ans = _rag_answer(i.get("verbatim_excerpt") or utterance)
+            ans = _rag_answer(i.get("verbatim_excerpt") or utterance, lang)
             per_intent_answers.append({
                 "intent": i.get("intent_name"),
                 "verbatim": i.get("verbatim_excerpt"),
@@ -262,10 +350,11 @@ def _ask(event, cors):
             "truncated_intents": decomposed.get("truncated_intents", []),
             "requires_safeguarding_review": decomposed.get("requires_safeguarding_review", False),
             "answers": per_intent_answers,
+            "language": lang,
         }, cors)
 
     # Single-intent path.
-    answer = _rag_answer(utterance)
+    answer = _rag_answer(utterance, lang)
     case_id = _open_case(
         sender_phone=sender_phone,
         primary_intent=intent_name,
@@ -281,6 +370,7 @@ def _ask(event, cors):
         "intent_confidence": intent_confidence,
         "guardrail_intervened": answer["intervened"],
         "citations": answer["citations"],
+        "language": lang,
     }, cors)
 
 
@@ -375,9 +465,26 @@ def _decompose_if_multi(utterance: str) -> Dict[str, Any]:
     return {}
 
 
-def _rag_answer(utterance: str) -> Dict[str, Any]:
+def _rag_answer(utterance: str, lang: str = "en") -> Dict[str, Any]:
     if not (KB_ID and GENERATION_MODEL_ARN):
         return {"text": "RAG not configured.", "intervened": False, "citations": []}
+    target = LANGUAGE_NAME.get(lang, "English")
+    language_clause = (
+        ""
+        if lang == "en"
+        else (
+            f"\n\nReply ONLY in {target}. Do not switch language mid-response. "
+            "Do not include the original English."
+        )
+    )
+    chat_prompt_template = (
+        "You are an Aldershire District Council assistant. Answer the resident "
+        "using the search results below in 1-3 short, helpful sentences."
+        f"{language_clause}\n\n"
+        "Search results:\n$search_results$\n\n"
+        "Resident asked: $query$\n\n"
+        "Answer:"
+    )
     try:
         resp = bedrock_agent.retrieve_and_generate(
             input={"text": utterance},
@@ -391,6 +498,7 @@ def _rag_answer(utterance: str) -> Dict[str, Any]:
                             "guardrailId": GUARDRAIL_ID,
                             "guardrailVersion": "DRAFT",
                         },
+                        "promptTemplate": {"textPromptTemplate": chat_prompt_template},
                         "inferenceConfig": {
                             "textInferenceConfig": {"maxTokens": 350, "temperature": 0.2},
                         },
@@ -400,8 +508,8 @@ def _rag_answer(utterance: str) -> Dict[str, Any]:
         )
     except Exception as exc:
         logger.exception("RAG failed: %s", exc)
-        return {"text": "I cannot help with that one. A council officer will follow up.",
-                "intervened": True, "citations": []}
+        fallback = "I cannot help with that one. A council officer will follow up."
+        return {"text": _localize_text(fallback, lang), "intervened": True, "citations": []}
     text = (resp.get("output") or {}).get("text") or ""
     intervened = resp.get("guardrailAction") == "INTERVENED"
     cites = []
@@ -412,7 +520,7 @@ def _rag_answer(utterance: str) -> Dict[str, Any]:
             if uri:
                 cites.append(uri.rsplit("/", 1)[-1])
     if intervened or not text:
-        text = "I cannot help with that one directly. A council officer will follow up."
+        text = _localize_text("I cannot help with that one directly. A council officer will follow up.", lang)
     return {"text": text, "intervened": intervened, "citations": cites[:3]}
 
 
@@ -464,8 +572,11 @@ def _climax(event, cors):
         line = f"Your enquiry about {intent} has reference {ref}; a council officer will be in touch."
     else:
         line = "We have logged your enquiry; a council officer will be in touch."
+    lang = _normalise_lang(body.get("language"))
+    if lang != "en":
+        line = _localize_text(line, lang)
     return _resp(200, {"line": line, "case_id": cid, "reference_number": ref,
-                       "has_photo": bool(multimodal)}, cors)
+                       "has_photo": bool(multimodal), "language": lang}, cors)
 
 
 def _web_call_start(event, cors):
