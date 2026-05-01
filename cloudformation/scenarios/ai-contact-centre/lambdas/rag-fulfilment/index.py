@@ -507,18 +507,20 @@ def _rag(query: str, lang: str = "en") -> Optional[str]:
 def _extract_utterance(event: Dict[str, Any]) -> str:
     if isinstance(event, dict) and "Details" in event:
         params = event.get("Details", {}).get("Parameters", {}) or {}
-        # Prefer the clean Transcribe transcript over Lex's locale-locked
-        # output when language-detect has run (which produces a much better
-        # transcript for non-English audio).
+        # Prefer Lex's per-turn transcript. transcribe_transcript is the
+        # one-shot language-detection capture and is only useful as a
+        # fallback for the very first turn before Lex has any input.
+        if "user_utterance" in params and (params.get("user_utterance") or "").strip():
+            return params["user_utterance"].strip()
+        attrs = event.get("Details", {}).get("ContactData", {}).get("Attributes", {}) or {}
+        for k in ("user_utterance", "InputTranscript"):
+            if k in attrs and attrs[k]:
+                return attrs[k].strip()
         transcribe = (params.get("transcribe_transcript") or "").strip()
         if transcribe:
             return transcribe
-        if "user_utterance" in params:
-            return (params["user_utterance"] or "").strip()
-        attrs = event.get("Details", {}).get("ContactData", {}).get("Attributes", {}) or {}
-        for k in ("TranscribeTranscript", "user_utterance", "InputTranscript"):
-            if k in attrs and attrs[k]:
-                return attrs[k].strip()
+        if attrs.get("TranscribeTranscript"):
+            return attrs["TranscribeTranscript"].strip()
     return (event.get("inputTranscript") or "").strip()
 
 
