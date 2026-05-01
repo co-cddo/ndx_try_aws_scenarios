@@ -3,7 +3,7 @@ layout: layouts/walkthrough.njk
 title: "Step 2: Multichannel - fly-tip on the phone, photo via the simulator - AI Contact Centre Walkthrough"
 description: Report a fly-tip on the phone. The bot asks for a photo. The line stays open while you upload one through the in-browser simulator. The bot reads back a single sentence linking call and photo to one case.
 currentStep: 2
-totalSteps: 7
+totalSteps: 8
 timeEstimate: "6 minutes"
 scenarioId: ai-contact-centre
 ---
@@ -48,41 +48,53 @@ scenarioId: ai-contact-centre
 <h3 class="govuk-heading-m">Download a photo to use</h3>
 
 <div class="ndx-photo-download">
-  <a href="/assets/downloads/sample-flytip.jpg" download class="govuk-button govuk-button--secondary">
-    Download a sample fly-tip photo (JPEG, 440 KB)
-  </a>
-  <p class="govuk-body-s govuk-!-margin-top-2">
-    A real-world picture of dumped rubbish you can send through the simulator. Or use any photo on your own device, the bot will describe whatever it sees.
+  <img src="/assets/downloads/sample-flytip.jpg"
+       alt="A real-world picture of dumped rubbish: bin bags, broken furniture, and other mixed waste left in an alley."
+       class="ndx-photo-download__image"
+       loading="lazy">
+  <p class="govuk-body govuk-!-margin-top-3">
+    A real-world picture of dumped rubbish. Save it to your machine, then upload it through the simulator pane in the next step. Or use any photo on your device &mdash; the bot will describe whatever it sees.
   </p>
+  <a href="/assets/downloads/sample-flytip.jpg" download class="govuk-button">
+    Download photo (JPEG, 440 KB)
+  </a>
 </div>
 
 <h3 class="govuk-heading-m">Open the simulator and send the photo</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
-  <li>In the companion app, look at the <strong>right-hand pane</strong>. That's the WhatsApp/iMessage/RCS simulator. It's a stand-in for whichever messaging channel the resident actually uses.</li>
-  <li>In the sender-phone field, enter the same number you dialled from in step 1. Use UK E.164 (<code>+44</code> followed by 10 digits) or local format (<code>0</code> followed by 10 digits). Cases looks up the open ticket by phone number.</li>
-  <li>Click "Choose photo" and pick the sample fly-tip photo above (or any photo on your device).</li>
-  <li>Click "Send".</li>
+  <li>In the companion app, look at the <strong>right-hand pane</strong>. That's the WhatsApp/iMessage/RCS simulator, standing in for whichever messaging channel the resident would actually use.</li>
+  <li>In the sender-phone field, type the same number you called from in step 1. The case is looked up by your phone number, so it has to match.</li>
+  <li>Click <strong>Choose photo</strong> and pick the photo you just downloaded (or any photo on your device).</li>
+  <li>Click <strong>Send</strong>.</li>
 </ol>
 
 <h3 class="govuk-heading-m">What you'll see</h3>
 
-<p class="govuk-body">A staged sequence of chat bubbles appears in the simulator pane:</p>
+<p class="govuk-body">A sequence of chat bubbles appears in the simulator pane:</p>
 
 <ul class="govuk-list govuk-list--bullet">
   <li><strong>~1 second:</strong> "Photo received. Sender ID: {your phone}"</li>
-  <li><strong>~3 seconds:</strong> "Analysing image with Amazon Bedrock&hellip;" with a shimmer animation</li>
+  <li><strong>~3 seconds:</strong> "Analysing image with Amazon Bedrock&hellip;" with a loading animation</li>
   <li><strong>~6 seconds:</strong> "Looking up your case in Connect Cases&hellip;"</li>
-  <li><strong>~10 seconds:</strong> A structured response with <code>object_class</code>, <code>condition</code>, <code>severity</code>, <code>suggested_council_action</code>, <code>confidence</code>, and optional <code>secondary_observations</code></li>
+  <li><strong>~10 seconds:</strong> the bot's structured read of the photo, with fields like:
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>What is it?</strong> e.g. fly-tip, pothole, broken streetlight</li>
+      <li><strong>What state is it in?</strong> e.g. "large pile of mixed waste"</li>
+      <li><strong>How urgent?</strong> low, medium, or high</li>
+      <li><strong>Suggested council response,</strong> e.g. "arrange for removal by contractor"</li>
+      <li><strong>How confident is the bot?</strong> a 0&nbsp;to&nbsp;1 score</li>
+    </ul>
+  </li>
 </ul>
+
+<p class="govuk-body">A few seconds later, on the still-open phone call, the bot reads back a single sentence:</p>
 
 <blockquote class="govuk-body govuk-!-font-size-36 ndx-headline-moment">
   "I've reviewed your photo; environmental health will visit Wednesday, ref ABC123."
 </blockquote>
 
-<p class="govuk-body">That single sentence is the headline moment of the scenario. It's what a council CIO will remember and what a Director of Customer Services will photograph for their own CIO. Voice and a photo, joined to one case, read back as one promise.</p>
-
-<p class="govuk-body">Behind the scenes, the web app calls <code>POST /api/upload-presign</code> on the companion API. The browser uploads the image directly to S3 using a presigned URL. Then the web app calls <code>POST /api/simulator/send</code> with the S3 key and your phone number, and a Lambda function handles the cross-channel link to your existing case.</p>
+<p class="govuk-body">One resident, one case, two channels, one answer. That's the moment this scenario exists to demonstrate.</p>
 
 <style>
   .ndx-headline-moment {
@@ -97,8 +109,18 @@ scenarioId: ai-contact-centre
   .ndx-photo-download {
     margin: 30px 0;
     padding: 24px;
-    background-color: #f3f2f1;
+    background-color: #ffffff;
+    border: 1px solid #b1b4b6;
     border-left: 4px solid #1d70b8;
+  }
+  .ndx-photo-download__image {
+    display: block;
+    max-width: 100%;
+    max-height: 400px;
+    height: auto;
+    margin: 0 auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   }
   .ndx-photo-download .govuk-button {
     margin-bottom: 0;

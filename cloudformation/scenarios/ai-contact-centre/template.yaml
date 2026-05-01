@@ -51,13 +51,6 @@ Parameters:
       Bump on every redeploy that changes the documents/ tree to force Bedrock
       KB re-ingestion AND Wisdom (Q in Connect) content re-upload. CFN custom
       resources only fire on Update if at least one property changes.
-  CouncilName:
-    Type: String
-    Default: Aldershire
-    Description: |
-      Council name shown on the bespoke agent-workspace application
-      ("NDX:Try {CouncilName}") and used to brand the agent dashboard page.
-
 Globals:
   Function:
     Runtime: python3.12
@@ -1761,40 +1754,12 @@ Resources:
       IntegrationType: CASES_DOMAIN
       IntegrationArn: !GetAtt CasesDomain.DomainArn
 
-  CouncilWorkspaceApp:
-    Type: AWS::AppIntegrations::Application
-    Properties:
-      # Name pattern doesn't allow `:`; the colon-form lives in the agent UI
-      # title bar instead (rendered client-side from the council querystring).
-      Name: !Sub 'NDX-Try ${CouncilName}'
-      Description: !Sub 'Bespoke agent-workspace app branded for ${CouncilName} (NDX:Try demo)'
-      Namespace: !Sub 'ndxtry${AWS::AccountId}'
-      ApplicationSourceConfig:
-        ExternalUrlConfig:
-          AccessUrl: !Sub
-            - 'https://${Domain}/agent.html?council=${CouncilName}'
-            - Domain: !GetAtt Cdn.DomainName
-          ApprovedOrigins:
-            - !Sub
-              - 'https://${Domain}'
-              - Domain: !GetAtt Cdn.DomainName
-      Permissions:
-        - User.Details.View
-
-  IaCouncilWorkspaceApp:
-    Type: AWS::Connect::IntegrationAssociation
-    DependsOn: [ConnectInstanceActiveWait, CouncilWorkspaceApp]
-    Properties:
-      InstanceId: !Ref ConnectInstance
-      IntegrationType: APPLICATION
-      IntegrationArn: !GetAtt CouncilWorkspaceApp.ApplicationArn
-
   # ============================================================
   # PHASE 9: Contact flows
   # ============================================================
   MainContactFlow:
     Type: AWS::Connect::ContactFlow
-    DependsOn: [IaLexBot, IaRagFn, IaMultiIntentFn, IaMultimodalFn, IaCasesDomain, IaOutboundCallbackFn, IaLandlineCallbackFn, IaProfileBuilderTriggerFn, IaPhotoWatcherFn, IaLocalizerFn, HoldMusicPromptLookup]
+    DependsOn: [IaLexBot, IaRagFn, IaMultiIntentFn, IaMultimodalFn, IaCasesDomain, IaOutboundCallbackFn, IaLandlineCallbackFn, IaProfileBuilderTriggerFn, IaPhotoWatcherFn, IaLocalizerFn, HoldMusicPromptLookup, BasicQueueLookup]
     Properties:
       InstanceArn: !GetAtt ConnectInstance.Arn
       Name: ndx-try-aicc-main-flow
@@ -2472,9 +2437,7 @@ Resources:
           RagArn: !GetAtt RagFulfilmentFunction.Arn
           OutboundCallbackArn: !GetAtt OutboundCallbackFunction.Arn
           LandlineCallbackArn: !GetAtt LandlineCallbackFunction.Arn
-          BasicQueueArn: !Sub
-            - 'arn:aws:connect:${AWS::Region}:${AWS::AccountId}:instance/${InstanceGuid}/queue/6c5c3ee4-e30b-4d0f-8fa5-0eb4e23ce62a'
-            - InstanceGuid: !Select [1, !Split ['/', !GetAtt ConnectInstance.Arn]]
+          BasicQueueArn: !GetAtt BasicQueueLookup.Arn
           ProfileBuilderTriggerArn: !GetAtt ProfileBuilderTriggerFunction.Arn
           PhotoWatcherArn: !GetAtt PhotoWatcherFunction.Arn
           HoldMusicPromptArn: !GetAtt HoldMusicPromptLookup.Arn
@@ -2812,7 +2775,7 @@ Resources:
 
   AgentSecurityProfilePermissions:
     Type: Custom::ConnectBootstrap
-    DependsOn: [ConnectInstanceActiveWait, IaWisdomAssistant, IaWisdomKnowledgeBase, IaCustomerProfilesIntegration, IaCouncilWorkspaceApp]
+    DependsOn: [ConnectInstanceActiveWait, IaWisdomAssistant, IaWisdomKnowledgeBase, IaCustomerProfilesIntegration]
     Properties:
       ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
       Action: AgentSecurityProfilePermissions
@@ -2831,10 +2794,6 @@ Resources:
         - ContentManagement.View
         - QConnectAIAgents.View
         - QConnectAIPrompts.View
-      # Application-level permissions on a security profile use a different
-      # permission vocabulary than the Application's own declared Permissions.
-      # IntegrationAssociation alone exposes the app in the agent workspace
-      # for users with BasicAgentAccess, which is sufficient for this demo.
 
   HoldMusicPromptLookup:
     Type: Custom::ConnectBootstrap
@@ -2843,8 +2802,16 @@ Resources:
       ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
       Action: LookupPrompt
       InstanceId: !Ref ConnectInstance
-      # AWS auto-creates this on every fresh Connect instance (queue music).
       PromptName: CustomerQueue.wav
+
+  BasicQueueLookup:
+    Type: Custom::ConnectBootstrap
+    DependsOn: ConnectInstanceActiveWait
+    Properties:
+      ServiceToken: !GetAtt ConnectBootstrapFunction.Arn
+      Action: LookupQueue
+      InstanceId: !Ref ConnectInstance
+      QueueName: BasicQueue
 
   CustomerProfilesNoInferredObjectType:
     Type: Custom::ConnectBootstrap

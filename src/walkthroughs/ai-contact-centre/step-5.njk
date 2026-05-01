@@ -3,14 +3,14 @@ layout: layouts/walkthrough.njk
 title: "Step 5: Edit the contact flow greeting in the GUI - AI Contact Centre Walkthrough"
 description: Open ndx-try-aicc-main-flow in the Connect console, change the greeting to 'hi this is a funky test', save, and dial in to hear the difference.
 currentStep: 5
-totalSteps: 7
+totalSteps: 8
 timeEstimate: "5 minutes"
 scenarioId: ai-contact-centre
 ---
 
 {% set stepNumber = 5 %}
 {% set stepTitle = "Edit the contact flow greeting in the GUI" %}
-{% set stepDescription = "Open the contact flow ndx-try-aicc-main-flow in the Connect console, click the 'Greet and get intent via Lex' block, change its prompt text to 'hi this is a funky test', save and publish, then dial the PstnNumber to hear your edit live." %}
+{% set stepDescription = "Open the contact flow ndx-try-aicc-main-flow in the Connect console, click the 'Greet and get intent via Lex' block, change its prompt text to 'hi this is a funky test', save and publish, then dial the council's number to hear your edit live." %}
 {% set timeEstimate = "5 minutes" %}
 {% set screenshotData = screenshots["ai-contact-centre"] %}
 {% set screenshots = [] %}
@@ -19,7 +19,7 @@ scenarioId: ai-contact-centre
   "You can find ndx-try-aicc-main-flow under Routing → Flows in the Connect admin console",
   "You can click the 'Greet and get intent via Lex' block and edit its prompt",
   "Save and Publish complete without errors",
-  "Dialling the PstnNumber after publishing plays the new greeting"
+  "Dialling the council's number after publishing plays the new greeting"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
@@ -48,7 +48,7 @@ scenarioId: ai-contact-centre
 
 <h3 class="govuk-heading-m">Hear it live</h3>
 
-<p class="govuk-body">Dial the <code>PstnNumber</code> from step 1. Instead of the corporate Aldershire greeting, you hear:</p>
+<p class="govuk-body">Dial the council's number from step 1. Instead of the corporate Aldershire greeting, you hear:</p>
 
 <div class="govuk-inset-text">
   <p class="govuk-body govuk-!-font-style-italic">

@@ -5,16 +5,23 @@
 scenario: ai-contact-centre
 scenarioTitle: "AI Contact Centre (Council Reception)"
 awsService: "Amazon Connect"
-totalSteps: 7
+totalSteps: 8
 
 steps:
   - step: 1
     title: "Bin collection by phone"
     screenshots:
-      - id: connect-instance-overview
-        filename: 46-aws-connect-instance-overview.png
-        alt: "Amazon Connect Account overview screen showing Access URL https://ndx-try-aicc-443938286016.my.connect.aws, Emergency access link, Instance ARN, and Service-linked role."
-        caption: "Find your Connect instance in the AWS console. The PstnNumber and CompanionUrl outputs from CloudFormation are what you need to dial and to open the companion app."
+      - id: cloudformation-stacks-list
+        filename: 55-cloudformation-stacks-list.png
+        alt: "AWS CloudFormation Stacks page in us-east-1, filtered to ndx-try-ai-contact-centre. One stack listed with status UPDATE_COMPLETE and a description starting 'NDX:Try - AI Contact Centre (Council Reception) Amazon Connect with claimed UK +44 800 toll-free, Lex v2 (en_GB), Bedrock KB + Guardrails, multimodal photo describe...'."
+        caption: "Filter CloudFormation by 'ndx-try-ai-contact-centre' and click into the stack. Status should be CREATE_COMPLETE or UPDATE_COMPLETE before the rest of the walkthrough will work."
+        width: 1440
+        height: 900
+
+      - id: cloudformation-outputs-tab
+        filename: 56-cloudformation-outputs-tab.png
+        alt: "CloudFormation stack details for ndx-try-ai-contact-centre, with the Outputs tab selected. Outputs (7) listed: CasesDomainId, CompanionUrl https://dxmudxxqf0b6z.cloudfront.net, ConnectInstanceId, KbSourceBucket, KnowledgeBaseId, and the start of an 'Inbound PSTN' description below the fold."
+        caption: "The Outputs tab. CompanionUrl is the three-pane web app; ConnectInstanceId is for AWS console live monitoring; PstnNumber (just below the fold here) is the UK number you dial."
         width: 1440
         height: 900
 
@@ -118,20 +125,6 @@ steps:
         width: 1600
         height: 900
 
-      - id: agent-workspace-apps
-        filename: 54-agent-workspace-apps-menu.png
-        alt: "Apps dropdown open in the agent workspace top bar. Two entries listed: Performance metrics, Worklist."
-        caption: "The Apps menu in the agent workspace exposes built-in views. The bespoke NDX:Try Aldershire app shows up here once it's registered with the instance."
-        width: 1600
-        height: 900
-
-      - id: custom-agent-dashboard
-        filename: 16-custom-agent-dashboard.png
-        alt: "Bespoke NDX:Try Aldershire agent dashboard with About-this-session card, Caller lookup form, and Quick links to chat, web call, and the photo upload simulator."
-        caption: "The bespoke dashboard inside the agent workspace gives a single-pane view of the caller's context: open cases, recent contacts, quick links."
-        width: 1200
-        height: 1000
-
       - id: cases-end-to-end
         filename: 33-cases-end-to-end.png
         alt: "Connect Cases list view showing one open ticket with safeguarding_flag set, sentiment red, and intents column listing AntiSocialBehaviour and Safeguarding."
@@ -189,4 +182,8 @@ steps:
 
   - step: 7
     title: "Italian multi-intent (language flip)"
+    screenshots: []
+
+  - step: 8
+    title: "Explore the chat"
     screenshots: []

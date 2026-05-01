@@ -3,7 +3,7 @@ layout: layouts/walkthrough.njk
 title: AI Contact Centre Walkthrough
 description: Step-by-step guide to a working AI council reception. Dial a real UK number, use the in-browser photo upload simulator, take a safeguarding call from a separate phone, edit the contact flow live, and run an Italian multi-intent demo.
 currentStep: 0
-totalSteps: 7
+totalSteps: 8
 scenarioId: ai-contact-centre
 ---
 
@@ -11,10 +11,10 @@ scenarioId: ai-contact-centre
 
 <div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
   <h2 class="govuk-panel__title">
-    38 minutes to dial a real council, send a photo, take an agent call, edit the flow live, and hear it answer in Italian
+    46 minutes to dial a real council, send a photo, take an agent call, edit the flow live, hear it answer in Italian, and stress-test the chat with prompt injection
   </h2>
   <div class="govuk-panel__body">
-    Seven hands-on demos that move from a single happy-path bin call to live flow editing in the GUI and an Italian multi-intent triage.
+    Eight hands-on demos that move from a single happy-path bin call to live flow editing, multilingual triage, and a thirty-question stress test of what the bot will and won't answer.
   </div>
 </div>
 
@@ -31,7 +31,7 @@ scenarioId: ai-contact-centre
 
 <h2 class="govuk-heading-l">What you'll do</h2>
 
-<p class="govuk-body-l">In this 38-minute walkthrough, you'll:</p>
+<p class="govuk-body-l">In this 46-minute walkthrough, you'll:</p>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li><strong>Bin collection by phone</strong>, dial the real UK number and hear the bot read back a reference number (5 minutes)</li>
@@ -41,6 +41,7 @@ scenarioId: ai-contact-centre
   <li><strong>Edit the contact flow greeting in the GUI</strong>, change the bot's opening line, save, dial in to hear the difference (5 minutes)</li>
   <li><strong>Multi-intent distressed call</strong>, play a layered script that mentions five issues; the bot triages the top four (6 minutes)</li>
   <li><strong>Italian multi-intent</strong>, hear Lex transcribe Italian and Bianca answer in Italian (5 minutes)</li>
+  <li><strong>Explore the chat</strong>, push thirty plus questions through the chat box and see what the knowledge base answers, what gets referred to a human, and how Bedrock Guardrails block prompt injection (8 minutes)</li>
 </ol>
 
 <div class="ndx-walkthrough-prerequisites">
@@ -84,7 +85,7 @@ scenarioId: ai-contact-centre
   <div class="govuk-grid-column-one-half">
     <h3 class="govuk-heading-s">For technical staff</h3>
     <ul class="govuk-list govuk-list--bullet">
-      <li>Amazon Connect with a claimed UK PSTN number, Lex v2, and Bedrock</li>
+      <li>Amazon Connect with a real UK phone number, Lex v2, and Bedrock</li>
       <li>Multi-intent decomposition with Bedrock Nova Pro</li>
       <li>Multimodal photo description with Bedrock Nova Pro vision</li>
       <li>Chime SDK web calling bridged into a Connect contact flow</li>
@@ -105,7 +106,7 @@ scenarioId: ai-contact-centre
   </a>
 
   <p class="govuk-body-s govuk-!-margin-top-2">
-    Takes approximately 38 minutes
+    Takes approximately 46 minutes
   </p>
 </div>
 

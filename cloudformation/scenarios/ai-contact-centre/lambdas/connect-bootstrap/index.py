@@ -71,6 +71,8 @@ def handler(event, context):
             data = _cp_object_type(props, request_type)
         elif action == "LookupPrompt":
             data = _lookup_prompt(props)
+        elif action == "LookupQueue":
+            data = _lookup_queue(props)
         else:
             return _send(event, context, "FAILED", {},
                          reason=f"Unknown Action: {action!r}", physical_id=physical_id)
@@ -94,6 +96,20 @@ def _lookup_prompt(props):
             if p.get("Name") == name:
                 return {"Arn": p["Arn"], "Id": p["Id"], "Name": name}
     raise RuntimeError(f"Prompt {name!r} not found in instance {instance_id}")
+
+
+def _lookup_queue(props):
+    """Resolve a Connect queue ARN by exact name. The BasicQueue auto-created
+    on every fresh instance gets a new UUID each time, so flows that reference
+    it need a runtime lookup instead of a hardcoded GUID."""
+    instance_id = props["InstanceId"]
+    name = props.get("QueueName", "BasicQueue")
+    paginator = connect.get_paginator("list_queues")
+    for page in paginator.paginate(InstanceId=instance_id, QueueTypes=["STANDARD"]):
+        for q in page.get("QueueSummaryList") or []:
+            if q.get("Name") == name:
+                return {"Arn": q["Arn"], "Id": q["Id"], "Name": name}
+    raise RuntimeError(f"Queue {name!r} not found in instance {instance_id}")
 
 
 def _connect_ia(props, event, request_type, current_physical_id):

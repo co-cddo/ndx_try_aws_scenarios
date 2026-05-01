@@ -3,7 +3,7 @@ layout: layouts/walkthrough.njk
 title: "Step 1: Bin collection by phone - AI Contact Centre Walkthrough"
 description: Dial the real UK phone number from your sandbox and walk a happy-path bin-collection script
 currentStep: 1
-totalSteps: 7
+totalSteps: 8
 timeEstimate: "5 minutes"
 scenarioId: ai-contact-centre
 ---
@@ -16,7 +16,7 @@ scenarioId: ai-contact-centre
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 1 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
-  "The PstnNumber stack output is visible in CloudFormation",
+  "You can find your sandbox's UK phone number in the CloudFormation Outputs",
   "You hear an en-GB greeting when you call",
   "You can walk a bin-collection script and hear a reference number read back",
   "Connect Cases shows a single open case for your phone number"
@@ -24,23 +24,62 @@ scenarioId: ai-contact-centre
 
 {% include "components/walkthrough-step.njk" %}
 
-<div class="ndx-phone-card">
-  <p class="govuk-body govuk-!-font-weight-bold">Call the council you just built. Right now.</p>
-  <p class="ndx-phone-number">{{ '{{' }} PstnNumber {{ '}}' }}</p>
-  <p class="govuk-body-s">From any UK phone, landline or mobile.</p>
-</div>
+<h3 class="govuk-heading-m">Navigating to CloudFormation</h3>
 
-<h3 class="govuk-heading-m">How to find your number</h3>
+<p class="govuk-body">
+  From the AWS Console homepage, find CloudFormation in the "Recently visited" section or by searching for "CloudFormation" in the search bar.
+</p>
+
+<h3 class="govuk-heading-m">Finding your phone number and companion app URL</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>
-    <strong>Open the CloudFormation console</strong> in us-east-1 and find your <code>ndx-try-ai-contact-centre-*</code> stack.
+    <strong>Open the CloudFormation console</strong>
+    <p class="govuk-body">
+      Go to <a href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=ndx-try-ai-contact-centre" target="_blank" rel="noopener noreferrer" class="govuk-link">CloudFormation console in us-east-1 (N. Virginia)<span class="govuk-visually-hidden"> (opens in new tab)</span></a>
+    </p>
   </li>
+
   <li>
-    <strong>Open the Outputs tab.</strong> The <code>PstnNumber</code> output is your real UK phone number.
+    <strong>Find your stack</strong>
+    <p class="govuk-body">
+      Look for a stack named <code>ndx-try-ai-contact-centre</code>. The status should be <span class="govuk-tag govuk-tag--green">CREATE_COMPLETE</span> or <span class="govuk-tag govuk-tag--green">UPDATE_COMPLETE</span>.
+    </p>
+    <div class="govuk-warning-text govuk-!-margin-top-2">
+      <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-visually-hidden">Warning</span>
+        If the status shows CREATE_IN_PROGRESS, the deployment is still running. The AI Contact Centre takes 30 to 60 minutes to deploy because Bedrock Knowledge Base ingestion is the long pole.
+      </strong>
+    </div>
   </li>
+
   <li>
-    <strong>Open the companion web app</strong> at the <code>CompanionUrl</code> output. The transcript on the left brightens as soon as you dial; the case in the middle assembles live.
+    <strong>Open the Outputs tab</strong>
+    <p class="govuk-body">
+      Click on your stack name, then select the "Outputs" tab. You will see seven output values.
+    </p>
+  </li>
+
+  <li>
+    <strong>Note these two values</strong>
+    <div class="ndx-credentials-list">
+      <p class="govuk-body">
+        <strong>PstnNumber:</strong> the real UK phone number assigned to your sandbox. Dial it from any UK landline or mobile.<br>
+        <code>+44 20 4639 8947</code> (your number will be different)
+      </p>
+      <p class="govuk-body">
+        <strong>CompanionUrl:</strong> the CloudFront URL for the three-pane companion web app.<br>
+        <code>https://[random-id].cloudfront.net</code>
+      </p>
+    </div>
+  </li>
+
+  <li>
+    <strong>Open the companion web app</strong>
+    <p class="govuk-body">
+      Click the <code>CompanionUrl</code> link or paste it into a new browser tab. The transcript on the left brightens as soon as you dial; the case in the middle assembles live.
+    </p>
   </li>
 </ol>
 
@@ -58,19 +97,16 @@ scenarioId: ai-contact-centre
 <p class="govuk-body">In the middle pane, a Connect Case appears. Fields fill in live: <code>customer_phone_number</code>, <code>address</code>, <code>intent_category</code>, and <code>intents[]</code>. The bot reads back a six-character reference ("Your reference is ABC-123. Environmental services will be in touch within two working days.") and ends the call.</p>
 
 <style>
-  .ndx-phone-card {
-    background: #1d70b8;
-    color: white;
-    text-align: center;
-    padding: 40px 20px;
-    margin: 30px 0;
-    border-radius: 8px;
-  }
-  .ndx-phone-number {
-    font-size: 64px;
-    font-weight: 700;
-    font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+  .ndx-credentials-list {
     margin: 15px 0;
-    letter-spacing: 2px;
+    padding: 15px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+  .ndx-credentials-list p {
+    margin-bottom: 10px;
+  }
+  .ndx-credentials-list p:last-child {
+    margin-bottom: 0;
   }
 </style>

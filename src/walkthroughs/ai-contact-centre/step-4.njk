@@ -3,7 +3,7 @@ layout: layouts/walkthrough.njk
 title: "Step 4: Agent workspace and a safeguarding hand-take - AI Contact Centre Walkthrough"
 description: Open the Connect Agent Workspace, mark yourself Available, and take a safeguarding call from a separate phone. Watch the live transcript, sentiment chips, and the safeguarding flag flip in real time.
 currentStep: 4
-totalSteps: 7
+totalSteps: 8
 timeEstimate: "7 minutes"
 scenarioId: ai-contact-centre
 ---
@@ -38,8 +38,7 @@ scenarioId: ai-contact-centre
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>From the Connect admin home (the page you reached via "Log in for emergency access" in step 1), open the <strong>top-right account dropdown</strong> and click <strong>Agent Workspace</strong>. It opens in a new tab.</li>
-  <li>Confirm you can see the Contact Control Panel (CCP) on the left, the Customer Profile and Cases tabs in the middle, and the Connect assistant pane on the right.</li>
-  <li>Click the <strong>Apps</strong> dropdown at the top of the workspace. Among "Performance metrics" and "Worklist" you should see the bespoke <strong>NDX:Try Aldershire</strong> app, which gives you a branded dashboard with caller lookup and quick links.</li>
+  <li>Confirm you can see the Contact Control Panel on the left, the Customer Profile and Cases tabs in the middle, and the Connect assistant pane on the right.</li>
 </ol>
 
 <h3 class="govuk-heading-m">Mark yourself Available</h3>
@@ -50,7 +49,7 @@ scenarioId: ai-contact-centre
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>Pick up your <strong>mobile phone</strong> (or any phone that isn't the laptop running the workspace).</li>
-  <li>Dial the <code>PstnNumber</code> from step 1.</li>
+  <li>Dial the council's UK phone number (the one from step 1).</li>
   <li>Say something with sustained distress in it. The script from step 6 works well, or just speak in character: <em>"I don't know what to do, my neighbour's been threatening me and the council won't return my calls and I'm scared to leave the house."</em></li>
   <li>Watch the agent workspace. Within seconds, an incoming-call popup appears with caller phone, intent guess, and a sentiment chip.</li>
   <li>Click <strong>Accept</strong>. The live transcript starts streaming. Sentiment chips on each segment colour green to amber to red as the conversation unfolds.</li>
@@ -61,7 +60,7 @@ scenarioId: ai-contact-centre
 
 <ul class="govuk-list govuk-list--bullet">
   <li><strong>The Connect assistant pane on the right</strong> &mdash; Q in Connect surfaces relevant Knowledge Base articles automatically. As soon as the caller mentions safeguarding, "Aldershire DC safeguarding contacts and escalation" pops to the top.</li>
-  <li><strong>The caller lookup form</strong> in the bespoke NDX:Try app &mdash; type the caller's phone, get back any open cases, recent contacts, and the Customer Profile.</li>
+  <li><strong>The Customer Profile and Cases tabs in the middle</strong> &mdash; Connect's built-in agent app. Search the Customer Profiles directory by phone, see recent contacts, and open the case the bot started for this call.</li>
   <li><strong>The redacted transcript</strong> &mdash; the caller's name and address appear as <code>{NAME}</code> and <code>{ADDRESS}</code> placeholders, even in your live agent view. Contact Lens redacts at instance level; there is no path that exposes the original PII to the agent.</li>
 </ul>
 
