@@ -2,8 +2,8 @@
 layout: layouts/walkthrough.njk
 title: "Walkthrough Complete - AI Contact Centre"
 description: You've completed the AI Contact Centre (Council Reception) walkthrough
-currentStep: 6
-totalSteps: 5
+currentStep: 8
+totalSteps: 7
 scenarioId: ai-contact-centre
 ---
 
@@ -12,12 +12,12 @@ scenarioId: ai-contact-centre
     Walkthrough complete
   </h1>
   <div class="govuk-panel__body">
-    You've seen one resident, one case, captured across voice and photo
+    Voice, browser audio, photo, agent hand-take, live flow edit, and a multilingual triage &mdash; all on one platform
   </div>
 </div>
 
 <p class="govuk-body-l govuk-!-margin-top-6">
-  In about 23 minutes you dialled a real UK number from your own phone, watched the bot triage a distressed multi-intent caller without a human, attached a photo on a different channel, and saw both stitched onto a single Connect Case with a friendly reference number read back over the line.
+  In about 38 minutes you dialled a real UK number from your own phone, sent a photo through the in-browser simulator, called the same bot from your laptop with no phone at all, took a safeguarding call as a Connect agent, edited the bot's greeting in the GUI, watched the bot triage a distressed multi-intent caller, and heard it answer in Italian.
 </p>
 
 <h2 class="govuk-heading-l">What you've learned</h2>
@@ -98,6 +98,45 @@ scenarioId: ai-contact-centre
     </p>
     <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
       Value: see what's happening end-to-end on one screen
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f3a7;</span>
+      Agent hand-take
+    </h3>
+    <p class="govuk-body">
+      Marking yourself Available in the agent workspace and accepting an inbound call gave you a live transcript, sentiment chips, and a safeguarding flag flipped on the case as soon as sustained distress was detected. The redacted transcript is what the agent sees, even live.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: humans in the loop, with full context, no PII exposure
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x270f;&#xfe0f;</span>
+      Editable in the console
+    </h3>
+    <p class="govuk-body">
+      You changed the bot's greeting in under a minute by clicking into the contact flow in the Connect admin GUI. No deploy, no developer. The change is live until the next IaC deploy resets it.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: customer services teams can iterate copy without a release cycle
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f30d;</span>
+      Six locales, one bot
+    </h3>
+    <p class="govuk-body">
+      Lex transcribes en, it, fr, de, es, pl with neural Polly voices. Welsh and Romanian fall back to en_US ASR with Polly playback in the target language. Locale flips per contact based on Bedrock's language detection from the caller's first reply.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: residents heard in their own language with no menu and no transfer
     </p>
   </div>
 </div>

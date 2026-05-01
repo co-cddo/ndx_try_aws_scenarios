@@ -1,74 +1,192 @@
 # Screenshot data for AI Contact Centre scenario
 # Used by screenshot.njk component to display screenshots in walkthrough steps
-# Images stored in src/screenshots/ai-contact-centre/
+# Images stored in src/assets/images/screenshots/ai-contact-centre/
 
 scenario: ai-contact-centre
 scenarioTitle: "AI Contact Centre (Council Reception)"
 awsService: "Amazon Connect"
-totalSteps: 5
+totalSteps: 7
 
 steps:
   - step: 1
-    title: "Dial in"
+    title: "Bin collection by phone"
     screenshots:
       - id: connect-instance-overview
-        filename: 11-connect-instance-overview.png
-        alt: "Amazon Connect Account overview screen showing Access URL, Emergency access link, Instance ARN, and Service-linked role"
-        caption: "Find your instance in the Amazon Connect console and click the access URL or 'Log in for emergency access'"
+        filename: 46-aws-connect-instance-overview.png
+        alt: "Amazon Connect Account overview screen showing Access URL https://ndx-try-aicc-443938286016.my.connect.aws, Emergency access link, Instance ARN, and Service-linked role."
+        caption: "Find your Connect instance in the AWS console. The PstnNumber and CompanionUrl outputs from CloudFormation are what you need to dial and to open the companion app."
         width: 1440
         height: 900
 
-      - id: connect-home
-        filename: 12-connect-home.png
-        alt: "Amazon Connect admin home page after emergency access login, showing welcome cards, latest announcements, and recent blog posts"
-        caption: "Emergency access drops you on the Amazon Connect admin home"
+      - id: companion-three-pane-fresh
+        filename: 40-companion-three-pane-fresh.png
+        alt: "Companion three-pane web app on first load. Left pane shows 'Welcome to Aldershire District Council. How can I help?' as a SYSTEM message. Middle pane shows an empty Connect Case placeholder. Right pane shows the WhatsApp/iMessage/RCS simulator with sender phone and Choose photo controls."
+        caption: "Open the companion web app at the CompanionUrl output. The left pane is the live transcript, the middle pane is the case being assembled in Connect Cases, and the right pane is the WhatsApp/iMessage/RCS simulator."
         width: 1440
         height: 900
 
-      - id: companion-spa
-        filename: 20-companion-spa.png
-        alt: "Three-pane companion web app: chat transcript on the left with welcome from Aldershire DC and NDX:Try greeting, empty Connect Case in the middle, and photo upload simulator on the right with phone field and Choose photo button"
-        caption: "Open the companion web app from the CompanionUrl stack output. Chat works; web call and photo upload simulator are visible side by side."
+      - id: companion-bin-conversation
+        filename: 44-companion-bin-conversation.png
+        alt: "Companion app mid-conversation. Transcript pane shows the bot greeting, then the customer asking about the missed Tuesday bin collection at number 12 on the close, then the bot asking 'What's your postcode?' to look up the round."
+        caption: "The bot greets the caller, listens to the bin-collection complaint, then asks for a postcode to look up the round."
+        width: 1440
+        height: 900
+
+      - id: rag-bin
+        filename: 26-rag-bin.png
+        alt: "Companion app left pane showing the bin-collection conversation: caller asks about Tuesday's missed pickup, bot replies with Aldershire DC's bin schedule, finishes by reading a six-character reference number."
+        caption: "The bot answers from the Bedrock Knowledge Base. Bin-day rules come straight out of Aldershire's published schedule, with a six-character reference at the end."
+        width: 1200
+        height: 900
+
+      - id: three-pane-with-case
+        filename: 22-three-pane-with-case.png
+        alt: "Companion app mid-call: transcript pane filling on the left, Connect Case in the middle showing customer_phone_number, address, intent_category=BinCollection, and intents[]=[MissedCollection]."
+        caption: "Watch Connect Cases assemble live. Customer phone, address, intent category, and the structured intents[] array all populate as the conversation unfolds."
         width: 1200
         height: 900
 
   - step: 2
-    title: "Distress and multi-intent triage"
+    title: "Multichannel: fly-tip on the phone, photo via the simulator"
     screenshots:
-      - id: agent-workspace-landing
-        filename: 14-agent-workspace-default.png
-        alt: "Amazon Connect Agent Workspace with the Contact Control Panel on the left, Customer Profile and Cases tabs in the centre, and the Connect assistant pane on the right"
-        caption: "The agent workspace, ready to take a call. Connect assistant (Q in Connect) is on the right."
+      - id: rag-flytip
+        filename: 27-rag-flytip.png
+        alt: "Companion transcript with the bot acknowledging a fly-tip report and asking the caller to send a photo through the simulator."
+        caption: "The bot recognises a fly-tip intent and immediately asks for a photo. The line stays open while you upload."
+        width: 1200
+        height: 900
+
+      - id: companion-photo-attached
+        filename: 42-companion-photo-attached.png
+        alt: "Companion app right pane after a photo has been attached. The 'Choose photo' button now reads 'sample-flytip.jpg' next to it. The Send button is enabled. Sender phone is filled in with 07700900126."
+        caption: "Pick the sample fly-tip photo (or any photo on your device) and click Send."
         width: 1440
         height: 900
 
-  - step: 3
-    title: "Send a photo through the simulator"
-    screenshots:
-      - id: companion-spa
-        filename: 20-companion-spa.png
-        alt: "Companion web app in step-3 mode: photo upload simulator pane is bright; left and middle panes are dimmed"
-        caption: "Open the photo upload simulator pane and attach a photo"
+      - id: companion-photo-described
+        filename: 43-companion-photo-described.png
+        alt: "Companion app right pane after Bedrock has described the photo. Bubbles read: 'Photo received. Sender ID: 07700900126', 'Analysing image with Amazon Bedrock', 'Looking up your case in Connect Cases'. Final structured response: status=ok, case_id, case_action=created, structured_description with object_class=fly_tip, condition='large pile of mixed waste', severity=high, suggested_council_action='arrange for removal by contractor', confidence=0.9."
+        caption: "Bedrock Nova Pro returns a structured description in about ten seconds: object_class fly_tip, severity high, suggested action 'arrange for removal by contractor', confidence 0.9. Connect Cases gets the linked case automatically."
+        width: 1440
+        height: 900
+
+      - id: multimodal-test
+        filename: 31-multimodal-test.png
+        alt: "Companion app right pane during photo upload: a chat bubble shows 'Photo received', an animated 'Analysing image with Amazon Bedrock' bubble, then a structured object_class/condition/severity/suggested_council_action response."
+        caption: "Same flow shown earlier in the project's life cycle, with a different photo. The structured-output schema is stable."
         width: 1200
         height: 900
 
-  - step: 4
-    title: "One case, two channels (the headline moment)"
-    screenshots:
-      - id: agent-workspace-apps
-        filename: 15-agent-workspace-apps-menu.png
-        alt: "Apps dropdown in the Agent Workspace showing Performance metrics and Worklist"
-        caption: "The Apps menu in the agent workspace exposes built-in views. The bespoke NDX:Try Aldershire app is registered with the instance."
+      - id: three-pane-after-photo
+        filename: 25-three-pane-after.png
+        alt: "Companion app three-pane after photo upload: transcript shows bot reading the photo description back to the caller, Connect Case in the middle shows photo_attachment populated, simulator pane shows the photo response bubble."
+        caption: "All three panes show the same case. One ticket, two channels, one resolution."
         width: 1200
+        height: 900
+
+      - id: climax-line
+        filename: 32-climax-line.png
+        alt: "Highlighted bot reply line in the transcript: 'I've reviewed your photo; environmental health will visit Wednesday, ref ABC123.' This is the headline moment of the scenario."
+        caption: "The single sentence the scenario exists to demonstrate: voice and a photo, joined to one case, read back as one promise."
+        width: 1200
+        height: 600
+
+  - step: 3
+    title: "Call via browser"
+    screenshots:
+      - id: companion-call-button
+        filename: 41-companion-step-3-simulator-focused.png
+        alt: "Companion app three-pane view. The chat-input row at the bottom of the left pane shows a 'Call via browser' button immediately under it. The transcript shows the system Welcome and the bot Aldershire greeting."
+        caption: "The 'Call via browser' button sits directly under the chat input. No phone needed, just a microphone."
+        width: 1440
+        height: 900
+
+  - step: 4
+    title: "Agent workspace and a safeguarding hand-take"
+    screenshots:
+      - id: workspace-dropdown
+        filename: 52-connect-workspace-dropdown.png
+        alt: "Amazon Connect admin top bar with the 'Connect Workspace' dropdown open. Three entries: Default, Agent Workspace, Contact Control Panel."
+        caption: "Open the Connect Workspace dropdown at the top-right of the Connect admin and choose Agent Workspace."
+        width: 1440
+        height: 900
+
+      - id: agent-workspace-loaded
+        filename: 53-agent-workspace-loaded.png
+        alt: "Amazon Connect Agent Workspace landing screen. CCP on the left with 'Available' status drop-down at top, Welcome panel with the agent's name, Quick connects, Number pad, Create Task buttons. Customer Profile and Cases tabs in the centre with a Recently viewed profiles table. Connect assistant pane on the right with the assistant introducing itself."
+        caption: "The agent workspace, ready for an inbound call. Toggle Available before you dial in from another device."
+        width: 1600
+        height: 900
+
+      - id: agent-workspace-apps
+        filename: 54-agent-workspace-apps-menu.png
+        alt: "Apps dropdown open in the agent workspace top bar. Two entries listed: Performance metrics, Worklist."
+        caption: "The Apps menu in the agent workspace exposes built-in views. The bespoke NDX:Try Aldershire app shows up here once it's registered with the instance."
+        width: 1600
         height: 900
 
       - id: custom-agent-dashboard
         filename: 16-custom-agent-dashboard.png
-        alt: "Bespoke NDX:Try Aldershire agent dashboard with About-this-session card, Caller lookup form, and Quick links"
-        caption: "The bespoke NDX:Try Aldershire app: a branded dashboard with caller lookup and quick links to chat, web call, and the photo upload simulator"
+        alt: "Bespoke NDX:Try Aldershire agent dashboard with About-this-session card, Caller lookup form, and Quick links to chat, web call, and the photo upload simulator."
+        caption: "The bespoke dashboard inside the agent workspace gives a single-pane view of the caller's context: open cases, recent contacts, quick links."
         width: 1200
         height: 1000
 
+      - id: cases-end-to-end
+        filename: 33-cases-end-to-end.png
+        alt: "Connect Cases list view showing one open ticket with safeguarding_flag set, sentiment red, and intents column listing AntiSocialBehaviour and Safeguarding."
+        caption: "Connect Cases is where safeguarding-flagged contacts surface for human follow-up. The flag is set automatically when sustained distress is detected on the call."
+        width: 1440
+        height: 900
+
   - step: 5
-    title: "Sentiment and safeguarding deep-dive"
+    title: "Edit the contact flow greeting in the GUI"
+    screenshots:
+      - id: flows-list
+        filename: 48-connect-flows-list.png
+        alt: "Amazon Connect Flows management page. Table of 23 flows including Default agent hold, Default agent transfer, Default agent whisper, Default customer hold, Default customer queue, etc. all with Published status."
+        caption: "The Flows page in the Connect admin lists every flow on the instance. Search for ndx-try-aicc-main-flow."
+        width: 1440
+        height: 900
+
+      - id: flow-editor-loaded
+        filename: 50-flow-editor-loaded.png
+        alt: "Amazon Connect flow designer for ndx-try-aicc-main-flow. Top left shows the flow name. Block library on the left, designer canvas in the middle showing Entry, Set logging behavior 'Enable flow logging', Set recording analytics 'Enable call recording', AWS Lambda function 'Build customer profile' blocks. Mini-map at the bottom right shows 48 blocks total."
+        caption: "The flow editor, with ndx-try-aicc-main-flow loaded. The mini-map at the bottom-right shows the full graph (48 blocks)."
+        width: 1440
+        height: 900
+
+      - id: flow-editor-search-greet
+        filename: 51-flow-editor-search-greet.png
+        alt: "Flow editor scrolled to show the Set Amy en GB voice, Start media streaming, Get customer input 'Greet and get inten...', AWS Lambda 'Detect language', and 'Get fallback ack text' blocks. The Greet block is highlighted with a blue selection border. The 'Greet' search match indicator '1/1' is visible at top right."
+        caption: "Search the designer for 'Greet' to jump to the 'Greet and get intent via Lex' block. Click into it and edit the prompt text in the right-hand properties panel."
+        width: 1440
+        height: 900
+
+  - step: 6
+    title: "Multi-intent distressed call"
+    screenshots:
+      - id: multi-intent-top
+        filename: 30-multi-intent-top.png
+        alt: "Companion app transcript with five caller utterances marked red on the sentiment chip: missed bins, damp, antisocial neighbour, council tax letter, blocked driveway."
+        caption: "Sentiment climbs from green to red as the caller layers on issues. Five distinct intents are extracted in a single Bedrock call."
+        width: 1200
+        height: 900
+
+      - id: multi-intent-decomposition
+        filename: 29-multi-intent.png
+        alt: "Companion app middle pane showing the multi-intent decomposition output: intents[] with five entries (MissedCollection, DampMould, AntiSocialBehaviour, CouncilTax, ParkedVehicle), top_intents[] capped at four, truncated_intents[] holding the fifth."
+        caption: "The decomposer caps at four intents per turn. The bot acknowledges each by name and offers a follow-up turn for the fifth."
+        width: 1200
+        height: 900
+
+      - id: chat-working-distress
+        filename: 34-chat-working.png
+        alt: "Live chat transcript pane in the companion app, sentiment chips graduating from amber to red across consecutive segments."
+        caption: "Each segment is processed by Contact Lens and tagged with sentiment. PII is redacted before anything is written to DynamoDB."
+        width: 1200
+        height: 900
+
+  - step: 7
+    title: "Italian multi-intent (language flip)"
     screenshots: []

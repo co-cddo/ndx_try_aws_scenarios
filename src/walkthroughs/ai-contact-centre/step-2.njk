@@ -1,64 +1,106 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 2: Distress and multi-intent triage - AI Contact Centre Walkthrough"
-description: Play a layered distressing script and watch the bot triage the top four intents
+title: "Step 2: Multichannel - fly-tip on the phone, photo via the simulator - AI Contact Centre Walkthrough"
+description: Report a fly-tip on the phone. The bot asks for a photo. The line stays open while you upload one through the in-browser simulator. The bot reads back a single sentence linking call and photo to one case.
 currentStep: 2
-totalSteps: 5
-timeEstimate: "5 minutes"
+totalSteps: 7
+timeEstimate: "6 minutes"
 scenarioId: ai-contact-centre
 ---
 
 {% set stepNumber = 2 %}
-{% set stepTitle = "Distress and multi-intent triage" %}
-{% set stepDescription = "Play (or speak live) a layered distressing script that mentions five different issues. Watch the bot pick the top four by confidence, acknowledge each by name, and offer a follow-up for the fifth." %}
-{% set timeEstimate = "5 minutes" %}
+{% set stepTitle = "Multichannel: fly-tip on the phone, photo via the simulator" %}
+{% set stepDescription = "Report a fly-tip on the phone. The bot asks for a photo and waits. Open the WhatsApp/iMessage/RCS simulator on the right of the companion app, attach a photo of rubbish, hit Send. The bot describes what it sees, links it to your open case, and reads a single sentence back down the phone." %}
+{% set timeEstimate = "6 minutes" %}
 {% set screenshotData = screenshots["ai-contact-centre"] %}
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 2 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
-  "Sentiment chips climb from green to amber to red as distress rises",
-  "The decomposer extracts five intents and the bot caps at four",
-  "The bot acknowledges each of the four intents by name",
-  "The bot offers a follow-up question for the fifth issue",
-  "Bedrock Guardrails block any hallucinated legal advice"
+  "The bot recognises a fly-tip intent and asks for a photo",
+  "The line stays open in a holding pattern while you upload",
+  "The right pane (the WhatsApp/iMessage/RCS simulator) accepts your photo upload",
+  "Bedrock Nova Pro returns a structured description in about ten seconds",
+  "Connect Cases shows one ticket with both the call transcript and the photo attachment",
+  "The bot reads back a single sentence linking the photo to your call"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<div class="govuk-warning-text" id="content-warning">
-  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-  <strong class="govuk-warning-text__text">
-    <span class="govuk-visually-hidden">Content warning</span>
-    This step shows how the bot handles a distressed caller. The audio is a fictional script. It is not based on any real call. If you find this content distressing, <a href="/walkthroughs/ai-contact-centre/step-3/" class="govuk-link">skip to Step 3</a>.
-  </strong>
-</div>
-
-<h3 class="govuk-heading-m">Credits and ethical sign-off</h3>
-
-<p class="govuk-body">
-  The audio file linked below is a fictional script reviewed for safeguarding sensitivity. See <a href="https://github.com/co-cddo/ndx_try_aws_scenarios/blob/main/cloudformation/scenarios/ai-contact-centre/audio/SCRIPT-ETHICAL-REVIEW.md" class="govuk-link">SCRIPT-ETHICAL-REVIEW.md</a> for full author credits, the safeguarding lead who reviewed it, the review date, and the playback policy.
-</p>
-
-<h3 class="govuk-heading-m">The layered distressing script</h3>
+<h3 class="govuk-heading-m">The fly-tip script</h3>
 
 <div class="govuk-inset-text">
-  <p class="govuk-body">Play this recording down the phone to the bot, or read it aloud yourself:</p>
+  <p class="govuk-body">Dial the number again. When the bot greets you, say:</p>
   <p class="govuk-body govuk-!-font-style-italic">
-    "Look, I don't know what to do anymore. The bins haven't been collected for three weeks, there's damp coming through my bedroom ceiling, my downstairs neighbour is shouting at all hours and the kids are scared, the council tax letter is threatening enforcement, and now there's a car parked across my driveway so I can't get out for work. Please. I'm at the end of my tether."
+    "There's a load of rubbish been dumped in the alley behind my house. It's been there since the weekend. Mattresses, bin bags, the lot."
   </p>
-  <audio controls preload="metadata" style="width: 100%;">
-    <source src="/assets/audio/ai-contact-centre/distress-script-en_GB.m4a" type="audio/mp4">
-    Your browser does not support the audio element.
-  </audio>
 </div>
 
-<h3 class="govuk-heading-m">What to watch for</h3>
+<p class="govuk-body">The bot says something like:</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-font-style-italic">
+    "Thanks for reporting that. Could you send a photo? You can upload one right now through the WhatsApp, iMessage or RCS simulator on the right of the companion app. I'll wait."
+  </p>
+</div>
+
+<p class="govuk-body">The line holds. The contact flow has dropped you into a long-poll branch that waits for the photo. You don't hang up; you upload.</p>
+
+<h3 class="govuk-heading-m">Download a photo to use</h3>
+
+<div class="ndx-photo-download">
+  <a href="/assets/downloads/sample-flytip.jpg" download class="govuk-button govuk-button--secondary">
+    Download a sample fly-tip photo (JPEG, 440 KB)
+  </a>
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    A real-world picture of dumped rubbish you can send through the simulator. Or use any photo on your own device, the bot will describe whatever it sees.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Open the simulator and send the photo</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>In the companion app, look at the <strong>right-hand pane</strong>. That's the WhatsApp/iMessage/RCS simulator. It's a stand-in for whichever messaging channel the resident actually uses.</li>
+  <li>In the sender-phone field, enter the same number you dialled from in step 1. Use UK E.164 (<code>+44</code> followed by 10 digits) or local format (<code>0</code> followed by 10 digits). Cases looks up the open ticket by phone number.</li>
+  <li>Click "Choose photo" and pick the sample fly-tip photo above (or any photo on your device).</li>
+  <li>Click "Send".</li>
+</ol>
+
+<h3 class="govuk-heading-m">What you'll see</h3>
+
+<p class="govuk-body">A staged sequence of chat bubbles appears in the simulator pane:</p>
 
 <ul class="govuk-list govuk-list--bullet">
-  <li>The decomposer Lambda calls Bedrock to extract five distinct intents: <code>MissedCollection</code>, <code>DampMould</code>, <code>AntiSocialBehaviour</code>, <code>CouncilTax</code>, and <code>ParkedVehicle</code>.</li>
-  <li>The cap of four kicks in. The bot says: "I've heard several issues. Let me focus on the top four first." The fifth (<code>truncated_intents[]</code>) is held for a follow-up turn.</li>
-  <li>The sentiment chip turns red. The Connect Case includes <code>safeguarding_flag: true</code>.</li>
-  <li>If you ask the bot whether you can sue the council, Bedrock Guardrails block the response and redirect you to a human.</li>
+  <li><strong>~1 second:</strong> "Photo received. Sender ID: {your phone}"</li>
+  <li><strong>~3 seconds:</strong> "Analysing image with Amazon Bedrock&hellip;" with a shimmer animation</li>
+  <li><strong>~6 seconds:</strong> "Looking up your case in Connect Cases&hellip;"</li>
+  <li><strong>~10 seconds:</strong> A structured response with <code>object_class</code>, <code>condition</code>, <code>severity</code>, <code>suggested_council_action</code>, <code>confidence</code>, and optional <code>secondary_observations</code></li>
 </ul>
 
-<p class="govuk-body">Add <code>?step=2</code> to the companion web app URL while you call. The right pane stays dimmed and your attention stays on the live transcript and the Connect Case.</p>
+<blockquote class="govuk-body govuk-!-font-size-36 ndx-headline-moment">
+  "I've reviewed your photo; environmental health will visit Wednesday, ref ABC123."
+</blockquote>
+
+<p class="govuk-body">That single sentence is the headline moment of the scenario. It's what a council CIO will remember and what a Director of Customer Services will photograph for their own CIO. Voice and a photo, joined to one case, read back as one promise.</p>
+
+<p class="govuk-body">Behind the scenes, the web app calls <code>POST /api/upload-presign</code> on the companion API. The browser uploads the image directly to S3 using a presigned URL. Then the web app calls <code>POST /api/simulator/send</code> with the S3 key and your phone number, and a Lambda function handles the cross-channel link to your existing case.</p>
+
+<style>
+  .ndx-headline-moment {
+    background: #fff8e1;
+    border-left: 6px solid #f0a020;
+    padding: 24px 28px;
+    margin: 32px 0;
+    font-style: italic;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .ndx-photo-download {
+    margin: 30px 0;
+    padding: 24px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+  }
+  .ndx-photo-download .govuk-button {
+    margin-bottom: 0;
+  }
+</style>

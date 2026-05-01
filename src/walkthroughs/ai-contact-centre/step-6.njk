@@ -1,0 +1,88 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 6: Multi-intent distressed call - AI Contact Centre Walkthrough"
+description: Play a layered distressing script that mentions five issues. Watch the bot pick the top four by confidence, acknowledge each by name, and offer a follow-up for the fifth.
+currentStep: 6
+totalSteps: 7
+timeEstimate: "6 minutes"
+scenarioId: ai-contact-centre
+---
+
+{% set stepNumber = 6 %}
+{% set stepTitle = "Multi-intent distressed call" %}
+{% set stepDescription = "Play one of the recorded scripts (or speak it live). The bot extracts five distinct intents, caps acknowledgement at the top four by confidence, offers a follow-up for the fifth, and lets Bedrock Guardrails block any hallucinated legal advice." %}
+{% set timeEstimate = "6 minutes" %}
+{% set screenshotData = screenshots["ai-contact-centre"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 6 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Sentiment chips climb from green to amber to red as distress rises",
+  "The decomposer extracts five intents and the bot caps acknowledgement at four",
+  "The bot acknowledges each of the four intents by name",
+  "The bot offers a follow-up question for the fifth issue",
+  "Bedrock Guardrails block any hallucinated legal advice"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<div class="govuk-warning-text" id="content-warning">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Content warning</span>
+    This step shows how the bot handles a distressed caller. The audio recordings are fictional scripts. They are not based on any real call. If you find this content distressing, <a href="/walkthroughs/ai-contact-centre/step-7/" class="govuk-link">skip to step 7</a>.
+  </strong>
+</div>
+
+<h3 class="govuk-heading-m">Credits and ethical sign-off</h3>
+
+<p class="govuk-body">
+  The audio files below are fictional scripts reviewed for safeguarding sensitivity. See <a href="https://github.com/co-cddo/ndx_try_aws_scenarios/blob/main/cloudformation/scenarios/ai-contact-centre/audio/SCRIPT-ETHICAL-REVIEW.md" class="govuk-link">SCRIPT-ETHICAL-REVIEW.md</a> for full author credits, the safeguarding lead who reviewed each recording, the review date, and the playback policy.
+</p>
+
+<h3 class="govuk-heading-m">The layered distressing script</h3>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">The script being read in both recordings:</p>
+  <p class="govuk-body govuk-!-font-style-italic">
+    "Look, I don't know what to do anymore. The bins haven't been collected for three weeks, there's damp coming through my bedroom ceiling, my downstairs neighbour is shouting at all hours and the kids are scared, the council tax letter is threatening enforcement, and now there's a car parked across my driveway so I can't get out for work. Please. I'm at the end of my tether."
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">Play it through to the bot</h3>
+
+<p class="govuk-body">The simplest way: dial the <code>PstnNumber</code> on your mobile, hold the phone next to your computer speaker, and click play on one of the recordings below. Lex hears it through the call. You can also speak the script live yourself, or upload the recording into the "Call via browser" microphone if your operating system supports it.</p>
+
+<div class="ndx-audio-card">
+  <h4 class="govuk-heading-s govuk-!-margin-bottom-2">English (female voice)</h4>
+  <audio controls preload="metadata" style="width: 100%;">
+    <source src="/assets/audio/ai-contact-centre/distress-multi-intent-female-en_GB.m4a" type="audio/mp4">
+    Your browser does not support the audio element.
+  </audio>
+</div>
+
+<div class="ndx-audio-card">
+  <h4 class="govuk-heading-s govuk-!-margin-bottom-2">English (male voice)</h4>
+  <audio controls preload="metadata" style="width: 100%;">
+    <source src="/assets/audio/ai-contact-centre/distress-multi-intent-male-en_GB.m4a" type="audio/mp4">
+    Your browser does not support the audio element.
+  </audio>
+</div>
+
+<h3 class="govuk-heading-m">What to watch for</h3>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>The decomposer Lambda calls Bedrock Nova Pro to extract five distinct intents: <code>MissedCollection</code>, <code>DampMould</code>, <code>AntiSocialBehaviour</code>, <code>CouncilTax</code>, and <code>ParkedVehicle</code>.</li>
+  <li>The cap of four kicks in. The bot says: "I've heard several issues. Let me focus on the top four first." The fifth (<code>truncated_intents[]</code>) is held for a follow-up turn.</li>
+  <li>The sentiment chip turns red. The Connect Case includes <code>safeguarding_flag: true</code>.</li>
+  <li>If you ask the bot whether you can sue the council, Bedrock Guardrails block the response and redirect you to a human.</li>
+</ul>
+
+<style>
+  .ndx-audio-card {
+    margin: 20px 0;
+    padding: 16px 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+    border-radius: 0 4px 4px 0;
+  }
+</style>

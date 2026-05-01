@@ -1,42 +1,63 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 5: Sentiment and safeguarding deep-dive - AI Contact Centre Walkthrough"
-description: Inspect the live transcript pane to see how Contact Lens redacts PII and tracks sentiment
+title: "Step 5: Edit the contact flow greeting in the GUI - AI Contact Centre Walkthrough"
+description: Open ndx-try-aicc-main-flow in the Connect console, change the greeting to 'hi this is a funky test', save, and dial in to hear the difference.
 currentStep: 5
-totalSteps: 5
-timeEstimate: "4 minutes"
+totalSteps: 7
+timeEstimate: "5 minutes"
 scenarioId: ai-contact-centre
 ---
 
 {% set stepNumber = 5 %}
-{% set stepTitle = "Sentiment and safeguarding deep-dive" %}
-{% set stepDescription = "Inspect the live transcript pane in detail. Personal details appear as {NAME}, {ADDRESS}, and {PHONE} placeholders. Sentiment chips colour green to red. The safeguarding flag is set when distress is sustained." %}
-{% set timeEstimate = "4 minutes" %}
+{% set stepTitle = "Edit the contact flow greeting in the GUI" %}
+{% set stepDescription = "Open the contact flow ndx-try-aicc-main-flow in the Connect console, click the 'Greet and get intent via Lex' block, change its prompt text to 'hi this is a funky test', save and publish, then dial the PstnNumber to hear your edit live." %}
+{% set timeEstimate = "5 minutes" %}
 {% set screenshotData = screenshots["ai-contact-centre"] %}
 {% set screenshots = [] %}
 {% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 5 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
 {% set expectedOutcomes = [
-  "Every personal detail in the transcript appears as {NAME}, {ADDRESS}, {PHONE}, or {EMAIL}",
-  "Sentiment chips on each segment match the Contact Lens analytic output",
-  "The DynamoDB ContactLensCache table contains only redacted segments, no raw PII",
-  "The Connect Case shows safeguarding_flag: true when distress was sustained"
+  "You can find ndx-try-aicc-main-flow under Routing → Flows in the Connect admin console",
+  "You can click the 'Greet and get intent via Lex' block and edit its prompt",
+  "Save and Publish complete without errors",
+  "Dialling the PstnNumber after publishing plays the new greeting"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
 
-<h3 class="govuk-heading-m">How redaction works</h3>
+<h3 class="govuk-heading-m">Why this matters</h3>
 
-<p class="govuk-body">Contact Lens is configured at the Connect instance level with <code>Attributes.Redaction.Enabled: true</code> and <code>RedactionOutput: REDACTED_AND_ORIGINAL</code>. Both segments are sent to Kinesis. The consumer Lambda <strong>reads only <code>RedactedSegment</code> and writes only that</strong> to DynamoDB. <code>OriginalSegment</code> is ignored entirely.</p>
+<p class="govuk-body">Contact flows are configurable. They are not a developer-only black box. A non-developer in your customer services team can change the words a caller hears in under a minute. This step proves it.</p>
 
-<p class="govuk-body">Contact Lens emits placeholders like <code>[NAME_1]</code> and <code>[ADDRESS_2]</code>. The consumer Lambda transforms these to the documented <code>{NAME}</code> and <code>{ADDRESS}</code> form, so the web app shows consistent placeholders no matter how many distinct entities Contact Lens detects in a single segment.</p>
-
-<h3 class="govuk-heading-m">What to inspect</h3>
+<h3 class="govuk-heading-m">Find the flow</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
-  <li>Open the companion web app and add <code>?step=5</code> to the URL.</li>
-  <li>Scroll the left pane. Each segment has a sentiment chip: green for neutral, amber for moderate distress, red for high distress.</li>
-  <li>Click any segment. Personal details (your name, address, phone) appear as monospace placeholders. There is no fallback path that exposes the original.</li>
-  <li>Open the AWS console, find the <code>ContactLensCache</code> DynamoDB table, and browse a few items. You will not find any of your real personal details. The PII residue test (<code>tests/pii-residue.test.mjs</code>) checks this in CI.</li>
+  <li>From the Connect admin home, open the left-hand nav and click <strong>Routing</strong>, then <strong>Flows</strong>.</li>
+  <li>In the flow list, search for <code>ndx-try-aicc-main-flow</code> and click into it. The visual flow editor opens.</li>
+  <li>The flow starts on the left. Find the block labelled <strong>"Greet and get intent via Lex"</strong>. It's the first <em>Get customer input</em> block after the entry point. The icon shows a Lex bot.</li>
 </ol>
 
-<p class="govuk-body">If your call in Step 2 sustained distress for more than two minutes, the Connect Case in the middle pane shows <code>safeguarding_flag: true</code> with a red badge. In a real council deployment, this would route the case to a safeguarding-trained agent.</p>
+<h3 class="govuk-heading-m">Edit the greeting</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>Click the "Greet and get intent via Lex" block. The properties panel slides in from the right.</li>
+  <li>Scroll to the <strong>"Prompts"</strong> section. The current text reads something like <em>"Hello, you've reached Aldershire District Council. This is an NDX:Try session. What can I help with?"</em></li>
+  <li>Click the prompt text and replace it with: <code>hi this is a funky test</code></li>
+  <li>Click <strong>Save</strong> at the top right. A toast confirms "Flow saved".</li>
+  <li>Click <strong>Publish</strong> next to Save. A confirmation dialog appears. Click <strong>Publish</strong> in the dialog.</li>
+</ol>
+
+<h3 class="govuk-heading-m">Hear it live</h3>
+
+<p class="govuk-body">Dial the <code>PstnNumber</code> from step 1. Instead of the corporate Aldershire greeting, you hear:</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-font-style-italic">
+    "Hi, this is a funky test."
+  </p>
+</div>
+
+<p class="govuk-body">The bot still does intent recognition after that line, so saying "bin collection" or "fly-tip" still routes correctly. You changed the words, not the routing.</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body"><strong>Note:</strong> this change lives in your sandbox session only. Re-deploying the AI Contact Centre stack from CloudFormation, or running <code>isb terminate</code> on your sandbox lease, resets the flow to its IaC-defined wording. To make a permanent change, edit <code>cloudformation/scenarios/ai-contact-centre/template.yaml</code> in the source repository.</p>
+</div>

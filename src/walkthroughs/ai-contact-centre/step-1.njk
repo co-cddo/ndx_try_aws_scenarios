@@ -1,16 +1,16 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 1: Dial in - AI Contact Centre Walkthrough"
-description: Call the real UK phone number from your sandbox and walk a happy-path bin-collection script
+title: "Step 1: Bin collection by phone - AI Contact Centre Walkthrough"
+description: Dial the real UK phone number from your sandbox and walk a happy-path bin-collection script
 currentStep: 1
-totalSteps: 5
+totalSteps: 7
 timeEstimate: "5 minutes"
 scenarioId: ai-contact-centre
 ---
 
 {% set stepNumber = 1 %}
-{% set stepTitle = "Dial the council you just built" %}
-{% set stepDescription = "Call the real UK phone number from your own phone, hear the en-GB greeting, walk a happy-path bin-collection script, and watch the bot read back a reference number." %}
+{% set stepTitle = "Bin collection by phone" %}
+{% set stepDescription = "Dial the real UK number from your own phone, hear the en-GB greeting, walk a happy-path bin-collection script, and watch the bot read back a reference number." %}
 {% set timeEstimate = "5 minutes" %}
 {% set screenshotData = screenshots["ai-contact-centre"] %}
 {% set screenshots = [] %}
@@ -40,7 +40,7 @@ scenarioId: ai-contact-centre
     <strong>Open the Outputs tab.</strong> The <code>PstnNumber</code> output is your real UK phone number.
   </li>
   <li>
-    <strong>Open the companion web app</strong> at the <code>CompanionUrl</code> output and add <code>?step=1</code> to the URL. The left and middle panes brighten; the photo upload simulator on the right is dimmed for now.
+    <strong>Open the companion web app</strong> at the <code>CompanionUrl</code> output. The transcript on the left brightens as soon as you dial; the case in the middle assembles live.
   </li>
 </ol>
 
@@ -56,25 +56,6 @@ scenarioId: ai-contact-centre
 <p class="govuk-body">As you talk, watch the left pane. Each thing you say arrives as a transcript segment with a sentiment chip and a timestamp. Personal details like your name, address, and phone number are replaced with <code>{NAME}</code>, <code>{ADDRESS}</code>, and <code>{PHONE}</code> placeholders before anything is saved. Contact Lens does this redaction at the Connect instance level.</p>
 
 <p class="govuk-body">In the middle pane, a Connect Case appears. Fields fill in live: <code>customer_phone_number</code>, <code>address</code>, <code>intent_category</code>, and <code>intents[]</code>. The bot reads back a six-character reference ("Your reference is ABC-123. Environmental services will be in touch within two working days.") and ends the call.</p>
-
-<h3 class="govuk-heading-m">Try it in another language</h3>
-
-<p class="govuk-body">After the English greeting, the bot listens to your first reply and detects the language. From the second turn onward, the voice and the answers switch to that language. Eight languages are supported, with caveats:</p>
-
-<ul class="govuk-list govuk-list--bullet">
-  <li><strong>English (en-GB):</strong> full quality, Amy neural voice, Contact Lens redacts PII automatically.</li>
-  <li><strong>Italian (it-IT):</strong> full quality, Bianca neural voice, full Contact Lens.</li>
-  <li><strong>French (fr-FR):</strong> full quality, Léa neural voice, full Contact Lens.</li>
-  <li><strong>German (de-DE):</strong> full quality, Vicki neural voice, full Contact Lens.</li>
-  <li><strong>Spanish (es-ES):</strong> full quality, Lucia neural voice, full Contact Lens.</li>
-  <li><strong>Polish (pl-PL):</strong> Ola neural voice. Contact Lens does not support sentiment scoring or PII redaction for Polish, so the transcript pane shows raw text.</li>
-  <li><strong>Welsh (cy-GB):</strong> Gwyneth standard voice (sounds robotic). Speech-to-text is best-effort because neither Lex nor Transcribe streaming supports Welsh; the bot transcribes against an English model and lets Bedrock Nova guess. Speak slowly and clearly.</li>
-  <li><strong>Romanian (ro-RO):</strong> Carmen standard voice. Lex does not support Romanian NLU, so intent recognition is Bedrock-only. Contact Lens lacks sentiment and redaction.</li>
-</ul>
-
-<div class="govuk-inset-text">
-  <p class="govuk-body">Try saying in Italian: <em>"Quando passa il netturbino?"</em> (When does the bin lorry come?). The bot replies in Italian via Bianca, with the same Aldershire knowledge base behind it.</p>
-</div>
 
 <style>
   .ndx-phone-card {
