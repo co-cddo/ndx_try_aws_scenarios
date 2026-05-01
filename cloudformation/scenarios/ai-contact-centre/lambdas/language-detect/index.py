@@ -305,66 +305,51 @@ async def _kvs_and_transcribe_open(stream_arn: str, start_fragment: Optional[str
 def _kvs_get_media(stream_arn: str, start_fragment: Optional[str]) -> bytes:
     """Pull recent Matroska bytes from KVS for this contact's media stream.
 
-    Uses the kinesis-video-archived-media API (ListFragments +
-    GetMediaForFragmentList) instead of GetMedia. GetMedia paces delivery
-    at ~1x real-time on live streams (Connect produces fragments as the
-    customer speaks; GetMedia hands them out at that pace), which on a
-    real call means a 9-10 s wait that blows the contact-flow's 8 s
-    InvokeLambda budget. The archived-media API delivers buffered
-    fragments in a burst (~10x real-time empirically) so we get ~12 s
-    of customer audio in ~1 s.
-
-    Strategy: list fragments produced in the last 30 s, take the most
-    recent N (cap at 30 to keep the response small), pull their media.
-    The 30 s window covers a typical Greet + customer turn 1."""
-    import datetime
+    KVS GetMedia opens a long-lived live stream connection that keeps reads
+    blocked while the contact is still streaming -- empirically observed
+    waits of ~30 seconds when streaming is active. We work around it by
+    setting a tight socket read timeout so the FIRST read that has nothing
+    new to deliver bails out, and by capping the overall data we consume."""
+    import socket
     from botocore.config import Config
 
-    region = os.environ.get("AWS_REGION", "us-east-1")
-    list_ep = kvs_meta.get_data_endpoint(StreamARN=stream_arn, APIName="LIST_FRAGMENTS")["DataEndpoint"]
-    get_ep = kvs_meta.get_data_endpoint(StreamARN=stream_arn, APIName="GET_MEDIA_FOR_FRAGMENT_LIST")["DataEndpoint"]
-
-    cfg = Config(read_timeout=5, retries={"max_attempts": 1})
-    list_client = boto3.client("kinesis-video-archived-media",
-                                endpoint_url=list_ep, region_name=region, config=cfg)
-    get_client = boto3.client("kinesis-video-archived-media",
-                               endpoint_url=get_ep, region_name=region, config=cfg)
-
-    # Use a 60-minute window. A real call only produces fragments while
-    # streaming is enabled (between Start customer media stream and Stop
-    # customer media stream blocks), which spans the customer's first
-    # turn -- typically 10-20 s. Querying a 60-minute window covers this
-    # comfortably AND lets the benchmark harness reuse an older stream.
-    now = datetime.datetime.now(datetime.timezone.utc)
-    window_start = now - datetime.timedelta(minutes=60)
-    list_resp = list_client.list_fragments(
-        StreamARN=stream_arn,
-        MaxResults=100,
-        FragmentSelector={
-            "FragmentSelectorType": "PRODUCER_TIMESTAMP",
-            "TimestampRange": {
-                "StartTimestamp": window_start,
-                "EndTimestamp": now,
-            },
-        },
+    endpoint = kvs_meta.get_data_endpoint(StreamARN=stream_arn, APIName="GET_MEDIA")["DataEndpoint"]
+    media = boto3.client(
+        "kinesis-video-media",
+        endpoint_url=endpoint,
+        region_name=os.environ.get("AWS_REGION", "us-east-1"),
+        config=Config(read_timeout=2, retries={"max_attempts": 1}),
     )
-    frags = list_resp.get("Fragments", []) or []
-    if not frags:
-        logger.info("kvs list_fragments returned 0 fragments in last 60min")
-        return b""
-    # Order ascending by ProducerTimestamp so the demuxed PCM is in order.
-    # We then keep only the MOST RECENT 24 fragments (~12 s of audio) so
-    # the response is small and delivery is fast.
-    frags.sort(key=lambda f: f.get("ProducerTimestamp", 0))
-    recent_frags = frags[-24:]
-    fragment_numbers = [f["FragmentNumber"] for f in recent_frags]
-    logger.info("kvs taking last %d/%d fragments from 60min window",
-                len(fragment_numbers), len(frags))
-
-    resp = get_client.get_media_for_fragment_list(
-        StreamARN=stream_arn, Fragments=fragment_numbers,
+    selector = (
+        {"StartSelectorType": "FRAGMENT_NUMBER", "AfterFragmentNumber": start_fragment}
+        if start_fragment
+        else {"StartSelectorType": "EARLIEST"}
     )
-    return resp["Payload"].read()
+    resp = media.get_media(StreamARN=stream_arn, StartSelector=selector)
+    body = resp["Payload"]
+    chunks: list[bytes] = []
+    # Read ~16 s worth of audio. Connect's `Start customer media stream`
+    # block fires before the Greet plays, so typically ~5-8 s of leading
+    # silence; the customer then speaks for 5-10 s. 16 s of buffered audio
+    # should give us 5+ s of speech post-trim. Smaller cap = we hit the
+    # exit threshold faster, before KVS's connection-idle timeout kicks
+    # in (the dominant cost of the previous 480 KB cap was waiting for
+    # more live fragments after we'd consumed the buffered ones).
+    target_bytes = 256 * 1024  # ~16 s of 8 kHz 16-bit mono LE PCM
+    read = 0
+    try:
+        while read < target_bytes:
+            chunk = body.read(64 * 1024)
+            if not chunk:
+                break
+            chunks.append(chunk)
+            read += len(chunk)
+    except (socket.timeout, Exception) as exc:
+        # Read timed out waiting for more live data. Use what we have so
+        # far -- it's normal for the connection to idle once we've consumed
+        # the buffered audio and the customer has stopped speaking.
+        logger.info("kvs read stopped after %d bytes (%s)", read, type(exc).__name__)
+    return b"".join(chunks)
 
 
 def _classify(language_bcp47: str) -> Tuple[str, str, str, str]:
@@ -425,14 +410,9 @@ def _do_worker(payload):
     benchmark harness can read stage-by-stage timing without parsing
     CloudWatch logs. Times are in seconds, measured with time.perf_counter.
 
-    Pipeline: ListFragments + GetMediaForFragmentList (archived-media API)
-    delivers buffered KVS fragments at ~10x real-time -- empirically ~0.7
-    to 1 s for ~12 s of audio, regardless of whether the call is still
-    live -- so we can overlap the Transcribe HTTP/2 stream open with it
-    safely (the stream stays alive on the wire for ~15 s of inactivity).
-    A previous parallel-init attempt failed on live calls because
-    GetMedia paced at 1x real-time and the Transcribe stream went stale
-    during the 9 s wait; the archived-media swap fixed that."""
+    Pipeline overlap: open the Transcribe stream concurrently with the KVS
+    GetMedia read so its ~500 ms HTTP/2 init is paid in parallel rather
+    than added to the wall-clock total."""
     timings: dict = {}
     contact_id = payload.get("contact_id", "")
     stream_arn = payload.get("stream_arn", "")
