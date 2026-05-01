@@ -1285,7 +1285,8 @@ Resources:
                   - kinesisvideo:GetDataEndpoint
                   - kinesisvideo:DescribeStream
                   - kinesisvideo:GetMedia
-                  - kinesis-video-media:GetMedia
+                  - kinesisvideo:ListFragments
+                  - kinesisvideo:GetMediaForFragmentList
                 Resource: '*'
               - Effect: Allow
                 Action:
