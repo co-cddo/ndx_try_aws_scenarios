@@ -1276,6 +1276,7 @@ Resources:
                   - connect:GetCurrentMetricData
                   - connect:DescribeQueue
                   - connect:UpdateContactAttributes
+                  - connect:GetContactAttributes
                 Resource: '*'
               - Effect: Allow
                 Action: [lex:RecognizeText, lex:RecognizeUtterance]
