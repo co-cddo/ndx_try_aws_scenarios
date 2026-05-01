@@ -265,6 +265,104 @@ def benchmark_live_lambda(audio_paths: list[str]) -> None:
     print()
 
 
+def benchmark_worker(phase_name: str, runs: int = 5) -> None:
+    """Invoke the DEPLOYED Lambda's worker code path `runs` times against
+    a real KVS stream, capture timing for each stage, append to
+    lex/perf-baseline.json. Used to gate phase changes -- compare numbers
+    against the previous phase to decide go/no-go.
+
+    The first invocation is typically a cold start. Force a fresh cold by
+    publishing a no-op env var bump before calling, OR rely on the natural
+    cold/warm distribution across `runs` invocations."""
+    import boto3, json as _json, time, urllib3, statistics, datetime
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    print(f"\n[benchmark-worker] phase={phase_name} runs={runs}")
+
+    session = boto3.Session(profile_name="NDX/SandboxAdmin", region_name="us-east-1")
+    kvs = session.client("kinesisvideo", verify=False)
+    lam = session.client("lambda")
+
+    # Find the most recent AICC KVS stream + extract its contact id from
+    # the stream name. Connect names them ...-contact-<contact_id>.
+    streams = kvs.list_streams().get("StreamInfoList", []) or []
+    aicc = [s for s in streams if "ndx-try-aicc" in s["StreamName"]]
+    if not aicc:
+        sys.exit("[benchmark-worker] no AICC KVS streams. Make a real call first.")
+    stream = aicc[0]
+    name = stream["StreamName"]
+    contact_id = name[name.rfind("contact-") + len("contact-"):] if "contact-" in name else "harness"
+    print(f"  stream: {name}")
+    print(f"  contact_id: {contact_id}")
+
+    # Use the WORKER_MODE_KEY shape so we get _timings back regardless of
+    # whether the deployed Lambda is the orchestrator+worker split or the
+    # collapsed sync handler -- both paths honour the flag.
+    samples = []
+    for i in range(runs):
+        worker_payload = {
+            "ndx_aicc_lang_detect_worker": True,
+            "contact_id": contact_id,
+            "stream_arn": stream["StreamARN"],
+            "start_fragment": "",
+        }
+        wall_t0 = time.time()
+        resp = lam.invoke(
+            FunctionName="ndx-try-aicc-language-detect-us-east-1",
+            InvocationType="RequestResponse",
+            Payload=_json.dumps(worker_payload).encode(),
+        )
+        wall_dt = time.time() - wall_t0
+        body = _json.loads(resp["Payload"].read())
+        timings = body.get("_timings", {}) or {}
+        sample = {
+            "run": i,
+            "wallclock_s": round(wall_dt, 3),
+            "lang": body.get("detected_language"),
+            **timings,
+        }
+        samples.append(sample)
+        print(f"  run{i}  wall={wall_dt:5.2f}s  "
+              f"kvs={timings.get('kvs_read_s', '—'):>5}  "
+              f"demux={timings.get('demux_s', '—'):>5}  "
+              f"trim={timings.get('trim_s', '—'):>5}  "
+              f"tx={timings.get('transcribe_total_s', '—'):>5}  "
+              f"upd={timings.get('update_attrs_s', '—'):>5}  "
+              f"total={timings.get('worker_total_s', '—'):>5}  "
+              f"lang={body.get('detected_language')}")
+
+    # Stats
+    totals = [s.get("worker_total_s") for s in samples if s.get("worker_total_s")]
+    walls = [s["wallclock_s"] for s in samples]
+    print()
+    print(f"  worker_total_s  median={statistics.median(totals):.2f}  "
+          f"p95={sorted(totals)[max(0, int(len(totals) * 0.95) - 1)]:.2f}  "
+          f"min={min(totals):.2f}  max={max(totals):.2f}")
+    print(f"  wallclock_s     median={statistics.median(walls):.2f}  "
+          f"max={max(walls):.2f}")
+
+    # Append to perf-baseline.json
+    perf_path = SCENARIO_DIR / "lex" / "perf-baseline.json"
+    perf_path.parent.mkdir(parents=True, exist_ok=True)
+    if perf_path.exists():
+        data = __import__("json").loads(perf_path.read_text())
+    else:
+        data = {"phases": []}
+    phase_entry = {
+        "name": phase_name,
+        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "kvs_stream": stream["StreamARN"],
+        "contact_id": contact_id,
+        "runs": runs,
+        "samples": samples,
+        "median_total_s": round(statistics.median(totals), 3) if totals else None,
+        "p95_total_s": round(sorted(totals)[max(0, int(len(totals) * 0.95) - 1)], 3) if totals else None,
+        "median_wallclock_s": round(statistics.median(walls), 3),
+    }
+    data["phases"].append(phase_entry)
+    perf_path.write_text(__import__("json").dumps(data, indent=2) + "\n")
+    print(f"\n  appended to {perf_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("audio", nargs="?", default=DEFAULT_AUDIO,
@@ -277,10 +375,16 @@ def main():
                         help="cap-vs-accuracy local benchmark across audio_message (1) and (2)")
     parser.add_argument("--benchmark-live", action="store_true",
                         help="invoke the deployed Lambda end-to-end against an existing KVS stream, measure orchestrator timing")
+    parser.add_argument("--benchmark-worker", metavar="PHASE_NAME",
+                        help="invoke the deployed Lambda's worker code path 5x against a real KVS stream, append timings to lex/perf-baseline.json")
     args = parser.parse_args()
 
     if args.benchmark:
         benchmark(BENCHMARK_AUDIO, BENCHMARK_CAPS)
+        return
+
+    if args.benchmark_worker:
+        benchmark_worker(args.benchmark_worker)
         return
 
     if args.benchmark_live:

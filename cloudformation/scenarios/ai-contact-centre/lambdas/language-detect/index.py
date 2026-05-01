@@ -232,15 +232,10 @@ def parse_mkv_audio_pcm(blob: bytes) -> bytes:
     return out.getvalue()
 
 
-async def _transcribe_pcm(pcm_le: bytes, sample_rate_hz: int) -> Tuple[str, str]:
-    """Send PCM audio to Transcribe streaming with IdentifyLanguage and
-    return (final_transcript, identified_language). Both Transcribe and
-    Connect's KVS storage use little-endian PCM (despite the L16 spec
-    naming) -- empirically verified by sending real KVS bytes both
-    orientations and watching which produces a clean transcript."""
-    if len(pcm_le) % 2 == 1:
-        pcm_le = pcm_le[:-1]
-
+async def _open_transcribe_stream(sample_rate_hz: int):
+    """Pre-open a Transcribe streaming connection so we can overlap its
+    ~500 ms init cost with KVS GetMedia. Returns the stream object and a
+    handler that we'll drive once we have audio bytes ready to send."""
     client = TranscribeStreamingClient(region=os.environ.get("AWS_REGION", "us-east-1"))
     stream = await client.start_stream_transcription(
         language_code=None,
@@ -250,6 +245,15 @@ async def _transcribe_pcm(pcm_le: bytes, sample_rate_hz: int) -> Tuple[str, str]
         media_sample_rate_hz=sample_rate_hz,
         media_encoding="pcm",
     )
+    return stream
+
+
+async def _drive_transcribe(stream, pcm_le: bytes, sample_rate_hz: int) -> Tuple[str, str]:
+    """Drive an already-open Transcribe stream with the given PCM bytes
+    and return (final_transcript, identified_language). KVS audio is
+    little-endian PCM despite the L16 spec naming -- verified empirically."""
+    if len(pcm_le) % 2 == 1:
+        pcm_le = pcm_le[:-1]
 
     state = {"transcript": "", "language": ""}
 
@@ -276,6 +280,28 @@ async def _transcribe_pcm(pcm_le: bytes, sample_rate_hz: int) -> Tuple[str, str]
     return state["transcript"].strip(), state["language"]
 
 
+async def _transcribe_pcm(pcm_le: bytes, sample_rate_hz: int) -> Tuple[str, str]:
+    """Backwards-compatible wrapper that opens a Transcribe stream then
+    drives it with the given PCM. Existing callers / tests use this; the
+    deployed worker uses the split _open_transcribe_stream + _drive_transcribe
+    pair so the stream open overlaps with KVS read."""
+    stream = await _open_transcribe_stream(sample_rate_hz)
+    return await _drive_transcribe(stream, pcm_le, sample_rate_hz)
+
+
+async def _kvs_and_transcribe_open(stream_arn: str, start_fragment: Optional[str],
+                                    sample_rate_hz: int) -> Tuple[bytes, object]:
+    """Run KVS GetMedia + Transcribe stream open concurrently. Returns
+    (blob, opened_stream) once both finish. Saves ~500 ms vs the
+    sequential path because Transcribe's HTTP/2 connection setup happens
+    while KVS is still sending us bytes."""
+    loop = asyncio.get_event_loop()
+    kvs_task = loop.run_in_executor(None, _kvs_get_media, stream_arn, start_fragment)
+    transcribe_task = asyncio.create_task(_open_transcribe_stream(sample_rate_hz))
+    blob, stream = await asyncio.gather(kvs_task, transcribe_task)
+    return blob, stream
+
+
 def _kvs_get_media(stream_arn: str, start_fragment: Optional[str]) -> bytes:
     """Pull recent Matroska bytes from KVS for this contact's media stream.
 
@@ -292,7 +318,7 @@ def _kvs_get_media(stream_arn: str, start_fragment: Optional[str]) -> bytes:
         "kinesis-video-media",
         endpoint_url=endpoint,
         region_name=os.environ.get("AWS_REGION", "us-east-1"),
-        config=Config(read_timeout=4, retries={"max_attempts": 1}),
+        config=Config(read_timeout=2, retries={"max_attempts": 1}),
     )
     selector = (
         {"StartSelectorType": "FRAGMENT_NUMBER", "AfterFragmentNumber": start_fragment}
@@ -302,12 +328,14 @@ def _kvs_get_media(stream_arn: str, start_fragment: Optional[str]) -> bytes:
     resp = media.get_media(StreamARN=stream_arn, StartSelector=selector)
     body = resp["Payload"]
     chunks: list[bytes] = []
-    # Read ~30 s worth of audio. Connect's `Start customer media stream`
-    # block fires before the Greet plays, so the first ~5-8 s of stream is
-    # silence (greeting playing, customer not yet speaking). Reading ~30 s
-    # of bytes ensures the customer's speech is captured even with a few
-    # seconds of leading silence trimmed off later.
-    target_bytes = 480 * 1024  # ~30 s of 8 kHz 16-bit mono LE PCM
+    # Read ~16 s worth of audio. Connect's `Start customer media stream`
+    # block fires before the Greet plays, so typically ~5-8 s of leading
+    # silence; the customer then speaks for 5-10 s. 16 s of buffered audio
+    # should give us 5+ s of speech post-trim. Smaller cap = we hit the
+    # exit threshold faster, before KVS's connection-idle timeout kicks
+    # in (the dominant cost of the previous 480 KB cap was waiting for
+    # more live fragments after we'd consumed the buffered ones).
+    target_bytes = 256 * 1024  # ~16 s of 8 kHz 16-bit mono LE PCM
     read = 0
     try:
         while read < target_bytes:
@@ -337,27 +365,21 @@ def _classify(language_bcp47: str) -> Tuple[str, str, str, str]:
 
 
 def lambda_handler(event, context):
-    """Two execution modes:
+    """Single synchronous execution path. Pulls audio from KVS in parallel
+    with opening the Transcribe HTTP/2 stream, runs IdentifyLanguage on
+    ~5 s of speech-trimmed audio, writes the detected language + Polly
+    voice + clean transcript back to the contact's attributes, and
+    returns the detection result for the contact flow's downstream blocks
+    to consume.
 
-    Orchestrator (the contact flow's `Detect language` action invokes this
-    synchronously with an 8 s budget). Reads `StreamARN` from contact data,
-    async-invokes itself in worker mode with the relevant identifiers, and
-    returns immediately so the flow can continue. Total turnaround typically
-    under 500 ms.
-
-    Worker (async-invoked with the WORKER_MODE_KEY flag set). Pulls audio
-    from KVS, runs Transcribe Streaming with IdentifyLanguage, and writes
-    the detected language + Polly voice + clean transcript back to the
-    contact's attributes. Takes as long as the audio plays (Transcribe
-    streaming is 1x real-time on the service side), so the budget is the
-    Lambda timeout, not the contact flow's 8 s wait."""
+    Backwards compat: the WORKER_MODE_KEY branch is preserved so any old
+    in-flight async invocations don't break, and so the benchmark harness
+    can pass an explicit stream_arn outside the contact-flow shape."""
     payload = event or {}
     if payload.get(WORKER_MODE_KEY):
         return _do_worker(payload)
-    return _do_orchestrator(event, context)
 
-
-def _do_orchestrator(event, context):
+    # Contact-flow shape: pull stream ARN from MediaStreams.Customer.Audio
     details = event.get("Details", {}) or {}
     cdata = details.get("ContactData", {}) or {}
     contact_id = cdata.get("ContactId", "")
@@ -376,96 +398,59 @@ def _do_orchestrator(event, context):
         "stream_arn": stream_arn,
         "start_fragment": start_fragment or "",
     }
-    try:
-        lambda_client.invoke(
-            FunctionName=context.function_name,
-            InvocationType="Event",  # async, no waiting
-            Payload=json.dumps(worker_payload).encode("utf-8"),
-        )
-    except Exception:
-        logger.exception("failed to async-invoke worker")
-        return _result(contact_id, "en", "", "worker_invoke_failed")
-
-    # Poll for the worker to finish so the contact flow's downstream blocks
-    # (Apply caller voice / Set Lex locale / Bedrock RAG fulfilment) see the
-    # detected language as part of THIS turn rather than waiting until turn 2.
-    # The contact flow caps the InvokeLambda action at 8 s server-side, so
-    # leave ~0.7 s margin and poll aggressively (250 ms cadence) once the
-    # worker is likely to be near done. Worker total time for 5 s of audio
-    # is ~6-7 s (Transcribe paces 1x + ~0.7 s overhead, plus KVS+update).
-    poll_start = time.time()
-    deadline = poll_start + 7.3
-    next_poll = poll_start + 4.5  # don't bother polling before the worker could plausibly be done
-    while time.time() < deadline:
-        time.sleep(max(0.0, next_poll - time.time()))
-        next_poll = time.time() + 0.25
-        if not (INSTANCE_ID and contact_id):
-            break
-        try:
-            resp = connect.get_contact_attributes(
-                InstanceId=INSTANCE_ID, InitialContactId=contact_id,
-            )
-        except Exception as exc:
-            # ResourceNotFoundException happens for expired/test contacts and
-            # for genuine race conditions before Connect has fully registered
-            # the contact. Log once but keep polling -- if the contact really
-            # doesn't exist we'll hit the deadline gracefully and the flow's
-            # downstream blocks will fall through to the en defaults.
-            logger.warning("get_contact_attributes transient error: %s", exc)
-            continue
-        attrs = resp.get("Attributes", {}) or {}
-        if attrs.get("LanguageCode"):
-            short = attrs["LanguageCode"]
-            voice = attrs.get("PollyVoice", "Amy")
-            engine = attrs.get("PollyEngine", "neural")
-            polly_language = attrs.get("PollyLanguage", "en-US")
-            elapsed = time.time() - poll_start
-            logger.info("orchestrator caught worker result for %s after %.2fs: lang=%s",
-                        contact_id, elapsed, short)
-            return {
-                "detected_language": short,
-                "polly_voice": voice,
-                "polly_engine": engine,
-                "polly_language": polly_language,
-                "status": "detection_complete",
-            }
-
-    logger.warning("orchestrator timed out (%.2fs) waiting for worker on contact %s; "
-                   "downstream blocks will see fallback en for this turn",
-                   time.time() - poll_start, contact_id)
-    return {
-        "detected_language": "en",
-        "polly_voice": "Amy",
-        "polly_engine": "neural",
-        "polly_language": "en-US",
-        "status": "detection_in_progress",
-    }
+    out = _do_worker(worker_payload)
+    # Strip the timing diagnostics from the contact-flow response shape;
+    # they're only useful for the benchmark harness.
+    out.pop("_timings", None)
+    return out
 
 
 def _do_worker(payload):
+    """Returns the detection result, plus a `_timings` dict so the
+    benchmark harness can read stage-by-stage timing without parsing
+    CloudWatch logs. Times are in seconds, measured with time.perf_counter.
+
+    Pipeline overlap: open the Transcribe stream concurrently with the KVS
+    GetMedia read so its ~500 ms HTTP/2 init is paid in parallel rather
+    than added to the wall-clock total."""
+    timings: dict = {}
     contact_id = payload.get("contact_id", "")
     stream_arn = payload.get("stream_arn", "")
     start_fragment = payload.get("start_fragment", "")
     if not stream_arn:
-        return _result(contact_id, "en", "", "worker_no_stream")
+        return _result(contact_id, "en", "", "worker_no_stream", timings=timings)
 
+    t0 = time.perf_counter()
     try:
-        blob = _kvs_get_media(stream_arn, start_fragment)
+        blob, transcribe_stream = asyncio.run(_kvs_and_transcribe_open(
+            stream_arn, start_fragment, sample_rate_hz=8000,
+        ))
     except Exception as exc:
-        logger.exception("kvs get_media failed: %s", exc)
-        return _result(contact_id, "en", "", f"kvs_error:{exc}")
+        logger.exception("kvs+transcribe init failed: %s", exc)
+        return _result(contact_id, "en", "", f"init_error:{exc}", timings=timings)
+    timings["kvs_and_open_s"] = round(time.perf_counter() - t0, 3)
+    timings["kvs_blob_bytes"] = len(blob)
 
     if not blob:
-        return _result(contact_id, "en", "", "empty_stream")
+        return _result(contact_id, "en", "", "empty_stream", timings=timings)
 
+    t1 = time.perf_counter()
     pcm = parse_mkv_audio_pcm(blob)
+    timings["demux_s"] = round(time.perf_counter() - t1, 3)
+    timings["pcm_bytes"] = len(pcm)
+
+    t2 = time.perf_counter()
     pre_trim_len = len(pcm)
     pcm = _trim_leading_silence(pcm)
-    logger.info("worker contact %s: kvs blob=%d, pcm=%d, after_silence_trim=%d",
-                contact_id, len(blob), pre_trim_len, len(pcm))
+    timings["trim_s"] = round(time.perf_counter() - t2, 3)
+    timings["pcm_after_trim_bytes"] = len(pcm)
+    logger.info("worker contact %s: kvs blob=%d, pcm=%d, after_silence_trim=%d, "
+                "kvs+open_s=%.2f demux_s=%.2f trim_s=%.2f",
+                contact_id, len(blob), pre_trim_len, len(pcm),
+                timings["kvs_and_open_s"], timings["demux_s"], timings["trim_s"])
 
     if len(pcm) < 8000 * 2:  # <1 second of speech
-        return _result(contact_id, "en", "", "audio_too_short")
+        return _result(contact_id, "en", "", "audio_too_short", timings=timings)
 
     # Cap audio at ~5 seconds of *speech* (after silence trim). Transcribe
     # streaming paces at ~1x real-time so worker total time is ~7 s for 5 s
@@ -476,17 +461,20 @@ def _do_worker(payload):
     if len(pcm) > max_pcm:
         pcm = pcm[:max_pcm]
 
+    t3 = time.perf_counter()
     try:
-        transcript, lang_bcp47 = asyncio.run(_transcribe_pcm(pcm, sample_rate_hz=8000))
+        transcript, lang_bcp47 = asyncio.run(_drive_transcribe(transcribe_stream, pcm, sample_rate_hz=8000))
     except Exception as exc:
         logger.exception("transcribe streaming failed: %s", exc)
-        return _result(contact_id, "en", "", f"transcribe_error:{exc}")
+        return _result(contact_id, "en", "", f"transcribe_error:{exc}", timings=timings)
+    timings["transcribe_total_s"] = round(time.perf_counter() - t3, 3)
 
     short, voice, engine, polly_language = _classify(lang_bcp47)
-    logger.info("worker contact %s: transcribe lang=%s short=%s transcript=%r",
-                contact_id, lang_bcp47, short, transcript[:200])
+    logger.info("worker contact %s: transcribe lang=%s short=%s transcript=%r transcribe_s=%.2f",
+                contact_id, lang_bcp47, short, transcript[:200], timings["transcribe_total_s"])
 
     if INSTANCE_ID and contact_id:
+        t4 = time.perf_counter()
         try:
             connect.update_contact_attributes(
                 InstanceId=INSTANCE_ID,
@@ -501,17 +489,20 @@ def _do_worker(payload):
             )
         except Exception:
             logger.exception("update_contact_attributes failed")
+        timings["update_attrs_s"] = round(time.perf_counter() - t4, 3)
 
+    timings["worker_total_s"] = round(time.perf_counter() - t0, 3)
     return {
         "detected_language": short,
         "polly_voice": voice,
         "polly_engine": engine,
         "polly_language": polly_language,
         "transcribe_text": transcript[:1024],
+        "_timings": timings,
     }
 
 
-def _result(contact_id: str, fallback: str, transcript: str, reason: str) -> dict:
+def _result(contact_id: str, fallback: str, transcript: str, reason: str, timings: dict | None = None) -> dict:
     short, voice, engine, polly_language = _classify(fallback)
     if INSTANCE_ID and contact_id:
         try:
@@ -536,4 +527,5 @@ def _result(contact_id: str, fallback: str, transcript: str, reason: str) -> dic
         "polly_language": polly_language,
         "transcribe_text": transcript[:1024],
         "fallback_reason": reason,
+        "_timings": timings or {},
     }
