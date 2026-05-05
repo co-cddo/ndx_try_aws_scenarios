@@ -3010,6 +3010,25 @@ Resources:
       SSESpecification: { SSEEnabled: true }
 
   # ============================================================
+  # PHASE 10b: Companion SPA deploy (index.html, app.js, styles.css)
+  # ============================================================
+  DeploySpaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'ndx-try-aicc-deploy-spa-${AWS::Region}'
+      CodeUri: lambdas/deploy-spa/
+      Handler: index.handler
+      Timeout: 60
+      Role: !GetAtt CustomResourceLambdaRole.Arn
+
+  DeploySpaInvocation:
+    Type: Custom::DeploySpa
+    DependsOn: [SpaBucket, SpaBucketPolicy]
+    Properties:
+      ServiceToken: !GetAtt DeploySpaFunction.Arn
+      SpaBucket: !Ref SpaBucket
+
+  # ============================================================
   # PHASE 11: Companion UI hosting + WAF
   # ============================================================
   SpaBucket:
