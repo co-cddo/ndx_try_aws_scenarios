@@ -1208,6 +1208,8 @@ Resources:
                 Resource:
                   - !Sub 'arn:aws:s3:::ndx-try-aicc-kb-${AWS::AccountId}-${AWS::Region}'
                   - !Sub 'arn:aws:s3:::ndx-try-aicc-kb-${AWS::AccountId}-${AWS::Region}/*'
+                  - !Sub 'arn:aws:s3:::ndx-try-aicc-spa-${AWS::AccountId}-${AWS::Region}'
+                  - !Sub 'arn:aws:s3:::ndx-try-aicc-spa-${AWS::AccountId}-${AWS::Region}/*'
               # Customer Profiles encrypts ObjectType data with this CMK; the
               # PutProfileObjectType call from connect-bootstrap fails without it.
               - Effect: Allow
