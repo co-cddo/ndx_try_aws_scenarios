@@ -1,0 +1,67 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 4: Agent workspace and a safeguarding hand-take - AI Contact Centre Walkthrough"
+description: Open the Connect Agent Workspace, mark yourself Available, and take a safeguarding call from a separate phone. Watch the live transcript, sentiment chips, and the safeguarding flag flip in real time.
+currentStep: 4
+totalSteps: 8
+timeEstimate: "7 minutes"
+scenarioId: ai-contact-centre
+---
+
+{% set stepNumber = 4 %}
+{% set stepTitle = "Agent workspace and a safeguarding hand-take" %}
+{% set stepDescription = "Open the Amazon Connect Agent Workspace from the admin home, toggle yourself to Available, then dial the council from a separate phone (not the same device the workspace is open on). Accept the call, watch the safeguarding flag flip on the case while the caller talks." %}
+{% set timeEstimate = "7 minutes" %}
+{% set screenshotData = screenshots["ai-contact-centre"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 4 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "You can navigate from the Connect admin home to the Agent Workspace",
+  "The Available toggle in the CCP turns green",
+  "Dialling from a separate device causes an incoming-call popup in the workspace",
+  "Accepting the call shows the live transcript with sentiment chips",
+  "Sustained distress flips the safeguarding_flag on the case",
+  "Connect Cases lists the call with safeguarding=true and a red sentiment indicator"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<div class="govuk-warning-text">
+  <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+  <strong class="govuk-warning-text__text">
+    <span class="govuk-visually-hidden">Important</span>
+    Use a <strong>separate</strong> phone for the dial-in. If you call from the same laptop that runs the agent workspace, you create an audio feedback loop and the call quality breaks. Your mobile is fine.
+  </strong>
+</div>
+
+<h3 class="govuk-heading-m">Open the agent workspace</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>From the Connect admin home (the page you reached via "Log in for emergency access" in step 1), open the <strong>top-right account dropdown</strong> and click <strong>Agent Workspace</strong>. It opens in a new tab.</li>
+  <li>Confirm you can see the Contact Control Panel on the left, the Customer Profile and Cases tabs in the middle, and the Connect assistant pane on the right.</li>
+</ol>
+
+<h3 class="govuk-heading-m">Mark yourself Available</h3>
+
+<p class="govuk-body">In the CCP on the left, the status drop-down at the top probably says "Offline". Click it and choose <strong>Available</strong>. The chip turns green. You are now in the routing pool for inbound contacts.</p>
+
+<h3 class="govuk-heading-m">Take the call</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>Pick up your <strong>mobile phone</strong> (or any phone that isn't the laptop running the workspace).</li>
+  <li>Dial the council's UK phone number (the one from step 1).</li>
+  <li>Say something with sustained distress in it. The script from step 6 works well, or just speak in character: <em>"I don't know what to do, my neighbour's been threatening me and the council won't return my calls and I'm scared to leave the house."</em></li>
+  <li>Watch the agent workspace. Within seconds, an incoming-call popup appears with caller phone, intent guess, and a sentiment chip.</li>
+  <li>Click <strong>Accept</strong>. The live transcript starts streaming. Sentiment chips on each segment colour green to amber to red as the conversation unfolds.</li>
+  <li>The Cases tab in the middle updates: <code>safeguarding_flag: true</code> appears with a red badge once distress is sustained.</li>
+</ol>
+
+<h3 class="govuk-heading-m">What to look for</h3>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>The Connect assistant pane on the right</strong> &mdash; Q in Connect surfaces relevant Knowledge Base articles automatically. As soon as the caller mentions safeguarding, "Aldershire DC safeguarding contacts and escalation" pops to the top.</li>
+  <li><strong>The Customer Profile and Cases tabs in the middle</strong> &mdash; Connect's built-in agent app. Search the Customer Profiles directory by phone, see recent contacts, and open the case the bot started for this call.</li>
+  <li><strong>The redacted transcript</strong> &mdash; the caller's name and address appear as <code>{NAME}</code> and <code>{ADDRESS}</code> placeholders, even in your live agent view. Contact Lens redacts at instance level; there is no path that exposes the original PII to the agent.</li>
+</ul>
+
+<p class="govuk-body">When the caller hangs up (or you wrap up), Connect Cases keeps the ticket. The safeguarding flag means it surfaces in the safeguarding queue's daily review, not in the general triage.</p>

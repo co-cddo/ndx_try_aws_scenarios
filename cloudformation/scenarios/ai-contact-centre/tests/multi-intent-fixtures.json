@@ -1,0 +1,50 @@
+{
+  "$comment": "Multi-intent decomposer fixtures. Used by tests/multi-intent (13.10). Each fixture has an utterance and expected intents (in declining confidence order). Fixtures with >4 expected intents test the cap behaviour.",
+  "fixtures": [
+    {
+      "id": "single-intent-bin",
+      "utterance": "My bin wasn't collected on Tuesday.",
+      "expected_intents": ["MissedCollection"],
+      "expected_truncated": [],
+      "expected_safeguarding": false
+    },
+    {
+      "id": "two-intent-clean",
+      "utterance": "There's a fly-tip on Smith Lane and someone's parked across my driveway.",
+      "expected_intents": ["FlyTip", "ParkedVehicle"],
+      "expected_truncated": [],
+      "expected_safeguarding": false
+    },
+    {
+      "id": "three-intent-mixed",
+      "utterance": "My recycling wasn't collected, the council tax letter is wrong, and there's mould in my bathroom.",
+      "expected_intents": ["MissedCollection", "CouncilTax", "DampMould"],
+      "expected_truncated": [],
+      "expected_safeguarding": false
+    },
+    {
+      "id": "four-intent-cap-edge",
+      "utterance": "Bins missed, council tax issue, mould on the wall, and a fly-tip on the corner.",
+      "expected_intents": ["MissedCollection", "CouncilTax", "DampMould", "FlyTip"],
+      "expected_truncated": [],
+      "expected_safeguarding": false
+    },
+    {
+      "id": "five-intent-cap-triggered",
+      "utterance": "Look, I don't know what to do anymore. The bins haven't been collected for three weeks, there's damp coming through my bedroom ceiling, my downstairs neighbour is shouting at all hours and the kids are scared, the council tax letter is threatening enforcement, and now there's a car parked across my driveway so I can't get out for work.",
+      "expected_intents_subset_of": ["MissedCollection", "DampMould", "AntiSocialBehaviour", "CouncilTax", "ParkedVehicle"],
+      "expected_intents_count": 4,
+      "expected_truncated_count": 1,
+      "expected_safeguarding": true,
+      "$comment": "Distress + 5 intents, exercises both the cap and the safeguarding flag"
+    },
+    {
+      "id": "six-intent-cap-triggered",
+      "utterance": "Right, lots to get through. Missed bin collection. Pothole on Smith Lane. Fly-tip on the lay-by. My council tax bill looks wrong. There's damp in the bedroom. And someone's car has been parked across the road blocking my drive for two days.",
+      "expected_intents_subset_of": ["MissedCollection", "PotholeReport", "FlyTip", "CouncilTax", "DampMould", "ParkedVehicle"],
+      "expected_intents_count": 4,
+      "expected_truncated_count": 2,
+      "expected_safeguarding": false
+    }
+  ]
+}

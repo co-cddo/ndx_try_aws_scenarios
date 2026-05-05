@@ -1,0 +1,123 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 7: Italian multi-intent (language flip) - AI Contact Centre Walkthrough"
+description: Hear Lex transcribe Italian, the contact flow swap voice to Bianca, and Bedrock answer in Italian. Same Aldershire knowledge base, six locales.
+currentStep: 7
+totalSteps: 8
+timeEstimate: "5 minutes"
+scenarioId: ai-contact-centre
+---
+
+{% set stepNumber = 7 %}
+{% set stepTitle = "Italian multi-intent (language flip)" %}
+{% set stepDescription = "Play the Italian recording into the call. Lex transcribes Italian from turn 2 onwards (we run a multi-locale Lex bot with dynamic locale selection per contact). The voice swaps to Polly Bianca neural. Bedrock answers in Italian, with the same Aldershire knowledge base and the same Connect Cases pipeline behind it." %}
+{% set timeEstimate = "5 minutes" %}
+{% set screenshotData = screenshots["ai-contact-centre"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 7 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "Turn 1 transcript may be phonetic English (Lex starts in en_US)",
+  "Language detection picks 'it' and the contact flow swaps Lex locale to it_IT and Polly voice to Bianca",
+  "Turn 2 onward the transcript shows real Italian text",
+  "The bot's reply is in Italian, spoken by Bianca",
+  "Connect Cases still creates a ticket with intent_category in English (intent labels are language-agnostic)"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Why this matters</h3>
+
+<p class="govuk-body">UK councils serve residents who speak many languages. The standard "press 1 for English" hold-loop is a barrier. This scenario detects the caller's language from their first reply and switches the bot's voice and ASR to match, in-call, with no menu and no transfer. Six languages are first-class (en, it, fr, de, es, pl); two more (cy Welsh, ro Romanian) are best-effort because Lex doesn't ship those locales.</p>
+
+<h3 class="govuk-heading-m">The Italian recording</h3>
+
+<p class="govuk-body">A male voice reads roughly the same multi-intent distressing script as step 6, in Italian:</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-font-style-italic">
+    "Senta, non so cosa fare. La nettezza urbana non è passata da tre settimane, c'è muffa nel soffitto della camera, il vicino di sotto urla a tutte le ore e i bambini hanno paura, la lettera del comune minaccia di pignorare, e adesso c'è una macchina parcheggiata davanti al mio cancello e non posso uscire per andare a lavoro. Per favore. Sono al limite."
+  </p>
+</div>
+
+<div class="ndx-audio-card">
+  <h4 class="govuk-heading-s govuk-!-margin-bottom-2">Italian (male voice)</h4>
+  <audio controls preload="metadata" style="width: 100%;">
+    <source src="/assets/audio/ai-contact-centre/distress-multi-intent-male-it_IT.m4a" type="audio/mp4">
+    Your browser does not support the audio element.
+  </audio>
+</div>
+
+<h3 class="govuk-heading-m">Play it through to the bot</h3>
+
+<p class="govuk-body">Same pattern as step 6: dial the council's number on your mobile, hold the phone next to your computer speaker, click play.</p>
+
+<p class="govuk-body">Listen for the moment the voice switches from Amy (en-GB) to Bianca (it-IT). It happens between turn 1 and turn 2, after Bedrock detects Italian from the first transcript segment.</p>
+
+<h3 class="govuk-heading-m">Language support summary</h3>
+
+<table class="govuk-table">
+  <caption class="govuk-table__caption govuk-table__caption--m govuk-visually-hidden">Supported languages and their playback voice + transcription quality</caption>
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Language</th>
+      <th scope="col" class="govuk-table__header">Polly voice</th>
+      <th scope="col" class="govuk-table__header">Quality</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">English (en-GB)</th>
+      <td class="govuk-table__cell">Amy neural</td>
+      <td class="govuk-table__cell">Full quality, Contact Lens with PII redaction.</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Italian (it-IT)</th>
+      <td class="govuk-table__cell">Bianca neural</td>
+      <td class="govuk-table__cell">Full quality, full Contact Lens.</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">French (fr-FR)</th>
+      <td class="govuk-table__cell">Léa neural</td>
+      <td class="govuk-table__cell">Full quality, full Contact Lens.</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">German (de-DE)</th>
+      <td class="govuk-table__cell">Vicki neural</td>
+      <td class="govuk-table__cell">Full quality, full Contact Lens.</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Spanish (es-ES)</th>
+      <td class="govuk-table__cell">Lucia neural</td>
+      <td class="govuk-table__cell">Full quality, full Contact Lens.</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Polish (pl-PL)</th>
+      <td class="govuk-table__cell">Ola neural</td>
+      <td class="govuk-table__cell">Lex transcribes; Contact Lens does not support Polish (raw transcript, no automatic redaction).</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Welsh (cy-GB)</th>
+      <td class="govuk-table__cell">Gwyneth standard</td>
+      <td class="govuk-table__cell">Best-effort. Lex does not ship Welsh ASR; transcription falls back to en_US (rough). Speak slowly and clearly.</td>
+    </tr>
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">Romanian (ro-RO)</th>
+      <td class="govuk-table__cell">Carmen standard</td>
+      <td class="govuk-table__cell">Best-effort. No Lex ro_RO locale; intent classification is Bedrock-only. No Contact Lens for Romanian.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 class="govuk-heading-m">Try another language live</h3>
+
+<p class="govuk-body">After the English greeting, the bot listens to your first reply and detects the language. From turn 2 onward, the voice and the answers switch to that language. To try Italian live without the recording: dial the number and say <em>"Quando passa il netturbino?"</em> (When does the bin lorry come?). The bot replies in Italian via Bianca, with the same Aldershire knowledge base behind it.</p>
+
+<style>
+  .ndx-audio-card {
+    margin: 20px 0;
+    padding: 16px 20px;
+    background-color: #f3f2f1;
+    border-left: 4px solid #1d70b8;
+    border-radius: 0 4px 4px 0;
+  }
+</style>

@@ -1,0 +1,175 @@
+---
+layout: layouts/walkthrough.njk
+title: "Walkthrough Complete - AI Contact Centre"
+description: You've completed the AI Contact Centre (Council Reception) walkthrough
+currentStep: 9
+totalSteps: 8
+scenarioId: ai-contact-centre
+---
+
+<div class="govuk-panel govuk-panel--confirmation">
+  <h1 class="govuk-panel__title">
+    Walkthrough complete
+  </h1>
+  <div class="govuk-panel__body">
+    Voice, browser audio, photo, agent hand-take, live flow edit, and a multilingual triage &mdash; all on one platform
+  </div>
+</div>
+
+<p class="govuk-body-l govuk-!-margin-top-6">
+  In about 38 minutes you dialled a real UK number from your own phone, sent a photo through the in-browser simulator, called the same bot from your laptop with no phone at all, took a safeguarding call as a Connect agent, edited the bot's greeting in the GUI, watched the bot triage a distressed multi-intent caller, and heard it answer in Italian.
+</p>
+
+<h2 class="govuk-heading-l">What you've learned</h2>
+
+<div class="ndx-takeaway-grid">
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f4de;</span>
+      Real phone line, real bot
+    </h3>
+    <p class="govuk-body">
+      Amazon Connect claimed a real UK phone number. You dialled from your own mobile or landline, and an AWS-hosted bot answered. Lex v2 classified the intent and a Bedrock Knowledge Base answered with citations.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: end-to-end voice on the AWS stack, no third-party telephony
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f9e0;</span>
+      Multi-intent triage
+    </h3>
+    <p class="govuk-body">
+      A layered distressing call produced four distinct council-service intents, each acknowledged by name. Bedrock Guardrails blocked hallucinated legal advice. Sentiment chips climbed from green to red as distress rose.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: handles real callers' real lives, not one issue at a time
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f4f7;</span>
+      Multimodal photo description
+    </h3>
+    <p class="govuk-body">
+      A photo uploaded through the in-browser simulator was classified by Bedrock Nova Pro into a structured object class, severity, and suggested council action, all attached to a Connect Case automatically.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: residents can show, not just tell, and the system understands
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f517;</span>
+      Cross-channel single case
+    </h3>
+    <p class="govuk-body">
+      When the caller dialled back, Customer Profiles recognised the phone number, the contact flow looked up the open case, and the bot read back a single sentence acknowledging both the call and the photo, with a shared reference number.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: one resident, one case, no duplicates across channels
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f6e1;</span>
+      PII redaction at source
+    </h3>
+    <p class="govuk-body">
+      Contact Lens redacted names, addresses, and phone numbers at the Connect instance level. Only redacted segments are saved in DynamoDB and the share PDF. Bedrock Guardrails also anonymise model output.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: sensitive content never leaves the Connect boundary in the clear
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f5a5;</span>
+      Companion web app
+    </h3>
+    <p class="govuk-body">
+      A three-pane web app showed the live transcript, the case being built, and the photo simulator. The same web app also offers a real Connect chat session and browser-based voice, video, and screen sharing through the Chime SDK.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: see what's happening end-to-end on one screen
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f3a7;</span>
+      Agent hand-take
+    </h3>
+    <p class="govuk-body">
+      Marking yourself Available in the agent workspace and accepting an inbound call gave you a live transcript, sentiment chips, and a safeguarding flag flipped on the case as soon as sustained distress was detected. The redacted transcript is what the agent sees, even live.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: humans in the loop, with full context, no PII exposure
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x270f;&#xfe0f;</span>
+      Editable in the console
+    </h3>
+    <p class="govuk-body">
+      You changed the bot's greeting in under a minute by clicking into the contact flow in the Connect admin GUI. No deploy, no developer. The change is live until the next IaC deploy resets it.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: customer services teams can iterate copy without a release cycle
+    </p>
+  </div>
+
+  <div class="ndx-takeaway-card">
+    <h3 class="govuk-heading-m">
+      <span class="ndx-takeaway-card__icon">&#x1f30d;</span>
+      Six locales, one bot
+    </h3>
+    <p class="govuk-body">
+      Lex transcribes en, it, fr, de, es, pl with neural Polly voices. Welsh and Romanian fall back to en_US ASR with Polly playback in the target language. Locale flips per contact based on Bedrock's language detection from the caller's first reply.
+    </p>
+    <p class="govuk-body-s" style="color: #505a5f; font-weight: 700;">
+      Value: residents heard in their own language with no menu and no transfer
+    </p>
+  </div>
+</div>
+
+<h2 class="govuk-heading-l">Where to go next</h2>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li>Try the <a href="/scenarios/council-chatbot/" class="govuk-link">Council Chatbot</a> scenario for a Bedrock-grounded chat-only experience.</li>
+  <li>Try the <a href="/scenarios/text-to-speech/" class="govuk-link">Text-to-Speech</a> scenario for accessibility audio generation.</li>
+  <li>Try the <a href="/scenarios/foi-redaction/" class="govuk-link">FOI Redaction</a> scenario for a deeper look at PII handling.</li>
+</ul>
+
+<div class="govuk-button-group govuk-!-margin-top-6">
+  <a href="/scenarios/" class="govuk-button" role="button" data-module="govuk-button">
+    Browse all scenarios
+  </a>
+  <a href="/walkthroughs/ai-contact-centre/" class="govuk-button govuk-button--secondary" role="button" data-module="govuk-button">
+    Replay this walkthrough
+  </a>
+</div>
+
+<style>
+  .ndx-takeaway-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 20px 0 40px;
+  }
+  .ndx-takeaway-card {
+    background: #f8f8f8;
+    padding: 20px;
+    border-left: 4px solid #1d70b8;
+  }
+  .ndx-takeaway-card h3 { margin-top: 0; }
+  .ndx-takeaway-card__icon { margin-right: 8px; }
+</style>

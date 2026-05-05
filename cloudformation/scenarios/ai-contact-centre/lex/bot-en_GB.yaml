@@ -1,0 +1,124 @@
+# Lex v2 bot definition for the AI Contact Centre scenario (en_GB locale).
+#
+# This file documents the intent set, slot types, and utterances. The CFN
+# template (template.yaml) embeds the same definition as an AWS::Lex::Bot
+# resource with AutoBuildBotLocales: true.
+#
+# Intent set is intentionally compact: most reasoning is delegated to:
+#   - the multi-intent decomposer Lambda (called from MultiIntentTriage and
+#     FallbackIntent), which extracts every distinct intent in the utterance
+#   - the RAG fulfilment Lambda, which calls Bedrock KB retrieveAndGenerate
+#     with Guardrails for grounded answers
+
+bot:
+  name: ndx-try-aicc-bot
+  description: AI Contact Centre, Aldershire District Council reception bot
+  idleSessionTtlSeconds: 300
+  dataPrivacy:
+    childDirected: false
+  locales:
+    - localeId: en_GB
+      voiceSettings:
+        voiceId: Amy
+        engine: neural
+      nluConfidenceThreshold: 0.4
+      slotTypes:
+        - name: BinColour
+          parentSlotTypeSignature: AMAZON.Slot
+          slotTypeValues:
+            - sampleValue: { value: green }
+            - sampleValue: { value: black }
+              synonyms: [{ value: refuse }, { value: rubbish }]
+            - sampleValue: { value: blue }
+              synonyms: [{ value: recycling }, { value: paper }]
+            - sampleValue: { value: brown }
+              synonyms: [{ value: garden }, { value: food }]
+        - name: PostcodePrefix
+          parentSlotTypeSignature: AMAZON.AlphaNumeric
+          # Aldershire fictional postcodes AL1..AL8
+      intents:
+        - name: BinCollection
+          description: Resident asks about bin collection day or schedule
+          sampleUtterances:
+            - { utterance: "When is my bin collection day" }
+            - { utterance: "What day do I put my bins out" }
+            - { utterance: "What day is the {BinColour} bin collected" }
+            - { utterance: "When does the {BinColour} bin get collected" }
+          slots:
+            - name: BinColour
+              slotTypeName: BinColour
+              valueElicitationSetting:
+                slotConstraint: Optional
+        - name: MissedCollection
+          description: Resident reports a bin that was not collected
+          sampleUtterances:
+            - { utterance: "My bins haven't been collected" }
+            - { utterance: "The bin lorry didn't come this week" }
+            - { utterance: "Missed collection" }
+            - { utterance: "The {BinColour} bin wasn't taken" }
+          slots:
+            - name: BinColour
+              slotTypeName: BinColour
+              valueElicitationSetting:
+                slotConstraint: Optional
+        - name: FlyTip
+          sampleUtterances:
+            - { utterance: "There's fly tipping" }
+            - { utterance: "Someone's dumped rubbish" }
+            - { utterance: "There's a mattress dumped on the corner" }
+        - name: PotholeReport
+          sampleUtterances:
+            - { utterance: "There's a pothole" }
+            - { utterance: "Pothole on the road" }
+        - name: BrokenPaving
+          sampleUtterances:
+            - { utterance: "The pavement is broken" }
+            - { utterance: "Broken paving slab" }
+        - name: ParkedVehicle
+          sampleUtterances:
+            - { utterance: "There's a car parked across my driveway" }
+            - { utterance: "Someone's blocking my drive" }
+        - name: DampMould
+          sampleUtterances:
+            - { utterance: "There's damp in my home" }
+            - { utterance: "Mould on the wall" }
+            - { utterance: "Damp through the ceiling" }
+        - name: AntiSocialBehaviour
+          sampleUtterances:
+            - { utterance: "Anti social behaviour" }
+            - { utterance: "My neighbour has been shouting" }
+            - { utterance: "Loud music every night" }
+        - name: Safeguarding
+          sampleUtterances:
+            - { utterance: "I'm worried about a vulnerable person" }
+            - { utterance: "I think someone is being abused" }
+            - { utterance: "I don't know what to do, I'm at the end of my tether" }
+        - name: CouncilTax
+          sampleUtterances:
+            - { utterance: "Council tax" }
+            - { utterance: "I can't afford to pay my council tax" }
+            - { utterance: "Question about my bill" }
+        - name: BenefitsSupport
+          sampleUtterances:
+            - { utterance: "Housing benefit" }
+            - { utterance: "Council Tax Reduction" }
+            - { utterance: "Benefits support" }
+        - name: PlanningEnquiry
+          sampleUtterances:
+            - { utterance: "Planning permission" }
+            - { utterance: "Planning application" }
+        - name: MultiIntentTriage
+          description: First-turn fallback that fans out to the multi-intent decomposer Lambda
+          sampleUtterances:
+            - { utterance: "I have multiple things" }
+            - { utterance: "Several issues" }
+            - { utterance: "A few different things to report" }
+        - name: FallbackIntent
+          parentIntentSignature: AMAZON.FallbackIntent
+        - name: WelcomeIntent
+          sampleUtterances:
+            - { utterance: "Hello" }
+            - { utterance: "Hi" }
+            - { utterance: "Hey" }
+            - { utterance: "Good morning" }
+            - { utterance: "Good afternoon" }

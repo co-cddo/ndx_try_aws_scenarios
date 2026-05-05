@@ -1,0 +1,113 @@
+{
+  "WelcomeIntent": [
+    "Hallo",
+    "Hi",
+    "Guten Morgen"
+  ],
+  "BinCollection": [
+    "Wann ist mein Müllabfuhrtag",
+    "An welchem Tag stelle ich meine Mülltonnen raus",
+    "Wann werden meine Mülltonnen abgeholt",
+    "An welchem Tag werden meine Mülltonnen geleert",
+    "Müllabfuhrtag"
+  ],
+  "MissedCollection": [
+    "Meine Mülltonnen wurden nicht abgeholt",
+    "Der Müllwagen ist diese Woche nicht gekommen",
+    "Abholung verpasst",
+    "Meine Mülltonne wurde nicht geleert",
+    "Die Mülltonnen wurden nicht abgeholt",
+    "Abfallsammlung verpasst"
+  ],
+  "FlyTip": [
+    "Es gibt illegales Müllentsorgen",
+    "Jemand hat Müll illegal abgeladen",
+    "Müll wurde illegal abgeladen",
+    "Illegale Müllentsorgung an der Ecke",
+    "Matratze auf der Straße abgeladen",
+    "Ich möchte illegales Müllentsorgen melden",
+    "Will illegales Müllentsorgen melden",
+    "Illegales Müllentsorgen melden",
+    "Ich melde illegales Müllentsorgen",
+    "Ich muss illegales Müllentsorgen melden",
+    "Es gab illegales Müllentsorgen",
+    "Jemand hat illegal Müll abgeladen",
+    "Illegale Müllentsorgung",
+    "Es gibt illegale Müllentsorgung",
+    "Jemand hat ein Sofa illegal abgeladen",
+    "Sofa auf der Straße abgeladen",
+    "Haufen Müll"
+  ],
+  "PotholeReport": [
+    "Da ist ein Schlagloch",
+    "Schlagloch auf der Straße",
+    "Beschädigte Straßenoberfläche"
+  ],
+  "BrokenPaving": [
+    "Der Bürgersteig ist kaputt",
+    "Ein Gehwegstein ist gebrochen",
+    "Der Gehweg ist beschädigt"
+  ],
+  "ParkedVehicle": [
+    "Da steht ein Auto quer auf meiner Einfahrt",
+    "Jemand blockiert meine Einfahrt",
+    "Illegal geparktes Auto"
+  ],
+  "DampMould": [
+    "Bei mir zu Hause ist es feucht",
+    "Schimmel an der Wand",
+    "Feuchtigkeit kommt durch meine Decke",
+    "Schwarzer Schimmel im Badezimmer",
+    "Nasser Fleck an der Wand"
+  ],
+  "AntiSocialBehaviour": [
+    "Antisoziales Verhalten",
+    "Mein Nachbar hat rumgeschrien",
+    "Jede Nacht laute Musik",
+    "Problem mit antisozialem Verhalten",
+    "Bedrohungsverhalten vom Nachbarn"
+  ],
+  "Safeguarding": [
+    "Ich mache mir Sorgen um eine schutzbedürftige Person",
+    "Ich glaube, dass jemand misshandelt wird",
+    "Ich weiß nicht, was ich tun soll",
+    "Ich bin am Ende meiner Kräfte",
+    "Besorgt um einen schutzbedürftigen Erwachsenen"
+  ],
+  "CouncilTax": [
+    "Gemeindesteuer",
+    "Ich kann mir die Gemeindesteuer nicht leisten",
+    "Ich habe Schwierigkeiten, meine Gemeindesteuer zu zahlen",
+    "Frage zu meiner Gemeindesteuerrechnung",
+    "Die Gemeindesteuer ist zu hoch",
+    "Gemeindesteuervollstreckung"
+  ],
+  "BenefitsSupport": [
+    "Wohngeld",
+    "Reduzierung der Gemeindesteuer",
+    "Hilfe bei Leistungen",
+    "Ich möchte Leistungen beantragen"
+  ],
+  "PlanningEnquiry": [
+    "Genehmigung für die Planung",
+    "Planungsantrag",
+    "Benötige ich eine Genehmigung für die Planung",
+    "Gebäudeerweiterung"
+  ],
+  "MultiIntentTriage": [
+    "Ich habe mehrere Dinge",
+    "Mehrere Probleme"
+  ],
+  "GoodbyeIntent": [
+    "Nein",
+    "Nein, danke",
+    "Nein, danke schön",
+    "Das war's",
+    "Nichts weiter",
+    "Tschüss",
+    "Bye",
+    "Danke, Tschüss",
+    "Ich bin fertig",
+    "Alles erledigt"
+  ]
+}

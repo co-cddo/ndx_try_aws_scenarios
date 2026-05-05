@@ -1,0 +1,21 @@
+{
+  "task_id": "0.2",
+  "purpose": "Verify Connect Cases (Domain + Field + Layout + Template) creates cleanly under NDX/SandboxAdmin",
+  "measurement_date": "2026-04-28",
+  "account": "714412037090",
+  "resource_types_verified": [
+    "AWS::ConnectCases::Domain (via Custom::CasesDomain)",
+    "AWS::ConnectCases::Field (via Custom::CasesField, x8 fields)",
+    "AWS::ConnectCases::Layout (via Custom::CasesLayout)",
+    "AWS::ConnectCases::Template (via Custom::CasesTemplate)"
+  ],
+  "iam_blocks_observed": [],
+  "scp_findings": "InnovationSandbox SCP p-tyb1wjxv did not block any Connect Cases API calls when the Lambda role name was prefixed InnovationSandbox-ndx-aicc-cr-*. SCP role-name prefix matching held.",
+  "cfn_finding": "AWS::ConnectCases::* CFN resource types are NOT registered/available in us-east-1 in this account. The connectcases API works directly. Workaround: a Custom resource Lambda (lambdas/connect-cases-resources) wraps cases:CreateDomain, cases:CreateField, cases:CreateLayout, cases:CreateTemplate via boto3.",
+  "domain_id": "ad40bc4b-8d49-452d-ae14-f3eff0457a60",
+  "fields_created": [
+    "customer_phone_number", "address", "intent_category", "intents",
+    "safeguarding_flag", "multimodal_summary", "attachments_summary", "severity"
+  ],
+  "notes": "Custom resource pattern adds complexity but is necessary while AWS hasn't shipped CFN coverage for ConnectCases. When CFN types become available, replace Custom::Cases* with native AWS::ConnectCases::* resources."
+}

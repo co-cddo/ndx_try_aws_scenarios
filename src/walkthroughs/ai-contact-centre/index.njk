@@ -1,0 +1,122 @@
+---
+layout: layouts/walkthrough.njk
+title: AI Contact Centre Walkthrough
+description: Step-by-step guide to a working AI council reception. Dial a real UK number, use the in-browser photo upload simulator, take a safeguarding call from a separate phone, edit the contact flow live, and run an Italian multi-intent demo.
+currentStep: 0
+totalSteps: 8
+scenarioId: ai-contact-centre
+---
+
+<h1 class="govuk-heading-xl">Try the AI Contact Centre (Council Reception)</h1>
+
+<div class="govuk-panel govuk-panel--confirmation ndx-walkthrough-value-prop">
+  <h2 class="govuk-panel__title">
+    46 minutes to dial a real council, send a photo, take an agent call, edit the flow live, hear it answer in Italian, and stress-test the chat with prompt injection
+  </h2>
+  <div class="govuk-panel__body">
+    Eight hands-on demos that move from a single happy-path bin call to live flow editing, multilingual triage, and a thirty-question stress test of what the bot will and won't answer.
+  </div>
+</div>
+
+<div class="govuk-inset-text ndx-walkthrough-reassurance">
+  <strong class="govuk-!-font-size-24">No technical knowledge required for the first three steps</strong>
+  <p class="govuk-body">
+    Steps 1, 2, 3, 6 and 7 only need a phone (or a microphone) and the companion web app open in your browser. Steps 4 and 5 take you into the AWS Connect console. Perfect for council CIOs, customer services directors, contact centre managers, and anyone evaluating AI for resident-facing services.
+  </p>
+</div>
+
+<p class="govuk-body">
+  Your sandbox provisions a full Amazon Connect contact centre with a real UK phone number you call from your own mobile or landline. It includes a Lex bot in six locales (en, it, fr, de, es, pl), a Bedrock Knowledge Base with Guardrails, a multi-intent decomposer, multimodal photo description, Connect Cases, Customer Profiles, and Contact Lens with PII redaction. A companion web app lets you watch the live transcript, the case being built, and the photo upload simulator side by side.
+</p>
+
+<h2 class="govuk-heading-l">What you'll do</h2>
+
+<p class="govuk-body-l">In this 46-minute walkthrough, you'll:</p>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li><strong>Bin collection by phone</strong>, dial the real UK number and hear the bot read back a reference number (5 minutes)</li>
+  <li><strong>Multichannel: fly-tip on the phone, photo via the simulator</strong>, the line stays open while you upload a photo, then the bot reads back a single sentence linking call and photo to one case (6 minutes)</li>
+  <li><strong>Call via browser</strong>, no phone needed, click a button, talk through your laptop microphone (4 minutes)</li>
+  <li><strong>Agent workspace and a safeguarding hand-take</strong>, mark yourself Available, take a call from a separate phone, watch the safeguarding flag flip live (7 minutes)</li>
+  <li><strong>Edit the contact flow greeting in the GUI</strong>, change the bot's opening line, save, dial in to hear the difference (5 minutes)</li>
+  <li><strong>Multi-intent distressed call</strong>, play a layered script that mentions five issues; the bot triages the top four (6 minutes)</li>
+  <li><strong>Italian multi-intent</strong>, hear Lex transcribe Italian and Bianca answer in Italian (5 minutes)</li>
+  <li><strong>Explore the chat</strong>, push thirty plus questions through the chat box and see what the knowledge base answers, what gets referred to a human, and how Bedrock Guardrails block prompt injection (8 minutes)</li>
+</ol>
+
+<div class="ndx-walkthrough-prerequisites">
+  <h2 class="govuk-heading-m">Before you start</h2>
+
+  <div class="govuk-warning-text">
+    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+    <strong class="govuk-warning-text__text">
+      <span class="govuk-visually-hidden">Important</span>
+      You must have already requested the AI Contact Centre scenario via NDX:Try and enabled Bedrock model access for amazon.titan-embed-text-v2:0 and amazon.nova-pro-v1:0.
+    </strong>
+  </div>
+
+  <p class="govuk-body">
+    <a href="/scenarios/ai-contact-centre/" class="govuk-link">Deploy the AI Contact Centre scenario</a> if you haven't already. Deployment takes 30 to 60 minutes; Bedrock Knowledge Base ingestion is the long pole.
+  </p>
+
+  <h3 class="govuk-heading-s">What you'll need</h3>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>A working phone (mobile or landline) for steps 1, 2, 5, 6 and 7.</li>
+    <li>For step 3: a working microphone in your browser (built-in laptop mic is fine).</li>
+    <li>For step 4: <strong>two devices</strong>. Your laptop runs the agent workspace; your mobile dials in. Calling from the same device that runs the workspace gives feedback loops and broken audio.</li>
+    <li>For steps 6 and 7: speakers on your computer so the audio recordings can play through to the phone you're holding next to them, or you can read the script live.</li>
+  </ul>
+</div>
+
+<h2 class="govuk-heading-m">What you'll learn</h2>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For service managers</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>How residents would experience an AI-led reception line</li>
+      <li>How the bot handles distressed callers raising several issues at once</li>
+      <li>How a single case captures voice, chat, and photo together</li>
+      <li>How sentiment and safeguarding signals route the right callers to a human</li>
+      <li>How quickly a non-developer can change the bot's words</li>
+    </ul>
+  </div>
+
+  <div class="govuk-grid-column-one-half">
+    <h3 class="govuk-heading-s">For technical staff</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Amazon Connect with a real UK phone number, Lex v2, and Bedrock</li>
+      <li>Multi-intent decomposition with Bedrock Nova Pro</li>
+      <li>Multimodal photo description with Bedrock Nova Pro vision</li>
+      <li>Chime SDK web calling bridged into a Connect contact flow</li>
+      <li>Connect Cases, Customer Profiles, cross-channel case unification</li>
+      <li>Contact Lens with PII redaction at the Connect instance level</li>
+      <li>Live editing of contact flows in the Connect console</li>
+      <li>Multi-locale Lex with dynamic locale selection per contact</li>
+    </ul>
+  </div>
+</div>
+
+<div class="govuk-!-margin-top-8">
+  <a href="/walkthroughs/ai-contact-centre/step-1/" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+    Start walkthrough
+    <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"/>
+    </svg>
+  </a>
+
+  <p class="govuk-body-s govuk-!-margin-top-2">
+    Takes approximately 46 minutes
+  </p>
+</div>
+
+<style>
+  .ndx-walkthrough-value-prop { margin-bottom: 30px; }
+  .ndx-walkthrough-reassurance { border-left-color: #00703c; }
+  .ndx-walkthrough-prerequisites {
+    margin: 40px 0;
+    padding: 30px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #1d70b8;
+  }
+</style>

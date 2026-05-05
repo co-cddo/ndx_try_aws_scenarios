@@ -1,0 +1,112 @@
+{
+  "WelcomeIntent": [
+    "Hola",
+    "Eh",
+    "Buenos días"
+  ],
+  "BinCollection": [
+    "¿Cuándo es el día de recogida de mi contenedor?",
+    "¿Qué día salgo con mis contenedores?",
+    "¿Cuándo recogen mis contenedores?",
+    "¿Qué día vacían mis contenedores?",
+    "Día de la basura"
+  ],
+  "MissedCollection": [
+    "Mis contenedores no han sido recogidos",
+    "El camión de la basura no vino esta semana",
+    "Recogida perdida",
+    "Mi contenedor no fue vaciado",
+    "No recogieron los contenedores",
+    "La recogida de basuras se perdió"
+  ],
+  "FlyTip": [
+    "Hay un vertido ilegal",
+    "Alguien ha tirado basura",
+    "Han tirado basura",
+    "Vertido en la esquina",
+    "Un colchón tirado en la calle",
+    "Quiero denunciar un vertido ilegal",
+    "Me gustaría denunciar un vertido ilegal",
+    "Denunciar un vertido ilegal",
+    "Estoy denunciando un vertido ilegal",
+    "Necesito denunciar un vertido ilegal",
+    "Ha habido algún vertido ilegal",
+    "Alguien ha estado vertiendo basura",
+    "Vertido ilegal",
+    "Hay vertido ilegal",
+    "Alguien ha tirado un sofá",
+    "Un sofá tirado en la calle",
+    "Pila de basura"
+  ],
+  "PotholeReport": [
+    "Hay un bache",
+    "Bache en la carretera",
+    "Superficie de la carretera dañada"
+  ],
+  "BrokenPaving": [
+    "El pavimento está roto",
+    "Hay una losa del pavimento rota",
+    "El pavimento está dañado"
+  ],
+  "ParkedVehicle": [
+    "Hay un coche aparcado en mi entrada",
+    "Alguien está bloqueando mi acceso",
+    "Coche aparcado ilegalmente"
+  ],
+  "DampMould": [
+    "Hay humedad en mi casa",
+    "Moho en la pared",
+    "Humedad que sale por el techo",
+    "Moho negro en el baño",
+    "Mancha húmeda en la pared"
+  ],
+  "AntiSocialBehaviour": [
+    "Comportamiento antisocial",
+    "Mi vecino ha estado gritando",
+    "Música alta todas las noches",
+    "Problema de comportamiento antisocial",
+    "Comportamiento amenazante del vecino"
+  ],
+  "Safeguarding": [
+    "Estoy preocupado por una persona vulnerable",
+    "Creo que alguien está siendo abusado",
+    "No sé qué hacer",
+    "Estoy al límite",
+    "Preocupado por un adulto vulnerable"
+  ],
+  "CouncilTax": [
+    "Impuesto municipal",
+    "No puedo pagar mi impuesto municipal",
+    "Estoy teniendo dificultades para pagar mi impuesto municipal",
+    "Tengo una pregunta sobre mi factura del impuesto municipal",
+    "El impuesto municipal es demasiado alto",
+    "Ejecución del impuesto municipal"
+  ],
+  "BenefitsSupport": [
+    "Beneficios de vivienda",
+    "Reducción del Impuesto Municipal",
+    "Ayuda con las prestaciones",
+    "Quiero solicitar las prestaciones"
+  ],
+  "PlanningEnquiry": [
+    "Permiso de planificación",
+    "Solicitud de planificación",
+    "¿Necesito permiso de planificación?",
+    "Extensión de edificio"
+  ],
+  "MultiIntentTriage": [
+    "Tengo varias cosas",
+    "Varios problemas"
+  ],
+  "GoodbyeIntent": [
+    "No",
+    "No, gracias",
+    "Eso es todo",
+    "Nada más",
+    "Adiós",
+    "Chau",
+    "Gracias, adiós",
+    "He terminado",
+    "Todo listo"
+  ]
+}

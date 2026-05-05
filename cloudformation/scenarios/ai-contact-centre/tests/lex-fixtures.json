@@ -1,0 +1,26 @@
+{
+  "$comment": "Lex v2 utterance fixtures, en_GB. Used by tests/lex-fixtures (13.2). Each entry maps an utterance to its expected intent. Slot extraction is verified separately.",
+  "locale": "en_GB",
+  "fixtures": [
+    {"utterance": "Hi, my bins haven't been collected this week.", "expected_intent": "MissedCollection"},
+    {"utterance": "The recycling lorry didn't come on Tuesday.", "expected_intent": "MissedCollection"},
+    {"utterance": "When is my next bin day?", "expected_intent": "BinCollection"},
+    {"utterance": "What day do I put my green bin out?", "expected_intent": "BinCollection"},
+    {"utterance": "There's a load of rubbish dumped on the lay-by.", "expected_intent": "FlyTip"},
+    {"utterance": "Someone's fly-tipped a mattress on the corner.", "expected_intent": "FlyTip"},
+    {"utterance": "There's a massive pothole on Smith Lane.", "expected_intent": "PotholeReport"},
+    {"utterance": "The pavement outside number 14 is broken and dangerous.", "expected_intent": "BrokenPaving"},
+    {"utterance": "There's a car parked across my driveway.", "expected_intent": "ParkedVehicle"},
+    {"utterance": "Damp's coming through my bedroom ceiling.", "expected_intent": "DampMould"},
+    {"utterance": "There's mould all over my kitchen wall.", "expected_intent": "DampMould"},
+    {"utterance": "My downstairs neighbour has been shouting all night, every night.", "expected_intent": "AntiSocialBehaviour"},
+    {"utterance": "I need to speak to someone about my council tax bill.", "expected_intent": "CouncilTax"},
+    {"utterance": "I've just lost my job and I'm worried about paying the council tax.", "expected_intent": "CouncilTax"},
+    {"utterance": "I need help with housing benefit.", "expected_intent": "BenefitsSupport"},
+    {"utterance": "Can I check the status of a planning application?", "expected_intent": "PlanningEnquiry"},
+    {"utterance": "I'm worried about my elderly neighbour, I think she's being taken advantage of.", "expected_intent": "Safeguarding"},
+    {"utterance": "I don't know what to do, I'm at the end of my tether.", "expected_intent": "Safeguarding"},
+    {"utterance": "I want to make a complaint.", "expected_intent": "GeneralEnquiry"},
+    {"utterance": "Hello?", "expected_intent": "GeneralEnquiry"}
+  ]
+}

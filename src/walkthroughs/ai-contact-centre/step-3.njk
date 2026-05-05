@@ -1,0 +1,70 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 3: Call via browser - AI Contact Centre Walkthrough"
+description: No phone needed. Click the Call via browser button in the companion app, grant microphone access, and talk to the bot through your laptop.
+currentStep: 3
+totalSteps: 8
+timeEstimate: "4 minutes"
+scenarioId: ai-contact-centre
+---
+
+{% set stepNumber = 3 %}
+{% set stepTitle = "Call via browser (no phone needed)" %}
+{% set stepDescription = "Open the companion web app and click the 'Call via browser' button. Your browser asks for microphone permission. Once granted, you're on a real Connect call, talking to the same Lex bot, the same Bedrock knowledge base, the same Connect Cases pipeline as a phone call. No phone needed." %}
+{% set timeEstimate = "4 minutes" %}
+{% set screenshotData = screenshots["ai-contact-centre"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 3 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "The 'Call via browser' button is visible at the top of the companion app",
+  "Your browser asks for microphone permission",
+  "After 'call connected', you can speak and the bot replies through your speakers",
+  "The transcript and case panes update exactly as they do for a phone call",
+  "After connect, 'Add video' and 'Share screen' buttons appear too"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Why this matters</h3>
+
+<p class="govuk-body">Not every demo audience has a phone to hand. The companion app embeds the <a href="https://aws.amazon.com/chime/chime-sdk/" class="govuk-link">Amazon Chime SDK</a>, which bridges browser audio into the same Connect contact flow a normal phone call uses. The transcript, the case, the bot, and the knowledge base behave identically.</p>
+
+<h3 class="govuk-heading-m">First: set your phone number</h3>
+
+<p class="govuk-body">
+  Before you click <strong>Call via browser</strong>, type a UK mobile-style number into the <strong>Sender phone</strong> field in the simulator pane on the right (e.g. <code>07700900126</code>). This is the identity the bot and the agent will see for your browser call. It is also the number the simulator uses to look up your open case if you want to upload a photo afterwards.
+</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">
+    <strong>Why it matters:</strong> the simulator's Sender phone field, the browser-call participant name, and the photo-upload sender are all the same field. Setting it once means your browser call <em>and</em> your photo upload share an identity, so they can land on the same Connect Case &mdash; just like the multichannel demo in step 2.
+  </p>
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    Leave the field blank and the call still works, but it goes out under a default placeholder (<code>+447700900126</code>) and won't link cleanly to a photo you upload later.
+  </p>
+</div>
+
+<h3 class="govuk-heading-m">What to do</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>Open the companion web app at the <code>CompanionUrl</code> output. Type your phone number into the <strong>Sender phone</strong> field in the right-hand pane.</li>
+  <li>Click the <strong>Call via browser</strong> button under the chat input on the left.</li>
+  <li>Your browser pops up a microphone permission dialog. Click <strong>Allow</strong>. Without microphone access the call cannot connect.</li>
+  <li>Wait about three seconds. The status text reads "starting&hellip;" then "loading SDK&hellip;" then <strong>"call connected"</strong>.</li>
+  <li>Speak. Try the bin-collection script from step 1 or the fly-tip script from step 2.</li>
+  <li>The bot replies through your laptop speakers. The transcript and case panes update live, just like for a phone call.</li>
+  <li><strong>Optional follow-up:</strong> while still on the browser call (or right after), upload a photo through the simulator pane. The phone field is still set, so the photo links to the same case the browser call created.</li>
+</ol>
+
+<h3 class="govuk-heading-m">Bonus: video and screen share</h3>
+
+<p class="govuk-body">After the audio call connects, two more buttons appear next to "End call":</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Add video</strong> &mdash; turns on your webcam. Your tile appears under the chat. The bot doesn't process the video stream directly today, but in a real deployment you could route the video to a human agent for sign language interpretation.</li>
+  <li><strong>Share screen</strong> &mdash; shares your screen into the call. Useful when an agent is helping a resident navigate something visual (a planning portal, a benefits form).</li>
+</ul>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body">The call ends when you click <strong>End call</strong> or close the tab. There's no per-minute telephony charge because no phone number was involved &mdash; this is the cheapest way to demo voice to a remote audience.</p>
+</div>

@@ -1,0 +1,251 @@
+# AI Contact Centre Exploration Data
+# Hands-on activities the user can try after the walkthrough
+
+scenario_id: ai-contact-centre
+scenario_title: AI Contact Centre (Council Reception)
+total_time_estimate: "30 minutes"
+
+# Persona paths
+personas:
+  service_manager:
+    id: service-manager
+    title: "Service Manager"
+    description: "Focus on resident experience and end-to-end journeys"
+    time_estimate: "20 minutes"
+    recommended_path:
+      - exp-web-call
+      - exp-flytip-photo
+      - exp-decline-photo
+      - exp-bespoke-app
+      - arch-visual
+  technical_lead:
+    id: technical
+    title: "Technical Lead"
+    description: "Focus on architecture, integration points, and production considerations"
+    time_estimate: "30 minutes"
+    recommended_path:
+      - exp-chat
+      - exp-web-call
+      - exp-video-screen
+      - arch-visual
+      - arch-console
+      - limit-pii
+      - limit-outbound
+      - limit-content
+
+# Activities
+activities:
+
+  # =========== EXPERIMENTS ===========
+
+  - id: exp-chat
+    title: "Try a real Connect chat"
+    category: experiments
+    time_estimate: "3 minutes"
+    learning: "Chat goes through the same intent and Bedrock pipeline as voice. You don't need a phone to demo it."
+    steps:
+      - title: "Open the companion app"
+        action: "Visit the CompanionUrl from the stack outputs in your browser."
+      - title: "Wait for the welcome message"
+        action: "The bot greets you in the chat transcript pane on the left."
+      - title: "Ask about bin day"
+        action: "Type 'When is my bin collection in AL3?' and press Enter."
+      - title: "Watch the answer"
+        action: "Bedrock returns a knowledge-grounded answer and the Connect Case panel updates."
+    expected_outcome: "You receive an Aldershire-specific answer in seconds, with a case reference attached."
+    what_to_observe:
+      - "The answer is council-specific, not generic"
+      - "A Connect Case appears in the middle pane"
+      - "The step indicator advances as you progress"
+
+  - id: exp-web-call
+    title: "Call from your browser, no phone"
+    category: experiments
+    time_estimate: "4 minutes"
+    learning: "A WebRTC call into Connect is a real contact, indistinguishable from a phone call to the bot."
+    steps:
+      - title: "Open the companion app"
+        action: "Visit the CompanionUrl in a browser that supports WebRTC."
+      - title: "Click 'Call via browser'"
+        action: "Allow microphone permission when prompted."
+      - title: "Speak naturally"
+        action: "Try 'I want to report a pothole on Aldermarket Lane.'"
+      - title: "Hear the bot respond"
+        action: "The same Lex and Bedrock pipeline answers as it would over the phone."
+    expected_outcome: "You finish a council interaction without needing a phone number."
+    what_to_observe:
+      - "Connection takes about 4 seconds"
+      - "The bot voice is the same en-GB voice you hear over the phone"
+      - "The Connect Case workflow is identical to the phone path"
+
+  - id: exp-video-screen
+    title: "Add video and screen sharing to a call"
+    category: experiments
+    time_estimate: "3 minutes"
+    learning: "The same browser call can carry video and a screen capture. Useful for showing damage or council notices."
+    steps:
+      - title: "Start a web call"
+        action: "Click 'Call via browser' in the companion app."
+      - title: "Click 'Add video'"
+        action: "Allow camera permission. A tile appears showing your camera feed."
+      - title: "Click 'Share screen'"
+        action: "Pick a window or your full desktop. The tile updates to show the screen capture."
+      - title: "End the call"
+        action: "Click 'End call'. The contact closes cleanly."
+    expected_outcome: "An agent on the workspace side could see exactly what the resident sees."
+    what_to_observe:
+      - "A single button toggles each capability"
+      - "No extra deployment needed, both features are part of the same Chime SDK session"
+
+  - id: exp-flytip-photo
+    title: "Report fly-tipping over the phone with a photo"
+    category: experiments
+    time_estimate: "5 minutes"
+    learning: "Voice and photo on different channels join onto a single case. The bot reads back a friendly case number."
+    steps:
+      - title: "Dial the council number"
+        action: "Call the real UK number from the stack outputs."
+      - title: "Say 'I want to report fly tipping'"
+        action: "The bot recognises FlyTip and asks you to use the photo upload simulator."
+      - title: "While on hold, open the simulator"
+        action: "In the companion app, type your phone number and choose any image of rubbish."
+      - title: "Hear the readback"
+        action: "While hold music plays, the bot polls. When the photo is processed, it reads back a numeric case reference for you to write down."
+    expected_outcome: "One case captures both your call and your photo, with a reference number that matches what the agent sees."
+    what_to_observe:
+      - "Hold music plays between checks"
+      - "The reference number is human-readable, not a UUID"
+      - "The same case appears in the agent workspace"
+
+  - id: exp-decline-photo
+    title: "Try a 'not a council issue' photo"
+    category: experiments
+    time_estimate: "2 minutes"
+    learning: "Bedrock can decline non-council photos cleanly rather than forcing them into the wrong category."
+    steps:
+      - title: "Open the simulator pane"
+        action: "Companion app, right-hand pane."
+      - title: "Upload a selfie or food photo"
+        action: "Anything not council-related: a pet, a meme, scenery."
+      - title: "Read the friendly decline"
+        action: "The bot replies 'That doesn't look like something the council can help with…' and does not create a case."
+    expected_outcome: "No case is created. The simulator shows a polite decline."
+    what_to_observe:
+      - "No fly-tip false positive"
+      - "The Connect Case panel stays empty for that upload"
+
+  - id: exp-multilingual
+    title: "Call (or chat) in another language"
+    category: experiments
+    time_estimate: "4 minutes"
+    learning: "The bot auto-detects the caller's language from the first reply and switches voice + answers to match. English, Italian, French, German, Spanish, and Polish run end-to-end through Polly neural voices and the same Aldershire knowledge base. Welsh and Romanian use Polly standard voices and Bedrock-only intent classification (no Lex)."
+    steps:
+      - title: "Dial the council number"
+        action: "Call the real UK number from the stack outputs."
+      - title: "Hear the English greeting"
+        action: "The greeting stays English because the bot doesn't know your language yet."
+      - title: "Reply in your language"
+        action: "Try Italian: 'Quando passa il netturbino?' Or Polish: 'Kiedy odbiór śmieci?' Or Welsh: 'Pryd mae'r sbwriel yn cael ei gasglu?'"
+      - title: "Listen to the response"
+        action: "The voice switches to the appropriate Polly voice (Bianca, Ola, Gwyneth, etc.) and the answer is in your language, drawn from the same knowledge base."
+      - title: "Try the chat too"
+        action: "Open the companion app and type a question in Polish or Spanish; the bot replies in the same language and the LANG badge in the header shows the detected code."
+    expected_outcome: "Two channels (voice + chat) work in eight languages, with documented quality caveats for Welsh, Romanian, and Polish."
+    what_to_observe:
+      - "First English greeting then language switch from turn two onwards"
+      - "Bedrock answers stay grounded in the English Aldershire knowledge base"
+      - "Welsh and Romanian sound robotic because Polly only has standard voices for them"
+      - "Polish transcripts show PII unredacted (Contact Lens limitation)"
+
+  - id: exp-bespoke-app
+    title: "Open the bespoke council dashboard in the agent workspace"
+    category: experiments
+    time_estimate: "3 minutes"
+    learning: "The Connect agent workspace can host council-branded apps alongside the Contact Control Panel, Customer Profiles, and Cases."
+    steps:
+      - title: "Log in for emergency access"
+        action: "From the AWS console, open Amazon Connect, find your instance, click 'Log in for emergency access.'"
+      - title: "Switch to Agent Workspace"
+        action: "Top right, pick 'Agent Workspace' from the workspace dropdown."
+      - title: "Open the council dashboard"
+        action: "The bespoke agent.html page on the same CloudFront distribution serves a branded landing for the council."
+    expected_outcome: "You see a council-branded view alongside the standard Connect agent panes."
+    what_to_observe:
+      - "The header reads NDX:Try {your council name}"
+      - "A caller-lookup form is ready for a phone search"
+      - "Quick links to the simulator, chat, and web call panes"
+
+  # =========== ARCHITECTURE ===========
+
+  - id: arch-visual
+    title: "Architecture at a glance"
+    category: architecture
+    time_estimate: "4 minutes"
+    learning: "How a resident's voice, chat, and photo become one Connect Case."
+    steps:
+      - title: "Inbound channel"
+        description: "The resident dials the real UK number, opens chat, or starts a web or video call. All three create an Amazon Connect contact and run the same MainContactFlow."
+      - title: "Intent classification"
+        description: "Lex v2 classifies what the caller said. A multi-intent decomposer Lambda (Bedrock Nova Pro) picks up to four service intents per turn for layered distress."
+      - title: "Knowledge-grounded answer"
+        description: "Bedrock Knowledge Base retrieves Aldershire-specific docs. Bedrock Guardrails anonymise PII in the response."
+      - title: "Case unification"
+        description: "Customer Profiles links the same caller across phone, chat, and the photo simulator. Connect Cases creates exactly one ticket per resident per topic."
+      - title: "Photo channel"
+        description: "Photos uploaded through the simulator (or any future messaging bridge) are described by Bedrock Nova Pro vision and stamped onto the same case."
+      - title: "Read-back"
+        description: "When the resident dials again, the contact flow finds the open case, reads back the resolution, and disconnects with a numeric case reference."
+
+  - id: arch-console
+    title: "Console tour: see it live"
+    category: architecture
+    time_estimate: "8 minutes"
+    requires_deployment: true
+    learning: "Find each AWS resource powering the demo in your sandbox account."
+    steps:
+      - title: "Amazon Connect instance"
+        description: "Console > Amazon Connect > your instance > Overview. Note the access URL and the 'Log in for emergency access' link."
+      - title: "Contact flow"
+        description: "Routing > Flows > ndx-try-aicc-main-flow. The graphical view shows the IVR logic, the Lex hand-off, and the FlyTip photo-wait branch with hold music."
+      - title: "Customer Profiles domain"
+        description: "Console > Amazon Connect > Customer Profiles. Search by phone number to see synthetic profiles created on inbound."
+      - title: "Connect Cases domain"
+        description: "Console > Amazon Connect > Cases. See cases with intent_category, severity, photo attachments, and customer linkage."
+      - title: "Bedrock Knowledge Base"
+        description: "Console > Amazon Bedrock > Knowledge Bases. Open the council corpus to see ingested documents and chunking."
+      - title: "Q in Connect (Wisdom)"
+        description: "Connect admin > Q in Connect. The same knowledge base drives in-call assistance for live agents."
+
+  # =========== LIMITS ===========
+
+  - id: limit-pii
+    title: "PII handling boundary"
+    category: limits
+    time_estimate: "3 minutes"
+    learning: "Where personal information lives, where it's redacted, and what to check before production."
+    consideration: "PII never leaves the Connect boundary in the clear. Contact Lens redacts at the instance level, so only redacted segments persist. Bedrock Guardrails also anonymise model output."
+    production_check:
+      - "Run a sample of redacted segments past your DPO to confirm coverage matches your DPIA"
+      - "Decide retention for redacted DynamoDB records and the share PDF"
+      - "Confirm CloudTrail and Connect contact-evaluation logs meet your records management policy"
+
+  - id: limit-outbound
+    title: "Outbound calling restrictions"
+    category: limits
+    time_estimate: "2 minutes"
+    learning: "Sandbox accounts cannot dial UK mobiles outbound. The flow asks for a landline as a fallback."
+    consideration: "AWS blocks outbound calls to 447 prefixes by default for new accounts. The flow handles this gracefully by asking the caller for a landline number."
+    production_check:
+      - "Raise an AWS Support case with your business reason to lift the outbound mobile block"
+      - "Decide whether outbound voice callback is required, or whether SMS via a partner is sufficient"
+
+  - id: limit-content
+    title: "Knowledge base content scope"
+    category: limits
+    time_estimate: "2 minutes"
+    learning: "The 370+ documents are synthetic Aldershire content. Replace them with your council's content before any real use."
+    consideration: "The knowledge base is seeded from the documents/ tree at deploy time. Bumping the CorpusVersion parameter forces a re-ingest after you sync new files."
+    production_check:
+      - "Replace synthetic Aldershire docs with your council's actual service pages, policies, and FAQs"
+      - "Set up an editorial review process for knowledge base content"
+      - "Decide whether to add per-team glossaries (for example, for Welsh place names or local jargon)"

@@ -1,0 +1,113 @@
+{
+  "WelcomeIntent": [
+    "Cześć",
+    "Hej",
+    "Dzień dobry"
+  ],
+  "BinCollection": [
+    "Kiedy jest mój dzień zbiórki śmieci",
+    "Którego dnia wystawiam śmieci",
+    "Kiedy są zabierane moje śmieci",
+    "Którego dnia opróżniane są moje śmieci",
+    "Dzień śmieci"
+  ],
+  "MissedCollection": [
+    "Moje śmieci nie zostały odniesione",
+    "Śmieciarka nie przyjechała w tym tygodniu",
+    "Przegapiona odbiórka",
+    "Mój kosz na śmieci nie został opróżniony",
+    "Śmieci nie zostały odniesione",
+    "Odbiór śmieci przegapiony"
+  ],
+  "FlyTip": [
+    "Jest zaleganie śmieci",
+    "Ktoś wylał śmieci",
+    "Śmieci zostały wyrzucone",
+    "Zaleganie śmieci na rogu",
+    "Wyrzucono materac na ulicy",
+    "Chcę zgłosić zaleganie śmieci",
+    "Chciałbym zgłosić zaleganie śmieci",
+    "Zgłosić zaleganie śmieci",
+    "Zgłaszam zaleganie śmieci",
+    "Muszę zgłosić zaleganie śmieci",
+    "Było zaleganie śmieci",
+    "Ktoś zalega śmieci",
+    "Nielegalne zaleganie",
+    "Jest nielegalne zaleganie",
+    "Ktoś wylał sofę",
+    "Sofa wylana na ulicy",
+    "Stos śmieci"
+  ],
+  "PotholeReport": [
+    "Jest dziura na drodze",
+    "Dziura na drodze",
+    "Uszkodzona nawierzchnia drogi"
+  ],
+  "BrokenPaving": [
+    "Ulica jest rozbita",
+    "Pęknięta płyta chodnikowa",
+    "Chodnik jest uszkodzony"
+  ],
+  "ParkedVehicle": [
+    "Jest jakiś samochód zaparkowany na mojej podjeździe",
+    "Ktoś mi zablokował wjazd",
+    "Samochód zaparkowany nielegalnie"
+  ],
+  "DampMould": [
+    "W moim domu jest wilgoć",
+    "Pleśń na ścianie",
+    "Wilgoć przedostaje się przez mój sufit",
+    "Czarna pleśń w łazience",
+    "Mokra plama na ścianie"
+  ],
+  "AntiSocialBehaviour": [
+    "Zachowanie antyspołeczne",
+    "Mój sąsiad krzyczy",
+    "Głośna muzyka co noc",
+    "Problem z zachowaniem antyspołecznym",
+    "Groźne zachowanie sąsiada"
+  ],
+  "Safeguarding": [
+    "Martwię się o osobę bezradną",
+    "Myślę, że ktoś jest wykorzystywany",
+    "Nie wiem, co robić",
+    "Doszło mi do głowy",
+    "Martwię się o bezradnego dorosłego"
+  ],
+  "CouncilTax": [
+    "Podatek komunalny",
+    "Nie mogę sobie pozwolić na zapłatę podatku komunalnego",
+    "Trudno mi zapłacić podatek komunalny",
+    "Pytanie dotyczące mojego rachunku za podatek komunalny",
+    "Podatek komunalny jest zbyt wysoki",
+    "Egzekucja podatku komunalnego"
+  ],
+  "BenefitsSupport": [
+    "Zasiłek mieszkaniowy",
+    "Zmniejszenie podatku komunalnego",
+    "Pomoc z zasiłkami",
+    "Chcę ubiegać się o zasiłki"
+  ],
+  "PlanningEnquiry": [
+    "Zezwolenie na budowę",
+    "Wniosek o zezwolenie na budowę",
+    "Czy potrzebuję pozwolenia na budowę",
+    "Rozbudowa budynku"
+  ],
+  "MultiIntentTriage": [
+    "Mam kilka rzeczy",
+    "Kilka problemów"
+  ],
+  "GoodbyeIntent": [
+    "Nie",
+    "Nie, dziękuję",
+    "Nie, dziękuję bardzo",
+    "To wszystko",
+    "Nic więcej",
+    "Do widzenia",
+    "Pa",
+    "Dziękuję, do widzenia",
+    "Skończyłem",
+    "Wszystko skończone"
+  ]
+}

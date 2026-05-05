@@ -1,0 +1,63 @@
+---
+layout: layouts/walkthrough.njk
+title: "Step 5: Edit the contact flow greeting in the GUI - AI Contact Centre Walkthrough"
+description: Open ndx-try-aicc-main-flow in the Connect console, change the greeting to 'hi this is a funky test', save, and dial in to hear the difference.
+currentStep: 5
+totalSteps: 8
+timeEstimate: "5 minutes"
+scenarioId: ai-contact-centre
+---
+
+{% set stepNumber = 5 %}
+{% set stepTitle = "Edit the contact flow greeting in the GUI" %}
+{% set stepDescription = "Open the contact flow ndx-try-aicc-main-flow in the Connect console, click the 'Greet and get intent via Lex' block, change its prompt text to 'hi this is a funky test', save and publish, then dial the council's number to hear your edit live." %}
+{% set timeEstimate = "5 minutes" %}
+{% set screenshotData = screenshots["ai-contact-centre"] %}
+{% set screenshots = [] %}
+{% if screenshotData and screenshotData.steps %}{% for s in screenshotData.steps %}{% if s.step == 5 %}{% set screenshots = s.screenshots %}{% endif %}{% endfor %}{% endif %}
+{% set expectedOutcomes = [
+  "You can find ndx-try-aicc-main-flow under Routing → Flows in the Connect admin console",
+  "You can click the 'Greet and get intent via Lex' block and edit its prompt",
+  "Save and Publish complete without errors",
+  "Dialling the council's number after publishing plays the new greeting"
+] %}
+
+{% include "components/walkthrough-step.njk" %}
+
+<h3 class="govuk-heading-m">Why this matters</h3>
+
+<p class="govuk-body">Contact flows are configurable. They are not a developer-only black box. A non-developer in your customer services team can change the words a caller hears in under a minute. This step proves it.</p>
+
+<h3 class="govuk-heading-m">Find the flow</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>From the Connect admin home, open the left-hand nav and click <strong>Routing</strong>, then <strong>Flows</strong>.</li>
+  <li>In the flow list, search for <code>ndx-try-aicc-main-flow</code> and click into it. The visual flow editor opens.</li>
+  <li>The flow starts on the left. Find the block labelled <strong>"Greet and get intent via Lex"</strong>. It's the first <em>Get customer input</em> block after the entry point. The icon shows a Lex bot.</li>
+</ol>
+
+<h3 class="govuk-heading-m">Edit the greeting</h3>
+
+<ol class="govuk-list govuk-list--number govuk-list--spaced">
+  <li>Click the "Greet and get intent via Lex" block. The properties panel slides in from the right.</li>
+  <li>Scroll to the <strong>"Prompts"</strong> section. The current text reads something like <em>"Hello, you've reached Aldershire District Council. This is an NDX:Try session. What can I help with?"</em></li>
+  <li>Click the prompt text and replace it with: <code>hi this is a funky test</code></li>
+  <li>Click <strong>Save</strong> at the top right. A toast confirms "Flow saved".</li>
+  <li>Click <strong>Publish</strong> next to Save. A confirmation dialog appears. Click <strong>Publish</strong> in the dialog.</li>
+</ol>
+
+<h3 class="govuk-heading-m">Hear it live</h3>
+
+<p class="govuk-body">Dial the council's number from step 1. Instead of the corporate Aldershire greeting, you hear:</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body govuk-!-font-style-italic">
+    "Hi, this is a funky test."
+  </p>
+</div>
+
+<p class="govuk-body">The bot still does intent recognition after that line, so saying "bin collection" or "fly-tip" still routes correctly. You changed the words, not the routing.</p>
+
+<div class="govuk-inset-text">
+  <p class="govuk-body"><strong>Note:</strong> this change lives in your sandbox session only. Re-deploying the AI Contact Centre stack from CloudFormation, or running <code>isb terminate</code> on your sandbox lease, resets the flow to its IaC-defined wording. To make a permanent change, edit <code>cloudformation/scenarios/ai-contact-centre/template.yaml</code> in the source repository.</p>
+</div>

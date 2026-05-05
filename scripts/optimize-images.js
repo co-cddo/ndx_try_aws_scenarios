@@ -63,7 +63,8 @@ const CONFIG = {
     'smart-car-park',
     'text-to-speech',
     'quicksight-dashboard',
-    'paperless-ngx'
+    'paperless-ngx',
+    'ai-contact-centre'
   ]
 };
 

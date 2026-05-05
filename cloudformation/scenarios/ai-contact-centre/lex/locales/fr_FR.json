@@ -1,0 +1,113 @@
+{
+  "WelcomeIntent": [
+    "Bonjour",
+    "Salut",
+    "Bonjour, comment ça va?"
+  ],
+  "BinCollection": [
+    "Quand est-ce que je dois sortir mes poubelles",
+    "Quel jour je mets mes poubelles dehors",
+    "Quand est-ce que mes poubelles sont ramassées",
+    "Quel jour mes poubelles sont vidées",
+    "Jour de collecte des ordures"
+  ],
+  "MissedCollection": [
+    "Mes poubelles n'ont pas été ramassées",
+    "Le camion de collecte des ordures n'est pas passé cette semaine",
+    "Collecte manquée",
+    "Ma poubelle n'a pas été vidée",
+    "Les poubelles n'ont pas été ramassées",
+    "La collecte des ordures a été manquée"
+  ],
+  "FlyTip": [
+    "Il y a du dépôt sauvage",
+    "Quelqu'un a jeté des déchets",
+    "Des déchets ont été jetés",
+    "Dépôt sauvage au coin de la rue",
+    "Un matelas jeté dans la rue",
+    "Je veux signaler un dépôt sauvage",
+    "J'aimerais signaler un dépôt sauvage",
+    "Signaler un dépôt sauvage",
+    "Je signale un dépôt sauvage",
+    "Je dois signaler un dépôt sauvage",
+    "Il y a eu du dépôt sauvage",
+    "Quelqu'un a fait du dépôt sauvage",
+    "Je veux signaler du dépôt sauvage",
+    "Dépôt illégal",
+    "Il y a un dépôt illégal",
+    "Quelqu'un a jeté un canapé",
+    "Un canapé jeté dans la rue",
+    "Une pile de déchets"
+  ],
+  "PotholeReport": [
+    "Il y a un nid-de-poule",
+    "Un nid-de-poule sur la route",
+    "Surface de la route endommagée"
+  ],
+  "BrokenPaving": [
+    "Le trottoir est cassé",
+    "Dalle de trottoir cassée",
+    "Le trottoir est endommagé"
+  ],
+  "ParkedVehicle": [
+    "Il y a une voiture garée devant mon entrée de garage",
+    "Quelqu'un m'a bloqué l'accès",
+    "Voiture garée illégalement"
+  ],
+  "DampMould": [
+    "Il y a de l'humidité chez moi",
+    "De la moisissure sur le mur",
+    "De l'humidité qui passe à travers mon plafond",
+    "De la moisissure noire dans la salle de bain",
+    "Une zone humide sur le mur"
+  ],
+  "AntiSocialBehaviour": [
+    "Comportement antisocial",
+    "Mon voisin a été en train de crier",
+    "De la musique forte tous les soirs",
+    "Problème de comportement antisocial",
+    "Comportement menaçant de mon voisin"
+  ],
+  "Safeguarding": [
+    "Je m'inquiète pour une personne vulnérable",
+    "Je pense que quelqu'un est maltraité",
+    "Je ne sais pas quoi faire",
+    "J'en ai marre",
+    "Inquiet pour un adulte vulnérable"
+  ],
+  "CouncilTax": [
+    "Taxe communale",
+    "Je ne peux pas me permettre de payer ma taxe communale",
+    "J'ai du mal à payer ma taxe communale",
+    "Question concernant ma facture de taxe communale",
+    "La taxe communale est trop élevée",
+    "Application de la taxe communale"
+  ],
+  "BenefitsSupport": [
+    "Aide au logement",
+    "Réduction de la taxe d'habitation",
+    "Aide pour les allocations",
+    "Je veux demander des allocations"
+  ],
+  "PlanningEnquiry": [
+    "Autorisation de construire",
+    "Demande de permis de construire",
+    "Ai-je besoin d'une autorisation de construire",
+    "Extension de bâtiment"
+  ],
+  "MultiIntentTriage": [
+    "J'ai plusieurs choses à signaler",
+    "Plusieurs problèmes à aborder"
+  ],
+  "GoodbyeIntent": [
+    "Non",
+    "Non merci",
+    "Non merci, merci",
+    "C'est tout",
+    "Rien d'autre",
+    "Au revoir",
+    "Merci, au revoir",
+    "C'est fini",
+    "Tout est fini"
+  ]
+}

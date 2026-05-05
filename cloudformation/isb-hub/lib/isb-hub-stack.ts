@@ -19,6 +19,13 @@ interface ScenarioConfig {
   description: string;
   /** Optional parameters passed to the StackSet (and through to stack instances) */
   parameterKeys?: string[];
+  /**
+   * SAM-style scenario: source template lives at `scenarios/<name>/dist/template.yaml`
+   * (produced by `sam package`) rather than the scenario root. The CI deploy job
+   * runs `sam package` which uploads Lambda zips to the blueprints bucket and
+   * writes the packaged template into dist/.
+   */
+  samStyle?: boolean;
 }
 
 const SCENARIOS: ScenarioConfig[] = [
@@ -31,9 +38,14 @@ const SCENARIOS: ScenarioConfig[] = [
   { name: 'localgov-drupal', description: 'NDX:Try LocalGov Drupal - AI-enhanced CMS for UK councils' },
   { name: 'simply-readable', description: 'NDX:Try Simply Readable - Document Translation & Easy Read, built by Swindon Borough Council' },
   { name: 'localgov-ims', description: 'NDX:Try LocalGov IMS - Income Management System with GOV.UK Pay', parameterKeys: ['GovUkPayApiKey'] },
-  { name: 'minute', description: 'Minute AI - Meeting transcription and AI-powered minute generation' },
-  { name: 'fixmystreet', description: 'NDX:Try FixMyStreet - Citizen problem reporting platform for UK councils' },
-  { name: 'paperless-ngx', description: 'NDX:Try Paperless-ngx - Document archive with OCR, full-text search and Bedrock AI' },
+  // TODO(orphan-import): minute, fixmystreet, paperless-ngx have ACTIVE
+  // StackSets in the hub account NOT owned by IsbHubStack. CDK create fails
+  // with AlreadyExists. Re-enable once imported via
+  // `cloudformation create-change-set --change-set-type IMPORT`.
+  // { name: 'minute', description: 'Minute AI - Meeting transcription and AI-powered minute generation' },
+  // { name: 'fixmystreet', description: 'NDX:Try FixMyStreet - Citizen problem reporting platform for UK councils' },
+  // { name: 'paperless-ngx', description: 'NDX:Try Paperless-ngx - Document archive with OCR, full-text search and Bedrock AI' },
+  { name: 'ai-contact-centre', description: 'NDX:Try AI Contact Centre - Amazon Connect with Lex, Bedrock RAG, multimodal photo describe, multi-intent triage, and multilingual support', samStyle: true },
   { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 7 scenarios as nested stacks' },
 ];
 
@@ -68,8 +80,14 @@ export class IsbHubStack extends cdk.Stack {
 
     // ========================================================================
     // TEMPLATE UPLOADS — one BucketDeployment per scenario
+    //
+    // Scenarios with no local template.yaml are skipped with a warning. CI is
+    // expected to synthesize/package every scenario before this stack runs, so
+    // a missing template in CI is a build error; locally it lets developers
+    // iterate on hub config without first building every scenario.
     // ========================================================================
     const deployments: Record<string, s3deploy.BucketDeployment> = {};
+    const skipped: string[] = [];
 
     for (const scenario of SCENARIOS) {
       const pascalName = scenario.name
@@ -77,14 +95,35 @@ export class IsbHubStack extends cdk.Stack {
         .map(s => s.charAt(0).toUpperCase() + s.slice(1))
         .join('');
 
+      // SAM-style scenarios source from dist/ (produced by `sam package`); others
+      // from the scenario root.
+      const sourceDir = scenario.samStyle
+        ? path.join(__dirname, '..', '..', 'scenarios', scenario.name, 'dist')
+        : path.join(__dirname, '..', '..', 'scenarios', scenario.name);
+
+      const templatePath = path.join(sourceDir, 'template.yaml');
+      if (!fs.existsSync(templatePath)) {
+        if (process.env.CI === 'true') {
+          throw new Error(`Missing template for scenario '${scenario.name}': ${templatePath}. CI must synthesize this scenario before the hub stack runs.`);
+        }
+        console.warn(`[isb-hub] WARN: skipping scenario '${scenario.name}' — no template at ${templatePath} (run the synth step locally first if you want it deployed)`);
+        skipped.push(scenario.name);
+        continue;
+      }
+
       const deployment = new s3deploy.BucketDeployment(this, `${pascalName}Templates`, {
         sources: [
-          s3deploy.Source.asset(path.join(__dirname, '..', '..', 'scenarios', scenario.name), {
+          s3deploy.Source.asset(sourceDir, {
             exclude: ['*', '!template.yaml'],
           }),
         ],
         destinationBucket: bucket,
         destinationKeyPrefix: `scenarios/${scenario.name}`,
+        // Don't delete sibling objects under the same prefix. SAM-style
+        // scenarios upload Lambda zips to scenarios/<name>/assets/ via
+        // `sam package` BEFORE this BucketDeployment runs; default prune:true
+        // would `aws s3 sync --delete` and remove them.
+        prune: scenario.samStyle ? false : undefined,
       });
 
       // Grant permissions on imported bucket (CDK can't auto-grant on imported resources)
@@ -174,12 +213,16 @@ export class IsbHubStack extends cdk.Stack {
     // STACKSETS — one per scenario, no stack instances (ISB manages those)
     // ========================================================================
     for (const scenario of SCENARIOS) {
+      if (skipped.includes(scenario.name)) continue;
+
       const pascalName = scenario.name
         .split('-')
         .map(s => s.charAt(0).toUpperCase() + s.slice(1))
         .join('');
 
-      const templatePath = path.join(__dirname, '..', '..', 'scenarios', scenario.name, 'template.yaml');
+      const templatePath = scenario.samStyle
+        ? path.join(__dirname, '..', '..', 'scenarios', scenario.name, 'dist', 'template.yaml')
+        : path.join(__dirname, '..', '..', 'scenarios', scenario.name, 'template.yaml');
       const templateContent = fs.readFileSync(templatePath, 'utf8');
       const contentHash = crypto.createHash('sha256').update(templateContent).digest('hex').substring(0, 16);
 
