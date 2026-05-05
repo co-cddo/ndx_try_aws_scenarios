@@ -1513,11 +1513,16 @@ Resources:
   # ============================================================
   # PHASE 7: Customer Profiles + ConnectCases
   # ============================================================
-  # Connect-Customer Profiles binding is auto-discovery: when the
-  # CustomerProfiles::Domain exists in the same account+region as the Connect
-  # instance, the contact flow can call customer-profiles:SearchProfiles
-  # directly from Lambda. No explicit association resource is required (no
-  # IntegrationType: CUSTOMER_PROFILES exists on Connect::IntegrationAssociation).
+  # The CP domain MUST be named with the `amazon-connect-` prefix:
+  # AmazonConnectServiceLinkedRolePolicy scopes every profile:* permission
+  # (SearchProfiles, GetDomain, ListProfileObjects, etc.) to
+  #   arn:aws:profile:*:*:domains/amazon-connect-*
+  # so any other name breaks the agent workspace's Customer Profile widget
+  # with the generic "review your Amazon Connect Role Policy" message.
+  # The CTR-ingestion binding is done by IaCustomerProfilesIntegration
+  # (customer-profiles:PutIntegration) so post-call CTRs auto-ingest. There
+  # is no separate connect:CreateIntegrationAssociation step — Connect
+  # auto-discovers the domain via the SLR once the prefix matches.
   # Phase 0.6 spike output: spikes/customer-profiles-wiring.md.
   CustomerProfilesKey:
     Type: AWS::KMS::Key
@@ -1538,7 +1543,8 @@ Resources:
     Type: AWS::CustomerProfiles::Domain
     DependsOn: ConnectInstanceActiveWait
     Properties:
-      DomainName: !Sub 'ndx-try-aicc-${AWS::AccountId}'
+      # Prefix REQUIRED: see PHASE 7 comment above (SLR resource scoping).
+      DomainName: !Sub 'amazon-connect-ndx-aicc-${AWS::AccountId}'
       DefaultExpirationDays: 30
       DefaultEncryptionKey: !GetAtt CustomerProfilesKey.Arn
 
