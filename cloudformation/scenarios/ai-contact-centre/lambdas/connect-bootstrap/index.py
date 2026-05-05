@@ -11,8 +11,11 @@ property) to wire up things CloudFormation doesn't support natively:
   Action="CustomerProfilesPutIntegration"
     Calls customer-profiles:put_integration on the domain so inbound contacts
     auto-associate to existing profiles via the CTR object type. CFN's
-    AWS::Connect::IntegrationAssociation enum doesn't include
-    CUSTOMER_PROFILES so we use the CP-side API.
+    AWS::Connect::IntegrationAssociation enum doesn't include CUSTOMER_PROFILES
+    (it really doesn't exist as a Connect IntegrationType), so the binding to
+    the agent workspace is via the CP-side integration plus the
+    AmazonConnectServiceLinkedRolePolicy-required `amazon-connect-` domain
+    name prefix.
 
   Action="WisdomContentUpload"
     Uploads every markdown file from an S3 prefix into a Q in Connect KB.
@@ -55,6 +58,10 @@ def handler(event, context):
                 _wisdom_clear_contents(props)
             elif action == "ConnectIntegrationAssociation":
                 _, _ = _connect_ia(props, event, request_type, physical_id)
+            elif action == "CustomerProfilesPutIntegration":
+                # Otherwise the parent AWS::CustomerProfiles::Domain delete is blocked
+                # by the orphan integration. Idempotent: ignore "already gone" errors.
+                _cp_delete_integration(props)
             return _send(event, context, "SUCCESS", {}, physical_id=physical_id)
 
         if action == "AgentSecurityProfilePermissions":
@@ -201,6 +208,16 @@ def _cp_put_integration(props):
         DomainName=domain_name, Uri=instance_arn, ObjectTypeName=object_type,
     )
     return {"DomainName": domain_name, "ObjectTypeName": object_type}
+
+
+def _cp_delete_integration(props):
+    domain_name = props["DomainName"]
+    instance_arn = props["InstanceArn"]
+    try:
+        profiles.delete_integration(DomainName=domain_name, Uri=instance_arn)
+    except ClientError as exc:
+        if exc.response.get("Error", {}).get("Code") not in ("ResourceNotFoundException",):
+            raise
 
 
 def _wisdom_default_aiagent(props):
