@@ -98,6 +98,8 @@ Resources:
                 Action:
                   - textract:DetectDocumentText
                   - textract:AnalyzeDocument
+                  - textract:StartDocumentTextDetection
+                  - textract:GetDocumentTextDetection
                 Resource: '*'
         - PolicyName: BedrockAccess
           PolicyDocument:
@@ -125,7 +127,7 @@ Resources:
       Runtime: python3.12
       Handler: index.lambda_handler
       Role: !GetAtt PlanningAIRole.Arn
-      Timeout: 60
+      Timeout: 300
       MemorySize: 512
       Environment:
         Variables:
@@ -933,6 +935,66 @@ Resources:
                       return None, 'Textract error: Access denied by organization policy. In this sandbox environment, please use the sample document to experience the Textract extraction flow. In production, Textract would process your uploaded document.'
                   return None, f'Textract error: {error_msg}'
 
+          def extract_with_textract_async(s3_key, max_wait_seconds=240):
+              """Extract text from multi-page PDFs via async Textract job."""
+              import time
+              try:
+                  start = textract.start_document_text_detection(
+                      DocumentLocation={'S3Object': {'Bucket': BUCKET, 'Name': s3_key}}
+                  )
+                  job_id = start['JobId']
+
+                  deadline = time.time() + max_wait_seconds
+                  status = 'IN_PROGRESS'
+                  while time.time() < deadline:
+                      time.sleep(2)
+                      resp = textract.get_document_text_detection(JobId=job_id)
+                      status = resp['JobStatus']
+                      if status in ('SUCCEEDED', 'FAILED', 'PARTIAL_SUCCESS'):
+                          break
+
+                  if status == 'FAILED':
+                      return None, f"Textract error: async job failed: {resp.get('StatusMessage', 'unknown')}"
+                  if status == 'IN_PROGRESS':
+                      return None, 'Textract error: timed out waiting for async job'
+
+                  # Collect all pages (paginate via NextToken)
+                  lines = []
+                  words = []
+                  confidences = []
+                  next_token = resp.get('NextToken')
+                  blocks = resp.get('Blocks', [])
+                  while True:
+                      for block in blocks:
+                          if block['BlockType'] == 'LINE':
+                              lines.append(block.get('Text', ''))
+                              confidences.append(block.get('Confidence', 0))
+                          elif block['BlockType'] == 'WORD':
+                              words.append(block.get('Text', ''))
+                      if not next_token:
+                          break
+                      page = textract.get_document_text_detection(JobId=job_id, NextToken=next_token)
+                      blocks = page.get('Blocks', [])
+                      next_token = page.get('NextToken')
+
+                  raw_text = '\n'.join(lines)
+                  avg_confidence = sum(confidences) / len(confidences) if confidences else 0
+                  return {
+                      'rawText': raw_text,
+                      'lines': lines,
+                      'words': words,
+                      'stats': {
+                          'lineCount': len(lines),
+                          'wordCount': len(words),
+                          'avgConfidence': avg_confidence
+                      }
+                  }, None
+              except Exception as e:
+                  error_msg = str(e)
+                  if 'AccessDeniedException' in error_msg:
+                      return None, 'Textract error: Access denied by organization policy. In this sandbox environment, please use the sample document to experience the Textract extraction flow.'
+                  return None, f'Textract error: {error_msg}'
+
           def parse_extracted_data(raw_text):
               """Parse structured data from extracted text"""
               import re
@@ -1039,7 +1101,28 @@ Resources:
                       # Decode and process uploaded document with Textract
                       document_bytes = base64.b64decode(document_base64)
 
-                      textract_result, error = extract_with_textract(document_bytes=document_bytes)
+                      # Textract sync DetectDocumentText accepts JPEG/PNG/TIFF via Bytes
+                      # but rejects PDFs (any page count) via Bytes; multi-page PDFs also
+                      # require the async StartDocumentTextDetection API. Stage PDFs in S3
+                      # and run async Textract; delete the upload afterwards.
+                      uploaded_key = None
+                      if document_bytes[:4] == b'%PDF':
+                          uploaded_key = f'uploads/{uuid.uuid4()}.pdf'
+                          s3.put_object(
+                              Bucket=BUCKET,
+                              Key=uploaded_key,
+                              Body=document_bytes,
+                              ContentType='application/pdf'
+                          )
+                          textract_result, error = extract_with_textract_async(s3_key=uploaded_key)
+                      else:
+                          textract_result, error = extract_with_textract(document_bytes=document_bytes)
+
+                      if uploaded_key:
+                          try:
+                              s3.delete_object(Bucket=BUCKET, Key=uploaded_key)
+                          except Exception:
+                              pass
 
                       if error:
                           return {
