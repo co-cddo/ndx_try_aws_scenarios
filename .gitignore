@@ -49,7 +49,6 @@ outputs.json
 .upstream/
 .website-build-tmp/
 website-build/
-package-lock.json
 
 # Generated CloudFormation templates
 cloudformation/scenarios/*/template.yaml
