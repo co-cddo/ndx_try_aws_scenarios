@@ -1310,9 +1310,4 @@ Conditions:
       - Fn::Equals:
           - Ref: AWS::Region
           - us-west-2
-Parameters:
-  BootstrapVersion:
-    Type: AWS::SSM::Parameter::Value<String>
-    Default: /cdk-bootstrap/hnb659fds/version
-    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
 

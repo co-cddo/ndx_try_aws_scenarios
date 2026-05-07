@@ -11,4 +11,7 @@ new LocalGovDrupalStack(app, 'LocalGovDrupalStack', {
   description: 'AI-Enhanced LocalGov Drupal on AWS - Demonstration Environment',
   deploymentMode: 'production',
   councilTheme: 'random',
+  synthesizer: new cdk.DefaultStackSynthesizer({
+    generateBootstrapVersionRule: false,
+  }),
 });
