@@ -755,8 +755,12 @@ Resources:
                   // PDF document - show embedded PDF viewer
                   document.getElementById("documentPdf").src = data.documentUrl;
                   pdfContainer.style.display = "block";
+                } else if (selectedFile && selectedFile.type === "application/pdf") {
+                  // Uploaded PDF: use blob URL — Chrome blocks data:application/pdf in <embed>
+                  document.getElementById("documentPdf").src = URL.createObjectURL(selectedFile);
+                  pdfContainer.style.display = "block";
                 } else if (documentDataUrl) {
-                  // Uploaded file - show the image
+                  // Uploaded image
                   document.getElementById("documentImage").src = documentDataUrl;
                   imgContainer.style.display = "block";
                 } else if (data.rawText) {
