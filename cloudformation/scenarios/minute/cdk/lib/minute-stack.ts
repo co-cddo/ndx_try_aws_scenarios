@@ -81,6 +81,14 @@ export class MinuteStack extends cdk.Stack {
       exportName: `${this.stackName}-MinuteUrl`,
     });
 
+    // Convenience: same URL with credentials embedded so you can paste it
+    // straight into a browser address bar instead of copy-pasting the
+    // username and password from the BasicAuth* outputs.
+    new cdk.CfnOutput(this, 'MinuteLoginUrl', {
+      description: 'Minute AI URL with basic auth credentials embedded (paste into browser)',
+      value: `https://admin:${cdn.basicAuthPassword}@${cdn.domainName}`,
+    });
+
 new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs URL',
       value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-minute')}`,
