@@ -15,28 +15,37 @@ DB_NAME=$(echo "$DB_URL" | sed -n 's|.*/\([^?]*\).*|\1|p')
 echo "DB Host: $DB_HOST"
 echo "DB Name: $DB_NAME"
 
-# 1. Wait for DNS resolution (Aurora DNS can take a minute to propagate)
+# 1. Wait for DNS resolution (Aurora DNS can take a minute to propagate).
+# Hard-fail if it never resolves: continuing past this point with a missing
+# host means Hasura starts up, fails its DB connection, exits, ECS restarts,
+# and the deployment circuit breaker eventually trips and rolls back the
+# whole stack with no useful error. Better to have the container exit fast
+# and ECS restart it (re-resolving DNS each time) than to bleed boot time.
 echo "[1/3] Waiting for DNS resolution of $DB_HOST..."
-for i in $(seq 1 60); do
+for i in $(seq 1 120); do
   if nslookup "$DB_HOST" > /dev/null 2>&1; then
     echo "DNS resolved."
     break
   fi
-  if [ $i -eq 60 ]; then
-    echo "WARNING: DNS resolution timed out after 5 minutes. Continuing anyway..."
+  if [ $i -eq 120 ]; then
+    echo "ERROR: DNS resolution failed after 10 minutes; exiting so ECS can retry."
+    exit 1
   fi
   sleep 5
 done
 
-# 2. Wait for PostgreSQL to accept connections
+# 2. Wait for PostgreSQL to accept connections. Same hard-fail rationale as
+# above — proceeding when PG is unreachable just guarantees a Hasura crash
+# loop and a circuit-breaker rollback.
 echo "[2/3] Waiting for PostgreSQL to be ready..."
-for i in $(seq 1 60); do
+for i in $(seq 1 120); do
   if PGPASSWORD="$DB_PASSWORD" pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" > /dev/null 2>&1; then
     echo "PostgreSQL ready."
     break
   fi
-  if [ $i -eq 60 ]; then
-    echo "WARNING: PostgreSQL not ready after 5 minutes. Continuing anyway..."
+  if [ $i -eq 120 ]; then
+    echo "ERROR: PostgreSQL not ready after 10 minutes; exiting so ECS can retry."
+    exit 1
   fi
   sleep 5
 done

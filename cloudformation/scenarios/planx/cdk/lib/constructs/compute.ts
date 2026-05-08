@@ -171,9 +171,16 @@ export class ComputeConstruct extends Construct {
       vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
       assignPublicIp: true,
       enableExecuteCommand: true,
-      circuitBreaker: { rollback: true },
+      // Don't roll the entire stack back when Hasura's first boot is slow.
+      // Aurora cold starts can be 5-10 minutes on a fresh sandbox; with
+      // rollback enabled, a couple of restart attempts trip the circuit
+      // breaker and the StackSet operation FAILS with no useful per-task
+      // reason (we lose the CloudWatch logs along with the rolled-back
+      // stack). Letting ECS keep retrying surfaces the actual task error
+      // and gives the entrypoint hard-wait loop time to win.
+      circuitBreaker: { enable: true, rollback: false },
       serviceName: 'NdxPlanx-Hasura',
-      healthCheckGracePeriod: cdk.Duration.minutes(15),
+      healthCheckGracePeriod: cdk.Duration.minutes(30),
     });
 
     // =========================================================================
