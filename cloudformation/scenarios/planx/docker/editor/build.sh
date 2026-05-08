@@ -17,6 +17,23 @@ echo "==> Preparing build context..."
 # Move editor to expected path
 mv "$BUILD_DIR/planx-src/apps/editor.planx.uk" "$BUILD_DIR/planx-src/editor.planx.uk"
 
+# Patch validateDomain to accept the runtime host. Upstream restricts /app
+# to editor.planx.{dev,uk}, *.planx.pizza, and localhost:3000; on any other
+# host (e.g. our ephemeral CloudFront distributions) the route guard throws
+# redirect({to:"/login"}) before initAuthStore runs, so the demo cookie is
+# never exchanged for a /user/me lookup. Replacing the body with a no-op is
+# the smallest change that lets the existing auth flow take over.
+LOADER="$BUILD_DIR/planx-src/editor.planx.uk/src/routes/_authenticated/-loader.tsx"
+if [ -f "$LOADER" ]; then
+  cat > "$LOADER" <<'EOF'
+// NDX:Try patch: original validateDomain restricts /app to a hardcoded
+// allowlist of upstream hosts and redirects everything else to /login,
+// blocking the demo auth flow on our CloudFront distributions.
+export const validateDomain = () => {};
+EOF
+  echo "    patched _authenticated/-loader.tsx"
+fi
+
 cp "$SCRIPT_DIR/Dockerfile" "$BUILD_DIR/Dockerfile"
 cp "$SCRIPT_DIR/nginx.conf" "$BUILD_DIR/nginx.conf"
 cp "$SCRIPT_DIR/entrypoint.sh" "$BUILD_DIR/entrypoint.sh"

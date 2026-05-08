@@ -6,16 +6,19 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-# Copy the full monorepo (pnpm workspaces need it)
+# Copy the full monorepo (still useful for workspace package references)
 COPY planx-src/ .
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile 2>/dev/null || pnpm install
+# Install api deps inside api.planx.uk. Upstream's api.planx.uk carries its
+# own pnpm-lock.yaml and is no longer linked through a root pnpm-workspace.yaml,
+# so a root-level install just pulls in `typescript` and the api's own
+# deps go missing (build then fails with "tsc not found").
+RUN cd api.planx.uk && (pnpm install --frozen-lockfile || pnpm install)
 
-# Build the API
+# Build the API (server.ts has been patched by build.sh to call setupDemoAuth)
 RUN cd api.planx.uk && pnpm build
 
-# Apply demo auth overlay after build
+# Pre-compiled JS overlay used by the patched server import resolution
 COPY overlays/demo-auth.js /app/api.planx.uk/dist/demo-auth.js
 
 # Production stage

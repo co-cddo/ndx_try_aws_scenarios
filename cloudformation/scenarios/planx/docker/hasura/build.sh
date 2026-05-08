@@ -29,8 +29,9 @@ echo "==> Copying seed data..."
 mkdir -p "$BUILD_DIR/seed"
 cp "$SCRIPT_DIR/seed/"*.sql "$BUILD_DIR/seed/" 2>/dev/null || true
 
-echo "==> Copying Dockerfile..."
+echo "==> Copying Dockerfile + entrypoint..."
 cp "$SCRIPT_DIR/Dockerfile" "$BUILD_DIR/Dockerfile"
+cp "$SCRIPT_DIR/entrypoint-wrapper.sh" "$BUILD_DIR/entrypoint-wrapper.sh"
 
 echo "==> Building Docker image..."
 cd "$BUILD_DIR"
