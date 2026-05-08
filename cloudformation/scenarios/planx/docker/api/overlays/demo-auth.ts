@@ -82,7 +82,26 @@ export function setupDemoAuth(app: Express) {
       { expiresIn: "24h" },
     );
 
-    // Redirect to editor with JWT in search params (relative URL to stay on CloudFront)
-    res.redirect(`/?jwt=${token}`);
+    // Set JWT as an HttpOnly cookie. Upstream's useLoggedInUserAuth reads
+    // req.cookies.jwt first, and the editor's apiClient sends cookies via
+    // withCredentials. Putting the JWT only in the URL hash/search no longer
+    // works: TanStack Router's `/` -> `/app` redirect drops the search params
+    // before the SPA's auth init can pick them up, and the user gets bounced
+    // to /login despite a successful POST. Set both cookies so the API and
+    // the editor's auth store agree on the logged-in state.
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res.cookie("auth", JSON.stringify({ loggedIn: true }), {
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res.redirect("/app");
   });
 }

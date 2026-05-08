@@ -120,7 +120,7 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.X86_64,
+        cpuArchitecture: ecs.CpuArchitecture.ARM64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
@@ -185,7 +185,10 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.X86_64,
+        // ARM64: matches the editor / api images we publish (built natively
+        // on Apple Silicon CI; cross-compiling to amd64 under QEMU OOMs the
+        // editor's vite/esbuild step). Also ~20% cheaper on Fargate.
+        cpuArchitecture: ecs.CpuArchitecture.ARM64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
@@ -285,7 +288,7 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.X86_64,
+        cpuArchitecture: ecs.CpuArchitecture.ARM64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
@@ -334,7 +337,7 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.X86_64,
+        cpuArchitecture: ecs.CpuArchitecture.ARM64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });

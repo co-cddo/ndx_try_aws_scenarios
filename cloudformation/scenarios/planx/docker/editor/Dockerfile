@@ -9,18 +9,28 @@ WORKDIR /app
 # Copy the full monorepo
 COPY planx-src/ .
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile 2>/dev/null || pnpm install
+# Install editor deps. Upstream's editor.planx.uk is a self-contained pnpm
+# project (its own pnpm-lock.yaml) and is no longer linked via a root
+# pnpm-workspace.yaml, so installing at the root just brings in `typescript`
+# and the editor's `tsc`/`vite` end up missing. Install inside the editor
+# directory directly.
+RUN cd editor.planx.uk && (pnpm install --frozen-lockfile || pnpm install)
 
 # Build editor with relative URLs (all services behind same CloudFront/ALB)
 # WebSocket URLs use window.location.host (injected at runtime)
 ENV VITE_APP_API_URL=/api
-ENV VITE_APP_HASURA_URL=/hasura/v1/graphql
-ENV VITE_APP_HASURA_WEBSOCKET=wss://__PLANX_HOST__/hasura/v1/graphql
+# CloudFront routes /v1/*, /v2/* and /console/* directly to Hasura; there is
+# no /hasura/* cache behaviour. Build with the same paths so the editor's
+# GraphQL client doesn't end up at the editor nginx (405) or ShareDB.
+ENV VITE_APP_HASURA_URL=/v1/graphql
+ENV VITE_APP_HASURA_WEBSOCKET=wss://__PLANX_HOST__/v1/graphql
 ENV VITE_APP_SHAREDB_URL=wss://__PLANX_HOST__/sharedb
 ENV VITE_APP_ENV=production
-ENV VITE_APP_AIRBRAKE_PROJECT_ID=0
-ENV VITE_APP_AIRBRAKE_PROJECT_KEY=unused
+# Airbrake intentionally not configured. Setting AIRBRAKE_PROJECT_ID=0 makes
+# upstream's airbrake.ts pass its truthy-string check, then call
+# `new Notifier({projectId: 0})`, which throws synchronously during module
+# init and blanks the editor SPA. Leave these unset so the no-op logger
+# branch runs instead.
 
 RUN cd editor.planx.uk && pnpm build
 

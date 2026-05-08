@@ -21,6 +21,13 @@ cp "$SCRIPT_DIR/Dockerfile" "$BUILD_DIR/Dockerfile"
 # Move API app to expected location
 mv "$BUILD_DIR/planx-src/apps/api.planx.uk" "$BUILD_DIR/planx-src/api.planx.uk"
 
+# Apply the demo-auth source patch into the freshly cloned upstream so the
+# build sees the import/setupDemoAuth call. Without this step, the build runs
+# unpatched server.ts and the demo overlay is never registered (yet the legacy
+# image we replace had the patch baked in by hand).
+echo "==> Patching server.ts with demo auth..."
+sh "$SCRIPT_DIR/patch-demo-auth.sh" "$BUILD_DIR/planx-src/api.planx.uk"
+
 echo "==> Building Docker image..."
 cd "$BUILD_DIR"
 docker build -t ndx-planx-api:latest .

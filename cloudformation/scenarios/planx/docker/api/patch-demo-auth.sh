@@ -17,9 +17,15 @@ cp "$(dirname "$0")/overlays/demo-auth.ts" "$API_DIR/modules/auth/demo-auth.ts"
 sed -i.bak '/^import { apiLimiter/a\
 import { setupDemoAuth } from "./modules/auth/demo-auth.js";' "$API_DIR/server.ts"
 
-# 3. Add demo auth setup before error handlers (the // Handle any server errors comment)
-sed -i.bak '/^\/\/ Handle any server errors/i\
-// NDX:Try demo auth (bypasses Google/Microsoft OAuth)\
+# 3. Add demo auth setup BEFORE the API route mounting (// Setup API routes anchor).
+# setupDemoAuth installs an `/api`-prefix-stripping middleware so /api/user/me
+# can reach the upstream user router. That middleware MUST run before
+# app.use(userRoutes) etc., or the rewrite happens too late and ALB-routed
+# /api/* requests 404. Inserting before the // Setup API routes comment
+# guarantees the right order regardless of which route bundles are added later.
+sed -i.bak '/^\/\/ Setup API routes/i\
+// NDX:Try demo auth (bypasses Google/Microsoft OAuth). Registered BEFORE the\
+// upstream route bundles so its /api-prefix-stripping middleware runs first.\
 if (process.env.DEMO_MODE === "true") {\
   setupDemoAuth(app);\
   console.info("Demo auth enabled at /auth/demo");\

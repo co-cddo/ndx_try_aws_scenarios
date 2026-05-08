@@ -9,11 +9,13 @@ WORKDIR /app
 # Copy the full monorepo
 COPY planx-src/ .
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile 2>/dev/null || pnpm install
+# Install sharedb deps inside its own dir. Upstream's sharedb.planx.uk has its
+# own pnpm-lock.yaml; the root has no pnpm-workspace.yaml that links it, so a
+# root-level install only brings in `typescript` and the sharedb deps go
+# missing. (Same fix pattern as editor and api Dockerfiles.)
+RUN cd sharedb.planx.uk && (pnpm install --frozen-lockfile || pnpm install)
 
-# Build ShareDB
-RUN cd sharedb.planx.uk && pnpm build 2>/dev/null || true
+# ShareDB has no build step — server.js runs directly from source.
 
 # Production stage
 FROM node:24.14-alpine AS production
@@ -21,7 +23,6 @@ FROM node:24.14-alpine AS production
 WORKDIR /app
 
 COPY --from=build /app/sharedb.planx.uk/ ./
-# ShareDB may not have a build step — it runs server.js directly
 
 ENV PORT=8000
 ENV NODE_ENV=production
