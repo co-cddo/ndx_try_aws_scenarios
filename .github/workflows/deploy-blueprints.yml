@@ -457,7 +457,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: cloudformation/isb-hub/package-lock.json
 
-      - uses: aws-actions/configure-aws-credentials@v6
+      - uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-deploy
           aws-region: us-west-2
@@ -475,7 +475,7 @@ jobs:
       # template (with absolute s3:// CodeUri values) to dist/template.yaml.
       # The hub CDK then uploads dist/template.yaml as the StackSet template.
       # No `sam build` needed: lambdas are pure Python with no native deps.
-      - uses: aws-actions/setup-sam@v2
+      - uses: aws-actions/setup-sam@v3
         with:
           use-installer: true
 
