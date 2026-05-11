@@ -1,28 +1,28 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 2: Log in to Minute AI - Minute AI Walkthrough"
-description: Access the Minute AI interface and explore the dashboard
+title: "Step 2: Open Minute AI - Minute AI Walkthrough"
+description: Open the Minute AI interface using your login link
 currentStep: 2
 totalSteps: 6
-timeEstimate: "2 minutes"
+timeEstimate: "1 minute"
 scenarioId: minute
 ---
 
 {#
-  Step 2: Log in to Minute AI
-  - Open the MinuteUrl in a new browser tab
-  - Enter the username and password from CloudFormation Outputs
+  Step 2: Open Minute AI
+  - Paste the MinuteLoginUrl in a new browser tab
+  - A session cookie is set automatically -- no dialog, no typing
   - Explore the Minute AI homepage with "New meeting" button
 #}
 
 {% set stepNumber = 2 %}
-{% set stepTitle = "Log in to Minute AI" %}
-{% set stepDescription = "Open Minute AI in your browser and log in with the credentials from CloudFormation." %}
-{% set timeEstimate = "2 minutes" %}
+{% set stepTitle = "Open Minute AI" %}
+{% set stepDescription = "Paste your MinuteLoginUrl into a new browser tab. It starts a 7-day session automatically." %}
+{% set timeEstimate = "1 minute" %}
 {% set expectedOutcomes = [
-  "You have opened the MinuteUrl in a new browser tab",
-  "You have logged in with BasicAuthUsername and BasicAuthPassword",
-  "You can see the Minute AI homepage with the New meeting button"
+  "You have opened the MinuteLoginUrl in a new browser tab",
+  "The Minute AI homepage has loaded without a login prompt",
+  "You can see the New meeting button"
 ] %}
 
 {% include "components/walkthrough-step.njk" %}
@@ -31,24 +31,19 @@ scenarioId: minute
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>
-    <strong>Open the MinuteUrl</strong>
+    <strong>Open the MinuteLoginUrl</strong>
     <p class="govuk-body">
-      Click the <strong>MinuteUrl</strong> link from CloudFormation Outputs, or paste it into a new browser tab.
+      Click the <strong>MinuteLoginUrl</strong> value from CloudFormation Outputs, or paste it into a new browser tab.
     </p>
-  </li>
-
-  <li>
-    <strong>Enter your credentials</strong>
     <p class="govuk-body">
-      When prompted with the browser's authentication dialog, enter the <strong>BasicAuthUsername</strong>
-      and <strong>BasicAuthPassword</strong> from the CloudFormation Outputs tab.
+      The URL ends in <code>?key=...</code>. The first time you open it, CloudFront sets a session cookie and removes the <code>?key=</code> from the address bar. There is no username or password prompt.
     </p>
   </li>
 
   <li>
     <strong>View the homepage</strong>
     <p class="govuk-body">
-      After logging in, you will see the Minute AI homepage.
+      The Minute AI homepage should load immediately. Your session lasts seven days; after that, open the MinuteLoginUrl again to start a new session.
     </p>
   </li>
 </ol>
@@ -56,7 +51,7 @@ scenarioId: minute
 <h3 class="govuk-heading-m">What you should see</h3>
 
 <p class="govuk-body">
-  After logging in, you should see:
+  After opening the link, you should see:
 </p>
 
 <ul class="govuk-list govuk-list--bullet">
@@ -72,7 +67,7 @@ scenarioId: minute
        alt="Minute AI homepage showing the dashboard with a New meeting button and clean modern interface"
        class="ndx-screenshot__image">
   <figcaption class="ndx-screenshot__caption govuk-body-s">
-    The Minute AI homepage after logging in -- click "New meeting" to get started
+    The Minute AI homepage after opening your login link &ndash; click "New meeting" to get started
   </figcaption>
 </figure>
 
@@ -98,7 +93,7 @@ scenarioId: minute
       If Minute AI does not load:
     </p>
     <ul class="govuk-list govuk-list--bullet">
-      <li>Wait 2 to 3 minutes after stack completion -- CloudFront may need time to propagate</li>
+      <li>Wait 2 to 3 minutes after stack completion &ndash; CloudFront may need time to propagate</li>
       <li>Check the CloudFormation "Events" tab for any errors</li>
       <li>Try refreshing the page</li>
       <li>Check you are using the correct URL from the Outputs tab</li>
@@ -109,18 +104,18 @@ scenarioId: minute
 <details class="govuk-details">
   <summary class="govuk-details__summary">
     <span class="govuk-details__summary-text">
-      Troubleshooting: Login not working
+      Troubleshooting: "Session link required" page
     </span>
   </summary>
   <div class="govuk-details__text">
     <p class="govuk-body">
-      If you cannot log in:
+      If you see a page saying <strong>"NDX:Try Minute &ndash; session link required"</strong>:
     </p>
     <ul class="govuk-list govuk-list--bullet">
-      <li>Double-check you copied the entire password (no trailing spaces)</li>
-      <li>Passwords are case-sensitive</li>
-      <li>Make sure you are using the BasicAuthUsername and BasicAuthPassword from Outputs</li>
-      <li>Try using a private/incognito window if cached credentials are interfering</li>
+      <li>You opened the <strong>MinuteUrl</strong> instead of the <strong>MinuteLoginUrl</strong>. Go back to the Outputs tab and copy the URL that ends in <code>?key=</code>.</li>
+      <li>Some chat clients and email clients strip <code>?key=</code> from links. Copy the URL directly from the CloudFormation Outputs tab, not from a forwarded message.</li>
+      <li>If your session has expired (7 days), open the MinuteLoginUrl again to start a new session.</li>
+      <li>The 401 page includes a direct link back to the CloudFormation Outputs tab for your stack.</li>
     </ul>
   </div>
 </details>

@@ -1,7 +1,7 @@
 ---
 layout: layouts/walkthrough.njk
-title: "Step 1: Get your credentials - Minute AI Walkthrough"
-description: Find your Minute AI URL and login credentials from CloudFormation
+title: "Step 1: Get your login link - Minute AI Walkthrough"
+description: Find your Minute AI login URL from CloudFormation Outputs
 currentStep: 1
 totalSteps: 6
 timeEstimate: "2 minutes"
@@ -9,20 +9,20 @@ scenarioId: minute
 ---
 
 {#
-  Step 1: Get your credentials
+  Step 1: Get your login link
   - Navigate to CloudFormation in AWS Console
   - Find the MinuteStack
   - Click the Outputs tab
-  - Copy MinuteUrl, BasicAuthUsername, BasicAuthPassword
+  - Copy MinuteLoginUrl
 #}
 
 {% set stepNumber = 1 %}
-{% set stepTitle = "Get your credentials" %}
-{% set stepDescription = "Navigate to CloudFormation in the AWS Console and copy your Minute AI URL and login credentials." %}
+{% set stepTitle = "Get your login link" %}
+{% set stepDescription = "Navigate to CloudFormation in the AWS Console and copy your Minute AI login link." %}
 {% set timeEstimate = "2 minutes" %}
 {% set expectedOutcomes = [
   "CloudFormation stack shows CREATE_COMPLETE status",
-  "You have copied the MinuteUrl, BasicAuthUsername, and BasicAuthPassword",
+  "You have copied the MinuteLoginUrl from the Outputs tab",
   "You know the CloudWatch Logs URL for monitoring"
 ] %}
 
@@ -35,7 +35,7 @@ scenarioId: minute
   or by searching for "CloudFormation" in the search bar.
 </p>
 
-<h3 class="govuk-heading-m">Finding your credentials</h3>
+<h3 class="govuk-heading-m">Finding your login link</h3>
 
 <ol class="govuk-list govuk-list--number govuk-list--spaced">
   <li>
@@ -88,17 +88,17 @@ scenarioId: minute
   </li>
 
   <li>
-    <strong>Copy these three values</strong>
+    <strong>Copy your login link</strong>
     <div class="ndx-credentials-list">
       <p class="govuk-body">
-        <strong>MinuteUrl:</strong> The URL to access Minute AI<br>
-        <code>https://[random-id].cloudfront.net</code>
+        <strong>MinuteLoginUrl:</strong> Your one-click login link. Paste it into a new browser tab to start a Minute AI session.<br>
+        <code>https://[random-id].cloudfront.net/?key=[token]</code>
       </p>
       <p class="govuk-body">
-        <strong>BasicAuthUsername:</strong> The username for login
+        The link sets a 7-day session cookie on first use, so you only need to open it once per week.
       </p>
-      <p class="govuk-body">
-        <strong>BasicAuthPassword:</strong> Auto-generated secure password
+      <p class="govuk-body govuk-body-s">
+        Also in the Outputs tab: <strong>MinuteUrl</strong> (the bare URL, works after the session cookie is set) and <strong>MinuteAuthToken</strong> (the raw token, in case you need to rebuild the link manually).
       </p>
     </div>
   </li>
@@ -107,17 +107,17 @@ scenarioId: minute
 {# Screenshot: CloudFormation Outputs tab #}
 <figure class="ndx-screenshot govuk-!-margin-top-4 govuk-!-margin-bottom-4">
   <img src="/assets/images/walkthroughs/minute/screenshots/cloudformation-outputs-desktop.png"
-       alt="AWS CloudFormation console showing the Outputs tab with MinuteUrl, BasicAuthUsername, BasicAuthPassword, CloudWatchLogsUrl, and DataBucketName values"
+       alt="AWS CloudFormation console showing the Outputs tab with MinuteUrl, MinuteLoginUrl, MinuteAuthToken, CloudWatchLogsUrl, and DataBucketName values"
        class="ndx-screenshot__image">
   <figcaption class="ndx-screenshot__caption govuk-body-s">
-    The CloudFormation Outputs tab shows your Minute AI URL and login credentials
+    The CloudFormation Outputs tab shows your Minute AI login link
   </figcaption>
 </figure>
 
 <div class="govuk-inset-text">
   <p class="govuk-body">
     <strong>Tip:</strong> If you deployed from the NDX:Try scenario page,
-    your credentials may also be shown in the Credentials Card on that page.
+    the login link may also be shown in the Credentials Card on that page.
   </p>
 </div>
 
