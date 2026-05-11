@@ -10,7 +10,7 @@ totalSteps: 6
 # Step-specific screenshots
 steps:
   - step: 1
-    title: "Get your credentials"
+    title: "Get your login link"
     screenshots:
       - id: cloudformation-stacks-list
         filename: cloudformation-stacks-list-desktop.png
@@ -21,18 +21,18 @@ steps:
 
       - id: cloudformation-outputs
         filename: cloudformation-outputs-desktop.png
-        alt: "CloudFormation Outputs tab showing MinuteUrl, BasicAuthUsername, BasicAuthPassword, CloudWatchLogsUrl, and DataBucketName values"
-        caption: "Copy the MinuteUrl, BasicAuthUsername, and BasicAuthPassword from the Outputs tab"
+        alt: "CloudFormation Outputs tab showing MinuteLoginUrl, MinuteUrl, MinuteAuthToken, CloudWatchLogsUrl, and DataBucketName values"
+        caption: "Copy the MinuteLoginUrl from the Outputs tab and paste it into a new browser tab"
         width: 1200
         height: 963
 
   - step: 2
-    title: "Log in to Minute AI"
+    title: "Open Minute AI"
     screenshots:
       - id: minute-homepage
         filename: minute-homepage-desktop.png
         alt: "Minute AI homepage showing the dashboard with a New meeting button and navigation sidebar"
-        caption: "The Minute AI homepage after logging in with your credentials"
+        caption: "The Minute AI homepage after opening your MinuteLoginUrl"
         width: 1200
         height: 963
 

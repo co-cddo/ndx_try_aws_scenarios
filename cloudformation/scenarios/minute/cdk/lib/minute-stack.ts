@@ -76,20 +76,20 @@ export class MinuteStack extends cdk.Stack {
     // Outputs
     // ==========================================================================
     new cdk.CfnOutput(this, 'MinuteUrl', {
-      description: 'URL to access Minute AI (HTTPS)',
+      description: 'URL to access Minute AI (HTTPS). Requires an active session; use MinuteLoginUrl first.',
       value: `https://${cdn.domainName}`,
       exportName: `${this.stackName}-MinuteUrl`,
     });
 
-    // Convenience: same URL with credentials embedded so you can paste it
-    // straight into a browser address bar instead of copy-pasting the
-    // username and password from the BasicAuth* outputs.
+    // Single shareable URL. The ?key=<token> is consumed by the CloudFront
+    // Function on first hit, which sets a 7-day HttpOnly cookie and redirects
+    // to the clean URL. Works with fetch() and without browser auth dialogs.
     new cdk.CfnOutput(this, 'MinuteLoginUrl', {
-      description: 'Minute AI URL with basic auth credentials embedded (paste into browser)',
-      value: `https://admin:${cdn.basicAuthPassword}@${cdn.domainName}`,
+      description: 'Paste this URL into your browser to start a Minute AI session (7-day cookie)',
+      value: `https://${cdn.domainName}/?key=${cdn.authToken}`,
     });
 
-new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
+    new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs URL',
       value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-minute')}`,
     });
@@ -99,14 +99,9 @@ new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       value: storage.dataBucket.bucketName,
     });
 
-    new cdk.CfnOutput(this, 'BasicAuthUsername', {
-      description: 'Basic auth username for Minute AI',
-      value: 'admin',
-    });
-
-    new cdk.CfnOutput(this, 'BasicAuthPassword', {
-      description: 'Basic auth password for Minute AI (generated at deploy time)',
-      value: cdn.basicAuthPassword,
+    new cdk.CfnOutput(this, 'MinuteAuthToken', {
+      description: 'Raw auth token for Minute AI (the ?key= value in MinuteLoginUrl). Redeploy the stack to rotate.',
+      value: cdn.authToken,
     });
   }
 
