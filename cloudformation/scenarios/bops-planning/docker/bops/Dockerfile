@@ -17,4 +17,4 @@
 #   cp scripts/seed_sample_data.rb bops-src/scripts/
 #   cp scripts/seed-entrypoint.sh bops-src/scripts/
 #   cp entrypoint.sh bops-src/
-#   docker build -f bops-src/Dockerfile.production -t bops:latest bops-src/
+#   docker build -f bops-src/Dockerfile.production -t bops-local bops-src/
