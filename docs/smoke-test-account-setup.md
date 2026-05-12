@@ -594,8 +594,13 @@ else
     --role-name "$DEPLOY_ROLE_NAME" \
     --assume-role-policy-document file:///tmp/deploy-role-trust.json \
     --description "Smoke-test deploy role; assumed by GitHub Actions via OIDC; managed by docs/smoke-test-account-setup.md" \
-    --max-session-duration 3600 \
+    --max-session-duration 21600 \
     --query 'Role.Arn' --output text)
+  # 21600s = 6 hours. The default 3600s (1h) expires mid-run for any
+  # smoke deploy that exceeds 1 hour (some scenarios on their own take
+  # 60+ min; all-demo nests 16 of them in parallel). OIDC credentials
+  # don't auto-refresh — once they expire, every subsequent AWS call
+  # in the workflow fails NoCredentials. 6h covers any realistic run.
   export DEPLOY_ROLE_ARN
   echo "Created role: $DEPLOY_ROLE_ARN"
 fi
