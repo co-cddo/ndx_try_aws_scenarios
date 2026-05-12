@@ -458,17 +458,44 @@ jobs:
           path: cloudformation/scenarios/planx/template.yaml
           retention-days: 1
 
-  # bops-planning synth job intentionally deferred to Phase 2b of the
-  # scenario-regression smoke-pack tech-spec. The current bops-planning CDK
-  # creates a LogGroup with RemovalPolicy.RETAIN (deliberate, comment in
-  # cloudformation/scenarios/bops-planning/cdk/lib/constructs/compute.ts:48
-  # cites debug-after-rollback). The existing synth-time lint rejects ANY
-  # DeletionPolicy: Retain. Phase 2b introduces a justification-aware
-  # retention lint that handles this case via Metadata.Justification on the
-  # resource, at which point the bops synth job can ship.
-  #
-  # Until then the bops-planning template is committed manually at
-  # cloudformation/scenarios/bops-planning/template.yaml.
+  synth-bops-planning:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Build and synth bops-planning CDK
+        working-directory: cloudformation/scenarios/bops-planning/cdk
+        run: |
+          npm install
+          npm run build
+          npx cdk synth
+
+      - name: Strip bootstrap cruft and write template
+        working-directory: cloudformation/scenarios/bops-planning/cdk
+        run: |
+          node -e "
+            const fs = require('fs');
+            const t = JSON.parse(fs.readFileSync('cdk.out/BopsPlanningStack.template.json', 'utf8'));
+            delete t.Parameters?.BootstrapVersion;
+            delete t.Resources?.CDKMetadata;
+            delete t.Rules?.CheckBootstrapVersion;
+            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
+            fs.writeFileSync('../template.yaml', content);
+            console.log('Wrote template.yaml (' + Buffer.byteLength(content) + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
+          "
+
+      - name: Retention-policy lint
+        run: ./scripts/lint-retention-policies.sh cloudformation/scenarios/bops-planning/template.yaml
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: bops-planning-template
+          path: cloudformation/scenarios/bops-planning/template.yaml
+          retention-days: 1
 
   synth-digital-planning-register:
     runs-on: ubuntu-latest
@@ -523,6 +550,37 @@ jobs:
           path: cloudformation/scenarios/digital-planning-register/template.yaml
           retention-days: 1
 
+  # Phase 2b: top-level retention-policy lint over the hand-authored CFN
+  # templates that don't go through any synth job (council-chatbot,
+  # foi-redaction, planning-ai, smart-car-park, text-to-speech,
+  # quicksight-dashboard, ai-contact-centre, all-demo). The lint script also
+  # detects oversize templates and AssetParameters / cdk-bootstrap residue.
+  lint-committed-templates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install yq (for real-YAML template parsing)
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Lint committed scenario templates
+        run: |
+          # Scenarios whose template.yaml is committed (not synthesized in CI).
+          # Synthesized scenarios are linted by their per-scenario synth job.
+          ./scripts/lint-retention-policies.sh \
+            cloudformation/scenarios/council-chatbot/template.yaml \
+            cloudformation/scenarios/foi-redaction/template.yaml \
+            cloudformation/scenarios/planning-ai/template.yaml \
+            cloudformation/scenarios/smart-car-park/template.yaml \
+            cloudformation/scenarios/text-to-speech/template.yaml \
+            cloudformation/scenarios/quicksight-dashboard/template.yaml \
+            cloudformation/scenarios/ai-contact-centre/template.yaml \
+            cloudformation/scenarios/all-demo/template.yaml
+
   deploy:
     needs:
       - synth-localgov-drupal
@@ -532,7 +590,9 @@ jobs:
       - synth-fixmystreet
       - synth-paperless-ngx
       - synth-planx
+      - synth-bops-planning
       - synth-digital-planning-register
+      - lint-committed-templates
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -584,6 +644,11 @@ jobs:
 
       - uses: actions/download-artifact@v8
         with:
+          name: bops-planning-template
+          path: cloudformation/scenarios/bops-planning
+
+      - uses: actions/download-artifact@v8
+        with:
           name: digital-planning-register-template
           path: cloudformation/scenarios/digital-planning-register
 
@@ -609,18 +674,16 @@ jobs:
           aws s3 sync cloudformation/scenarios/simply-readable/website-build/ \
             "s3://${BUCKET}/scenarios/simply-readable/website-build/" --region us-east-1 --delete
 
-      # Non-ISB scenarios (planx, digital-planning-register) deploy via
-      # direct CFN, NOT via the isb-hub StackSet pipeline. Upload their
-      # templates to the same blueprints bucket so the all-demo nested-stack
-      # template can reference them by URL. bops-planning's synth job is
-      # deferred to Phase 2b of the smoke-pack tech-spec (see comment above
-      # the deferred synth slot); it still ships its template via manual PR
-      # for now and gets uploaded by the bops-planning row below using the
-      # committed file.
-      - name: Upload non-ISB scenario templates to S3
+      # The non-ISB scenarios (planx, bops-planning, digital-planning-register)
+      # and the orphan-import scenarios (minute, fixmystreet, paperless-ngx) do
+      # NOT go through the isb-hub StackSet pipeline. Upload their synthed
+      # templates directly to the blueprints bucket so the all-demo nested
+      # stacks can reference them by URL via the scenarios/<name>/template.yaml
+      # path convention.
+      - name: Upload non-StackSet scenario templates to S3
         run: |
           BUCKET=ndx-try-isb-blueprints-568672915267
-          for SCENARIO in planx digital-planning-register bops-planning; do
+          for SCENARIO in planx digital-planning-register bops-planning minute fixmystreet paperless-ngx; do
             aws s3 cp "cloudformation/scenarios/${SCENARIO}/template.yaml" \
               "s3://${BUCKET}/scenarios/${SCENARIO}/template.yaml" \
               --region us-east-1
