@@ -14,6 +14,9 @@ on:
       - 'cloudformation/scenarios/fixmystreet/cdk/**'
       - 'cloudformation/scenarios/paperless-ngx/cdk/**'
       - 'cloudformation/scenarios/ai-contact-centre/**'
+      - 'cloudformation/scenarios/planx/cdk/**'
+      - 'cloudformation/scenarios/bops-planning/cdk/**'
+      - 'cloudformation/scenarios/digital-planning-register/cdk/**'
       - 'cloudformation/isb-hub/**'
   workflow_dispatch:
 
@@ -402,8 +405,134 @@ jobs:
           path: cloudformation/scenarios/paperless-ngx/template.yaml
           retention-days: 1
 
+  synth-planx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Build and synth planx CDK
+        working-directory: cloudformation/scenarios/planx/cdk
+        run: |
+          npm install
+          npm run build
+          npx cdk synth
+
+      - name: Strip bootstrap cruft and validate template
+        working-directory: cloudformation/scenarios/planx/cdk
+        run: |
+          node -e "
+            const fs = require('fs');
+            const t = JSON.parse(fs.readFileSync('cdk.out/PlanxStack.template.json', 'utf8'));
+            delete t.Parameters?.BootstrapVersion;
+            delete t.Resources?.CDKMetadata;
+            delete t.Rules?.CheckBootstrapVersion;
+            const str = JSON.stringify(t);
+            const errors = [];
+            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
+              errors.push('Template contains CDK bootstrap/asset dependencies');
+            }
+            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
+            if (deletionPolicies) {
+              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
+            }
+            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
+            if (size > 400000) {
+              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
+            }
+            if (errors.length > 0) {
+              errors.forEach(e => console.error('ERROR: ' + e));
+              process.exit(1);
+            }
+            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
+            fs.writeFileSync('../template.yaml', content);
+            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
+          "
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: planx-template
+          path: cloudformation/scenarios/planx/template.yaml
+          retention-days: 1
+
+  # bops-planning synth job intentionally deferred to Phase 2b of the
+  # scenario-regression smoke-pack tech-spec. The current bops-planning CDK
+  # creates a LogGroup with RemovalPolicy.RETAIN (deliberate, comment in
+  # cloudformation/scenarios/bops-planning/cdk/lib/constructs/compute.ts:48
+  # cites debug-after-rollback). The existing synth-time lint rejects ANY
+  # DeletionPolicy: Retain. Phase 2b introduces a justification-aware
+  # retention lint that handles this case via Metadata.Justification on the
+  # resource, at which point the bops synth job can ship.
+  #
+  # Until then the bops-planning template is committed manually at
+  # cloudformation/scenarios/bops-planning/template.yaml.
+
+  synth-digital-planning-register:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Build and synth digital-planning-register CDK
+        working-directory: cloudformation/scenarios/digital-planning-register/cdk
+        run: |
+          npm install
+          npm run build
+          npx cdk synth
+
+      - name: Strip bootstrap cruft and validate template
+        working-directory: cloudformation/scenarios/digital-planning-register/cdk
+        run: |
+          node -e "
+            const fs = require('fs');
+            const t = JSON.parse(fs.readFileSync('cdk.out/DigitalPlanningRegisterStack.template.json', 'utf8'));
+            delete t.Parameters?.BootstrapVersion;
+            delete t.Resources?.CDKMetadata;
+            delete t.Rules?.CheckBootstrapVersion;
+            const str = JSON.stringify(t);
+            const errors = [];
+            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
+              errors.push('Template contains CDK bootstrap/asset dependencies');
+            }
+            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
+            if (deletionPolicies) {
+              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
+            }
+            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
+            if (size > 400000) {
+              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
+            }
+            if (errors.length > 0) {
+              errors.forEach(e => console.error('ERROR: ' + e));
+              process.exit(1);
+            }
+            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
+            fs.writeFileSync('../template.yaml', content);
+            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
+          "
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: digital-planning-register-template
+          path: cloudformation/scenarios/digital-planning-register/template.yaml
+          retention-days: 1
+
   deploy:
-    needs: [synth-localgov-drupal, synth-localgov-ims, synth-simply-readable, synth-minute, synth-fixmystreet, synth-paperless-ngx]
+    needs:
+      - synth-localgov-drupal
+      - synth-localgov-ims
+      - synth-simply-readable
+      - synth-minute
+      - synth-fixmystreet
+      - synth-paperless-ngx
+      - synth-planx
+      - synth-digital-planning-register
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -448,6 +577,16 @@ jobs:
           name: simply-readable-website
           path: cloudformation/scenarios/simply-readable/website-build
 
+      - uses: actions/download-artifact@v8
+        with:
+          name: planx-template
+          path: cloudformation/scenarios/planx
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: digital-planning-register-template
+          path: cloudformation/scenarios/digital-planning-register
+
       - name: Build planning-ai template (inject PDF + text into template)
         run: python3 cloudformation/scenarios/planning-ai/build-template.py -o cloudformation/scenarios/planning-ai/template.yaml
 
@@ -470,6 +609,23 @@ jobs:
           aws s3 sync cloudformation/scenarios/simply-readable/website-build/ \
             "s3://${BUCKET}/scenarios/simply-readable/website-build/" --region us-east-1 --delete
 
+      # Non-ISB scenarios (planx, digital-planning-register) deploy via
+      # direct CFN, NOT via the isb-hub StackSet pipeline. Upload their
+      # templates to the same blueprints bucket so the all-demo nested-stack
+      # template can reference them by URL. bops-planning's synth job is
+      # deferred to Phase 2b of the smoke-pack tech-spec (see comment above
+      # the deferred synth slot); it still ships its template via manual PR
+      # for now and gets uploaded by the bops-planning row below using the
+      # committed file.
+      - name: Upload non-ISB scenario templates to S3
+        run: |
+          BUCKET=ndx-try-isb-blueprints-568672915267
+          for SCENARIO in planx digital-planning-register bops-planning; do
+            aws s3 cp "cloudformation/scenarios/${SCENARIO}/template.yaml" \
+              "s3://${BUCKET}/scenarios/${SCENARIO}/template.yaml" \
+              --region us-east-1
+          done
+
       # AI Contact Centre: SAM-style scenario. `sam package` zips each Lambda
       # CodeUri, uploads zips to the blueprints bucket, and writes a packaged
       # template (with absolute s3:// CodeUri values) to dist/template.yaml.
@@ -489,6 +645,26 @@ jobs:
             --s3-bucket ndx-try-isb-blueprints-568672915267 \
             --s3-prefix scenarios/ai-contact-centre/assets \
             --region us-east-1
+
+      # Phase 2a / T2a.5: verify the packaged template's CodeUri values all
+      # target the blueprints bucket. SAM's default --s3-bucket would write
+      # CodeUri values pointing at aws-sam-cli-managed-default-samclisourcebucket-*;
+      # the deploy role only has read on the blueprints bucket, so a packaging
+      # regression that drops --s3-bucket would silently produce a template
+      # the smoke-test account cannot deploy. Fail the build early instead.
+      - name: Verify AI Contact Centre packaged CodeUri targets the blueprints bucket
+        working-directory: cloudformation/scenarios/ai-contact-centre
+        run: |
+          BAD=$(grep -oE 's3://[a-z0-9.-]+' dist/template.yaml | sort -u | grep -v 'ndx-try-isb-blueprints-568672915267' || true)
+          if [ -n "$BAD" ]; then
+            echo "ERROR: packaged template references non-blueprints buckets:"
+            echo "$BAD"
+            echo ""
+            echo "Re-check the sam package command's --s3-bucket flag."
+            exit 1
+          fi
+          COUNT=$(grep -c 's3://ndx-try-isb-blueprints-568672915267' dist/template.yaml || true)
+          echo "Verified $COUNT CodeUri references point at the blueprints bucket"
 
       - run: npm ci
         working-directory: cloudformation/isb-hub
