@@ -11,6 +11,8 @@
   "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
     "labels": ["security", "security-priority"],
+    "groupName": "security-priority",
+    "schedule": ["at any time"],
     "minimumReleaseAge": null
   },
   "rangeStrategy": "bump",
@@ -83,24 +85,20 @@
       "schedule": ["before 09:00 on monday"]
     },
     {
-      "description": "GitHub Actions — workflow action references. Weekly batched; action bumps rarely break.",
+      "description": "GitHub Actions — workflow action references. Weekly batched; action bumps rarely break. pinDigests scoped to OUR workflows; third-party actions in docker-build scripts (renovatebot/github-action etc.) keep their explicit digest pins because the workflow author already chose them.",
       "matchManagers": ["github-actions"],
+      "matchFileNames": [".github/workflows/*"],
       "groupName": "github-actions",
       "schedule": ["before 09:00 on monday"]
     },
     {
-      "description": "Pin tag-only docker references in workflow files to digest. Required by the spec's pinning strategy ('every pin must carry a Renovate-trackable tag alongside the digest', conversely actions referenced without digest are not Renovate-trackable).",
+      "description": "Pin official actions/* and aws-actions/* references in workflows to digest. Other action sources (community / vendor-specific) keep their existing pin shape — pinning everything caused a firehose in past adoption.",
       "matchManagers": ["github-actions"],
+      "matchPackagePatterns": [
+        "^actions/",
+        "^aws-actions/"
+      ],
       "pinDigests": true
-    },
-    {
-      "description": "CVE response — never batch. Highest priority; surfaces via osvVulnerabilityAlerts.",
-      "matchPackagePatterns": [".*"],
-      "matchUpdateTypes": ["patch", "minor"],
-      "vulnerabilityAlerts": {
-        "groupName": "security-priority",
-        "schedule": ["at any time"]
-      }
     },
     {
       "description": "Python pip Lambda layer deps — batched weekly with npm-dev cadence.",
@@ -109,7 +107,7 @@
       "schedule": ["before 09:00 on monday"]
     }
   ],
-  "prConcurrentLimit": 10,
+  "prConcurrentLimit": 6,
   "prHourlyLimit": 4,
-  "branchConcurrentLimit": 20
+  "branchConcurrentLimit": 12
 }
