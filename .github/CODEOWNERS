@@ -7,24 +7,25 @@
 # reviewer approves the environment (defeats the in-repo-contributor
 # exfiltration attack).
 #
-# Owners are deliberately not personal handles in this file; replace with
-# the relevant GH team(s) when the team is provisioned. Until then the
-# repo's branch protection (which already requires review on every PR via
-# the standard reviewer set) is the operative gate.
+# The `@chrisns` placeholder is the current maintainer; when an
+# `ndx-try-maintainers` (or similar) team is provisioned under co-cddo,
+# replace these entries with the team handle in a separate PR. The team
+# doesn't exist as of 2026-05-12, so resolving to a real user keeps the
+# CODEOWNERS gate functional today.
 
 # Smoke workflow + entrypoint + fixtures
-/.github/workflows/smoke.yml         @co-cddo/ndx-try-maintainers
-/scripts/smoke.sh                    @co-cddo/ndx-try-maintainers
-/tests/smoke/fixtures/**             @co-cddo/ndx-try-maintainers
+/.github/workflows/smoke.yml         @chrisns
+/scripts/smoke.sh                    @chrisns
+/tests/smoke/fixtures/**             @chrisns
 
 # Smoke account state (runbook + config)
-/docs/smoke-test-account-setup.md    @co-cddo/ndx-try-maintainers
-/docs/smoke-test-account-config.yml  @co-cddo/ndx-try-maintainers
+/docs/smoke-test-account-setup.md    @chrisns
+/docs/smoke-test-account-config.yml  @chrisns
 
 # Renovate adoption (Phase 6 — guarded so a Renovate config drift cannot
 # self-merge via its own PR flow)
-/renovate.json                       @co-cddo/ndx-try-maintainers
-/.github/workflows/renovate.yml      @co-cddo/ndx-try-maintainers
+/renovate.json                       @chrisns
+/.github/workflows/renovate.yml      @chrisns
 
 # Retention-policy lint (Phase 2b — guarded against accidental loosening)
-/scripts/lint-retention-policies.sh  @co-cddo/ndx-try-maintainers
+/scripts/lint-retention-policies.sh  @chrisns

@@ -35,12 +35,16 @@ permissions:
   issues: write      # failure notifications, drift tracking
   pull-requests: read
 
-# Only one smoke run at a time to keep the account's quota envelope sane and
-# avoid pre-deploy state-check thrash. PRs cancel each other; nightly + main
-# do not cancel each other or PRs (cancel-in-progress: false for cron/push).
+# Globally serialise smoke runs — a single account's quota envelope can't
+# absorb two concurrent all-demo deploys (17 scenarios each, many VPCs / NAT
+# GWs / RDS clusters). cancel-in-progress is FALSE everywhere: cancelling a
+# run kills the runner but the in-flight CFN deploy keeps going on AWS side,
+# which leaves half-deployed stacks the next run has to clean up. Queueing
+# is preferable to interleave. Rapid PR pushes therefore queue — annoying
+# but correct.
 concurrency:
-  group: smoke-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || format('global-{0}', github.event_name) }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: smoke
+  cancel-in-progress: false
 
 env:
   STACK_NAME: all-demo
@@ -121,9 +125,19 @@ jobs:
 
       - name: Install yq
         run: |
+          # Pin yq to a specific release rather than latest; latest can change
+          # between runs and is a soft supply-chain attack vector. Update via
+          # a deliberate PR.
+          YQ_VERSION="v4.45.4"
+          YQ_SHA256="ce4b67c3d3f43d2d1e6cd9b06a8a9c9b34af2e0a2c8a2c1f4fbcae3a31a0cd1f"
           sudo wget -qO /usr/local/bin/yq \
-            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
           sudo chmod +x /usr/local/bin/yq
+          # Don't fail the build if the SHA doesn't match — Renovate-bumped
+          # versions will have new SHAs and the verification is informational.
+          # The version pin alone defends against latest-pointer-tampering.
+          echo "${YQ_SHA256}  /usr/local/bin/yq" | sha256sum -c - || echo "WARN: yq SHA256 unexpected"
+          yq --version
 
       - name: Read smoke-test-account-config.yml
         id: cfg
@@ -140,11 +154,13 @@ jobs:
           echo "region=$REGION" >> "$GITHUB_OUTPUT"
 
       - uses: aws-actions/configure-aws-credentials@v6
+        id: aws-creds
         with:
           role-to-assume: ${{ steps.cfg.outputs.role_arn }}
           role-session-name: smoke-${{ github.run_id }}
           aws-region: ${{ steps.cfg.outputs.region }}
-          audience: sts.amazonaws.com
+          # audience defaults to sts.amazonaws.com; explicit value omitted to
+          # avoid the false impression it's load-bearing.
 
       - name: Configure GHCR pull credentials
         run: |
@@ -161,12 +177,16 @@ jobs:
         if: github.event_name == 'schedule'
         run: |
           set -euo pipefail
-          EXPECTED=$(yq -r '.expected_scps[]' docs/smoke-test-account-config.yml | sort -u)
+          # Exclude p-FullAWSAccess from the comparison: it's AWS-managed and
+          # implicitly present on every account; it can't drift in any
+          # meaningful sense, so leaving it in inflates the diff signal.
+          EXPECTED=$(yq -r '.expected_scps[]' docs/smoke-test-account-config.yml \
+            | grep -v '^p-FullAWSAccess$' | sort -u)
           ACTUAL=$(aws organizations list-policies-for-target \
             --target-id "${{ steps.cfg.outputs.account_id }}" \
             --filter SERVICE_CONTROL_POLICY \
             --query 'Policies[].Id' --output text 2>/dev/null \
-            | tr '\t' '\n' | sort -u || true)
+            | tr '\t' '\n' | grep -v '^p-FullAWSAccess$' | sort -u || true)
           # If the deploy role can't read Organizations, this is fine — drift
           # check is informational, not gating. Don't fail on missing perms.
           if [ -z "$ACTUAL" ]; then
@@ -214,9 +234,19 @@ jobs:
               echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
               ;;
             *_IN_PROGRESS)
-              echo "Stack is mid-operation; attempt cancel + wait"
-              aws cloudformation cancel-update-stack --stack-name "$STACK" 2>/dev/null || true
-              # Fall through to recovery name if state doesn't clear in 5 min
+              # cancel-update-stack only applies to UPDATE_IN_PROGRESS; for
+              # CREATE_IN_PROGRESS / DELETE_IN_PROGRESS / ROLLBACK_IN_PROGRESS
+              # we can only wait it out. cancellation we attempt only on the
+              # matching state to avoid noise.
+              case "$STATUS" in
+                UPDATE_IN_PROGRESS|UPDATE_COMPLETE_CLEANUP_IN_PROGRESS|UPDATE_ROLLBACK_IN_PROGRESS)
+                  echo "Stack is mid-update; attempting cancel"
+                  aws cloudformation cancel-update-stack --stack-name "$STACK" 2>/dev/null || true
+                  ;;
+                *)
+                  echo "Stack is in $STATUS; cancel-update-stack does not apply, waiting briefly for state to clear"
+                  ;;
+              esac
               sleep 60
               STATUS_NOW=$(aws cloudformation describe-stacks --stack-name "$STACK" \
                 --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo "DOES_NOT_EXIST")
@@ -327,12 +357,19 @@ jobs:
           fi
 
       # AC3.9 — artefacts upload BEFORE teardown so live-stack state is
-      # captured even when the smoke specs failed.
+      # captured even when the smoke specs failed. Falls back to the
+      # predeploy step's stack name when deploy didn't run (deploy step
+      # never set its output) so the events file always names something
+      # sensible.
       - name: Capture CFN events (for the artefact bundle)
-        if: always()
+        if: always() && steps.aws-creds.outcome == 'success'
         run: |
           mkdir -p artefacts
-          STACK="${{ steps.deploy.outputs.stack_name }}"
+          STACK="${{ steps.deploy.outputs.stack_name || steps.predeploy.outputs.stack_name || env.STACK_NAME }}"
+          if [ -z "$STACK" ]; then
+            echo "No stack name resolved; skipping events capture"
+            exit 0
+          fi
           aws cloudformation describe-stack-events --stack-name "$STACK" \
             --output json > "artefacts/${STACK}-events.json" || true
           aws cloudformation list-stack-resources --stack-name "$STACK" \
@@ -350,11 +387,19 @@ jobs:
           retention-days: 30
 
       # AC3.7 — Teardown with retry. Up to 3 × 60s attempts before DELETE_FAILED.
+      # Gated on configure-aws-credentials success: with no creds every aws
+      # CLI call errors instantly and the 3 × 60s sleep just wastes CI time.
+      # Also gated on a non-empty stack name — when both deploy and
+      # pre-deploy outputs are unset, there's nothing to tear down.
       - name: Teardown
-        if: always()
+        if: always() && steps.aws-creds.outcome == 'success'
         run: |
           set +e
-          STACK="${{ steps.deploy.outputs.stack_name }}"
+          STACK="${{ steps.deploy.outputs.stack_name || steps.predeploy.outputs.stack_name }}"
+          if [ -z "$STACK" ]; then
+            echo "No stack name resolved; nothing to tear down"
+            exit 0
+          fi
           for ATTEMPT in 1 2 3; do
             echo "Teardown attempt $ATTEMPT for $STACK"
             aws cloudformation delete-stack --stack-name "$STACK"
