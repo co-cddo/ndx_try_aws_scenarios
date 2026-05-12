@@ -44,20 +44,16 @@
 
 # The 12-digit AWS account ID returned by `aws organizations create-account`
 # in Step 4 of the runbook.
-smoke_test_account_id: "000000000000"
-
+smoke_test_account_id: "464453619983"
 # The ARN of the GitHub Actions deploy role created in Step 10 of the runbook.
 # Name must start with InnovationSandbox-ndx-* (Restrictions SCP requirement).
-smoke_test_deploy_role_arn: "arn:aws:iam::000000000000:role/InnovationSandbox-ndx-SmokeTestDeployRole"
-
+smoke_test_deploy_role_arn: "arn:aws:iam::464453619983:role/InnovationSandbox-ndx-SmokeTestDeployRole"
 # Region for the smoke account and its deploys. us-east-1 per the global
 # CLAUDE.md constraint and ADR-1 of the tech-spec.
 smoke_test_region: "us-east-1"
-
 # The OU containing the smoke account. Set by Step 3 (or by Step 7-fallback
 # if the ProtectISB canary failed).
-smoke_test_ou_id: "ou-xxxx-xxxxxxxx"
-
+smoke_test_ou_id: "r-2laj"
 # Records which placement branch the runbook took:
 #   - "child-of-sandboxOu"                    primary branch; SCP inheritance
 #                                             via sandboxOu's four parent SCPs
@@ -67,15 +63,13 @@ smoke_test_ou_id: "ou-xxxx-xxxxxxxx"
 #                                             Runbook records a 6-month review
 #                                             cadence via the scp-fallback-revisit
 #                                             issue.
-smoke_test_ou_placement_branch: "child-of-sandboxOu"
-
+smoke_test_ou_placement_branch: "child-of-root-with-selective-scps"
 # --- Organizations context ---------------------------------------------------
 
 # The sandboxOu ID discovered in Step 1 of the runbook. Stored here so the
 # nightly drift check has a stable reference for "parent OU we are inheriting
 # from" even if the ISB display name changes.
-sandbox_ou_id: "ou-yyyy-yyyyyyyy"
-
+sandbox_ou_id: "ou-2laj-4dyae1oa"
 # The SCP policy IDs attached to sandboxOu at setup time. The nightly drift
 # check compares live state to this list; mismatch opens an issue tagged
 # `scp-drift`. Order does not matter; sets are compared.
@@ -84,19 +78,16 @@ sandbox_ou_id: "ou-yyyy-yyyyyyyy"
 # LimitRegions). If the count differs from 4, ISB may have been upgraded with
 # additional policies; investigate before merging the diff.
 expected_scps:
-  - "p-xxxxxxxx"
-  - "p-xxxxxxxx"
-  - "p-xxxxxxxx"
-  - "p-xxxxxxxx"
-
+  - p-6tw8eixp
+  - p-7pd0szg9
+  - p-FullAWSAccess
 # --- Provenance --------------------------------------------------------------
 
 # ISO date the runbook was last executed end-to-end. Populated by Step 15.
-setup_date: "1970-01-01"
-
+setup_date: "2026-05-12"
 # Commit SHA of docs/smoke-test-account-setup.md at the time of setup.
 # Populated by Step 15 via:
 #   yq -i ".runbook_version = \"$(git log -1 --pretty=%H -- docs/smoke-test-account-setup.md)\"" $CONFIG_FILE
 # Re-running the runbook updates this field, so a diff in `git log -p` against
 # this file is the audit trail of when the procedure was last verified end-to-end.
-runbook_version: "0000000000000000000000000000000000000000"
+runbook_version: "c8cead25dbc8c6ea4e3fc1381da57bd7251c7032"
