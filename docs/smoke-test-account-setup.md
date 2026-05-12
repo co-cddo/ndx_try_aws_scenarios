@@ -433,49 +433,43 @@ If `CANARY_RESULT=fail`: continue to Step 7-fallback.
 ### Step 7-fallback: ProtectISB deadlock → move to root with selective SCPs
 
 This branch is taken ONLY if the Step 7 canary failed. The account moves out from
-under ProtectISB (which lives at `sandboxOu`) and re-attaches the other three SCPs
-directly to the OU. We give up ProtectISB-driven faithfulness in exchange for being
-able to create our deploy role.
+under ProtectISB (which lives at `sandboxOu`) and re-attaches a SELECTIVE subset
+of the other SCPs directly to the account. We give up ProtectISB-driven
+faithfulness in exchange for being able to create our deploy role.
+
+**Critical: do NOT attach `InnovationSandboxAwsNukeSupportedServices`** (or any
+other NotAction-Deny SCP that doesn't explicitly allow `sts:*`). That SCP's
+NotAction allow-list does not include `sts:*`, so attaching it blocks
+`sts:AssumeRoleWithWebIdentity` — which is the very call GitHub Actions makes
+to assume the deploy role. The smoke pack uses CFN delete + retention lint
+(ADR-4), not aws-nuke, so AwsNukeSupportedServices serves no purpose here.
 
 ```bash
-# Move the OU itself out from under sandboxOu (back to root)
+# Move the account out from under sandboxOu (back to root)
 aws organizations move-account \
   --account-id "$SMOKE_ACCOUNT_ID" \
   --source-parent-id "$SMOKE_OU_ID" \
   --destination-parent-id "$ROOT_ID" \
   --profile "$ORG_PROFILE"
 
-# Read the per-policy names so we can pick Restrictions, LimitRegions, AwsNukeSupportedServices
-# (skipping ProtectISB)
-aws organizations list-policies-for-target \
-  --target-id "$SANDBOX_OU_ID" \
-  --filter SERVICE_CONTROL_POLICY \
-  --profile "$ORG_PROFILE" \
-  --output table
-
-# Identify the three policy IDs that are NOT ProtectISB. ProtectISB has a name
-# containing "ProtectISB" or "Protect" depending on the ISB version; read the
-# policy bodies if the name is ambiguous:
-for ID in $SCP_IDS; do
-  NAME=$(aws organizations describe-policy \
-    --policy-id "$ID" \
-    --profile "$ORG_PROFILE" \
-    --query 'Policy.PolicySummary.Name' --output text)
-  echo "$ID  $NAME"
-done
-
-# Attach the non-ProtectISB SCPs directly to the smoke account (or its now-root-level OU)
-# Replace the IDs below with the three you identified.
-for ID in <Restrictions-id> <LimitRegions-id> <AwsNukeSupportedServices-id>; do
-  aws organizations attach-policy \
-    --policy-id "$ID" \
-    --target-id "$SMOKE_ACCOUNT_ID" \
-    --profile "$ORG_PROFILE"
-done
+# Attach Restrictions only. AwsNukeSupportedServices is deliberately excluded
+# (blocks sts:AssumeRoleWithWebIdentity). Replace the ID below with your
+# Restrictions SCP ID (capture from Step 2's output).
+aws organizations attach-policy \
+  --policy-id "<Restrictions-id>" \
+  --target-id "$SMOKE_ACCOUNT_ID" \
+  --profile "$ORG_PROFILE"
 
 # Update the config file to record the fallback
 yq -i ".smoke_test_ou_placement_branch = \"child-of-root-with-selective-scps\"" "$CONFIG_FILE"
 ```
+
+**SCP-attachment guidance:** before attaching ANY SCP directly to the smoke
+account, inspect its policy body. If it's a `Deny` on `NotAction: [...]`
+(i.e., allows only the listed services), confirm `sts:*` (or at least
+`sts:AssumeRoleWithWebIdentity`) is in the allow-list. If not, skip the
+attachment. The recommended set is **Restrictions only**; other SCPs may add
+value but each must be verified against this rule.
 
 **File a tracking issue immediately**: open a GitHub issue tagged
 `scp-fallback-revisit` with title `Smoke-test account uses ProtectISB fallback
@@ -551,9 +545,22 @@ aws iam delete-open-id-connect-provider --open-id-connect-provider-arn "$OIDC_PR
 
 ### Step 10: Create the deploy role with trust policy
 
-The trust policy is the spec's belt-and-braces shape: `repo:co-cddo/ndx_try_aws_scenarios:*`
-on `sub` with an additional `repository_owner=co-cddo` claim to defeat
-`pull_request_target` misuse.
+The trust policy uses the sub-pattern `repo:co-cddo/ndx_try_aws_scenarios:*` to
+restrict to this exact repo. The spec originally called for an additional
+`repository_owner=co-cddo` claim condition as belt-and-braces against
+`pull_request_target` misuse, but that condition is **omitted here**: at the
+time of authoring (2026-05), GitHub's OIDC token issued by `core.getIDToken()`
+does not produce a `repository_owner` claim that AWS surfaces under
+`token.actions.githubusercontent.com:repository_owner`, so adding the
+condition causes `sts:AssumeRoleWithWebIdentity` to fail with `Not authorized
+to perform sts:AssumeRoleWithWebIdentity` (the condition never matches because
+the claim value is null).
+
+The remaining defences are: (a) the sub-pattern is repo-locked, (b) GitHub's
+documented behaviour is that `pull_request` from forks does NOT pass secrets
+or OIDC, (c) the `smoke-test-deploy` GitHub deployment environment requires
+CODEOWNERS approval for non-main refs. If GitHub later starts including
+`repository_owner` reliably, re-add the condition.
 
 ```bash
 cat > /tmp/deploy-role-trust.json <<EOF
@@ -565,8 +572,7 @@ cat > /tmp/deploy-role-trust.json <<EOF
     "Action": "sts:AssumeRoleWithWebIdentity",
     "Condition": {
       "StringEquals": {
-        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-        "token.actions.githubusercontent.com:repository_owner": "co-cddo"
+        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
       },
       "StringLike": {
         "token.actions.githubusercontent.com:sub": "repo:${GITHUB_REPO}:*"
@@ -1102,7 +1108,9 @@ aws iam get-open-id-connect-provider \
 
 ```bash
 aws iam get-role --role-name "$DEPLOY_ROLE_NAME"
-# AssumeRolePolicyDocument must contain repository_owner=co-cddo
+# AssumeRolePolicyDocument must contain sub=repo:co-cddo/ndx_try_aws_scenarios:*
+# and aud=sts.amazonaws.com. See Step 10 for why repository_owner is NOT a
+# condition.
 
 aws iam get-role-policy --role-name "$DEPLOY_ROLE_NAME" --policy-name SmokeTestDeployInline | jq '.PolicyDocument'
 # Compare to /tmp/deploy-role-policy.json from Step 11 (or to the runbook source)

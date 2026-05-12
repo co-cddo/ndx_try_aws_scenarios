@@ -79,7 +79,6 @@ sandbox_ou_id: "ou-2laj-4dyae1oa"
 # additional policies; investigate before merging the diff.
 expected_scps:
   - p-6tw8eixp
-  - p-7pd0szg9
   - p-FullAWSAccess
 # --- Provenance --------------------------------------------------------------
 
@@ -90,4 +89,4 @@ setup_date: "2026-05-12"
 #   yq -i ".runbook_version = \"$(git log -1 --pretty=%H -- docs/smoke-test-account-setup.md)\"" $CONFIG_FILE
 # Re-running the runbook updates this field, so a diff in `git log -p` against
 # this file is the audit trail of when the procedure was last verified end-to-end.
-runbook_version: "c8cead25dbc8c6ea4e3fc1381da57bd7251c7032"
+runbook_version: "11d96763ef749ba81ef02a9704ec66582a944254"
