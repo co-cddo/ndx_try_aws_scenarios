@@ -1,0 +1,115 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits"
+  ],
+  "timezone": "Europe/London",
+  "platform": "github",
+  "labels": ["renovate"],
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "labels": ["security", "security-priority"],
+    "minimumReleaseAge": null
+  },
+  "rangeStrategy": "bump",
+  "configMigration": true,
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/cdk.out/**",
+    "**/.aws-sam/**",
+    "**/dist/**",
+    "**/.upstream/**"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Pin GHCR + docker.io image references in CDK TypeScript and raw CFN templates. Renovate's built-in docker manager does not cover ecs.ContainerImage.fromRegistry() string literals; this manager does.",
+      "fileMatch": [
+        "^cloudformation/scenarios/.*\\.(ts|yaml|yml|json)$"
+      ],
+      "matchStrings": [
+        "(?<depName>(?:ghcr\\.io|docker\\.io)/[a-z0-9._/-]+):(?<currentValue>[a-z0-9.\\-]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Pin discipline: NEVER replace a digest with a bare tag; updates must carry both.",
+      "matchCustomManagers": ["custom.regex"],
+      "pinDigests": true
+    },
+    {
+      "description": "Own GHCR images — one PR per scenario; immediate when an image bumps. Smoke runs scoped to that scenario give fast feedback.",
+      "groupName": "scenario-{{packageName}}",
+      "matchCustomManagers": ["custom.regex"],
+      "matchPackagePatterns": [
+        "^ghcr\\.io/co-cddo/ndx_try_aws_scenarios-"
+      ],
+      "schedule": ["at any time"]
+    },
+    {
+      "description": "Upstream container deps (tika, paperless-ngx, gotenberg). Weekly grouped per image to keep blast radius small.",
+      "groupName": "upstream-{{packageName}}",
+      "matchCustomManagers": ["custom.regex"],
+      "matchPackagePatterns": [
+        "^docker\\.io/apache/tika",
+        "^docker\\.io/gotenberg/gotenberg",
+        "^ghcr\\.io/paperless-ngx/paperless-ngx"
+      ],
+      "schedule": ["before 09:00 on monday"]
+    },
+    {
+      "description": "npm dev deps — weekly batched. Low-risk; noise control.",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "groupName": "npm-dev",
+      "schedule": ["before 09:00 on monday"]
+    },
+    {
+      "description": "npm prod deps — weekly batched. Higher risk; smoke gates the merge.",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "groupName": "npm-prod",
+      "schedule": ["before 09:00 on monday"]
+    },
+    {
+      "description": "Drupal composer deps. Same cadence as npm-prod.",
+      "matchManagers": ["composer"],
+      "groupName": "composer",
+      "schedule": ["before 09:00 on monday"]
+    },
+    {
+      "description": "GitHub Actions — workflow action references. Weekly batched; action bumps rarely break.",
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions",
+      "schedule": ["before 09:00 on monday"]
+    },
+    {
+      "description": "Pin tag-only docker references in workflow files to digest. Required by the spec's pinning strategy ('every pin must carry a Renovate-trackable tag alongside the digest', conversely actions referenced without digest are not Renovate-trackable).",
+      "matchManagers": ["github-actions"],
+      "pinDigests": true
+    },
+    {
+      "description": "CVE response — never batch. Highest priority; surfaces via osvVulnerabilityAlerts.",
+      "matchPackagePatterns": [".*"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "vulnerabilityAlerts": {
+        "groupName": "security-priority",
+        "schedule": ["at any time"]
+      }
+    },
+    {
+      "description": "Python pip Lambda layer deps — batched weekly with npm-dev cadence.",
+      "matchManagers": ["pip_requirements", "pip-compile"],
+      "groupName": "pip",
+      "schedule": ["before 09:00 on monday"]
+    }
+  ],
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 4,
+  "branchConcurrentLimit": 20
+}
