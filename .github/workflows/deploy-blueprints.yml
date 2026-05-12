@@ -14,6 +14,9 @@ on:
       - 'cloudformation/scenarios/fixmystreet/cdk/**'
       - 'cloudformation/scenarios/paperless-ngx/cdk/**'
       - 'cloudformation/scenarios/ai-contact-centre/**'
+      - 'cloudformation/scenarios/planx/cdk/**'
+      - 'cloudformation/scenarios/bops-planning/cdk/**'
+      - 'cloudformation/scenarios/digital-planning-register/cdk/**'
       - 'cloudformation/isb-hub/**'
   workflow_dispatch:
 
@@ -402,8 +405,194 @@ jobs:
           path: cloudformation/scenarios/paperless-ngx/template.yaml
           retention-days: 1
 
+  synth-planx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Build and synth planx CDK
+        working-directory: cloudformation/scenarios/planx/cdk
+        run: |
+          npm install
+          npm run build
+          npx cdk synth
+
+      - name: Strip bootstrap cruft and validate template
+        working-directory: cloudformation/scenarios/planx/cdk
+        run: |
+          node -e "
+            const fs = require('fs');
+            const t = JSON.parse(fs.readFileSync('cdk.out/PlanxStack.template.json', 'utf8'));
+            delete t.Parameters?.BootstrapVersion;
+            delete t.Resources?.CDKMetadata;
+            delete t.Rules?.CheckBootstrapVersion;
+            const str = JSON.stringify(t);
+            const errors = [];
+            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
+              errors.push('Template contains CDK bootstrap/asset dependencies');
+            }
+            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
+            if (deletionPolicies) {
+              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
+            }
+            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
+            if (size > 400000) {
+              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
+            }
+            if (errors.length > 0) {
+              errors.forEach(e => console.error('ERROR: ' + e));
+              process.exit(1);
+            }
+            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
+            fs.writeFileSync('../template.yaml', content);
+            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
+          "
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: planx-template
+          path: cloudformation/scenarios/planx/template.yaml
+          retention-days: 1
+
+  synth-bops-planning:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Build and synth bops-planning CDK
+        working-directory: cloudformation/scenarios/bops-planning/cdk
+        run: |
+          npm install
+          npm run build
+          npx cdk synth
+
+      - name: Strip bootstrap cruft and write template
+        working-directory: cloudformation/scenarios/bops-planning/cdk
+        run: |
+          node -e "
+            const fs = require('fs');
+            const t = JSON.parse(fs.readFileSync('cdk.out/BopsPlanningStack.template.json', 'utf8'));
+            delete t.Parameters?.BootstrapVersion;
+            delete t.Resources?.CDKMetadata;
+            delete t.Rules?.CheckBootstrapVersion;
+            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
+            fs.writeFileSync('../template.yaml', content);
+            console.log('Wrote template.yaml (' + Buffer.byteLength(content) + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
+          "
+
+      - name: Retention-policy lint
+        run: ./scripts/lint-retention-policies.sh cloudformation/scenarios/bops-planning/template.yaml
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: bops-planning-template
+          path: cloudformation/scenarios/bops-planning/template.yaml
+          retention-days: 1
+
+  synth-digital-planning-register:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Build and synth digital-planning-register CDK
+        working-directory: cloudformation/scenarios/digital-planning-register/cdk
+        run: |
+          npm install
+          npm run build
+          npx cdk synth
+
+      - name: Strip bootstrap cruft and validate template
+        working-directory: cloudformation/scenarios/digital-planning-register/cdk
+        run: |
+          node -e "
+            const fs = require('fs');
+            const t = JSON.parse(fs.readFileSync('cdk.out/DigitalPlanningRegisterStack.template.json', 'utf8'));
+            delete t.Parameters?.BootstrapVersion;
+            delete t.Resources?.CDKMetadata;
+            delete t.Rules?.CheckBootstrapVersion;
+            const str = JSON.stringify(t);
+            const errors = [];
+            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
+              errors.push('Template contains CDK bootstrap/asset dependencies');
+            }
+            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
+            if (deletionPolicies) {
+              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
+            }
+            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
+            if (size > 400000) {
+              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
+            }
+            if (errors.length > 0) {
+              errors.forEach(e => console.error('ERROR: ' + e));
+              process.exit(1);
+            }
+            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
+            fs.writeFileSync('../template.yaml', content);
+            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
+          "
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: digital-planning-register-template
+          path: cloudformation/scenarios/digital-planning-register/template.yaml
+          retention-days: 1
+
+  # Phase 2b: top-level retention-policy lint over the hand-authored CFN
+  # templates that don't go through any synth job (council-chatbot,
+  # foi-redaction, planning-ai, smart-car-park, text-to-speech,
+  # quicksight-dashboard, ai-contact-centre, all-demo). The lint script also
+  # detects oversize templates and AssetParameters / cdk-bootstrap residue.
+  lint-committed-templates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install yq (for real-YAML template parsing)
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Lint committed scenario templates
+        run: |
+          # Scenarios whose template.yaml is committed (not synthesized in CI).
+          # Synthesized scenarios are linted by their per-scenario synth job.
+          ./scripts/lint-retention-policies.sh \
+            cloudformation/scenarios/council-chatbot/template.yaml \
+            cloudformation/scenarios/foi-redaction/template.yaml \
+            cloudformation/scenarios/planning-ai/template.yaml \
+            cloudformation/scenarios/smart-car-park/template.yaml \
+            cloudformation/scenarios/text-to-speech/template.yaml \
+            cloudformation/scenarios/quicksight-dashboard/template.yaml \
+            cloudformation/scenarios/ai-contact-centre/template.yaml \
+            cloudformation/scenarios/all-demo/template.yaml
+
   deploy:
-    needs: [synth-localgov-drupal, synth-localgov-ims, synth-simply-readable, synth-minute, synth-fixmystreet, synth-paperless-ngx]
+    needs:
+      - synth-localgov-drupal
+      - synth-localgov-ims
+      - synth-simply-readable
+      - synth-minute
+      - synth-fixmystreet
+      - synth-paperless-ngx
+      - synth-planx
+      - synth-bops-planning
+      - synth-digital-planning-register
+      - lint-committed-templates
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -448,6 +637,21 @@ jobs:
           name: simply-readable-website
           path: cloudformation/scenarios/simply-readable/website-build
 
+      - uses: actions/download-artifact@v8
+        with:
+          name: planx-template
+          path: cloudformation/scenarios/planx
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: bops-planning-template
+          path: cloudformation/scenarios/bops-planning
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: digital-planning-register-template
+          path: cloudformation/scenarios/digital-planning-register
+
       - name: Build planning-ai template (inject PDF + text into template)
         run: python3 cloudformation/scenarios/planning-ai/build-template.py -o cloudformation/scenarios/planning-ai/template.yaml
 
@@ -489,6 +693,26 @@ jobs:
             --s3-bucket ndx-try-isb-blueprints-568672915267 \
             --s3-prefix scenarios/ai-contact-centre/assets \
             --region us-east-1
+
+      # Phase 2a / T2a.5: verify the packaged template's CodeUri values all
+      # target the blueprints bucket. SAM's default --s3-bucket would write
+      # CodeUri values pointing at aws-sam-cli-managed-default-samclisourcebucket-*;
+      # the deploy role only has read on the blueprints bucket, so a packaging
+      # regression that drops --s3-bucket would silently produce a template
+      # the smoke-test account cannot deploy. Fail the build early instead.
+      - name: Verify AI Contact Centre packaged CodeUri targets the blueprints bucket
+        working-directory: cloudformation/scenarios/ai-contact-centre
+        run: |
+          BAD=$(grep -oE 's3://[a-z0-9.-]+' dist/template.yaml | sort -u | grep -v 'ndx-try-isb-blueprints-568672915267' || true)
+          if [ -n "$BAD" ]; then
+            echo "ERROR: packaged template references non-blueprints buckets:"
+            echo "$BAD"
+            echo ""
+            echo "Re-check the sam package command's --s3-bucket flag."
+            exit 1
+          fi
+          COUNT=$(grep -c 's3://ndx-try-isb-blueprints-568672915267' dist/template.yaml || true)
+          echo "Verified $COUNT CodeUri references point at the blueprints bucket"
 
       - run: npm ci
         working-directory: cloudformation/isb-hub

@@ -1,0 +1,467 @@
+name: Smoke Pack
+
+# Scenario-regression smoke pack. Deploys all-demo (or a scoped subset) into
+# the long-lived smoke-test AWS account, runs the per-scenario Playwright
+# smoke specs, and tears the deploy down again. Phase 3 / T3.6 of the
+# scenario-regression smoke-pack tech-spec.
+
+on:
+  # PR: scoped smoke — only scenarios whose paths changed run. Keeps the PR
+  # feedback loop under 20 min.
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/**'
+      - 'tests/smoke/**'
+      - 'scripts/smoke.sh'
+      - 'playwright.config.ts'
+      - 'docs/smoke-test-account-config.yml'
+      - 'docs/smoke-test-account-setup.md'
+      - '.github/workflows/smoke.yml'
+      - 'package.json'
+
+  # Nightly full smoke at 02:00 UTC.
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Merge-verification full smoke.
+  push:
+    branches: [main]
+
+  # Ad-hoc full smoke for manual rails verification.
+  workflow_dispatch:
+
+permissions:
+  id-token: write    # OIDC role assumption
+  contents: read     # repo checkout
+  issues: write      # failure notifications, drift tracking
+  pull-requests: read
+
+# Globally serialise smoke runs — a single account's quota envelope can't
+# absorb two concurrent all-demo deploys (17 scenarios each, many VPCs / NAT
+# GWs / RDS clusters). cancel-in-progress is FALSE everywhere: cancelling a
+# run kills the runner but the in-flight CFN deploy keeps going on AWS side,
+# which leaves half-deployed stacks the next run has to clean up. Queueing
+# is preferable to interleave. Rapid PR pushes therefore queue — annoying
+# but correct.
+concurrency:
+  group: smoke
+  cancel-in-progress: false
+
+env:
+  STACK_NAME: all-demo
+  AWS_REGION: us-east-1
+
+jobs:
+  # Phase 3 / T3.6 — Decide which scenarios to deploy. Rails-changes (paths
+  # under tests/smoke/fixtures, scripts/smoke.sh, playwright.config.ts,
+  # all-demo/template.yaml, etc.) force a full deploy because they affect
+  # every scenario. Per-scenario path changes deploy that scenario only.
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.decide.outputs.mode }}   # 'full' | 'scoped' | 'none'
+      scenarios: ${{ steps.decide.outputs.scenarios }}   # JSON array
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - id: decide
+        run: |
+          set -euo pipefail
+          EVENT="${{ github.event_name }}"
+          if [ "$EVENT" = "schedule" ] || [ "$EVENT" = "workflow_dispatch" ] || [ "$EVENT" = "push" ]; then
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+            echo 'scenarios=["all-demo"]' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # PR scope: compare against base ref.
+          git fetch origin "${{ github.base_ref }}" --depth 1
+          CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)
+          echo "Changed paths:"
+          echo "$CHANGED" | sed 's/^/  /'
+
+          # Rails paths force full smoke.
+          if echo "$CHANGED" | grep -qE '^(scripts/smoke\.sh|playwright\.config\.ts|tests/smoke/fixtures/|cloudformation/scenarios/all-demo/|\.github/workflows/smoke\.yml|docs/smoke-test-account-config\.yml|docs/smoke-test-account-setup\.md|package\.json)'; then
+            echo "Rails change detected — full smoke"
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+            echo 'scenarios=["all-demo"]' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Per-scenario paths.
+          SCENARIOS=$(echo "$CHANGED" \
+            | grep -oE '(cloudformation/scenarios/[a-z0-9-]+|tests/smoke/[a-z0-9-]+)' \
+            | sed -E 's#(cloudformation/scenarios/|tests/smoke/)##' \
+            | grep -v -E '^(all-demo|fixtures)$' \
+            | sort -u || true)
+
+          if [ -z "$SCENARIOS" ]; then
+            echo "No scenario paths changed — skipping smoke"
+            echo "mode=none" >> "$GITHUB_OUTPUT"
+            echo 'scenarios=[]' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          JSON=$(echo "$SCENARIOS" | jq -R . | jq -s .)
+          echo "Scoped scenarios: $JSON"
+          echo "mode=scoped" >> "$GITHUB_OUTPUT"
+          echo "scenarios=$(echo "$JSON" | jq -c .)" >> "$GITHUB_OUTPUT"
+
+  # The deploy/run/teardown is one job (not three) so any failure mid-flow
+  # still reaches teardown (if: always() steps) and uploads partial artefacts.
+  smoke:
+    needs: scope
+    if: needs.scope.outputs.mode != 'none'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    # The deployment environment gate. CODEOWNERS-required reviewer must
+    # approve any run from a non-main ref (configured in repo Settings →
+    # Environments → smoke-test-deploy with deployment-branch-policy:
+    # refs/heads/main = no-required-reviewer, all others = required).
+    environment: smoke-test-deploy
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Fetch history so `git log -1 -- docs/smoke-test-account-setup.md`
+          # in the runbook_version drift check resolves to a real commit
+          # rather than the shallow-clone HEAD.
+          fetch-depth: 0
+
+      - name: Install yq
+        run: |
+          # Pin yq by version (not :latest) so the URL is stable. We trust
+          # GitHub Releases to serve the right bytes for the tag — same
+          # trust model as the rest of CI's third-party-action references.
+          # A SHA-verification step was tried but became noise (Renovate-
+          # bumped versions need new SHAs and the previous check was set
+          # non-fatal anyway).
+          YQ_VERSION="v4.45.4"
+          sudo wget -qO /usr/local/bin/yq \
+            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Read smoke-test-account-config.yml
+        id: cfg
+        run: |
+          yq -e '.smoke_test_account_id != "000000000000" and .smoke_test_account_id != null' docs/smoke-test-account-config.yml > /dev/null || {
+            echo "ERROR: docs/smoke-test-account-config.yml has placeholder values; Phase 1b not complete?" >&2
+            exit 1
+          }
+
+          # runbook_version drift is now informational (was a strict lint
+          # but the chicken-and-egg between recording-SHA and the commit-
+          # that-creates-the-SHA made it brittle, especially for squashed
+          # PRs). Warn but don't fail.
+          RECORDED=$(yq -r '.runbook_version' docs/smoke-test-account-config.yml)
+          LATEST=$(git log -1 --pretty=%H -- docs/smoke-test-account-setup.md)
+          if [ "$RECORDED" != "$LATEST" ]; then
+            echo "::warning::runbook_version ($RECORDED) is older than the latest setup.md commit ($LATEST). Operator should bump via: yq -i '.runbook_version = \"$LATEST\"' docs/smoke-test-account-config.yml"
+          fi
+
+          ACCOUNT_ID=$(yq -r '.smoke_test_account_id' docs/smoke-test-account-config.yml)
+          ROLE_ARN=$(yq -r '.smoke_test_deploy_role_arn' docs/smoke-test-account-config.yml)
+          REGION=$(yq -r '.smoke_test_region' docs/smoke-test-account-config.yml)
+          echo "account_id=$ACCOUNT_ID" >> "$GITHUB_OUTPUT"
+          echo "role_arn=$ROLE_ARN" >> "$GITHUB_OUTPUT"
+          echo "region=$REGION" >> "$GITHUB_OUTPUT"
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        id: aws-creds
+        with:
+          role-to-assume: ${{ steps.cfg.outputs.role_arn }}
+          role-session-name: smoke-${{ github.run_id }}
+          aws-region: ${{ steps.cfg.outputs.region }}
+          # Request a 6-hour session. The action's default is 1h; some
+          # all-demo deploys exceed that, after which every AWS call —
+          # including teardown — fails NoCredentials because OIDC
+          # credentials don't auto-refresh. The deploy role's
+          # max-session-duration must match (see runbook Step 10).
+          role-duration-seconds: 21600
+          # audience defaults to sts.amazonaws.com; explicit value omitted to
+          # avoid the false impression it's load-bearing.
+
+      - name: Configure GHCR pull credentials
+        run: |
+          # Some scenarios pull images from ghcr.io at deploy time. Logging in
+          # avoids unauthenticated-pull rate limits on the smoke account.
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin || true
+
+      # AC3.6 / AC3.6b — SCP drift detection. Compares the smoke account's
+      # current SCP attachments against docs/smoke-test-account-config.yml
+      # expected_scps. First detection opens an issue tagged scp-drift; the
+      # GH issue body is the counter (no separate state store), and after 7
+      # nightly detections the build flips to fail-on-mismatch.
+      - name: SCP drift check
+        if: github.event_name == 'schedule'
+        run: |
+          set -euo pipefail
+          # Exclude p-FullAWSAccess from the comparison: it's AWS-managed and
+          # implicitly present on every account; it can't drift in any
+          # meaningful sense, so leaving it in inflates the diff signal.
+          EXPECTED=$(yq -r '.expected_scps[]' docs/smoke-test-account-config.yml \
+            | grep -v '^p-FullAWSAccess$' | sort -u)
+          ACTUAL=$(aws organizations list-policies-for-target \
+            --target-id "${{ steps.cfg.outputs.account_id }}" \
+            --filter SERVICE_CONTROL_POLICY \
+            --query 'Policies[].Id' --output text 2>/dev/null \
+            | tr '\t' '\n' | grep -v '^p-FullAWSAccess$' | sort -u || true)
+          # If the deploy role can't read Organizations, this is fine — drift
+          # check is informational, not gating. Don't fail on missing perms.
+          if [ -z "$ACTUAL" ]; then
+            echo "Could not enumerate live SCPs (likely missing organizations:ListPoliciesForTarget)"
+            exit 0
+          fi
+          if [ "$EXPECTED" = "$ACTUAL" ]; then
+            echo "SCP drift check: live attachments match expected_scps"
+            exit 0
+          fi
+          echo "SCP drift detected"
+          echo "Expected:" && echo "$EXPECTED" | sed 's/^/  /'
+          echo "Actual:" && echo "$ACTUAL" | sed 's/^/  /'
+          # Use the issue body as the counter (timestamped comments). Open if
+          # missing; flip the build to fail at >= 7 comments.
+          BODY="Live SCP attachments differ from docs/smoke-test-account-config.yml expected_scps. See AC3.6b."
+          ISSUE_NUM=$(gh issue list --state open --label scp-drift --json number --jq '.[0].number' || true)
+          if [ -z "$ISSUE_NUM" ]; then
+            gh issue create --title "scp-drift detected on smoke-test account" --label scp-drift --body "$BODY"
+            ISSUE_NUM=$(gh issue list --state open --label scp-drift --json number --jq '.[0].number')
+          fi
+          gh issue comment "$ISSUE_NUM" --body "Drift still present at $(date -u +%FT%TZ); run ${{ github.run_id }}"
+          COUNT=$(gh issue view "$ISSUE_NUM" --json comments --jq '.comments | length')
+          if [ "$COUNT" -ge 7 ]; then
+            echo "scp-drift persisted >= 7 nightly runs (issue #$ISSUE_NUM); failing the build" >&2
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # AC3.7b / AC3.13 — Pre-deploy state check. If a previous run left the
+      # stack in DELETE_FAILED / *_IN_PROGRESS, try to recover; if recovery
+      # fails, proceed against a unique stack name so subsequent runs are not
+      # blocked.
+      - name: Pre-deploy state check
+        id: predeploy
+        run: |
+          set -euo pipefail
+          STACK="${STACK_NAME}"
+          STATUS=$(aws cloudformation describe-stacks --stack-name "$STACK" \
+            --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo "DOES_NOT_EXIST")
+          echo "Current $STACK status: $STATUS"
+          case "$STATUS" in
+            DOES_NOT_EXIST|CREATE_COMPLETE|UPDATE_COMPLETE|UPDATE_ROLLBACK_COMPLETE)
+              echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+              ;;
+            ROLLBACK_COMPLETE)
+              # CFN does NOT allow updates on a ROLLBACK_COMPLETE stack —
+              # the only valid action is delete-then-recreate. Delete in-
+              # place and wait; if it succeeds we proceed with the same
+              # name. If it fails (e.g. retained resources), use a recovery
+              # name so subsequent runs aren't blocked.
+              echo "Stack is in ROLLBACK_COMPLETE; deleting before recreating"
+              aws cloudformation delete-stack --stack-name "$STACK"
+              if aws cloudformation wait stack-delete-complete --stack-name "$STACK"; then
+                echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+              else
+                RECOVERY="${STACK}-recovery-${{ github.run_id }}"
+                echo "stack_name=$RECOVERY" >> "$GITHUB_OUTPUT"
+                gh issue create --title "stranded-stack: $STACK delete from ROLLBACK_COMPLETE failed" \
+                  --label stranded-stack \
+                  --body "Run ${{ github.run_id }} proceeded against recovery name $RECOVERY. Manual cleanup needed." || true
+              fi
+              ;;
+            *_IN_PROGRESS)
+              # cancel-update-stack only applies to UPDATE_IN_PROGRESS; for
+              # CREATE_IN_PROGRESS / DELETE_IN_PROGRESS / ROLLBACK_IN_PROGRESS
+              # we can only wait it out. cancellation we attempt only on the
+              # matching state to avoid noise.
+              case "$STATUS" in
+                UPDATE_IN_PROGRESS|UPDATE_COMPLETE_CLEANUP_IN_PROGRESS|UPDATE_ROLLBACK_IN_PROGRESS)
+                  echo "Stack is mid-update; attempting cancel"
+                  aws cloudformation cancel-update-stack --stack-name "$STACK" 2>/dev/null || true
+                  ;;
+                *)
+                  echo "Stack is in $STATUS; cancel-update-stack does not apply, waiting briefly for state to clear"
+                  ;;
+              esac
+              sleep 60
+              STATUS_NOW=$(aws cloudformation describe-stacks --stack-name "$STACK" \
+                --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo "DOES_NOT_EXIST")
+              if [[ "$STATUS_NOW" =~ _IN_PROGRESS$ ]]; then
+                RECOVERY="${STACK}-recovery-${{ github.run_id }}"
+                echo "stack_name=$RECOVERY" >> "$GITHUB_OUTPUT"
+                gh issue create --title "stranded-stack: $STACK stuck in $STATUS_NOW" \
+                  --label stranded-stack \
+                  --body "Run ${{ github.run_id }} proceeded against recovery name $RECOVERY. Manual cleanup needed." || true
+              else
+                echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+              fi
+              ;;
+            UPDATE_ROLLBACK_FAILED)
+              echo "Attempting continue-update-rollback"
+              aws cloudformation continue-update-rollback --stack-name "$STACK" || true
+              echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+              ;;
+            DELETE_FAILED)
+              echo "Retrying delete-stack"
+              aws cloudformation delete-stack --stack-name "$STACK"
+              aws cloudformation wait stack-delete-complete --stack-name "$STACK" || {
+                RECOVERY="${STACK}-recovery-${{ github.run_id }}"
+                echo "stack_name=$RECOVERY" >> "$GITHUB_OUTPUT"
+                gh issue create --title "stranded-stack: $STACK DELETE_FAILED" \
+                  --label stranded-stack \
+                  --body "Run ${{ github.run_id }} proceeded against recovery name $RECOVERY. Manual cleanup needed." || true
+                exit 0
+              }
+              echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unhandled status $STATUS; proceeding with default name"
+              echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy all-demo (or scoped subset)
+        id: deploy
+        run: |
+          set -euo pipefail
+          STACK="${{ steps.predeploy.outputs.stack_name }}"
+          MODE="${{ needs.scope.outputs.mode }}"
+
+          # Smoke account uses the blueprints bucket as the template source;
+          # the all-demo template's defaults already point at the right
+          # bucket / region, so we just need to pass --capabilities and run.
+          aws cloudformation deploy \
+            --stack-name "$STACK" \
+            --template-file cloudformation/scenarios/all-demo/template.yaml \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+            --no-fail-on-empty-changeset \
+            --tags "Project=ndx-try" "SmokeRun=${{ github.run_id }}" "SmokeMode=$MODE"
+          echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Quarantine-expiry check
+        run: |
+          # Parse assertion-bar.ts for quarantine rows. Fail if any until-date
+          # has passed, or if more than 3 scenarios are concurrently quarantined.
+          node -e "
+            const fs = require('fs');
+            const src = fs.readFileSync('tests/smoke/fixtures/assertion-bar.ts', 'utf8');
+            const re = /state:\s*'quarantined'[^}]*until:\s*'([0-9-]+)'[^}]*reason:\s*'([^']+)'/g;
+            const today = new Date().toISOString().slice(0,10);
+            let m, expired = [], total = 0;
+            while ((m = re.exec(src)) !== null) {
+              total++;
+              if (m[1] < today) expired.push({date: m[1], reason: m[2]});
+            }
+            if (expired.length > 0) {
+              console.error('FAILURE: quarantined tests have passed their until-date:');
+              for (const e of expired) console.error('  - ' + e.date + ': ' + e.reason);
+              process.exit(1);
+            }
+            if (total > 3) {
+              console.error('FAILURE: ' + total + ' scenarios concurrently quarantined; cap is 3 (Phase 4 DoD).');
+              process.exit(1);
+            }
+            console.log('Quarantine check: ' + total + ' active quarantine(s) within cap 3.');
+          "
+
+      - name: Run smoke pack
+        id: run
+        env:
+          SMOKE_STACK_NAME: ${{ steps.deploy.outputs.stack_name }}
+          SMOKE_AWS_REGION: ${{ steps.cfg.outputs.region }}
+          CI: 'true'
+        run: |
+          MODE="${{ needs.scope.outputs.mode }}"
+          if [ "$MODE" = "scoped" ]; then
+            # JSON array of scenario slugs; Playwright --grep uses regex OR.
+            PATTERN=$(echo '${{ needs.scope.outputs.scenarios }}' | jq -r 'join("|")')
+            ./scripts/smoke.sh --grep "$PATTERN"
+          else
+            ./scripts/smoke.sh
+          fi
+
+      # AC3.9 — artefacts upload BEFORE teardown so live-stack state is
+      # captured even when the smoke specs failed. Falls back to the
+      # predeploy step's stack name when deploy didn't run (deploy step
+      # never set its output) so the events file always names something
+      # sensible.
+      - name: Capture CFN events (for the artefact bundle)
+        if: always() && steps.aws-creds.outcome == 'success'
+        run: |
+          mkdir -p artefacts
+          STACK="${{ steps.deploy.outputs.stack_name || steps.predeploy.outputs.stack_name || env.STACK_NAME }}"
+          if [ -z "$STACK" ]; then
+            echo "No stack name resolved; skipping events capture"
+            exit 0
+          fi
+          aws cloudformation describe-stack-events --stack-name "$STACK" \
+            --output json > "artefacts/${STACK}-events.json" || true
+          aws cloudformation list-stack-resources --stack-name "$STACK" \
+            --output json > "artefacts/${STACK}-resources.json" || true
+
+      - name: Upload artefact bundle
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-artefacts-${{ github.run_id }}
+          path: |
+            artefacts/
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+      # AC3.7 — Teardown with retry. Up to 3 × 60s attempts before DELETE_FAILED.
+      # Gated on configure-aws-credentials success: with no creds every aws
+      # CLI call errors instantly and the 3 × 60s sleep just wastes CI time.
+      # Also gated on a non-empty stack name — when both deploy and
+      # pre-deploy outputs are unset, there's nothing to tear down.
+      - name: Teardown
+        if: always() && steps.aws-creds.outcome == 'success'
+        run: |
+          set +e
+          STACK="${{ steps.deploy.outputs.stack_name || steps.predeploy.outputs.stack_name }}"
+          if [ -z "$STACK" ]; then
+            echo "No stack name resolved; nothing to tear down"
+            exit 0
+          fi
+          for ATTEMPT in 1 2 3; do
+            echo "Teardown attempt $ATTEMPT for $STACK"
+            aws cloudformation delete-stack --stack-name "$STACK"
+            if aws cloudformation wait stack-delete-complete --stack-name "$STACK"; then
+              echo "Teardown succeeded"
+              exit 0
+            fi
+            sleep 60
+          done
+          echo "Teardown failed after 3 attempts; opening stranded-stack issue"
+          BODY="Stack $STACK on smoke-test account failed delete after 3 attempts in run ${{ github.run_id }}. See artefacts for events."
+          gh issue create --title "stranded-stack: $STACK DELETE_FAILED after teardown retry" \
+            --label stranded-stack --body "$BODY" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # AC3.5 — failure notification on nightly cron only. PR / push failures
+      # surface via the PR check already.
+      - name: Open smoke-failed issue on cron failure
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --title "Nightly smoke failed (run ${{ github.run_id }})" \
+            --label smoke-failed \
+            --body "Smoke run ${{ github.run_id }} failed. Mode: ${{ needs.scope.outputs.mode }}. Artefacts: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}" || true

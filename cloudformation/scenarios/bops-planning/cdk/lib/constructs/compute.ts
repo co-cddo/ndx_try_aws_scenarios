@@ -51,6 +51,16 @@ export class ComputeConstruct extends Construct {
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
+    // Smoke-pack retention-policy lint exemption (Phase 2b of the
+    // scenario-regression smoke-pack tech-spec). RETAIN is deliberate here
+    // for debug-after-rollback; the lint requires a Justification annotation
+    // on every retained resource. addPropertyOverride writes the value via
+    // the synthesizer's late-resolution path, so CDK's aws:cdk:path
+    // injection does not clobber it.
+    (this.logGroup.node.defaultChild as logs.CfnLogGroup).addOverride(
+      'Metadata.Justification',
+      'BOPS stack rollback debug: preserves application logs across CFN rollback so post-mortem queries against /ndx-bops/production still resolve once the failed deployment has been rolled back. Smoke teardown reclaims the LogGroup separately via the quarterly orphan sweep.',
+    );
 
     // IAM Roles — ISB SCP requires InnovationSandbox-ndx-* prefix
     const executionRole = new iam.Role(this, 'ExecutionRole', {

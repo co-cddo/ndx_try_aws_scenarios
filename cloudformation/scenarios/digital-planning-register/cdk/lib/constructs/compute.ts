@@ -30,7 +30,7 @@ export class ComputeConstruct extends Construct {
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
       logGroupName: '/ndx-dpr/production',
       retention: logs.RetentionDays.ONE_WEEK,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     // IAM Roles — ISB SCP requires InnovationSandbox-ndx-* prefix

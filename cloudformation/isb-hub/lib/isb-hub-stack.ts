@@ -38,15 +38,24 @@ const SCENARIOS: ScenarioConfig[] = [
   { name: 'localgov-drupal', description: 'NDX:Try LocalGov Drupal - AI-enhanced CMS for UK councils' },
   { name: 'simply-readable', description: 'NDX:Try Simply Readable - Document Translation & Easy Read, built by Swindon Borough Council' },
   { name: 'localgov-ims', description: 'NDX:Try LocalGov IMS - Income Management System with GOV.UK Pay', parameterKeys: ['GovUkPayApiKey'] },
-  // TODO(orphan-import): minute, fixmystreet, paperless-ngx have ACTIVE
-  // StackSets in the hub account NOT owned by IsbHubStack. CDK create fails
-  // with AlreadyExists. Re-enable once imported via
-  // `cloudformation create-change-set --change-set-type IMPORT`.
-  // { name: 'minute', description: 'Minute AI - Meeting transcription and AI-powered minute generation' },
-  // { name: 'fixmystreet', description: 'NDX:Try FixMyStreet - Citizen problem reporting platform for UK councils' },
-  // { name: 'paperless-ngx', description: 'NDX:Try Paperless-ngx - Document archive with OCR, full-text search and Bedrock AI' },
   { name: 'ai-contact-centre', description: 'NDX:Try AI Contact Centre - Amazon Connect with Lex, Bedrock RAG, multimodal photo describe, multi-intent triage, and multilingual support', samStyle: true },
-  { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 7 scenarios as nested stacks' },
+  // The six scenarios below have ACTIVE StackSets in the hub but were
+  // previously orphaned from CDK ownership. CDK create-stack-set would
+  // fail with AlreadyExists; the operator must run a one-off
+  // `cloudformation create-change-set --change-set-type IMPORT` per
+  // StackSet to bring it under this stack's management. After the first
+  // import, subsequent deploys go through the standard CDK path. See the
+  // squash PR's body for the exact import procedure.
+  { name: 'minute', description: 'Minute AI - Meeting transcription and AI-powered minute generation' },
+  { name: 'fixmystreet', description: 'NDX:Try FixMyStreet - Citizen problem reporting platform for UK councils' },
+  { name: 'paperless-ngx', description: 'NDX:Try Paperless-ngx - Document archive with OCR, full-text search and Bedrock AI' },
+  { name: 'planx', description: 'NDX:Try PlanX - Digital planning platform with Hasura + GraphQL' },
+  { name: 'bops-planning', description: 'NDX:Try BOPS Planning - Back-Office Planning System with map tiles', parameterKeys: ['OSVectorTilesApiKey'] },
+  { name: 'digital-planning-register', description: 'NDX:Try Digital Planning Register - Public-facing planning-application register' },
+  // all-demo nests every other scenario. It forwards GovUkPayApiKey and
+  // OSVectorTilesApiKey to its localgov-ims and bops-planning children
+  // respectively, so the StackSet must pass those parameters through.
+  { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 16 scenarios as nested stacks', parameterKeys: ['GovUkPayApiKey', 'OSVectorTilesApiKey'] },
 ];
 
 export class IsbHubStack extends cdk.Stack {
@@ -63,9 +72,17 @@ export class IsbHubStack extends cdk.Stack {
       description: 'GOV.UK Pay sandbox API key (for localgov-ims scenario)',
     });
 
+    const osVectorTilesApiKey = new cdk.CfnParameter(this, 'OSVectorTilesApiKey', {
+      type: 'String',
+      noEcho: true,
+      default: '',
+      description: 'Ordnance Survey Vector Tiles API key (for bops-planning scenario; empty = map tiles will not render)',
+    });
+
     // Map of parameter keys to their CfnParameter values
     const scenarioParamValues: Record<string, string> = {
       GovUkPayApiKey: govUkPayApiKey.valueAsString,
+      OSVectorTilesApiKey: osVectorTilesApiKey.valueAsString,
     };
 
     // ========================================================================

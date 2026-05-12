@@ -1,0 +1,61 @@
+name: Renovate
+
+# Self-hosted Renovate via renovatebot/github-action. Phase 6 of the
+# scenario-regression smoke-pack tech-spec. Replaces .github/dependabot.yml
+# (deleted in this PR per ADR-2) with the unified bot.
+#
+# Cadence: twice daily. The cold-start cost is non-trivial (~2-3 min full
+# scan + per-package resolution) so 4×/day would burn CI minutes without
+# proportional value. workflow_dispatch lets a maintainer trigger ad-hoc.
+#
+# Action pin: digest, not tag. The spec's pinning strategy is "every pin
+# must carry a Renovate-trackable tag alongside the digest." The digest
+# below tracks v46.1.14 of renovatebot/github-action. Renovate's
+# github-actions packageRule (in renovate.json) pinDigests=true keeps
+# this current.
+
+on:
+  schedule:
+    - cron: '0 6,18 * * *'   # 06:00 and 18:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level (debug for verbose)'
+        required: false
+        default: 'info'
+        type: choice
+        options:
+          - info
+          - debug
+
+permissions:
+  contents: read
+  # Renovate writes via the PAT (RENOVATE_TOKEN), NOT GITHUB_TOKEN. Keeping
+  # GITHUB_TOKEN's permissions tight prevents accidental scope creep.
+
+concurrency:
+  group: renovate
+  cancel-in-progress: false
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run Renovate
+        uses: renovatebot/github-action@693b9ef15eec82123529a37c782242f091365961   # v46.1.14
+        with:
+          # Fine-grained PAT scoped repo:read+write on co-cddo/ndx_try_aws_scenarios only.
+          # Minted by the operator per docs/smoke-test-account-setup.md →
+          # Operational Notes → RENOVATE_TOKEN rotation.
+          token: ${{ secrets.RENOVATE_TOKEN }}
+          configurationFile: renovate.json
+        env:
+          LOG_LEVEL: ${{ inputs.logLevel || 'info' }}
+          RENOVATE_PLATFORM: github
+          RENOVATE_REPOSITORIES: '["co-cddo/ndx_try_aws_scenarios"]'
+          # Keep Renovate's onboarding off; renovate.json is the committed config.
+          RENOVATE_ONBOARDING: 'false'
+          RENOVATE_REQUIRE_CONFIG: 'required'

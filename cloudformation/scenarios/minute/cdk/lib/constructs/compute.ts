@@ -11,10 +11,12 @@ import * as servicediscovery from 'aws-cdk-lib/aws-servicediscovery';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 
-// GHCR public images (built by .github/workflows/docker-build-minute.yml)
-const FRONTEND_IMAGE = 'ghcr.io/co-cddo/ndx_try_aws_scenarios-minute_frontend:latest';
-const BACKEND_IMAGE = 'ghcr.io/co-cddo/ndx_try_aws_scenarios-minute_backend:latest';
-const WORKER_IMAGE = 'ghcr.io/co-cddo/ndx_try_aws_scenarios-minute_worker:latest';
+// GHCR public images (built by .github/workflows/docker-build-minute.yml).
+// Pins follow the spec's "own GHCR" pattern: <repo>:sha-<7chars>@sha256:<digest>.
+// Renovate tracks both via the regex in renovate.json.
+const FRONTEND_IMAGE = 'ghcr.io/co-cddo/ndx_try_aws_scenarios-minute_frontend:sha-5d3d423@sha256:0cfbf3bca86f2360935765dc5ae33e9cbcc88d96ad2d58fd5c9d0a5b99862abf';
+const BACKEND_IMAGE = 'ghcr.io/co-cddo/ndx_try_aws_scenarios-minute_backend:sha-5d3d423@sha256:0830ab1fe636764380c0eb2ea56530abfff6658a694f3550f9dda2eddb48517b';
+const WORKER_IMAGE = 'ghcr.io/co-cddo/ndx_try_aws_scenarios-minute_worker:sha-5d3d423@sha256:13d7800495c7268cd75170649025e6a7f98bf12cdd2e87cbdab5ddbef5d76a65';
 
 export interface ComputeConstructProps {
   readonly vpc: ec2.IVpc;

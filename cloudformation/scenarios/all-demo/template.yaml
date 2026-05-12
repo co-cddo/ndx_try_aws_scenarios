@@ -1,8 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: |
   NDX:Try - All Demo
-  Deploys all 7 NDX:Try scenarios as nested stacks for demonstrations and showcases.
-  Each child stack is an independent scenario deployed in parallel.
+  Deploys all 16 NDX:Try scenarios as nested stacks for demonstrations and the
+  scenario-regression smoke pack. Each child stack is an independent scenario
+  deployed in parallel.
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -13,6 +14,13 @@ Metadata:
           - TemplateBucket
           - TemplateBucketRegion
           - Environment
+      - Label:
+          default: Scenario-specific credentials (override at deploy time)
+        Parameters:
+          - GovUkPayApiKey
+          - OSVectorTilesApiKey
+          - DprImageUri
+          - DprCouncilConfig
 
 Parameters:
   Environment:
@@ -33,6 +41,33 @@ Parameters:
     Type: String
     Default: us-east-1
     Description: Region of the S3 bucket containing the scenario templates
+
+  # The five scenarios with parameters: most have non-empty defaults in their
+  # own templates and survive empty pass-through. Two (localgov-ims and
+  # bops-planning) need real values for full functionality; passing empty
+  # strings yields a deployed-but-degraded scenario which is acceptable for
+  # smoke. Override at deploy time for full functionality.
+  GovUkPayApiKey:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: GOV.UK Pay sandbox API key (localgov-ims). Empty = payment portal will reject transactions but the rest of the stack still deploys.
+
+  OSVectorTilesApiKey:
+    Type: String
+    Default: ''
+    NoEcho: true
+    Description: Ordnance Survey vector tiles API key (bops-planning). Empty = map tiles will not render but the rest of the stack still deploys.
+
+  DprImageUri:
+    Type: String
+    Default: 'ghcr.io/co-cddo/ndx_try_aws_scenarios-dpr:latest'
+    Description: Docker image URI for digital-planning-register. Default tracks GHCR latest; pin to a digest in production.
+
+  DprCouncilConfig:
+    Type: String
+    Default: '{}'
+    Description: JSON council configuration for digital-planning-register. Empty JSON object uses scenario defaults.
 
 Resources:
   CouncilChatbot:
@@ -153,6 +188,156 @@ Resources:
         - Key: awsApplication
           Value: !GetAtt AppRegistryApplication.Arn
 
+  SimplyReadable:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/simply-readable/template.yaml'
+      Parameters:
+        BlueprintsBucketName: !Ref TemplateBucket
+      TimeoutInMinutes: 45
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: simply-readable
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
+
+  AiContactCentre:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/ai-contact-centre/template.yaml'
+      Parameters:
+        Environment: !Ref Environment
+      TimeoutInMinutes: 45
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: ai-contact-centre
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
+
+  LocalgovIms:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/localgov-ims/template.yaml'
+      Parameters:
+        GovUkPayApiKey: !Ref GovUkPayApiKey
+      TimeoutInMinutes: 45
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: localgov-ims
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
+
+  Minute:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/minute/template.yaml'
+      Parameters: {}
+      TimeoutInMinutes: 45
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: minute
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
+
+  FixMyStreet:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/fixmystreet/template.yaml'
+      Parameters: {}
+      TimeoutInMinutes: 45
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: fixmystreet
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
+
+  PaperlessNgx:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/paperless-ngx/template.yaml'
+      Parameters: {}
+      TimeoutInMinutes: 45
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: paperless-ngx
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
+
+  Planx:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/planx/template.yaml'
+      Parameters: {}
+      TimeoutInMinutes: 60
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: planx
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
+
+  BopsPlanning:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/bops-planning/template.yaml'
+      Parameters:
+        OSVectorTilesApiKey: !Ref OSVectorTilesApiKey
+      TimeoutInMinutes: 60
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: bops-planning
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
+
+  DigitalPlanningRegister:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/digital-planning-register/template.yaml'
+      Parameters:
+        ImageUri: !Ref DprImageUri
+        CouncilConfig: !Ref DprCouncilConfig
+      TimeoutInMinutes: 30
+      Tags:
+        - Key: Project
+          Value: ndx-try
+        - Key: Scenario
+          Value: digital-planning-register
+        - Key: ParentStack
+          Value: !Ref 'AWS::StackName'
+        - Key: awsApplication
+          Value: !GetAtt AppRegistryApplication.Arn
+
   # AppRegistry Application - visible in myApplications on the AWS Console
   # Parent application that groups all NDX:Try scenarios
   AppRegistryApplication:
@@ -211,6 +396,114 @@ Outputs:
     Description: Drupal admin password (stored in Secrets Manager)
     Value: !GetAtt LocalgovDrupal.Outputs.AdminPassword
 
+  SimplyReadableAppUrl:
+    Description: Simply Readable app URL
+    Value: !GetAtt SimplyReadable.Outputs.AppUrl
+
+  SimplyReadableAdminUsername:
+    Description: Simply Readable admin username
+    Value: !GetAtt SimplyReadable.Outputs.AdminUsername
+
+  SimplyReadableAdminPassword:
+    Description: Simply Readable admin password (Cognito-managed)
+    Value: !GetAtt SimplyReadable.Outputs.AdminPassword
+
+  AiContactCentreCompanionUrl:
+    Description: AI Contact Centre companion UI URL
+    Value: !GetAtt AiContactCentre.Outputs.CompanionUrl
+
+  AiContactCentrePstnNumber:
+    Description: AI Contact Centre PSTN claim number
+    Value: !GetAtt AiContactCentre.Outputs.PstnNumber
+
+  LocalgovImsAdminPortalUrl:
+    Description: LocalGov IMS admin portal URL (Windows EC2 + IIS)
+    Value: !GetAtt LocalgovIms.Outputs.AdminPortalUrl
+
+  LocalgovImsPaymentPortalUrl:
+    Description: LocalGov IMS payment portal URL
+    Value: !GetAtt LocalgovIms.Outputs.PaymentPortalUrl
+
+  LocalgovImsAdminUsername:
+    Description: LocalGov IMS admin username
+    Value: !GetAtt LocalgovIms.Outputs.AdminUsername
+
+  LocalgovImsAdminPassword:
+    Description: LocalGov IMS admin password
+    Value: !GetAtt LocalgovIms.Outputs.AdminPassword
+
+  MinuteUrl:
+    Description: Minute AI transcription URL (clean URL; requires an active session cookie)
+    Value: !GetAtt Minute.Outputs.MinuteUrl
+
+  MinuteLoginUrl:
+    Description: Minute AI single-use login URL — visit once to set a 7-day session cookie
+    Value: !GetAtt Minute.Outputs.MinuteLoginUrl
+
+  MinuteAuthToken:
+    Description: Raw auth token for Minute AI (the ?key= value in MinuteLoginUrl)
+    Value: !GetAtt Minute.Outputs.MinuteAuthToken
+
+  FixMyStreetUrl:
+    Description: FixMyStreet URL
+    Value: !GetAtt FixMyStreet.Outputs.FixMyStreetUrl
+
+  FixMyStreetAdminUsername:
+    Description: FixMyStreet admin username
+    Value: !GetAtt FixMyStreet.Outputs.AdminUsername
+
+  FixMyStreetAdminPassword:
+    Description: FixMyStreet admin password
+    Value: !GetAtt FixMyStreet.Outputs.AdminPassword
+
+  PaperlessNgxUrl:
+    Description: Paperless-ngx document archive URL
+    Value: !GetAtt PaperlessNgx.Outputs.PaperlessUrl
+
+  PaperlessNgxAdminUsername:
+    Description: Paperless-ngx admin username
+    Value: !GetAtt PaperlessNgx.Outputs.AdminUsername
+
+  PaperlessNgxAdminPassword:
+    Description: Paperless-ngx admin password
+    Value: !GetAtt PaperlessNgx.Outputs.AdminPassword
+
+  PlanXUrl:
+    Description: PlanX URL
+    Value: !GetAtt Planx.Outputs.PlanXUrl
+
+  PlanXLoginUrl:
+    Description: PlanX login URL
+    Value: !GetAtt Planx.Outputs.PlanXLoginUrl
+
+  PlanXDemoUsername:
+    Description: PlanX demo account username
+    Value: !GetAtt Planx.Outputs.DemoUsername
+
+  PlanXDemoPassword:
+    Description: PlanX demo account password
+    Value: !GetAtt Planx.Outputs.DemoPassword
+
+  BopsPlanningUrl:
+    Description: BOPS Planning web URL
+    Value: !GetAtt BopsPlanning.Outputs.BOPSUrl
+
+  BopsPlanningLoginUrl:
+    Description: BOPS Planning login URL
+    Value: !GetAtt BopsPlanning.Outputs.BOPSLoginUrl
+
+  BopsPlanningUsername:
+    Description: BOPS Planning admin username
+    Value: !GetAtt BopsPlanning.Outputs.BOPSUsername
+
+  BopsPlanningPassword:
+    Description: BOPS Planning admin password
+    Value: !GetAtt BopsPlanning.Outputs.BOPSPassword
+
+  DigitalPlanningRegisterUrl:
+    Description: Digital Planning Register URL
+    Value: !GetAtt DigitalPlanningRegister.Outputs.RegisterUrl
+
   # ========================================================================
   # SECONDARY OUTPUTS — buckets, tables, and other resources
   # ========================================================================
@@ -254,7 +547,16 @@ Outputs:
           "quicksight-dashboard",
           "smart-car-park",
           "text-to-speech",
-          "localgov-drupal"
+          "localgov-drupal",
+          "simply-readable",
+          "ai-contact-centre",
+          "localgov-ims",
+          "minute",
+          "fixmystreet",
+          "paperless-ngx",
+          "planx",
+          "bops-planning",
+          "digital-planning-register"
         ],
-        "note": "All 7 NDX:Try scenarios deployed as nested stacks"
+        "note": "All 16 NDX:Try scenarios deployed as nested stacks (all-demo umbrella excluded)"
       }

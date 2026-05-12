@@ -1,0 +1,31 @@
+# Smoke-pack sensitive paths (Phase 3 / T3.10).
+#
+# Changes to any of these files require review by the listed owners. Because
+# the smoke-test-deploy GitHub deployment environment is configured with a
+# branch policy that auto-approves refs/heads/main only, a PR modifying any
+# of these paths cannot run with deploy credentials until a CODEOWNERS
+# reviewer approves the environment (defeats the in-repo-contributor
+# exfiltration attack).
+#
+# The `@chrisns` placeholder is the current maintainer; when an
+# `ndx-try-maintainers` (or similar) team is provisioned under co-cddo,
+# replace these entries with the team handle in a separate PR. The team
+# doesn't exist as of 2026-05-12, so resolving to a real user keeps the
+# CODEOWNERS gate functional today.
+
+# Smoke workflow + entrypoint + fixtures
+/.github/workflows/smoke.yml         @chrisns
+/scripts/smoke.sh                    @chrisns
+/tests/smoke/fixtures/**             @chrisns
+
+# Smoke account state (runbook + config)
+/docs/smoke-test-account-setup.md    @chrisns
+/docs/smoke-test-account-config.yml  @chrisns
+
+# Renovate adoption (Phase 6 — guarded so a Renovate config drift cannot
+# self-merge via its own PR flow)
+/renovate.json                       @chrisns
+/.github/workflows/renovate.yml      @chrisns
+
+# Retention-policy lint (Phase 2b — guarded against accidental loosening)
+/scripts/lint-retention-policies.sh  @chrisns

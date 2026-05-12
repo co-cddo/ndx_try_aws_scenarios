@@ -94,7 +94,7 @@ export class ComputeConstruct extends Construct {
 
     // Main FixMyStreet container (Perl/Catalyst app on port 9000)
     const fmsContainer = this.taskDefinition.addContainer('fixmystreet', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-fixmystreet:latest'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-fixmystreet:sha-be035a6@sha256:863c3e7dded6d2132663b9e46725bc4f46e934c8ce86b3977a13ade45d986e94'),
       logging: ecs.LogDrivers.awsLogs({
         logGroup: this.logGroup,
         streamPrefix: 'fms',
