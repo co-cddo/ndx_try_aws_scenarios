@@ -38,7 +38,16 @@ test.describe(SCENARIO, () => {
     const chatbotUrl = requireSafe(outputs, 'ChatbotURL');
     const kbBucket = requireSafe(outputs, 'ChatbotKnowledgeBaseBucket');
 
-    const resp = await request.get(chatbotUrl, { failOnStatusCode: false });
+    // POST with a minimal valid chat body. A GET against the chatbot
+    // FunctionURL returns 405 Method Not Allowed (Lambda only accepts
+    // POST), which is < 500 — i.e. a GET passes vacuously. POST forces
+    // the Lambda to actually boot and reach Bedrock, so a 5xx here is a
+    // real regression (likely the legacy claude-3-haiku migration in NAP-548).
+    const resp = await request.post(chatbotUrl, {
+      failOnStatusCode: false,
+      headers: { 'Content-Type': 'application/json' },
+      data: { message: 'hi', sessionId: 'smoke-test' },
+    });
     expect(resp.status(), 'chatbot FunctionURL 5xx (likely Bedrock-legacy regression — see NAP-548)').toBeLessThan(500);
     expect(resp.status(), 'chatbot FunctionURL 403 — public-Lambda perms regressed').not.toBe(403);
     expect(kbBucket, 'KnowledgeBaseBucket Output empty').toMatch(/^.+$/);

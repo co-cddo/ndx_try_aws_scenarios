@@ -118,11 +118,12 @@ export async function fetchStackOutputs(
     const key = o.OutputKey;
     const value = o.OutputValue;
     if (!key || value === undefined) continue;
+    // Limitation: CloudFormation's DescribeStacks API does NOT return
+    // Output Metadata, so the spec's Metadata: { Sensitive: true } opt-in
+    // is unimplementable via this API. The regex below is the sole signal.
+    // The spec's "audit pass after Phase 4" should grow the regex when it
+    // identifies outputs that need redaction but aren't matched yet.
     if (isSensitiveKey(key, undefined)) {
-      // Note: OutputMetadata is NOT returned by DescribeStacks; the Sensitive
-      // opt-in via Metadata: { Sensitive: true } only takes effect via the
-      // key-name regex above OR via the (future) audit pass that adds names
-      // to the regex.
       map[key] = makeSensitive(value);
     } else {
       map[key] = makeSafe(value);

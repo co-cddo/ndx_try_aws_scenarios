@@ -46,9 +46,15 @@ test.describe(SCENARIO, () => {
     expect(resp?.status() ?? 0, 'companion UI not reachable').toBeLessThan(500);
 
     // (b) PSTN number claim. UK +44 numbers are sometimes finicky from
-    //     us-east-1 (per aws-connect-uk-numbers memory). The output must
-    //     either be a UK +44 number or a US toll-free fallback; either way
-    //     it should NOT be empty or a placeholder.
-    expect(pstnNumber, 'PSTN number missing').toMatch(/^\+\d{6,}/);
+    //     us-east-1 (per aws-connect-uk-numbers memory). Accept either:
+    //     - a UK +44 toll-free (800 / 808 / 3xx) or common landline prefix
+    //     - a US toll-free fallback (+1 8xx)
+    //     Generic /^\+\d{6,}/ accepted any international number, defeating
+    //     the point of the check. Strip whitespace first since Connect
+    //     sometimes returns "+44 800 ..." formatted.
+    const pstnDigits = pstnNumber.replace(/\s+/g, '');
+    expect(pstnDigits, 'PSTN number not a UK or US claim — most likely an unintended international fallback').toMatch(
+      /^\+(44(800|808|3[0-9]{2}|20|121|131|141|151|161|113)|1(800|888|877|866|855|844|833))/,
+    );
   });
 });
