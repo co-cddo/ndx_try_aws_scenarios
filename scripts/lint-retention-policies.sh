@@ -22,7 +22,13 @@
 #   scripts/lint-retention-policies.sh <template.json> [template.json ...]
 #
 # Env vars:
-#   MAX_JUSTIFICATIONS  global cap, default 5
+#   MAX_JUSTIFICATIONS_PER_TEMPLATE  per-template cap, default 3
+#   MAX_JUSTIFICATIONS_GLOBAL        global cap across all templates, default 10
+#
+# Two-cap design: per-template prevents any single scenario from
+# pencil-whipping a long list of retentions; global puts an upper bound
+# on the repo as a whole. Both are configurable via env so a long-running
+# fix-forward can raise them temporarily.
 #
 # Exit codes:
 #   0   all checks passed
@@ -31,7 +37,8 @@
 
 set -euo pipefail
 
-MAX_JUSTIFICATIONS="${MAX_JUSTIFICATIONS:-5}"
+MAX_JUSTIFICATIONS_PER_TEMPLATE="${MAX_JUSTIFICATIONS_PER_TEMPLATE:-3}"
+MAX_JUSTIFICATIONS_GLOBAL="${MAX_JUSTIFICATIONS_GLOBAL:-10}"
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "ERROR: jq is required" >&2
@@ -75,6 +82,7 @@ EXIT=0
 TOTAL_JUSTIFICATIONS=0
 FAILED_RESOURCES=()
 JUSTIFIED_RESOURCES=()
+OVER_PER_TEMPLATE=()
 
 for TEMPLATE in "$@"; do
   if [ ! -f "$TEMPLATE" ]; then
@@ -89,6 +97,8 @@ for TEMPLATE in "$@"; do
     continue
   fi
 
+  TEMPLATE_JUSTIFICATIONS=0
+
   # Walk every resource. jq emits one line per offending resource as
   # "<logical-id>\t<retention-source>\t<has-justification>".
   while IFS=$'\t' read -r LOGICAL_ID SOURCE JUSTIFICATION; do
@@ -98,6 +108,7 @@ for TEMPLATE in "$@"; do
     else
       JUSTIFIED_RESOURCES+=("$TEMPLATE:$LOGICAL_ID ($SOURCE) — $JUSTIFICATION")
       TOTAL_JUSTIFICATIONS=$((TOTAL_JUSTIFICATIONS + 1))
+      TEMPLATE_JUSTIFICATIONS=$((TEMPLATE_JUSTIFICATIONS + 1))
     fi
   done < <(echo "$CONTENT" | jq -r '
     .Resources // {} |
@@ -138,6 +149,12 @@ for TEMPLATE in "$@"; do
   if [ "$SIZE" -gt 460800 ]; then
     FAILED_RESOURCES+=("$TEMPLATE:<top-level> (template size $SIZE bytes exceeds CFN limit 460800)")
   fi
+
+  # Per-template cap: prevents any single scenario from pencil-whipping a
+  # long list of retentions in one template.
+  if [ "$TEMPLATE_JUSTIFICATIONS" -gt "$MAX_JUSTIFICATIONS_PER_TEMPLATE" ]; then
+    OVER_PER_TEMPLATE+=("$TEMPLATE: $TEMPLATE_JUSTIFICATIONS justified retentions (cap: $MAX_JUSTIFICATIONS_PER_TEMPLATE)")
+  fi
 done
 
 if [ ${#FAILED_RESOURCES[@]} -gt 0 ]; then
@@ -153,9 +170,17 @@ if [ ${#FAILED_RESOURCES[@]} -gt 0 ]; then
   EXIT=1
 fi
 
-if [ "$TOTAL_JUSTIFICATIONS" -gt "$MAX_JUSTIFICATIONS" ]; then
-  echo "RETENTION-LINT FAILURE: total justified retentions = $TOTAL_JUSTIFICATIONS exceeds cap MAX_JUSTIFICATIONS=$MAX_JUSTIFICATIONS" >&2
-  echo "Justifications must be a sparingly-used exception, not a routine bypass." >&2
+if [ ${#OVER_PER_TEMPLATE[@]} -gt 0 ]; then
+  echo "RETENTION-LINT FAILURE: per-template justification cap exceeded:" >&2
+  for R in "${OVER_PER_TEMPLATE[@]}"; do
+    echo "  - $R" >&2
+  done
+  echo "Justifications must be a sparingly-used exception per scenario." >&2
+  EXIT=1
+fi
+
+if [ "$TOTAL_JUSTIFICATIONS" -gt "$MAX_JUSTIFICATIONS_GLOBAL" ]; then
+  echo "RETENTION-LINT FAILURE: total justified retentions = $TOTAL_JUSTIFICATIONS exceeds global cap MAX_JUSTIFICATIONS_GLOBAL=$MAX_JUSTIFICATIONS_GLOBAL" >&2
   echo "Currently-justified resources:" >&2
   for R in "${JUSTIFIED_RESOURCES[@]}"; do
     echo "  - $R" >&2
@@ -165,7 +190,7 @@ fi
 
 if [ "$EXIT" -eq 0 ]; then
   if [ ${#JUSTIFIED_RESOURCES[@]} -gt 0 ]; then
-    echo "Retention lint: OK ($TOTAL_JUSTIFICATIONS justified retention(s) within cap $MAX_JUSTIFICATIONS)"
+    echo "Retention lint: OK ($TOTAL_JUSTIFICATIONS justified retention(s) within global cap $MAX_JUSTIFICATIONS_GLOBAL; per-template cap $MAX_JUSTIFICATIONS_PER_TEMPLATE)"
     for R in "${JUSTIFIED_RESOURCES[@]}"; do
       echo "  - $R"
     done
