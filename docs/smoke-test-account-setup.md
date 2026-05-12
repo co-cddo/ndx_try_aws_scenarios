@@ -1186,10 +1186,36 @@ before updating `expected_scps`.
 
 ### Bedrock model-access gotchas
 
-(Populated by the operator when a model requires manual TOS click-through.)
+(Populated by operators as models require manual TOS click-through or as
+upstream model lifecycle changes affect canaries.)
 
-- _empty as of runbook authoring; future operators record affected model IDs and
-  the TOS URL here_
+- **`anthropic.claude-3-haiku-20240307-v1:0` is Legacy (2026-05-12)**: a
+  fresh account that has not previously invoked this model receives
+  `ResourceNotFoundException: Access denied. This Model is marked by
+  provider as Legacy and you have not been actively using the model in
+  the last 30 days. Please upgrade to an active model on Amazon Bedrock`.
+  AWS has retired the "no active usage in 30 days" grandfathering window
+  for Anthropic's earliest Claude 3 models. Scenarios that pinned this
+  model ID (council-chatbot, foi-redaction, planning-ai, paperless-ngx,
+  ai-contact-centre lambdas) must migrate to a currently-active model
+  (e.g. `anthropic.claude-3-5-haiku-20241022-v1:0` or
+  `anthropic.claude-haiku-4-5-20251001-v1:0`). The canary in [Step 12](#step-12-enable-bedrock-model-access)
+  will fail with the same ResourceNotFoundException until the migration
+  lands; ignore it for that one model ID OR re-run the canary against the
+  replacement model ID instead.
+- **Nova models (`amazon.nova-lite-v1:0`, `amazon.nova-pro-v1:0`,
+  `amazon.nova-canvas-v1:0`) do NOT use the Anthropic body shape**: the
+  Step 12 canary as written sends `{"messages":[...],"max_tokens":...,
+  "anthropic_version":"..."}` which Nova rejects with
+  `ValidationException: Malformed input request: #: extraneous key
+  [max_tokens] is not permitted`. For Nova use the Converse API
+  (`bedrock-runtime converse`) or send Nova-shaped JSON (`{"messages":
+  [{"role":"user","content":[{"text":"hi"}]}],"inferenceConfig":
+  {"maxTokens":10}}`). The ValidationException is NOT an access denial,
+  it's a payload shape error and proves the call reaches the model.
+- **Titan embeddings (`amazon.titan-embed-text-v2:0`) use a different body
+  again**: `{"inputText":"hi"}`. Step 12's canary block sends this
+  correctly.
 
 ### Quarterly cost audit
 
