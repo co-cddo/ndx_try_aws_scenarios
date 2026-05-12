@@ -74,7 +74,70 @@ export const ASSERTION_BAR: ReadonlyMap<string, AssertionBarRow> = new Map<
   string,
   AssertionBarRow
 >([
-  // (filled in by Phase 4 PRs — see tech-spec for the priority order)
+  [
+    'fixmystreet',
+    {
+      scenario: 'fixmystreet',
+      authMode: 'admin-login',
+      outputsToCheck: [
+        'FixMyStreetUrl',
+        'FixMyStreetAdminUsername',
+        'FixMyStreetAdminPassword',
+      ],
+      landingAssertion:
+        'GET / responds with HTTP 200; page title matches /FixMyStreet/; body contains no absolute :9000 URLs (the ALB sidecar mis-routing regression).',
+      loginAssertion:
+        'POST /auth with admin credentials redirects to /my or /admin (not back to /auth).',
+      featureFlow:
+        'Post-login: /reports must render without error (catches the bin/update-all-reports regression) and /admin must reach the dashboard without a 2FA redirect (catches the must_have_2fa regression).',
+      historicalRegressionCited:
+        'FixMyStreet had 15+ deploy iterations spanning EFS UID, ALB sidecar targeting, BASE_URL/CloudFront, X-Forwarded-Proto / using_frontend_proxy, must_have_2fa, /reports requiring bin/update-all-reports. See memory:fixmystreet-lessons.md.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'planx',
+    {
+      scenario: 'planx',
+      authMode: 'admin-login',
+      outputsToCheck: [
+        'PlanXUrl',
+        'PlanXLoginUrl',
+        'PlanXDemoUsername',
+        'PlanXDemoPassword',
+      ],
+      landingAssertion:
+        'GET / loads past the SPA boot without emitting an Airbrake error overlay (VITE_APP_ENV=production regression) or a "host not allowed" page (window.location.host domain-allowlist regression).',
+      loginAssertion:
+        'POST /<login-url> with demo credentials redirects out of the login page; the demo-auth patch in server.ts sets a session cookie.',
+      featureFlow:
+        'Post-login: editor reachable on the SPA host (catches the domain-allowlist regression), and Hasura native /v1/version responds (catches the Caddy-elimination regression where /hasura prefix-stripping was the prior workaround).',
+      historicalRegressionCited:
+        'PlanX had 13 issues — Caddy proxy path stripping eliminated, Hasura migrations on cli-migrations-v3, window.location.host allowlist, VITE_APP_ENV=production Airbrake crash, demo auth + body-parser order. See memory:planx-scenario-lessons.md.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'minute',
+    {
+      scenario: 'minute',
+      authMode: 'admin-login',
+      outputsToCheck: [
+        'MinuteUrl',
+        'MinuteBasicAuthUsername',
+        'MinuteBasicAuthPassword',
+      ],
+      landingAssertion:
+        'GET / with HTTP basic auth headers (NOT URL-embedded credentials) returns the Minute SPA shell. Title matches /Minute/.',
+      loginAssertion:
+        'HTTP basic auth supplied via Playwright httpCredentials (browser-attached); page loads without a 401.',
+      featureFlow:
+        'Inside the SPA, fetch() against the same origin must succeed (catches the CloudFront-embedded-basic-auth regression where fetch() refuses URL-embedded credentials). /api/proxy/healthcheck must reach the backend via frontend middleware (catches the ALB /api/* rule interception regression).',
+      historicalRegressionCited:
+        'Minute had 12 issues — no CDK bootstrap, postgres reserved username, ECS circuit breaker blocking CFN, basic auth breaking fetch(), ALB /api/* rule intercepting middleware proxy. See memory:minute-scenario-lessons.md.',
+      quarantine: { state: 'active' },
+    },
+  ],
 ]);
 
 /**
