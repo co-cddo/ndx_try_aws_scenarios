@@ -178,6 +178,12 @@ jobs:
           role-to-assume: ${{ steps.cfg.outputs.role_arn }}
           role-session-name: smoke-${{ github.run_id }}
           aws-region: ${{ steps.cfg.outputs.region }}
+          # Request a 6-hour session. The action's default is 1h; some
+          # all-demo deploys exceed that, after which every AWS call —
+          # including teardown — fails NoCredentials because OIDC
+          # credentials don't auto-refresh. The deploy role's
+          # max-session-duration must match (see runbook Step 10).
+          role-duration-seconds: 21600
           # audience defaults to sts.amazonaws.com; explicit value omitted to
           # avoid the false impression it's load-bearing.
 
