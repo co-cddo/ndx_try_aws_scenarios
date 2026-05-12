@@ -877,7 +877,9 @@ Starting list (as of the runbook authoring date; re-derive at run time):
 - `amazon.nova-lite-v1:0`
 - `amazon.nova-pro-v1:0`
 - `amazon.titan-embed-text-v2:0`
-- `anthropic.claude-3-haiku-20240307-v1:0`
+- `anthropic.claude-3-5-haiku-20241022-v1:0` (replaces the now-Legacy
+  `claude-3-haiku-20240307-v1:0`; see Operational Notes → Bedrock
+  model-access gotchas)
 
 **Procedure:**
 
@@ -896,21 +898,55 @@ Starting list (as of the runbook authoring date; re-derive at run time):
 
 **Verification:**
 
+The CLI expects `--body` either base64-encoded inline or via `fileb://`.
+Use a body file. Different model families use different body shapes:
+Anthropic models take `messages` + `max_tokens` + `anthropic_version`;
+Nova models use `messages` + `inferenceConfig`; Titan embeds use
+`inputText`. Sending the Anthropic shape to Nova produces a
+ValidationException (not an AccessDenied), which still proves the call
+reached the model but masks real access failures.
+
 ```bash
-# Invoke each model with a trivial prompt; ExpiredTokenError implies Step 8 re-assume.
-# AccessDeniedException implies the model-access page does not list it as granted.
-for MODEL_ID in \
-    amazon.nova-lite-v1:0 \
-    amazon.nova-pro-v1:0 \
-    anthropic.claude-3-haiku-20240307-v1:0; do
+# Per-family body files (write once, reuse per model).
+cat > /tmp/claude-body.json <<'BODY'
+{"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}],"max_tokens":10,"anthropic_version":"bedrock-2023-05-31"}
+BODY
+cat > /tmp/nova-body.json <<'BODY'
+{"messages":[{"role":"user","content":[{"text":"hi"}]}],"inferenceConfig":{"maxTokens":10}}
+BODY
+cat > /tmp/titan-embed-body.json <<'BODY'
+{"inputText":"hi"}
+BODY
+
+# Anthropic family.
+for MODEL_ID in anthropic.claude-3-5-haiku-20241022-v1:0; do
   echo "=== $MODEL_ID ==="
   aws bedrock-runtime invoke-model \
     --model-id "$MODEL_ID" \
-    --body '{"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}],"max_tokens":10,"anthropic_version":"bedrock-2023-05-31"}' \
+    --body fileb:///tmp/claude-body.json \
     --content-type application/json \
     --region "$SMOKE_REGION" \
     /tmp/bedrock-canary.json && cat /tmp/bedrock-canary.json
 done
+
+# Nova family.
+for MODEL_ID in amazon.nova-lite-v1:0 amazon.nova-pro-v1:0; do
+  echo "=== $MODEL_ID ==="
+  aws bedrock-runtime invoke-model \
+    --model-id "$MODEL_ID" \
+    --body fileb:///tmp/nova-body.json \
+    --content-type application/json \
+    --region "$SMOKE_REGION" \
+    /tmp/bedrock-canary.json && cat /tmp/bedrock-canary.json
+done
+
+# Titan embeddings.
+aws bedrock-runtime invoke-model \
+  --model-id amazon.titan-embed-text-v2:0 \
+  --body fileb:///tmp/titan-embed-body.json \
+  --content-type application/json \
+  --region "$SMOKE_REGION" \
+  /tmp/bedrock-embed.json && cat /tmp/bedrock-embed.json
 ```
 
 If any model returns `AccessDeniedException`, re-open the Model Access console and
@@ -919,17 +955,8 @@ may need an additional 60 minutes. If still failing after 60 minutes, suspect a
 manual TOS click-through (see step 3 above) and record the affected model IDs in
 [Bedrock model-access gotchas](#bedrock-model-access-gotchas).
 
-**Note for the Nova embedding models**: `amazon.titan-embed-text-v2:0` uses the
-`invoke-model` path with `inputText` payload shape, not `messages`. Use:
-
-```bash
-aws bedrock-runtime invoke-model \
-  --model-id amazon.titan-embed-text-v2:0 \
-  --body '{"inputText":"hi"}' \
-  --content-type application/json \
-  --region "$SMOKE_REGION" \
-  /tmp/bedrock-embed-canary.json
-```
+The titan-embed and Nova body shapes are demonstrated in the
+verification block above.
 
 **Rollback for this step:** un-tick the models in the same Bedrock console page.
 Note: the rest of the runbook produces a functional account regardless; failing
