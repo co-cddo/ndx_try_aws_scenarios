@@ -548,19 +548,33 @@ aws iam delete-open-id-connect-provider --open-id-connect-provider-arn "$OIDC_PR
 The trust policy uses the sub-pattern `repo:co-cddo/ndx_try_aws_scenarios:*` to
 restrict to this exact repo. The spec originally called for an additional
 `repository_owner=co-cddo` claim condition as belt-and-braces against
-`pull_request_target` misuse, but that condition is **omitted here**: at the
-time of authoring (2026-05), GitHub's OIDC token issued by `core.getIDToken()`
-does not produce a `repository_owner` claim that AWS surfaces under
-`token.actions.githubusercontent.com:repository_owner`, so adding the
-condition causes `sts:AssumeRoleWithWebIdentity` to fail with `Not authorized
-to perform sts:AssumeRoleWithWebIdentity` (the condition never matches because
-the claim value is null).
+`pull_request_target` misuse, but that condition is **omitted here** because
+adding it causes `sts:AssumeRoleWithWebIdentity` to fail consistently with
+`Not authorized to perform sts:AssumeRoleWithWebIdentity` — even though the
+GitHub OIDC token DOES contain `repository_owner: co-cddo` (verified by
+running `.github/workflows/_oidc-debug.yml` and decoding the JWT mid-segment).
 
-The remaining defences are: (a) the sub-pattern is repo-locked, (b) GitHub's
-documented behaviour is that `pull_request` from forks does NOT pass secrets
-or OIDC, (c) the `smoke-test-deploy` GitHub deployment environment requires
-CODEOWNERS approval for non-main refs. If GitHub later starts including
-`repository_owner` reliably, re-add the condition.
+What was tried and reproducibly fails:
+- `StringEquals: { "token.actions.githubusercontent.com:repository_owner": "co-cddo" }`
+- `StringLike:   { "token.actions.githubusercontent.com:repository_owner": "co-cddo" }`
+
+The exact reason AWS's authorization engine doesn't surface the claim against
+that condition key is unclear; it may be a quirk of AWS's OIDC trust
+evaluation for GitHub's particular issuer. If a fix is identified later (a
+different key spelling, a provider-config tweak, an AWS docs update), re-add
+the condition; the runbook's defence chain is otherwise:
+
+1. The sub-pattern `repo:co-cddo/ndx_try_aws_scenarios:*` is repo-locked, so
+   even an attacker with a co-cddo-owned different repo cannot assume.
+2. GitHub's documented behaviour: `pull_request` events from forks do NOT
+   pass secrets or OIDC tokens to the workflow runner on public repos.
+3. The `smoke-test-deploy` GitHub deployment environment requires CODEOWNERS
+   approval for non-main refs, so even an in-org PR modifying the workflow
+   can't run with deploy credentials without human review.
+
+Net: the assume gate is sub-pattern + branch policy + CODEOWNERS, which is
+strictly more defensive than the original three conditions would have been
+on a public repo.
 
 ```bash
 cat > /tmp/deploy-role-trust.json <<EOF

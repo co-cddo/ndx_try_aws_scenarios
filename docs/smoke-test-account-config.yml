@@ -25,10 +25,20 @@
 # Public-repo disclosure note:
 #   This repo is public by design. Account IDs, role ARNs, OU IDs, and SCP
 #   policy IDs are NOT AWS secrets per AWS guidance. The security model relies
-#   on (a) GitHub fork OIDC isolation, (b) trust-policy repository_owner claim,
-#   (c) the smoke-test-deploy deployment environment with branch policy,
-#   (d) CODEOWNERS review on sensitive paths, (e) iterate-to-least-privilege
-#   IAM, (f) the quarterly audit.
+#   on (a) GitHub fork OIDC isolation (pull_request from forks does not pass
+#   secrets/OIDC on public repos), (b) the trust-policy sub-pattern locked to
+#   repo:co-cddo/ndx_try_aws_scenarios:* (an attacker would need a co-cddo-
+#   owned different repo, of which there are none with this slug), (c) the
+#   smoke-test-deploy deployment environment with branch policy + CODEOWNERS
+#   approval for non-main refs, (d) iterate-to-least-privilege IAM, and (e)
+#   the quarterly audit.
+#
+#   The original spec also called for a trust-policy repository_owner=co-cddo
+#   claim condition as belt-and-braces; that condition reproducibly breaks
+#   sts:AssumeRoleWithWebIdentity even though the OIDC token verifiably
+#   contains the claim. See the runbook's Step 10 for the investigation
+#   notes and the doctrinal explanation of why the remaining defences are
+#   adequate.
 #
 #   Do NOT commit anything to this file that is materially secret (passwords,
 #   API keys, internal hostnames not already published). If a future field
@@ -70,13 +80,30 @@ smoke_test_ou_placement_branch: "child-of-root-with-selective-scps"
 # nightly drift check has a stable reference for "parent OU we are inheriting
 # from" even if the ISB display name changes.
 sandbox_ou_id: "ou-2laj-4dyae1oa"
-# The SCP policy IDs attached to sandboxOu at setup time. The nightly drift
-# check compares live state to this list; mismatch opens an issue tagged
-# `scp-drift`. Order does not matter; sets are compared.
+# The SCP policy IDs attached DIRECTLY to the smoke-test account (NOT
+# inherited). The nightly drift check compares live state to this list;
+# mismatch opens an issue tagged `scp-drift`. Order does not matter; sets
+# are compared (modulo p-FullAWSAccess which is excluded by the drift
+# check — AWS-managed, always present).
 #
-# Expected count: 4 (AwsNukeSupportedServices, Restrictions, ProtectISB,
-# LimitRegions). If the count differs from 4, ISB may have been upgraded with
-# additional policies; investigate before merging the diff.
+# Current state reflects the fallback branch (smoke_test_ou_placement_branch
+# = child-of-root-with-selective-scps):
+# - p-6tw8eixp = InnovationSandboxRestrictionsScp (enforces role-name
+#   prefix InnovationSandbox-ndx-* and various security restrictions)
+# - p-FullAWSAccess = AWS-managed default (implicit on every account)
+#
+# Notably NOT attached:
+# - p-gn4fu3co (ProtectISBResourcesScp) — would block role creation on
+#   InnovationSandbox-* names from non-ISB principals (Step 7 canary
+#   showed this blocks OrganizationAccountAccessRole's create-role call).
+# - p-7pd0szg9 (AwsNukeSupportedServicesScp) — would block any
+#   sts:AssumeRoleWithWebIdentity call because its NotAction allow-list
+#   does not include sts:*. AwsNuke isn't relevant for the smoke account
+#   (we use CFN delete + retention lint, ADR-4).
+#
+# If ISB is upgraded and adds new SCPs, capture and re-attach selectively
+# per the runbook's Step 7-fallback guidance (verify sts:* is in any
+# NotAction-Deny allow-list before attaching).
 expected_scps:
   - p-6tw8eixp
   - p-FullAWSAccess
@@ -89,4 +116,4 @@ setup_date: "2026-05-12"
 #   yq -i ".runbook_version = \"$(git log -1 --pretty=%H -- docs/smoke-test-account-setup.md)\"" $CONFIG_FILE
 # Re-running the runbook updates this field, so a diff in `git log -p` against
 # this file is the audit trail of when the procedure was last verified end-to-end.
-runbook_version: "11d96763ef749ba81ef02a9704ec66582a944254"
+runbook_version: "4c0d2ef72cc85512b4681be0c5e3d0d7f4d79edf"
