@@ -116,4 +116,4 @@ setup_date: "2026-05-12"
 #   yq -i ".runbook_version = \"$(git log -1 --pretty=%H -- docs/smoke-test-account-setup.md)\"" $CONFIG_FILE
 # Re-running the runbook updates this field, so a diff in `git log -p` against
 # this file is the audit trail of when the procedure was last verified end-to-end.
-runbook_version: "4c0d2ef72cc85512b4681be0c5e3d0d7f4d79edf"
+runbook_version: "aa93a062fbb9ea4e58025691377858441e88cf50"
