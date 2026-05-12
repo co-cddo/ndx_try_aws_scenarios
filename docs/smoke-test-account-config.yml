@@ -1,0 +1,102 @@
+# Smoke-Test Account Config (post-runbook state record)
+# =====================================================
+#
+# This file records the post-execution state of the smoke-test AWS account that
+# hosts the NDX:Try scenario-regression smoke pack. It is the committed,
+# machine-readable companion to docs/smoke-test-account-setup.md (the runbook).
+#
+# Lifecycle:
+#   - Phase 1a (this PR): committed in template form with placeholder values.
+#   - Phase 1b: operator runs the runbook end-to-end and PRs this file with the
+#     real values populated. PR reviewed by the same security/org-admin reviewer
+#     who approved the runbook.
+#   - Drift / SCP updates: PR to this file. The nightly SCP drift check in
+#     .github/workflows/smoke.yml compares live state to expected_scps and
+#     opens an issue tagged `scp-drift` on first mismatch.
+#
+# Consumers:
+#   - .github/workflows/smoke.yml          reads smoke_test_account_id +
+#                                          smoke_test_deploy_role_arn +
+#                                          smoke_test_region +
+#                                          expected_scps (via yq)
+#   - scripts/smoke.sh                     same fields, locally via yq
+#   - .github/workflows/quarterly-audit.yml uses the same set for audit checks
+#
+# Public-repo disclosure note:
+#   This repo is public by design. Account IDs, role ARNs, OU IDs, and SCP
+#   policy IDs are NOT AWS secrets per AWS guidance. The security model relies
+#   on (a) GitHub fork OIDC isolation, (b) trust-policy repository_owner claim,
+#   (c) the smoke-test-deploy deployment environment with branch policy,
+#   (d) CODEOWNERS review on sensitive paths, (e) iterate-to-least-privilege
+#   IAM, (f) the quarterly audit.
+#
+#   Do NOT commit anything to this file that is materially secret (passwords,
+#   API keys, internal hostnames not already published). If a future field
+#   would carry secret material, use GitHub secrets or AWS Secrets Manager.
+#
+# Schema-allowlist enforcement:
+#   A CI lint step on PRs touching this file validates that any added top-level
+#   field appears in a static allowlist defined in the lint script. PRs adding
+#   fields outside the allowlist fail CI. Adding to the allowlist requires a
+#   separate PR with security/devops CODEOWNERS approval.
+
+# --- Account placement -------------------------------------------------------
+
+# The 12-digit AWS account ID returned by `aws organizations create-account`
+# in Step 4 of the runbook.
+smoke_test_account_id: "000000000000"
+
+# The ARN of the GitHub Actions deploy role created in Step 10 of the runbook.
+# Name must start with InnovationSandbox-ndx-* (Restrictions SCP requirement).
+smoke_test_deploy_role_arn: "arn:aws:iam::000000000000:role/InnovationSandbox-ndx-SmokeTestDeployRole"
+
+# Region for the smoke account and its deploys. us-east-1 per the global
+# CLAUDE.md constraint and ADR-1 of the tech-spec.
+smoke_test_region: "us-east-1"
+
+# The OU containing the smoke account. Set by Step 3 (or by Step 7-fallback
+# if the ProtectISB canary failed).
+smoke_test_ou_id: "ou-xxxx-xxxxxxxx"
+
+# Records which placement branch the runbook took:
+#   - "child-of-sandboxOu"                    primary branch; SCP inheritance
+#                                             via sandboxOu's four parent SCPs
+#   - "child-of-root-with-selective-scps"     fallback branch (ProtectISB
+#                                             role-creation deadlock); SCPs
+#                                             attached directly to the account.
+#                                             Runbook records a 6-month review
+#                                             cadence via the scp-fallback-revisit
+#                                             issue.
+smoke_test_ou_placement_branch: "child-of-sandboxOu"
+
+# --- Organizations context ---------------------------------------------------
+
+# The sandboxOu ID discovered in Step 1 of the runbook. Stored here so the
+# nightly drift check has a stable reference for "parent OU we are inheriting
+# from" even if the ISB display name changes.
+sandbox_ou_id: "ou-yyyy-yyyyyyyy"
+
+# The SCP policy IDs attached to sandboxOu at setup time. The nightly drift
+# check compares live state to this list; mismatch opens an issue tagged
+# `scp-drift`. Order does not matter; sets are compared.
+#
+# Expected count: 4 (AwsNukeSupportedServices, Restrictions, ProtectISB,
+# LimitRegions). If the count differs from 4, ISB may have been upgraded with
+# additional policies; investigate before merging the diff.
+expected_scps:
+  - "p-xxxxxxxx"
+  - "p-xxxxxxxx"
+  - "p-xxxxxxxx"
+  - "p-xxxxxxxx"
+
+# --- Provenance --------------------------------------------------------------
+
+# ISO date the runbook was last executed end-to-end. Populated by Step 15.
+setup_date: "1970-01-01"
+
+# Commit SHA of docs/smoke-test-account-setup.md at the time of setup.
+# Populated by Step 15 via:
+#   yq -i ".runbook_version = \"$(git log -1 --pretty=%H -- docs/smoke-test-account-setup.md)\"" $CONFIG_FILE
+# Re-running the runbook updates this field, so a diff in `git log -p` against
+# this file is the audit trail of when the procedure was last verified end-to-end.
+runbook_version: "0000000000000000000000000000000000000000"
