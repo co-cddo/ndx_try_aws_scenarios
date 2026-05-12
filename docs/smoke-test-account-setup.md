@@ -583,12 +583,19 @@ EOF
 EXISTING_ROLE=$(aws iam get-role --role-name "$DEPLOY_ROLE_NAME" --query 'Role.Arn' --output text 2>/dev/null || true)
 
 if [ -n "$EXISTING_ROLE" ]; then
-  # Role exists. Update its trust policy in place so re-runs absorb runbook updates.
+  # Role exists. Update its trust policy AND max-session-duration in place
+  # so re-runs absorb runbook updates without delete+recreate. The original
+  # create-role command sets max-session-duration to 21600 (6h); re-runs of
+  # an older role created with the previous default (1h) would otherwise
+  # keep their short session.
   aws iam update-assume-role-policy \
     --role-name "$DEPLOY_ROLE_NAME" \
     --policy-document file:///tmp/deploy-role-trust.json
+  aws iam update-role \
+    --role-name "$DEPLOY_ROLE_NAME" \
+    --max-session-duration 21600
   export DEPLOY_ROLE_ARN="$EXISTING_ROLE"
-  echo "Role already exists at $DEPLOY_ROLE_ARN; trust policy refreshed"
+  echo "Role already exists at $DEPLOY_ROLE_ARN; trust policy + session duration refreshed"
 else
   DEPLOY_ROLE_ARN=$(aws iam create-role \
     --role-name "$DEPLOY_ROLE_NAME" \
