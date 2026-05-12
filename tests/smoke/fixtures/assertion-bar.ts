@@ -138,6 +138,277 @@ export const ASSERTION_BAR: ReadonlyMap<string, AssertionBarRow> = new Map<
       quarantine: { state: 'active' },
     },
   ],
+  [
+    'localgov-ims',
+    {
+      scenario: 'localgov-ims',
+      authMode: 'admin-login',
+      outputsToCheck: [
+        'LocalgovImsAdminPortalUrl',
+        'LocalgovImsPaymentPortalUrl',
+        'LocalgovImsAdminUsername',
+        'LocalgovImsAdminPassword',
+      ],
+      landingAssertion:
+        'Both admin and payment portal CloudFront URLs resolve without leaving their hostname.',
+      loginAssertion:
+        'POST to admin portal login form with Email + Password redirects off the login page.',
+      featureFlow:
+        'AdminPassword Output must not contain the literal {{resolve:...}} token (catches the Lambda-custom-resource regression where SM dynamic refs in CFN Outputs returned the unresolved string).',
+      historicalRegressionCited:
+        'LocalGov IMS pivoted from Windows Fargate (broken http.sys multi-site IIS) to Windows EC2 on 2026-03-22. Issues: empty NuGet sources, Start-Process redirect deadlock, {{resolve:secretsmanager:...}} in UserData, m5.xlarge capacity exhaustion in us-east-1a, AdminPassword unresolved in Outputs. See memory:localgov-ims-deploy-status.md.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'localgov-drupal',
+    {
+      scenario: 'localgov-drupal',
+      authMode: 'admin-login',
+      outputsToCheck: ['DrupalUrl', 'DrupalAdminUsername', 'DrupalAdminPassword'],
+      landingAssertion:
+        'Landing renders without PHP fatal or Bedrock AccessDeniedException — the ndx_aws_ai module boots cleanly.',
+      loginAssertion:
+        '/user/login POST with name + pass redirects off the login page.',
+      featureFlow:
+        '/admin reachable post-login; body has no AccessDeniedException and no "module ... could not be enabled" errors. Cross-references the Bedrock legacy-model migration in NAP-548.',
+      historicalRegressionCited:
+        'LocalGov Drupal CDK conversion: CDK bootstrap blocked by ISB SCP; ndx_aws_ai module needs ISB-BedrockAccess inline policies; claude-3-haiku-20240307 used to be the default model and is now Legacy.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'simply-readable',
+    {
+      scenario: 'simply-readable',
+      authMode: 'admin-login',
+      outputsToCheck: [
+        'SimplyReadableAppUrl',
+        'SimplyReadableAdminUsername',
+        'SimplyReadableAdminPassword',
+      ],
+      landingAssertion:
+        'SPA loads without a React chunk-load error and without a "your-graphql-endpoint" placeholder.',
+      loginAssertion:
+        '(skipped) Cognito Hosted UI requires manual first-time password reset; smoke does not drive it. Credentials presence + redaction checked instead.',
+      featureFlow:
+        'AdminPassword must be >8 chars and not the {{resolve:...}} literal. SPA reload produces no 5xx network responses (catches BlueprintsBucketName parameter mis-wire where Lambda assets 404).',
+      historicalRegressionCited:
+        'Simply Readable template.yaml vs dist/simply-readable.template.json drift; _toCloudFormation() override adds Policies + RoleName; "function role cannot be assumed by Lambda" actually missing inline policies; nested model-table format (text.M / image.M). See memory:simply-readable-lessons.md.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'ai-contact-centre',
+    {
+      scenario: 'ai-contact-centre',
+      authMode: 'admin-login',
+      outputsToCheck: [
+        'AiContactCentreCompanionUrl',
+        'AiContactCentrePstnNumber',
+      ],
+      landingAssertion: 'Companion UI returns < 5xx.',
+      loginAssertion: null,
+      featureFlow:
+        'PSTN number Output matches /^\\+\\d{6,}/. UK +44 numbers from us-east-1 are finicky; either UK or US fallback acceptable, but empty / placeholder is a regression.',
+      historicalRegressionCited:
+        'Amazon Connect UK number claim from us-east-1 has been finicky; clickops sometimes succeeds where API fails. See memory:aws-connect-uk-numbers.md.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'paperless-ngx',
+    {
+      scenario: 'paperless-ngx',
+      authMode: 'admin-login',
+      outputsToCheck: [
+        'PaperlessNgxUrl',
+        'PaperlessNgxAdminUsername',
+        'PaperlessNgxAdminPassword',
+      ],
+      landingAssertion: 'Login page renders the username/password form.',
+      loginAssertion:
+        'POST to login with admin credentials redirects off the login page.',
+      featureFlow:
+        '/documents view + in-SPA fetch of /api/documents/?page=1 returns < 500. Catches the S3 Files mount regression where Documents never render because the mount is broken.',
+      historicalRegressionCited:
+        'S3 Files (CFN) gotchas: versioned bucket, EFS service principal, nested fsap- ARN, EventBridge perms. See memory:feedback_s3files_quirks.md.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'bops-planning',
+    {
+      scenario: 'bops-planning',
+      authMode: 'admin-login',
+      outputsToCheck: [
+        'BopsPlanningUrl',
+        'BopsPlanningLoginUrl',
+        'BopsPlanningUsername',
+        'BopsPlanningPassword',
+      ],
+      landingAssertion:
+        'BOPS web responds without a Rails 500 page and does NOT match "applicants portal" (which would indicate the routing.rb override failed).',
+      loginAssertion:
+        'POST to /users/sign_in with user[email] + user[password] redirects off the sign_in page.',
+      featureFlow:
+        'Post-login URL must NOT contain :8080 (the Applicants port). Catches the regression where the base64-decoded routing.rb patch failed at boot.',
+      historicalRegressionCited:
+        'BOPS uses base64-encoded routing.rb override for single-tenant mode; LogGroup RETAIN intentional with smoke-pack Justification metadata (Phase 2b PR #228). Routing patch is brittle due to many edge cases.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'digital-planning-register',
+    {
+      scenario: 'digital-planning-register',
+      authMode: 'public',
+      outputsToCheck: ['DigitalPlanningRegisterUrl'],
+      landingAssertion:
+        'Landing returns < 5xx; body contains "planning" or "register".',
+      loginAssertion: null,
+      featureFlow:
+        'Body must not contain a Next.js "application error" overlay. Image pinning (Phase 5 PR #231) bounds this regression to Renovate-tracked digest bumps.',
+      historicalRegressionCited:
+        'DPR LogGroup had RemovalPolicy.RETAIN without justification (fixed in Phase 2a); ImageUri parameter defaulted to :latest until Phase 5 pin sweep.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'foi-redaction',
+    {
+      scenario: 'foi-redaction',
+      authMode: 'public',
+      outputsToCheck: ['RedactionURL', 'FoiDocumentsBucket'],
+      landingAssertion:
+        'FunctionURL reachable; not 403 (which would mean InvokeFunctionUrl + InvokeFunction dual-perm regressed) and not 5xx.',
+      loginAssertion: null,
+      featureFlow:
+        'FoiDocumentsBucket Output is non-empty (deploy-completeness — bucket failed-to-create still produces a deployable stack but empty Output).',
+      historicalRegressionCited:
+        'Public Lambda Function URLs need TWO permissions: InvokeFunctionUrl AND InvokeFunction + InvokedViaFunctionUrl: true (since Oct 2025). Without both you get 403 — NOT an SCP issue. See memory:feedback_isb_blocks_public_lambda_urls.md.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'planning-ai',
+    {
+      scenario: 'planning-ai',
+      authMode: 'public',
+      outputsToCheck: ['PlanningAnalyzerURL', 'PlanningDocumentsBucket'],
+      landingAssertion:
+        'Analyzer FunctionURL responds < 500 and not 403.',
+      loginAssertion: null,
+      featureFlow:
+        'DocumentsBucket Output non-empty. Sample PDF + Textract-text injection by build-template.py not deeply exercised in smoke.',
+      historicalRegressionCited:
+        'Planning-AI uses build-template.py to inject sample PDF + Textract-extracted text into the template at deploy-time. Past bugs: PR #212 (textract + sample doc), PR #215 (PDF preview).',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'text-to-speech',
+    {
+      scenario: 'text-to-speech',
+      authMode: 'public',
+      outputsToCheck: ['TextToSpeechConvertURL', 'TextToSpeechAudioBucket'],
+      landingAssertion: 'Convert FunctionURL responds < 500 and not 403.',
+      loginAssertion: null,
+      featureFlow: 'AudioBucket Output non-empty. Polly invocation not exercised by smoke.',
+      historicalRegressionCited:
+        'Public Lambda FunctionURL dual-perm pattern (same as foi-redaction). No scenario-specific regression history yet.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'smart-car-park',
+    {
+      scenario: 'smart-car-park',
+      authMode: 'public',
+      outputsToCheck: ['SmartCarParkDashboardURL', 'SmartCarParkSensorReadingsTable'],
+      landingAssertion: 'Dashboard FunctionURL responds < 500 and not 403.',
+      loginAssertion: null,
+      featureFlow:
+        'SensorReadingsTable Output non-empty. EventBridge-scheduled simulator + table query not exercised by smoke.',
+      historicalRegressionCited:
+        'No specific historical regression in memory for this scenario. Deploy-completeness check until a regression escapes.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'council-chatbot',
+    {
+      scenario: 'council-chatbot',
+      authMode: 'public',
+      outputsToCheck: ['ChatbotURL', 'ChatbotKnowledgeBaseBucket'],
+      landingAssertion:
+        'Chatbot FunctionURL responds < 500 (5xx most likely = the legacy claude-3-haiku regression, see NAP-548) and not 403.',
+      loginAssertion: null,
+      featureFlow:
+        'KnowledgeBaseBucket Output non-empty. KB-grounded query not exercised; the not-5xx already proves the Lambda boots and reaches Bedrock.',
+      historicalRegressionCited:
+        'Bedrock Knowledge Base + S3 data source. The model the chatbot uses (claude-3-haiku-20240307) is now Legacy — see NAP-548.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'quicksight-dashboard',
+    {
+      scenario: 'quicksight-dashboard',
+      authMode: 'sso-skip',
+      outputsToCheck: ['QuicksightDashboardUrl', 'QuicksightDataBucket'],
+      landingAssertion:
+        'Dashboard URL responds < 500 (typically redirects to QuickSight SSO).',
+      loginAssertion: null,
+      featureFlow:
+        '(skipped per auth-mode categorisation) — only (a) landing and (d) Outputs are asserted.',
+      historicalRegressionCited:
+        'QuickSight Enterprise subscription provisioning is operator-driven (NAP-551). No scenario-specific regression in memory.',
+      quarantine: { state: 'active' },
+    },
+  ],
+  [
+    'all-demo',
+    {
+      scenario: 'all-demo',
+      authMode: 'public',
+      outputsToCheck: [
+        'ChatbotURL',
+        'RedactionURL',
+        'PlanningAnalyzerURL',
+        'QuicksightDashboardUrl',
+        'SmartCarParkDashboardURL',
+        'TextToSpeechConvertURL',
+        'DrupalUrl',
+        'SimplyReadableAppUrl',
+        'AiContactCentreCompanionUrl',
+        'LocalgovImsAdminPortalUrl',
+        'LocalgovImsPaymentPortalUrl',
+        'MinuteUrl',
+        'FixMyStreetUrl',
+        'PaperlessNgxUrl',
+        'PlanXUrl',
+        'BopsPlanningUrl',
+        'DigitalPlanningRegisterUrl',
+        'ChatbotKnowledgeBaseBucket',
+        'FoiDocumentsBucket',
+        'PlanningDocumentsBucket',
+        'QuicksightDataBucket',
+        'SmartCarParkSensorReadingsTable',
+        'TextToSpeechAudioBucket',
+        'AiContactCentrePstnNumber',
+        'ScenarioInfo',
+      ],
+      landingAssertion:
+        'Every Output the all-demo umbrella promises is present, non-empty, and not {{resolve:...}}. URL outputs match https?://.',
+      loginAssertion: null,
+      featureFlow:
+        'Umbrella deploy-completeness. Per-scenario specs cover per-scenario depth; this spec catches nested-stack regressions where a child stack succeeds CREATE_COMPLETE but the umbrella GetAtt is misspelled or the child Output was renamed.',
+      historicalRegressionCited:
+        'T3.8 verification (PR #233 comment) — LocalgovIms nested stack failed because the umbrella passed an empty GovUkPayApiKey but the scenario template required >= 1 character. The umbrella spec catches that earlier than the deploy-time CFN failure.',
+      quarantine: { state: 'active' },
+    },
+  ],
 ]);
 
 /**
