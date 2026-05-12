@@ -1,0 +1,97 @@
+name: Quarterly Audit
+
+# Opens a tracking issue every 3 months on the 1st at 09:00 UTC listing the
+# items the runbook's Operational Notes section says we must verify quarterly.
+# Phase 3 / T3.8b of the scenario-regression smoke-pack tech-spec.
+#
+# The issue assignment defers to CODEOWNERS rotation. If the issue stays open
+# more than 30 days, a separate escalation step auto-comments to nudge the
+# assignee.
+
+on:
+  schedule:
+    - cron: '0 9 1 */3 *'   # 09:00 UTC on the 1st of every 3rd month
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  open-audit-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Open quarterly audit issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          BODY=$(cat <<'EOF'
+          Quarterly audit of the smoke-test account and its operational state.
+          Created automatically by `.github/workflows/quarterly-audit.yml`; assign yourself or rotate via the CODEOWNERS team.
+
+          ### 1. Smoke-account spend audit
+          - [ ] Run `aws ce get-cost-and-usage` against the smoke account for the last 90 days.
+          - [ ] Flag any line item materially above expectations (per docs/smoke-test-account-setup.md → Cost trade-off).
+          - [ ] If a meaningful spend line has emerged, open a follow-up issue to revisit the deploy strategy (shared VPC, longer-lived deployment, weekly-only smoke).
+
+          ### 2. Orphan-resource sweep
+          - [ ] List resources by tag `Project=ndx-try` and check that each corresponds to an active CFN stack.
+          - [ ] Specifically inspect resource categories the retention lint does NOT cover: Lambda-created resources, Bedrock provisioned throughput, log groups outliving their stacks, S3 buckets created by application code.
+          - [ ] Clean up orphans manually or open targeted issues for each.
+
+          ### 3. Deploy-role policy drift
+          - [ ] `aws iam get-role-policy --role-name InnovationSandbox-ndx-SmokeTestDeployRole --policy-name SmokeTestDeployInline` and compare the live document to the JSON committed in `docs/smoke-test-account-setup.md` (Step 11).
+          - [ ] Any drift must be reconciled via a PR to the runbook (per the role-policy update discipline). Do NOT correct via direct `aws iam put-role-policy` without a runbook PR first.
+
+          ### 4. SCP attachment drift
+          - [ ] Compare the live `list-policies-for-target --target-id <smoke account id>` to `expected_scps` in `docs/smoke-test-account-config.yml`.
+          - [ ] The nightly drift check already opens `scp-drift` issues if mismatched; close those out here or escalate per AC3.6b.
+
+          ### 5. Renovate liveness
+          - [ ] `gh pr list --author renovate[bot] --search 'created:>30 days ago'` — if zero Renovate PRs in 30 days, the token / regex / action digest may be broken. Investigate:
+            - [ ] Token expiration (rotate per the runbook's RENOVATE_TOKEN rotation procedure).
+            - [ ] `renovate.json` custom-manager regex still matches the current pin syntax.
+            - [ ] `renovate.yml` action digest still resolves (Renovate self-pins; a removed image breaks the workflow).
+
+          ### 6. ProtectISB fallback revisit
+          - [ ] If `smoke_test_ou_placement_branch` in the config file is `child-of-root-with-selective-scps`, the runbook tracks a 6-month review issue (`scp-fallback-revisit`). Confirm whether ProtectISB has been loosened enough to re-run the canary; if so, move the account back to under `sandboxOu`.
+
+          ### Closing the audit
+          - When all six are checked, close this issue with a comment summarising any follow-ups opened.
+
+          Auto-escalation: this issue auto-receives a "still open" comment after 30 days if it has not been closed.
+          EOF
+          )
+          gh issue create \
+            --title "Smoke-pack quarterly audit ($(date -u +%Y-Q%q))" \
+            --label quarterly-audit \
+            --body "$BODY"
+
+  escalate-stale-audits:
+    # Nudges any quarterly-audit issue that has been open for over 30 days.
+    # Runs daily; cheap. The nudge is a comment, not an assignment change,
+    # so it doesn't disrupt human triage.
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Comment on stale audit issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          THRESHOLD=$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \
+            || date -u -v-30d +%Y-%m-%dT%H:%M:%SZ)
+          ISSUE_NUMS=$(gh issue list --state open --label quarterly-audit \
+            --search "created:<$THRESHOLD" --json number --jq '.[].number' || true)
+          for N in $ISSUE_NUMS; do
+            # Don't double-nudge in a single day; check the last comment.
+            LAST=$(gh issue view "$N" --json comments \
+              --jq '.comments[-1].body // ""' 2>/dev/null || echo "")
+            if echo "$LAST" | grep -q "Auto-escalation:"; then
+              continue
+            fi
+            gh issue comment "$N" --body "Auto-escalation: this quarterly-audit issue has been open >30 days. Please complete or close, or hand to the next-rotation owner."
+          done

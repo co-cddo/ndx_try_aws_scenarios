@@ -17,6 +17,7 @@
     "test:visual": "playwright test tests/visual-regression.spec.ts",
     "test:drupal-screenshots": "playwright test tests/drupal-screenshots.spec.ts",
     "test:playwright": "playwright test",
+    "test:smoke": "./scripts/smoke.sh",
     "clean": "rm -rf _site",
     "optimize-images": "node scripts/optimize-images.js",
     "check:screenshots": "node scripts/check-screenshots.js"
