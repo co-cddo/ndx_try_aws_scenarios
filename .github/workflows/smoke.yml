@@ -15,6 +15,7 @@ on:
       - 'scripts/smoke.sh'
       - 'playwright.config.ts'
       - 'docs/smoke-test-account-config.yml'
+      - 'docs/smoke-test-account-setup.md'
       - '.github/workflows/smoke.yml'
       - 'package.json'
 
@@ -81,7 +82,7 @@ jobs:
           echo "$CHANGED" | sed 's/^/  /'
 
           # Rails paths force full smoke.
-          if echo "$CHANGED" | grep -qE '^(scripts/smoke\.sh|playwright\.config\.ts|tests/smoke/fixtures/|cloudformation/scenarios/all-demo/|\.github/workflows/smoke\.yml|docs/smoke-test-account-config\.yml|package\.json)'; then
+          if echo "$CHANGED" | grep -qE '^(scripts/smoke\.sh|playwright\.config\.ts|tests/smoke/fixtures/|cloudformation/scenarios/all-demo/|\.github/workflows/smoke\.yml|docs/smoke-test-account-config\.yml|docs/smoke-test-account-setup\.md|package\.json)'; then
             echo "Rails change detected — full smoke"
             echo "mode=full" >> "$GITHUB_OUTPUT"
             echo 'scenarios=["all-demo"]' >> "$GITHUB_OUTPUT"
@@ -122,21 +123,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Fetch history so `git log -1 -- docs/smoke-test-account-setup.md`
+          # in the runbook_version drift check resolves to a real commit
+          # rather than the shallow-clone HEAD.
+          fetch-depth: 0
 
       - name: Install yq
         run: |
-          # Pin yq to a specific release rather than latest; latest can change
-          # between runs and is a soft supply-chain attack vector. Update via
-          # a deliberate PR.
+          # Pin yq by version (not :latest) so the URL is stable. We trust
+          # GitHub Releases to serve the right bytes for the tag — same
+          # trust model as the rest of CI's third-party-action references.
+          # A SHA-verification step was tried but became noise (Renovate-
+          # bumped versions need new SHAs and the previous check was set
+          # non-fatal anyway).
           YQ_VERSION="v4.45.4"
-          YQ_SHA256="ce4b67c3d3f43d2d1e6cd9b06a8a9c9b34af2e0a2c8a2c1f4fbcae3a31a0cd1f"
           sudo wget -qO /usr/local/bin/yq \
             "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
           sudo chmod +x /usr/local/bin/yq
-          # Don't fail the build if the SHA doesn't match — Renovate-bumped
-          # versions will have new SHAs and the verification is informational.
-          # The version pin alone defends against latest-pointer-tampering.
-          echo "${YQ_SHA256}  /usr/local/bin/yq" | sha256sum -c - || echo "WARN: yq SHA256 unexpected"
           yq --version
 
       - name: Read smoke-test-account-config.yml
@@ -146,6 +150,21 @@ jobs:
             echo "ERROR: docs/smoke-test-account-config.yml has placeholder values; Phase 1b not complete?" >&2
             exit 1
           }
+
+          # runbook_version drift check: the SHA in the config file must equal
+          # the most recent commit that touched docs/smoke-test-account-setup.md.
+          # Otherwise the operator updated the runbook but forgot to bump the
+          # provenance field. Twice my own fixes hit this; the lint prevents
+          # a third time.
+          RECORDED=$(yq -r '.runbook_version' docs/smoke-test-account-config.yml)
+          LATEST=$(git log -1 --pretty=%H -- docs/smoke-test-account-setup.md)
+          if [ "$RECORDED" != "$LATEST" ]; then
+            echo "ERROR: runbook_version in config ($RECORDED) does not match the most recent commit touching the runbook ($LATEST)." >&2
+            echo "Run: yq -i '.runbook_version = \"$LATEST\"' docs/smoke-test-account-config.yml" >&2
+            echo "Then commit. Re-run smoke after." >&2
+            exit 1
+          fi
+
           ACCOUNT_ID=$(yq -r '.smoke_test_account_id' docs/smoke-test-account-config.yml)
           ROLE_ARN=$(yq -r '.smoke_test_deploy_role_arn' docs/smoke-test-account-config.yml)
           REGION=$(yq -r '.smoke_test_region' docs/smoke-test-account-config.yml)
