@@ -48,4 +48,19 @@ describe('PaperlessNgxStack', () => {
     template.hasOutput('AdminPassword', {});
     template.hasOutput('CloudWatchLogsUrl', {});
   });
+
+  test('grants comprehend:DetectPiiEntities on the task role, region-pinned', () => {
+    const actionMatches = (a: unknown) =>
+      a === 'comprehend:DetectPiiEntities' ||
+      (Array.isArray(a) && a.includes('comprehend:DetectPiiEntities'));
+    const policies = template.findResources('AWS::IAM::Policy');
+    const matched = Object.values(policies).flatMap((r: any) =>
+      (r.Properties?.PolicyDocument?.Statement ?? []).filter(
+        (s: any) =>
+          actionMatches(s.Action) &&
+          s.Condition?.StringEquals?.['aws:RequestedRegion'] !== undefined,
+      ),
+    );
+    expect(matched).toHaveLength(1);
+  });
 });
