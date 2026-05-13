@@ -2348,8 +2348,8 @@
   "Parameters": {
     "GovUkPayApiKey": {
       "Type": "String",
-      "Description": "GOV.UK Pay sandbox API key (required for payment processing)",
-      "MinLength": 1,
+      "Default": "",
+      "Description": "GOV.UK Pay sandbox API key. Empty = payment portal will reject transactions but the rest of the stack still deploys.",
       "NoEcho": true
     },
     "SsmParameterValueawsserviceamiwindowslatestWindowsServer2022EnglishFullBaseC96584B6F00A464EAD1953AFF4B05118Parameter": {

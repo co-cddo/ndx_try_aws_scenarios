@@ -1,28 +1,18 @@
 #!/usr/bin/env bash
-# Phase 2b of the scenario-regression smoke-pack tech-spec.
-#
-# Lints synthesized CloudFormation for resources that retain state through
-# `cfn delete`. Such resources orphan in the smoke-test account and require a
-# quarterly manual sweep to clean up. We forbid them unless the author opts
-# in via a Metadata.Justification on the resource.
+# Lints CloudFormation for resources that retain state through `cfn delete`.
+# Orphaned retained resources require manual cleanup in the smoke account.
+# Resources opt out via a non-empty Metadata.Justification; the global cap
+# (MAX_JUSTIFICATIONS, default 5) keeps the opt-out from becoming routine.
 #
 # Targets:
-#   - DeletionPolicy: Retain
-#   - UpdateReplacePolicy: Retain
+#   - DeletionPolicy: Retain | Snapshot
+#   - UpdateReplacePolicy: Retain | Snapshot
 #   - Properties.DeletionProtection: true              (RDS / Aurora)
 #   - Properties.FinalSnapshotIdentifier               (suppression equivalent)
 #   - Properties.EnableDeletionProtection: true        (ELB, etc.)
 #
-# A resource is exempt if its Metadata contains a non-empty Justification
-# string. The second-order cap prevents the justification mechanism from
-# eroding into rubber-stamping: total justifications across all templates
-# is bounded.
-#
 # Usage:
-#   scripts/lint-retention-policies.sh <template.json> [template.json ...]
-#
-# Env vars:
-#   MAX_JUSTIFICATIONS  global cap, default 5
+#   scripts/lint-retention-policies.sh <template.yaml|template.json> [...]
 #
 # Exit codes:
 #   0   all checks passed
@@ -105,7 +95,9 @@ for TEMPLATE in "$@"; do
     . as $r |
     [
       (if (.value.DeletionPolicy == "Retain") then "DeletionPolicy=Retain" else empty end),
+      (if (.value.DeletionPolicy == "Snapshot") then "DeletionPolicy=Snapshot" else empty end),
       (if (.value.UpdateReplacePolicy == "Retain") then "UpdateReplacePolicy=Retain" else empty end),
+      (if (.value.UpdateReplacePolicy == "Snapshot") then "UpdateReplacePolicy=Snapshot" else empty end),
       (if (.value.Properties.DeletionProtection == true) then "Properties.DeletionProtection=true" else empty end),
       (if (.value.Properties.EnableDeletionProtection == true) then "Properties.EnableDeletionProtection=true" else empty end),
       (if (.value.Properties.FinalSnapshotIdentifier != null and .value.Properties.FinalSnapshotIdentifier != "") then "Properties.FinalSnapshotIdentifier=set" else empty end)

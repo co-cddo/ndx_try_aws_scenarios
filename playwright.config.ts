@@ -1,13 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Playwright configuration for NDX:Try AWS Scenarios.
- * - desktop / mobile: screenshot capture + visual regression of the portal
- *   site (run against http-server _site on localhost:8080).
- * - smoke: scenario-regression smoke pack against a deployed all-demo in the
- *   smoke-test AWS account. Resolves URLs at test-time from CFN outputs;
- *   does not consume baseURL or webServer.
- */
 const isSmoke = process.env.PLAYWRIGHT_SUITE === 'smoke';
 
 export default defineConfig({
@@ -30,7 +22,8 @@ export default defineConfig({
   projects: [
     {
       name: 'desktop',
-      testMatch: /tests\/(?!smoke\/).*\.spec\.ts$/,
+      testDir: './tests',
+      testMatch: /.*\.spec\.ts$/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },
@@ -38,7 +31,8 @@ export default defineConfig({
     },
     {
       name: 'mobile',
-      testMatch: /tests\/(?!smoke\/).*\.spec\.ts$/,
+      testDir: './tests',
+      testMatch: /.*\.spec\.ts$/,
       use: {
         ...devices['iPhone SE'],
         viewport: { width: 375, height: 667 },
@@ -46,7 +40,8 @@ export default defineConfig({
     },
     {
       name: 'smoke',
-      testMatch: /tests\/smoke\/.*\.spec\.ts$/,
+      testDir: './cloudformation/scenarios',
+      testMatch: /[^/]+\/smoke\.ts$/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },
@@ -54,8 +49,6 @@ export default defineConfig({
     },
   ],
 
-  // The portal-site webServer is only relevant for the desktop/mobile suites.
-  // Smoke does not need it (and starting it on a CI smoke run is wasteful).
   ...(isSmoke
     ? {}
     : {
@@ -67,10 +60,9 @@ export default defineConfig({
         },
       }),
 
-  // Screenshot specific settings (portal site only; smoke uses default expect).
   expect: {
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.1, // 10% diff threshold
+      maxDiffPixelRatio: 0.1,
     },
   },
 });

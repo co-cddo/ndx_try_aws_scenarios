@@ -1,13 +1,8 @@
-/**
- * Smoke-pack CFN-outputs helper.
- *
- * Resolves the deployed all-demo stack's Outputs at test time via
- * cloudformation:DescribeStacks and returns a typed map where sensitive
- * outputs are gated behind a callable accessor that never leaks through
- * toString / JSON.stringify / Playwright trace logs.
- *
- * Phase 3 / T3.2 of the scenario-regression smoke-pack tech-spec.
- */
+// Resolves a stack's Outputs via DescribeStacks. Outputs whose key matches
+// SENSITIVE_KEY_PATTERN come back wrapped in a SensitiveValue whose toString
+// / JSON.stringify / inspect emit [REDACTED]; the underlying value is only
+// reachable via .sensitiveValue() so it can't accidentally land in a
+// Playwright trace.
 
 import {
   CloudFormationClient,
@@ -15,26 +10,17 @@ import {
   Output as CfnOutput,
 } from '@aws-sdk/client-cloudformation';
 
-/**
- * The regex is deliberately broader than first-pass to catch AdminCreds,
- * DefaultLogin, BootstrapKey, ApiKey, DBConnectionString, etc. Plus an
- * opt-in via OutputMetadata: { Sensitive: true } on the CFN Output.
- */
 const SENSITIVE_KEY_PATTERN =
   /(Password|Secret|Token|Credentials|Creds|Login|ApiKey|ConnectionString|PrivateKey|Passphrase)/i;
 
 export interface SafeValue {
   readonly kind: 'safe';
-  /** The output value, safe to log / assert by string. */
   readonly value: string;
 }
 
 export interface SensitiveValue {
   readonly kind: 'sensitive';
-  /** Length of the redacted value (safe to log; useful for shape assertions). */
   readonly length: number;
-  /** Returns the actual value. Callers MUST NOT pass this through string
-   *  interpolation or assertion frameworks that auto-print on failure. */
   sensitiveValue(): string;
 }
 
@@ -45,8 +31,7 @@ export type CfnOutputs = Readonly<Record<string, ResolvedOutput>>;
 const REDACTED_PLACEHOLDER = (length: number) => `[REDACTED (${length} chars)]`;
 
 function makeSensitive(value: string): SensitiveValue {
-  // Closures own the value; toString / JSON.stringify / inspect on the
-  // wrapper object never expose it. The accessor is the explicit unlock.
+  // Closure owns the value; toString / inspect emit a placeholder.
   const v = value;
   const wrapper: SensitiveValue = {
     kind: 'sensitive',
@@ -63,7 +48,6 @@ function makeSensitive(value: string): SensitiveValue {
     enumerable: false,
     value: () => REDACTED_PLACEHOLDER(v.length),
   });
-  // Node's util.inspect honors this:
   Object.defineProperty(wrapper, Symbol.for('nodejs.util.inspect.custom'), {
     enumerable: false,
     value: () => REDACTED_PLACEHOLDER(v.length),
@@ -94,12 +78,6 @@ interface FetchOptions {
   readonly client?: CloudFormationClient;
 }
 
-/**
- * Resolves all Outputs of the named stack. The returned map is the helper's
- * authoritative read of "what does this deployment expose"; smoke tests
- * import the assertion-bar row, look up the row's outputsToCheck, and
- * assert on this map.
- */
 export async function fetchStackOutputs(
   opts: FetchOptions,
 ): Promise<CfnOutputs> {
@@ -118,11 +96,9 @@ export async function fetchStackOutputs(
     const key = o.OutputKey;
     const value = o.OutputValue;
     if (!key || value === undefined) continue;
-    // Limitation: CloudFormation's DescribeStacks API does NOT return
-    // Output Metadata, so the spec's Metadata: { Sensitive: true } opt-in
-    // is unimplementable via this API. The regex below is the sole signal.
-    // The spec's "audit pass after Phase 4" should grow the regex when it
-    // identifies outputs that need redaction but aren't matched yet.
+    // DescribeStacks does NOT return Output Metadata, so OutputMetadata:
+    // { Sensitive: true } is unreachable here — the key-name regex is the
+    // only signal. Extend SENSITIVE_KEY_PATTERN when new sensitive keys appear.
     if (isSensitiveKey(key, undefined)) {
       map[key] = makeSensitive(value);
     } else {
@@ -132,11 +108,6 @@ export async function fetchStackOutputs(
   return Object.freeze(map);
 }
 
-/**
- * Convenience: assert a Safe output exists and return its value, or throw.
- * Prevents tests from accidentally treating a missing Output as an empty
- * string.
- */
 export function requireSafe(outputs: CfnOutputs, key: string): string {
   const o = outputs[key];
   if (!o) throw new Error(`Required CFN output "${key}" not present`);
@@ -148,12 +119,6 @@ export function requireSafe(outputs: CfnOutputs, key: string): string {
   return o.value;
 }
 
-/**
- * Convenience: assert a Sensitive output exists and return its accessor.
- * The caller MUST only pass the accessor's RETURN VALUE to credential-entry
- * sites (e.g. secure-form.ts::fillPassword); the accessor itself never logs
- * the value.
- */
 export function requireSensitive(
   outputs: CfnOutputs,
   key: string,

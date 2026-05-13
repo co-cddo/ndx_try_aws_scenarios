@@ -29,68 +29,45 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  synth-localgov-drupal:
+  # Standard CDK scenarios: TypeScript CDK in cloudformation/scenarios/<name>/cdk
+  # producing one stack named in the matrix. Each entry's cdk.json sets
+  # `output: ../cdk.out`, so `cdk synth` writes to the scenario root's cdk.out/
+  # directory. The strip step reads from there and writes template.yaml at the
+  # scenario root. `lint-retention-policies.sh` then enforces the retention bar,
+  # bootstrap-residue check, and template-size limit (replacing per-job inline
+  # validations).
+  #
+  # The matrix only varies on three knobs:
+  #   - name:      scenario directory name
+  #   - stack:     CDK stack name (used by the strip step to find the template)
+  #   - run-tests: run `npm test` (only enabled where meaningful test files exist)
+  #
+  # Lockfile presence is detected at runtime (npm ci vs npm install) so the
+  # matrix entries don't need a flag for it. simply-readable is special-cased
+  # below (upstream clone, React build, Lambda asset packaging).
+  synth-cdk:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: cloudformation/scenarios/localgov-drupal/cdk/package-lock.json
-
-      - name: Build and test localgov-drupal CDK
-        working-directory: cloudformation/scenarios/localgov-drupal/cdk
-        run: |
-          npm ci
-          npm run build
-          npm test
-          npx cdk synth
-
-      - name: Strip bootstrap cruft and validate template
-        working-directory: cloudformation/scenarios/localgov-drupal/cdk
-        run: |
-          node -e "
-            const fs = require('fs');
-            const t = JSON.parse(fs.readFileSync('../cdk.out/LocalGovDrupalStack.template.json', 'utf8'));
-            delete t.Parameters?.BootstrapVersion;
-            delete t.Resources?.CDKMetadata;
-            delete t.Rules?.CheckBootstrapVersion;
-            const str = JSON.stringify(t);
-            const errors = [];
-            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
-              errors.push('Template contains CDK bootstrap/asset dependencies');
-            }
-            if (!str.includes('secretsmanager')) {
-              errors.push('Template missing Secrets Manager resources (admin password not migrated)');
-            }
-            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
-            if (deletionPolicies) {
-              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
-            }
-            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
-            if (size > 400000) {
-              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
-            }
-            if (errors.length > 0) {
-              errors.forEach(e => console.error('ERROR: ' + e));
-              process.exit(1);
-            }
-            // Write JSON content to .yaml — CloudFormation accepts both formats regardless of extension
-            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
-            fs.writeFileSync('../template.yaml', content);
-            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
-          "
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: localgov-drupal-template
-          path: cloudformation/scenarios/localgov-drupal/template.yaml
-          retention-days: 1
-
-  synth-localgov-ims:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario:
+          - name: localgov-drupal
+            stack: LocalGovDrupalStack
+            run-tests: true
+          - name: localgov-ims
+            stack: LocalGovImsStack
+          - name: minute
+            stack: MinuteStack
+          - name: fixmystreet
+            stack: FixMyStreetStack
+          - name: paperless-ngx
+            stack: PaperlessNgxStack
+          - name: planx
+            stack: PlanxStack
+          - name: bops-planning
+            stack: BopsPlanningStack
+          - name: digital-planning-register
+            stack: DigitalPlanningRegisterStack
     steps:
       - uses: actions/checkout@v6
 
@@ -98,49 +75,35 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Build and synth localgov-ims CDK
-        working-directory: cloudformation/scenarios/localgov-ims/cdk
+      - name: Install + build + synth (${{ matrix.scenario.name }})
+        working-directory: cloudformation/scenarios/${{ matrix.scenario.name }}/cdk
         run: |
-          npm install
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
           npm run build
           npx cdk synth
 
-      - name: Strip bootstrap cruft and validate template
-        working-directory: cloudformation/scenarios/localgov-ims/cdk
-        run: |
-          node -e "
-            const fs = require('fs');
-            const t = JSON.parse(fs.readFileSync('../cdk.out/LocalGovImsStack.template.json', 'utf8'));
-            delete t.Parameters?.BootstrapVersion;
-            delete t.Resources?.CDKMetadata;
-            delete t.Rules?.CheckBootstrapVersion;
-            const str = JSON.stringify(t);
-            const errors = [];
-            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
-              errors.push('Template contains CDK bootstrap/asset dependencies');
-            }
-            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
-            if (deletionPolicies) {
-              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
-            }
-            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
-            if (size > 400000) {
-              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
-            }
-            if (errors.length > 0) {
-              errors.forEach(e => console.error('ERROR: ' + e));
-              process.exit(1);
-            }
-            // Write JSON content to .yaml — CloudFormation accepts both formats regardless of extension
-            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
-            fs.writeFileSync('../template.yaml', content);
-            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
-          "
+      - name: Test (${{ matrix.scenario.name }})
+        if: matrix.scenario.run-tests
+        working-directory: cloudformation/scenarios/${{ matrix.scenario.name }}/cdk
+        run: npm test
+
+      - name: Strip bootstrap cruft and write template
+        working-directory: cloudformation/scenarios/${{ matrix.scenario.name }}
+        env:
+          STACK: ${{ matrix.scenario.stack }}
+        run: node ../../../scripts/strip-cdk-template.cjs
+
+      - name: Retention-policy lint
+        run: ./scripts/lint-retention-policies.sh cloudformation/scenarios/${{ matrix.scenario.name }}/template.yaml
 
       - uses: actions/upload-artifact@v7
         with:
-          name: localgov-ims-template
-          path: cloudformation/scenarios/localgov-ims/template.yaml
+          name: ${{ matrix.scenario.name }}-template
+          path: cloudformation/scenarios/${{ matrix.scenario.name }}/template.yaml
           retention-days: 1
 
   synth-simply-readable:
@@ -241,320 +204,9 @@ jobs:
           path: cloudformation/scenarios/simply-readable/website-build/
           retention-days: 1
 
-  synth-minute:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Build minute CDK
-        working-directory: cloudformation/scenarios/minute/cdk
-        run: |
-          npm install
-          npx cdk synth
-
-      - name: Strip bootstrap cruft and validate template
-        working-directory: cloudformation/scenarios/minute/cdk
-        run: |
-          node -e "
-            const fs = require('fs');
-            const t = JSON.parse(fs.readFileSync('../cdk.out/MinuteStack.template.json', 'utf8'));
-            delete t.Parameters?.BootstrapVersion;
-            delete t.Resources?.CDKMetadata;
-            delete t.Rules?.CheckBootstrapVersion;
-            const str = JSON.stringify(t);
-            const errors = [];
-            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
-              errors.push('Template contains CDK bootstrap/asset dependencies');
-            }
-            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
-            if (deletionPolicies) {
-              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
-            }
-            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
-            if (size > 400000) {
-              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
-            }
-            if (errors.length > 0) {
-              errors.forEach(e => console.error('ERROR: ' + e));
-              process.exit(1);
-            }
-            // Write JSON content to .yaml — CloudFormation accepts both formats regardless of extension
-            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
-            fs.writeFileSync('../template.yaml', content);
-            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
-          "
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: minute-template
-          path: cloudformation/scenarios/minute/template.yaml
-          retention-days: 1
-
-  synth-fixmystreet:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: cloudformation/scenarios/fixmystreet/cdk/package-lock.json
-
-      - name: Build and synth fixmystreet CDK
-        working-directory: cloudformation/scenarios/fixmystreet/cdk
-        run: |
-          npm ci
-          npm run build
-          npx cdk synth
-
-      - name: Strip bootstrap cruft and validate template
-        working-directory: cloudformation/scenarios/fixmystreet/cdk
-        run: |
-          node -e "
-            const fs = require('fs');
-            const t = JSON.parse(fs.readFileSync('../cdk.out/FixMyStreetStack.template.json', 'utf8'));
-            delete t.Parameters?.BootstrapVersion;
-            delete t.Resources?.CDKMetadata;
-            delete t.Rules?.CheckBootstrapVersion;
-            const str = JSON.stringify(t);
-            const errors = [];
-            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
-              errors.push('Template contains CDK bootstrap/asset dependencies');
-            }
-            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
-            if (deletionPolicies) {
-              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
-            }
-            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
-            if (size > 400000) {
-              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
-            }
-            if (errors.length > 0) {
-              errors.forEach(e => console.error('ERROR: ' + e));
-              process.exit(1);
-            }
-            // Write JSON content to .yaml — CloudFormation accepts both formats regardless of extension
-            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
-            fs.writeFileSync('../template.yaml', content);
-            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
-          "
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: fixmystreet-template
-          path: cloudformation/scenarios/fixmystreet/template.yaml
-          retention-days: 1
-
-  synth-paperless-ngx:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: cloudformation/scenarios/paperless-ngx/cdk/package-lock.json
-
-      - name: Build and synth paperless-ngx CDK
-        working-directory: cloudformation/scenarios/paperless-ngx/cdk
-        run: |
-          npm ci
-          npm run build
-          npx cdk synth --output cdk.out
-
-      - name: Strip bootstrap cruft and validate template
-        working-directory: cloudformation/scenarios/paperless-ngx/cdk
-        run: |
-          node -e "
-            const fs = require('fs');
-            const t = JSON.parse(fs.readFileSync('cdk.out/PaperlessNgxStack.template.json', 'utf8'));
-            delete t.Parameters?.BootstrapVersion;
-            delete t.Resources?.CDKMetadata;
-            delete t.Rules?.CheckBootstrapVersion;
-            const str = JSON.stringify(t);
-            const errors = [];
-            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
-              errors.push('Template contains CDK bootstrap/asset dependencies');
-            }
-            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
-            if (deletionPolicies) {
-              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
-            }
-            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
-            if (size > 400000) {
-              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
-            }
-            if (errors.length > 0) {
-              errors.forEach(e => console.error('ERROR: ' + e));
-              process.exit(1);
-            }
-            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
-            fs.writeFileSync('../template.yaml', content);
-            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
-          "
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: paperless-ngx-template
-          path: cloudformation/scenarios/paperless-ngx/template.yaml
-          retention-days: 1
-
-  synth-planx:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Build and synth planx CDK
-        working-directory: cloudformation/scenarios/planx/cdk
-        run: |
-          npm install
-          npm run build
-          npx cdk synth
-
-      - name: Strip bootstrap cruft and validate template
-        working-directory: cloudformation/scenarios/planx/cdk
-        run: |
-          node -e "
-            const fs = require('fs');
-            const t = JSON.parse(fs.readFileSync('cdk.out/PlanxStack.template.json', 'utf8'));
-            delete t.Parameters?.BootstrapVersion;
-            delete t.Resources?.CDKMetadata;
-            delete t.Rules?.CheckBootstrapVersion;
-            const str = JSON.stringify(t);
-            const errors = [];
-            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
-              errors.push('Template contains CDK bootstrap/asset dependencies');
-            }
-            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
-            if (deletionPolicies) {
-              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
-            }
-            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
-            if (size > 400000) {
-              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
-            }
-            if (errors.length > 0) {
-              errors.forEach(e => console.error('ERROR: ' + e));
-              process.exit(1);
-            }
-            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
-            fs.writeFileSync('../template.yaml', content);
-            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
-          "
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: planx-template
-          path: cloudformation/scenarios/planx/template.yaml
-          retention-days: 1
-
-  synth-bops-planning:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Build and synth bops-planning CDK
-        working-directory: cloudformation/scenarios/bops-planning/cdk
-        run: |
-          npm install
-          npm run build
-          npx cdk synth
-
-      - name: Strip bootstrap cruft and write template
-        working-directory: cloudformation/scenarios/bops-planning/cdk
-        run: |
-          node -e "
-            const fs = require('fs');
-            const t = JSON.parse(fs.readFileSync('cdk.out/BopsPlanningStack.template.json', 'utf8'));
-            delete t.Parameters?.BootstrapVersion;
-            delete t.Resources?.CDKMetadata;
-            delete t.Rules?.CheckBootstrapVersion;
-            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
-            fs.writeFileSync('../template.yaml', content);
-            console.log('Wrote template.yaml (' + Buffer.byteLength(content) + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
-          "
-
-      - name: Retention-policy lint
-        run: ./scripts/lint-retention-policies.sh cloudformation/scenarios/bops-planning/template.yaml
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: bops-planning-template
-          path: cloudformation/scenarios/bops-planning/template.yaml
-          retention-days: 1
-
-  synth-digital-planning-register:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-
-      - name: Build and synth digital-planning-register CDK
-        working-directory: cloudformation/scenarios/digital-planning-register/cdk
-        run: |
-          npm install
-          npm run build
-          npx cdk synth
-
-      - name: Strip bootstrap cruft and validate template
-        working-directory: cloudformation/scenarios/digital-planning-register/cdk
-        run: |
-          node -e "
-            const fs = require('fs');
-            const t = JSON.parse(fs.readFileSync('cdk.out/DigitalPlanningRegisterStack.template.json', 'utf8'));
-            delete t.Parameters?.BootstrapVersion;
-            delete t.Resources?.CDKMetadata;
-            delete t.Rules?.CheckBootstrapVersion;
-            const str = JSON.stringify(t);
-            const errors = [];
-            if (str.includes('AssetParameters') || str.includes('cdk-bootstrap')) {
-              errors.push('Template contains CDK bootstrap/asset dependencies');
-            }
-            const deletionPolicies = str.match(/\"DeletionPolicy\":\s*\"(Snapshot|Retain)\"/g);
-            if (deletionPolicies) {
-              errors.push('Template contains non-DESTROY deletion policies: ' + deletionPolicies.join(', '));
-            }
-            const size = Buffer.byteLength(JSON.stringify(t, null, 2));
-            if (size > 400000) {
-              errors.push('Template size ' + size + ' bytes approaching CloudFormation S3 limit (460,800)');
-            }
-            if (errors.length > 0) {
-              errors.forEach(e => console.error('ERROR: ' + e));
-              process.exit(1);
-            }
-            const content = '# Auto-generated from CDK synthesis. Do not edit.\n' + JSON.stringify(t, null, 2);
-            fs.writeFileSync('../template.yaml', content);
-            console.log('Wrote template.yaml (' + size + ' bytes, ' + Object.keys(t.Resources || {}).length + ' resources)');
-          "
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: digital-planning-register-template
-          path: cloudformation/scenarios/digital-planning-register/template.yaml
-          retention-days: 1
-
-  # Phase 2b: top-level retention-policy lint over the hand-authored CFN
-  # templates that don't go through any synth job (council-chatbot,
-  # foi-redaction, planning-ai, smart-car-park, text-to-speech,
-  # quicksight-dashboard, ai-contact-centre, all-demo). The lint script also
-  # detects oversize templates and AssetParameters / cdk-bootstrap residue.
+  # Retention-policy lint over hand-authored CFN templates that don't pass
+  # through a synth job. The lint script also catches oversize templates and
+  # AssetParameters / cdk-bootstrap residue.
   lint-committed-templates:
     runs-on: ubuntu-latest
     steps:
@@ -583,15 +235,8 @@ jobs:
 
   deploy:
     needs:
-      - synth-localgov-drupal
-      - synth-localgov-ims
+      - synth-cdk
       - synth-simply-readable
-      - synth-minute
-      - synth-fixmystreet
-      - synth-paperless-ngx
-      - synth-planx
-      - synth-bops-planning
-      - synth-digital-planning-register
       - lint-committed-templates
     runs-on: ubuntu-latest
     steps:
@@ -694,25 +339,8 @@ jobs:
             --s3-prefix scenarios/ai-contact-centre/assets \
             --region us-east-1
 
-      # Phase 2a / T2a.5: verify the packaged template's CodeUri values all
-      # target the blueprints bucket. SAM's default --s3-bucket would write
-      # CodeUri values pointing at aws-sam-cli-managed-default-samclisourcebucket-*;
-      # the deploy role only has read on the blueprints bucket, so a packaging
-      # regression that drops --s3-bucket would silently produce a template
-      # the smoke-test account cannot deploy. Fail the build early instead.
       - name: Verify AI Contact Centre packaged CodeUri targets the blueprints bucket
-        working-directory: cloudformation/scenarios/ai-contact-centre
-        run: |
-          BAD=$(grep -oE 's3://[a-z0-9.-]+' dist/template.yaml | sort -u | grep -v 'ndx-try-isb-blueprints-568672915267' || true)
-          if [ -n "$BAD" ]; then
-            echo "ERROR: packaged template references non-blueprints buckets:"
-            echo "$BAD"
-            echo ""
-            echo "Re-check the sam package command's --s3-bucket flag."
-            exit 1
-          fi
-          COUNT=$(grep -c 's3://ndx-try-isb-blueprints-568672915267' dist/template.yaml || true)
-          echo "Verified $COUNT CodeUri references point at the blueprints bucket"
+        run: ./scripts/verify-sam-package-bucket.sh cloudformation/scenarios/ai-contact-centre/dist/template.yaml ndx-try-isb-blueprints-568672915267
 
       - run: npm ci
         working-directory: cloudformation/isb-hub

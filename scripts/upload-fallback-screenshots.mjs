@@ -1,20 +1,10 @@
 #!/usr/bin/env node
 
-/**
- * Fallback Screenshot Upload Script
- * Story: S0.5 - Reference Deployment Environment
- *
- * Uploads screenshots to S3 fallback/ prefix with disclaimer metadata.
- * These screenshots are used when the reference stack is unavailable.
- *
- * AC5.6: Fallback screenshots stored in S3 fallback/ prefix with disclaimer
- *
- * Usage:
- *   node scripts/upload-fallback-screenshots.mjs <scenario> <screenshot-path> [<template-version>]
- *
- * Example:
- *   node scripts/upload-fallback-screenshots.mjs council-chatbot ./screenshots/lambda.png v1.0.0
- */
+// Uploads a screenshot to the S3 fallback/ prefix with disclaimer metadata.
+// Used when the reference stack is unavailable.
+//
+// Usage:
+//   node scripts/upload-fallback-screenshots.mjs <scenario> <screenshot-path> [<template-version>]
 
 import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { readFile } from 'fs/promises';

@@ -66,12 +66,14 @@ export class LocalGovImsStack extends cdk.Stack {
     cdk.Tags.of(this).add('Project', 'ndx-try-aws-scenarios');
     cdk.Tags.of(this).add('Scenario', 'localgov-ims');
 
-    // CloudFormation parameter for GOV.UK Pay API key (NoEcho)
+    // Empty value is accepted so the stack still deploys when no key is
+    // supplied (smoke, demos); the payment portal will reject transactions
+    // but the rest of the system stays healthy.
     const govukPayApiKeyParam = new cdk.CfnParameter(this, 'GovUkPayApiKey', {
       type: 'String',
       noEcho: true,
-      minLength: 1,
-      description: 'GOV.UK Pay sandbox API key (required for payment processing)',
+      default: '',
+      description: 'GOV.UK Pay sandbox API key. Empty = payment portal will reject transactions but the rest of the stack still deploys.',
     });
 
     // Generate secrets — no hardcoded secretName to avoid recovery window collisions
