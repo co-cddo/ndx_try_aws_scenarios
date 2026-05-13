@@ -102,6 +102,14 @@ export class ComputeConstruct extends Construct {
       resources: ['*'],
     }));
 
+    taskRole.addToPolicy(new iam.PolicyStatement({
+      actions: ['comprehend:DetectPiiEntities'],
+      resources: ['*'],
+      conditions: {
+        StringEquals: { 'aws:RequestedRegion': region },
+      },
+    }));
+
     const executionRole = new iam.Role(this, 'ExecutionRole', {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
       managedPolicies: [
@@ -217,6 +225,9 @@ export class ComputeConstruct extends Construct {
         PAPERLESS_POST_CONSUME_SCRIPT: '/scripts/post-consume.sh',
         PAPERLESS_BEDROCK_REGION: region,
         PAPERLESS_BEDROCK_MODEL_ID: props.bedrockModelId,
+        PAPERLESS_COMPREHEND_REGION: region,
+        PAPERLESS_PII_MIN_SCORE: '0.80',
+        PAPERLESS_PII_DROP_TYPES: 'DATE_TIME,AGE',
         PAPERLESS_ARCHIVE_BUCKET: props.archiveBucket.bucketName,
         PAPERLESS_KB_PREFIX: props.kbPrefix,
         PAPERLESS_KB_LOCAL_DIR: '/kb',

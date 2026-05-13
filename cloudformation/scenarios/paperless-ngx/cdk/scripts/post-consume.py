@@ -36,6 +36,18 @@ ADMIN_USER = os.environ.get("PAPERLESS_ADMIN_USER", "admin")
 ADMIN_PASS = os.environ.get("PAPERLESS_ADMIN_PASSWORD", "")
 BEDROCK_REGION = os.environ.get("PAPERLESS_BEDROCK_REGION", "us-east-1")
 BEDROCK_MODEL_ID = os.environ.get("PAPERLESS_BEDROCK_MODEL_ID", "amazon.nova-pro-v1:0")
+COMPREHEND_REGION = os.environ.get("PAPERLESS_COMPREHEND_REGION", BEDROCK_REGION)
+_raw_min_score = os.environ.get("PAPERLESS_PII_MIN_SCORE", "0.80")
+try:
+    PII_MIN_SCORE = float(_raw_min_score)
+except (TypeError, ValueError):
+    log.warning("Invalid PAPERLESS_PII_MIN_SCORE=%r, falling back to 0.80", _raw_min_score)
+    PII_MIN_SCORE = 0.80
+PII_DROP_TYPES = frozenset(
+    tok.strip().upper()
+    for tok in os.environ.get("PAPERLESS_PII_DROP_TYPES", "DATE_TIME,AGE").split(",")
+    if tok.strip()
+)
 ARCHIVE_BUCKET = os.environ.get("PAPERLESS_ARCHIVE_BUCKET")
 KB_PREFIX = os.environ.get("PAPERLESS_KB_PREFIX", "kb/")
 KB_LOCAL_DIR = os.environ.get("PAPERLESS_KB_LOCAL_DIR", "/kb")
@@ -106,6 +118,51 @@ def ensure_named(http: requests.Session, kind: str, name: str) -> int | None:
         return r.json()["id"]
     log.warning("Failed to create %s '%s': %s %s", kind, name, r.status_code, r.text[:200])
     return None
+
+
+def detect_pii(content: str) -> tuple[dict[str, list[dict[str, Any]]], int]:
+    """Call Comprehend DetectPiiEntities on chunked OCR text.
+
+    Returns (entities_by_type, chunks_count) where entities_by_type is keyed by
+    Comprehend entity Type (uppercase enum, e.g. NAME, EMAIL) and contains only
+    entities passing the Score and drop-list filters.
+    """
+    comprehend = boto3.client("comprehend", region_name=COMPREHEND_REGION)
+    content_bytes = (content or "").encode("utf-8")
+    chunks: list[bytes] = []
+    pos = 0
+    while pos < len(content_bytes):
+        end = min(pos + 4500, len(content_bytes))
+        if end < len(content_bytes):
+            ws_pos = max(
+                content_bytes.rfind(b" ", end - 500, end),
+                content_bytes.rfind(b"\n", end - 500, end),
+                content_bytes.rfind(b"\t", end - 500, end),
+            )
+            if ws_pos > pos:
+                end = ws_pos
+        while end < len(content_bytes) and end > pos and (content_bytes[end] & 0xC0) == 0x80:
+            end -= 1
+        chunks.append(content_bytes[pos:end])
+        pos = end
+        if pos < len(content_bytes) and content_bytes[pos:pos + 1] in (b" ", b"\n", b"\t"):
+            pos += 1
+
+    result: dict[str, list[dict[str, Any]]] = {}
+    for chunk in chunks:
+        if not chunk:
+            continue
+        chunk_str = chunk.decode("utf-8", errors="replace")
+        resp = comprehend.detect_pii_entities(Text=chunk_str, LanguageCode="en")
+        for ent in resp.get("Entities", []):
+            etype = ent.get("Type", "")
+            score = ent.get("Score", 0.0)
+            if score < PII_MIN_SCORE:
+                continue
+            if etype in PII_DROP_TYPES:
+                continue
+            result.setdefault(etype, []).append(ent)
+    return result, len(chunks)
 
 
 def call_bedrock(content: str, original_title: str) -> dict[str, Any]:
@@ -203,6 +260,12 @@ def main() -> int:
         log.error("Bedrock call failed for %s: %s", DOCUMENT_ID, e)
         return 0
 
+    try:
+        pii_result, pii_chunks = detect_pii(content)
+    except Exception as e:  # noqa: BLE001
+        log.warning("Comprehend PII detection failed: %s", e)
+        pii_result, pii_chunks = {}, 0
+
     payload: dict[str, Any] = {}
     if isinstance(ai.get("title"), str) and ai["title"].strip():
         payload["title"] = ai["title"].strip()[:128]
@@ -236,6 +299,32 @@ def main() -> int:
         corr_id = ensure_named(http, "correspondents", corr.strip())
         if corr_id:
             payload["correspondent"] = corr_id
+
+    if pii_result:
+        pii_tag_names = ["pii"] + sorted({f"pii-{t.lower().replace('_', '-')}" for t in pii_result})
+        pii_tag_ids = [tid for tid in (ensure_named(http, "tags", n) for n in pii_tag_names) if tid is not None]
+        existing_tag_ids = set(payload.get("tags", []))
+        payload["tags"] = list(existing_tag_ids | set(pii_tag_ids))
+
+        total_spans = sum(len(v) for v in pii_result.values())
+        type_counts = {t: len(v) for t, v in sorted(pii_result.items())}
+        log.info(
+            "[post-consume-pii] doc_id=%s chunks=%d total_spans=%d types=%s",
+            DOCUMENT_ID, pii_chunks, total_spans, json.dumps(type_counts),
+        )
+
+        try:
+            http.post(
+                f"{API_URL}/documents/{DOCUMENT_ID}/notes/",
+                json={
+                    "note": "Comprehend PII: " + ", ".join(
+                        f"{t} ({len(v)} spans)" for t, v in sorted(pii_result.items())
+                    ),
+                },
+                timeout=10,
+            )
+        except Exception:  # noqa: BLE001
+            pass
 
     if payload:
         patch_document(http, payload)
