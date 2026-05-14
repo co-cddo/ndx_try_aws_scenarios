@@ -750,6 +750,7 @@ cat > /tmp/deploy-role-policy.json <<'EOF'
         "lambda:*",
         "apigateway:*",
         "logs:*",
+        "servicediscovery:*",
         "ssm:GetParameter",
         "ssm:GetParameters",
         "ssm:PutParameter",
@@ -765,10 +766,9 @@ cat > /tmp/deploy-role-policy.json <<'EOF'
       "Effect": "Allow",
       "Action": [
         "rds:*",
-        "aurora:*",
         "dynamodb:*",
         "elasticache:*",
-        "efs:*",
+        "elasticfilesystem:*",
         "s3:*",
         "secretsmanager:*",
         "kms:*"

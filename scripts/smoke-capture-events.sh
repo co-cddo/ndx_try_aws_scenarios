@@ -16,12 +16,17 @@ fi
 
 capture() {
   local stack="$1"
-  local safe="${stack//\//_}"
+  # Nested-stack physical IDs are full ARNs containing colons + slashes;
+  # artefact uploaders reject those. Extract the human-readable stack-name
+  # portion after the last slash, then sanitise any remaining unsafe chars.
+  local short="${stack##*/}"
+  local safe
+  safe=$(printf '%s' "$short" | tr -c '[:alnum:].-' '_')
   aws cloudformation describe-stack-events --stack-name "$stack" \
     --output json > "artefacts/${safe}-events.json" || true
   aws cloudformation list-stack-resources --stack-name "$stack" \
     --output json > "artefacts/${safe}-resources.json" || true
-  # Recurse into nested stacks
+  # Recurse into nested stacks (PhysicalResourceId is the nested stack's ARN)
   aws cloudformation list-stack-resources --stack-name "$stack" \
     --query 'StackResourceSummaries[?ResourceType==`AWS::CloudFormation::Stack`].PhysicalResourceId' \
     --output text 2>/dev/null | tr '\t' '\n' | while read -r nested; do
