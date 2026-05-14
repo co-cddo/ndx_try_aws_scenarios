@@ -45,22 +45,18 @@ export class ComputeConstruct extends Construct {
       clusterName: 'NdxBops-Cluster',
     });
 
-    // RETAIN so we can debug failures after rollback
+    // DESTROY so CFN cleans the LogGroup when the stack is deleted. The
+    // previous RETAIN+fixed-name pattern was operationally fragile: a
+    // failed-deploy + rollback leaves /ndx-bops/production owned by AWS but
+    // not by CFN, and the next deploy fails with AlreadyExists on the
+    // CREATE. Smoke's artefact-capture step preserves stack events across
+    // failures, so "debug after rollback" is covered without retaining the
+    // raw LogGroup.
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
       logGroupName: '/ndx-bops/production',
       retention: logs.RetentionDays.ONE_WEEK,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    // Smoke-pack retention-policy lint exemption (Phase 2b of the
-    // scenario-regression smoke-pack tech-spec). RETAIN is deliberate here
-    // for debug-after-rollback; the lint requires a Justification annotation
-    // on every retained resource. addPropertyOverride writes the value via
-    // the synthesizer's late-resolution path, so CDK's aws:cdk:path
-    // injection does not clobber it.
-    (this.logGroup.node.defaultChild as logs.CfnLogGroup).addOverride(
-      'Metadata.Justification',
-      'BOPS stack rollback debug: preserves application logs across CFN rollback so post-mortem queries against /ndx-bops/production still resolve once the failed deployment has been rolled back. Smoke teardown reclaims the LogGroup separately via the quarterly orphan sweep.',
-    );
 
     // IAM Roles — ISB SCP requires InnovationSandbox-ndx-* prefix
     const executionRole = new iam.Role(this, 'ExecutionRole', {
