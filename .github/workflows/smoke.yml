@@ -94,6 +94,8 @@ jobs:
           echo "account_id=$(yq -r '.smoke_test_account_id' docs/smoke-test-account-config.yml)" >> "$GITHUB_OUTPUT"
           echo "role_arn=$(yq -r '.smoke_test_deploy_role_arn' docs/smoke-test-account-config.yml)" >> "$GITHUB_OUTPUT"
           echo "region=$(yq -r '.smoke_test_region' docs/smoke-test-account-config.yml)" >> "$GITHUB_OUTPUT"
+          echo "aicc_phone_arn=$(yq -r '.aicc_existing_phone_number_arn' docs/smoke-test-account-config.yml)" >> "$GITHUB_OUTPUT"
+          echo "aicc_phone_number=$(yq -r '.aicc_existing_phone_number' docs/smoke-test-account-config.yml)" >> "$GITHUB_OUTPUT"
 
       - uses: aws-actions/configure-aws-credentials@v6
         id: aws-creds
@@ -136,6 +138,9 @@ jobs:
             --stack-name "$STACK" \
             --template-file cloudformation/scenarios/all-demo/template.yaml \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+            --parameter-overrides \
+              AiccExistingPhoneNumberArn='${{ steps.cfg.outputs.aicc_phone_arn }}' \
+              AiccExistingPhoneNumber='${{ steps.cfg.outputs.aicc_phone_number }}' \
             --no-fail-on-empty-changeset \
             --tags "Project=ndx-try" "SmokeRun=${{ github.run_id }}" "SmokeMode=$MODE"
           echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"

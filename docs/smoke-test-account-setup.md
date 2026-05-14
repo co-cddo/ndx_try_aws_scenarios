@@ -975,7 +975,78 @@ verification block above.
 Note: the rest of the runbook produces a functional account regardless; failing
 Bedrock just means AI-using smoke specs will fail until model access is granted.
 
-### Step 13: Request service-quota increases
+### Step 13: Pre-claim ai-contact-centre PSTN number
+
+Amazon Connect releases a phone number on stack-delete; the released number is
+held in a 30-day cooldown and consumes the account's UK DID claim quota during
+that window. Long-lived smoke deploys (multiple per day) would exhaust the
+quota in days. The fix: claim ONE number against a long-lived "holder" Connect
+instance and reuse it on every smoke deploy via the ai-contact-centre
+template's `ExistingPhoneNumberArn` / `ExistingPhoneNumber` parameters.
+
+This step must run as the `SmokeTestDeployRole` (the Restrictions SCP blocks
+`connect:CreateInstance` from non-`InnovationSandbox-ndx-*` principals). The
+easiest path is a one-shot workflow_dispatch on a small setup workflow, OR
+manually via a federated session if you have one.
+
+```bash
+# 1. Create the holder instance (idempotent: re-running creates a new alias if
+#    the previous one was deleted).
+HOLDER_ALIAS="ndx-smoke-pstn-holder"
+HOLDER_ID=$(aws connect create-instance \
+  --identity-management-type CONNECT_MANAGED \
+  --instance-alias "$HOLDER_ALIAS" \
+  --inbound-calls-enabled \
+  --no-outbound-calls-enabled \
+  --query 'Id' --output text)
+
+# 2. Wait until ACTIVE (Connect provisioning is async, ~1-2 min).
+until [ "$(aws connect describe-instance --instance-id "$HOLDER_ID" \
+  --query 'Instance.InstanceStatus' --output text)" = "ACTIVE" ]; do
+  sleep 10
+done
+HOLDER_ARN=$(aws connect describe-instance --instance-id "$HOLDER_ID" \
+  --query 'Instance.Arn' --output text)
+
+# 3. Find an available UK DID number.
+NUM=$(aws connect search-available-phone-numbers \
+  --target-arn "$HOLDER_ARN" \
+  --phone-number-country-code GB \
+  --phone-number-type DID \
+  --max-results 1 \
+  --query 'AvailableNumbersList[0].PhoneNumber' --output text)
+echo "Found number: $NUM"
+
+# 4. Claim it against the holder.
+CLAIM=$(aws connect claim-phone-number \
+  --target-arn "$HOLDER_ARN" \
+  --phone-number "$NUM" \
+  --query '{Arn:PhoneNumberArn,Id:PhoneNumberId}' --output json)
+echo "$CLAIM"
+PHONE_ARN=$(echo "$CLAIM" | jq -r .Arn)
+
+# 5. Write back to docs/smoke-test-account-config.yml and commit.
+yq -i ".aicc_existing_phone_number_arn = \"$PHONE_ARN\"" docs/smoke-test-account-config.yml
+yq -i ".aicc_existing_phone_number = \"$NUM\"" docs/smoke-test-account-config.yml
+git add docs/smoke-test-account-config.yml
+git commit -m "smoke: record pre-claimed ai-contact-centre PSTN number"
+```
+
+After the values are committed, smoke deploys pass them via
+`--parameter-overrides` and ai-contact-centre's stack skips claim+release.
+Update the quarantine in `cloudformation/scenarios/ai-contact-centre/smoke.ts`
+to `{ state: 'active' }` so the smoke spec re-engages.
+
+**Rollback for this step:** release the number + delete the holder:
+
+```bash
+aws connect release-phone-number --phone-number-id <id-from-step-4>
+aws connect delete-instance --instance-id "$HOLDER_ID"
+yq -i ".aicc_existing_phone_number_arn = \"placeholder-arn\"" docs/smoke-test-account-config.yml
+yq -i ".aicc_existing_phone_number = \"+440000000000\"" docs/smoke-test-account-config.yml
+```
+
+### Step 14: Request service-quota increases
 
 Smoke deploys all 17 scenarios in parallel; default service quotas are not
 sufficient. The current best-effort matrix (refined post-Phase-4 once real usage
@@ -1017,7 +1088,7 @@ Targets (initial estimate; refine via PR to this runbook after Phase 4 lands):
 | Fargate | vCPU per region | 64 | Scenario task concurrency + headroom |
 | Bedrock | Per-model TPM | service-default | Smoke calls are low-volume; revisit if hit |
 | SES | Production access mode | enabled | FixMyStreet email-send smoke step |
-| QuickSight | Enterprise subscription | enabled | See Step 14 |
+| QuickSight | Enterprise subscription | enabled | See Step 15 |
 
 Open quota increase requests via:
 
@@ -1037,7 +1108,7 @@ days.
 **Rollback for this step:** quotas only increase via approval; AWS sets no
 automatic decrease.
 
-### Step 14: QuickSight subscription
+### Step 15: QuickSight subscription
 
 The `quicksight-dashboard` scenario requires a QuickSight Enterprise subscription.
 This is a one-off click-through in the QuickSight console, not API-driven, and is
@@ -1061,7 +1132,7 @@ in the assertion-bar row and proceed without subscribing.
 unsubscribed via the QuickSight account-settings page; billing continues to the
 end of the current month.
 
-### Step 15: Populate the config file
+### Step 16: Populate the config file
 
 By this point most fields have been populated by previous steps. Verify the final
 state with the schema below:

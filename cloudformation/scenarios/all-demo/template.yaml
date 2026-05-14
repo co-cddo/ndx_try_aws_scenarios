@@ -69,6 +69,20 @@ Parameters:
     Default: '{}'
     Description: JSON council configuration for digital-planning-register. Empty JSON object uses scenario defaults.
 
+  AiccExistingPhoneNumberArn:
+    Type: String
+    Default: ''
+    Description: |
+      Pre-claimed Connect PhoneNumber ARN for ai-contact-centre. Empty = claim a
+      fresh DID (default; ISB pool deploys). Set in long-lived deploys (smoke
+      account) to dodge the 30-day release cooldown that exhausts UK DID quota.
+  AiccExistingPhoneNumber:
+    Type: String
+    Default: ''
+    Description: |
+      Dialable E.164 number (e.g. +442012345678) for AiccExistingPhoneNumberArn.
+      Required when that ARN is set; ignored otherwise.
+
 Resources:
   CouncilChatbot:
     Type: AWS::CloudFormation::Stack
@@ -211,6 +225,8 @@ Resources:
       TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/ai-contact-centre/template.yaml'
       Parameters:
         Environment: !Ref Environment
+        ExistingPhoneNumberArn: !Ref AiccExistingPhoneNumberArn
+        ExistingPhoneNumber: !Ref AiccExistingPhoneNumber
       TimeoutInMinutes: 45
       Tags:
         - Key: Project

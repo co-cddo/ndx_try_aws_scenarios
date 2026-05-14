@@ -104,12 +104,34 @@ sandbox_ou_id: "ou-2laj-4dyae1oa"
 expected_scps:
   - p-6tw8eixp
   - p-FullAWSAccess
+
+# --- ai-contact-centre PSTN holder -----------------------------------------
+#
+# Amazon Connect releases a phone number on stack-delete, but the released
+# number is held in a 30-day cooldown and consumes claim quota during that
+# window. Long-lived smoke deploys claim/release once per CI run, so we
+# exhaust UK +44 DID quota in days. The fix: claim ONE number against a
+# long-lived "holder" Connect instance and reuse it on every smoke deploy.
+#
+# Both values are non-empty placeholders today. When set to real values,
+# the smoke deploy passes them to the all-demo umbrella, which passes them
+# to ai-contact-centre, which uses ExistingPhoneNumberArn/ExistingPhoneNumber
+# to skip claim+release. When the values are placeholders, ai-contact-centre
+# stack still deploys (placeholder ARN routed through the conditional) but
+# its smoke spec is quarantined and the deploy is effectively a no-op for
+# the PSTN path.
+#
+# Operator setup (one-off): see docs/smoke-test-account-setup.md →
+# "Step 13: pre-claim ai-contact-centre PSTN number".
+aicc_existing_phone_number_arn: "placeholder-arn"
+aicc_existing_phone_number: "+440000000000"
+
 # --- Provenance --------------------------------------------------------------
 
-# ISO date the runbook was last executed end-to-end. Populated by Step 15.
+# ISO date the runbook was last executed end-to-end. Populated by Step 16.
 setup_date: "2026-05-12"
 # Commit SHA of docs/smoke-test-account-setup.md at the time of setup.
-# Populated by Step 15 via:
+# Populated by Step 16 via:
 #   yq -i ".runbook_version = \"$(git log -1 --pretty=%H -- docs/smoke-test-account-setup.md)\"" $CONFIG_FILE
 # Re-running the runbook updates this field, so a diff in `git log -p` against
 # this file is the audit trail of when the procedure was last verified end-to-end.

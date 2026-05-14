@@ -51,6 +51,25 @@ Parameters:
       Bump on every redeploy that changes the documents/ tree to force Bedrock
       KB re-ingestion AND Wisdom (Q in Connect) content re-upload. CFN custom
       resources only fire on Update if at least one property changes.
+  ExistingPhoneNumberArn:
+    Type: String
+    Default: ''
+    Description: |
+      If non-empty, use this pre-claimed Connect phone-number ARN instead of
+      claiming a new DID. Lets long-lived deploys (smoke account) avoid the
+      30-day release cooldown that exhausts UK DID quota. Leave empty for
+      ISB pool deploys — the default behaviour claims a fresh number, as before.
+  ExistingPhoneNumber:
+    Type: String
+    Default: ''
+    Description: |
+      The dialable E.164 number string for ExistingPhoneNumberArn (e.g.
+      "+442012345678"). Required when ExistingPhoneNumberArn is set; otherwise
+      ignored. Surfaced as the PstnNumber output so smoke can regex-check it.
+
+Conditions:
+  ClaimNewPhoneNumber: !Equals [!Ref ExistingPhoneNumberArn, '']
+
 Globals:
   Function:
     Runtime: python3.12
@@ -237,6 +256,7 @@ Resources:
       InstanceId: !Ref ConnectInstance
 
   GeoNumber:
+    Condition: ClaimNewPhoneNumber
     Type: AWS::Connect::PhoneNumber
     Properties:
       TargetArn: !GetAtt ConnectInstance.Arn
@@ -2666,7 +2686,7 @@ Resources:
         Variables:
           INSTANCE_ID: !Ref ConnectInstance
           CALLBACK_FLOW_ID: !Ref CallbackSimulationFlow
-          SOURCE_PHONE_NUMBER: !GetAtt GeoNumber.Address
+          SOURCE_PHONE_NUMBER: !If [ClaimNewPhoneNumber, !GetAtt GeoNumber.Address, !Ref ExistingPhoneNumber]
 
   LandlineCallbackFunction:
     Type: AWS::Serverless::Function
@@ -2870,7 +2890,13 @@ Resources:
       AIAgentId: !GetAtt WisdomAnswerAgent.AIAgentId
       AIAgentType: ANSWER_RECOMMENDATION
 
+  # Flow association is only valid when the phone number is on this stack's
+  # Connect instance. When ExistingPhoneNumberArn is set, the number lives on
+  # a different (long-lived holder) instance and can't be associated here —
+  # so the association is skipped. Smoke only verifies the output regex; the
+  # full inbound-call routing isn't exercised in long-lived deploys.
   GeoFlowAssoc:
+    Condition: ClaimNewPhoneNumber
     Type: Custom::PhoneFlowAssoc
     DependsOn: [GeoNumber, MainContactFlow]
     Properties:
@@ -3225,10 +3251,10 @@ Outputs:
     Value: !Ref ConnectInstance
   PstnNumber:
     Description: Inbound PSTN geographic DID number (+44 20...)
-    Value: !GetAtt GeoNumber.Address
+    Value: !If [ClaimNewPhoneNumber, !GetAtt GeoNumber.Address, !Ref ExistingPhoneNumber]
   PstnNumberId:
-    Description: Connect DID PhoneNumber resource ID (for console linkage)
-    Value: !Ref GeoNumber
+    Description: Connect DID PhoneNumber resource ID / ARN (for console linkage)
+    Value: !If [ClaimNewPhoneNumber, !Ref GeoNumber, !Ref ExistingPhoneNumberArn]
   KnowledgeBaseId:
     Description: Bedrock Knowledge Base ID
     Value: !Ref KnowledgeBase
