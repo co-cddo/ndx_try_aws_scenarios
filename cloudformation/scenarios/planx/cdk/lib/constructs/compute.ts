@@ -134,7 +134,7 @@ export class ComputeConstruct extends Construct {
     // 3. Pre-creates extensions (postgis, pgcrypto, fuzzystrmatch, pg_cron, etc.)
     // 4. Then runs the standard Hasura cli-migrations entrypoint
     hasuraTaskDef.addContainer('hasura-engine', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-hasura:sha-e748ef5@sha256:0d81caa04dccbbc890a589e709eb0d98c727b64768f34c95185137a05d768c8b'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-hasura:sha-7cd69fd@sha256:a6f4d2d733c67db630dcd20138ab64056077023b7022365b3d7327b397655529'),
       logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'hasura' }),
       environment: {
         HASURA_GRAPHQL_DATABASE_URL: databaseUrl,
@@ -211,7 +211,7 @@ export class ComputeConstruct extends Construct {
     ].join(' && ');
 
     apiTaskDef.addContainer('api', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-api:sha-e748ef5@sha256:9f765c0130675218066d11178b2dc7275cd8c1f8916af5583c25ddbb9e03bd79'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-api:sha-7cd69fd@sha256:c149d3168293c6a4a70023be228d8ba716120a6b0a72aae9f1e3c08bec22500f'),
       logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'api' }),
       environment: {
         ...sharedEnv,
@@ -303,7 +303,7 @@ export class ComputeConstruct extends Construct {
     });
 
     sharedbTaskDef.addContainer('sharedb', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-sharedb:sha-e748ef5@sha256:e998deeb6246e92568a2993e4e3dd5579edad77ef26bcc9e7c131606211b4c03'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-sharedb:sha-7cd69fd@sha256:f50bac68056a0d2e47c49a5ff17b3020aaf8428bcb08792ff562487815299047'),
       logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'sharedb' }),
       environment: {
         ...sharedEnv,
@@ -352,7 +352,7 @@ export class ComputeConstruct extends Construct {
     });
 
     editorTaskDef.addContainer('editor', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-editor:sha-e748ef5@sha256:99212cef72aa68c8119e387409e3ae8f37087a36d47128487c8e1b02cd5d8d8b'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-editor:sha-7cd69fd@sha256:7865e0656e1b703f1d65398a952c933529831926f54e635e4f49d9c822633d30'),
       logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'editor' }),
       environment: {
         // Editor SPA uses relative paths for API/Hasura and window.location.host for WebSockets
