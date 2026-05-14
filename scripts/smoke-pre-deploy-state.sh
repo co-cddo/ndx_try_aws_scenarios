@@ -13,25 +13,10 @@
 
 set -euo pipefail
 
-# Sweep known LogGroup orphans from prior failed deploys before the stack
-# state check. AWS::Logs::LogGroup with a fixed LogGroupName collides with
-# the implicit one created by Lambda's first invocation; if the explicit
-# CFN one fails to delete on rollback (or wasn't created because CFN raced),
-# the orphan blocks the next deploy with "already exists". With fix-forward
-# (--disable-rollback) the smoke pack relies on the same names being
-# available run-to-run, so we proactively prune them here.
-echo "Pruning known orphan LogGroups from prior runs..."
-for lg in \
-  '/ndx-bops/production' \
-  '/aws/lambda/ndx-quicksight-data-generator-us-east-1' \
-  '/aws/lambda/ndx-quicksight-setup-us-east-1' \
-  '/aws/lambda/ndx-try-aicc-connect-bootstrap-us-east-1' \
-  '/aws/lambda/ndx-try-aicc-seed-kb-us-east-1' \
-  '/aws/lambda/ndx-try-chatbot-seed-data-us-east-1'; do
-  aws logs delete-log-group --log-group-name "$lg" 2>/dev/null \
-    && echo "  deleted: $lg" \
-    || true
-done
+# The fixed-name LogGroup orphan sweep used to live here. It deleted LGs
+# that CFN currently owned (between umbrella runs); the next CFN update
+# then failed NotFound on those same resources. Rely on CFN's own cleanup
+# instead (PowerUserAccess on the deploy role now allows logs:DeleteLogGroup).
 
 STACK="${STACK_NAME}"
 STATUS=$(aws cloudformation describe-stacks --stack-name "$STACK" \
