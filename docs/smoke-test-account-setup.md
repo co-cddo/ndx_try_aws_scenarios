@@ -839,17 +839,24 @@ aws iam put-role-policy \
   --role-name "$DEPLOY_ROLE_NAME" \
   --policy-name SmokeTestDeployInline \
   --policy-document file:///tmp/deploy-role-policy.json
-```
 
-This is the **baseline** policy. After the first 5 smoke runs (Phase 3 nightly cron),
-the operator reviews CloudTrail in the smoke account for `AccessDenied` events and
-tightens this policy via a PR to this file. See
-[Iterate-to-least-privilege protocol](#iterate-to-least-privilege-protocol).
+# Plus PowerUserAccess managed policy: covers every AWS service except IAM.
+# Required because scenarios use a wide service spread (Connect, Wisdom,
+# AppSync, S3Vectors, IoT, Cognito, S3 Files, etc.) and curating an inline
+# allow-list per service proved fragile — every new scenario surfaced
+# another gap. IAM remains constrained by the inline SmokeTestDeployInline.
+# Smoke runs in the smoke account only; the Restrictions SCP plus a tight
+# IAM inline policy still bound what the role can actually do.
+aws iam attach-role-policy \
+  --role-name "$DEPLOY_ROLE_NAME" \
+  --policy-arn arn:aws:iam::aws:policy/PowerUserAccess
+```
 
 **Rollback for this step:**
 
 ```bash
 aws iam delete-role-policy --role-name "$DEPLOY_ROLE_NAME" --policy-name SmokeTestDeployInline
+aws iam detach-role-policy --role-name "$DEPLOY_ROLE_NAME" --policy-arn arn:aws:iam::aws:policy/PowerUserAccess
 ```
 
 ### Step 12: Enable Bedrock model access
