@@ -31,8 +31,19 @@ case "$STATUS" in
   DOES_NOT_EXIST|CREATE_COMPLETE|UPDATE_COMPLETE|UPDATE_ROLLBACK_COMPLETE)
     echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
     ;;
+  CREATE_FAILED)
+    # We deploy with --disable-rollback. On CREATE failure the stack stays
+    # in CREATE_FAILED with successful child stacks preserved. CFN's
+    # update-stack works on CREATE_FAILED since 2020-ish: it replaces failed
+    # resources without rebuilding successful ones. The deploy step issues
+    # update-stack via `aws cloudformation deploy` here — fix-forward.
+    echo "Fix-forwarding from CREATE_FAILED (likely a flaky scenario; healthy children preserved)"
+    echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+    ;;
   ROLLBACK_COMPLETE)
-    # CFN refuses updates on ROLLBACK_COMPLETE; must delete and recreate.
+    # Predates --disable-rollback; shouldn't occur going forward, but handle
+    # historical state. CFN refuses updates on ROLLBACK_COMPLETE; delete +
+    # recreate is the only option.
     aws cloudformation delete-stack --stack-name "$STACK"
     if aws cloudformation wait stack-delete-complete --stack-name "$STACK"; then
       echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"

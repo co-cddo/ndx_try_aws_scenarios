@@ -134,6 +134,12 @@ jobs:
           set -euo pipefail
           STACK="${{ steps.predeploy.outputs.stack_name }}"
           MODE="${{ needs.scope.outputs.mode }}"
+          # --disable-rollback: leaves the stack in CREATE_FAILED on failure
+          # rather than rolling back. Lets the NEXT run fix-forward via
+          # update-stack — replacing only the failed resources instead of
+          # rebuilding 16 healthy nested stacks (Aurora cold-start, ALB
+          # warm-up etc. are slow to rebuild). Pre-deploy state check handles
+          # CREATE_FAILED by issuing an update against the same name.
           aws cloudformation deploy \
             --stack-name "$STACK" \
             --template-file cloudformation/scenarios/all-demo/template.yaml \
@@ -142,6 +148,7 @@ jobs:
               AiccExistingPhoneNumberArn='${{ steps.cfg.outputs.aicc_phone_arn }}' \
               AiccExistingPhoneNumber='${{ steps.cfg.outputs.aicc_phone_number }}' \
             --no-fail-on-empty-changeset \
+            --disable-rollback \
             --tags "Project=ndx-try" "SmokeRun=${{ github.run_id }}" "SmokeMode=$MODE"
           echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
 
