@@ -120,7 +120,7 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        cpuArchitecture: ecs.CpuArchitecture.X86_64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
@@ -192,10 +192,12 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        // ARM64: matches the editor / api images we publish (built natively
-        // on Apple Silicon CI; cross-compiling to amd64 under QEMU OOMs the
-        // editor's vite/esbuild step). Also ~20% cheaper on Fargate.
-        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        // X86_64: our four custom planx images (hasura, api, editor, sharedb)
+        // are published as amd64-only via the build pipeline. Fargate refuses
+        // to pull them as arm64. Switching back to ARM64 requires a multi-arch
+        // build in the planx image CI (docker buildx) and re-publishing each
+        // image with both architectures in the manifest list.
+        cpuArchitecture: ecs.CpuArchitecture.X86_64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
@@ -295,7 +297,7 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        cpuArchitecture: ecs.CpuArchitecture.X86_64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
@@ -344,7 +346,7 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        cpuArchitecture: ecs.CpuArchitecture.X86_64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
