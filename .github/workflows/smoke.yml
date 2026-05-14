@@ -198,8 +198,15 @@ jobs:
             test-results/
           retention-days: 30
 
+      # Teardown only runs on success or on the nightly cron. On PR failures we
+      # KEEP the CREATE_FAILED stack around so the next run can fix-forward via
+      # update-stack instead of rebuilding 16 healthy nested stacks. The cron
+      # run still tears down nightly so the smoke account doesn't accumulate
+      # debris indefinitely.
       - name: Teardown
-        if: always() && steps.aws-creds.outcome == 'success'
+        if: |
+          steps.aws-creds.outcome == 'success' &&
+          (success() || github.event_name == 'schedule')
         env:
           STACK: ${{ steps.deploy.outputs.stack_name || steps.predeploy.outputs.stack_name }}
           GITHUB_RUN_ID: ${{ github.run_id }}
