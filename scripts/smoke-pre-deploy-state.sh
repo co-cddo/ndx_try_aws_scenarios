@@ -51,13 +51,13 @@ case "$STATUS" in
   DOES_NOT_EXIST|CREATE_COMPLETE|UPDATE_COMPLETE|UPDATE_ROLLBACK_COMPLETE)
     echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
     ;;
-  CREATE_FAILED)
-    # We deploy with --disable-rollback. On CREATE failure the stack stays
-    # in CREATE_FAILED with successful child stacks preserved. CFN's
-    # update-stack works on CREATE_FAILED since 2020-ish: it replaces failed
-    # resources without rebuilding successful ones. The deploy step issues
-    # update-stack via `aws cloudformation deploy` here — fix-forward.
-    echo "Fix-forwarding from CREATE_FAILED (likely a flaky scenario; healthy children preserved)"
+  CREATE_FAILED|UPDATE_FAILED)
+    # We deploy with --disable-rollback. On CREATE/UPDATE failure the stack
+    # stays in *_FAILED with successful child stacks preserved. CFN's
+    # update-stack works on both: it replaces failed resources without
+    # rebuilding the healthy ones. The deploy step issues update-stack via
+    # `aws cloudformation deploy` here — fix-forward.
+    echo "Fix-forwarding from $STATUS (healthy children preserved)"
     echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
     ;;
   ROLLBACK_COMPLETE)
