@@ -715,7 +715,7 @@ cat > /tmp/deploy-role-policy.json <<'EOF'
         "iam:ListAttachedRolePolicies"
       ],
       "Resource": [
-        "arn:aws:iam::*:role/InnovationSandbox-ndx-*"
+        "arn:aws:iam::*:role/*"
       ]
     },
     {
