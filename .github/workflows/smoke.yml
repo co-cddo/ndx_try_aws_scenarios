@@ -139,6 +139,11 @@ jobs:
           # for a new image), so the second run cycle fails with
           # "Replacement type updates not supported on stack with
           # disable-rollback." Standard rollback semantics it is.
+          # Tags must be stable across runs. CFN propagates parent tags down to
+          # nested stacks and triggers per-resource UPDATE on tag-change; AICC's
+          # AWS::Wisdom::* resources don't support UPDATE (handler is CREATE/DELETE
+          # only) and roll the whole umbrella back. SmokeRun is captured via stack
+          # description / metadata elsewhere — don't tag it here.
           aws cloudformation deploy \
             --stack-name "$STACK" \
             --template-file cloudformation/scenarios/all-demo/template.yaml \
@@ -147,7 +152,7 @@ jobs:
               AiccExistingPhoneNumberArn='${{ steps.cfg.outputs.aicc_phone_arn }}' \
               AiccExistingPhoneNumber='${{ steps.cfg.outputs.aicc_phone_number }}' \
             --no-fail-on-empty-changeset \
-            --tags "Project=ndx-try" "SmokeRun=${{ github.run_id }}" "SmokeMode=$MODE"
+            --tags "Project=ndx-try" "SmokeMode=$MODE"
           echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-node@v6
