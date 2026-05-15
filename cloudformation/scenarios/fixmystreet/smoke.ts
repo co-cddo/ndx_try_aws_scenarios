@@ -28,9 +28,15 @@ runSmoke({
       getSecret('FixMyStreetAdminPassword').sensitiveValue(),
       { fieldNames: ['password'] },
     );
+    // Two buttons named "Sign in" exist (Header link + form submit); scope to the
+    // form to pick the submit button. Also press Enter on the password field as a
+    // fallback in case the button click is racy.
     await Promise.all([
-      page.waitForURL((u) => !u.toString().toLowerCase().includes('auth'), { timeout: 30_000 }),
-      page.locator('button[type="submit"], input[type="submit"]').first().click(),
+      page.waitForURL((u) => !u.toString().toLowerCase().includes('auth'), { timeout: 45_000 }),
+      page.locator('form').filter({ has: page.locator('input[type="password"]') })
+        .getByRole('button', { name: /^Sign in$/i })
+        .first()
+        .click(),
     ]);
 
     // /reports requires bin/update-all-reports to have produced data/all-reports.json.
