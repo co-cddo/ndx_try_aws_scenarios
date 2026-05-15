@@ -1,7 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { expect } from '@playwright/test';
 import { runSmoke } from '../../../tests/smoke/runner';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Discover the umbrella Output keys at test time. The template uses CFN intrinsics
 // (!Sub, !GetAtt) that real YAML loaders trip over, so regex the Outputs block:

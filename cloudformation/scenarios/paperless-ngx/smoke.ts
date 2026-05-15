@@ -10,12 +10,15 @@ runSmoke({
     const root = landing.replace(/\/$/, '');
 
     await page.goto(landing, { waitUntil: 'domcontentloaded' });
-    await page.waitForSelector('input[name="username"], input#username', { timeout: 30_000 });
+    // Paperless-NGX (Angular) form labels inputs by placeholder; name= may not be set.
+    await page.waitForSelector('input[type="text"], input[name="username"], input#username', { timeout: 30_000 });
 
     await adminLogin(page, {
       url: page.url(),
       username: get('PaperlessNgxAdminUsername'),
       password: getSecret('PaperlessNgxAdminPassword'),
+      usernameSelector: 'input[type="text"], input[name="username"], input#username',
+      passwordSelector: 'input[type="password"], input[name="password"], input#password',
     });
 
     // /api/documents/ 500 = S3 Files mount or Postgres regressed.

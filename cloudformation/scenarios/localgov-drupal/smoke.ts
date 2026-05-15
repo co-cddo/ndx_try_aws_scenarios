@@ -16,8 +16,9 @@ runSmoke({
     // ndx_aws_ai bootstraps Bedrock at cache:bin construction; AccessDenied here = regressed model access.
     expect(html).not.toContain('accessdeniedexception');
 
+    // /user/login 404s on LocalGov Drupal demo; /user redirects unauthenticated to login form.
     await adminLogin(page, {
-      url: `${root}/user/login`,
+      url: `${root}/user`,
       username: get('DrupalAdminUsername'),
       password: getSecret('DrupalAdminPassword'),
       usernameSelector: 'input[name="name"]',

@@ -16,7 +16,7 @@ runSmoke({
     expect(body).not.toContain('airbrake');
 
     await adminLogin(page, {
-      url: get('PlanXLoginUrl'),
+      url: getSecret('PlanXLoginUrl').sensitiveValue(),
       username: get('PlanXDemoUsername'),
       password: getSecret('PlanXDemoPassword'),
       usernameSelector: 'input[name="email"], input[name="username"]',

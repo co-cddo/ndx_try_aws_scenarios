@@ -13,7 +13,7 @@ runSmoke({
     expect(body).not.toMatch(/applicants? portal/);
 
     await adminLogin(page, {
-      url: get('BopsPlanningLoginUrl'),
+      url: getSecret('BopsPlanningLoginUrl').sensitiveValue(),
       username: get('BopsPlanningUsername'),
       password: getSecret('BopsPlanningPassword'),
       usernameSelector: 'input[name="user[email]"], input#user_email',
