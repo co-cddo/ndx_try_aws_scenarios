@@ -42,6 +42,10 @@ export default defineConfig({
       name: 'smoke',
       testDir: './cloudformation/scenarios',
       testMatch: /[^/]+\/smoke\.ts$/,
+      // 60s test budget: secure-form fillPassword burns ~10s waiting for a
+      // (never-arrives) intercepted submit, multi-stage logins use multiple
+      // page.goto/waitForURL cycles, and fresh stacks have cold-cache latency.
+      timeout: 60_000,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },

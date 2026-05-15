@@ -9,6 +9,10 @@ import {
   DescribeStacksCommand,
   Output as CfnOutput,
 } from '@aws-sdk/client-cloudformation';
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from '@aws-sdk/client-secrets-manager';
 
 const SENSITIVE_KEY_PATTERN =
   /(Password|Secret|Token|Credentials|Creds|Login|ApiKey|ConnectionString|PrivateKey|Passphrase)/i;
@@ -78,6 +82,32 @@ interface FetchOptions {
   readonly client?: CloudFormationClient;
 }
 
+// Some scenarios expose passwords via `secret.secretValueFromJson(...).unsafeUnwrap()`
+// in CDK outputs. CFN doesn't resolve `{{resolve:secretsmanager:...}}` references
+// in Output values (only in resource properties), so the smoke test sees the literal
+// placeholder. Detect that pattern and fetch the secret at test time.
+// Format: {{resolve:secretsmanager:<secretArn>:SecretString:<jsonKey>::}}
+const SECRETS_RESOLVE_PATTERN =
+  /^\{\{resolve:secretsmanager:([^:]+:[^:]+:[^:]+:[^:]+:[^:]+:[^:]+):SecretString:([^:]+)::\}\}$/;
+
+async function resolveSecretsPlaceholder(
+  value: string,
+  region: string,
+  smClient: SecretsManagerClient,
+): Promise<string> {
+  const m = value.match(SECRETS_RESOLVE_PATTERN);
+  if (!m) return value;
+  const [, secretId, jsonKey] = m;
+  const res = await smClient.send(new GetSecretValueCommand({ SecretId: secretId }));
+  const raw = res.SecretString ?? '';
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed[jsonKey] ?? raw;
+  } catch {
+    return raw;
+  }
+}
+
 export async function fetchStackOutputs(
   opts: FetchOptions,
 ): Promise<CfnOutputs> {
@@ -91,11 +121,13 @@ export async function fetchStackOutputs(
     throw new Error(`Stack "${opts.stackName}" not found in ${opts.region}`);
   }
   const outputs: CfnOutput[] = stacks[0].Outputs ?? [];
+  const smClient = new SecretsManagerClient({ region: opts.region });
   const map: Record<string, ResolvedOutput> = {};
   for (const o of outputs) {
     const key = o.OutputKey;
-    const value = o.OutputValue;
+    let value = o.OutputValue;
     if (!key || value === undefined) continue;
+    value = await resolveSecretsPlaceholder(value, opts.region, smClient);
     // DescribeStacks does NOT return Output Metadata, so OutputMetadata:
     // { Sensitive: true } is unreachable here — the key-name regex is the
     // only signal. Extend SENSITIVE_KEY_PATTERN when new sensitive keys appear.

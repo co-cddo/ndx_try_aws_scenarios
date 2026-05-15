@@ -7,20 +7,30 @@ runSmoke({
   outputs: ['DrupalUrl', 'DrupalAdminUsername', 'DrupalAdminPassword'],
   test: async ({ page, get, getSecret }) => {
     const landing = get('DrupalUrl');
-    const root = landing.replace(/\/$/, '');
+    // DrupalUrl ends with `/init-status`; the smoke target is the site root.
+    const root = landing.replace(/\/init-status\/?$/, '').replace(/\/$/, '');
 
-    await page.goto(landing, { waitUntil: 'domcontentloaded' });
+    await page.goto(root, { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveTitle(/.+/);
     const html = (await page.content()).toLowerCase();
     expect(html).not.toContain('fatal error');
     // ndx_aws_ai bootstraps Bedrock at cache:bin construction; AccessDenied here = regressed model access.
     expect(html).not.toContain('accessdeniedexception');
 
-    // /user/login 404s on LocalGov Drupal demo; /user redirects unauthenticated to login form.
+    // DrupalAdminPassword output is JSON-wrapped: `{"password":"...","username":"..."}`.
+    const adminPasswordRaw = getSecret('DrupalAdminPassword').sensitiveValue();
+    const adminPasswordParsed = (() => {
+      try { return JSON.parse(adminPasswordRaw).password as string; } catch { return adminPasswordRaw; }
+    })();
+
     await adminLogin(page, {
-      url: `${root}/user`,
+      url: `${root}/user/login`,
       username: get('DrupalAdminUsername'),
-      password: getSecret('DrupalAdminPassword'),
+      password: {
+        kind: 'sensitive',
+        length: adminPasswordParsed.length,
+        sensitiveValue: () => adminPasswordParsed,
+      },
       usernameSelector: 'input[name="name"]',
       passwordSelector: 'input[name="pass"]',
       passwordFieldNames: ['pass', 'password'],
