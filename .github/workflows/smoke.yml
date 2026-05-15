@@ -201,15 +201,18 @@ jobs:
             test-results/
           retention-days: 30
 
-      # Teardown only runs on success or on the nightly cron. On PR failures we
-      # KEEP the CREATE_FAILED stack around so the next run can fix-forward via
-      # update-stack instead of rebuilding 16 healthy nested stacks. The cron
-      # run still tears down nightly so the smoke account doesn't accumulate
-      # debris indefinitely.
+      # Teardown only runs on the nightly cron. PR/push/dispatch runs always
+      # fix-forward against the persistent umbrella: a no-op `aws cloudformation
+      # deploy` on an unchanged template is a clean changeset-empty pass, so
+      # AICC's ConnectInstance, Wisdom resources, Lex bot, and SimplyReadable's
+      # logging bucket all stick around between runs (avoiding Connect quota
+      # exhaustion, Wisdom UPDATE-unsupported, Lex Creating-state delete-races,
+      # and CloudFront access-log bucket-not-empty races on teardown). The
+      # nightly cron still tears down so the account doesn't accumulate debris.
       - name: Teardown
         if: |
           steps.aws-creds.outcome == 'success' &&
-          (success() || github.event_name == 'schedule')
+          github.event_name == 'schedule'
         env:
           STACK: ${{ steps.deploy.outputs.stack_name || steps.predeploy.outputs.stack_name }}
           GITHUB_RUN_ID: ${{ github.run_id }}
