@@ -87,8 +87,10 @@ interface FetchOptions {
 // in Output values (only in resource properties), so the smoke test sees the literal
 // placeholder. Detect that pattern and fetch the secret at test time.
 // Format: {{resolve:secretsmanager:<secretArn>:SecretString:<jsonKey>::}}
+// The ARN itself contains 7 colon-separated parts, so use a lazy match anchored
+// on `:SecretString:` to extract the ARN cleanly.
 const SECRETS_RESOLVE_PATTERN =
-  /^\{\{resolve:secretsmanager:([^:]+:[^:]+:[^:]+:[^:]+:[^:]+:[^:]+):SecretString:([^:]+)::\}\}$/;
+  /^\{\{resolve:secretsmanager:(.+?):SecretString:([^:]+)::\}\}$/;
 
 async function resolveSecretsPlaceholder(
   value: string,
