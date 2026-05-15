@@ -9,16 +9,24 @@ const __dirname = path.dirname(__filename);
 
 // Discover the umbrella Output keys at test time. The template uses CFN intrinsics
 // (!Sub, !GetAtt) that real YAML loaders trip over, so regex the Outputs block:
-// the keys are 2-space-indent lines under `Outputs:`.
+// the keys are 2-space-indent lines under `Outputs:`. Skip outputs that carry
+// a Condition (they're conditionally absent in the deployed stack).
 function discoverAllDemoOutputKeys(): string[] {
   const templatePath = path.resolve(__dirname, 'template.yaml');
   const content = fs.readFileSync(templatePath, 'utf8');
   const outputsIdx = content.indexOf('\nOutputs:');
   if (outputsIdx < 0) throw new Error('Outputs: section not found in all-demo/template.yaml');
+  const lines = content.slice(outputsIdx).split('\n');
   const keys: string[] = [];
-  for (const line of content.slice(outputsIdx).split('\n')) {
-    const m = line.match(/^ {2}([A-Za-z][A-Za-z0-9]*):\s*$/);
-    if (m) keys.push(m[1]);
+  for (let i = 0; i < lines.length; i += 1) {
+    const m = lines[i].match(/^ {2}([A-Za-z][A-Za-z0-9]*):\s*$/);
+    if (!m) continue;
+    // Peek the next few lines for a Condition: directive in this output's block.
+    let hasCondition = false;
+    for (let j = i + 1; j < lines.length && /^ {4}/.test(lines[j]); j += 1) {
+      if (/^ {4}Condition:/.test(lines[j])) { hasCondition = true; break; }
+    }
+    if (!hasCondition) keys.push(m[1]);
   }
   if (keys.length === 0) throw new Error('Discovered zero Output keys in all-demo/template.yaml');
   return keys;
