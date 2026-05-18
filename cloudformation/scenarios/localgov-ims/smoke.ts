@@ -35,5 +35,21 @@ runSmoke({
     });
 
     expect(await page.content()).not.toMatch(/access denied|forbidden|unauthorized/i);
+
+    // Post-login the admin lands on the dashboard. Verify the IIS-served IMS
+    // nav is intact (Dashboard / Transactions / Payment / Users / etc.) — a
+    // missing nav points at .NET app pool failure that still serves a 200.
+    await expect(page.locator('a:has-text("Dashboard")').first()).toBeVisible();
+    await expect(page.locator('a:has-text("Transactions")').first()).toBeVisible();
+    await expect(page.locator('a:has-text("Payment")').first()).toBeVisible();
+    await expect(page.locator('body')).toContainText(/System overview|Dashboard/i);
+
+    // GOV.UK Pay integration: navigate to the Payment / Create page. The form
+    // renders the GOV.UK Pay-backed payment basket. A 5xx here would mean
+    // the SQL Server connection or the integration secret is broken.
+    const baseAdmin = adminUrl.replace(/\/Account\/Login.*$/, '');
+    await page.goto(`${baseAdmin}/Payment`, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('h1, h2', { hasText: /Create a payment/i })).toBeVisible();
+    await expect(page.locator('body')).toContainText(/Basket/i);
   },
 });

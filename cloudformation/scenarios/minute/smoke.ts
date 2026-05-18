@@ -40,6 +40,21 @@ runSmoke({
       });
       expect(apiResp).toBeGreaterThan(0);
       expect(apiResp).toBeLessThan(500);
+
+      // Landing page shows the AI transcription service copy + a "New meeting"
+      // entry point. A regression of the SPA build pipeline (or the proxy
+      // misroute we already test above) shows up here as the wrong content.
+      await expect(page.locator('body')).toContainText(/AI transcription and drafting service/i);
+      await expect(page.locator('a:has-text("New meeting"), a[href$="/new"]').first()).toBeVisible();
+
+      // Templates page lists the seeded Document + Form template types. The
+      // SPA loads these from its API server; a 5xx on /api/templates would
+      // leave the page blank.
+      await page.goto(`${minuteUrl}/templates`, { waitUntil: 'domcontentloaded' });
+      await expect(page.locator('body')).toContainText(/Document/i);
+      await expect(page.locator('body')).toContainText(/Form/i);
+      const templateLinks = await page.locator('a[href^="/templates/"]').count();
+      expect(templateLinks, 'templates page rendered no template entries — backend API regression').toBeGreaterThanOrEqual(2);
     } finally {
       await context.close();
     }

@@ -21,19 +21,39 @@ runSmoke({
       passwordSelector: 'input[type="password"], input[name="password"], input#password',
     });
 
-    // /api/documents/ 500 = S3 Files mount or Postgres regressed.
+    // /api/documents/ 500 = S3 Files mount or Postgres regressed. Parse the
+    // response: a healthy seeded instance has > 30 documents, each with OCR
+    // content. Empty count = post-consume hook didn't run; empty content
+    // on a non-empty list = OCR pipeline regressed silently.
     await page.goto(`${root}/documents`, { waitUntil: 'domcontentloaded' });
-    const apiStatus = await page.evaluate(async () => {
+    type ListResponse = {
+      count: number;
+      results: Array<{ id: number; title: string; content: string; notes: Array<{ note: string }> }>;
+    };
+    const listResp = await page.evaluate(async () => {
       try {
         const r = await fetch(window.location.origin + '/api/documents/?page=1', {
           credentials: 'same-origin',
         });
-        return r.status;
-      } catch {
-        return -1;
+        return { status: r.status, body: r.status === 200 ? await r.json() : null };
+      } catch (e) {
+        return { status: -1, body: null, error: String(e) };
       }
-    });
-    expect(apiStatus).toBeGreaterThan(0);
-    expect(apiStatus).toBeLessThan(500);
+    }) as { status: number; body: ListResponse | null };
+
+    expect(listResp.status).toBeGreaterThan(0);
+    expect(listResp.status, '/api/documents/ returned 5xx — S3 Files mount or Postgres regression').toBeLessThan(500);
+    expect(listResp.body, '/api/documents/ returned non-200 — auth or API regression').not.toBeNull();
+    const list = listResp.body as ListResponse;
+    expect(list.count, 'paperless has zero documents — seed regression or post-consume failure').toBeGreaterThan(0);
+
+    const first = list.results[0];
+    expect(first, '/api/documents/ returned empty results array despite count > 0').toBeDefined();
+    expect(first.content.length, `first document "${first.title}" has no OCR content — OCR pipeline regression`).toBeGreaterThan(50);
+    // AI summary note is written by the post-consume Bedrock hook. Missing
+    // note on every seeded doc = Bedrock/Lambda hook regression (silent —
+    // documents would still appear, just without AI enrichment).
+    const hasAiNote = list.results.some((d) => d.notes.some((n) => /AI summary/i.test(n.note)));
+    expect(hasAiNote, 'no seeded document has an "AI summary" note — Bedrock post-consume hook regression').toBe(true);
   },
 });
