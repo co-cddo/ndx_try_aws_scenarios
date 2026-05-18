@@ -43,8 +43,11 @@ export class StorageConstruct extends Construct {
 
     // Source-of-truth bucket: holds Paperless's working set AND is the KB data source.
     // S3 Files requires versioning to be enabled and SSE-S3 or SSE-KMS encryption.
+    // The `-v2-` segment side-steps an orphan S3Files FS in the long-lived
+    // smoke account that holds the v1 bucket name hostage (pending exports
+    // mean it can't be deleted via API; AWS Support case required).
     this.archiveBucket = new s3.Bucket(this, 'ArchiveBucket', {
-      bucketName: `ndx-try-paperless-archive-${accountId}-${region}`,
+      bucketName: `ndx-try-paperless-archive-v2-${accountId}-${region}`,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       encryption: s3.BucketEncryption.S3_MANAGED,

@@ -99,7 +99,7 @@ export class DigitalPlanningRegisterStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs for the application',
-      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-dpr/production')}`,
+      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent(`/ndx-dpr-${this.stackName}/production`)}`,
     });
 
     new cdk.CfnOutput(this, 'ECSClusterUrl', {

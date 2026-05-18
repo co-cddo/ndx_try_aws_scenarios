@@ -15,7 +15,11 @@ export class NetworkingConstruct extends Construct {
   constructor(scope: Construct, id: string, props?: NetworkingConstructProps) {
     super(scope, id);
 
-    const prefix = 'NdxBops';
+    // `NdxBops-v2-` prefix side-steps an orphan BopsPlanning stack in the
+    // long-lived smoke account that's stuck in UPDATE_ROLLBACK_COMPLETE_CLEANUP
+    // and holds the un-suffixed VPC + SG names. Same reason for the IAM roles,
+    // ECS cluster, ALB and service names in compute.ts/storage.ts.
+    const prefix = 'NdxBops-v2';
 
     // VPC: public-only subnets, 2 AZs, 0 NAT gateways
     this.vpc = new ec2.Vpc(this, 'Vpc', {

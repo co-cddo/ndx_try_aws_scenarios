@@ -55,17 +55,18 @@ Parameters:
     Type: String
     Default: ''
     Description: |
-      If non-empty, use this pre-claimed Connect phone-number ARN instead of
-      claiming a new DID. Lets long-lived deploys (smoke account) avoid the
-      30-day release cooldown that exhausts UK DID quota. Leave empty for
-      ISB pool deploys — the default behaviour claims a fresh number, as before.
+      Any non-empty value disables the GeoNumber claim path: no real GB DID is
+      claimed, no PhoneNumberFlowAssociation is created. Smoke passes a DUMMY
+      string here (UK DID claim quota is 5/30 days; deploying-and-tearing-down
+      AICC would exhaust it). Leave empty in ISB pool deploys — the default
+      behaviour claims a fresh DID and wires it to the contact flow.
   ExistingPhoneNumber:
     Type: String
     Default: ''
     Description: |
-      The dialable E.164 number string for ExistingPhoneNumberArn (e.g.
-      "+442012345678"). Required when ExistingPhoneNumberArn is set; otherwise
-      ignored. Surfaced as the PstnNumber output so smoke can regex-check it.
+      The dialable E.164 number string surfaced as the PstnNumber output when
+      ExistingPhoneNumberArn is set. Smoke uses "+442012345678" — chosen to
+      satisfy the +44 format regex without identifying any real DID.
 
 Conditions:
   ClaimNewPhoneNumber: !Equals [!Ref ExistingPhoneNumberArn, '']
@@ -2891,10 +2892,10 @@ Resources:
       AIAgentType: ANSWER_RECOMMENDATION
 
   # Flow association is only valid when the phone number is on this stack's
-  # Connect instance. When ExistingPhoneNumberArn is set, the number lives on
-  # a different (long-lived holder) instance and can't be associated here —
-  # so the association is skipped. Smoke only verifies the output regex; the
-  # full inbound-call routing isn't exercised in long-lived deploys.
+  # Connect instance, which we only created when ClaimNewPhoneNumber is true.
+  # In the smoke/DUMMY path, no real number is in scope; the association is
+  # skipped. Smoke only checks the format of the PstnNumber output, not the
+  # actual inbound-call routing.
   GeoFlowAssoc:
     Condition: ClaimNewPhoneNumber
     Type: Custom::PhoneFlowAssoc

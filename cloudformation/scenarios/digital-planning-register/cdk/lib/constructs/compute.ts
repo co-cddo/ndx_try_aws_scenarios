@@ -27,8 +27,9 @@ export class ComputeConstruct extends Construct {
       clusterName: 'NdxDpr-Cluster',
     });
 
+    // Stack-name suffix keeps the LogGroup unique across redeploys.
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/ndx-dpr/production',
+      logGroupName: `/ndx-dpr-${cdk.Stack.of(this).stackName}/production`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });

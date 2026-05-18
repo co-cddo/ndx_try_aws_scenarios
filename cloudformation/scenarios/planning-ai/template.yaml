@@ -1221,7 +1221,7 @@ Resources:
   PlanningAnalyzerLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${PlanningAnalyzerFunction}'
+      LogGroupName: !Sub '/aws/lambda/${PlanningAnalyzerFunction}-${AWS::StackName}'
       RetentionInDays: 7
       Tags:
         - Key: Project

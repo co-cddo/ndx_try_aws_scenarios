@@ -40,27 +40,25 @@ export class ComputeConstruct extends Construct {
   constructor(scope: Construct, id: string, props: ComputeConstructProps) {
     super(scope, id);
 
+    // All fixed names carry a `-v2-` segment to side-step an orphan
+    // BopsPlanning stack in the long-lived smoke account that's stuck in
+    // UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS and holds the un-suffixed
+    // names. Same reason in networking.ts and storage.ts.
     this.cluster = new ecs.Cluster(this, 'Cluster', {
       vpc: props.vpc,
-      clusterName: 'NdxBops-Cluster',
+      clusterName: 'NdxBops-v2-Cluster',
     });
 
-    // DESTROY so CFN cleans the LogGroup when the stack is deleted. The
-    // previous RETAIN+fixed-name pattern was operationally fragile: a
-    // failed-deploy + rollback leaves /ndx-bops/production owned by AWS but
-    // not by CFN, and the next deploy fails with AlreadyExists on the
-    // CREATE. Smoke's artefact-capture step preserves stack events across
-    // failures, so "debug after rollback" is covered without retaining the
-    // raw LogGroup.
+    // DESTROY so CFN cleans the LogGroup when the stack is deleted.
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/ndx-bops/production',
+      logGroupName: '/ndx-bops-v2/production',
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     // IAM Roles — ISB SCP requires InnovationSandbox-ndx-* prefix
     const executionRole = new iam.Role(this, 'ExecutionRole', {
-      roleName: 'InnovationSandbox-ndx-bops-exec',
+      roleName: 'InnovationSandbox-ndx-bops-v2-exec',
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
@@ -69,7 +67,7 @@ export class ComputeConstruct extends Construct {
     props.databaseSecret.grantRead(executionRole);
 
     const taskRole = new iam.Role(this, 'TaskRole', {
-      roleName: 'InnovationSandbox-ndx-bops-task',
+      roleName: 'InnovationSandbox-ndx-bops-v2-task',
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
     });
     props.uploadsBucket.grantReadWrite(taskRole);
@@ -99,7 +97,7 @@ export class ComputeConstruct extends Construct {
       vpc: props.vpc,
       internetFacing: true,
       securityGroup: props.albSecurityGroup,
-      loadBalancerName: 'NdxBops-ALB',
+      loadBalancerName: 'NdxBops-v2-ALB',
     });
     this.loadBalancerDnsName = this.loadBalancer.loadBalancerDnsName;
 
@@ -279,7 +277,7 @@ export class ComputeConstruct extends Construct {
       assignPublicIp: true,
       enableExecuteCommand: true,
       circuitBreaker: { rollback: true },
-      serviceName: 'NdxBops-Web',
+      serviceName: 'NdxBops-v2-Web',
       healthCheckGracePeriod: cdk.Duration.minutes(15),
     });
 
@@ -292,7 +290,7 @@ export class ComputeConstruct extends Construct {
       assignPublicIp: true,
       enableExecuteCommand: true,
       circuitBreaker: { rollback: true },
-      serviceName: 'NdxBops-Applicants',
+      serviceName: 'NdxBops-v2-Applicants',
       healthCheckGracePeriod: cdk.Duration.minutes(15),
     });
 

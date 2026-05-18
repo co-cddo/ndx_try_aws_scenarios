@@ -174,7 +174,7 @@ function send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);cons
     // CloudWatch Logs URL
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs for FixMyStreet',
-      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-fixmystreet/production')}`,
+      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent(`/ndx-fixmystreet-${this.stackName}/production`)}`,
     });
 
     new cdk.CfnOutput(this, 'StackDescription', {

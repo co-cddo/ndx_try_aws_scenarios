@@ -601,7 +601,7 @@ Resources:
   TextToSpeechLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${TextToSpeechFunction}'
+      LogGroupName: !Sub '/aws/lambda/${TextToSpeechFunction}-${AWS::StackName}'
       RetentionInDays: 7
       Tags:
         - Key: Project

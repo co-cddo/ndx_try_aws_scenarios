@@ -195,7 +195,7 @@ function send(u,d){return new Promise((ok,fail)=>{const b=JSON.stringify(d);cons
     });
 
     // CloudWatch Logs URL for monitoring initialization
-    const logGroupName = `/ndx-drupal/${deploymentMode}`;
+    const logGroupName = `/ndx-drupal-${this.stackName}/${deploymentMode}`;
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs for initialization monitoring',
       value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent(logGroupName)}`,

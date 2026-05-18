@@ -73,15 +73,15 @@ Parameters:
     Type: String
     Default: ''
     Description: |
-      Pre-claimed Connect PhoneNumber ARN for ai-contact-centre. Empty = claim a
-      fresh DID (default; ISB pool deploys). Set in long-lived deploys (smoke
-      account) to dodge the 30-day release cooldown that exhausts UK DID quota.
+      Any non-empty value disables the GeoNumber claim path in ai-contact-centre.
+      Smoke passes a DUMMY string here (UK DID claim quota is 5/30 days).
+      Leave empty for ISB pool deploys to claim a fresh DID, as before.
   AiccExistingPhoneNumber:
     Type: String
     Default: ''
     Description: |
-      Dialable E.164 number (e.g. +442012345678) for AiccExistingPhoneNumberArn.
-      Required when that ARN is set; ignored otherwise.
+      E.164 number string surfaced as the AICC PstnNumber output when
+      AiccExistingPhoneNumberArn is set (smoke uses "+442012345678").
 
 Resources:
   CouncilChatbot:

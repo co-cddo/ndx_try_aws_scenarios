@@ -36,9 +36,10 @@ export class ComputeConstruct extends Construct {
       clusterName: 'NdxFms-Cluster',
     });
 
-    // CloudWatch Log Group
+    // Stack-name suffix keeps the LogGroup unique across redeploys (orphan
+    // LG from a previous rollback would otherwise block CREATE on AlreadyExists).
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/ndx-fixmystreet/production',
+      logGroupName: `/ndx-fixmystreet-${cdk.Stack.of(this).stackName}/production`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });

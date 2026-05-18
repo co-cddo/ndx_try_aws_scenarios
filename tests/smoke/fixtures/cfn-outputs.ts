@@ -14,6 +14,10 @@ import {
   GetSecretValueCommand,
 } from '@aws-sdk/client-secrets-manager';
 
+// `Login` is in here on purpose: scenarios surface ...LoginUrl outputs that
+// can carry pre-auth tokens in the query string (e.g. MinuteLoginUrl's magic
+// link) or whose presence in a trace is itself sensitive. Treat them as
+// sensitive and force callers to use requireSensitive() + sensitiveValue().
 const SENSITIVE_KEY_PATTERN =
   /(Password|Secret|Token|Credentials|Creds|Login|ApiKey|ConnectionString|PrivateKey|Passphrase)/i;
 

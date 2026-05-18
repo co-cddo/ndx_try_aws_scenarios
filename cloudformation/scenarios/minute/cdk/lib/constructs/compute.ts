@@ -59,8 +59,12 @@ export class ComputeConstruct extends Construct {
     // ==========================================================================
     // CloudWatch Log Group
     // ==========================================================================
+    // Stack-name suffix keeps the LogGroup unique across redeploys: a
+    // failed-deploy + rollback that leaves the LG orphaned (CFN believes it
+    // owns the name, but the next stack creation collides on AlreadyExists)
+    // is the most common smoke-account failure mode without the suffix.
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/ndx-minute',
+      logGroupName: `/ndx-minute-${cdk.Stack.of(this).stackName}`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });

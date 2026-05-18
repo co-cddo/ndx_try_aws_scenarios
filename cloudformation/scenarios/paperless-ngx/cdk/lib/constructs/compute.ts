@@ -56,8 +56,9 @@ export class ComputeConstruct extends Construct {
       containerInsights: false,
     });
 
+    // Stack-name suffix keeps the LogGroup unique across redeploys.
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/ndx-paperless-ngx/production',
+      logGroupName: `/ndx-paperless-ngx-${cdk.Stack.of(this).stackName}/production`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });

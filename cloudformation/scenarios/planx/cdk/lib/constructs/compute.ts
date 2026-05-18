@@ -39,8 +39,9 @@ export class ComputeConstruct extends Construct {
       clusterName: 'NdxPlanx-Cluster',
     });
 
+    // Stack-name suffix keeps the LogGroup unique across redeploys.
     const logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/ndx-planx/production',
+      logGroupName: `/ndx-planx-${cdk.Stack.of(this).stackName}/production`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -465,7 +466,7 @@ export class ComputeConstruct extends Construct {
     // =========================================================================
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs for PlanX containers',
-      value: `https://${cdk.Aws.REGION}.console.aws.amazon.com/cloudwatch/home?region=${cdk.Aws.REGION}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-planx/production')}`,
+      value: `https://${cdk.Aws.REGION}.console.aws.amazon.com/cloudwatch/home?region=${cdk.Aws.REGION}#logsV2:log-groups/log-group/${encodeURIComponent(`/ndx-planx-${cdk.Stack.of(this).stackName}/production`)}`,
     });
   }
 }

@@ -134,16 +134,11 @@ jobs:
           set -euo pipefail
           STACK="${{ steps.predeploy.outputs.stack_name }}"
           MODE="${{ needs.scope.outputs.mode }}"
-          # --disable-rollback was tried as a fix-forward enabler but
-          # blocks Replacement-type updates (e.g. ECS task-def replacement
-          # for a new image), so the second run cycle fails with
-          # "Replacement type updates not supported on stack with
-          # disable-rollback." Standard rollback semantics it is.
-          # Tags must be stable across runs. CFN propagates parent tags down to
-          # nested stacks and triggers per-resource UPDATE on tag-change; AICC's
-          # AWS::Wisdom::* resources don't support UPDATE (handler is CREATE/DELETE
-          # only) and roll the whole umbrella back. SmokeRun is captured via stack
-          # description / metadata elsewhere — don't tag it here.
+          # Tags must stay stable across runs. CFN propagates parent tags to
+          # nested stacks; any tag-change triggers a per-resource UPDATE, and
+          # AICC's AWS::Wisdom::* resources reject UPDATE (handler is
+          # CREATE/DELETE only) — that rolls the whole umbrella back. So no
+          # per-run tag values here; correlate runs via stack description.
           aws cloudformation deploy \
             --stack-name "$STACK" \
             --template-file cloudformation/scenarios/all-demo/template.yaml \

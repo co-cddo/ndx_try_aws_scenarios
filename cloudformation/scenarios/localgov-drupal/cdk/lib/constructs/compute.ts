@@ -125,8 +125,9 @@ export class ComputeConstruct extends Construct {
     // ==========================================================================
     // CloudWatch Log Group
     // ==========================================================================
+    // Stack-name suffix keeps the LogGroup unique across redeploys.
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: `/ndx-drupal/${deploymentMode}`,
+      logGroupName: `/ndx-drupal-${cdk.Stack.of(this).stackName}/${deploymentMode}`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
