@@ -27,7 +27,9 @@ runSmoke({
     const audio = await request.get(body.audioUrl, { failOnStatusCode: false });
     expect(audio.status(), `signed audioUrl returned ${audio.status()}`).toBe(200);
     const ct = audio.headers()['content-type'] ?? '';
-    expect(ct).toMatch(/audio\/mpeg|application\/octet-stream/);
+    // S3 serves Polly output as audio/mp3 (less standard); MIME-strict
+    // proxies might rewrite to audio/mpeg. Accept either + octet-stream.
+    expect(ct).toMatch(/audio\/(mp3|mpeg)|application\/octet-stream/);
     const buf = await audio.body();
     expect(buf.length, 'signed audio body empty').toBeGreaterThan(1024);
     // MP3 magic: ID3 header (0x49 0x44 0x33) or MPEG sync (0xFF 0xFB).

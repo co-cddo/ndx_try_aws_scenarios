@@ -49,10 +49,12 @@ runSmoke({
 
     // Cognito hosted UI must render the username + password inputs for the
     // operator (or, post-merge, a smoke-managed user) to sign in. A blank
-    // hosted-UI page = Cognito user-pool deletion regression.
-    await expect(page.locator('input[name="username"], input[type="text"]').first(),
-      'Cognito hosted UI missing username input').toBeVisible();
-    await expect(page.locator('input[name="password"], input[type="password"]').first(),
-      'Cognito hosted UI missing password input').toBeVisible();
+    // hosted-UI page = Cognito user-pool deletion regression. The default
+    // hosted UI renders username with display:none until the OAuth flow
+    // progresses, so check presence in DOM rather than visibility.
+    expect(await page.locator('input[name="username"], input#signInFormUsername').count(),
+      'Cognito hosted UI missing username input — user-pool deletion regression').toBeGreaterThan(0);
+    expect(await page.locator('input[type="password"], input#signInFormPassword').count(),
+      'Cognito hosted UI missing password input').toBeGreaterThan(0);
   },
 });

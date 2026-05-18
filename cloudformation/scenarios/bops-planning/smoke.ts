@@ -39,8 +39,11 @@ runSmoke({
     await page.goto(`${baseUrl}/planning_applications/all`, { waitUntil: 'domcontentloaded' });
     const appRows = await page.locator('a[href*="/planning_applications/"]').evaluateAll((els) =>
       els.map((e) => e.getAttribute('href') ?? '')
-        // Filter to ID-suffixed application detail links: /planning_applications/<numeric-id>
-        .filter((h) => /\/planning_applications\/\d+($|\?)/.test(h)),
+        // BOPS application refs look like `26-00124-PA1A` (yy-NNNNN-TYPE).
+        // Exclude nav paths (all/mine/unassigned/closed/updated/new) and
+        // query-string-only fragments.
+        .filter((h) => /\/planning_applications\/[A-Z0-9-]+($|\?|#)/i.test(h))
+        .filter((h) => !/\/planning_applications\/(all|mine|unassigned|closed|updated|new)\b/.test(h)),
     );
     expect(appRows.length, '/planning_applications/all shows no seeded applications — seed_sample_data.rb regression').toBeGreaterThan(0);
   },
