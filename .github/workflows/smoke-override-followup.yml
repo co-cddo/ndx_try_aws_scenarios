@@ -1,0 +1,56 @@
+name: Smoke Override Follow-up
+
+# AC3.10: when a PR is merged with the `smoke-override-emergency` label, the
+# smoke gate is bypassed (see smoke.yml's `scope` job). 48 hours later we
+# open a `smoke-override-followup` issue so the underlying regression isn't
+# forgotten. Runs hourly so the 48h window is met within ±1h.
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  followup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Open follow-up issues for ~48h-old overrides
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # PRs merged in the 47-49h window with the override label and no
+          # existing follow-up issue. Hourly cron means each qualifying PR is
+          # caught exactly once in the 47-49h window (idempotent search).
+          NOW_TS=$(date -u +%s)
+          WINDOW_OPEN=$((NOW_TS - 49 * 3600))
+          WINDOW_CLOSE=$((NOW_TS - 47 * 3600))
+          gh pr list --state merged --label smoke-override-emergency --json number,title,mergedAt,url \
+            --limit 50 \
+            | jq -r --argjson open "$WINDOW_OPEN" --argjson close "$WINDOW_CLOSE" '
+                .[]
+                | select((.mergedAt | fromdate) >= $open and (.mergedAt | fromdate) <= $close)
+                | "\(.number)\t\(.title)\t\(.url)"
+              ' \
+            | while IFS=$'\t' read -r num title url; do
+                [ -z "$num" ] && continue
+                # Skip if a follow-up issue for this PR already exists.
+                existing=$(gh issue list --state all --label smoke-override-followup --search "in:title #$num" --json number --jq '.[0].number')
+                if [ -n "$existing" ]; then
+                  echo "PR #$num already has follow-up issue #$existing — skipping"
+                  continue
+                fi
+                gh issue create \
+                  --title "Follow-up: smoke-override-emergency on PR #$num ($title)" \
+                  --label smoke-override-followup \
+                  --body "PR #$num merged with the smoke-override-emergency label, bypassing the smoke gate. 48h have elapsed — please record the underlying regression's resolution (smoke now green / scenario re-quarantined / etc.) and close this issue.
+
+PR: $url
+Merged: ~48h ago"
+              done

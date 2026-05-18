@@ -44,6 +44,7 @@ jobs:
     outputs:
       mode: ${{ steps.decide.outputs.mode }}
       scenarios: ${{ steps.decide.outputs.scenarios }}
+      override: ${{ steps.override.outputs.active }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -53,10 +54,25 @@ jobs:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           GITHUB_BASE_REF: ${{ github.base_ref }}
         run: ./scripts/smoke-scope.sh
+      # AC3.10: `smoke-override-emergency` label causes the smoke job to skip,
+      # making it a pass — so the merge gate clears. CODEOWNERS approval of the
+      # PR itself is required by repo branch-protection, not by this workflow.
+      # The 48h follow-up issue is opened by smoke-override-followup.yml.
+      - id: override
+        if: github.event_name == 'pull_request'
+        env:
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          if echo "$LABELS" | jq -re '.[]|select(.=="smoke-override-emergency")' >/dev/null; then
+            echo "active=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::smoke-override-emergency label present — smoke gate bypassed."
+          else
+            echo "active=false" >> "$GITHUB_OUTPUT"
+          fi
 
   smoke:
     needs: scope
-    if: needs.scope.outputs.mode != 'none'
+    if: needs.scope.outputs.mode != 'none' && needs.scope.outputs.override != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     # smoke-test-deploy environment is gated by CODEOWNERS for non-main refs
