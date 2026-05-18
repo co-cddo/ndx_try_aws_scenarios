@@ -122,8 +122,8 @@ expected_scps:
 #
 # Operator setup (one-off): see docs/smoke-test-account-setup.md →
 # "Step 13: pre-claim ai-contact-centre PSTN number".
-aicc_existing_phone_number_arn: "arn:aws:connect:us-east-1:464453619983:phone-number/8388ccd0-eb70-4233-a998-60ce0374d94d"
-aicc_existing_phone_number: "+442046425134"
+aicc_existing_phone_number_arn: "DUMMY-no-real-pstn-claimed-do-not-replace-with-arn"
+aicc_existing_phone_number: "+442012345678"
 # --- Provenance --------------------------------------------------------------
 
 # ISO date the runbook was last executed end-to-end. Populated by Step 16.

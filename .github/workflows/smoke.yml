@@ -151,7 +151,6 @@ jobs:
             --parameter-overrides \
               AiccExistingPhoneNumberArn='${{ steps.cfg.outputs.aicc_phone_arn }}' \
               AiccExistingPhoneNumber='${{ steps.cfg.outputs.aicc_phone_number }}' \
-              DeployAiContactCentre='false' \
             --no-fail-on-empty-changeset \
             --tags "Project=ndx-try" "SmokeMode=$MODE"
           echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"

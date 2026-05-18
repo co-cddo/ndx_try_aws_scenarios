@@ -82,18 +82,6 @@ Parameters:
     Description: |
       Dialable E.164 number (e.g. +442012345678) for AiccExistingPhoneNumberArn.
       Required when that ARN is set; ignored otherwise.
-  DeployAiContactCentre:
-    Type: String
-    Default: 'true'
-    AllowedValues: ['true', 'false']
-    Description: |
-      Set to 'false' to skip the AICC nested stack. Smoke account uses 'false'
-      while Connect instance quota (L-AA17A6B9) is 1 and the holder occupies
-      the slot — AICC's CreateInstance would fail with "Quota limit reached".
-      Flip back to 'true' once the live quota reads >= 2.
-
-Conditions:
-  WithAiContactCentre: !Equals [!Ref DeployAiContactCentre, 'true']
 
 Resources:
   CouncilChatbot:
@@ -233,7 +221,6 @@ Resources:
 
   AiContactCentre:
     Type: AWS::CloudFormation::Stack
-    Condition: WithAiContactCentre
     Properties:
       TemplateURL: !Sub 'https://${TemplateBucket}.s3.${TemplateBucketRegion}.amazonaws.com/scenarios/ai-contact-centre/template.yaml'
       Parameters:
@@ -438,12 +425,10 @@ Outputs:
     Value: !GetAtt SimplyReadable.Outputs.AdminPassword
 
   AiContactCentreCompanionUrl:
-    Condition: WithAiContactCentre
     Description: AI Contact Centre companion UI URL
     Value: !GetAtt AiContactCentre.Outputs.CompanionUrl
 
   AiContactCentrePstnNumber:
-    Condition: WithAiContactCentre
     Description: AI Contact Centre PSTN claim number
     Value: !GetAtt AiContactCentre.Outputs.PstnNumber
 
