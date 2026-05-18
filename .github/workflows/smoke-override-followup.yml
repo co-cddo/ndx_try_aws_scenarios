@@ -46,11 +46,9 @@ jobs:
                   echo "PR #$num already has follow-up issue #$existing — skipping"
                   continue
                 fi
+                body=$(printf 'PR #%s merged with the smoke-override-emergency label, bypassing the smoke gate. 48h have elapsed — please record the underlying regression resolution (smoke now green / scenario re-quarantined / etc.) and close this issue.\n\nPR: %s\nMerged: ~48h ago' "$num" "$url")
                 gh issue create \
                   --title "Follow-up: smoke-override-emergency on PR #$num ($title)" \
                   --label smoke-override-followup \
-                  --body "PR #$num merged with the smoke-override-emergency label, bypassing the smoke gate. 48h have elapsed — please record the underlying regression's resolution (smoke now green / scenario re-quarantined / etc.) and close this issue.
-
-PR: $url
-Merged: ~48h ago"
+                  --body "$body"
               done
