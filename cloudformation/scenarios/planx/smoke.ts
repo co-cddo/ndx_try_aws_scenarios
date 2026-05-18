@@ -9,12 +9,19 @@ runSmoke({
     const landing = get('PlanXUrl');
     const root = landing.replace(/\/$/, '');
 
+    // Capture console errors across the whole test so we can fail on the
+    // Airbrake bootstrap crash (`projectId and projectKey are required`).
+    // The crash is thrown synchronously during module init and blanks the
+    // SPA. The CI Dockerfile + airbrake.ts overlay must keep this clean.
+    const consoleErrors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
     await page.goto(landing, { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle', { timeout: 30_000 });
     const body = (await page.content()).toLowerCase();
-    // domain-allowlist + Airbrake-on-prod regressions both leak the same way.
     expect(body).not.toContain('permission denied for this domain');
-    expect(body).not.toContain('airbrake');
 
     await adminLogin(page, {
       url: getSecret('PlanXLoginUrl').sensitiveValue(),
@@ -35,14 +42,22 @@ runSmoke({
       expect(await versionResp.text()).toMatch(/version/i);
     }
 
-    // Editor SPA sanity: the React tree currently fails to mount in the smoke
-    // account because Airbrake creds aren't seeded (`airbrake: projectId and
-    // projectKey are required` in the console). Until that's fixed upstream,
-    // we can only assert the SPA entrypoint chunk is served by CloudFront —
-    // its presence proves the build pipeline + S3 origin are intact.
-    await page.waitForLoadState('networkidle', { timeout: 30_000 });
-    const spaHtml = await page.content();
-    expect(spaHtml, 'SPA index bundle missing — CloudFront/build regression')
-      .toMatch(/<script[^>]+src=["'][^"']*\/assets\/index-[A-Za-z0-9]+\.js["']/);
+    // Editor dashboard must render. Upstream renders the team-selector page
+    // (`<h1>Select a team</h1>` + `<h2>My teams</h2>` + at least one team
+    // card link) for an authenticated user with no active team in path.
+    // A blanked SPA (the old Airbrake bootstrap crash) trips here.
+    await expect(page.locator('h1', { hasText: /Select a team/i }),
+      'editor dashboard "Select a team" heading missing — SPA failed to mount').toBeVisible({ timeout: 30_000 });
+    await expect(page.locator('h2', { hasText: /My teams/i }),
+      '"My teams" section missing — auth bootstrap or store regression').toBeVisible();
+    const teamLinks = await page.locator('a[href^="/"]:not([href="/"]):not([href*="logout"]):not([href*="login"])').count();
+    expect(teamLinks, 'no team links on dashboard — Hasura seed or auth-store regression').toBeGreaterThan(0);
+
+    // The Airbrake bootstrap crash leaves a console error matching this
+    // pattern; if it's back, the CI overlay (drop VITE_APP_AIRBRAKE_* +
+    // stub airbrake.ts) has regressed.
+    const airbrakeBoot = consoleErrors.find((m) => /airbrake.*projectId.*projectKey.*required/i.test(m));
+    expect(airbrakeBoot,
+      `Airbrake bootstrap crash returned: ${airbrakeBoot}`).toBeUndefined();
   },
 });

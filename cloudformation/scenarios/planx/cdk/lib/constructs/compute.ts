@@ -353,7 +353,7 @@ export class ComputeConstruct extends Construct {
     });
 
     editorTaskDef.addContainer('editor', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-editor:sha-7cd69fd@sha256:7865e0656e1b703f1d65398a952c933529831926f54e635e4f49d9c822633d30'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-editor:sha-25bc309@sha256:38ff08f2ae59c0f6d140d6de7abba5978bd170d79bdac362bf3f6ad2e04309f9'),
       logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'editor' }),
       environment: {
         // Editor SPA uses relative paths for API/Hasura and window.location.host for WebSockets
