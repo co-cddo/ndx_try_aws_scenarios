@@ -52,6 +52,7 @@ website-build/
 
 # Generated CloudFormation templates
 cloudformation/scenarios/*/template.yaml
+cloudformation/scenarios/*/template.json
 # Whitelist scenarios where template.yaml is hand-authored (not CDK-generated)
 !cloudformation/scenarios/ai-contact-centre/template.yaml
 

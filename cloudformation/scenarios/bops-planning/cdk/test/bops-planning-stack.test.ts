@@ -17,7 +17,7 @@ describe('BopsPlanningStack', () => {
 
     template.hasResourceProperties('AWS::EC2::VPC', {
       Tags: Match.arrayWith([
-        Match.objectLike({ Key: 'Name', Value: Match.stringLikeRegexp('NdxBops-VPC') }),
+        Match.objectLike({ Key: 'Name', Value: Match.stringLikeRegexp('NdxBops-v2-VPC') }),
       ]),
     });
   });
@@ -76,7 +76,7 @@ describe('BopsPlanningStack', () => {
     const template = Template.fromStack(stack);
 
     template.hasResourceProperties('AWS::ECS::Cluster', {
-      ClusterName: 'NdxBops-Cluster',
+      ClusterName: 'NdxBops-v2-Cluster',
     });
   });
 

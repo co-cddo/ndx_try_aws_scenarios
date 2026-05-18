@@ -125,8 +125,9 @@ export class ComputeConstruct extends Construct {
     // ==========================================================================
     // CloudWatch Log Group
     // ==========================================================================
+    // Stack-name suffix keeps the LogGroup unique across redeploys.
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: `/ndx-drupal/${deploymentMode}`,
+      logGroupName: `/ndx-drupal-${cdk.Stack.of(this).stackName}/${deploymentMode}`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -272,7 +273,7 @@ export class ComputeConstruct extends Construct {
 
     // Add container - pull from GitHub Container Registry
     const container = taskDefinition.addContainer('drupal', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-localgov_drupal:latest'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-localgov_drupal:sha-5801fb7@sha256:e91947e3eebc50d408921367069d6e4046a6e61f94521e19c6b0b55a5773e5d0'),
       logging: ecs.LogDrivers.awsLogs({
         logGroup: this.logGroup,
         streamPrefix: 'drupal',

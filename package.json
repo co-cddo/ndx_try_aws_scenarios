@@ -17,6 +17,7 @@
     "test:visual": "playwright test tests/visual-regression.spec.ts",
     "test:drupal-screenshots": "playwright test tests/drupal-screenshots.spec.ts",
     "test:playwright": "playwright test",
+    "test:smoke": "./scripts/smoke.sh",
     "clean": "rm -rf _site",
     "optimize-images": "node scripts/optimize-images.js",
     "check:screenshots": "node scripts/check-screenshots.js"
@@ -31,6 +32,7 @@
   "author": "NDX Partnership",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.1047.0",
     "@sindresorhus/slugify": "^3.0.0",
     "@x-govuk/govuk-eleventy-plugin": "^9.0.1",
     "govuk-frontend": "^6.1.0",

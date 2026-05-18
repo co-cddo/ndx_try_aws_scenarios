@@ -178,7 +178,7 @@ export class PaperlessNgxStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs for Paperless containers',
-      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-paperless-ngx/production')}`,
+      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent(`/ndx-paperless-ngx-${this.stackName}/production`)}`,
     });
 
     new cdk.CfnOutput(this, 'ArchiveBucket', {

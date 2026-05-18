@@ -36,9 +36,10 @@ export class ComputeConstruct extends Construct {
       clusterName: 'NdxFms-Cluster',
     });
 
-    // CloudWatch Log Group
+    // Stack-name suffix keeps the LogGroup unique across redeploys (orphan
+    // LG from a previous rollback would otherwise block CREATE on AlreadyExists).
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/ndx-fixmystreet/production',
+      logGroupName: `/ndx-fixmystreet-${cdk.Stack.of(this).stackName}/production`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -94,7 +95,7 @@ export class ComputeConstruct extends Construct {
 
     // Main FixMyStreet container (Perl/Catalyst app on port 9000)
     const fmsContainer = this.taskDefinition.addContainer('fixmystreet', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-fixmystreet:latest'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-fixmystreet:sha-be035a6@sha256:863c3e7dded6d2132663b9e46725bc4f46e934c8ce86b3977a13ade45d986e94'),
       logging: ecs.LogDrivers.awsLogs({
         logGroup: this.logGroup,
         streamPrefix: 'fms',

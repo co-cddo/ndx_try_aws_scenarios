@@ -190,19 +190,19 @@ Resources:
   SimulatorLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/ndx-try-carpark-${AWS::Region}-simulator'
+      LogGroupName: !Sub '/aws/lambda/ndx-try-carpark-${AWS::Region}-simulator-${AWS::StackName}'
       RetentionInDays: 7
 
   ProcessorLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/ndx-try-carpark-${AWS::Region}-processor'
+      LogGroupName: !Sub '/aws/lambda/ndx-try-carpark-${AWS::Region}-processor-${AWS::StackName}'
       RetentionInDays: 7
 
   DashboardLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/ndx-try-carpark-${AWS::Region}-dashboard'
+      LogGroupName: !Sub '/aws/lambda/ndx-try-carpark-${AWS::Region}-dashboard-${AWS::StackName}'
       RetentionInDays: 7
 
   # ============================================================

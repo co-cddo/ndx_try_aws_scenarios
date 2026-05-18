@@ -39,8 +39,9 @@ export class ComputeConstruct extends Construct {
       clusterName: 'NdxPlanx-Cluster',
     });
 
+    // Stack-name suffix keeps the LogGroup unique across redeploys.
     const logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/ndx-planx/production',
+      logGroupName: `/ndx-planx-${cdk.Stack.of(this).stackName}/production`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -120,7 +121,7 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        cpuArchitecture: ecs.CpuArchitecture.X86_64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
@@ -134,7 +135,7 @@ export class ComputeConstruct extends Construct {
     // 3. Pre-creates extensions (postgis, pgcrypto, fuzzystrmatch, pg_cron, etc.)
     // 4. Then runs the standard Hasura cli-migrations entrypoint
     hasuraTaskDef.addContainer('hasura-engine', {
-      image: ecs.ContainerImage.fromRegistry(`${ghcrPrefix}-hasura:latest`),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-hasura:sha-7cd69fd@sha256:a6f4d2d733c67db630dcd20138ab64056077023b7022365b3d7327b397655529'),
       logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'hasura' }),
       environment: {
         HASURA_GRAPHQL_DATABASE_URL: databaseUrl,
@@ -192,10 +193,12 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        // ARM64: matches the editor / api images we publish (built natively
-        // on Apple Silicon CI; cross-compiling to amd64 under QEMU OOMs the
-        // editor's vite/esbuild step). Also ~20% cheaper on Fargate.
-        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        // X86_64: our four custom planx images (hasura, api, editor, sharedb)
+        // are published as amd64-only via the build pipeline. Fargate refuses
+        // to pull them as arm64. Switching back to ARM64 requires a multi-arch
+        // build in the planx image CI (docker buildx) and re-publishing each
+        // image with both architectures in the manifest list.
+        cpuArchitecture: ecs.CpuArchitecture.X86_64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
@@ -209,7 +212,7 @@ export class ComputeConstruct extends Construct {
     ].join(' && ');
 
     apiTaskDef.addContainer('api', {
-      image: ecs.ContainerImage.fromRegistry(`${ghcrPrefix}-api:latest`),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-api:sha-7cd69fd@sha256:c149d3168293c6a4a70023be228d8ba716120a6b0a72aae9f1e3c08bec22500f'),
       logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'api' }),
       environment: {
         ...sharedEnv,
@@ -295,13 +298,13 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        cpuArchitecture: ecs.CpuArchitecture.X86_64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
 
     sharedbTaskDef.addContainer('sharedb', {
-      image: ecs.ContainerImage.fromRegistry(`${ghcrPrefix}-sharedb:latest`),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-sharedb:sha-7cd69fd@sha256:f50bac68056a0d2e47c49a5ff17b3020aaf8428bcb08792ff562487815299047'),
       logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'sharedb' }),
       environment: {
         ...sharedEnv,
@@ -344,13 +347,13 @@ export class ComputeConstruct extends Construct {
       executionRole,
       taskRole,
       runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        cpuArchitecture: ecs.CpuArchitecture.X86_64,
         operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
     });
 
     editorTaskDef.addContainer('editor', {
-      image: ecs.ContainerImage.fromRegistry(`${ghcrPrefix}-editor:latest`),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/co-cddo/ndx_try_aws_scenarios-planx-editor:sha-25bc309@sha256:38ff08f2ae59c0f6d140d6de7abba5978bd170d79bdac362bf3f6ad2e04309f9'),
       logging: ecs.LogDrivers.awsLogs({ logGroup, streamPrefix: 'editor' }),
       environment: {
         // Editor SPA uses relative paths for API/Hasura and window.location.host for WebSockets
@@ -463,7 +466,7 @@ export class ComputeConstruct extends Construct {
     // =========================================================================
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs for PlanX containers',
-      value: `https://${cdk.Aws.REGION}.console.aws.amazon.com/cloudwatch/home?region=${cdk.Aws.REGION}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-planx/production')}`,
+      value: `https://${cdk.Aws.REGION}.console.aws.amazon.com/cloudwatch/home?region=${cdk.Aws.REGION}#logsV2:log-groups/log-group/${encodeURIComponent(`/ndx-planx-${cdk.Stack.of(this).stackName}/production`)}`,
     });
   }
 }

@@ -91,7 +91,7 @@ export class MinuteStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs URL',
-      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-minute')}`,
+      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent(`/ndx-minute-${this.stackName}`)}`,
     });
 
     new cdk.CfnOutput(this, 'DataBucketName', {

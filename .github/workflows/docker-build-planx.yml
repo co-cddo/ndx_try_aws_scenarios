@@ -219,6 +219,35 @@ jobs:
           cp -r planx-src/apps/editor.planx.uk build-ctx/planx-editor
           cp cloudformation/scenarios/planx/docker/editor/nginx.conf build-ctx/
           cp cloudformation/scenarios/planx/docker/editor/entrypoint.sh build-ctx/
+
+          # Patch validateDomain: upstream restricts /app to a hardcoded
+          # allowlist of hosts and redirects everything else to /login, which
+          # blocks the demo auth flow on our CloudFront distributions.
+          LOADER="build-ctx/planx-editor/src/routes/_authenticated/-loader.tsx"
+          if [ -f "$LOADER" ]; then
+            cat > "$LOADER" <<'EOF'
+          export const validateDomain = () => {};
+          EOF
+            echo "patched _authenticated/-loader.tsx"
+          fi
+
+          # Stub Airbrake. Upstream's hasConfig check is meant to take the
+          # no-op branch when VITE_APP_AIRBRAKE_* env vars are unset, but in
+          # practice `new Notifier()` still gets reached somehow and throws
+          # `projectId and projectKey are required` during module init,
+          # blanking the SPA. Replace the module with an unconditional no-op.
+          AIRBRAKE="build-ctx/planx-editor/src/airbrake.ts"
+          if [ -f "$AIRBRAKE" ]; then
+            cat > "$AIRBRAKE" <<'EOF'
+          export const logger = {
+            notify: (error: unknown) => {
+              if (typeof console !== "undefined") console.warn("[airbrake stub]", error);
+            },
+          };
+          EOF
+            echo "patched airbrake.ts (no-op stub)"
+          fi
+
           cat > build-ctx/Dockerfile << 'DEOF'
           FROM node:24.14.0-alpine AS build
           RUN apk add --no-cache git
@@ -227,12 +256,14 @@ jobs:
           COPY planx-editor/ .
           RUN pnpm install --recursive 2>/dev/null || pnpm install
           ENV VITE_APP_API_URL=/api
-          ENV VITE_APP_HASURA_URL=/hasura/v1/graphql
-          ENV VITE_APP_HASURA_WEBSOCKET=wss://__PLANX_HOST__/hasura/v1/graphql
+          # CloudFront routes /v1/*, /v2/* and /console/* directly to Hasura;
+          # there is no /hasura/* cache behaviour, so the editor's GraphQL
+          # client must use the native paths.
+          ENV VITE_APP_HASURA_URL=/v1/graphql
+          ENV VITE_APP_HASURA_WEBSOCKET=wss://__PLANX_HOST__/v1/graphql
           ENV VITE_APP_SHAREDB_URL=wss://__PLANX_HOST__/sharedb
           ENV VITE_APP_ENV=production
-          ENV VITE_APP_AIRBRAKE_PROJECT_ID=0
-          ENV VITE_APP_AIRBRAKE_PROJECT_KEY=unused
+          # Airbrake stubbed at build time (see airbrake.ts overlay above).
           RUN pnpm build
           FROM nginx:1.27-alpine
           COPY --from=build /app/build/ /usr/share/nginx/html/

@@ -1,20 +1,8 @@
 #!/usr/bin/env node
 
-/**
- * Pre-Capture Verification Script
- * Story: S0.5 - Reference Deployment Environment
- *
- * Validates reference stack health before screenshot capture:
- * - CloudFormation stack status (CREATE_COMPLETE/UPDATE_COMPLETE)
- * - Stack outputs availability
- * - Sample data accessibility
- *
- * AC5.5: Pre-capture verification script validates stack health
- *
- * Exit Codes:
- * - 0: Stack healthy and ready for screenshots
- * - 1: Stack unhealthy or not found
- */
+// Validates the reference stack's health before screenshot capture:
+// stack status, outputs availability, sample-data accessibility.
+// Exit 0 = healthy, 1 = unhealthy or missing.
 
 import {
   CloudFormationClient,

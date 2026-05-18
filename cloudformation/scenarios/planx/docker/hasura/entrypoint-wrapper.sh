@@ -38,10 +38,20 @@ done
 # above — proceeding when PG is unreachable just guarantees a Hasura crash
 # loop and a circuit-breaker rollback.
 echo "[2/3] Waiting for PostgreSQL to be ready..."
+# Use bash's built-in /dev/tcp instead of pg_isready — the latter is not in
+# the Hasura image's postgresql-client package on Debian slim. psql IS
+# there, so step 3 still works. /dev/tcp probes the TCP socket; if Aurora
+# accepted the connection, PostgreSQL is listening.
 for i in $(seq 1 120); do
-  if PGPASSWORD="$DB_PASSWORD" pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" > /dev/null 2>&1; then
-    echo "PostgreSQL ready."
-    break
+  if timeout 5 bash -c "exec 3<>/dev/tcp/$DB_HOST/$DB_PORT" 2>/dev/null; then
+    echo "PostgreSQL TCP listening."
+    # Now verify auth + role by running a trivial query (catches "ready but
+    # wrong credentials" early — pg_isready would return success in that
+    # case too, so this is actually stronger than the previous check).
+    if PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1" > /dev/null 2>&1; then
+      echo "PostgreSQL ready (TCP + auth)."
+      break
+    fi
   fi
   if [ $i -eq 120 ]; then
     echo "ERROR: PostgreSQL not ready after 10 minutes; exiting so ECS can retry."

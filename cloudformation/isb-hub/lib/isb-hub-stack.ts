@@ -17,14 +17,8 @@ const DEPLOY_ROLE_NAME = 'isb-hub-github-actions-deploy';
 interface ScenarioConfig {
   name: string;
   description: string;
-  /** Optional parameters passed to the StackSet (and through to stack instances) */
   parameterKeys?: string[];
-  /**
-   * SAM-style scenario: source template lives at `scenarios/<name>/dist/template.yaml`
-   * (produced by `sam package`) rather than the scenario root. The CI deploy job
-   * runs `sam package` which uploads Lambda zips to the blueprints bucket and
-   * writes the packaged template into dist/.
-   */
+  // sam-package output (scenarios/<name>/dist/template.yaml) rather than scenarios/<name>/template.yaml
   samStyle?: boolean;
 }
 
@@ -38,24 +32,21 @@ const SCENARIOS: ScenarioConfig[] = [
   { name: 'localgov-drupal', description: 'NDX:Try LocalGov Drupal - AI-enhanced CMS for UK councils' },
   { name: 'simply-readable', description: 'NDX:Try Simply Readable - Document Translation & Easy Read, built by Swindon Borough Council' },
   { name: 'localgov-ims', description: 'NDX:Try LocalGov IMS - Income Management System with GOV.UK Pay', parameterKeys: ['GovUkPayApiKey'] },
-  // TODO(orphan-import): minute, fixmystreet, paperless-ngx have ACTIVE
-  // StackSets in the hub account NOT owned by IsbHubStack. CDK create fails
-  // with AlreadyExists. Re-enable once imported via
-  // `cloudformation create-change-set --change-set-type IMPORT`.
-  // { name: 'minute', description: 'Minute AI - Meeting transcription and AI-powered minute generation' },
-  // { name: 'fixmystreet', description: 'NDX:Try FixMyStreet - Citizen problem reporting platform for UK councils' },
-  // { name: 'paperless-ngx', description: 'NDX:Try Paperless-ngx - Document archive with OCR, full-text search and Bedrock AI' },
   { name: 'ai-contact-centre', description: 'NDX:Try AI Contact Centre - Amazon Connect with Lex, Bedrock RAG, multimodal photo describe, multi-intent triage, and multilingual support', samStyle: true },
-  { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 7 scenarios as nested stacks' },
+  { name: 'minute', description: 'Minute AI - Meeting transcription and AI-powered minute generation' },
+  { name: 'fixmystreet', description: 'NDX:Try FixMyStreet - Citizen problem reporting platform for UK councils' },
+  { name: 'paperless-ngx', description: 'NDX:Try Paperless-ngx - Document archive with OCR, full-text search and Bedrock AI' },
+  { name: 'planx', description: 'NDX:Try PlanX - Digital planning platform with Hasura + GraphQL' },
+  { name: 'bops-planning', description: 'NDX:Try BOPS Planning - Back-Office Planning System with map tiles', parameterKeys: ['OSVectorTilesApiKey'] },
+  { name: 'digital-planning-register', description: 'NDX:Try Digital Planning Register - Public-facing planning-application register' },
+  { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 16 scenarios as nested stacks', parameterKeys: ['GovUkPayApiKey', 'OSVectorTilesApiKey'] },
 ];
 
 export class IsbHubStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // ========================================================================
-    // SCENARIO PARAMETERS — secrets injected at deploy time, forwarded to StackSets
-    // ========================================================================
+    // Scenario parameters: secrets injected at deploy time, forwarded to StackSets.
     const govUkPayApiKey = new cdk.CfnParameter(this, 'GovUkPayApiKey', {
       type: 'String',
       noEcho: true,
@@ -63,29 +54,24 @@ export class IsbHubStack extends cdk.Stack {
       description: 'GOV.UK Pay sandbox API key (for localgov-ims scenario)',
     });
 
-    // Map of parameter keys to their CfnParameter values
+    const osVectorTilesApiKey = new cdk.CfnParameter(this, 'OSVectorTilesApiKey', {
+      type: 'String',
+      noEcho: true,
+      default: '',
+      description: 'Ordnance Survey Vector Tiles API key (for bops-planning scenario; empty = map tiles will not render)',
+    });
+
     const scenarioParamValues: Record<string, string> = {
       GovUkPayApiKey: govUkPayApiKey.valueAsString,
+      OSVectorTilesApiKey: osVectorTilesApiKey.valueAsString,
     };
 
-    // ========================================================================
-    // S3 BUCKET (imported — already exists in us-east-1)
-    // ========================================================================
+    // Imported: the bucket lives in us-east-1 and its policy is managed there directly.
     const bucket = s3.Bucket.fromBucketName(this, 'BlueprintsBucket', BLUEPRINTS_BUCKET_NAME);
 
-    // ========================================================================
-    // NOTE: Bucket policy (AllowOrgAccountsReadTemplates) is managed
-    // directly in us-east-1 — not via this stack (us-west-2).
-    // ========================================================================
-
-    // ========================================================================
-    // TEMPLATE UPLOADS — one BucketDeployment per scenario
-    //
-    // Scenarios with no local template.yaml are skipped with a warning. CI is
-    // expected to synthesize/package every scenario before this stack runs, so
-    // a missing template in CI is a build error; locally it lets developers
-    // iterate on hub config without first building every scenario.
-    // ========================================================================
+    // One BucketDeployment per scenario. Missing local templates are skipped
+    // (CI synthesises every scenario before this stack; locally the skip lets
+    // operators iterate on hub config without building every scenario).
     const deployments: Record<string, s3deploy.BucketDeployment> = {};
     const skipped: string[] = [];
 
@@ -119,39 +105,23 @@ export class IsbHubStack extends cdk.Stack {
         ],
         destinationBucket: bucket,
         destinationKeyPrefix: `scenarios/${scenario.name}`,
-        // Don't delete sibling objects under the same prefix. SAM-style
-        // scenarios upload Lambda zips to scenarios/<name>/assets/ via
-        // `sam package` BEFORE this BucketDeployment runs; default prune:true
-        // would `aws s3 sync --delete` and remove them.
+        // SAM-style scenarios upload Lambda zips to scenarios/<name>/assets/
+        // via sam package BEFORE this runs; default prune:true would delete them.
         prune: scenario.samStyle ? false : undefined,
       });
 
-      // Grant permissions on imported bucket (CDK can't auto-grant on imported resources)
+      // CDK can't auto-grant on imported buckets.
       bucket.grantReadWrite(deployment.handlerRole);
 
       deployments[scenario.name] = deployment;
     }
 
-    // ========================================================================
-    // GITHUB OIDC PROVIDER (lookup existing — only one can exist per account)
-    // ========================================================================
-    // If the OIDC provider does NOT exist yet, comment out the fromOpenIdConnectProviderArn
-    // line and uncomment the new OpenIdConnectProvider block below.
     const oidcProvider = iam.OpenIdConnectProvider.fromOpenIdConnectProviderArn(
       this,
       'GitHubOidc',
       `arn:aws:iam::${HUB_ACCOUNT}:oidc-provider/token.actions.githubusercontent.com`,
     );
 
-    // Uncomment this block if no OIDC provider exists in the account:
-    // const oidcProvider = new iam.OpenIdConnectProvider(this, 'GitHubOidc', {
-    //   url: 'https://token.actions.githubusercontent.com',
-    //   clientIds: ['sts.amazonaws.com'],
-    // });
-
-    // ========================================================================
-    // GITHUB ACTIONS IAM ROLE
-    // ========================================================================
     const deployRole = new iam.Role(this, 'GitHubActionsRole', {
       roleName: DEPLOY_ROLE_NAME,
       assumedBy: new iam.FederatedPrincipal(
@@ -209,9 +179,7 @@ export class IsbHubStack extends cdk.Stack {
       }),
     );
 
-    // ========================================================================
-    // STACKSETS — one per scenario, no stack instances (ISB manages those)
-    // ========================================================================
+    // One StackSet per scenario; ISB owns the stack instances.
     for (const scenario of SCENARIOS) {
       if (skipped.includes(scenario.name)) continue;
 
@@ -235,7 +203,6 @@ export class IsbHubStack extends cdk.Stack {
         managedExecution: { Active: true },
         templateUrl: `https://${BLUEPRINTS_BUCKET_NAME}.s3.${BLUEPRINTS_BUCKET_REGION}.amazonaws.com/scenarios/${scenario.name}/template.yaml`,
         description: `${scenario.description} [${contentHash}]`,
-        // Forward parameters to StackSet if defined
         ...(scenario.parameterKeys?.length ? {
           parameters: scenario.parameterKeys.map(key => ({
             parameterKey: key,
@@ -245,14 +212,9 @@ export class IsbHubStack extends cdk.Stack {
       };
 
       const stackSet = new cfn.CfnStackSet(this, `${pascalName}StackSet`, stackSetProps);
-
-      // Ensure template is uploaded before StackSet references it
       stackSet.node.addDependency(deployments[scenario.name]);
     }
 
-    // ========================================================================
-    // OUTPUTS
-    // ========================================================================
     new cdk.CfnOutput(this, 'DeployRoleArn', {
       value: deployRole.roleArn,
       description: 'GitHub Actions deploy role ARN',

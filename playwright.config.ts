@@ -1,13 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Playwright configuration for NDX:Try AWS Scenarios
- * Used for screenshot capture and visual regression testing
- * Story 6.6: Screenshot Automation Pipeline
- */
+const isSmoke = process.env.PLAYWRIGHT_SUITE === 'smoke';
+
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: true,
+  fullyParallel: !process.env.CI && !isSmoke,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
@@ -17,14 +14,16 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:8080',
-    trace: 'on-first-retry',
+    baseURL: isSmoke ? undefined : (process.env.BASE_URL || 'http://localhost:8080'),
+    trace: isSmoke ? 'retain-on-failure' : 'on-first-retry',
     screenshot: 'only-on-failure',
   },
 
   projects: [
     {
       name: 'desktop',
+      testDir: './tests',
+      testMatch: /.*\.spec\.ts$/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },
@@ -32,24 +31,42 @@ export default defineConfig({
     },
     {
       name: 'mobile',
+      testDir: './tests',
+      testMatch: /.*\.spec\.ts$/,
       use: {
         ...devices['iPhone SE'],
         viewport: { width: 375, height: 667 },
       },
     },
+    {
+      name: 'smoke',
+      testDir: './cloudformation/scenarios',
+      testMatch: /[^/]+\/smoke\.ts$/,
+      // 60s test budget: secure-form fillPassword burns ~10s waiting for a
+      // (never-arrives) intercepted submit, multi-stage logins use multiple
+      // page.goto/waitForURL cycles, and fresh stacks have cold-cache latency.
+      timeout: 60_000,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 800 },
+      },
+    },
   ],
 
-  webServer: {
-    command: 'npx http-server _site -p 8080',
-    url: 'http://localhost:8080',
-    reuseExistingServer: !process.env.CI,
-    timeout: 30000,
-  },
+  ...(isSmoke
+    ? {}
+    : {
+        webServer: {
+          command: 'npx http-server _site -p 8080',
+          url: 'http://localhost:8080',
+          reuseExistingServer: !process.env.CI,
+          timeout: 30000,
+        },
+      }),
 
-  // Screenshot specific settings
   expect: {
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.1, // 10% diff threshold
+      maxDiffPixelRatio: 0.1,
     },
   },
 });

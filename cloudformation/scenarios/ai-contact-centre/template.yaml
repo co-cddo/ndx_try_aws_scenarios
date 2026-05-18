@@ -51,6 +51,26 @@ Parameters:
       Bump on every redeploy that changes the documents/ tree to force Bedrock
       KB re-ingestion AND Wisdom (Q in Connect) content re-upload. CFN custom
       resources only fire on Update if at least one property changes.
+  ExistingPhoneNumberArn:
+    Type: String
+    Default: ''
+    Description: |
+      Any non-empty value disables the GeoNumber claim path: no real GB DID is
+      claimed, no PhoneNumberFlowAssociation is created. Smoke passes a DUMMY
+      string here (UK DID claim quota is 5/30 days; deploying-and-tearing-down
+      AICC would exhaust it). Leave empty in ISB pool deploys — the default
+      behaviour claims a fresh DID and wires it to the contact flow.
+  ExistingPhoneNumber:
+    Type: String
+    Default: ''
+    Description: |
+      The dialable E.164 number string surfaced as the PstnNumber output when
+      ExistingPhoneNumberArn is set. Smoke uses "+442012345678" — chosen to
+      satisfy the +44 format regex without identifying any real DID.
+
+Conditions:
+  ClaimNewPhoneNumber: !Equals [!Ref ExistingPhoneNumberArn, '']
+
 Globals:
   Function:
     Runtime: python3.12
@@ -237,6 +257,7 @@ Resources:
       InstanceId: !Ref ConnectInstance
 
   GeoNumber:
+    Condition: ClaimNewPhoneNumber
     Type: AWS::Connect::PhoneNumber
     Properties:
       TargetArn: !GetAtt ConnectInstance.Arn
@@ -2666,7 +2687,7 @@ Resources:
         Variables:
           INSTANCE_ID: !Ref ConnectInstance
           CALLBACK_FLOW_ID: !Ref CallbackSimulationFlow
-          SOURCE_PHONE_NUMBER: !GetAtt GeoNumber.Address
+          SOURCE_PHONE_NUMBER: !If [ClaimNewPhoneNumber, !GetAtt GeoNumber.Address, !Ref ExistingPhoneNumber]
 
   LandlineCallbackFunction:
     Type: AWS::Serverless::Function
@@ -2870,7 +2891,13 @@ Resources:
       AIAgentId: !GetAtt WisdomAnswerAgent.AIAgentId
       AIAgentType: ANSWER_RECOMMENDATION
 
+  # Flow association is only valid when the phone number is on this stack's
+  # Connect instance, which we only created when ClaimNewPhoneNumber is true.
+  # In the smoke/DUMMY path, no real number is in scope; the association is
+  # skipped. Smoke only checks the format of the PstnNumber output, not the
+  # actual inbound-call routing.
   GeoFlowAssoc:
+    Condition: ClaimNewPhoneNumber
     Type: Custom::PhoneFlowAssoc
     DependsOn: [GeoNumber, MainContactFlow]
     Properties:
@@ -3225,10 +3252,10 @@ Outputs:
     Value: !Ref ConnectInstance
   PstnNumber:
     Description: Inbound PSTN geographic DID number (+44 20...)
-    Value: !GetAtt GeoNumber.Address
+    Value: !If [ClaimNewPhoneNumber, !GetAtt GeoNumber.Address, !Ref ExistingPhoneNumber]
   PstnNumberId:
-    Description: Connect DID PhoneNumber resource ID (for console linkage)
-    Value: !Ref GeoNumber
+    Description: Connect DID PhoneNumber resource ID / ARN (for console linkage)
+    Value: !If [ClaimNewPhoneNumber, !Ref GeoNumber, !Ref ExistingPhoneNumberArn]
   KnowledgeBaseId:
     Description: Bedrock Knowledge Base ID
     Value: !Ref KnowledgeBase

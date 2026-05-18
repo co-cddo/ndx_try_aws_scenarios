@@ -61,7 +61,7 @@ export class DigitalPlanningRegisterStack extends cdk.Stack {
     // CloudFormation parameter for Docker image URI
     const imageUriParam = new cdk.CfnParameter(this, 'ImageUri', {
       type: 'String',
-      default: 'ghcr.io/co-cddo/ndx_try_aws_scenarios-dpr:latest',
+      default: 'ghcr.io/co-cddo/ndx_try_aws_scenarios-dpr:sha-33e9e9f@sha256:775db3c01e2cb01302078b1e2e9129423016ec8c4dc2000f3c35066e2912de35',
       description: 'Docker image URI for the Digital Planning Register container',
     });
 
@@ -99,7 +99,7 @@ export class DigitalPlanningRegisterStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs for the application',
-      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-dpr/production')}`,
+      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent(`/ndx-dpr-${this.stackName}/production`)}`,
     });
 
     new cdk.CfnOutput(this, 'ECSClusterUrl', {

@@ -34,6 +34,27 @@ EOF
   echo "    patched _authenticated/-loader.tsx"
 fi
 
+# Replace airbrake.ts with an unconditional no-op logger. Upstream's
+# hasConfig check is *meant* to take the no-op branch when VITE_APP_AIRBRAKE_*
+# env vars are unset, but in practice the deployed SPA still calls
+# `new Notifier()` somewhere and the SDK throws `projectId and projectKey are
+# required` synchronously during module init, blanking the editor. Stubbing
+# the module is the smallest change that guarantees the import path is safe
+# regardless of upstream drift.
+AIRBRAKE="$BUILD_DIR/planx-src/editor.planx.uk/src/airbrake.ts"
+if [ -f "$AIRBRAKE" ]; then
+  cat > "$AIRBRAKE" <<'EOF'
+// NDX:Try patch: stub Airbrake out entirely. We don't ship error telemetry
+// to Airbrake in the sandbox, and `new Notifier()` throws on empty creds.
+export const logger = {
+  notify: (error: unknown) => {
+    if (typeof console !== "undefined") console.warn("[airbrake stub]", error);
+  },
+};
+EOF
+  echo "    patched airbrake.ts (no-op stub)"
+fi
+
 cp "$SCRIPT_DIR/Dockerfile" "$BUILD_DIR/Dockerfile"
 cp "$SCRIPT_DIR/nginx.conf" "$BUILD_DIR/nginx.conf"
 cp "$SCRIPT_DIR/entrypoint.sh" "$BUILD_DIR/entrypoint.sh"

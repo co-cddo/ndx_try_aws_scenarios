@@ -781,7 +781,7 @@ Resources:
   RedactionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${RedactionFunction}'
+      LogGroupName: !Sub '/aws/lambda/${RedactionFunction}-${AWS::StackName}'
       RetentionInDays: 7
       Tags:
         - Key: Project

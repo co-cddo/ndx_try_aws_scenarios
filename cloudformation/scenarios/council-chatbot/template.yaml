@@ -1614,7 +1614,7 @@ Resources:
   ChatbotLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${ChatbotFunction}'
+      LogGroupName: !Sub '/aws/lambda/${ChatbotFunction}-${AWS::StackName}'
       RetentionInDays: 7
       Tags:
         - Key: Project

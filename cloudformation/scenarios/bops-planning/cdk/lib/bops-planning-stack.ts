@@ -229,7 +229,7 @@ export class BopsPlanningStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'CloudWatchLogsUrl', {
       description: 'CloudWatch Logs for BOPS containers',
-      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-bops/production')}`,
+      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/${encodeURIComponent('/ndx-bops-v2/production')}`,
     });
 
     new cdk.CfnOutput(this, 'StackDescription', {

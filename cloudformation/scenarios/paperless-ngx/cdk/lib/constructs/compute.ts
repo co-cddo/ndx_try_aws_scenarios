@@ -56,8 +56,9 @@ export class ComputeConstruct extends Construct {
       containerInsights: false,
     });
 
+    // Stack-name suffix keeps the LogGroup unique across redeploys.
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/ndx-paperless-ngx/production',
+      logGroupName: `/ndx-paperless-ngx-${cdk.Stack.of(this).stackName}/production`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -170,7 +171,7 @@ export class ComputeConstruct extends Construct {
     );
 
     const tikaContainer = this.taskDefinition.addContainer('tika', {
-      image: ecs.ContainerImage.fromRegistry('docker.io/apache/tika:latest'),
+      image: ecs.ContainerImage.fromRegistry('docker.io/apache/tika:3.3.0.0-full@sha256:ecdd37e204308266b1f8e28569f8516ebd5b96d7a4518a71d3904710b20c03b3'),
       essential: true,
       logging: ecs.LogDrivers.awsLogs({ logGroup: this.logGroup, streamPrefix: 'tika' }),
       portMappings: [{ containerPort: 9998, protocol: ecs.Protocol.TCP }],
@@ -196,7 +197,7 @@ export class ComputeConstruct extends Construct {
     const dbPass = props.databaseSecret.secretValueFromJson('password').unsafeUnwrap();
 
     const paperlessContainer = this.taskDefinition.addContainer('paperless', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/paperless-ngx/paperless-ngx:latest'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/paperless-ngx/paperless-ngx:2.9@sha256:948dc7297df8259bffac23e564a7ca688bfc8f04fed9113e7fb14f6030da63dd'),
       essential: true,
       logging: ecs.LogDrivers.awsLogs({ logGroup: this.logGroup, streamPrefix: 'paperless' }),
       portMappings: [{ containerPort: 8000, protocol: ecs.Protocol.TCP }],

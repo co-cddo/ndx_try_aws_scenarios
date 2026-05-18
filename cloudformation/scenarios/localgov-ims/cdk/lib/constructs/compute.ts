@@ -36,9 +36,9 @@ export class ComputeConstruct extends Construct {
   constructor(scope: Construct, id: string, props: ComputeConstructProps) {
     super(scope, id);
 
-    // CloudWatch log group
+    // Stack-name suffix keeps the LogGroup unique across redeploys.
     new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/ndx-ims/production',
+      logGroupName: `/ndx-ims-${cdk.Stack.of(this).stackName}/production`,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });

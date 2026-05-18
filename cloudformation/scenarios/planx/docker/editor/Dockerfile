@@ -26,11 +26,10 @@ ENV VITE_APP_HASURA_URL=/v1/graphql
 ENV VITE_APP_HASURA_WEBSOCKET=wss://__PLANX_HOST__/v1/graphql
 ENV VITE_APP_SHAREDB_URL=wss://__PLANX_HOST__/sharedb
 ENV VITE_APP_ENV=production
-# Airbrake intentionally not configured. Setting AIRBRAKE_PROJECT_ID=0 makes
-# upstream's airbrake.ts pass its truthy-string check, then call
-# `new Notifier({projectId: 0})`, which throws synchronously during module
-# init and blanks the editor SPA. Leave these unset so the no-op logger
-# branch runs instead.
+# Airbrake is stubbed out at build time by docker/editor/build.sh — upstream's
+# `hasConfig` branch was unreliable in our deployed bundle and the SDK kept
+# throwing `projectId and projectKey are required` during module init, blanking
+# the SPA. No env vars are needed here.
 
 RUN cd editor.planx.uk && pnpm build
 

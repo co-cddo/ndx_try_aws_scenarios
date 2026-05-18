@@ -402,7 +402,7 @@ Resources:
   DataGeneratorLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${DataGeneratorFunction}'
+      LogGroupName: !Sub '/aws/lambda/${DataGeneratorFunction}-${AWS::StackName}'
       RetentionInDays: 7
       Tags:
         - Key: Project
@@ -731,7 +731,7 @@ Resources:
   QuickSightSetupLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/ndx-quicksight-setup-${AWS::Region}'
+      LogGroupName: !Sub '/aws/lambda/ndx-quicksight-setup-${AWS::Region}-${AWS::StackName}'
       RetentionInDays: 7
       Tags:
         - Key: Project
@@ -849,7 +849,7 @@ Resources:
   QuickSightGroupSyncLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${QuickSightGroupSyncFunction}'
+      LogGroupName: !Sub '/aws/lambda/${QuickSightGroupSyncFunction}-${AWS::StackName}'
       RetentionInDays: 7
 
   QuickSightGroupSyncRule:

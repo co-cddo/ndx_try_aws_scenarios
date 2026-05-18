@@ -30,7 +30,7 @@ export class StorageConstruct extends Construct {
     // Cannot use autoDeleteObjects — it requires CDK bootstrap (CDKToolkit stack)
     // which ISB sandbox accounts do not have
     const emptyBucketRole = new iam.Role(this, 'EmptyBucketRole', {
-      roleName: 'InnovationSandbox-ndx-bops-empty-bucket',
+      roleName: 'InnovationSandbox-ndx-bops-v2-empty-bucket',
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
