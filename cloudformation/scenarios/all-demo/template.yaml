@@ -61,8 +61,8 @@ Parameters:
 
   DprImageUri:
     Type: String
-    Default: 'ghcr.io/co-cddo/ndx_try_aws_scenarios-dpr:latest'
-    Description: Docker image URI for digital-planning-register. Default tracks GHCR latest; pin to a digest in production.
+    Default: 'ghcr.io/co-cddo/ndx_try_aws_scenarios-dpr:sha-3e68d51@sha256:deef2727d72ced5da88ed1e3aa971eb42e701576eb38f1ea52e5aa19a743625c'
+    Description: Docker image URI for digital-planning-register. Renovate-trackable `:sha-<7chars>@sha256:<digest>` form.
 
   DprCouncilConfig:
     Type: String
