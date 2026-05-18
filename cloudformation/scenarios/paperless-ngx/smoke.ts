@@ -5,6 +5,11 @@ import { adminLogin } from '../../../tests/smoke/helpers';
 runSmoke({
   scenario: 'paperless-ngx',
   outputs: ['PaperlessNgxUrl', 'PaperlessNgxAdminUsername', 'PaperlessNgxAdminPassword'],
+  outputAliases: {
+    PaperlessNgxUrl: 'PaperlessUrl',
+    PaperlessNgxAdminUsername: 'AdminUsername',
+    PaperlessNgxAdminPassword: 'AdminPassword',
+  },
   test: async ({ page, get, getSecret }) => {
     const landing = get('PaperlessNgxUrl');
     const root = landing.replace(/\/$/, '');

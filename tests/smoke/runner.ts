@@ -36,6 +36,17 @@ export interface UrlProbe {
 export interface SmokeConfig {
   scenario: string;
   outputs?: ReadonlyArray<string>;
+  /**
+   * Per-spec output-name aliases. Keys are the canonical names the spec
+   * already uses (matching the all-demo umbrella's namespaced names);
+   * values are the fallback leaf-stack output names emitted when the spec
+   * runs against a single-scenario ISB-leased stack instead of all-demo.
+   * If the canonical key is missing from the stack outputs, the alias is
+   * copied to the canonical key so the rest of the spec works unchanged.
+   * Never overwrites an already-present canonical value, so all-demo
+   * smoke runs are unaffected.
+   */
+  outputAliases?: Readonly<Record<string, string>>;
   quarantine?: Quarantine;
   publicUrl?: UrlProbe;
   test?: (ctx: SmokeContext) => Promise<void>;
@@ -51,10 +62,17 @@ export function runSmoke(config: SmokeConfig): void {
         );
       }
 
-      const outputs = await fetchStackOutputs({
+      const fetched = await fetchStackOutputs({
         stackName: process.env.SMOKE_STACK_NAME ?? 'all-demo',
         region: process.env.SMOKE_AWS_REGION ?? 'us-east-1',
       });
+      const merged = { ...fetched } as Record<string, typeof fetched[string]>;
+      for (const [canonical, alias] of Object.entries(config.outputAliases ?? {})) {
+        if (merged[canonical] === undefined && merged[alias] !== undefined) {
+          merged[canonical] = merged[alias];
+        }
+      }
+      const outputs = merged as CfnOutputs;
 
       for (const key of config.outputs ?? []) {
         expect(outputs[key], `CFN output ${key} missing`).toBeDefined();

@@ -5,6 +5,10 @@ import { fillPassword } from '../../../tests/smoke/fixtures/secure-form';
 runSmoke({
   scenario: 'fixmystreet',
   outputs: ['FixMyStreetUrl', 'FixMyStreetAdminUsername', 'FixMyStreetAdminPassword'],
+  outputAliases: {
+    FixMyStreetAdminUsername: 'AdminUsername',
+    FixMyStreetAdminPassword: 'AdminPassword',
+  },
   test: async ({ page, get, getSecret }) => {
     const landing = get('FixMyStreetUrl');
     const root = landing.replace(/\/$/, '');

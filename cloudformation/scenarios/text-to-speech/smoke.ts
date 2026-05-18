@@ -4,6 +4,10 @@ import { runSmoke } from '../../../tests/smoke/runner';
 runSmoke({
   scenario: 'text-to-speech',
   outputs: ['TextToSpeechConvertURL', 'TextToSpeechAudioBucket'],
+  outputAliases: {
+    TextToSpeechConvertURL: 'ConvertURL',
+    TextToSpeechAudioBucket: 'AudioBucket',
+  },
   test: async ({ request, get }) => {
     const url = get('TextToSpeechConvertURL');
 

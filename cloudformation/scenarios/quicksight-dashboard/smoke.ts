@@ -4,6 +4,10 @@ import { runSmoke } from '../../../tests/smoke/runner';
 runSmoke({
   scenario: 'quicksight-dashboard',
   outputs: ['QuicksightDashboardUrl', 'QuicksightDataBucket'],
+  outputAliases: {
+    QuicksightDashboardUrl: 'DashboardUrl',
+    QuicksightDataBucket: 'DataBucket',
+  },
   test: async ({ page, request, get }) => {
     const url = get('QuicksightDashboardUrl');
 

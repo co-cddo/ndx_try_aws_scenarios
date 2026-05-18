@@ -5,6 +5,10 @@ import { adminLogin } from '../../../tests/smoke/helpers';
 runSmoke({
   scenario: 'localgov-drupal',
   outputs: ['DrupalUrl', 'DrupalAdminUsername', 'DrupalAdminPassword'],
+  outputAliases: {
+    DrupalAdminUsername: 'AdminUsername',
+    DrupalAdminPassword: 'AdminPassword',
+  },
   test: async ({ page, get, getSecret }) => {
     const landing = get('DrupalUrl');
     // DrupalUrl ends with `/init-status`; the smoke target is the site root.
