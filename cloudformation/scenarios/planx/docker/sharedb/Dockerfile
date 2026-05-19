@@ -1,6 +1,6 @@
 # PlanX ShareDB — real-time collaborative editing via WebSocket
 # Multi-stage build from the PlanX monorepo
-FROM node:24.14-alpine AS build
+FROM node:26.1-alpine AS build
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -18,7 +18,7 @@ RUN cd sharedb.planx.uk && (pnpm install --frozen-lockfile || pnpm install)
 # ShareDB has no build step — server.js runs directly from source.
 
 # Production stage
-FROM node:24.14-alpine AS production
+FROM node:26.1-alpine AS production
 
 WORKDIR /app
 

@@ -1,6 +1,6 @@
 # PlanX Editor - pre-built SPA served by nginx
 # Multi-stage build from the PlanX monorepo
-FROM node:24.14-alpine AS build
+FROM node:26.1-alpine AS build
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
