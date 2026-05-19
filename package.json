@@ -55,7 +55,7 @@
     "ajv-formats": "^3.0.1",
     "axios": "^1.15.1",
     "http-server": "^14.1.1",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "pa11y-ci": "^4.1.0",
     "pixelmatch": "^7.1.0",
     "pngjs": "^7.0.0",
