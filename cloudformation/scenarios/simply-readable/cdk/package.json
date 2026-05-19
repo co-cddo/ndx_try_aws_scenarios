@@ -12,7 +12,7 @@
   "devDependencies": {
     "@types/node": "^20.9.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.2.2"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@aws-cdk/aws-cognito-identitypool-alpha": "^2.153.0-alpha.0",
