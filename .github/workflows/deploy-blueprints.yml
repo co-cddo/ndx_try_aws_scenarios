@@ -73,7 +73,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24.15.0'
 
       - name: Install + build + synth (${{ matrix.scenario.name }})
         working-directory: cloudformation/scenarios/${{ matrix.scenario.name }}/cdk
@@ -113,7 +113,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24.15.0'
 
       - name: Clone upstream document-translation
         run: |
@@ -302,7 +302,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24.15.0'
           cache: 'npm'
           cache-dependency-path: cloudformation/isb-hub/package-lock.json
 

@@ -1,6 +1,6 @@
 # PlanX API with demo auth overlay
 # Multi-stage build from the PlanX monorepo
-FROM node:24.14-alpine AS build
+FROM node:24.15-alpine AS build
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -22,7 +22,7 @@ RUN cd api.planx.uk && pnpm build
 COPY overlays/demo-auth.js /app/api.planx.uk/dist/demo-auth.js
 
 # Production stage
-FROM node:24.14-alpine AS production
+FROM node:24.15-alpine AS production
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
