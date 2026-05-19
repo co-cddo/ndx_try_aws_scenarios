@@ -1,0 +1,129 @@
+# Digital Planning Register Exploration Data
+# Initial draft — subject-matter review welcome.
+
+scenario_id: digital-planning-register
+scenario_title: Digital Planning Register
+total_time_estimate: "20 minutes"
+description: "Take the Digital Planning Register beyond the walkthrough — search, follow the BOPS data feed, and look at the minimal Next.js hosting."
+
+personas:
+  service_manager:
+    id: service-manager
+    title: "Service Manager / Planning Lead"
+    description: "Focus on the resident search experience and what data is shown publicly."
+    time_estimate: "12 minutes"
+  technical:
+    id: technical
+    title: "Developer / Technical Lead"
+    description: "Focus on the Next.js + ECS hosting and the BOPS API integration."
+    time_estimate: "20 minutes"
+
+activities:
+  - id: exp-search
+    title: "Search for planning applications by address"
+    category: experiments
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "How residents discover applications in their area — postcode, street, application reference."
+    safe_badge: true
+    expected_output: "Filtered results listing matching applications with status, consultation deadline, and link to details."
+
+  - id: exp-detail
+    title: "Open an application detail page"
+    category: experiments
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "What data the register shows publicly — consultation dates, site maps, document list, comments where supported."
+    safe_badge: true
+    expected_output: "A clear, accessible page that doesn't reveal internal officer notes or assessment text."
+
+  - id: exp-accessibility
+    title: "Try the page with keyboard-only navigation"
+    category: experiments
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "The register is built on the GOV.UK Design System — keyboard navigation, focus states, screen-reader semantics all come from the framework."
+    safe_badge: true
+    expected_output: "Tab navigation reaches every interactive element. Focus states are visible. No mouse-only traps."
+
+  - id: exp-api-feed
+    title: "Watch the BOPS API feed being consumed"
+    category: experiments
+    persona: technical
+    time_estimate: "5 min"
+    learning: "The register has no database of its own — it pulls live data from BOPS APIs each request (cached briefly)."
+    safe_badge: true
+    input_text: |
+      In CloudWatch Logs for the ECS service:
+      - Look for outbound HTTPS calls to a BOPS host
+      - Note the cache headers on responses
+    expected_output: "Network calls per page load, with short-lived caching keeping the register fast."
+
+  - id: arch-console
+    title: "Walk the Next.js-on-Fargate hosting"
+    category: architecture
+    persona: technical
+    time_estimate: "8 min"
+    learning: "Single ECS Fargate service serving a Next.js app, CloudFront in front, no data store — everything comes from external BOPS APIs."
+    steps:
+      - title: "ECS Cluster"
+        console_url: "https://console.aws.amazon.com/ecs/v2/clusters"
+        what_to_look_for: "A single Fargate service running the Next.js app."
+      - title: "Application Load Balancer"
+        console_url: "https://console.aws.amazon.com/ec2/home#LoadBalancers:"
+        what_to_look_for: "ALB target group for the Next.js service. Health check is the Next.js /_next/static endpoint."
+      - title: "CloudFront"
+        console_url: "https://console.aws.amazon.com/cloudfront/v4/home#/distributions"
+        what_to_look_for: "HTTPS termination, static asset caching, and a fairly short cache TTL for HTML so updates show up."
+      - title: "CloudWatch Logs"
+        console_url: "https://console.aws.amazon.com/cloudwatch/home#logsV2:log-groups"
+        what_to_look_for: "Next.js access logs and any error pages."
+
+  - id: limit-aggregation
+    title: "Aggregating multiple councils"
+    category: limits
+    persona: technical
+    time_estimate: "4 min"
+    learning: "The register can show data from any number of BOPS-running councils, but each council's BOPS must be reachable and have a published API."
+    challenge_description: "Inspect the council configuration in the source repo."
+    expected_behavior: "A list of councils with the BOPS endpoint per council."
+    business_implication: "Onboarding a new council to the register means adding their BOPS endpoint and confirming the API contract."
+
+  - id: limit-realtime
+    title: "Freshness of the register"
+    category: limits
+    persona: technical
+    time_estimate: "3 min"
+    learning: "The register is as fresh as the upstream BOPS APIs plus the CloudFront cache TTL."
+    challenge_description: "Change something in the upstream demo BOPS and see how long until the register reflects it."
+    expected_behavior: "A short window (minutes) while the CloudFront cache TTL expires."
+    business_implication: "For statutory consultation deadlines, tune the cache TTL conservatively or invalidate on content changes."
+
+production_guidance:
+  - id: customisation
+    title: "Customising for your council"
+    topics:
+      - "Add or remove councils from the configuration."
+      - "Brand and translation overrides — GOV.UK Design System with council-name substitutions."
+      - "Optional analytics integration (e.g. GA4 with consent)."
+  - id: scale
+    title: "What would change at scale"
+    topics:
+      - "ECS autoscaling on CPU and request count."
+      - "CloudFront cache tuning is the most effective scale lever — caches do the heavy lifting."
+      - "Stateless app, so horizontal scale is trivial."
+  - id: costs
+    title: "Indicative production cost"
+    demo_costs:
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
+    production_costs:
+      total: "£60 to £150 per month — Fargate plus CloudFront dominate; no database."
+  - id: security
+    title: "Security checklist for going live"
+    items:
+      - "Custom domain and ACM certificate on CloudFront."
+      - "WAF rules on CloudFront — particularly rate limiting for the search endpoint."
+      - "TLS on every BOPS API call."
+      - "Read-only IAM role for the ECS task."
+      - "CloudTrail for the small number of admin actions (cache invalidation, deploys)."

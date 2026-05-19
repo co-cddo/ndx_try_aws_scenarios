@@ -1,0 +1,140 @@
+# Simply Readable Exploration Data
+# Initial draft — subject-matter review welcome.
+
+scenario_id: simply-readable
+scenario_title: Simply Readable
+total_time_estimate: "30 minutes"
+description: "Take Simply Readable beyond the walkthrough — try multilingual translation, generate Easy Read variants, and see the Step Functions pipeline."
+
+personas:
+  service_manager:
+    id: service-manager
+    title: "Service Manager / Accessibility Lead"
+    description: "Focus on the resident experience — translation quality and Easy Read readability."
+    time_estimate: "20 minutes"
+  technical:
+    id: technical
+    title: "Developer / Technical Lead"
+    description: "Focus on the Step Functions pipeline, Bedrock prompts, and AppSync API."
+    time_estimate: "30 minutes"
+
+activities:
+  - id: exp-translate-short
+    title: "Translate a short council letter into Welsh and Urdu"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "How Amazon Translate handles short, formal council prose, and how rapidly it returns multi-language output."
+    safe_badge: true
+    expected_output: "The same letter in Welsh and Urdu in under a minute, with formatting preserved."
+
+  - id: exp-translate-long
+    title: "Translate a multi-page policy document"
+    category: experiments
+    persona: both
+    time_estimate: "8 min"
+    learning: "How the pipeline handles longer documents and what changes for documents with mixed content."
+    safe_badge: true
+    expected_output: "Each page translated, with retained headings and lists. Tables may need post-editing."
+
+  - id: exp-easy-read
+    title: "Generate an Easy Read version of a benefits letter"
+    category: experiments
+    persona: service_manager
+    time_estimate: "5 min"
+    learning: "How Amazon Bedrock rewrites dense council prose for residents with learning disabilities, and how the output compares to the original."
+    safe_badge: true
+    expected_output: "A simplified version with shorter sentences, plainer vocabulary, and clearer structure. Some council-specific jargon may need a manual pass."
+
+  - id: exp-tone
+    title: "Compare formal vs friendly tone"
+    category: experiments
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "Small prompt changes (tone, audience) materially shift the Easy Read output."
+    safe_badge: true
+    expected_output: "Two visibly different versions of the same letter — useful for setting council editorial guidelines before rolling Easy Read out."
+
+  - id: exp-bedrock-direct
+    title: "Inspect the Bedrock prompt"
+    category: experiments
+    persona: technical
+    time_estimate: "5 min"
+    learning: "The Easy Read prompt is auditable — you can see exactly what is asked of the model and tune it."
+    safe_badge: true
+    input_text: |
+      In the AWS Console:
+      - Lambda → simply-readable-easy-read-* → Code
+      - Search for the system prompt
+    expected_output: "A readable prompt that includes audience, style guidance, and an example output structure."
+
+  - id: arch-console
+    title: "Walk the Step Functions pipeline in the console"
+    category: architecture
+    persona: technical
+    time_estimate: "10 min"
+    learning: "The translation and Easy Read jobs are orchestrated as a Step Functions workflow that fans out to Translate and Bedrock and writes results back to S3."
+    steps:
+      - title: "Step Functions"
+        console_url: "https://console.aws.amazon.com/states/home"
+        what_to_look_for: "Two state machines — one for translation, one for Easy Read. Click any recent execution to see the inputs and outputs."
+      - title: "AppSync GraphQL API"
+        console_url: "https://console.aws.amazon.com/appsync/home"
+        what_to_look_for: "The schema the React app uses, plus resolvers wired to Lambda and DynamoDB."
+      - title: "DynamoDB tables"
+        console_url: "https://console.aws.amazon.com/dynamodbv2/home"
+        what_to_look_for: "Job records — one per document submitted. Each carries status and output location."
+      - title: "S3 bucket"
+        console_url: "https://console.aws.amazon.com/s3/home"
+        what_to_look_for: "Input and output objects, plus a per-user prefix structure."
+
+  - id: limit-language-coverage
+    title: "Which languages does Translate cover well"
+    category: limits
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "Amazon Translate supports 75 languages but quality varies — major European languages are excellent, smaller languages need human review."
+    challenge_description: "Translate the same letter into a language you speak and assess it."
+    expected_behavior: "Output is generally good for high-resource languages, weaker for low-resource ones."
+    business_implication: "Pair translation with a human-in-the-loop review for languages where your council lacks in-house speakers."
+
+  - id: limit-easy-read-judgement
+    title: "Where Easy Read still needs a human"
+    category: limits
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "Easy Read isn't just shorter sentences — it's accessible language. The model gets you most of the way, then a person makes it land."
+    challenge_description: "Run Easy Read on a letter that contains legal or statutory language."
+    expected_behavior: "Surface concepts are simplified but legal nuance can be lost or softened."
+    business_implication: "Use AI Easy Read as a first draft; route to your accessibility team for sign-off on statutory communications."
+
+production_guidance:
+  - id: customisation
+    title: "Customising for your council"
+    topics:
+      - "Replace the brand colours and logo in the React app build."
+      - "Edit the Easy Read prompt to match your editorial guidelines."
+      - "Adjust the supported languages list to what your community actually needs."
+      - "Wire Amazon Cognito to your council's identity provider for staff sign-in."
+  - id: scale
+    title: "What would change at scale"
+    topics:
+      - "Step Functions handles bursty load — no change needed for moderate council volumes."
+      - "Bedrock model access quotas: request a quota increase for production usage."
+      - "S3 lifecycle: archive processed documents to S3 Glacier after 90 days."
+      - "DynamoDB on-demand handles unpredictable submission patterns."
+  - id: costs
+    title: "Indicative production cost"
+    demo_costs:
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
+    production_costs:
+      total: "£50 to £200 per month for a typical small council"
+  - id: security
+    title: "Security checklist for going live"
+    items:
+      - "Pair Cognito with SSO and MFA via your council's identity provider."
+      - "S3 bucket policies that scope each user to their own prefix."
+      - "CloudFront with WAF rules for the public app."
+      - "Bedrock Guardrails for content moderation on user-supplied text."
+      - "CloudTrail and CloudWatch alarms on all Lambda errors."

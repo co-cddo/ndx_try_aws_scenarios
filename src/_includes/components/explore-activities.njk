@@ -1,0 +1,130 @@
+{# Shared explore activity + production guidance renderer for single-page exploration landings (NAP-558).
+   Consumed by all walkthroughs/<slug>/explore/index.njk that use the schema in src/_data/exploration/<slug>.yaml. #}
+
+<section aria-labelledby="experiments-heading">
+  <h2 class="govuk-heading-l" id="experiments-heading">Experiments to try</h2>
+  {% for activity in activities %}
+    {% if activity.category == "experiments" %}
+      <details class="govuk-details" data-module="govuk-details">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">
+            {{ activity.title }} <span class="govuk-body-s">({{ activity.time_estimate }})</span>
+          </span>
+        </summary>
+        <div class="govuk-details__text">
+          <p class="govuk-body"><strong>What you'll learn:</strong> {{ activity.learning }}</p>
+          {% if activity.input_text %}
+            <p class="govuk-body"><strong>Try:</strong></p>
+            <pre class="govuk-body-s">{{ activity.input_text }}</pre>
+          {% endif %}
+          {% if activity.input_variations %}
+            <p class="govuk-body"><strong>Try each of these:</strong></p>
+            <ul class="govuk-list govuk-list--bullet">
+              {% for v in activity.input_variations %}<li>{{ v }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+          {% if activity.expected_output %}
+            <p class="govuk-body"><strong>You should see:</strong> {{ activity.expected_output }}</p>
+          {% endif %}
+        </div>
+      </details>
+    {% endif %}
+  {% endfor %}
+</section>
+
+<section aria-labelledby="arch-heading">
+  <h2 class="govuk-heading-l" id="arch-heading">Architecture tours</h2>
+  {% for activity in activities %}
+    {% if activity.category == "architecture" %}
+      <details class="govuk-details" data-module="govuk-details">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">
+            {{ activity.title }} <span class="govuk-body-s">({{ activity.time_estimate }})</span>
+          </span>
+        </summary>
+        <div class="govuk-details__text">
+          <p class="govuk-body"><strong>What you'll learn:</strong> {{ activity.learning }}</p>
+          {% if activity.steps %}
+            <ol class="govuk-list govuk-list--number">
+              {% for step in activity.steps %}
+                <li>
+                  <strong>{{ step.title }}.</strong>
+                  {% if step.console_url %}
+                    <a href="{{ step.console_url }}" class="govuk-link" target="_blank" rel="noopener">Open in AWS Console</a> (opens in new tab).
+                  {% endif %}
+                  {% if step.what_to_look_for %} {{ step.what_to_look_for }}{% endif %}
+                </li>
+              {% endfor %}
+            </ol>
+          {% endif %}
+        </div>
+      </details>
+    {% endif %}
+  {% endfor %}
+</section>
+
+<section aria-labelledby="limits-heading">
+  <h2 class="govuk-heading-l" id="limits-heading">Where this demo stops, and what changes at scale</h2>
+  {% for activity in activities %}
+    {% if activity.category == "limits" %}
+      <details class="govuk-details" data-module="govuk-details">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">
+            {{ activity.title }} <span class="govuk-body-s">({{ activity.time_estimate }})</span>
+          </span>
+        </summary>
+        <div class="govuk-details__text">
+          <p class="govuk-body"><strong>What you'll learn:</strong> {{ activity.learning }}</p>
+          {% if activity.challenge_description %}
+            <p class="govuk-body"><strong>Consider:</strong> {{ activity.challenge_description }}</p>
+          {% endif %}
+          {% if activity.expected_behavior %}
+            <p class="govuk-body"><strong>What happens:</strong> {{ activity.expected_behavior }}</p>
+          {% endif %}
+          {% if activity.business_implication %}
+            <p class="govuk-body"><strong>For production:</strong> {{ activity.business_implication }}</p>
+          {% endif %}
+        </div>
+      </details>
+    {% endif %}
+  {% endfor %}
+</section>
+
+{% if productionGuidance %}
+<section aria-labelledby="prod-heading">
+  <h2 class="govuk-heading-l" id="prod-heading">Production guidance</h2>
+  {% for topic in productionGuidance %}
+    <details class="govuk-details" data-module="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">{{ topic.title }}</span>
+      </summary>
+      <div class="govuk-details__text">
+        {% if topic.topics %}
+          <ul class="govuk-list govuk-list--bullet">
+            {% for t in topic.topics %}<li>{{ t }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+        {% if topic.items %}
+          <ul class="govuk-list govuk-list--bullet">
+            {% for t in topic.items %}<li>{{ t }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+        {% if topic.demo_costs %}
+          <p class="govuk-body"><strong>Demo cost:</strong> {{ topic.demo_costs.total }} ({{ topic.demo_costs.note }}).</p>
+        {% endif %}
+        {% if topic.production_costs %}
+          <p class="govuk-body"><strong>Indicative production cost:</strong> {{ topic.production_costs.total }}.</p>
+          {% if topic.production_costs.ecs_fargate or topic.production_costs.aurora or topic.production_costs.elasticache or topic.production_costs.cloudfront %}
+            <ul class="govuk-list govuk-list--bullet">
+              {% if topic.production_costs.ecs_fargate %}<li>ECS Fargate: {{ topic.production_costs.ecs_fargate }}</li>{% endif %}
+              {% if topic.production_costs.aurora %}<li>Aurora: {{ topic.production_costs.aurora }}</li>{% endif %}
+              {% if topic.production_costs.elasticache %}<li>ElastiCache: {{ topic.production_costs.elasticache }}</li>{% endif %}
+              {% if topic.production_costs.cloudfront %}<li>CloudFront: {{ topic.production_costs.cloudfront }}</li>{% endif %}
+            </ul>
+          {% endif %}
+        {% endif %}
+      </div>
+    </details>
+  {% endfor %}
+</section>
+{% endif %}

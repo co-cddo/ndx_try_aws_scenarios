@@ -1,0 +1,58 @@
+---
+layout: layouts/exploration
+title: "Explore - Simply Readable"
+description: "Hands-on activities to take the Simply Readable demo further"
+scenarioId: simply-readable
+eleventyNavigation:
+  key: simply-readable-explore
+  parent: simply-readable-walkthrough
+  title: Explore Further
+---
+
+{% set scenarioId = "simply-readable" %}
+{% set explorationData = exploration[scenarioId] %}
+{% set activities = explorationData.activities %}
+{% set personas = explorationData.personas %}
+{% set productionGuidance = explorationData.production_guidance %}
+
+<section class="ndx-explore-intro" aria-labelledby="explore-intro-heading">
+  <h2 class="govuk-heading-l" id="explore-intro-heading">Explore further</h2>
+
+  <p class="govuk-body-l">
+    You've completed the walkthrough. Now try multilingual translation, generate
+    Easy Read variants from your own letters, and look inside the Step Functions
+    pipeline.
+  </p>
+
+  <div class="govuk-inset-text">
+    <strong>Safe to explore:</strong> the sandbox is yours. Everything here is designed for experimentation. Nothing you do can break it.
+  </div>
+</section>
+
+<section aria-labelledby="deeper-heading">
+  <h2 class="govuk-heading-m" id="deeper-heading">Pre-made deep dives</h2>
+  <ul class="govuk-list">
+    <li><a class="govuk-link" href="/walkthroughs/simply-readable/explore/understand/">Understand how Simply Readable works</a></li>
+    <li><a class="govuk-link" href="/walkthroughs/simply-readable/explore/extend/">Extend Simply Readable for your council</a></li>
+  </ul>
+</section>
+
+{% if personas %}
+<section class="ndx-persona-selection" aria-labelledby="persona-heading">
+  <h2 class="govuk-heading-m" id="persona-heading">Choose your path</h2>
+
+  <div class="govuk-grid-row">
+    {% for key, persona in personas %}
+      <div class="govuk-grid-column-one-half">
+        <div class="ndx-persona-card" data-persona="{{ persona.id }}">
+          <h3 class="govuk-heading-s">{{ persona.title }}</h3>
+          <p class="govuk-body-s">{{ persona.description }}</p>
+          <p class="govuk-body-s"><strong>Time:</strong> {{ persona.time_estimate }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% include "components/explore-activities.njk" %}

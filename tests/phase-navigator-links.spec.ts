@@ -6,7 +6,8 @@ import yaml from 'js-yaml';
 
 /**
  * NAP-558: Phase navigator on each scenario page must link to *its own*
- * scenario, not silently fall back to council-chatbot.
+ * scenario, not silently fall back to council-chatbot. Each linked URL must
+ * actually resolve (200), not 404.
  *
  * The list of scenarios is loaded from src/_data/scenarios.yaml at test setup
  * so adding a new scenario automatically extends test coverage.
@@ -24,7 +25,7 @@ const scenarioIds = data.scenarios.map(s => s.id);
 
 test.describe('Phase navigator links match the current scenario (NAP-558)', () => {
   for (const id of scenarioIds) {
-    test(`scenario "${id}" — phase nav points to its own scenario`, async ({ page }) => {
+    test(`scenario "${id}" — phase nav points to its own scenario and all phase pages exist`, async ({ page, request }) => {
       await page.goto(`/scenarios/${id}/`);
 
       const nav = page.locator('[data-phase-navigator]');
@@ -36,9 +37,13 @@ test.describe('Phase navigator links match the current scenario (NAP-558)', () =
       const wtLink = nav.locator('[data-phase-link="walkthrough"]');
       const exLink = nav.locator('[data-phase-link="explore"]');
 
-      await expect(tryLink, 'TRY href').toHaveAttribute('href', `/scenarios/${id}/`);
-      await expect(wtLink, 'WALK THROUGH href').toHaveAttribute('href', `/walkthroughs/${id}/`);
-      await expect(exLink, 'EXPLORE href').toHaveAttribute('href', `/walkthroughs/${id}/explore/`);
+      const expectedTry = `/scenarios/${id}/`;
+      const expectedWt = `/walkthroughs/${id}/`;
+      const expectedEx = `/walkthroughs/${id}/explore/`;
+
+      await expect(tryLink, 'TRY href').toHaveAttribute('href', expectedTry);
+      await expect(wtLink, 'WALK THROUGH href').toHaveAttribute('href', expectedWt);
+      await expect(exLink, 'EXPLORE href').toHaveAttribute('href', expectedEx);
 
       // Regression guard for the silent council-chatbot fallback at
       // src/_includes/components/phase-navigator.njk:28.
@@ -48,6 +53,24 @@ test.describe('Phase navigator links match the current scenario (NAP-558)', () =
           expect(href, 'phase link must not silently fall back to council-chatbot').not.toContain('council-chatbot');
         }
       }
+
+      // Each phase URL must actually resolve. A 404 here means the page is missing
+      // (walkthrough or explore never authored), which is what NAP-558 surfaced.
+      for (const url of [expectedTry, expectedWt, expectedEx]) {
+        const response = await request.get(url);
+        expect(response.status(), `${url} must return 200`).toBe(200);
+      }
+    });
+  }
+});
+
+test.describe('all-demo is hidden from the public portal', () => {
+  // all-demo is a CloudFormation-only deployable scenario (see cloudformation/scenarios/all-demo/);
+  // it must not appear on the public site.
+  for (const url of ['/scenarios/all-demo/', '/walkthroughs/all-demo/', '/walkthroughs/all-demo/explore/']) {
+    test(`${url} returns 404`, async ({ request }) => {
+      const response = await request.get(url);
+      expect(response.status(), `${url} must be hidden from the public site`).toBe(404);
     });
   }
 });
