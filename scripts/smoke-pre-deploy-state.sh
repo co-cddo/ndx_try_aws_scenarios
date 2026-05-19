@@ -121,6 +121,46 @@ sweep_orphan_stacks() {
   done <<< "$orphans"
 }
 
+# Delete orphan S3 Files file systems whose bucket name matches ndx-try-*.
+# AWS::S3Files::FileSystem (Paperless-ngx StorageFileSystem etc.) attaches
+# to an S3 bucket; the bucket then refuses delete with
+# BucketHasS3FileSystemAttached until the file system is removed. Must
+# run before sweep_orphan_s3_buckets so the buckets actually disappear.
+sweep_orphan_s3files() {
+  local acct fs_list fs_id fs_bucket
+  acct=$(aws sts get-caller-identity --query Account --output text 2>/dev/null) || return 0
+  # Output format: fileSystemId<TAB>bucket-arn per line.
+  fs_list=$(aws s3files list-file-systems --max-results 100 \
+    --query "fileSystems[].[fileSystemId,bucket]" \
+    --output text 2>&1) || {
+    echo "  list-file-systems failed (CLI may be too old in this runner): $fs_list"
+    return 0
+  }
+  [ -z "$fs_list" ] && { echo "No S3 Files file systems to sweep."; return 0; }
+  echo "S3 Files file systems to sweep (filtered by bucket name):"
+  while IFS=$'\t' read -r fs_id fs_bucket; do
+    [ -z "$fs_id" ] && continue
+    # fs_bucket is an arn like arn:aws:s3:::ndx-try-*-<acct>-<region>
+    case "$fs_bucket" in
+      *ndx-try-*${acct}*)
+        echo "  deleting file system: $fs_id (bucket: $fs_bucket)"
+        aws s3files delete-file-system --file-system-id "$fs_id" --force-delete 2>&1 | sed 's/^/    /' || \
+          gh issue create --title "smoke: S3 Files filesystem $fs_id couldn't be deleted" \
+            --label stranded-stack \
+            --body "Pre-deploy sweep on run ${GITHUB_RUN_ID} could not delete file system $fs_id (bucket $fs_bucket)." || true
+        ;;
+      *)
+        echo "  skipping unrelated file system: $fs_id (bucket: $fs_bucket)"
+        ;;
+    esac
+  done <<< "$fs_list"
+  # File-system delete is async; the bucket stays "attached" until the
+  # delete completes server-side. Wait briefly so the subsequent bucket
+  # rb has a chance of succeeding.
+  echo "  waiting 60s for S3 Files deletes to release buckets"
+  sleep 60
+}
+
 # Empty and delete a single S3 bucket. Iterates because (a) list-object-
 # versions paginates at 1000 entries, (b) `aws s3 rb --force` doesn't
 # touch noncurrent versions or delete-markers on versioned buckets, and
@@ -241,6 +281,8 @@ use_canonical() {
   sweep_orphan_stacks
   if [ "$(aws cloudformation describe-stacks --stack-name "$STACK" \
         --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo DOES_NOT_EXIST)" = "DOES_NOT_EXIST" ]; then
+    # Order matters: file systems first (they hold buckets), then buckets.
+    sweep_orphan_s3files
     sweep_orphan_s3_buckets
     sweep_orphan_appregistry
     sweep_orphan_connect
