@@ -19,7 +19,7 @@
     "@types/aws-lambda": "^8.10.126",
     "aws-cdk": "^2.1013.0",
     "aws-cdk-lib": "^2.193.0",
-    "awscdk-appsync-utils": "^0.0.271",
+    "awscdk-appsync-utils": "^0.0.858",
     "cdk-nag": "2.27.210",
     "constructs": "^10.3.0",
     "esbuild": "^0.25.0",
