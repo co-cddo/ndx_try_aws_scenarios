@@ -34,7 +34,7 @@ ENV VITE_APP_ENV=production
 RUN cd editor.planx.uk && pnpm build
 
 # Production stage — nginx serving static files
-FROM nginx:1.27-alpine
+FROM nginx:1.31-alpine
 
 # Copy built SPA
 COPY --from=build /app/editor.planx.uk/build/ /usr/share/nginx/html/
