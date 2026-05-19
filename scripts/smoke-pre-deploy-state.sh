@@ -100,12 +100,38 @@ case "$STATUS" in
   UPDATE_ROLLBACK_FAILED)
     # continue-update-rollback is async — without a wait, the deploy step
     # races straight back into the rollback and fails the changeset call.
+    # If the first attempt lands back in UPDATE_ROLLBACK_FAILED, one or
+    # more leaf resources are stuck in UPDATE_FAILED in a way CFN can't
+    # un-do (nested stacks where the same dependency keeps failing, Wisdom
+    # resources rejecting UPDATE, etc.); the second attempt skips them so
+    # the umbrella can at least reach UPDATE_ROLLBACK_COMPLETE and accept
+    # a fresh deploy.
     aws cloudformation continue-update-rollback --stack-name "$STACK" || true
-    if STATUS_NOW=$(wait_for_stable "$STACK" 3600); then
-      echo "Reached stable state after continue-update-rollback: $STATUS_NOW"
-      echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
-    else
+    STATUS_NOW=$(wait_for_stable "$STACK" 3600) || {
       emit_recovery "continue-update-rollback still running after 60m"
+      exit 0
+    }
+    echo "Reached stable state after continue-update-rollback: $STATUS_NOW"
+    if [ "$STATUS_NOW" = "UPDATE_ROLLBACK_FAILED" ]; then
+      SKIP=$(aws cloudformation list-stack-resources --stack-name "$STACK" \
+        --query 'StackResourceSummaries[?ResourceStatus==`UPDATE_FAILED`].LogicalResourceId' \
+        --output text | tr '\t' ' ')
+      if [ -n "$SKIP" ]; then
+        echo "Retrying continue-update-rollback skipping: $SKIP"
+        # shellcheck disable=SC2086 # word-splitting required to pass multiple ids
+        aws cloudformation continue-update-rollback --stack-name "$STACK" \
+          --resources-to-skip $SKIP || true
+        STATUS_NOW=$(wait_for_stable "$STACK" 3600) || {
+          emit_recovery "rollback retry-with-skip still running after 60m"
+          exit 0
+        }
+        echo "After skip retry: $STATUS_NOW"
+      fi
+    fi
+    if [ "$STATUS_NOW" = "UPDATE_ROLLBACK_FAILED" ]; then
+      emit_recovery "umbrella stuck in UPDATE_ROLLBACK_FAILED after skip retry"
+    else
+      echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
     fi
     ;;
   DELETE_FAILED)
