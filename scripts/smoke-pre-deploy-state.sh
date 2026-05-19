@@ -121,11 +121,76 @@ sweep_orphan_stacks() {
   done <<< "$orphans"
 }
 
+# Empty and delete S3 buckets matching ndx-try-*${ACCOUNT_ID}*. Force-retain
+# orphan stack cleanups leave their non-stack-owned children behind, and
+# scenario templates use deterministic bucket names with the account id in
+# the suffix (e.g. ndx-try-planning-docs-<acct>-<region>). The next umbrella
+# create then trips on AlreadyExists. Only call when the umbrella is truly
+# absent from CFN (status=DOES_NOT_EXIST) so we can't accidentally delete a
+# bucket that an in-flight stack still owns.
+sweep_orphan_s3_buckets() {
+  local acct buckets bucket
+  acct=$(aws sts get-caller-identity --query Account --output text 2>/dev/null) || return 0
+  buckets=$(aws s3api list-buckets \
+    --query "Buckets[?starts_with(Name, \`ndx-try-\`) && contains(Name, \`${acct}\`)].Name" \
+    --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
+  [ -z "$buckets" ] && { echo "No ndx-try-*${acct}* buckets to sweep."; return 0; }
+  echo "S3 buckets to sweep:"
+  echo "$buckets"
+  while IFS= read -r bucket; do
+    [ -z "$bucket" ] && continue
+    echo "  emptying + deleting bucket: $bucket"
+    # `aws s3 rb --force` handles non-versioned buckets. Versioned buckets
+    # need delete-object-versions first; --force does not enumerate versions.
+    aws s3api delete-objects --bucket "$bucket" \
+      --delete "Objects=$(aws s3api list-object-versions --bucket "$bucket" \
+        --query '{Objects: Versions[].{Key: Key, VersionId: VersionId}}' \
+        --output json 2>/dev/null | jq -c '.Objects // []')" 2>/dev/null || true
+    aws s3api delete-objects --bucket "$bucket" \
+      --delete "Objects=$(aws s3api list-object-versions --bucket "$bucket" \
+        --query '{Objects: DeleteMarkers[].{Key: Key, VersionId: VersionId}}' \
+        --output json 2>/dev/null | jq -c '.Objects // []')" 2>/dev/null || true
+    aws s3 rb "s3://$bucket" --force 2>/dev/null || \
+      gh issue create --title "smoke: bucket $bucket couldn't be deleted" \
+        --label stranded-stack \
+        --body "Pre-deploy sweep on run ${GITHUB_RUN_ID} could not delete $bucket." || true
+  done <<< "$buckets"
+}
+
+# Delete ServiceCatalog AppRegistry applications matching NDXTry_*. Same
+# orphan story as buckets: scenario templates create AppRegistry apps with
+# deterministic names; survivors block the next create.
+sweep_orphan_appregistry() {
+  local apps app
+  apps=$(aws servicecatalog-appregistry list-applications \
+    --query 'applications[?starts_with(name, `NDXTry_`)].name' \
+    --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
+  [ -z "$apps" ] && { echo "No NDXTry_* AppRegistry apps to sweep."; return 0; }
+  echo "AppRegistry apps to sweep:"
+  echo "$apps"
+  while IFS= read -r app; do
+    [ -z "$app" ] && continue
+    echo "  deleting appregistry: $app"
+    aws servicecatalog-appregistry delete-application --application "$app" 2>/dev/null || \
+      gh issue create --title "smoke: appregistry $app couldn't be deleted" \
+        --label stranded-stack \
+        --body "Pre-deploy sweep on run ${GITHUB_RUN_ID} could not delete $app." || true
+  done <<< "$apps"
+}
+
 # Final exit path for "use the canonical stack name". Sweeps orphans (so
 # any nested-stack children left over from prior runs don't collide on
 # globally-unique resource names) and writes the GH Actions output.
+# Resource-level sweeps (S3 / AppRegistry) only fire when the umbrella is
+# truly gone — running them while CFN is mid-create would yank live state
+# out from under the stack.
 use_canonical() {
   sweep_orphan_stacks
+  if [ "$(aws cloudformation describe-stacks --stack-name "$STACK" \
+        --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo DOES_NOT_EXIST)" = "DOES_NOT_EXIST" ]; then
+    sweep_orphan_s3_buckets
+    sweep_orphan_appregistry
+  fi
   echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
   exit 0
 }
