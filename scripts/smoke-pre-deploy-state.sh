@@ -371,12 +371,30 @@ for ITER in $(seq 1 $MAX_ITER); do
       continue
       ;;
     ROLLBACK_FAILED)
-      # Rare: CREATE rolled back but rollback itself failed. Same shape as
-      # UPDATE_ROLLBACK_FAILED — try continue-update-rollback then delete.
-      echo "Attempting continue-update-rollback from ROLLBACK_FAILED"
-      aws cloudformation continue-update-rollback --stack-name "$STACK" 2>/dev/null || true
-      wait_for_stable "$STACK" 3600 || \
-        emit_recovery "continue-rollback from ROLLBACK_FAILED timed out"
+      # ROLLBACK_FAILED comes from a failed initial CREATE rollback. Unlike
+      # UPDATE_ROLLBACK_FAILED, CFN does not accept continue-update-rollback
+      # here — the only recovery is delete-stack. If delete itself ends in
+      # DELETE_FAILED, retain the stuck leaves and proceed.
+      echo "Deleting from ROLLBACK_FAILED"
+      aws cloudformation delete-stack --stack-name "$STACK" 2>/dev/null || true
+      STATUS_NOW=$(wait_for_stable "$STACK" 3600) || \
+        emit_recovery "delete from ROLLBACK_FAILED still running after 60m"
+      if [ "$STATUS_NOW" = "DELETE_FAILED" ]; then
+        RETAIN=$(aws cloudformation list-stack-resources --stack-name "$STACK" \
+          --query 'StackResourceSummaries[?ResourceStatus==`DELETE_FAILED`].LogicalResourceId' \
+          --output text | tr '\t' ' ')
+        if [ -n "$RETAIN" ]; then
+          echo "Retrying delete-stack from ROLLBACK_FAILED retaining: $RETAIN"
+          # shellcheck disable=SC2086
+          aws cloudformation delete-stack --stack-name "$STACK" \
+            --retain-resources $RETAIN 2>/dev/null || true
+          wait_for_stable "$STACK" 3600 || \
+            emit_recovery "ROLLBACK_FAILED retain-delete still running after 60m"
+          gh issue create --title "smoke: retained resources after $STACK delete (ROLLBACK_FAILED)" \
+            --label stranded-stack \
+            --body "Retained on delete: $RETAIN. Run ${GITHUB_RUN_ID}." || true
+        fi
+      fi
       continue
       ;;
     *)
