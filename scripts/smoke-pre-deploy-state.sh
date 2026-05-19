@@ -129,10 +129,42 @@ case "$STATUS" in
       fi
     fi
     if [ "$STATUS_NOW" = "UPDATE_ROLLBACK_FAILED" ]; then
-      emit_recovery "umbrella stuck in UPDATE_ROLLBACK_FAILED after skip retry"
-    else
-      echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+      # Last resort: delete the stack outright. CFN accepts delete-stack
+      # from UPDATE_ROLLBACK_FAILED, and the umbrella's recovery-name
+      # fallback can't be used while the original stack still owns
+      # globally-unique resources (e.g. AppRegistryApplication name).
+      # Resources that refuse to delete get retained on a second delete
+      # call and surface as a stranded-stack issue for human triage.
+      echo "Rollback unrecoverable; deleting $STACK"
+      aws cloudformation delete-stack --stack-name "$STACK" || true
+      STATUS_NOW=$(wait_for_stable "$STACK" 3600) || {
+        emit_recovery "delete-stack still running after 60m"
+        exit 0
+      }
+      if [ "$STATUS_NOW" = "DELETE_FAILED" ]; then
+        RETAIN=$(aws cloudformation list-stack-resources --stack-name "$STACK" \
+          --query 'StackResourceSummaries[?ResourceStatus==`DELETE_FAILED`].LogicalResourceId' \
+          --output text | tr '\t' ' ')
+        if [ -n "$RETAIN" ]; then
+          echo "Retrying delete-stack retaining: $RETAIN"
+          # shellcheck disable=SC2086 # word-splitting required to pass multiple ids
+          aws cloudformation delete-stack --stack-name "$STACK" \
+            --retain-resources $RETAIN || true
+          STATUS_NOW=$(wait_for_stable "$STACK" 3600) || {
+            emit_recovery "delete-stack-with-retain still running after 60m"
+            exit 0
+          }
+          # Open a follow-up so the retained resources get cleaned up.
+          gh issue create --title "smoke: retained resources after $STACK delete" \
+            --label stranded-stack \
+            --body "Retained on delete: $RETAIN. Run ${GITHUB_RUN_ID}." || true
+        fi
+      fi
+      # After delete (with or without retain) the stack is gone or in
+      # DELETE_COMPLETE. The next deploy creates it fresh.
+      echo "Post-delete status: $STATUS_NOW"
     fi
+    echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
     ;;
   DELETE_FAILED)
     aws cloudformation delete-stack --stack-name "$STACK"
