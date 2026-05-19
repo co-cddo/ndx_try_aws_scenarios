@@ -324,7 +324,7 @@ jobs:
       # template (with absolute s3:// CodeUri values) to dist/template.yaml.
       # The hub CDK then uploads dist/template.yaml as the StackSet template.
       # No `sam build` needed: lambdas are pure Python with no native deps.
-      - uses: aws-actions/setup-sam@v2
+      - uses: aws-actions/setup-sam@v3
         with:
           use-installer: true
 
