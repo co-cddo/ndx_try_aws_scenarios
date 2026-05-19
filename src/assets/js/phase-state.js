@@ -7,7 +7,6 @@ const PhaseState = {
   STORAGE_KEY: 'ndx_phase_state',
   SESSION_EXPIRY_MS: 5400000, // 90 minutes
   VALID_PHASES: ['try', 'walkthrough', 'explore'],
-  VALID_SCENARIOS: ['council-chatbot', 'planning-application-ai', 'foi-redaction', 'smart-car-park', 'text-to-speech', 'quicksight-dashboard'],
   _initialized: false,
 
   /**
@@ -33,8 +32,6 @@ const PhaseState = {
    */
   isValidScenario(scenario) {
     if (!scenario || typeof scenario !== 'string') return false;
-    // Allow known scenarios or properly formatted custom ones
-    if (this.VALID_SCENARIOS.includes(scenario)) return true;
     return /^[a-zA-Z0-9_-]+$/.test(scenario);
   },
 

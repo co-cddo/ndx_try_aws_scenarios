@@ -25,7 +25,6 @@
 {% set scenarioId = scenarioId if scenarioId is defined else "council-chatbot" %}
 {% set phases = phaseConfig.phases %}
 {% set costMessage = phaseConfig.costReassurance %}
-{% set scenarioConfig = phaseConfig.scenarios[scenarioId] if phaseConfig.scenarios[scenarioId] else phaseConfig.scenarios["council-chatbot"] %}
 
 {# Skeleton loading state - prevents layout shift (AC-16) #}
 <div class="ndx-phase-navigator__skeleton" data-skeleton hidden aria-hidden="true">
@@ -64,8 +63,14 @@
             data-phase-id="{{ phase.id }}"
             {% if loop.index === 1 %}data-phase-initial{% endif %}>
 
-          {# Phase link - AC13: Keyboard navigable #}
-          {% set phaseUrl = scenarioConfig.tryUrl if phase.id == "try" else (scenarioConfig.walkthroughUrl if phase.id == "walkthrough" else scenarioConfig.exploreUrl) %}
+          {# Phase link - AC13: Keyboard navigable. URLs are derived by convention from scenarioId. #}
+          {% if phase.id == "try" %}
+            {% set phaseUrl = "/scenarios/" + scenarioId + "/" %}
+          {% elif phase.id == "walkthrough" %}
+            {% set phaseUrl = "/walkthroughs/" + scenarioId + "/" %}
+          {% else %}
+            {% set phaseUrl = "/walkthroughs/" + scenarioId + "/explore/" %}
+          {% endif %}
           <a href="{{ phaseUrl }}"
              class="ndx-phase-navigator__link"
              tabindex="0"
