@@ -121,6 +121,46 @@ sweep_orphan_stacks() {
   done <<< "$orphans"
 }
 
+# Empty and delete a single S3 bucket. Iterates because (a) list-object-
+# versions paginates at 1000 entries, (b) `aws s3 rb --force` doesn't
+# touch noncurrent versions or delete-markers on versioned buckets, and
+# (c) we need to verify the bucket actually disappeared rather than rely
+# on a swallowed exit code. stderr is captured + surfaced so a permissions
+# problem doesn't look like "no buckets found".
+delete_bucket_completely() {
+  local bucket="$1" attempt versions markers rb_err
+  for attempt in 1 2 3; do
+    # Versions[] -- noncurrent object versions
+    versions=$(aws s3api list-object-versions --bucket "$bucket" --max-items 1000 \
+      --query '{Objects: Versions[].{Key: Key, VersionId: VersionId}}' \
+      --output json 2>/dev/null | jq -c '.Objects // []')
+    if [ "$versions" != "[]" ] && [ -n "$versions" ]; then
+      aws s3api delete-objects --bucket "$bucket" \
+        --delete "Objects=$versions" 2>&1 | sed 's/^/    /'
+    fi
+    # DeleteMarkers[] -- tombstones on versioned buckets
+    markers=$(aws s3api list-object-versions --bucket "$bucket" --max-items 1000 \
+      --query '{Objects: DeleteMarkers[].{Key: Key, VersionId: VersionId}}' \
+      --output json 2>/dev/null | jq -c '.Objects // []')
+    if [ "$markers" != "[]" ] && [ -n "$markers" ]; then
+      aws s3api delete-objects --bucket "$bucket" \
+        --delete "Objects=$markers" 2>&1 | sed 's/^/    /'
+    fi
+    echo "  attempt $attempt: rb s3://$bucket --force"
+    rb_err=$(aws s3 rb "s3://$bucket" --force 2>&1) || true
+    if ! aws s3api head-bucket --bucket "$bucket" 2>/dev/null; then
+      echo "  $bucket deleted"
+      return 0
+    fi
+    echo "  $bucket still present after attempt $attempt; rb stderr: ${rb_err:-<empty>}"
+    sleep 5
+  done
+  gh issue create --title "smoke: bucket $bucket couldn't be deleted" \
+    --label stranded-stack \
+    --body "Pre-deploy sweep on run ${GITHUB_RUN_ID} could not delete $bucket. Last rb stderr: $rb_err" || true
+  return 1
+}
+
 # Empty and delete S3 buckets matching ndx-try-*${ACCOUNT_ID}*. Force-retain
 # orphan stack cleanups leave their non-stack-owned children behind, and
 # scenario templates use deterministic bucket names with the account id in
@@ -143,22 +183,31 @@ sweep_orphan_s3_buckets() {
   echo "$buckets"
   while IFS= read -r bucket; do
     [ -z "$bucket" ] && continue
-    echo "  emptying + deleting bucket: $bucket"
-    # `aws s3 rb --force` handles non-versioned buckets. Versioned buckets
-    # need delete-object-versions first; --force does not enumerate versions.
-    aws s3api delete-objects --bucket "$bucket" \
-      --delete "Objects=$(aws s3api list-object-versions --bucket "$bucket" \
-        --query '{Objects: Versions[].{Key: Key, VersionId: VersionId}}' \
-        --output json 2>/dev/null | jq -c '.Objects // []')" 2>/dev/null || true
-    aws s3api delete-objects --bucket "$bucket" \
-      --delete "Objects=$(aws s3api list-object-versions --bucket "$bucket" \
-        --query '{Objects: DeleteMarkers[].{Key: Key, VersionId: VersionId}}' \
-        --output json 2>/dev/null | jq -c '.Objects // []')" 2>/dev/null || true
-    aws s3 rb "s3://$bucket" --force 2>/dev/null || \
-      gh issue create --title "smoke: bucket $bucket couldn't be deleted" \
-        --label stranded-stack \
-        --body "Pre-deploy sweep on run ${GITHUB_RUN_ID} could not delete $bucket." || true
+    delete_bucket_completely "$bucket"
   done <<< "$buckets"
+}
+
+# Delete Amazon Connect instances whose InstanceAlias starts with ndx-try-.
+# AICC creates one and its alias is account-globally-unique, so a leftover
+# from a previous run blocks the next create with "Instance alias is
+# already used". delete-instance is async but the alias is freed
+# immediately on the API call.
+sweep_orphan_connect() {
+  local instances inst alias
+  instances=$(aws connect list-instances \
+    --query "InstanceSummaryList[?starts_with(InstanceAlias, 'ndx-try-')].[Id,InstanceAlias]" \
+    --output text 2>/dev/null | grep -v '^$' || true)
+  [ -z "$instances" ] && { echo "No ndx-try-* Connect instances to sweep."; return 0; }
+  echo "Connect instances to sweep:"
+  echo "$instances"
+  while IFS=$'\t' read -r inst alias; do
+    [ -z "$inst" ] && continue
+    echo "  deleting connect instance: $alias ($inst)"
+    aws connect delete-instance --instance-id "$inst" 2>&1 | sed 's/^/    /' || \
+      gh issue create --title "smoke: Connect instance $alias couldn't be deleted" \
+        --label stranded-stack \
+        --body "Pre-deploy sweep on run ${GITHUB_RUN_ID} could not delete Connect instance $alias ($inst)." || true
+  done <<< "$instances"
 }
 
 # Delete ServiceCatalog AppRegistry applications matching NDXTry_*. Same
@@ -194,6 +243,7 @@ use_canonical() {
         --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo DOES_NOT_EXIST)" = "DOES_NOT_EXIST" ]; then
     sweep_orphan_s3_buckets
     sweep_orphan_appregistry
+    sweep_orphan_connect
   fi
   echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
   exit 0
