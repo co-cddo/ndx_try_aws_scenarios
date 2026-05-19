@@ -168,23 +168,27 @@ sweep_orphan_s3files() {
 # on a swallowed exit code. stderr is captured + surfaced so a permissions
 # problem doesn't look like "no buckets found".
 delete_bucket_completely() {
-  local bucket="$1" attempt versions markers rb_err
+  local bucket="$1" attempt versions markers rb_err del_payload del_err
   for attempt in 1 2 3; do
-    # Versions[] -- noncurrent object versions
+    # Versions[] -- noncurrent object versions. Must be JSON object form
+    # (`--delete '{"Objects":[...]}'`); CLI shorthand `Objects=[{...}]`
+    # rejects JSON-quoted keys and dies with "Expected: '=', received: '"'".
     versions=$(aws s3api list-object-versions --bucket "$bucket" --max-items 1000 \
       --query '{Objects: Versions[].{Key: Key, VersionId: VersionId}}' \
-      --output json 2>/dev/null | jq -c '.Objects // []')
+      --output json 2>/dev/null | jq -c '.Objects // []' || echo '[]')
     if [ "$versions" != "[]" ] && [ -n "$versions" ]; then
-      aws s3api delete-objects --bucket "$bucket" \
-        --delete "Objects=$versions" 2>&1 | sed 's/^/    /'
+      del_payload=$(jq -n --argjson o "$versions" '{Objects: $o}')
+      del_err=$(aws s3api delete-objects --bucket "$bucket" --delete "$del_payload" 2>&1) || true
+      [ -n "$del_err" ] && echo "$del_err" | sed 's/^/    /'
     fi
     # DeleteMarkers[] -- tombstones on versioned buckets
     markers=$(aws s3api list-object-versions --bucket "$bucket" --max-items 1000 \
       --query '{Objects: DeleteMarkers[].{Key: Key, VersionId: VersionId}}' \
-      --output json 2>/dev/null | jq -c '.Objects // []')
+      --output json 2>/dev/null | jq -c '.Objects // []' || echo '[]')
     if [ "$markers" != "[]" ] && [ -n "$markers" ]; then
-      aws s3api delete-objects --bucket "$bucket" \
-        --delete "Objects=$markers" 2>&1 | sed 's/^/    /'
+      del_payload=$(jq -n --argjson o "$markers" '{Objects: $o}')
+      del_err=$(aws s3api delete-objects --bucket "$bucket" --delete "$del_payload" 2>&1) || true
+      [ -n "$del_err" ] && echo "$del_err" | sed 's/^/    /'
     fi
     echo "  attempt $attempt: rb s3://$bucket --force"
     rb_err=$(aws s3 rb "s3://$bucket" --force 2>&1) || true
