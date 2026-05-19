@@ -27,7 +27,10 @@ export async function adminLogin(page: Page, opts: AdminLoginOptions): Promise<v
     submitSelector = 'button[type="submit"], input[type="submit"]',
     awayFrom = 'login',
     passwordFieldNames,
-    timeoutMs = 30_000,
+    // 60s default absorbs cold-start ECS / fresh Aurora latency observed on
+    // ISB-leased deploys (e.g. localgov-drupal on first lease); still tight
+    // enough that real regressions surface within it.
+    timeoutMs = 60_000,
   } = opts;
 
   await page.goto(url, { waitUntil: 'domcontentloaded' });
