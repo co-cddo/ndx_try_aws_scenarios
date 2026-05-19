@@ -9,7 +9,7 @@
     },
     "require": {
         "php": ">=8.2",
-        "composer/installers": "^2.0",
+        "composer/installers": "^2.3.0",
         "drupal/core-composer-scaffold": "^11.3",
         "drupal/core-recommended": "^10.3",
         "localgovdrupal/localgov": "^3.0",
