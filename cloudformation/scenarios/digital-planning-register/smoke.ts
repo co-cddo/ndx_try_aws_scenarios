@@ -4,6 +4,9 @@ import { runSmoke } from '../../../tests/smoke/runner';
 runSmoke({
   scenario: 'digital-planning-register',
   outputs: ['DigitalPlanningRegisterUrl'],
+  outputAliases: {
+    DigitalPlanningRegisterUrl: 'RegisterUrl',
+  },
   test: async ({ page, get }) => {
     const landing = get('DigitalPlanningRegisterUrl');
     const root = landing.replace(/\/$/, '');

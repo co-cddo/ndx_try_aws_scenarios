@@ -4,6 +4,10 @@ import { runSmoke } from '../../../tests/smoke/runner';
 runSmoke({
   scenario: 'smart-car-park',
   outputs: ['SmartCarParkDashboardURL', 'SmartCarParkSensorReadingsTable'],
+  outputAliases: {
+    SmartCarParkDashboardURL: 'DashboardURL',
+    SmartCarParkSensorReadingsTable: 'SensorReadingsTable',
+  },
   test: async ({ page, get }) => {
     const url = get('SmartCarParkDashboardURL');
 

@@ -4,6 +4,9 @@ import { runSmoke } from '../../../tests/smoke/runner';
 runSmoke({
   scenario: 'foi-redaction',
   outputs: ['RedactionURL', 'FoiDocumentsBucket'],
+  outputAliases: {
+    FoiDocumentsBucket: 'DocumentsBucket',
+  },
   test: async ({ request, get }) => {
     const url = get('RedactionURL');
 

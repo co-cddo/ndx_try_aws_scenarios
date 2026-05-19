@@ -5,6 +5,10 @@ import { adminLogin } from '../../../tests/smoke/helpers';
 runSmoke({
   scenario: 'planx',
   outputs: ['PlanXUrl', 'PlanXLoginUrl', 'PlanXDemoUsername', 'PlanXDemoPassword'],
+  outputAliases: {
+    PlanXDemoUsername: 'DemoUsername',
+    PlanXDemoPassword: 'DemoPassword',
+  },
   test: async ({ page, request, get, getSecret }) => {
     const landing = get('PlanXUrl');
     const root = landing.replace(/\/$/, '');

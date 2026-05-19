@@ -4,6 +4,9 @@ import { runSmoke } from '../../../tests/smoke/runner';
 runSmoke({
   scenario: 'council-chatbot',
   outputs: ['ChatbotURL', 'ChatbotKnowledgeBaseBucket'],
+  outputAliases: {
+    ChatbotKnowledgeBaseBucket: 'KnowledgeBaseBucket',
+  },
   test: async ({ request, get }) => {
     const url = get('ChatbotURL');
 

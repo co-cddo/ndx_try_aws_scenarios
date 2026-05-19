@@ -10,6 +10,10 @@ const ACCEPTABLE_PSTN = /^\+(44(800|808|3[0-9]{2}|20|121|131|141|151|161|113)|1(
 runSmoke({
   scenario: 'ai-contact-centre',
   outputs: ['AiContactCentreCompanionUrl', 'AiContactCentrePstnNumber'],
+  outputAliases: {
+    AiContactCentreCompanionUrl: 'CompanionUrl',
+    AiContactCentrePstnNumber: 'PstnNumber',
+  },
   // Smoke deploys AICC with a placeholder ExistingPhoneNumberArn (DUMMY string)
   // so the `ClaimNewPhoneNumber` condition is false: no real GB DID claim, no
   // GeoFlowAssoc. AICC's ConnectInstance + Lex + Wisdom + KB + companion UI all

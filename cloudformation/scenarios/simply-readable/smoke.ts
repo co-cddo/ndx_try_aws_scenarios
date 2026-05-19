@@ -8,6 +8,11 @@ import { runSmoke } from '../../../tests/smoke/runner';
 runSmoke({
   scenario: 'simply-readable',
   outputs: ['SimplyReadableAppUrl', 'SimplyReadableAdminUsername', 'SimplyReadableAdminPassword'],
+  outputAliases: {
+    SimplyReadableAppUrl: 'AppUrl',
+    SimplyReadableAdminUsername: 'AdminUsername',
+    SimplyReadableAdminPassword: 'AdminPassword',
+  },
   test: async ({ page, get, getSecret }) => {
     const appUrl = get('SimplyReadableAppUrl');
     const adminUser = get('SimplyReadableAdminUsername');

@@ -5,6 +5,12 @@ import { adminLogin } from '../../../tests/smoke/helpers';
 runSmoke({
   scenario: 'bops-planning',
   outputs: ['BopsPlanningUrl', 'BopsPlanningLoginUrl', 'BopsPlanningUsername', 'BopsPlanningPassword'],
+  outputAliases: {
+    BopsPlanningUrl: 'BOPSUrl',
+    BopsPlanningLoginUrl: 'BOPSLoginUrl',
+    BopsPlanningUsername: 'BOPSUsername',
+    BopsPlanningPassword: 'BOPSPassword',
+  },
   test: async ({ page, get, getSecret }) => {
     await page.goto(get('BopsPlanningUrl'), { waitUntil: 'domcontentloaded' });
     const body = (await page.content()).toLowerCase();

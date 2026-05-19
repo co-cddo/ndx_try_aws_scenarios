@@ -4,6 +4,10 @@ import { runSmoke } from '../../../tests/smoke/runner';
 runSmoke({
   scenario: 'planning-ai',
   outputs: ['PlanningAnalyzerURL', 'PlanningDocumentsBucket'],
+  outputAliases: {
+    PlanningAnalyzerURL: 'AnalyzerURL',
+    PlanningDocumentsBucket: 'DocumentsBucket',
+  },
   test: async ({ request, get }) => {
     const url = get('PlanningAnalyzerURL');
 

@@ -10,6 +10,12 @@ runSmoke({
     'LocalgovImsAdminUsername',
     'LocalgovImsAdminPassword',
   ],
+  outputAliases: {
+    LocalgovImsAdminPortalUrl: 'AdminPortalUrl',
+    LocalgovImsPaymentPortalUrl: 'PaymentPortalUrl',
+    LocalgovImsAdminUsername: 'AdminUsername',
+    LocalgovImsAdminPassword: 'AdminPassword',
+  },
   test: async ({ page, get, getSecret }) => {
     const adminUrl = get('LocalgovImsAdminPortalUrl');
     const paymentUrl = get('LocalgovImsPaymentPortalUrl');
