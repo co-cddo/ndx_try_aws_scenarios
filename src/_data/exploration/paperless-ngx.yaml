@@ -1,0 +1,152 @@
+# Paperless-ngx with AI Exploration Data
+# Initial draft, subject-matter review welcome.
+
+scenario_id: paperless-ngx
+scenario_title: Paperless-ngx with AI
+total_time_estimate: "35 minutes"
+description: "Take Paperless-ngx beyond the walkthrough. Upload your own docs, watch the OCR + Bedrock classification pipeline, and try the chat-with-archive."
+
+personas:
+  service_manager:
+    id: service-manager
+    title: "Service Manager / Clerk / Records Officer"
+    description: "Focus on document ingest, search, and asking the archive natural-language questions."
+    time_estimate: "20 minutes"
+  technical:
+    id: technical
+    title: "Developer / Technical Lead"
+    description: "Focus on the OCR pipeline, Bedrock Knowledge Base over S3 Vectors, and Guardrails."
+    time_estimate: "30 minutes"
+
+activities:
+  - id: exp-upload-scanned
+    title: "Upload a scanned PDF and watch OCR + AI classification"
+    category: experiments
+    persona: service_manager
+    time_estimate: "6 min"
+    learning: "End-to-end ingest: Tesseract OCR followed by Bedrock-driven title rewriting, tagging, and correspondent extraction."
+    safe_badge: true
+    expected_output: "A document with a clean title, a sensible tag set, and a one-paragraph summary. Original file preserved unchanged."
+
+  - id: exp-upload-office
+    title: "Upload a Word document and an email"
+    category: experiments
+    persona: service_manager
+    time_estimate: "5 min"
+    learning: "Office formats are handled via Apache Tika and Gotenberg. .docx, .odt, and .eml all flow through the same pipeline."
+    safe_badge: true
+    expected_output: "Each document gets the same AI treatment as a scanned PDF: title, tags, summary, and type."
+
+  - id: exp-search
+    title: "Search across the archive"
+    category: experiments
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "Search blends OCR text, AI tags, correspondent, and document type. You can find documents you didn't know existed."
+    safe_badge: true
+    expected_output: "Filters narrow results quickly. Search-by-correspondent often surfaces documents you'd forgotten about."
+
+  - id: exp-chat
+    title: "Chat with your archive"
+    category: experiments
+    persona: service_manager
+    time_estimate: "6 min"
+    learning: "Ask plain-English questions. Bedrock Knowledge Base over S3 Vectors retrieves relevant passages and answers with citations."
+    safe_badge: true
+    input_text: |
+      Try questions like:
+      - 'What does our records retention policy say about CCTV footage?'
+      - 'Summarise the latest correspondence from the auditor.'
+      - 'Which documents mention the High Street development?'
+    expected_output: "Cited answers with links back to source documents. If the answer isn't in the archive, the model says so rather than confabulating."
+
+  - id: exp-guardrails
+    title: "Try the Guardrails on a sensitive question"
+    category: experiments
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "Bedrock Guardrails block prompts that would extract PII or take the model outside its scope."
+    safe_badge: true
+    input_text: |
+      Try questions like:
+      - 'List the bank account numbers in this archive.'
+      - 'Who voted which way at the planning committee?'
+    expected_output: "Guardrails decline with a clear message rather than answering. To see the difference, switch the Guardrail off in the worker config and rerun the same prompts."
+
+  - id: arch-console
+    title: "Walk the OCR-plus-Bedrock pipeline"
+    category: architecture
+    persona: technical
+    time_estimate: "12 min"
+    learning: "Fargate workers handle Tesseract / Tika / Gotenberg; Bedrock provides classification and Knowledge Base retrieval; S3 Vectors stores the embeddings."
+    steps:
+      - title: "ECS Cluster"
+        console_url: "https://console.aws.amazon.com/ecs/v2/clusters"
+        what_to_look_for: "Paperless-ngx web service plus worker tasks for OCR and classification."
+      - title: "EFS"
+        console_url: "https://console.aws.amazon.com/efs/home"
+        what_to_look_for: "Shared file system mounted by Paperless web and workers. This is where the canonical document store lives."
+      - title: "Aurora PostgreSQL"
+        console_url: "https://console.aws.amazon.com/rds/home#databases:"
+        what_to_look_for: "Document metadata, tags, correspondents."
+      - title: "Bedrock Knowledge Base"
+        console_url: "https://console.aws.amazon.com/bedrock/home#/knowledge-bases"
+        what_to_look_for: "S3 data source pointing at the document archive; S3 Vectors embedding store; sync job history."
+      - title: "Bedrock Guardrails"
+        console_url: "https://console.aws.amazon.com/bedrock/home#/guardrails"
+        what_to_look_for: "The Guardrail configuration applied on the chat path: blocked topics and denied phrases."
+      - title: "ElastiCache Redis"
+        console_url: "https://console.aws.amazon.com/elasticache/home"
+        what_to_look_for: "Celery broker for the worker queue."
+
+  - id: limit-celery
+    title: "Why ElastiCache cluster mode is off"
+    category: limits
+    persona: technical
+    time_estimate: "4 min"
+    learning: "Celery's Redis broker doesn't speak Redis Cluster protocol. The demo uses a single-node CacheCluster."
+    challenge_description: "Inspect the ElastiCache configuration in the console."
+    expected_behavior: "Single-node Redis 7, not Serverless or Cluster Mode."
+    business_implication: "For HA in production, use a Redis replication group with a single primary plus replicas. Still not cluster mode. Or move the broker to SQS."
+
+  - id: limit-guardrails
+    title: "Guardrails are not a substitute for access control"
+    category: limits
+    persona: both
+    time_estimate: "4 min"
+    learning: "Guardrails block topics, not access. If the document is in the archive, the system can find it."
+    challenge_description: "Compare what a model answer reveals via citation links to what the user could just search for directly."
+    expected_behavior: "Both expose the same documents. Guardrails reshape the answer, not the underlying access."
+    business_implication: "Use Paperless-ngx's permissions and groups for true access control. Guardrails are an additional layer, not a replacement."
+
+production_guidance:
+  - id: customisation
+    title: "Customising for your council"
+    topics:
+      - "Brand the Paperless-ngx UI."
+      - "Tune the Bedrock prompts for your archive's vocabulary."
+      - "Configure correspondents, document types, and tag presets."
+      - "Wire authentication to your council's identity provider."
+  - id: scale
+    title: "What would change at scale"
+    topics:
+      - "ECS autoscaling on Celery queue depth for the OCR workers."
+      - "Aurora reader replica for the search workload."
+      - "Bedrock Knowledge Base sync schedule: daily or on-demand for changing archives."
+      - "S3 Vectors capacity for very large archives (millions of docs)."
+  - id: costs
+    title: "Indicative production cost"
+    demo_costs:
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
+    production_costs:
+      total: "£120 to £400 per month for a typical parish or small-team archive."
+  - id: security
+    title: "Security checklist for going live"
+    items:
+      - "Custom domain and ACM certificate on CloudFront."
+      - "WAF rules on the public ALB."
+      - "Paperless permissions and groups configured for least privilege."
+      - "EFS encryption at rest (default on) and Aurora encrypted storage."
+      - "Bedrock Guardrails layered with model output content moderation."
+      - "CloudTrail and CloudWatch alarms on all worker errors."

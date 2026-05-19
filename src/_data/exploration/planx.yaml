@@ -1,0 +1,141 @@
+# PlanX Digital Planning Exploration Data
+# Initial draft, subject-matter review welcome.
+
+scenario_id: planx
+scenario_title: PlanX Digital Planning
+total_time_estimate: "30 minutes"
+description: "Take PlanX beyond the walkthrough, design a flow, submit as a citizen, and look at the Hasura-fronted GraphQL data layer."
+
+personas:
+  service_designer:
+    id: service-designer
+    title: "Service Designer / Planning Officer"
+    description: "Focus on the visual flow editor and the citizen-facing service."
+    time_estimate: "25 minutes"
+  technical:
+    id: technical
+    title: "Developer / Technical Lead"
+    description: "Focus on the React app, Hasura GraphQL API, Aurora PostgreSQL, and migration management."
+    time_estimate: "30 minutes"
+
+activities:
+  - id: exp-explore-flow
+    title: "Open a published flow in the editor"
+    category: experiments
+    persona: service_designer
+    time_estimate: "5 min"
+    learning: "How a planning service is modelled as nodes (questions, content, calculations, decisions), and how data passes between them."
+    safe_badge: true
+    expected_output: "A visual graph of the flow with the start node highlighted. Select any node to see its config."
+
+  - id: exp-edit-flow
+    title: "Edit a question and republish"
+    category: experiments
+    persona: service_designer
+    time_estimate: "6 min"
+    learning: "How small wording changes affect the citizen flow, and how publishing draft to live works."
+    safe_badge: true
+    expected_output: "Edited copy shows up on the next citizen run-through. Draft vs live keeps experimental changes off the public version."
+
+  - id: exp-citizen-submission
+    title: "Run a flow as a citizen and submit a planning application"
+    category: experiments
+    persona: service_designer
+    time_estimate: "8 min"
+    learning: "The end-to-end citizen journey: eligibility, questions, payment placeholder, and submission."
+    safe_badge: true
+    expected_output: "A structured JSON submission stored against the flow, ready to feed onward systems such as BOPS."
+
+  - id: exp-graphql
+    title: "Inspect the GraphQL data layer"
+    category: experiments
+    persona: technical
+    time_estimate: "5 min"
+    learning: "Hasura auto-generates a GraphQL API over the Aurora schema. You can introspect everything, including the schema of submitted applications."
+    safe_badge: true
+    input_text: |
+      Open the Hasura console (URL in the stack outputs).
+      Try the GraphiQL Explorer with a query like:
+
+      {
+        flows(limit: 5) {
+          id
+          slug
+          published_flows(limit: 1) {
+            data
+          }
+        }
+      }
+    expected_output: "JSON of the flow structure, exactly as the React editor sees it. Useful for understanding how submitted data is shaped."
+
+  - id: arch-console
+    title: "Walk the ECS-plus-Hasura hosting"
+    category: architecture
+    persona: technical
+    time_estimate: "10 min"
+    learning: "Two ECS services (the React app and the Hasura GraphQL engine), an Aurora cluster, S3 + CloudFront for static assets."
+    steps:
+      - title: "ECS Cluster"
+        console_url: "https://console.aws.amazon.com/ecs/v2/clusters"
+        what_to_look_for: "Two services (planx-api running Hasura and planx-editor running React). Different target groups."
+      - title: "Aurora PostgreSQL"
+        console_url: "https://console.aws.amazon.com/rds/home#databases:"
+        what_to_look_for: "Aurora cluster. Migrations are applied by an init container on each Hasura start."
+      - title: "Application Load Balancer"
+        console_url: "https://console.aws.amazon.com/ec2/home#LoadBalancers:"
+        what_to_look_for: "Path-based routing: /v1/graphql to Hasura, everything else to the editor."
+      - title: "S3 + CloudFront"
+        console_url: "https://console.aws.amazon.com/cloudfront/v4/home#/distributions"
+        what_to_look_for: "Static assets and the public citizen flow served via CloudFront for low-latency."
+      - title: "Secrets Manager"
+        console_url: "https://console.aws.amazon.com/secretsmanager/listsecrets"
+        what_to_look_for: "Hasura admin secret and database credentials."
+
+  - id: limit-migrations
+    title: "Hasura migration management"
+    category: limits
+    persona: technical
+    time_estimate: "5 min"
+    learning: "Hasura schema changes are managed via migration files, not edited live. Production deployments need a disciplined migration workflow."
+    challenge_description: "Inspect the migrations directory in the source repo and trace how a schema change reaches running Hasura."
+    expected_behavior: "Migrations applied automatically on container start in this demo. Production may run them as a separate ECS task."
+    business_implication: "Adopt a migration discipline early. Out-of-band schema changes to Aurora bypass Hasura's metadata and cause drift."
+
+  - id: limit-multi-council
+    title: "Multi-council deployment"
+    category: limits
+    persona: technical
+    time_estimate: "4 min"
+    learning: "PlanX is designed for multi-tenant operation. The 18 councils that use it share one PlanX instance per region, scoped by team."
+    challenge_description: "Inspect the team-based scoping in the editor and the database."
+    expected_behavior: "Flows belong to a team. Teams provide isolation between councils."
+    business_implication: "You can host a single PlanX for several councils, or run a council-private instance. The per-council instance pattern simplifies governance."
+
+production_guidance:
+  - id: customisation
+    title: "Customising for your council"
+    topics:
+      - "Brand the editor and citizen-facing services with your council's logo and palette."
+      - "Configure team membership and roles."
+      - "Wire to BOPS or your own back-office for the submission step."
+  - id: scale
+    title: "What would change at scale"
+    topics:
+      - "ECS autoscaling on CPU and request count for both Hasura and the editor."
+      - "Aurora Serverless v2 already scales storage and capacity."
+      - "Hasura read replicas for very read-heavy workloads (rare in practice)."
+  - id: costs
+    title: "Indicative production cost"
+    demo_costs:
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
+    production_costs:
+      total: "£150 to £400 per month for a single-council instance."
+  - id: security
+    title: "Security checklist for going live"
+    items:
+      - "Custom domain and ACM certificate on CloudFront."
+      - "Hasura admin secret rotation in Secrets Manager."
+      - "Aurora encryption at rest (default on)."
+      - "WAF on the CloudFront distribution."
+      - "Auth integration with your council identity provider via Hasura JWT mode."

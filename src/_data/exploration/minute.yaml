@@ -1,0 +1,140 @@
+# Minute AI Exploration Data
+# Initial draft, subject-matter review welcome.
+
+scenario_id: minute
+scenario_title: Minute AI
+total_time_estimate: "30 minutes"
+description: "Take Minute beyond the walkthrough, test transcripts of varying quality, try different templates, and look at the SQS / Bedrock pipeline."
+
+personas:
+  service_manager:
+    id: service-manager
+    title: "Service Manager / Clerk"
+    description: "Focus on minute quality, templates, tone, action item extraction."
+    time_estimate: "20 minutes"
+  technical:
+    id: technical
+    title: "Developer / Technical Lead"
+    description: "Focus on the Transcribe + Bedrock + SQS pipeline and the editor."
+    time_estimate: "30 minutes"
+
+activities:
+  - id: exp-meeting-templates
+    title: "Try different meeting templates on the same recording"
+    category: experiments
+    persona: service_manager
+    time_estimate: "6 min"
+    learning: "Templates (Cabinet, Planning Committee, General) materially shift the structure and headings of generated minutes."
+    safe_badge: true
+    expected_output: "The same input produces noticeably different minute formats. Useful for picking the right template per committee."
+
+  - id: exp-action-items
+    title: "Check action item extraction"
+    category: experiments
+    persona: service_manager
+    time_estimate: "5 min"
+    learning: "Where Bedrock identifies action items well, and where it misses or hallucinates them."
+    safe_badge: true
+    expected_output: "Most clear actions are extracted with an assignee and a rough deadline. Implicit or politely-phrased asks may be missed. Review before publishing."
+
+  - id: exp-speaker-identification
+    title: "See speaker identification in a multi-speaker recording"
+    category: experiments
+    persona: both
+    time_estimate: "5 min"
+    learning: "AWS Transcribe labels speakers but does not name them. The Minute UI lets you rename them once."
+    safe_badge: true
+    expected_output: "Speaker_0, Speaker_1 labels in the raw transcript. Rename them and watch the generated minutes pick up the names."
+
+  - id: exp-edit-flow
+    title: "Edit and re-export the AI draft"
+    category: experiments
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "The rich text editor lets you correct AI output without regenerating it. This matters because re-running Bedrock costs money and may move other content."
+    safe_badge: true
+    expected_output: "Inline edits persist, and the export reflects them."
+
+  - id: exp-noisy-audio
+    title: "Upload a low-quality recording"
+    category: experiments
+    persona: technical
+    time_estimate: "5 min"
+    learning: "How Transcribe handles background noise, overlapping speakers, and remote callers."
+    safe_badge: true
+    expected_output: "Visibly more transcription errors in noisy sections. Minute generation covers some of this, but poor input still produces weaker output."
+
+  - id: arch-console
+    title: "Walk the SQS-driven pipeline in the console"
+    category: architecture
+    persona: technical
+    time_estimate: "10 min"
+    learning: "Upload → S3 → SQS → Transcribe → SQS → Bedrock → Aurora. Each link in the chain is visible in the console."
+    steps:
+      - title: "S3 uploads bucket"
+        console_url: "https://console.aws.amazon.com/s3/home"
+        what_to_look_for: "Per-user prefix with the uploaded audio file."
+      - title: "SQS queues"
+        console_url: "https://console.aws.amazon.com/sqs/v3/home"
+        what_to_look_for: "Two queues (transcribe-jobs and minute-jobs). Watch the in-flight count change when you upload."
+      - title: "Transcribe jobs"
+        console_url: "https://console.aws.amazon.com/transcribe/home#jobs"
+        what_to_look_for: "A job per recording. Open one to see the JSON output structure."
+      - title: "ECS Fargate service"
+        console_url: "https://console.aws.amazon.com/ecs/v2/clusters"
+        what_to_look_for: "The minute-generator workers consuming SQS and calling Bedrock."
+      - title: "Aurora PostgreSQL"
+        console_url: "https://console.aws.amazon.com/rds/home#databases:"
+        what_to_look_for: "Where finished minutes and edits are persisted."
+      - title: "Bedrock model"
+        console_url: "https://console.aws.amazon.com/bedrock/home"
+        what_to_look_for: "Confirm Nova Pro is the active model. Switch to a different model in the worker code and compare output."
+
+  - id: limit-context-length
+    title: "Long-meeting limits"
+    category: limits
+    persona: technical
+    time_estimate: "5 min"
+    learning: "Very long meetings (3+ hours) bump against model context limits."
+    challenge_description: "Upload an artificially long audio file and watch what happens."
+    expected_behavior: "Transcribe handles it; minute generation may truncate the transcript or summarise less faithfully."
+    business_implication: "For long meetings, chunk by agenda item or use a larger-context model."
+
+  - id: limit-accuracy
+    title: "Where to keep a human in the loop"
+    category: limits
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "AI-generated minutes are a draft, not a record of decision. Tone, attribution, and statutory language all need a clerk's pass."
+    challenge_description: "Compare the AI minute to your council's clerk-authored version of the same meeting."
+    expected_behavior: "Structure and key points usually right. Attribution may be wrong, decisions may be paraphrased inaccurately."
+    business_implication: "Treat the AI output as the clerk's first draft. Always have a human sign-off before publishing."
+
+production_guidance:
+  - id: customisation
+    title: "Customising for your council"
+    topics:
+      - "Add or edit meeting templates to match your committees."
+      - "Tune the Bedrock prompt for your council's voice and length preferences."
+      - "Wire authentication to your existing identity provider."
+  - id: scale
+    title: "What would change at scale"
+    topics:
+      - "ECS Fargate autoscaling on SQS queue depth."
+      - "Aurora Serverless v2 already handles bursty load."
+      - "Bedrock quotas: request higher TPS for production use."
+  - id: costs
+    title: "Indicative production cost"
+    demo_costs:
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
+    production_costs:
+      total: "£30 to £150 per month for a small council, dominated by Bedrock and Transcribe usage."
+  - id: security
+    title: "Security checklist for going live"
+    items:
+      - "S3 bucket policies scoping users to their own prefix."
+      - "Bedrock Guardrails on the model invocation."
+      - "Transcribe content redaction for PII if recordings contain sensitive personal information."
+      - "Encrypted Aurora storage and automated backups."
+      - "CloudTrail across the pipeline."

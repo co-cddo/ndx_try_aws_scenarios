@@ -1,0 +1,50 @@
+---
+layout: layouts/exploration
+title: "Explore - Minute AI"
+description: "Hands-on activities to take the Minute AI demo further"
+scenarioId: minute
+eleventyNavigation:
+  key: minute-explore
+  parent: minute-walkthrough
+  title: Explore Further
+---
+
+{% set scenarioId = "minute" %}
+{% set explorationData = exploration[scenarioId] %}
+{% set activities = explorationData.activities %}
+{% set personas = explorationData.personas %}
+{% set productionGuidance = explorationData.production_guidance %}
+
+<section class="ndx-explore-intro" aria-labelledby="explore-intro-heading">
+  <h2 class="govuk-heading-l" id="explore-intro-heading">Explore further</h2>
+
+  <p class="govuk-body-l">
+    You've completed the Minute walkthrough. Now try different templates and
+    tones on the same recording, test action-item extraction, and trace the
+    SQS-plus-Bedrock pipeline.
+  </p>
+
+  <div class="govuk-inset-text">
+    <strong>Safe to explore:</strong> the sandbox is yours. Use the sample recordings or upload your own non-sensitive audio. Everything here is designed for experimentation.
+  </div>
+</section>
+
+{% if personas %}
+<section class="ndx-persona-selection" aria-labelledby="persona-heading">
+  <h2 class="govuk-heading-m" id="persona-heading">Choose your path</h2>
+
+  <div class="govuk-grid-row">
+    {% for key, persona in personas %}
+      <div class="govuk-grid-column-one-half">
+        <div class="ndx-persona-card" data-persona="{{ persona.id }}">
+          <h3 class="govuk-heading-s">{{ persona.title }}</h3>
+          <p class="govuk-body-s">{{ persona.description }}</p>
+          <p class="govuk-body-s"><strong>Time:</strong> {{ persona.time_estimate }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% include "components/explore-activities.njk" %}

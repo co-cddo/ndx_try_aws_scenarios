@@ -41,64 +41,6 @@ costReassurance: "This demo costs nothing to deploy"
 # Session expiration threshold (90 minutes in milliseconds)
 sessionExpiryMs: 5400000
 
-# Scenario-specific phase configurations
-scenarios:
-  council-chatbot:
-    phases: [try, walkthrough, explore]
-    evidencePackPhase: walkthrough
-    tryUrl: "/scenarios/council-chatbot/"
-    walkthroughUrl: "/walkthroughs/council-chatbot/"
-    exploreUrl: "/walkthroughs/council-chatbot/explore/"
-
-  planning-application-ai:
-    phases: [try, walkthrough, explore]
-    evidencePackPhase: walkthrough
-    tryUrl: "/scenarios/planning-application-ai/"
-    walkthroughUrl: "/walkthroughs/planning-application-ai/"
-    exploreUrl: "/walkthroughs/planning-application-ai/explore/"
-
-  foi-redaction:
-    phases: [try, walkthrough, explore]
-    evidencePackPhase: walkthrough
-    tryUrl: "/scenarios/foi-redaction/"
-    walkthroughUrl: "/walkthroughs/foi-redaction/"
-    exploreUrl: "/walkthroughs/foi-redaction/explore/"
-
-  smart-car-park:
-    phases: [try, walkthrough, explore]
-    evidencePackPhase: walkthrough
-    tryUrl: "/scenarios/smart-car-park/"
-    walkthroughUrl: "/walkthroughs/smart-car-park/"
-    exploreUrl: "/walkthroughs/smart-car-park/explore/"
-
-  text-to-speech:
-    phases: [try, walkthrough, explore]
-    evidencePackPhase: walkthrough
-    tryUrl: "/scenarios/text-to-speech/"
-    walkthroughUrl: "/walkthroughs/text-to-speech/"
-    exploreUrl: "/walkthroughs/text-to-speech/explore/"
-
-  quicksight-dashboard:
-    phases: [try, walkthrough, explore]
-    evidencePackPhase: walkthrough
-    tryUrl: "/scenarios/quicksight-dashboard/"
-    walkthroughUrl: "/walkthroughs/quicksight-dashboard/"
-    exploreUrl: "/walkthroughs/quicksight-dashboard/explore/"
-
-  simply-readable:
-    phases: [try, walkthrough, explore]
-    evidencePackPhase: walkthrough
-    tryUrl: "/scenarios/simply-readable/"
-    walkthroughUrl: "/walkthroughs/simply-readable/"
-    exploreUrl: "/walkthroughs/simply-readable/explore/"
-
-  localgov-drupal:
-    phases: [try, walkthrough, explore]
-    evidencePackPhase: walkthrough
-    tryUrl: "/scenarios/localgov-drupal/"
-    walkthroughUrl: "/walkthroughs/localgov-drupal/"
-    exploreUrl: "/walkthroughs/localgov-drupal/explore/"
-
 # Branching configuration (AC-7)
 branching:
   postWalkthroughOptions:

@@ -4,16 +4,12 @@
  */
 const NDXAnalytics = {
   VALID_PHASES: ['try', 'walkthrough', 'explore'],
-  VALID_SCENARIOS: ['council-chatbot', 'planning-application-ai', 'foi-redaction', 'smart-car-park', 'text-to-speech', 'quicksight-dashboard'],
 
   /**
    * Sanitize scenario ID to prevent injection
    */
   sanitizeScenarioId(id) {
     if (!id || typeof id !== 'string') return 'unknown';
-    // Only allow known scenarios or properly formatted custom ones
-    if (this.VALID_SCENARIOS.includes(id)) return id;
-    // Fallback to alphanumeric, hyphens, underscores only
     const sanitized = id.replace(/[^a-zA-Z0-9_-]/g, '');
     return sanitized || 'unknown';
   },

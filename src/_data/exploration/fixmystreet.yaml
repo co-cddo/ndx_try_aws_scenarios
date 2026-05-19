@@ -1,0 +1,141 @@
+# FixMyStreet Exploration Data
+# Initial draft, subject-matter review welcome.
+
+scenario_id: fixmystreet
+scenario_title: FixMyStreet
+total_time_estimate: "30 minutes"
+description: "Take FixMyStreet beyond the walkthrough, file a report end-to-end, work it as an officer, and look at the Aurora-plus-EFS hosting."
+
+personas:
+  service_manager:
+    id: service-manager
+    title: "Service Manager / Customer Service"
+    description: "Focus on the citizen and officer experience, reporting, triage, public visibility."
+    time_estimate: "20 minutes"
+  technical:
+    id: technical
+    title: "Developer / Technical Lead"
+    description: "Focus on the Perl app, the Aurora database, EFS shared storage, and the council backend."
+    time_estimate: "30 minutes"
+
+activities:
+  - id: exp-file-report
+    title: "File a report as a citizen"
+    category: experiments
+    persona: service_manager
+    time_estimate: "5 min"
+    learning: "How a resident actually reports a problem: what they're asked for, what's optional, and what shows publicly."
+    safe_badge: true
+    expected_output: "A new report visible on the public map and in the council dashboard, scoped to the council area you picked."
+
+  - id: exp-officer-dashboard
+    title: "Work a report as a council officer"
+    category: experiments
+    persona: service_manager
+    time_estimate: "5 min"
+    learning: "Officer triage workflow: assigning a category, changing state, and replying to the reporter."
+    safe_badge: true
+    expected_output: "State changes are reflected on the public report and the reporter is notified."
+
+  - id: exp-categories
+    title: "Try different report categories"
+    category: experiments
+    persona: service_manager
+    time_estimate: "4 min"
+    learning: "Each category routes to a different team and shows different help text. Categories are council-configurable."
+    safe_badge: true
+    expected_output: "Different categories show different report forms and route to different officer queues."
+
+  - id: exp-map
+    title: "Browse the public map"
+    category: experiments
+    persona: both
+    time_estimate: "4 min"
+    learning: "OpenStreetMap-backed map with 260 demo reports clustered by area and state."
+    safe_badge: true
+    expected_output: "Reports cluster at low zoom, individual pins at high zoom. Select any report to see its full thread."
+
+  - id: exp-search
+    title: "Search and filter reports"
+    category: experiments
+    persona: both
+    time_estimate: "4 min"
+    learning: "How reports are searchable by area, postcode, category and state."
+    safe_badge: true
+    expected_output: "The filter persists in the URL. Useful for sharing a saved view between team members."
+
+  - id: arch-console
+    title: "Look at the Perl-on-Fargate hosting"
+    category: architecture
+    persona: technical
+    time_estimate: "12 min"
+    learning: "Perl monolith. Three identical Fargate tasks share EFS for uploaded photos. Aurora PostgreSQL with PostGIS handles geospatial queries, with CloudFront in front."
+    steps:
+      - title: "ECS Cluster"
+        console_url: "https://console.aws.amazon.com/ecs/v2/clusters"
+        what_to_look_for: "Three Fargate tasks behind a single service. All identical."
+      - title: "Aurora PostgreSQL with PostGIS"
+        console_url: "https://console.aws.amazon.com/rds/home#databases:"
+        what_to_look_for: "PostgreSQL instance with PostGIS extension. PostGIS is what makes 'reports near me' fast."
+      - title: "EFS file system"
+        console_url: "https://console.aws.amazon.com/efs/home"
+        what_to_look_for: "Shared file system mounted across all three Fargate tasks for uploaded photos."
+      - title: "Application Load Balancer"
+        console_url: "https://console.aws.amazon.com/ec2/home#LoadBalancers:"
+        what_to_look_for: "Round-robins requests across the three tasks. Health check hits a Perl endpoint."
+      - title: "CloudFront"
+        console_url: "https://console.aws.amazon.com/cloudfront/v4/home#/distributions"
+        what_to_look_for: "HTTPS termination and static asset caching."
+
+  - id: limit-uploads
+    title: "Photo upload concurrency"
+    category: limits
+    persona: technical
+    time_estimate: "5 min"
+    learning: "EFS shared storage works for moderate council volumes but is a contention point at very high concurrent upload rates."
+    challenge_description: "Submit reports with attached photos rapidly from multiple tabs."
+    expected_behavior: "Uploads succeed but throughput is capped by EFS provisioned mode."
+    business_implication: "For high-volume councils, switch uploaded-photo storage to S3 with signed-URL upload. The change is small and well-trodden."
+
+  - id: limit-perl
+    title: "Perl version pinning"
+    category: limits
+    persona: technical
+    time_estimate: "4 min"
+    learning: "FixMyStreet is built on a specific Perl version; system upgrades need to be tested against it."
+    challenge_description: "Inspect the container image and identify the Perl runtime version."
+    expected_behavior: "A pinned Perl interpreter version baked into the image."
+    business_implication: "mySociety publishes upgrade guidance with each major release. Don't deviate from their tested combinations without a reason."
+
+production_guidance:
+  - id: customisation
+    title: "Customising for your council"
+    topics:
+      - "Set your council's name, branding and contact email through environment variables."
+      - "Configure your real category list and routing rules."
+      - "Integrate with your CRM via the FixMyStreet API (push reports as cases)."
+      - "Optionally enable resident accounts vs anonymous reporting."
+  - id: scale
+    title: "What would change at scale"
+    topics:
+      - "ECS autoscaling on CPU once you grow past three tasks."
+      - "Aurora reader replica if reporting queries hurt the writer."
+      - "Move photo storage from EFS to S3 + CloudFront signed URLs for very high upload volumes."
+      - "WAF on the public ALB."
+  - id: costs
+    title: "Indicative production cost"
+    demo_costs:
+      note: "FREE as part of NDX:Try programme"
+      total: "No cost to your council"
+    production_costs:
+      ecs_fargate: "£80 to £200 per month (3 tasks, always-on)"
+      aurora: "£100 to £250 per month (Aurora PostgreSQL with PostGIS, db.t3.medium)"
+      total: "£200 to £500 per month for a typical small council"
+  - id: security
+    title: "Security checklist for going live"
+    items:
+      - "Custom domain and ACM certificate on CloudFront."
+      - "WAF rules to throttle abusive report submission."
+      - "Secrets Manager for Aurora credentials and any external API keys."
+      - "Encrypted EFS file system."
+      - "CloudTrail for officer admin actions."
