@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 ENV RAY_ROTATION_MAX_BYTES=10485760
 ENV RAY_ROTATION_BACKUP_COUNT=1
