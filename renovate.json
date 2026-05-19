@@ -27,8 +27,8 @@
     {
       "customType": "regex",
       "description": "Pin GHCR + docker.io image references in CDK TypeScript and raw CFN templates. Renovate's built-in docker manager does not cover ecs.ContainerImage.fromRegistry() string literals; this manager does.",
-      "fileMatch": [
-        "^cloudformation/scenarios/.*\\.(ts|yaml|yml|json)$"
+      "managerFilePatterns": [
+        "/^cloudformation/scenarios/.*\\.(ts|yaml|yml|json)$/"
       ],
       "matchStrings": [
         "(?<depName>(?:ghcr\\.io|docker\\.io)/[a-z0-9._/-]+):(?<currentValue>[a-z0-9.\\-]+)@(?<currentDigest>sha256:[a-f0-9]+)"
@@ -47,21 +47,21 @@
       "description": "Own GHCR images — one PR per scenario; immediate when an image bumps. Smoke runs scoped to that scenario give fast feedback.",
       "groupName": "scenario-{{packageName}}",
       "matchManagers": ["custom.regex"],
-      "matchPackagePatterns": [
-        "^ghcr\\.io/co-cddo/ndx_try_aws_scenarios-"
-      ],
-      "schedule": ["at any time"]
+      "schedule": ["at any time"],
+      "matchPackageNames": [
+        "/^ghcr\\.io/co-cddo/ndx_try_aws_scenarios-/"
+      ]
     },
     {
       "description": "Upstream container deps (tika, paperless-ngx, gotenberg). Weekly grouped per image to keep blast radius small.",
       "groupName": "upstream-{{packageName}}",
       "matchManagers": ["custom.regex"],
-      "matchPackagePatterns": [
-        "^docker\\.io/apache/tika",
-        "^docker\\.io/gotenberg/gotenberg",
-        "^ghcr\\.io/paperless-ngx/paperless-ngx"
-      ],
-      "schedule": ["before 09:00 on monday"]
+      "schedule": ["before 09:00 on monday"],
+      "matchPackageNames": [
+        "/^docker\\.io/apache/tika/",
+        "/^docker\\.io/gotenberg/gotenberg/",
+        "/^ghcr\\.io/paperless-ngx/paperless-ngx/"
+      ]
     },
     {
       "description": "npm dev deps — weekly batched. Low-risk; noise control.",
@@ -93,11 +93,11 @@
     {
       "description": "Pin official actions/* and aws-actions/* references in workflows to digest. Other action sources (community / vendor-specific) keep their existing pin shape — pinning everything caused a firehose in past adoption.",
       "matchManagers": ["github-actions"],
-      "matchPackagePatterns": [
-        "^actions/",
-        "^aws-actions/"
-      ],
-      "pinDigests": true
+      "pinDigests": true,
+      "matchPackageNames": [
+        "/^actions//",
+        "/^aws-actions//"
+      ]
     },
     {
       "description": "Python pip Lambda layer deps — batched weekly with npm-dev cadence.",
