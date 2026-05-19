@@ -32,6 +32,32 @@ emit_recovery() {
     --body "Run ${GITHUB_RUN_ID} proceeded against recovery name $recovery. Manual cleanup needed." || true
 }
 
+# Block until the stack reaches a terminal (non-IN_PROGRESS) state or the
+# wait budget expires. Echoes the final status. Returns 0 on stable, 1 on
+# timeout. We poll instead of using `aws cloudformation wait` because the
+# all-demo umbrella's rollbacks routinely run past the CLI waiter's
+# 60-poll * 30s = 30-minute budget.
+wait_for_stable() {
+  local stack="$1"
+  local max_wait="${2:-3600}"
+  local interval=30
+  local elapsed=0
+  local s
+  while (( elapsed < max_wait )); do
+    s=$(aws cloudformation describe-stacks --stack-name "$stack" \
+        --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo "DOES_NOT_EXIST")
+    if [[ "$s" != *_IN_PROGRESS ]]; then
+      echo "$s"
+      return 0
+    fi
+    echo "  $stack still $s (${elapsed}s elapsed, max ${max_wait}s)" >&2
+    sleep "$interval"
+    elapsed=$((elapsed + interval))
+  done
+  echo "$s"
+  return 1
+}
+
 case "$STATUS" in
   DOES_NOT_EXIST|CREATE_COMPLETE|UPDATE_COMPLETE|UPDATE_ROLLBACK_COMPLETE)
     echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
@@ -56,23 +82,31 @@ case "$STATUS" in
     fi
     ;;
   *_IN_PROGRESS)
+    # cancel-update-stack only works on UPDATE_IN_PROGRESS; CFN refuses on
+    # the cleanup or rollback variants. Either way we wait for whatever is
+    # in flight to finish before deciding next steps.
     case "$STATUS" in
-      UPDATE_IN_PROGRESS|UPDATE_COMPLETE_CLEANUP_IN_PROGRESS|UPDATE_ROLLBACK_IN_PROGRESS)
+      UPDATE_IN_PROGRESS)
         aws cloudformation cancel-update-stack --stack-name "$STACK" 2>/dev/null || true
         ;;
     esac
-    sleep 60
-    STATUS_NOW=$(aws cloudformation describe-stacks --stack-name "$STACK" \
-      --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo "DOES_NOT_EXIST")
-    if [[ "$STATUS_NOW" =~ _IN_PROGRESS$ ]]; then
-      emit_recovery "stuck in $STATUS_NOW"
-    else
+    if STATUS_NOW=$(wait_for_stable "$STACK" 3600); then
+      echo "Reached stable state: $STATUS_NOW"
       echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+    else
+      emit_recovery "stuck in $STATUS_NOW after 60m wait"
     fi
     ;;
   UPDATE_ROLLBACK_FAILED)
+    # continue-update-rollback is async — without a wait, the deploy step
+    # races straight back into the rollback and fails the changeset call.
     aws cloudformation continue-update-rollback --stack-name "$STACK" || true
-    echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+    if STATUS_NOW=$(wait_for_stable "$STACK" 3600); then
+      echo "Reached stable state after continue-update-rollback: $STATUS_NOW"
+      echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+    else
+      emit_recovery "continue-update-rollback still running after 60m"
+    fi
     ;;
   DELETE_FAILED)
     aws cloudformation delete-stack --stack-name "$STACK"
