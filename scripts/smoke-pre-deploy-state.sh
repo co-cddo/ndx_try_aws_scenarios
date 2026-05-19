@@ -163,6 +163,45 @@ case "$STATUS" in
       # After delete (with or without retain) the stack is gone or in
       # DELETE_COMPLETE. The next deploy creates it fresh.
       echo "Post-delete status: $STATUS_NOW"
+      # Retained nested stacks (e.g. all-demo-PaperlessNgx-*) still own
+      # globally-unique resources (AppRegistryApplication names) and will
+      # block recreation of the umbrella's matching child. Sweep them now;
+      # the orphan re-delete usually succeeds because the parent-child
+      # race that originally blocked them is gone.
+      ORPHANS=$(aws cloudformation list-stacks \
+        --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE DELETE_FAILED UPDATE_ROLLBACK_FAILED \
+        --query "StackSummaries[?starts_with(StackName, \`${STACK}-\`)].StackName" \
+        --output text | tr '\t' '\n' | grep -v '^$' || true)
+      if [ -n "$ORPHANS" ]; then
+        echo "Orphaned nested stacks to clean up:"
+        echo "$ORPHANS"
+        while IFS= read -r ORPHAN; do
+          [ -z "$ORPHAN" ] && continue
+          echo "  deleting orphan: $ORPHAN"
+          aws cloudformation delete-stack --stack-name "$ORPHAN" || true
+          if ! ORPH_STATUS=$(wait_for_stable "$ORPHAN" 1800); then
+            gh issue create --title "smoke: orphan $ORPHAN delete timed out" \
+              --label stranded-stack \
+              --body "Run ${GITHUB_RUN_ID} couldn't clean up $ORPHAN within 30m." || true
+            continue
+          fi
+          if [ "$ORPH_STATUS" = "DELETE_FAILED" ]; then
+            ORPH_RETAIN=$(aws cloudformation list-stack-resources --stack-name "$ORPHAN" \
+              --query 'StackResourceSummaries[?ResourceStatus==`DELETE_FAILED`].LogicalResourceId' \
+              --output text | tr '\t' ' ')
+            if [ -n "$ORPH_RETAIN" ]; then
+              echo "  retrying orphan delete retaining: $ORPH_RETAIN"
+              # shellcheck disable=SC2086
+              aws cloudformation delete-stack --stack-name "$ORPHAN" \
+                --retain-resources $ORPH_RETAIN || true
+              wait_for_stable "$ORPHAN" 1800 || true
+              gh issue create --title "smoke: $ORPHAN retained resources" \
+                --label stranded-stack \
+                --body "Retained on orphan delete: $ORPH_RETAIN. Run ${GITHUB_RUN_ID}." || true
+            fi
+          fi
+        done <<< "$ORPHANS"
+      fi
     fi
     echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
     ;;
