@@ -10,7 +10,7 @@
     "synth": "cd ../.upstream/infrastructure && npx ts-node --prefer-ts-exts --project ../../cdk/tsconfig.json ../../cdk/bin/app.ts"
   },
   "devDependencies": {
-    "@types/node": "^20.9.0",
+    "@types/node": "^25.9.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.2.2"
   },
