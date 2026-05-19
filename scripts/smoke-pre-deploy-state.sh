@@ -131,8 +131,12 @@ sweep_orphan_stacks() {
 sweep_orphan_s3_buckets() {
   local acct buckets bucket
   acct=$(aws sts get-caller-identity --query Account --output text 2>/dev/null) || return 0
+  # JMESPath backtick-literals parse their contents as JSON, so a bare
+  # 12-digit account id becomes a number — and `contains(Name, <number>)`
+  # never matches the string bucket names. Single-quoted JMESPath strings
+  # avoid the parse and behave intuitively.
   buckets=$(aws s3api list-buckets \
-    --query "Buckets[?starts_with(Name, \`ndx-try-\`) && contains(Name, \`${acct}\`)].Name" \
+    --query "Buckets[?starts_with(Name, 'ndx-try-') && contains(Name, '${acct}')].Name" \
     --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
   [ -z "$buckets" ] && { echo "No ndx-try-*${acct}* buckets to sweep."; return 0; }
   echo "S3 buckets to sweep:"
@@ -163,7 +167,7 @@ sweep_orphan_s3_buckets() {
 sweep_orphan_appregistry() {
   local apps app
   apps=$(aws servicecatalog-appregistry list-applications \
-    --query 'applications[?starts_with(name, `NDXTry_`)].name' \
+    --query "applications[?starts_with(name, 'NDXTry_')].name" \
     --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
   [ -z "$apps" ] && { echo "No NDXTry_* AppRegistry apps to sweep."; return 0; }
   echo "AppRegistry apps to sweep:"
