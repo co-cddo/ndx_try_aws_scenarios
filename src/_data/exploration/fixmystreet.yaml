@@ -1,16 +1,16 @@
 # FixMyStreet Exploration Data
-# Initial draft — subject-matter review welcome.
+# Initial draft, subject-matter review welcome.
 
 scenario_id: fixmystreet
 scenario_title: FixMyStreet
 total_time_estimate: "30 minutes"
-description: "Take FixMyStreet beyond the walkthrough — file a report end-to-end, work it as an officer, and look at the Aurora-plus-EFS hosting."
+description: "Take FixMyStreet beyond the walkthrough, file a report end-to-end, work it as an officer, and look at the Aurora-plus-EFS hosting."
 
 personas:
   service_manager:
     id: service-manager
     title: "Service Manager / Customer Service"
-    description: "Focus on the citizen and officer experience — reporting, triage, public visibility."
+    description: "Focus on the citizen and officer experience, reporting, triage, public visibility."
     time_estimate: "20 minutes"
   technical:
     id: technical
@@ -24,7 +24,7 @@ activities:
     category: experiments
     persona: service_manager
     time_estimate: "5 min"
-    learning: "How a resident actually reports a problem — what they're asked for, what's optional, what shows publicly."
+    learning: "How a resident actually reports a problem: what they're asked for, what's optional, and what shows publicly."
     safe_badge: true
     expected_output: "A new report visible on the public map and in the council dashboard, scoped to the council area you picked."
 
@@ -33,7 +33,7 @@ activities:
     category: experiments
     persona: service_manager
     time_estimate: "5 min"
-    learning: "Officer triage workflow — assigning a category, changing state, replying to the reporter."
+    learning: "Officer triage workflow: assigning a category, changing state, and replying to the reporter."
     safe_badge: true
     expected_output: "State changes are reflected on the public report and the reporter is notified."
 
@@ -53,7 +53,7 @@ activities:
     time_estimate: "4 min"
     learning: "OpenStreetMap-backed map with 260 demo reports clustered by area and state."
     safe_badge: true
-    expected_output: "Reports cluster at low zoom, individual pins at high zoom. Click any report to see its full thread."
+    expected_output: "Reports cluster at low zoom, individual pins at high zoom. Select any report to see its full thread."
 
   - id: exp-search
     title: "Search and filter reports"
@@ -62,14 +62,14 @@ activities:
     time_estimate: "4 min"
     learning: "How reports are searchable by area, postcode, category and state."
     safe_badge: true
-    expected_output: "Filter persists in the URL, useful for sharing a saved view between team members."
+    expected_output: "The filter persists in the URL. Useful for sharing a saved view between team members."
 
   - id: arch-console
     title: "Look at the Perl-on-Fargate hosting"
     category: architecture
     persona: technical
     time_estimate: "12 min"
-    learning: "Perl monolith, three identical Fargate tasks sharing EFS for uploaded photos, Aurora PostgreSQL with PostGIS for geospatial queries, CloudFront in front."
+    learning: "Perl monolith. Three identical Fargate tasks share EFS for uploaded photos. Aurora PostgreSQL with PostGIS handles geospatial queries, with CloudFront in front."
     steps:
       - title: "ECS Cluster"
         console_url: "https://console.aws.amazon.com/ecs/v2/clusters"

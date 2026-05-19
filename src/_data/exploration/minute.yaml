@@ -1,16 +1,16 @@
 # Minute AI Exploration Data
-# Initial draft — subject-matter review welcome.
+# Initial draft, subject-matter review welcome.
 
 scenario_id: minute
 scenario_title: Minute AI
 total_time_estimate: "30 minutes"
-description: "Take Minute beyond the walkthrough — test transcripts of varying quality, try different templates, and look at the SQS / Bedrock pipeline."
+description: "Take Minute beyond the walkthrough, test transcripts of varying quality, try different templates, and look at the SQS / Bedrock pipeline."
 
 personas:
   service_manager:
     id: service-manager
     title: "Service Manager / Clerk"
-    description: "Focus on minute quality — templates, tone, action item extraction."
+    description: "Focus on minute quality, templates, tone, action item extraction."
     time_estimate: "20 minutes"
   technical:
     id: technical
@@ -35,14 +35,14 @@ activities:
     time_estimate: "5 min"
     learning: "Where Bedrock identifies action items well, and where it misses or hallucinates them."
     safe_badge: true
-    expected_output: "Most clear actions are extracted with assignee and a rough deadline. Implicit or politely-phrased asks may be missed — review before publishing."
+    expected_output: "Most clear actions are extracted with an assignee and a rough deadline. Implicit or politely-phrased asks may be missed. Review before publishing."
 
   - id: exp-speaker-identification
     title: "See speaker identification in a multi-speaker recording"
     category: experiments
     persona: both
     time_estimate: "5 min"
-    learning: "AWS Transcribe labels speakers but does not name them — the Minute UI lets you rename them once."
+    learning: "AWS Transcribe labels speakers but does not name them. The Minute UI lets you rename them once."
     safe_badge: true
     expected_output: "Speaker_0, Speaker_1 labels in the raw transcript. Rename them and watch the generated minutes pick up the names."
 
@@ -51,7 +51,7 @@ activities:
     category: experiments
     persona: service_manager
     time_estimate: "4 min"
-    learning: "The rich text editor lets you correct AI output without regenerating — important because re-running Bedrock costs and may move other content."
+    learning: "The rich text editor lets you correct AI output without regenerating it. This matters because re-running Bedrock costs money and may move other content."
     safe_badge: true
     expected_output: "Inline edits persist, and the export reflects them."
 
@@ -62,24 +62,24 @@ activities:
     time_estimate: "5 min"
     learning: "How Transcribe handles background noise, overlapping speakers, and remote callers."
     safe_badge: true
-    expected_output: "Visibly more transcription errors in noisy sections. The minute generation step covers some of this, but garbage in still gives weaker minutes out."
+    expected_output: "Visibly more transcription errors in noisy sections. Minute generation covers some of this, but poor input still produces weaker output."
 
   - id: arch-console
     title: "Walk the SQS-driven pipeline in the console"
     category: architecture
     persona: technical
     time_estimate: "10 min"
-    learning: "Upload → S3 → SQS → Transcribe → SQS → Bedrock → Aurora — see each link in the chain."
+    learning: "Upload → S3 → SQS → Transcribe → SQS → Bedrock → Aurora. Each link in the chain is visible in the console."
     steps:
       - title: "S3 uploads bucket"
         console_url: "https://console.aws.amazon.com/s3/home"
         what_to_look_for: "Per-user prefix with the uploaded audio file."
       - title: "SQS queues"
         console_url: "https://console.aws.amazon.com/sqs/v3/home"
-        what_to_look_for: "Two queues — transcribe-jobs and minute-jobs. Watch in-flight count change when you upload."
+        what_to_look_for: "Two queues (transcribe-jobs and minute-jobs). Watch the in-flight count change when you upload."
       - title: "Transcribe jobs"
         console_url: "https://console.aws.amazon.com/transcribe/home#jobs"
-        what_to_look_for: "A job per recording. Click in to see the JSON output structure."
+        what_to_look_for: "A job per recording. Open one to see the JSON output structure."
       - title: "ECS Fargate service"
         console_url: "https://console.aws.amazon.com/ecs/v2/clusters"
         what_to_look_for: "The minute-generator workers consuming SQS and calling Bedrock."
@@ -122,7 +122,7 @@ production_guidance:
     topics:
       - "ECS Fargate autoscaling on SQS queue depth."
       - "Aurora Serverless v2 already handles bursty load."
-      - "Bedrock quotas — request higher TPS for production use."
+      - "Bedrock quotas: request higher TPS for production use."
   - id: costs
     title: "Indicative production cost"
     demo_costs:

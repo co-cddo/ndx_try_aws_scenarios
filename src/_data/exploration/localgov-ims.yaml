@@ -1,16 +1,16 @@
 # LocalGov IMS Exploration Data
-# Initial draft — subject-matter review welcome.
+# Initial draft, subject-matter review welcome.
 
 scenario_id: localgov-ims
 scenario_title: LocalGov IMS
 total_time_estimate: "40 minutes"
-description: "Take LocalGov IMS beyond the walkthrough — process payments, work suspense items, run eReturns, and look inside the Windows container."
+description: "Take LocalGov IMS beyond the walkthrough, process payments, work suspense items, run eReturns, and look inside the Windows container."
 
 personas:
   finance:
     id: finance
     title: "Finance Officer / Income Manager"
-    description: "Focus on the workflow — payments, account holders, suspense, eReturns."
+    description: "Focus on the workflow, payments, account holders, suspense, eReturns."
     time_estimate: "25 minutes"
   technical:
     id: technical
@@ -31,7 +31,7 @@ activities:
       - Number: 4444 3333 2222 1111
       - Expiry: any future date
       - CVC: any 3 digits
-    expected_output: "Payment captured by GOV.UK Pay, callback updates the IMS record, receipt visible against the account holder."
+    expected_output: "Payment captured by GOV.UK Pay. The callback updates the IMS record. Receipt visible against the account holder."
 
   - id: exp-payment-failure
     title: "Watch a failed payment and the suspense workflow"
@@ -43,14 +43,14 @@ activities:
     input_text: |
       Use a GOV.UK Pay sandbox decline card:
       - Number: 4000 0000 0000 0002
-    expected_output: "Payment declined, no reconciliation, the unmatched amount lands in suspense for an officer to action."
+    expected_output: "Payment declined, with no reconciliation. The unmatched amount lands in suspense for an officer to action."
 
   - id: exp-account-holder
     title: "Look up an account holder and their transaction history"
     category: experiments
     persona: finance
     time_estimate: "5 min"
-    learning: "Account holders aggregate transactions across multiple funds — a single resident may have parking, council tax and licensing entries."
+    learning: "Account holders aggregate transactions across multiple funds. A single resident may have parking, council tax and licensing entries."
     safe_badge: true
     expected_output: "Filtered transaction history showing recent payments, suspense items and balances per fund."
 
@@ -59,16 +59,16 @@ activities:
     category: experiments
     persona: finance
     time_estimate: "5 min"
-    learning: "eReturns is how IMS reconciles batches of digital receipts (e.g. from a payment gateway) against expected income."
+    learning: "eReturns is how IMS reconciles batches of digital receipts (for example, from a payment gateway) against expected income."
     safe_badge: true
-    expected_output: "A reconciliation summary listing matched and unmatched lines — the unmatched lines feed into suspense."
+    expected_output: "A reconciliation summary listing matched and unmatched lines. The unmatched lines feed into suspense."
 
   - id: exp-roles
     title: "Try the system as different roles"
     category: experiments
     persona: both
     time_estimate: "4 min"
-    learning: "Officer vs administrator views differ — administrators configure funds and cashiers, officers do day-to-day reconciliation."
+    learning: "Officer and administrator views differ. Administrators configure funds and cashiers. Officers do day-to-day reconciliation."
     safe_badge: true
     expected_output: "Each role sees a different navigation and permitted actions."
 
@@ -77,7 +77,7 @@ activities:
     category: architecture
     persona: technical
     time_estimate: "12 min"
-    learning: "Windows .NET Framework on ECS Fargate with SQL Server on RDS — see what 'lift and shift Windows to AWS' really looks like."
+    learning: "Windows .NET Framework on ECS Fargate, with SQL Server on RDS. See what running a Windows .NET workload on AWS actually looks like."
     steps:
       - title: "ECS Cluster (Windows tasks)"
         console_url: "https://console.aws.amazon.com/ecs/v2/clusters"
@@ -87,7 +87,7 @@ activities:
         what_to_look_for: "SQL Server instance with encryption at rest, automated backups."
       - title: "Application Load Balancer"
         console_url: "https://console.aws.amazon.com/ec2/home#LoadBalancers:"
-        what_to_look_for: "Two target groups — admin portal and payment portal — both on IIS-served HTTP behind the ALB."
+        what_to_look_for: "Two target groups (admin portal and payment portal), both on IIS-served HTTP behind the ALB."
       - title: "CloudFront"
         console_url: "https://console.aws.amazon.com/cloudfront/v4/home#/distributions"
         what_to_look_for: "HTTPS termination and caching policy in front of the ALB."
@@ -100,7 +100,7 @@ activities:
     category: limits
     persona: technical
     time_estimate: "4 min"
-    learning: "Windows containers start more slowly than Linux ones — provisioning the platform is more expensive."
+    learning: "Windows containers start more slowly than Linux ones. Provisioning the platform is more expensive."
     challenge_description: "Stop the ECS service, start it again, and time how long until the load balancer reports healthy targets."
     expected_behavior: "Tens of seconds to a minute, depending on image size. Not great for rapid auto-scaling."
     business_implication: "Keep one task always running, scale out using target tracking with conservative cool-down. For a small council the demo's single-task setup is fine."
@@ -111,7 +111,7 @@ activities:
     persona: both
     time_estimate: "3 min"
     learning: "The demo ships with 200+ synthetic account holders and 500+ transactions. Real production has different data volume and integration shape."
-    challenge_description: "Search for high-volume edge cases (e.g. an account with hundreds of transactions)."
+    challenge_description: "Search for high-volume edge cases, for example an account with hundreds of transactions."
     expected_behavior: "Demo loads quickly because the data set is small."
     business_implication: "Production sizing depends on transaction volume and concurrent cashier sessions. Aurora-compatible alternatives reduce cost; staying on SQL Server keeps existing tooling."
 
@@ -126,7 +126,7 @@ production_guidance:
     title: "What would change at scale"
     topics:
       - "ECS auto-scaling on CPU or request count for busy periods."
-      - "RDS SQL Server instance sizing — start with db.t3.medium, scale up if reconciliation jobs slow."
+      - "RDS SQL Server instance sizing: start with db.t3.medium and scale up if reconciliation jobs slow."
       - "Multi-AZ RDS for HA in production."
       - "Read replica for reporting if eReturns or batch jobs hurt foreground performance."
   - id: costs
@@ -146,4 +146,4 @@ production_guidance:
       - "WAF rules on the CloudFront distribution."
       - "SQL Server encryption at rest (default on) plus encrypted automated backups."
       - "CloudTrail and CloudWatch alarms on cashier login failures."
-      - "Network — IMS lives in private subnets behind the ALB; database is not internet-routable."
+      - "Network: IMS lives in private subnets behind the ALB. The database is not internet-routable."

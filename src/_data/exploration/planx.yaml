@@ -1,10 +1,10 @@
 # PlanX Digital Planning Exploration Data
-# Initial draft — subject-matter review welcome.
+# Initial draft, subject-matter review welcome.
 
 scenario_id: planx
 scenario_title: PlanX Digital Planning
 total_time_estimate: "30 minutes"
-description: "Take PlanX beyond the walkthrough — design a flow, submit as a citizen, and look at the Hasura-fronted GraphQL data layer."
+description: "Take PlanX beyond the walkthrough, design a flow, submit as a citizen, and look at the Hasura-fronted GraphQL data layer."
 
 personas:
   service_designer:
@@ -24,9 +24,9 @@ activities:
     category: experiments
     persona: service_designer
     time_estimate: "5 min"
-    learning: "How a planning service is modelled as nodes — questions, content, calculations, decisions — and how data passes between them."
+    learning: "How a planning service is modelled as nodes (questions, content, calculations, decisions), and how data passes between them."
     safe_badge: true
-    expected_output: "A visual graph of the flow with the start node highlighted. Click any node to see its config."
+    expected_output: "A visual graph of the flow with the start node highlighted. Select any node to see its config."
 
   - id: exp-edit-flow
     title: "Edit a question and republish"
@@ -42,9 +42,9 @@ activities:
     category: experiments
     persona: service_designer
     time_estimate: "8 min"
-    learning: "The end-to-end citizen journey — eligibility, questions, payment placeholder, submission."
+    learning: "The end-to-end citizen journey: eligibility, questions, payment placeholder, and submission."
     safe_badge: true
-    expected_output: "A structured JSON submission stored against the flow, ready to feed onward systems (e.g. BOPS)."
+    expected_output: "A structured JSON submission stored against the flow, ready to feed onward systems such as BOPS."
 
   - id: exp-graphql
     title: "Inspect the GraphQL data layer"
@@ -77,13 +77,13 @@ activities:
     steps:
       - title: "ECS Cluster"
         console_url: "https://console.aws.amazon.com/ecs/v2/clusters"
-        what_to_look_for: "Two services — planx-api (Hasura) and planx-editor (React). Different target groups."
+        what_to_look_for: "Two services (planx-api running Hasura and planx-editor running React). Different target groups."
       - title: "Aurora PostgreSQL"
         console_url: "https://console.aws.amazon.com/rds/home#databases:"
         what_to_look_for: "Aurora cluster. Migrations are applied by an init container on each Hasura start."
       - title: "Application Load Balancer"
         console_url: "https://console.aws.amazon.com/ec2/home#LoadBalancers:"
-        what_to_look_for: "Path-based routing — /v1/graphql to Hasura, everything else to the editor."
+        what_to_look_for: "Path-based routing: /v1/graphql to Hasura, everything else to the editor."
       - title: "S3 + CloudFront"
         console_url: "https://console.aws.amazon.com/cloudfront/v4/home#/distributions"
         what_to_look_for: "Static assets and the public citizen flow served via CloudFront for low-latency."

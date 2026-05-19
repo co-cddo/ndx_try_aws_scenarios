@@ -1,16 +1,16 @@
 # Simply Readable Exploration Data
-# Initial draft — subject-matter review welcome.
+# Initial draft, subject-matter review welcome.
 
 scenario_id: simply-readable
 scenario_title: Simply Readable
 total_time_estimate: "30 minutes"
-description: "Take Simply Readable beyond the walkthrough — try multilingual translation, generate Easy Read variants, and see the Step Functions pipeline."
+description: "Take Simply Readable beyond the walkthrough, try multilingual translation, generate Easy Read variants, and see the Step Functions pipeline."
 
 personas:
   service_manager:
     id: service-manager
     title: "Service Manager / Accessibility Lead"
-    description: "Focus on the resident experience — translation quality and Easy Read readability."
+    description: "Focus on the resident experience, translation quality and Easy Read readability."
     time_estimate: "20 minutes"
   technical:
     id: technical
@@ -53,14 +53,14 @@ activities:
     time_estimate: "4 min"
     learning: "Small prompt changes (tone, audience) materially shift the Easy Read output."
     safe_badge: true
-    expected_output: "Two visibly different versions of the same letter — useful for setting council editorial guidelines before rolling Easy Read out."
+    expected_output: "Two visibly different versions of the same letter, useful for setting council editorial guidelines before rolling Easy Read out."
 
   - id: exp-bedrock-direct
     title: "Inspect the Bedrock prompt"
     category: experiments
     persona: technical
     time_estimate: "5 min"
-    learning: "The Easy Read prompt is auditable — you can see exactly what is asked of the model and tune it."
+    learning: "The Easy Read prompt is auditable. You can see exactly what is asked of the model and tune it."
     safe_badge: true
     input_text: |
       In the AWS Console:
@@ -73,17 +73,17 @@ activities:
     category: architecture
     persona: technical
     time_estimate: "10 min"
-    learning: "The translation and Easy Read jobs are orchestrated as a Step Functions workflow that fans out to Translate and Bedrock and writes results back to S3."
+    learning: "Translation and Easy Read run as a Step Functions workflow. The workflow fans out to Translate and Bedrock, then writes results back to S3."
     steps:
       - title: "Step Functions"
         console_url: "https://console.aws.amazon.com/states/home"
-        what_to_look_for: "Two state machines — one for translation, one for Easy Read. Click any recent execution to see the inputs and outputs."
+        what_to_look_for: "Two state machines, one for translation, one for Easy Read. Select any recent execution to see the inputs and outputs."
       - title: "AppSync GraphQL API"
         console_url: "https://console.aws.amazon.com/appsync/home"
         what_to_look_for: "The schema the React app uses, plus resolvers wired to Lambda and DynamoDB."
       - title: "DynamoDB tables"
         console_url: "https://console.aws.amazon.com/dynamodbv2/home"
-        what_to_look_for: "Job records — one per document submitted. Each carries status and output location."
+        what_to_look_for: "Job records, one per document submitted. Each carries status and output location."
       - title: "S3 bucket"
         console_url: "https://console.aws.amazon.com/s3/home"
         what_to_look_for: "Input and output objects, plus a per-user prefix structure."
@@ -93,7 +93,7 @@ activities:
     category: limits
     persona: service_manager
     time_estimate: "4 min"
-    learning: "Amazon Translate supports 75 languages but quality varies — major European languages are excellent, smaller languages need human review."
+    learning: "Amazon Translate supports 75 languages but quality varies. Major European languages are excellent. Smaller languages need human review."
     challenge_description: "Translate the same letter into a language you speak and assess it."
     expected_behavior: "Output is generally good for high-resource languages, weaker for low-resource ones."
     business_implication: "Pair translation with a human-in-the-loop review for languages where your council lacks in-house speakers."
@@ -103,7 +103,7 @@ activities:
     category: limits
     persona: service_manager
     time_estimate: "4 min"
-    learning: "Easy Read isn't just shorter sentences — it's accessible language. The model gets you most of the way, then a person makes it land."
+    learning: "Easy Read isn't just shorter sentences. It's accessible language. The model produces a strong first draft. A human accessibility reviewer makes it usable."
     challenge_description: "Run Easy Read on a letter that contains legal or statutory language."
     expected_behavior: "Surface concepts are simplified but legal nuance can be lost or softened."
     business_implication: "Use AI Easy Read as a first draft; route to your accessibility team for sign-off on statutory communications."
@@ -119,7 +119,7 @@ production_guidance:
   - id: scale
     title: "What would change at scale"
     topics:
-      - "Step Functions handles bursty load — no change needed for moderate council volumes."
+      - "Step Functions handles bursty load. No change needed for moderate council volumes."
       - "Bedrock model access quotas: request a quota increase for production usage."
       - "S3 lifecycle: archive processed documents to S3 Glacier after 90 days."
       - "DynamoDB on-demand handles unpredictable submission patterns."

@@ -1,10 +1,10 @@
 # Digital Planning Register Exploration Data
-# Initial draft — subject-matter review welcome.
+# Initial draft, subject-matter review welcome.
 
 scenario_id: digital-planning-register
 scenario_title: Digital Planning Register
 total_time_estimate: "20 minutes"
-description: "Take the Digital Planning Register beyond the walkthrough — search, follow the BOPS data feed, and look at the minimal Next.js hosting."
+description: "Take the Digital Planning Register beyond the walkthrough. Search, follow the BOPS data feed, and look at the minimal Next.js hosting."
 
 personas:
   service_manager:
@@ -24,7 +24,7 @@ activities:
     category: experiments
     persona: service_manager
     time_estimate: "4 min"
-    learning: "How residents discover applications in their area — postcode, street, application reference."
+    learning: "How residents discover applications in their area: by postcode, street, or application reference."
     safe_badge: true
     expected_output: "Filtered results listing matching applications with status, consultation deadline, and link to details."
 
@@ -33,7 +33,7 @@ activities:
     category: experiments
     persona: service_manager
     time_estimate: "4 min"
-    learning: "What data the register shows publicly — consultation dates, site maps, document list, comments where supported."
+    learning: "What data the register shows publicly: consultation dates, site maps, document list, and comments where supported."
     safe_badge: true
     expected_output: "A clear, accessible page that doesn't reveal internal officer notes or assessment text."
 
@@ -42,7 +42,7 @@ activities:
     category: experiments
     persona: service_manager
     time_estimate: "4 min"
-    learning: "The register is built on the GOV.UK Design System — keyboard navigation, focus states, screen-reader semantics all come from the framework."
+    learning: "The register is built on the GOV.UK Design System. Keyboard navigation, focus states, and screen-reader semantics all come from the framework."
     safe_badge: true
     expected_output: "Tab navigation reaches every interactive element. Focus states are visible. No mouse-only traps."
 
@@ -51,7 +51,7 @@ activities:
     category: experiments
     persona: technical
     time_estimate: "5 min"
-    learning: "The register has no database of its own — it pulls live data from BOPS APIs each request (cached briefly)."
+    learning: "The register has no database of its own. It pulls live data from BOPS APIs each request, cached briefly."
     safe_badge: true
     input_text: |
       In CloudWatch Logs for the ECS service:
@@ -64,7 +64,7 @@ activities:
     category: architecture
     persona: technical
     time_estimate: "8 min"
-    learning: "Single ECS Fargate service serving a Next.js app, CloudFront in front, no data store — everything comes from external BOPS APIs."
+    learning: "Single ECS Fargate service serving a Next.js app with CloudFront in front. No data store. Everything comes from external BOPS APIs."
     steps:
       - title: "ECS Cluster"
         console_url: "https://console.aws.amazon.com/ecs/v2/clusters"
@@ -104,13 +104,13 @@ production_guidance:
     title: "Customising for your council"
     topics:
       - "Add or remove councils from the configuration."
-      - "Brand and translation overrides — GOV.UK Design System with council-name substitutions."
-      - "Optional analytics integration (e.g. GA4 with consent)."
+      - "Brand and translation overrides: GOV.UK Design System with council-name substitutions."
+      - "Optional analytics integration, for example GA4 with consent."
   - id: scale
     title: "What would change at scale"
     topics:
       - "ECS autoscaling on CPU and request count."
-      - "CloudFront cache tuning is the most effective scale lever — caches do the heavy lifting."
+      - "CloudFront cache tuning is the most effective scaling step. Caches do the heavy lifting."
       - "Stateless app, so horizontal scale is trivial."
   - id: costs
     title: "Indicative production cost"
@@ -118,12 +118,12 @@ production_guidance:
       note: "FREE as part of NDX:Try programme"
       total: "No cost to your council"
     production_costs:
-      total: "£60 to £150 per month — Fargate plus CloudFront dominate; no database."
+      total: "£60 to £150 per month. Fargate plus CloudFront dominate. No database."
   - id: security
     title: "Security checklist for going live"
     items:
       - "Custom domain and ACM certificate on CloudFront."
-      - "WAF rules on CloudFront — particularly rate limiting for the search endpoint."
+      - "WAF rules on CloudFront, particularly rate-limiting for the search endpoint."
       - "TLS on every BOPS API call."
       - "Read-only IAM role for the ECS task."
       - "CloudTrail for the small number of admin actions (cache invalidation, deploys)."
