@@ -105,9 +105,15 @@ export class IsbHubStack extends cdk.Stack {
         ],
         destinationBucket: bucket,
         destinationKeyPrefix: `scenarios/${scenario.name}`,
-        // SAM-style scenarios upload Lambda zips to scenarios/<name>/assets/
-        // via sam package BEFORE this runs; default prune:true would delete them.
-        prune: scenario.samStyle ? false : undefined,
+        // Never prune. The deploy-blueprints workflow uploads scenario-specific
+        // out-of-band content (sam-package Lambda zips for SAM scenarios,
+        // CDK-synthesized asset zips + website-build/ for simply-readable,
+        // etc.) to scenarios/<name>/* BEFORE this BucketDeployment runs. The
+        // BD's source contains only template.yaml; with prune:true (the
+        // default for non-SAM) it would delete everything else under the
+        // prefix every hub deploy, which is why simply-readable's lease
+        // deploys started failing with NoSuchKey on Lambda assets.
+        prune: false,
       });
 
       // CDK can't auto-grant on imported buckets.
