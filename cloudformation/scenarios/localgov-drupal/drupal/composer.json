@@ -14,7 +14,7 @@
         "drupal/core-recommended": "^10.3",
         "localgovdrupal/localgov": "^3.0",
         "drush/drush": "^12.0",
-        "aws/aws-sdk-php": "^3.300",
+        "aws/aws-sdk-php": "^3.381.3",
         "drupal/office_hours": "^1.0"
     },
     "require-dev": {
