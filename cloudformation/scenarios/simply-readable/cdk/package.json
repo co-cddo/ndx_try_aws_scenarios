@@ -20,7 +20,7 @@
     "aws-cdk": "^2.1013.0",
     "aws-cdk-lib": "^2.193.0",
     "awscdk-appsync-utils": "^0.0.271",
-    "cdk-nag": "2.27.210",
+    "cdk-nag": "2.38.2",
     "constructs": "^10.3.0",
     "esbuild": "^0.25.0",
     "source-map-support": "^0.5.21"
