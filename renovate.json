@@ -6,7 +6,6 @@
     ":semanticCommits"
   ],
   "timezone": "Europe/London",
-  "platform": "github",
   "labels": ["renovate"],
   "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
@@ -41,13 +40,13 @@
   "packageRules": [
     {
       "description": "Pin discipline: NEVER replace a digest with a bare tag; updates must carry both.",
-      "matchCustomManagers": ["custom.regex"],
+      "matchManagers": ["custom.regex"],
       "pinDigests": true
     },
     {
       "description": "Own GHCR images — one PR per scenario; immediate when an image bumps. Smoke runs scoped to that scenario give fast feedback.",
       "groupName": "scenario-{{packageName}}",
-      "matchCustomManagers": ["custom.regex"],
+      "matchManagers": ["custom.regex"],
       "matchPackagePatterns": [
         "^ghcr\\.io/co-cddo/ndx_try_aws_scenarios-"
       ],
@@ -56,7 +55,7 @@
     {
       "description": "Upstream container deps (tika, paperless-ngx, gotenberg). Weekly grouped per image to keep blast radius small.",
       "groupName": "upstream-{{packageName}}",
-      "matchCustomManagers": ["custom.regex"],
+      "matchManagers": ["custom.regex"],
       "matchPackagePatterns": [
         "^docker\\.io/apache/tika",
         "^docker\\.io/gotenberg/gotenberg",
