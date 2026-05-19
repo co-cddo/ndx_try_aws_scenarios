@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@aws-cdk/aws-cognito-identitypool-alpha": "^2.153.0-alpha.0",
-    "@types/aws-lambda": "^8.10.126",
+    "@types/aws-lambda": "^8.10.161",
     "aws-cdk": "^2.1013.0",
     "aws-cdk-lib": "^2.193.0",
     "awscdk-appsync-utils": "^0.0.271",
