@@ -19,18 +19,6 @@ set -euo pipefail
 # instead (PowerUserAccess on the deploy role now allows logs:DeleteLogGroup).
 
 STACK="${STACK_NAME}"
-STATUS=$(aws cloudformation describe-stacks --stack-name "$STACK" \
-  --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo "DOES_NOT_EXIST")
-echo "Current $STACK status: $STATUS"
-
-emit_recovery() {
-  local reason="$1"
-  local recovery="${STACK}-recovery-${GITHUB_RUN_ID}"
-  echo "stack_name=$recovery" >> "$GITHUB_OUTPUT"
-  gh issue create --title "stranded-stack: $STACK ($reason)" \
-    --label stranded-stack \
-    --body "Run ${GITHUB_RUN_ID} proceeded against recovery name $recovery. Manual cleanup needed." || true
-}
 
 # Block until the stack reaches a terminal (non-IN_PROGRESS) state or the
 # wait budget expires. Echoes the final status. Returns 0 on stable, 1 on
@@ -58,9 +46,75 @@ wait_for_stable() {
   return 1
 }
 
+# Sweep CFN stacks whose name starts with "${STACK}-" — both retained nested
+# stacks left over from delete-with-retain (all-demo-PaperlessNgx-*) and any
+# previous recovery stacks (all-demo-recovery-*). These orphans still own
+# globally-unique resources (AppRegistryApplication names in particular) and
+# block the next umbrella's creation of the same child. Best-effort: any
+# orphan that ends in DELETE_FAILED gets retained-and-issued for triage so
+# the deploy can proceed.
+sweep_orphan_stacks() {
+  local orphans orphan orph_status orph_retain
+  orphans=$(aws cloudformation list-stacks \
+    --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE DELETE_FAILED UPDATE_ROLLBACK_FAILED CREATE_FAILED UPDATE_FAILED ROLLBACK_COMPLETE \
+    --query "StackSummaries[?starts_with(StackName, \`${STACK}-\`)].StackName" \
+    --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
+  [ -z "$orphans" ] && { echo "No orphan ${STACK}-* stacks to sweep."; return 0; }
+  echo "Orphan stacks to sweep:"
+  echo "$orphans"
+  while IFS= read -r orphan; do
+    [ -z "$orphan" ] && continue
+    echo "  deleting orphan: $orphan"
+    aws cloudformation delete-stack --stack-name "$orphan" || true
+    if ! orph_status=$(wait_for_stable "$orphan" 1800); then
+      gh issue create --title "smoke: orphan $orphan delete timed out" \
+        --label stranded-stack \
+        --body "Run ${GITHUB_RUN_ID} couldn't clean up $orphan within 30m." || true
+      continue
+    fi
+    if [ "$orph_status" = "DELETE_FAILED" ]; then
+      orph_retain=$(aws cloudformation list-stack-resources --stack-name "$orphan" \
+        --query 'StackResourceSummaries[?ResourceStatus==`DELETE_FAILED`].LogicalResourceId' \
+        --output text | tr '\t' ' ')
+      if [ -n "$orph_retain" ]; then
+        echo "  retrying orphan delete retaining: $orph_retain"
+        # shellcheck disable=SC2086
+        aws cloudformation delete-stack --stack-name "$orphan" \
+          --retain-resources $orph_retain || true
+        wait_for_stable "$orphan" 1800 || true
+        gh issue create --title "smoke: $orphan retained resources" \
+          --label stranded-stack \
+          --body "Retained on orphan delete: $orph_retain. Run ${GITHUB_RUN_ID}." || true
+      fi
+    fi
+  done <<< "$orphans"
+}
+
+# All "use the canonical stack name" exit paths funnel through here so that
+# orphan sweep runs exactly once, just before the deploy step reads the
+# output. Recovery exit paths (emit_recovery) skip this; an orphan's
+# resource conflict against a recovery name is rare in practice.
+use_canonical() {
+  sweep_orphan_stacks
+  echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+}
+
+emit_recovery() {
+  local reason="$1"
+  local recovery="${STACK}-recovery-${GITHUB_RUN_ID}"
+  echo "stack_name=$recovery" >> "$GITHUB_OUTPUT"
+  gh issue create --title "stranded-stack: $STACK ($reason)" \
+    --label stranded-stack \
+    --body "Run ${GITHUB_RUN_ID} proceeded against recovery name $recovery. Manual cleanup needed." || true
+}
+
+STATUS=$(aws cloudformation describe-stacks --stack-name "$STACK" \
+  --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo "DOES_NOT_EXIST")
+echo "Current $STACK status: $STATUS"
+
 case "$STATUS" in
   DOES_NOT_EXIST|CREATE_COMPLETE|UPDATE_COMPLETE|UPDATE_ROLLBACK_COMPLETE)
-    echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+    use_canonical
     ;;
   CREATE_FAILED|UPDATE_FAILED)
     # Fix-forward: CFN's `update-stack` (which `aws cloudformation deploy`
@@ -69,14 +123,14 @@ case "$STATUS" in
     # leaf resource failed outright but the umbrella rollback couldn't run to
     # completion — we let the next deploy retry the leaves.
     echo "Fix-forwarding from $STATUS"
-    echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+    use_canonical
     ;;
   ROLLBACK_COMPLETE)
     # CFN refuses updates on ROLLBACK_COMPLETE (initial CREATE rolled back).
     # Delete + recreate is the only option.
     aws cloudformation delete-stack --stack-name "$STACK"
     if aws cloudformation wait stack-delete-complete --stack-name "$STACK"; then
-      echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+      use_canonical
     else
       emit_recovery "delete from ROLLBACK_COMPLETE failed"
     fi
@@ -92,7 +146,7 @@ case "$STATUS" in
     esac
     if STATUS_NOW=$(wait_for_stable "$STACK" 3600); then
       echo "Reached stable state: $STATUS_NOW"
-      echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+      use_canonical
     else
       emit_recovery "stuck in $STATUS_NOW after 60m wait"
     fi
@@ -105,7 +159,9 @@ case "$STATUS" in
     # un-do (nested stacks where the same dependency keeps failing, Wisdom
     # resources rejecting UPDATE, etc.); the second attempt skips them so
     # the umbrella can at least reach UPDATE_ROLLBACK_COMPLETE and accept
-    # a fresh deploy.
+    # a fresh deploy. If even the skip-retry can't unstick, we fall through
+    # to delete-stack so the umbrella's globally-unique child resources
+    # (AppRegistryApplication etc.) get freed for the next create.
     aws cloudformation continue-update-rollback --stack-name "$STACK" || true
     STATUS_NOW=$(wait_for_stable "$STACK" 3600) || {
       emit_recovery "continue-update-rollback still running after 60m"
@@ -129,12 +185,6 @@ case "$STATUS" in
       fi
     fi
     if [ "$STATUS_NOW" = "UPDATE_ROLLBACK_FAILED" ]; then
-      # Last resort: delete the stack outright. CFN accepts delete-stack
-      # from UPDATE_ROLLBACK_FAILED, and the umbrella's recovery-name
-      # fallback can't be used while the original stack still owns
-      # globally-unique resources (e.g. AppRegistryApplication name).
-      # Resources that refuse to delete get retained on a second delete
-      # call and surface as a stranded-stack issue for human triage.
       echo "Rollback unrecoverable; deleting $STACK"
       aws cloudformation delete-stack --stack-name "$STACK" || true
       STATUS_NOW=$(wait_for_stable "$STACK" 3600) || {
@@ -160,61 +210,20 @@ case "$STATUS" in
             --body "Retained on delete: $RETAIN. Run ${GITHUB_RUN_ID}." || true
         fi
       fi
-      # After delete (with or without retain) the stack is gone or in
-      # DELETE_COMPLETE. The next deploy creates it fresh.
       echo "Post-delete status: $STATUS_NOW"
-      # Retained nested stacks (e.g. all-demo-PaperlessNgx-*) still own
-      # globally-unique resources (AppRegistryApplication names) and will
-      # block recreation of the umbrella's matching child. Sweep them now;
-      # the orphan re-delete usually succeeds because the parent-child
-      # race that originally blocked them is gone.
-      ORPHANS=$(aws cloudformation list-stacks \
-        --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE DELETE_FAILED UPDATE_ROLLBACK_FAILED \
-        --query "StackSummaries[?starts_with(StackName, \`${STACK}-\`)].StackName" \
-        --output text | tr '\t' '\n' | grep -v '^$' || true)
-      if [ -n "$ORPHANS" ]; then
-        echo "Orphaned nested stacks to clean up:"
-        echo "$ORPHANS"
-        while IFS= read -r ORPHAN; do
-          [ -z "$ORPHAN" ] && continue
-          echo "  deleting orphan: $ORPHAN"
-          aws cloudformation delete-stack --stack-name "$ORPHAN" || true
-          if ! ORPH_STATUS=$(wait_for_stable "$ORPHAN" 1800); then
-            gh issue create --title "smoke: orphan $ORPHAN delete timed out" \
-              --label stranded-stack \
-              --body "Run ${GITHUB_RUN_ID} couldn't clean up $ORPHAN within 30m." || true
-            continue
-          fi
-          if [ "$ORPH_STATUS" = "DELETE_FAILED" ]; then
-            ORPH_RETAIN=$(aws cloudformation list-stack-resources --stack-name "$ORPHAN" \
-              --query 'StackResourceSummaries[?ResourceStatus==`DELETE_FAILED`].LogicalResourceId' \
-              --output text | tr '\t' ' ')
-            if [ -n "$ORPH_RETAIN" ]; then
-              echo "  retrying orphan delete retaining: $ORPH_RETAIN"
-              # shellcheck disable=SC2086
-              aws cloudformation delete-stack --stack-name "$ORPHAN" \
-                --retain-resources $ORPH_RETAIN || true
-              wait_for_stable "$ORPHAN" 1800 || true
-              gh issue create --title "smoke: $ORPHAN retained resources" \
-                --label stranded-stack \
-                --body "Retained on orphan delete: $ORPH_RETAIN. Run ${GITHUB_RUN_ID}." || true
-            fi
-          fi
-        done <<< "$ORPHANS"
-      fi
     fi
-    echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+    use_canonical
     ;;
   DELETE_FAILED)
     aws cloudformation delete-stack --stack-name "$STACK"
     if aws cloudformation wait stack-delete-complete --stack-name "$STACK"; then
-      echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+      use_canonical
     else
       emit_recovery "DELETE_FAILED"
     fi
     ;;
   *)
     echo "Unhandled status $STATUS; proceeding with default name"
-    echo "stack_name=$STACK" >> "$GITHUB_OUTPUT"
+    use_canonical
     ;;
 esac
