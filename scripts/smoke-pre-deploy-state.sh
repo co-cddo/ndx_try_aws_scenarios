@@ -323,8 +323,37 @@ for ITER in $(seq 1 $MAX_ITER); do
   echo "[iter ${ITER}/${MAX_ITER}] $STACK status: $STATUS"
 
   case "$STATUS" in
-    DOES_NOT_EXIST|CREATE_COMPLETE|UPDATE_COMPLETE|UPDATE_ROLLBACK_COMPLETE)
+    DOES_NOT_EXIST|CREATE_COMPLETE|UPDATE_COMPLETE)
       use_canonical
+      ;;
+    UPDATE_ROLLBACK_COMPLETE)
+      # Technically deployable per CFN, but the post-merge smoke run on
+      # main proved this is fragile for the all-demo umbrella: a stale
+      # UPDATE_ROLLBACK_COMPLETE often hides nested resources (S3Files
+      # file systems with pending exports, half-deleted nested stacks)
+      # that fail the next update's own internal rollback. Treat it the
+      # same as ROLLBACK_COMPLETE — nuke and recreate from clean slate.
+      echo "Deleting from UPDATE_ROLLBACK_COMPLETE for clean recreate"
+      aws cloudformation delete-stack --stack-name "$STACK" 2>/dev/null || true
+      STATUS_NOW=$(wait_for_stable "$STACK" 3600) || \
+        emit_recovery "delete from UPDATE_ROLLBACK_COMPLETE still running after 60m"
+      if [ "$STATUS_NOW" = "DELETE_FAILED" ]; then
+        RETAIN=$(aws cloudformation list-stack-resources --stack-name "$STACK" \
+          --query 'StackResourceSummaries[?ResourceStatus==`DELETE_FAILED`].LogicalResourceId' \
+          --output text | tr '\t' ' ')
+        if [ -n "$RETAIN" ]; then
+          echo "Retrying delete-stack from UPDATE_ROLLBACK_COMPLETE retaining: $RETAIN"
+          # shellcheck disable=SC2086
+          aws cloudformation delete-stack --stack-name "$STACK" \
+            --retain-resources $RETAIN 2>/dev/null || true
+          wait_for_stable "$STACK" 3600 || \
+            emit_recovery "UPDATE_ROLLBACK_COMPLETE retain-delete still running after 60m"
+          gh issue create --title "smoke: retained resources after $STACK delete (UPDATE_ROLLBACK_COMPLETE)" \
+            --label stranded-stack \
+            --body "Retained on delete: $RETAIN. Run ${GITHUB_RUN_ID}." || true
+        fi
+      fi
+      continue
       ;;
     CREATE_FAILED|UPDATE_FAILED)
       # Fix-forward: CFN's `update-stack` (which `aws cloudformation deploy`
