@@ -113,7 +113,7 @@ top_stacks=$(aws cloudformation list-stacks \
   --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE \
     DELETE_FAILED UPDATE_ROLLBACK_FAILED CREATE_FAILED UPDATE_FAILED \
     ROLLBACK_COMPLETE ROLLBACK_FAILED \
-  --query "StackSummaries[?(StackName=='${STACK}' || starts_with(StackName, '${STACK}-')) && ParentId==\`null\`].StackName" \
+  --query "StackSummaries[?StackName=='${STACK}' || starts_with(StackName, '${STACK}-')].StackName" \
   --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
 if [ -z "$top_stacks" ]; then
   echo "(none in terminal states)"
@@ -130,7 +130,7 @@ fi
 in_progress=$(aws cloudformation list-stacks \
   --stack-status-filter CREATE_IN_PROGRESS UPDATE_IN_PROGRESS DELETE_IN_PROGRESS \
     ROLLBACK_IN_PROGRESS UPDATE_ROLLBACK_IN_PROGRESS UPDATE_COMPLETE_CLEANUP_IN_PROGRESS REVIEW_IN_PROGRESS \
-  --query "StackSummaries[?(StackName=='${STACK}' || starts_with(StackName, '${STACK}-')) && ParentId==\`null\`].StackName" \
+  --query "StackSummaries[?StackName=='${STACK}' || starts_with(StackName, '${STACK}-')].StackName" \
   --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
 if [ -n "$in_progress" ]; then
   echo "Waiting for in-progress matches to settle:"
