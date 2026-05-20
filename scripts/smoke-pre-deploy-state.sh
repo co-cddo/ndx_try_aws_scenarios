@@ -108,9 +108,15 @@ cleanup_orphan() {
 # previous recovery stacks (all-demo-recovery-*).
 sweep_orphan_stacks() {
   local orphans orphan
+  # CRITICAL: filter on ParentId being absent. Stacks whose name starts
+  # with ${STACK}- but ParentId is set are LIVE nested children of the
+  # active umbrella, not orphans. Without this filter the sweep happily
+  # deletes the working umbrella's children when called from a healthy
+  # CREATE_COMPLETE state (which it is — use_canonical runs sweep before
+  # checking whether the umbrella is alive).
   orphans=$(aws cloudformation list-stacks \
     --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE DELETE_FAILED UPDATE_ROLLBACK_FAILED CREATE_FAILED UPDATE_FAILED ROLLBACK_COMPLETE ROLLBACK_FAILED \
-    --query "StackSummaries[?starts_with(StackName, \`${STACK}-\`)].StackName" \
+    --query "StackSummaries[?starts_with(StackName, '${STACK}-') && ParentId==\`null\`].StackName" \
     --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
   [ -z "$orphans" ] && { echo "No orphan ${STACK}-* stacks to sweep."; return 0; }
   echo "Orphan stacks to sweep:"
