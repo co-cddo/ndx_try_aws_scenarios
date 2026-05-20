@@ -123,7 +123,7 @@ sweep_orphan_stacks() {
   echo "$orphans"
   while IFS= read -r orphan; do
     [ -z "$orphan" ] && continue
-    cleanup_orphan "$orphan"
+    cleanup_orphan "$orphan" || true
   done <<< "$orphans"
 }
 
@@ -149,11 +149,27 @@ sweep_orphan_s3files() {
     # fs_bucket is an arn like arn:aws:s3:::ndx-try-*-<acct>-<region>
     case "$fs_bucket" in
       *ndx-try-*${acct}*)
+        # Delete mount targets first — file system delete fails with
+        # ConflictException ("has mount targets") otherwise.
+        local mt_list mt_id
+        mt_list=$(aws s3files list-mount-targets --file-system-id "$fs_id" \
+          --query 'mountTargets[].mountTargetId' --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
+        if [ -n "$mt_list" ]; then
+          while IFS= read -r mt_id; do
+            [ -z "$mt_id" ] && continue
+            echo "  deleting mount target: $mt_id (fs: $fs_id)"
+            local err
+            err=$(aws s3files delete-mount-target --mount-target-id "$mt_id" 2>&1) || true
+            [ -n "$err" ] && echo "    $err"
+          done <<< "$mt_list"
+          # delete-mount-target is async; wait so the subsequent
+          # delete-file-system isn't rejected on the same ConflictException.
+          sleep 30
+        fi
         echo "  deleting file system: $fs_id (bucket: $fs_bucket)"
-        aws s3files delete-file-system --file-system-id "$fs_id" --force-delete 2>&1 | sed 's/^/    /' || \
-          gh issue create --title "smoke: S3 Files filesystem $fs_id couldn't be deleted" \
-            --label stranded-stack \
-            --body "Pre-deploy sweep on run ${GITHUB_RUN_ID} could not delete file system $fs_id (bucket $fs_bucket)." || true
+        local fs_err
+        fs_err=$(aws s3files delete-file-system --file-system-id "$fs_id" --force-delete 2>&1) || true
+        [ -n "$fs_err" ] && echo "    $fs_err"
         ;;
       *)
         echo "  skipping unrelated file system: $fs_id (bucket: $fs_bucket)"
@@ -233,7 +249,10 @@ sweep_orphan_s3_buckets() {
   echo "$buckets"
   while IFS= read -r bucket; do
     [ -z "$bucket" ] && continue
-    delete_bucket_completely "$bucket"
+    # `|| true` keeps set -e from killing the loop if one bucket can't
+    # be deleted; delete_bucket_completely already opens a stranded-stack
+    # issue and returns 1 in that case, so we just note and move on.
+    delete_bucket_completely "$bucket" || true
   done <<< "$buckets"
 }
 
