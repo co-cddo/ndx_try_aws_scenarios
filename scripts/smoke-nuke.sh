@@ -197,6 +197,22 @@ if [ -z "$apps" ]; then
 else
   while IFS= read -r app; do
     [ -z "$app" ] && continue
+    # AppRegistry refuses delete while resources are associated.
+    # Disassociate every resource type listed under the app, then delete.
+    echo "disassociating resources for: $app"
+    assoc=$(aws servicecatalog-appregistry list-associated-resources \
+      --application "$app" \
+      --query 'resources[].[arn,resourceType]' \
+      --output text 2>/dev/null | grep -v '^$' || true)
+    if [ -n "$assoc" ]; then
+      while IFS=$'\t' read -r arn rtype; do
+        [ -z "$arn" ] && continue
+        echo "  disassociate $rtype: $arn"
+        aws servicecatalog-appregistry disassociate-resource \
+          --application "$app" --resource-type "$rtype" --resource "$arn" \
+          2>&1 | sed 's/^/    /' || true
+      done <<< "$assoc"
+    fi
     echo "delete appregistry: $app"
     aws servicecatalog-appregistry delete-application --application "$app" 2>&1 | sed 's/^/    /' || true
   done <<< "$apps"
