@@ -107,7 +107,7 @@ cleanup_orphan() {
 # stacks left over from delete-with-retain (all-demo-PaperlessNgx-*) and any
 # previous recovery stacks (all-demo-recovery-*).
 sweep_orphan_stacks() {
-  local orphans orphan
+  local orphans orphan in_progress
   # CRITICAL: filter on ParentId being absent. Stacks whose name starts
   # with ${STACK}- but ParentId is set are LIVE nested children of the
   # active umbrella, not orphans. Without this filter the sweep happily
@@ -118,13 +118,35 @@ sweep_orphan_stacks() {
     --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE DELETE_FAILED UPDATE_ROLLBACK_FAILED CREATE_FAILED UPDATE_FAILED ROLLBACK_COMPLETE ROLLBACK_FAILED \
     --query "StackSummaries[?starts_with(StackName, '${STACK}-') && ParentId==\`null\`].StackName" \
     --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
-  [ -z "$orphans" ] && { echo "No orphan ${STACK}-* stacks to sweep."; return 0; }
-  echo "Orphan stacks to sweep:"
-  echo "$orphans"
-  while IFS= read -r orphan; do
-    [ -z "$orphan" ] && continue
-    cleanup_orphan "$orphan"
-  done <<< "$orphans"
+  if [ -n "$orphans" ]; then
+    echo "Orphan stacks to sweep:"
+    echo "$orphans"
+    while IFS= read -r orphan; do
+      [ -z "$orphan" ] && continue
+      # `|| true` keeps set -e from killing the loop if one orphan can't
+      # be fully removed; cleanup_orphan opens its own stranded-stack issue.
+      cleanup_orphan "$orphan" || true
+    done <<< "$orphans"
+  else
+    echo "No orphan ${STACK}-* stacks to sweep."
+  fi
+  # Wait for any ${STACK}-* stacks currently in *_IN_PROGRESS (either from
+  # our just-issued deletes or from leftover server-side work) to settle
+  # before returning. Otherwise the next deploy step races with their
+  # AppRegistryAssociation children and hits InvalidRequest.
+  in_progress=$(aws cloudformation list-stacks \
+    --stack-status-filter CREATE_IN_PROGRESS UPDATE_IN_PROGRESS DELETE_IN_PROGRESS ROLLBACK_IN_PROGRESS UPDATE_ROLLBACK_IN_PROGRESS UPDATE_COMPLETE_CLEANUP_IN_PROGRESS REVIEW_IN_PROGRESS \
+    --query "StackSummaries[?starts_with(StackName, '${STACK}-') && ParentId==\`null\`].StackName" \
+    --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
+  if [ -n "$in_progress" ]; then
+    echo "Waiting for in-progress orphan ${STACK}-* stacks to finish:"
+    echo "$in_progress"
+    while IFS= read -r orphan; do
+      [ -z "$orphan" ] && continue
+      wait_for_stable "$orphan" 3600 >/dev/null || \
+        echo "  $orphan still in progress after 60m; proceeding anyway"
+    done <<< "$in_progress"
+  fi
 }
 
 # Delete orphan S3 Files file systems whose bucket name matches ndx-try-*.
@@ -149,11 +171,35 @@ sweep_orphan_s3files() {
     # fs_bucket is an arn like arn:aws:s3:::ndx-try-*-<acct>-<region>
     case "$fs_bucket" in
       *ndx-try-*${acct}*)
+        # Delete order: access points → mount targets → file system.
+        # Each parent refuses delete while children exist:
+        #   ConflictException "has access points" / "has mount targets".
+        local ap_list ap_id ap_err mt_list mt_id mt_err fs_err
+        ap_list=$(aws s3files list-access-points --file-system-id "$fs_id" \
+          --query 'accessPoints[].accessPointId' --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
+        if [ -n "$ap_list" ]; then
+          while IFS= read -r ap_id; do
+            [ -z "$ap_id" ] && continue
+            echo "  deleting access point: $ap_id (fs: $fs_id)"
+            ap_err=$(aws s3files delete-access-point --access-point-id "$ap_id" 2>&1) || true
+            [ -n "$ap_err" ] && echo "    $ap_err"
+          done <<< "$ap_list"
+          sleep 15
+        fi
+        mt_list=$(aws s3files list-mount-targets --file-system-id "$fs_id" \
+          --query 'mountTargets[].mountTargetId' --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
+        if [ -n "$mt_list" ]; then
+          while IFS= read -r mt_id; do
+            [ -z "$mt_id" ] && continue
+            echo "  deleting mount target: $mt_id (fs: $fs_id)"
+            mt_err=$(aws s3files delete-mount-target --mount-target-id "$mt_id" 2>&1) || true
+            [ -n "$mt_err" ] && echo "    $mt_err"
+          done <<< "$mt_list"
+          sleep 30
+        fi
         echo "  deleting file system: $fs_id (bucket: $fs_bucket)"
-        aws s3files delete-file-system --file-system-id "$fs_id" --force-delete 2>&1 | sed 's/^/    /' || \
-          gh issue create --title "smoke: S3 Files filesystem $fs_id couldn't be deleted" \
-            --label stranded-stack \
-            --body "Pre-deploy sweep on run ${GITHUB_RUN_ID} could not delete file system $fs_id (bucket $fs_bucket)." || true
+        fs_err=$(aws s3files delete-file-system --file-system-id "$fs_id" --force-delete 2>&1) || true
+        [ -n "$fs_err" ] && echo "    $fs_err"
         ;;
       *)
         echo "  skipping unrelated file system: $fs_id (bucket: $fs_bucket)"
@@ -233,7 +279,9 @@ sweep_orphan_s3_buckets() {
   echo "$buckets"
   while IFS= read -r bucket; do
     [ -z "$bucket" ] && continue
-    delete_bucket_completely "$bucket"
+    # `|| true` keeps set -e from killing the loop if one bucket can't
+    # be deleted; delete_bucket_completely opens its own stranded-stack issue.
+    delete_bucket_completely "$bucket" || true
   done <<< "$buckets"
 }
 
@@ -279,6 +327,10 @@ sweep_orphan_appregistry() {
         --label stranded-stack \
         --body "Pre-deploy sweep on run ${GITHUB_RUN_ID} could not delete $app." || true
   done <<< "$apps"
+  # AppRegistry delete propagates async; the next umbrella deploy raced
+  # CFN's "already own application" check without this grace period.
+  echo "  waiting 30s for AppRegistry deletes to propagate"
+  sleep 30
 }
 
 # Final exit path for "use the canonical stack name". Sweeps orphans (so
