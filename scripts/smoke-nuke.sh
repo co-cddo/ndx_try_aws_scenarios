@@ -109,10 +109,22 @@ echo "PHASE 1: delete CFN stacks matching ${STACK}*"
 echo "============================================================"
 # Top-level stacks named STACK or STACK-*: delete each.
 # delete-stack on the umbrella cascades to nested children.
+# All non-DELETE_COMPLETE states. The earlier filter missed
+# UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS and the IMPORT_* family;
+# `Q59CODQ417ER` / `1KFCREGSEO53T` were ghosts the nuke kept skipping.
+# Listing every non-terminal-deleted state guarantees we see them.
 top_stacks=$(aws cloudformation list-stacks \
-  --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE \
-    DELETE_FAILED UPDATE_ROLLBACK_FAILED CREATE_FAILED UPDATE_FAILED \
-    ROLLBACK_COMPLETE ROLLBACK_FAILED \
+  --stack-status-filter \
+    CREATE_IN_PROGRESS CREATE_FAILED CREATE_COMPLETE \
+    ROLLBACK_IN_PROGRESS ROLLBACK_FAILED ROLLBACK_COMPLETE \
+    DELETE_IN_PROGRESS DELETE_FAILED \
+    UPDATE_IN_PROGRESS UPDATE_COMPLETE_CLEANUP_IN_PROGRESS UPDATE_COMPLETE \
+    UPDATE_FAILED \
+    UPDATE_ROLLBACK_IN_PROGRESS UPDATE_ROLLBACK_FAILED \
+    UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS UPDATE_ROLLBACK_COMPLETE \
+    REVIEW_IN_PROGRESS \
+    IMPORT_IN_PROGRESS IMPORT_COMPLETE \
+    IMPORT_ROLLBACK_IN_PROGRESS IMPORT_ROLLBACK_FAILED IMPORT_ROLLBACK_COMPLETE \
   --query "StackSummaries[?StackName=='${STACK}' || starts_with(StackName, '${STACK}-')].StackName" \
   --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
 if [ -z "$top_stacks" ]; then
