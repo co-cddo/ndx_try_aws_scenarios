@@ -71,10 +71,6 @@
       "groupName": "scenario-ai-contact-centre"
     },
     {
-      "matchFileNames": ["cloudformation/scenarios/all-demo/**"],
-      "groupName": "scenario-all-demo"
-    },
-    {
       "matchFileNames": ["cloudformation/scenarios/bops-planning/**"],
       "groupName": "scenario-bops-planning"
     },

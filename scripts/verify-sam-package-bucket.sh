@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Fails if a sam-package output references any S3 bucket other than the
 # blueprints bucket. SAM's default --s3-bucket would write CodeUri values
-# pointing at aws-sam-cli-managed-default-samclisourcebucket-* which the
-# smoke deploy role can't read.
+# pointing at aws-sam-cli-managed-default-samclisourcebucket-* which leased
+# sandbox accounts can't read.
 #
 # Args: <packaged-template-path> <expected-bucket-name>
 
