@@ -1,0 +1,28 @@
+name: Scenario / council-chatbot
+
+# Pilot caller for the per-scenario ephemeral-lease CI model. Triggered on
+# changes that affect the council-chatbot scenario or the shared CI infra.
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/council-chatbot/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-council-chatbot.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  # One run per branch; cancel a superseded run in flight (the new commit
+  # will get a fresh lease — releasing the old lease happens on the
+  # cancelled run's if: always() release step, or eventually by the janitor).
+  group: scenario-council-chatbot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: council-chatbot
+    secrets: inherit
