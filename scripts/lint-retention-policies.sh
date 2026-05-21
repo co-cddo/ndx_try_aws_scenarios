@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Lints CloudFormation for resources that retain state through `cfn delete`.
-# Orphaned retained resources require manual cleanup in the smoke account.
+# Orphaned retained resources require manual cleanup in the leased sandbox
+# account before ISB can recycle it.
 # Resources opt out via a non-empty Metadata.Justification; the global cap
 # (MAX_JUSTIFICATIONS, default 5) keeps the opt-out from becoming routine.
 #

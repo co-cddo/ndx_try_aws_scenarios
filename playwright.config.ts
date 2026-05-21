@@ -39,6 +39,9 @@ export default defineConfig({
       },
     },
     {
+      // Per-scenario smoke specs run by the ephemeral-lease CI workflow.
+      // Each scenario's CI sets SMOKE_STACK_NAME=ndx-try-<scenario> and
+      // PLAYWRIGHT_SUITE=smoke (skips the local webServer/baseURL block).
       name: 'smoke',
       testDir: './cloudformation/scenarios',
       testMatch: /[^/]+\/smoke\.ts$/,

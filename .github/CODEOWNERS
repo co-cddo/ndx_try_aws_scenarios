@@ -1,17 +1,7 @@
-# Sensitive paths require review from the ndx team. The smoke-test-deploy
-# environment's branch policy auto-approves refs/heads/main; PRs touching any
-# of these paths can't run with deploy credentials until a CODEOWNERS
-# reviewer signs off.
+# Sensitive paths require review from the ndx team.
 
-# Smoke pack
-/.github/workflows/smoke.yml         @co-cddo/ndx
-/scripts/smoke*.sh                   @co-cddo/ndx
-/scripts/check-quarantines.mjs       @co-cddo/ndx
+# Smoke specs (per-scenario CI deploys ephemeral ISB leases and runs these)
 /tests/smoke/**                      @co-cddo/ndx
-
-# Smoke account state
-/docs/smoke-test-account-setup.md    @co-cddo/ndx
-/docs/smoke-test-account-config.yml  @co-cddo/ndx
 
 # Renovate (guarded so config drift can't self-merge)
 /renovate.json                       @co-cddo/ndx

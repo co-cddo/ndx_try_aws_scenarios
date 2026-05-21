@@ -230,8 +230,7 @@ jobs:
             cloudformation/scenarios/smart-car-park/template.yaml \
             cloudformation/scenarios/text-to-speech/template.yaml \
             cloudformation/scenarios/quicksight-dashboard/template.yaml \
-            cloudformation/scenarios/ai-contact-centre/template.yaml \
-            cloudformation/scenarios/all-demo/template.yaml
+            cloudformation/scenarios/ai-contact-centre/template.yaml
 
   deploy:
     needs:

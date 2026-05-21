@@ -2,7 +2,10 @@
 title: 'Scenario Regression Smoke-Test Pack & Long-Lived Test Account'
 slug: 'scenario-regression-smoke-pack'
 created: '2026-05-11'
-status: 'ready-for-dev'
+status: 'superseded'
+supersededOn: '2026-05-21'
+supersededBy: 'Per-scenario ephemeral-lease CI — plan at .claude/plans/rosy-sparking-narwhal.md'
+supersededReason: 'The all-demo umbrella + long-lived smoke account model documented here was demolished. See the replacement plan for the per-scenario ISB-lease CI design.'
 stepsCompleted: [1, 2, 3, 4]
 tech_stack:
   - 'CloudFormation nested stacks (via all-demo); template-bucket: ndx-try-isb-blueprints-568672915267 in us-east-1; path convention scenarios/{name}/template.yaml'
