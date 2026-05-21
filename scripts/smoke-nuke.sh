@@ -128,31 +128,74 @@ top_stacks=$(aws cloudformation list-stacks \
   --query "StackSummaries[?StackName=='${STACK}' || starts_with(StackName, '${STACK}-')].StackName" \
   --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
 if [ -z "$top_stacks" ]; then
-  echo "(none in terminal states)"
+  echo "(none)"
 else
-  echo "Top-level stacks to delete:"
+  echo "Top-level stacks to delete (parallel):"
   echo "$top_stacks"
+  # Round 1: fire delete-stack on every stack in parallel — they all
+  # start tearing down at the same time. CFN limits concurrent deletes
+  # per stack but not across stacks.
   while IFS= read -r s; do
     [ -z "$s" ] && continue
-    force_delete_stack "$s" || true
+    echo "  delete-stack: $s"
+    aws cloudformation delete-stack --stack-name "$s" 2>/dev/null || true
   done <<< "$top_stacks"
-fi
-
-# Wait for any in-progress matches to settle too.
-in_progress=$(aws cloudformation list-stacks \
-  --stack-status-filter CREATE_IN_PROGRESS UPDATE_IN_PROGRESS DELETE_IN_PROGRESS \
-    ROLLBACK_IN_PROGRESS UPDATE_ROLLBACK_IN_PROGRESS UPDATE_COMPLETE_CLEANUP_IN_PROGRESS REVIEW_IN_PROGRESS \
-  --query "StackSummaries[?StackName=='${STACK}' || starts_with(StackName, '${STACK}-')].StackName" \
-  --output text 2>/dev/null | tr '\t' '\n' | grep -v '^$' || true)
-if [ -n "$in_progress" ]; then
-  echo "Waiting for in-progress matches to settle:"
-  echo "$in_progress"
-  while IFS= read -r s; do
-    [ -z "$s" ] && continue
-    wait_for_stable "$s" 3600 >/dev/null || echo "  $s timeout, moving on"
-    # After stable, try delete again
-    force_delete_stack "$s" || true
-  done <<< "$in_progress"
+  # Poll every 60s for ALL stacks to settle. Per-stack budget 90 min
+  # within the workflow's 6h timeout. Stacks that reach DELETE_FAILED
+  # get a retain-resources pass; anything still stuck after that gets
+  # force-retained.
+  pending="$top_stacks"
+  max_wait=5400; elapsed=0; interval=60
+  while [ -n "$pending" ] && (( elapsed < max_wait )); do
+    new_pending=""
+    while IFS= read -r s; do
+      [ -z "$s" ] && continue
+      st=$(aws cloudformation describe-stacks --stack-name "$s" \
+        --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo DOES_NOT_EXIST)
+      case "$st" in
+        DELETE_COMPLETE|DOES_NOT_EXIST)
+          echo "  ✓ $s gone"
+          ;;
+        DELETE_IN_PROGRESS)
+          new_pending+="$s"$'\n'
+          ;;
+        DELETE_FAILED)
+          retain=$(aws cloudformation list-stack-resources --stack-name "$s" \
+            --query 'StackResourceSummaries[?ResourceStatus==`DELETE_FAILED`].LogicalResourceId' \
+            --output text 2>/dev/null | tr '\t' ' ')
+          if [ -n "$retain" ]; then
+            echo "  $s DELETE_FAILED — retain-retry: $retain"
+            # shellcheck disable=SC2086
+            aws cloudformation delete-stack --stack-name "$s" --retain-resources $retain 2>/dev/null || true
+            new_pending+="$s"$'\n'
+          else
+            echo "  $s DELETE_FAILED with no FAILED resources — force-retain all"
+            remaining=$(aws cloudformation list-stack-resources --stack-name "$s" \
+              --query 'StackResourceSummaries[].LogicalResourceId' \
+              --output text 2>/dev/null | tr '\t' ' ')
+            # shellcheck disable=SC2086
+            [ -n "$remaining" ] && aws cloudformation delete-stack --stack-name "$s" --retain-resources $remaining 2>/dev/null || true
+            new_pending+="$s"$'\n'
+          fi
+          ;;
+        *)
+          echo "  $s in $st"
+          new_pending+="$s"$'\n'
+          ;;
+      esac
+    done <<< "$pending"
+    pending="$new_pending"
+    if [ -n "$pending" ]; then
+      echo "  [${elapsed}s/${max_wait}s] still pending:"
+      echo "$pending" | sed 's/^/    /'
+      sleep "$interval"
+      elapsed=$((elapsed + interval))
+    fi
+  done
+  if [ -n "$pending" ]; then
+    echo "  ! TIMEOUT after ${max_wait}s; still pending:"
+    echo "$pending" | sed 's/^/    /'
+  fi
 fi
 
 echo
