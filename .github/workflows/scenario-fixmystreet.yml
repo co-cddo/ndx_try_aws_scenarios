@@ -14,6 +14,10 @@ concurrency:
   group: scenario-fixmystreet-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   smoke:
     uses: ./.github/workflows/scenario-ci.yml

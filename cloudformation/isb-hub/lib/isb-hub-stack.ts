@@ -268,6 +268,24 @@ export class IsbHubStack extends cdk.Stack {
       }),
     );
 
+    // The JWT secret is KMS-encrypted; GetSecretValue silently calls Decrypt
+    // on the underlying key. Without this, the API returns
+    // AccessDeniedException: Access to KMS is not allowed. ViaService
+    // condition keeps the permission scoped to secretsmanager only — the
+    // role can't directly decrypt anything else with this key.
+    ciLeaseRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['kms:Decrypt'],
+        resources: ['*'],
+        conditions: {
+          StringEquals: {
+            'kms:ViaService': `secretsmanager.${ISB_JWT_SECRET_REGION}.amazonaws.com`,
+          },
+        },
+      }),
+    );
+
     // Assume CIDeployRole in whichever account the lease lands us in.
     // Deployed to all pool accounts by the Isb-ndx-CIDeployRole StackSet
     // owned by cloudformation/isb-hub-orgmgmt/.
