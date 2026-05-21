@@ -38,13 +38,12 @@ export interface SmokeConfig {
   outputs?: ReadonlyArray<string>;
   /**
    * Per-spec output-name aliases. Keys are the canonical names the spec
-   * already uses (matching the all-demo umbrella's namespaced names);
-   * values are the fallback leaf-stack output names emitted when the spec
-   * runs against a single-scenario ISB-leased stack instead of all-demo.
-   * If the canonical key is missing from the stack outputs, the alias is
-   * copied to the canonical key so the rest of the spec works unchanged.
-   * Never overwrites an already-present canonical value, so all-demo
-   * smoke runs are unaffected.
+   * uses; values are leaf-stack output names emitted by the scenario's
+   * standalone template. If the canonical key is missing from the stack
+   * outputs, the alias is copied to the canonical key so the rest of the
+   * spec works unchanged. Originally added to bridge the (now-removed)
+   * all-demo umbrella's namespaced outputs to leaf-stack outputs; kept
+   * because per-scenario CI deploys leaf stacks directly.
    */
   outputAliases?: Readonly<Record<string, string>>;
   quarantine?: Quarantine;
@@ -62,8 +61,12 @@ export function runSmoke(config: SmokeConfig): void {
         );
       }
 
+      const stackName = process.env.SMOKE_STACK_NAME;
+      if (!stackName) {
+        throw new Error('SMOKE_STACK_NAME env var is required (per-scenario CI sets it to ndx-try-<scenario>)');
+      }
       const fetched = await fetchStackOutputs({
-        stackName: process.env.SMOKE_STACK_NAME ?? 'all-demo',
+        stackName,
         region: process.env.SMOKE_AWS_REGION ?? 'us-east-1',
       });
       const merged = { ...fetched } as Record<string, typeof fetched[string]>;
