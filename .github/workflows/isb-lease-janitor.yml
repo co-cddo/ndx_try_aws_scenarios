@@ -27,7 +27,10 @@ permissions:
   issues: write
 
 env:
-  CI_LEASE_EMAIL: ci-bot@ndx-try.local
+  # Must match the ci_lease_email default in scenario-ci.yml — janitor looks
+  # up leases owned by this email. Future: replace with a dedicated CI user
+  # created via `isb create-user --firstname=CI --lastname=Bot --email=...`.
+  CI_LEASE_EMAIL: chris@cns.me.uk
   # 3h: scenario-ci.yml's job timeout is 90m. 3h buffer keeps the janitor
   # from racing an in-flight workflow's own release.
   DEFAULT_OLDER_THAN: '180'
