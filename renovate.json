@@ -15,6 +15,8 @@
     "minimumReleaseAge": null
   },
   "rangeStrategy": "bump",
+  "minimumReleaseAge": "3 days",
+  "schedule": ["before 09:00 on monday"],
   "configMigration": true,
   "ignorePaths": [
     "**/node_modules/**",
@@ -44,54 +46,7 @@
       "pinDigests": true
     },
     {
-      "description": "Own GHCR images — one PR per scenario; immediate when an image bumps. Smoke runs scoped to that scenario give fast feedback.",
-      "groupName": "scenario-{{packageName}}",
-      "matchManagers": ["custom.regex"],
-      "schedule": ["at any time"],
-      "matchPackageNames": [
-        "/^ghcr\\.io/co-cddo/ndx_try_aws_scenarios-/"
-      ]
-    },
-    {
-      "description": "Upstream container deps (tika, paperless-ngx, gotenberg). Weekly grouped per image to keep blast radius small.",
-      "groupName": "upstream-{{packageName}}",
-      "matchManagers": ["custom.regex"],
-      "schedule": ["before 09:00 on monday"],
-      "matchPackageNames": [
-        "/^docker\\.io/apache/tika/",
-        "/^docker\\.io/gotenberg/gotenberg/",
-        "/^ghcr\\.io/paperless-ngx/paperless-ngx/"
-      ]
-    },
-    {
-      "description": "npm dev deps — weekly batched. Low-risk; noise control.",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["devDependencies"],
-      "groupName": "npm-dev",
-      "schedule": ["before 09:00 on monday"]
-    },
-    {
-      "description": "npm prod deps — weekly batched. Higher risk; smoke gates the merge.",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "groupName": "npm-prod",
-      "schedule": ["before 09:00 on monday"]
-    },
-    {
-      "description": "Drupal composer deps. Same cadence as npm-prod.",
-      "matchManagers": ["composer"],
-      "groupName": "composer",
-      "schedule": ["before 09:00 on monday"]
-    },
-    {
-      "description": "GitHub Actions — workflow action references. Weekly batched; action bumps rarely break. pinDigests scoped to OUR workflows; third-party actions in docker-build scripts (renovatebot/github-action etc.) keep their explicit digest pins because the workflow author already chose them.",
-      "matchManagers": ["github-actions"],
-      "matchFileNames": [".github/workflows/*"],
-      "groupName": "github-actions",
-      "schedule": ["before 09:00 on monday"]
-    },
-    {
-      "description": "Pin official actions/* and aws-actions/* references in workflows to digest. Other action sources (community / vendor-specific) keep their existing pin shape — pinning everything caused a firehose in past adoption.",
+      "description": "Pin official actions/* and aws-actions/* references in workflows to digest. Other action sources keep their existing pin shape.",
       "matchManagers": ["github-actions"],
       "pinDigests": true,
       "matchPackageNames": [
@@ -100,10 +55,84 @@
       ]
     },
     {
-      "description": "Python pip Lambda layer deps — batched weekly with npm-dev cadence.",
-      "matchManagers": ["pip_requirements", "pip-compile"],
-      "groupName": "pip",
-      "schedule": ["before 09:00 on monday"]
+      "description": "Root web page — Eleventy site + tooling. One PR for all root npm deps (dev + prod).",
+      "matchManagers": ["npm"],
+      "matchFileNames": ["package.json"],
+      "groupName": "npm-web"
+    },
+    {
+      "description": "GitHub Actions — workflow action references. One PR for all action bumps.",
+      "matchManagers": ["github-actions"],
+      "matchFileNames": [".github/workflows/*"],
+      "groupName": "github-actions"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/ai-contact-centre/**"],
+      "groupName": "scenario-ai-contact-centre"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/all-demo/**"],
+      "groupName": "scenario-all-demo"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/bops-planning/**"],
+      "groupName": "scenario-bops-planning"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/council-chatbot/**"],
+      "groupName": "scenario-council-chatbot"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/digital-planning-register/**"],
+      "groupName": "scenario-digital-planning-register"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/fixmystreet/**"],
+      "groupName": "scenario-fixmystreet"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/foi-redaction/**"],
+      "groupName": "scenario-foi-redaction"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/localgov-drupal/**"],
+      "groupName": "scenario-localgov-drupal"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/localgov-ims/**"],
+      "groupName": "scenario-localgov-ims"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/minute/**"],
+      "groupName": "scenario-minute"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/paperless-ngx/**"],
+      "groupName": "scenario-paperless-ngx"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/planning-ai/**"],
+      "groupName": "scenario-planning-ai"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/planx/**"],
+      "groupName": "scenario-planx"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/quicksight-dashboard/**"],
+      "groupName": "scenario-quicksight-dashboard"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/simply-readable/**"],
+      "groupName": "scenario-simply-readable"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/smart-car-park/**"],
+      "groupName": "scenario-smart-car-park"
+    },
+    {
+      "matchFileNames": ["cloudformation/scenarios/text-to-speech/**"],
+      "groupName": "scenario-text-to-speech"
     }
   ],
   "prConcurrentLimit": 6,
