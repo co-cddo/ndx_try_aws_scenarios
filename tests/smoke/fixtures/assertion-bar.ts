@@ -4,8 +4,6 @@
 // or new author scans to understand "why does this scenario check that".
 //
 // AC4.2: each scenario has exactly one row citing a historical regression.
-// AC4.3: 17 rows total — one per scenario (16 deployable + the all-demo
-// umbrella, which has its own assertion).
 //
 // Add a row whenever a new scenario lands. Update the row when a regression
 // drives a new assertion into that scenario's smoke spec.
@@ -30,13 +28,6 @@ export const ASSERTION_BAR: ReadonlyMap<string, AssertionBarRow> = new Map([
     featureFlow: 'PstnNumber output matches +44 (or US toll-free) E.164 format',
     outputsToCheck: ['AiContactCentreCompanionUrl', 'AiContactCentrePstnNumber'],
     historicalRegressionCited: '+44 number claim from us-east-1 regressed to generic /^\\+\\d{6,}/ — see memory:aws-connect-uk-numbers and ACCEPTABLE_PSTN regex narrowing in ai-contact-centre/smoke.ts',
-  }],
-  ['all-demo', {
-    landingAssertion: 'every Outputs key in template.yaml resolves on the live stack',
-    loginAssertion: 'n/a (umbrella)',
-    featureFlow: 'safe outputs are non-empty + not "{{resolve:...}}" literal; URL outputs match https://; sensitive outputs have non-zero length',
-    outputsToCheck: ['discovered from template at test time'],
-    historicalRegressionCited: 'BopsPlanning/Paperless secretsmanager dynamic refs leaked the unresolved {{resolve:...}} literal into CFN Outputs; smoke now asserts no Output is that placeholder',
   }],
   ['bops-planning', {
     landingAssertion: 'landing page does not contain the Rails generic "we\'re sorry, but something went wrong" or fall through to the Applicants tenant',

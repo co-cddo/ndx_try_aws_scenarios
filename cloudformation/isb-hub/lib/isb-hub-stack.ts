@@ -39,7 +39,6 @@ const SCENARIOS: ScenarioConfig[] = [
   { name: 'planx', description: 'NDX:Try PlanX - Digital planning platform with Hasura + GraphQL' },
   { name: 'bops-planning', description: 'NDX:Try BOPS Planning - Back-Office Planning System with map tiles', parameterKeys: ['OSVectorTilesApiKey'] },
   { name: 'digital-planning-register', description: 'NDX:Try Digital Planning Register - Public-facing planning-application register' },
-  { name: 'all-demo', description: 'NDX:Try All Demo - Deploys all 16 scenarios as nested stacks', parameterKeys: ['GovUkPayApiKey', 'OSVectorTilesApiKey'] },
 ];
 
 export class IsbHubStack extends cdk.Stack {

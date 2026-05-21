@@ -63,14 +63,3 @@ test.describe('Phase navigator links match the current scenario (NAP-558)', () =
     });
   }
 });
-
-test.describe('all-demo is hidden from the public portal', () => {
-  // all-demo is a CloudFormation-only deployable scenario (see cloudformation/scenarios/all-demo/);
-  // it must not appear on the public site.
-  for (const url of ['/scenarios/all-demo/', '/walkthroughs/all-demo/', '/walkthroughs/all-demo/explore/']) {
-    test(`${url} returns 404`, async ({ request }) => {
-      const response = await request.get(url);
-      expect(response.status(), `${url} must be hidden from the public site`).toBe(404);
-    });
-  }
-});
