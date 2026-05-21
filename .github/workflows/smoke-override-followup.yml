@@ -5,9 +5,11 @@ name: Smoke Override Follow-up
 # open a `smoke-override-followup` issue so the underlying regression isn't
 # forgotten. Runs hourly so the 48h window is met within ±1h.
 
+# DISABLED 2026-05-21 alongside smoke.yml — no point opening follow-up
+# issues for a smoke gate that no longer runs. workflow_dispatch remains
+# so the issue-creation logic can still be exercised manually if a label
+# bypass happens via the new approach.
 on:
-  schedule:
-    - cron: '0 * * * *'
   workflow_dispatch:
 
 permissions:
