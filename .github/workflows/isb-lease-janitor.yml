@@ -1,0 +1,109 @@
+name: ISB Lease Janitor
+
+# Releases orphaned CI leases left behind when a scenario workflow's release
+# step fails (e.g. transient ConnectionReset on the terminate POST, runner
+# OOM, or workflow cancellation mid-run). Replaces the load-bearing role of
+# the old smoke-nuke.sh.
+#
+# This is the only scheduled workflow in the CI suite. The "no scheduled
+# tests" rule applies to test runs, not cleanup safety nets.
+
+on:
+  schedule:
+    # Every 6h. Aligns with the worst-case lease duration (2h scenario
+    # default + buffer) so a stuck lease never lives more than ~8h.
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      older_than_minutes:
+        description: Only release leases older than this many minutes.
+        required: false
+        type: string
+        default: '180'
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+env:
+  CI_LEASE_EMAIL: ci-bot@ndx-try.local
+  # 3h: scenario-ci.yml's job timeout is 90m. 3h buffer keeps the janitor
+  # from racing an in-flight workflow's own release.
+  DEFAULT_OLDER_THAN: '180'
+
+jobs:
+  janitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-ci-lease
+          role-session-name: isb-janitor-${{ github.run_id }}
+          aws-region: us-west-2
+          role-duration-seconds: 3600
+
+      - name: Find orphan leases
+        id: scan
+        env:
+          OLDER_THAN: ${{ inputs.older_than_minutes || env.DEFAULT_OLDER_THAN }}
+        run: |
+          set -euo pipefail
+          python3 scripts/isb/ci_lease.py list-orphans \
+            --owned-by "$CI_LEASE_EMAIL" \
+            --older-than-minutes "$OLDER_THAN" \
+            > orphans.tsv
+          count=$(wc -l < orphans.tsv | tr -d ' ')
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          if [ "$count" -gt 0 ]; then
+            echo "Found $count orphan lease(s):"
+            cat orphans.tsv
+          fi
+
+      - name: Release orphans
+        if: steps.scan.outputs.count != '0'
+        run: |
+          set -uo pipefail
+          failed=0
+          while IFS=$'\t' read -r lease_id account_id status age_min; do
+            [ -z "$lease_id" ] && continue
+            echo "Releasing lease_id=$lease_id account_id=$account_id status=$status age=${age_min}m"
+            if ! python3 scripts/isb/ci_lease.py release \
+                --lease-id "$lease_id" \
+                --user-email "$CI_LEASE_EMAIL"; then
+              failed=$((failed + 1))
+            fi
+          done < orphans.tsv
+          if [ "$failed" -gt 0 ]; then
+            echo "::warning::$failed orphan(s) failed to release; will retry on next run"
+          fi
+
+      - name: Open tracking issue on orphan cleanup
+        if: steps.scan.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COUNT: ${{ steps.scan.outputs.count }}
+        run: |
+          gh issue create \
+            --title "ISB lease janitor cleaned $COUNT orphan(s) (run ${{ github.run_id }})" \
+            --label isb-janitor \
+            --body "$(cat <<EOF
+          The janitor released $COUNT orphan lease(s). Each one represents a scenario CI run whose release step failed.
+
+          ## Orphans
+
+          \`\`\`tsv
+          lease_id	account_id	status	age_minutes
+          $(cat orphans.tsv)
+          \`\`\`
+
+          ## Why investigate
+
+          A handful of orphans per week is acceptable (transient ISB API failures). A spike means scenario-ci.yml's release step is broken or the workflow is being cancelled before it runs — check recent workflow run history.
+
+          Artefacts: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}
+          EOF
+          )" || true
