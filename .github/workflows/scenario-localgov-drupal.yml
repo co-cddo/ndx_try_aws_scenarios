@@ -1,0 +1,22 @@
+name: Scenario / localgov-drupal
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/localgov-drupal/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-localgov-drupal.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-localgov-drupal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: localgov-drupal
+    secrets: inherit

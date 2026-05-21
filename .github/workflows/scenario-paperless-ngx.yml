@@ -1,0 +1,22 @@
+name: Scenario / paperless-ngx
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/paperless-ngx/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-paperless-ngx.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-paperless-ngx-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: paperless-ngx
+    secrets: inherit
