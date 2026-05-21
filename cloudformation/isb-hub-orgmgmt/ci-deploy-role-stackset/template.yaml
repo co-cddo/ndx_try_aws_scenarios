@@ -1,0 +1,226 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Provisions a SERVICE_MANAGED StackSet that auto-deploys
+  InnovationSandbox-ndx-CIDeployRole into every pool account under the
+  Innovation Sandbox parent OU. The role is what per-scenario CI
+  workflows assume after acquiring an ISB lease, to deploy and tear down
+  a single scenario CloudFormation stack inside the leased account.
+
+  This template is deployed to the AWS Organizations management account
+  (NOT the ISB hub account 568672915267) because SERVICE_MANAGED
+  StackSets with autoDeployment require an org-management-account
+  context. The hub-side OIDC role that assumes into the
+  CIDeployRole lives in the hub CDK app (isb-hub-stack.ts).
+
+  Deploy:
+    aws cloudformation deploy \
+      --profile NDX/orgManagement \
+      --region us-west-2 \
+      --stack-name isb-ndx-ci-deploy-role \
+      --template-file cloudformation/isb-hub-orgmgmt/ci-deploy-role-stackset/template.yaml \
+      --capabilities CAPABILITY_NAMED_IAM
+
+Parameters:
+  HubAccountId:
+    Type: String
+    Default: '568672915267'
+    Description: ISB hub account holding the GitHub Actions OIDC role.
+    AllowedPattern: '\d{12}'
+
+  HubCiLeaseRoleName:
+    Type: String
+    Default: 'isb-hub-github-actions-ci-lease'
+    Description: Name of the hub-side OIDC role permitted to assume the CIDeployRole.
+
+  SandboxOuId:
+    Type: String
+    Default: 'ou-2laj-4dyae1oa'
+    Description: Parent OU containing all ISB pool sub-OUs (Available, Active, Entry, ...). The StackSet auto-deploys to every account under this OU.
+    AllowedPattern: 'ou-[a-z0-9]{4,}-[a-z0-9]{8,}'
+
+  Namespace:
+    Type: String
+    Default: 'ndx'
+    Description: ISB namespace. Determines the role name and SCP exemption (must match InnovationSandbox-${Namespace}*).
+    AllowedPattern: '[a-z0-9]+'
+
+Resources:
+  CIDeployRoleStackSet:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: !Sub 'Isb-${Namespace}-CIDeployRole'
+      Description: >
+        Auto-deployed to every pool account. Provides a role per-scenario
+        CI workflows assume after acquiring an ISB lease.
+      PermissionModel: SERVICE_MANAGED
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        # Pool is ~1300 accounts; deploy as fast as AWS will let us.
+        ConcurrencyMode: SOFT_FAILURE_TOLERANCE
+        FailureTolerancePercentage: 100
+        MaxConcurrentPercentage: 100
+        RegionConcurrencyType: PARALLEL
+      StackInstancesGroup:
+        - DeploymentTargets:
+            OrganizationalUnitIds:
+              - !Ref SandboxOuId
+          Regions:
+            # IAM is global; one region is enough for StackSet bookkeeping.
+            - us-west-2
+      Parameters:
+        - ParameterKey: HubAccountId
+          ParameterValue: !Ref HubAccountId
+        - ParameterKey: HubCiLeaseRoleName
+          ParameterValue: !Ref HubCiLeaseRoleName
+        - ParameterKey: Namespace
+          ParameterValue: !Ref Namespace
+      TemplateBody: |
+        AWSTemplateFormatVersion: '2010-09-09'
+        Description: 'InnovationSandbox CIDeployRole - assumed by hub GHA OIDC role to deploy per-scenario stacks into this pool account.'
+
+        Parameters:
+          HubAccountId:
+            Type: String
+          HubCiLeaseRoleName:
+            Type: String
+          Namespace:
+            Type: String
+
+        Resources:
+          CIDeployRole:
+            Type: AWS::IAM::Role
+            Properties:
+              # Role name MUST start with InnovationSandbox-${Namespace}- to be
+              # exempt from SCP p-tyb1wjxv (isb-deny-all-non-control-plane-actions).
+              RoleName: !Sub 'InnovationSandbox-${Namespace}-CIDeployRole'
+              Description: 'Per-scenario CI workflows assume this after acquiring an ISB lease to deploy + tear down ndx-try-* stacks.'
+              MaxSessionDuration: 21600  # 6h, matches GHA OIDC session length
+              AssumeRolePolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                  - Effect: Allow
+                    Principal:
+                      AWS: !Sub 'arn:aws:iam::${HubAccountId}:role/${HubCiLeaseRoleName}'
+                    Action: 'sts:AssumeRole'
+              Policies:
+                - PolicyName: CloudFormationDeployment
+                  PolicyDocument:
+                    Version: '2012-10-17'
+                    Statement:
+                      - Effect: Allow
+                        Action:
+                          - 'cloudformation:CreateStack'
+                          - 'cloudformation:UpdateStack'
+                          - 'cloudformation:DeleteStack'
+                          - 'cloudformation:DescribeStacks'
+                          - 'cloudformation:DescribeStackEvents'
+                          - 'cloudformation:DescribeStackResources'
+                          - 'cloudformation:DescribeStackResource'
+                          - 'cloudformation:GetTemplate'
+                          - 'cloudformation:GetTemplateSummary'
+                          - 'cloudformation:ValidateTemplate'
+                          - 'cloudformation:ListStacks'
+                          - 'cloudformation:ListStackResources'
+                          - 'cloudformation:CreateChangeSet'
+                          - 'cloudformation:DescribeChangeSet'
+                          - 'cloudformation:ExecuteChangeSet'
+                          - 'cloudformation:DeleteChangeSet'
+                          - 'cloudformation:SetStackPolicy'
+                          - 'cloudformation:TagResource'
+                          - 'cloudformation:UntagResource'
+                        Resource: '*'
+                      - Effect: Allow
+                        Action:
+                          - 'iam:PassRole'
+                        Resource: '*'
+                        Condition:
+                          StringEquals:
+                            'iam:PassedToService': 'cloudformation.amazonaws.com'
+                # Broad service permissions matching what scenario templates need.
+                # Modelled on the existing isb-deployer-sandbox-role pattern,
+                # already proven against the SCP allow-list. Tightening
+                # per-service is a follow-up — get the loop working first.
+                - PolicyName: ScenarioResourceManagement
+                  PolicyDocument:
+                    Version: '2012-10-17'
+                    Statement:
+                      - Effect: Allow
+                        Action:
+                          - 's3:*'
+                          - 'lambda:*'
+                          - 'apigateway:*'
+                          - 'dynamodb:*'
+                          - 'sns:*'
+                          - 'sqs:*'
+                          - 'logs:*'
+                          - 'cloudwatch:*'
+                          - 'ec2:*'
+                          - 'iam:*'
+                          - 'secretsmanager:*'
+                          - 'ssm:*'
+                          - 'states:*'
+                          - 'events:*'
+                          - 'bedrock:*'
+                          - 'sagemaker:*'
+                          - 'elasticloadbalancing:*'
+                          - 'ecs:*'
+                          - 'ecr:*'
+                          - 'application-autoscaling:*'
+                          - 'autoscaling:*'
+                          - 'route53:*'
+                          - 'acm:*'
+                          - 'cloudfront:*'
+                          - 'rds:*'
+                          - 'elasticache:*'
+                          - 'efs:*'
+                          - 'kms:*'
+                          - 'wafv2:*'
+                          - 'connect:*'
+                          - 'lex:*'
+                          - 'wisdom:*'
+                          - 'polly:*'
+                          - 'transcribe:*'
+                          - 'translate:*'
+                          - 'kendra:*'
+                          - 'quicksight:*'
+                          - 'glue:*'
+                          - 'athena:*'
+                          - 'firehose:*'
+                          - 'cognito-identity:*'
+                          - 'cognito-idp:*'
+                          - 'cognito-sync:*'
+                          - 'opensearch:*'
+                          - 'es:*'
+                          - 'aoss:*'
+                          - 'application-signals:*'
+                          - 'appsync:*'
+                        Resource: '*'
+              Tags:
+                - Key: ManagedBy
+                  Value: 'isb-ndx-ci-deploy-role'
+                - Key: Purpose
+                  Value: 'Per-scenario CI deployment into ISB-leased pool accounts'
+
+        Outputs:
+          RoleArn:
+            Value: !GetAtt CIDeployRole.Arn
+            Export:
+              Name: !Sub '${AWS::StackName}-RoleArn'
+          RoleName:
+            Value: !Ref CIDeployRole
+            Export:
+              Name: !Sub '${AWS::StackName}-RoleName'
+
+Outputs:
+  StackSetName:
+    Description: Name of the CIDeployRole StackSet.
+    Value: !Ref CIDeployRoleStackSet
+  DeployCommand:
+    Description: One-liner to re-deploy this stack after a template change.
+    Value: !Sub 'aws cloudformation deploy --profile NDX/orgManagement --region us-west-2 --stack-name ${AWS::StackName} --template-file cloudformation/isb-hub-orgmgmt/ci-deploy-role-stackset/template.yaml --capabilities CAPABILITY_NAMED_IAM'

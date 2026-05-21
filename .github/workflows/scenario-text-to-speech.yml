@@ -1,0 +1,22 @@
+name: Scenario / text-to-speech
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/text-to-speech/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-text-to-speech.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-text-to-speech-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: text-to-speech
+    secrets: inherit

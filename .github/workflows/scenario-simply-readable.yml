@@ -1,0 +1,22 @@
+name: Scenario / simply-readable
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/simply-readable/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-simply-readable.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-simply-readable-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: simply-readable
+    secrets: inherit

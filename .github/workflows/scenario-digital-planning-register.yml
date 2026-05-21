@@ -1,0 +1,22 @@
+name: Scenario / digital-planning-register
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/digital-planning-register/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-digital-planning-register.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-digital-planning-register-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: digital-planning-register
+    secrets: inherit

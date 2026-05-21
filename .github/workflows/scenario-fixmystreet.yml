@@ -1,0 +1,22 @@
+name: Scenario / fixmystreet
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/fixmystreet/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-fixmystreet.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-fixmystreet-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: fixmystreet
+    secrets: inherit

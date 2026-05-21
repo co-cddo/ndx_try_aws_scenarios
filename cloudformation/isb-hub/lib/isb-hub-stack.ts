@@ -14,6 +14,9 @@ const BLUEPRINTS_BUCKET_NAME = `ndx-try-isb-blueprints-${HUB_ACCOUNT}`;
 const BLUEPRINTS_BUCKET_REGION = 'us-east-1';
 const GITHUB_REPO = 'co-cddo/ndx_try_aws_scenarios';
 const DEPLOY_ROLE_NAME = 'isb-hub-github-actions-deploy';
+const CI_LEASE_ROLE_NAME = 'isb-hub-github-actions-ci-lease';
+const ISB_JWT_SECRET_NAME = '/InnovationSandbox/ndx/Auth/JwtSecret';
+const ISB_JWT_SECRET_REGION = 'us-west-2';
 interface ScenarioConfig {
   name: string;
   description: string;
@@ -228,6 +231,59 @@ export class IsbHubStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'BlueprintsBucketName', {
       value: BLUEPRINTS_BUCKET_NAME,
       description: 'S3 bucket for ISB blueprint templates',
+    });
+
+    // CI lease role: separate identity for per-scenario CI workflows that
+    // need to (a) read the ISB API JWT secret and (b) assume the
+    // CIDeployRole inside a leased pool account. Trust is widened to any
+    // ref so PRs (not just main) can use it; access is gated at the
+    // workflow layer via the smoke-test-deploy GitHub environment (which
+    // carries the CODEOWNERS-approval policy).
+    const ciLeaseRole = new iam.Role(this, 'GitHubActionsCiLeaseRole', {
+      roleName: CI_LEASE_ROLE_NAME,
+      description: 'GHA OIDC role assumed by per-scenario CI workflows to acquire an ISB lease + assume CIDeployRole into the leased pool account.',
+      maxSessionDuration: cdk.Duration.hours(6),
+      assumedBy: new iam.FederatedPrincipal(
+        oidcProvider.openIdConnectProviderArn,
+        {
+          StringEquals: {
+            'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
+          },
+          StringLike: {
+            'token.actions.githubusercontent.com:sub': `repo:${GITHUB_REPO}:*`,
+          },
+        },
+        'sts:AssumeRoleWithWebIdentity',
+      ),
+    });
+
+    // Read the JWT used to sign ISB API requests.
+    ciLeaseRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [
+          `arn:aws:secretsmanager:${ISB_JWT_SECRET_REGION}:${HUB_ACCOUNT}:secret:${ISB_JWT_SECRET_NAME}*`,
+        ],
+      }),
+    );
+
+    // Assume CIDeployRole in whichever account the lease lands us in.
+    // Deployed to all pool accounts by the Isb-ndx-CIDeployRole StackSet
+    // owned by cloudformation/isb-hub-orgmgmt/.
+    ciLeaseRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['sts:AssumeRole'],
+        resources: [
+          `arn:aws:iam::*:role/InnovationSandbox-${ISB_NAMESPACE}-CIDeployRole`,
+        ],
+      }),
+    );
+
+    new cdk.CfnOutput(this, 'CiLeaseRoleArn', {
+      value: ciLeaseRole.roleArn,
+      description: 'GHA OIDC role for per-scenario CI lease workflows',
     });
   }
 }

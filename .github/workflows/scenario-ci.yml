@@ -1,0 +1,168 @@
+name: Scenario CI (reusable)
+
+# Reusable workflow invoked by per-scenario caller workflows. Provisions an
+# ephemeral ISB lease, deploys the scenario's CloudFormation template into the
+# leased pool account, runs the scenario's Playwright smoke spec, terminates
+# the lease. Lease termination runs on if: always() so a failed deploy or smoke
+# still releases the account back to the pool.
+#
+# Per-scenario callers declare `environment: smoke-test-deploy` to gate access
+# to the hub OIDC role (CODEOWNERS approval + branch policy on that env).
+
+on:
+  workflow_call:
+    inputs:
+      scenario:
+        description: Scenario name (matches cloudformation/scenarios/<name>/).
+        required: true
+        type: string
+      template_path:
+        description: Path to the CloudFormation template to deploy.
+        required: false
+        type: string
+        default: ''
+      lease_template:
+        description: ISB lease template to acquire.
+        required: false
+        type: string
+        default: empty-sandbox
+      ci_lease_email:
+        description: Email associated with the lease (use a service identity).
+        required: false
+        type: string
+        default: ci-bot@ndx-try.local
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    # smoke-test-deploy gates PR-triggered access to the hub OIDC role.
+    # CODEOWNERS approval + branch policy on this environment is the
+    # human-in-the-loop sign-off for spending a pool account on a lease.
+    environment: smoke-test-deploy
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Resolve template path
+        id: paths
+        env:
+          SCENARIO: ${{ inputs.scenario }}
+          OVERRIDE: ${{ inputs.template_path }}
+        run: |
+          if [ -n "$OVERRIDE" ]; then
+            path="$OVERRIDE"
+          else
+            path="cloudformation/scenarios/${SCENARIO}/template.yaml"
+          fi
+          if [ ! -f "$path" ]; then
+            echo "::error::Template not found at $path"; exit 1
+          fi
+          echo "template_path=$path" >> "$GITHUB_OUTPUT"
+
+      # Assume the CI-lease OIDC role in the hub. This identity can read
+      # the ISB JWT secret and assume CIDeployRole in any pool account.
+      - uses: aws-actions/configure-aws-credentials@v6
+        id: hub-creds
+        with:
+          role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-ci-lease
+          role-session-name: scenario-ci-${{ github.run_id }}
+          aws-region: us-west-2
+          role-duration-seconds: 21600
+
+      - name: Acquire ISB lease
+        id: lease
+        run: |
+          python3 scripts/isb/ci_lease.py acquire \
+            --template '${{ inputs.lease_template }}' \
+            --user-email '${{ inputs.ci_lease_email }}'
+
+      # Now assume the in-lease CIDeployRole using the account_id we just got.
+      - uses: aws-actions/configure-aws-credentials@v6
+        id: lease-creds
+        with:
+          role-to-assume: arn:aws:iam::${{ steps.lease.outputs.account_id }}:role/InnovationSandbox-ndx-CIDeployRole
+          role-session-name: scenario-ci-deploy-${{ github.run_id }}
+          aws-region: us-east-1
+          role-duration-seconds: 21600
+
+      - name: Deploy scenario stack
+        id: deploy
+        env:
+          SCENARIO: ${{ inputs.scenario }}
+          TEMPLATE: ${{ steps.paths.outputs.template_path }}
+        run: |
+          set -euo pipefail
+          STACK_NAME="ndx-try-${SCENARIO}"
+          aws cloudformation deploy \
+            --stack-name "$STACK_NAME" \
+            --template-file "$TEMPLATE" \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+            --no-fail-on-empty-changeset \
+            --tags Project=ndx-try Scenario="$SCENARIO" RunId="${{ github.run_id }}"
+          echo "stack_name=$STACK_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Run scenario smoke spec
+        env:
+          SMOKE_STACK_NAME: ${{ steps.deploy.outputs.stack_name }}
+          SMOKE_AWS_REGION: us-east-1
+          CI: 'true'
+        run: |
+          npx playwright test --project=smoke \
+            "cloudformation/scenarios/${{ inputs.scenario }}/smoke.ts"
+
+      # Captured BEFORE teardown so live-stack state survives a failure.
+      - name: Capture CFN events
+        if: always() && steps.deploy.outputs.stack_name != ''
+        env:
+          STACK: ${{ steps.deploy.outputs.stack_name }}
+        run: |
+          mkdir -p artefacts
+          aws cloudformation describe-stack-events --stack-name "$STACK" \
+            > "artefacts/${STACK}-events.json" 2>&1 || true
+          aws cloudformation describe-stacks --stack-name "$STACK" \
+            > "artefacts/${STACK}-stack.json" 2>&1 || true
+
+      - name: Upload artefacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: scenario-${{ inputs.scenario }}-${{ github.run_id }}
+          path: |
+            artefacts/
+            playwright-report/
+            test-results/
+          retention-days: 14
+
+      # Switch back to the hub-side identity to call the ISB API for release.
+      # The lease-creds identity is only valid for ops inside the pool account;
+      # the release POST goes to the hub API.
+      - uses: aws-actions/configure-aws-credentials@v6
+        if: always() && steps.lease.outputs.lease_id != ''
+        with:
+          role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-ci-lease
+          role-session-name: scenario-ci-release-${{ github.run_id }}
+          aws-region: us-west-2
+          role-duration-seconds: 3600
+
+      - name: Release ISB lease
+        if: always() && steps.lease.outputs.lease_id != ''
+        run: |
+          python3 scripts/isb/ci_lease.py release \
+            --lease-id '${{ steps.lease.outputs.lease_id }}' \
+            --user-email '${{ inputs.ci_lease_email }}' \
+            || echo "::warning::Lease release failed (lease_id=${{ steps.lease.outputs.lease_id }}); janitor will recover it"
