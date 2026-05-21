@@ -33,7 +33,7 @@ env:
 jobs:
   nuke:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 360
     environment: smoke-test-deploy
     steps:
       - name: Validate confirmation
