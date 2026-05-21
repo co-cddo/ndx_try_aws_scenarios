@@ -1,34 +1,11 @@
 name: Smoke Pack
 
+# DISABLED 2026-05-21. The smoke account (464453619983) is being torn down
+# and closed; we're moving to a new approach. Auto-triggers (pull_request,
+# schedule, push) are removed so this workflow no longer runs on every PR
+# or nightly. workflow_dispatch remains for ad-hoc invocations if needed
+# (e.g. against a future replacement account).
 on:
-  pull_request:
-    paths:
-      - 'cloudformation/scenarios/**'
-      - 'tests/smoke/**'
-      - 'scripts/smoke*.sh'
-      - 'scripts/check-quarantines.mjs'
-      - 'playwright.config.ts'
-      - 'docs/smoke-test-account-config.yml'
-      - 'docs/smoke-test-account-setup.md'
-      - '.github/workflows/smoke.yml'
-      - 'package.json'
-
-  schedule:
-    - cron: '0 2 * * *'
-
-  push:
-    branches: [main]
-    paths:
-      - 'cloudformation/scenarios/**'
-      - 'tests/smoke/**'
-      - 'scripts/smoke*.sh'
-      - 'scripts/check-quarantines.mjs'
-      - 'playwright.config.ts'
-      - 'docs/smoke-test-account-config.yml'
-      - 'docs/smoke-test-account-setup.md'
-      - '.github/workflows/smoke.yml'
-      - 'package.json'
-
   workflow_dispatch:
 
 permissions:
