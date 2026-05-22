@@ -101,7 +101,12 @@ jobs:
           role-to-assume: arn:aws:iam::${{ steps.lease.outputs.account_id }}:role/InnovationSandbox-ndx-CIDeployRole
           role-session-name: scenario-ci-deploy-${{ github.run_id }}
           aws-region: us-east-1
-          role-duration-seconds: 21600
+          # Chained assumes (sigv4 from already-assumed creds) are capped
+          # at 1h by AWS regardless of MaxSessionDuration on the target
+          # role. Asking for more returns ValidationError. Workflow job
+          # timeout is 90m so any deploy needing >1h would already need
+          # other plumbing.
+          role-duration-seconds: 3600
           role-chaining: true
           # The default session-tag attempt requires sts:TagSession in the
           # target role's trust policy, which CIDeployRole doesn't grant.
