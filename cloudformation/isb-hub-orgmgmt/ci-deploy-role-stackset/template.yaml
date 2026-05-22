@@ -32,10 +32,39 @@ Parameters:
     Default: 'isb-hub-github-actions-ci-lease'
     Description: Name of the hub-side OIDC role permitted to assume the CIDeployRole.
 
-  SandboxOuId:
+  # SERVICE_MANAGED StackSets with AutoDeployment don't recurse into
+  # descendant OUs — they only deploy to accounts DIRECTLY in the targeted
+  # OUs. So we enumerate each ISB lifecycle OU explicitly. Accounts move
+  # between these during a lease cycle (Available -> Active -> CleanUp
+  # -> Available); covering them all ensures the role stays present
+  # throughout the lease.
+  EntryOuId:
     Type: String
-    Default: 'ou-2laj-4dyae1oa'
-    Description: Parent OU containing all ISB pool sub-OUs (Available, Active, Entry, ...). The StackSet auto-deploys to every account under this OU.
+    Default: 'ou-2laj-2by9v0sr'
+    AllowedPattern: 'ou-[a-z0-9]{4,}-[a-z0-9]{8,}'
+  AvailableOuId:
+    Type: String
+    Default: 'ou-2laj-oihxgbtr'
+    AllowedPattern: 'ou-[a-z0-9]{4,}-[a-z0-9]{8,}'
+  ActiveOuId:
+    Type: String
+    Default: 'ou-2laj-sre4rnjs'
+    AllowedPattern: 'ou-[a-z0-9]{4,}-[a-z0-9]{8,}'
+  FrozenOuId:
+    Type: String
+    Default: 'ou-2laj-jpffue7g'
+    AllowedPattern: 'ou-[a-z0-9]{4,}-[a-z0-9]{8,}'
+  CleanUpOuId:
+    Type: String
+    Default: 'ou-2laj-x3o8lbk8'
+    AllowedPattern: 'ou-[a-z0-9]{4,}-[a-z0-9]{8,}'
+  QuarantineOuId:
+    Type: String
+    Default: 'ou-2laj-mmagoake'
+    AllowedPattern: 'ou-[a-z0-9]{4,}-[a-z0-9]{8,}'
+  ExitOuId:
+    Type: String
+    Default: 'ou-2laj-s1t02mrz'
     AllowedPattern: 'ou-[a-z0-9]{4,}-[a-z0-9]{8,}'
 
   Namespace:
@@ -69,7 +98,13 @@ Resources:
       StackInstancesGroup:
         - DeploymentTargets:
             OrganizationalUnitIds:
-              - !Ref SandboxOuId
+              - !Ref EntryOuId
+              - !Ref AvailableOuId
+              - !Ref ActiveOuId
+              - !Ref FrozenOuId
+              - !Ref CleanUpOuId
+              - !Ref QuarantineOuId
+              - !Ref ExitOuId
           Regions:
             # IAM is global; one region is enough for StackSet bookkeeping.
             - us-west-2
