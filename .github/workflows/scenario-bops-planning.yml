@@ -1,0 +1,26 @@
+name: Scenario / bops-planning
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/bops-planning/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-bops-planning.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-bops-planning-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: bops-planning
+    secrets: inherit

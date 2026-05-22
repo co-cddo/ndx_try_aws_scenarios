@@ -1,0 +1,26 @@
+name: Scenario / quicksight-dashboard
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/quicksight-dashboard/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-quicksight-dashboard.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-quicksight-dashboard-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: quicksight-dashboard
+    secrets: inherit

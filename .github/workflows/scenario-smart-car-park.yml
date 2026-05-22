@@ -1,0 +1,26 @@
+name: Scenario / smart-car-park
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/smart-car-park/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-smart-car-park.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-smart-car-park-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: smart-car-park
+    secrets: inherit

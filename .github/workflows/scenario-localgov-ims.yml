@@ -1,0 +1,26 @@
+name: Scenario / localgov-ims
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/localgov-ims/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-localgov-ims.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-localgov-ims-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: localgov-ims
+    secrets: inherit

@@ -91,7 +91,10 @@ jobs:
             --template '${{ inputs.lease_template }}' \
             --user-email '${{ inputs.ci_lease_email }}'
 
-      # Now assume the in-lease CIDeployRole using the account_id we just got.
+      # Now assume the in-lease CIDeployRole. role-chaining=true tells
+      # configure-aws-credentials to sigv4-sign from the already-loaded
+      # hub creds (sts:AssumeRole) instead of trying OIDC against the
+      # leased account (which has no OIDC provider).
       - uses: aws-actions/configure-aws-credentials@v6
         id: lease-creds
         with:
@@ -99,6 +102,7 @@ jobs:
           role-session-name: scenario-ci-deploy-${{ github.run_id }}
           aws-region: us-east-1
           role-duration-seconds: 21600
+          role-chaining: true
 
       - name: Deploy scenario stack
         id: deploy

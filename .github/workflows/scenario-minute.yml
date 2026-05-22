@@ -1,0 +1,26 @@
+name: Scenario / minute
+
+on:
+  pull_request:
+    paths:
+      - 'cloudformation/scenarios/minute/**'
+      - '.github/workflows/scenario-ci.yml'
+      - '.github/workflows/scenario-minute.yml'
+      - 'scripts/isb/**'
+      - 'tests/smoke/**'
+  workflow_dispatch:
+
+concurrency:
+  group: scenario-minute-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  smoke:
+    uses: ./.github/workflows/scenario-ci.yml
+    with:
+      scenario: minute
+    secrets: inherit
