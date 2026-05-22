@@ -189,6 +189,7 @@ Resources:
                         Action:
                           - 's3:*'
                           - 's3vectors:*'
+                          - 'servicecatalog:*'
                           - 'lambda:*'
                           - 'apigateway:*'
                           - 'dynamodb:*'
