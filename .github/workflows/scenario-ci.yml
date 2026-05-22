@@ -31,6 +31,16 @@ on:
         required: false
         type: string
         default: ci-bot@ndx-try.local
+      reuse_account_id:
+        description: |
+          DEBUG: skip acquire/release; use this already-leased pool account.
+          Lease the account locally first (`isb assign` then look at
+          assigned account_id) and paste here. Workflow will assume
+          CIDeployRole directly. Lease is NOT released — call `isb terminate`
+          when done. Used during CI iteration to avoid burning pool accounts.
+        required: false
+        type: string
+        default: ''
 
 permissions:
   id-token: write
@@ -86,10 +96,18 @@ jobs:
 
       - name: Acquire ISB lease
         id: lease
+        if: inputs.reuse_account_id == ''
         run: |
           python3 scripts/isb/ci_lease.py acquire \
             --template '${{ inputs.lease_template }}' \
             --user-email '${{ inputs.ci_lease_email }}'
+
+      - name: Use reused lease account
+        id: reuse
+        if: inputs.reuse_account_id != ''
+        run: |
+          echo "::notice::Reusing already-leased account ${{ inputs.reuse_account_id }} — acquire+release skipped"
+          echo "account_id=${{ inputs.reuse_account_id }}" >> "$GITHUB_OUTPUT"
 
       # Now assume the in-lease CIDeployRole. role-chaining=true tells
       # configure-aws-credentials to sigv4-sign from the already-loaded
@@ -98,7 +116,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v6
         id: lease-creds
         with:
-          role-to-assume: arn:aws:iam::${{ steps.lease.outputs.account_id }}:role/InnovationSandbox-ndx-CIDeployRole
+          role-to-assume: arn:aws:iam::${{ steps.lease.outputs.account_id || steps.reuse.outputs.account_id }}:role/InnovationSandbox-ndx-CIDeployRole
           role-session-name: scenario-ci-deploy-${{ github.run_id }}
           aws-region: us-east-1
           # Chained assumes (sigv4 from already-assumed creds) are capped
@@ -117,7 +135,7 @@ jobs:
         env:
           SCENARIO: ${{ inputs.scenario }}
           TEMPLATE: ${{ steps.paths.outputs.template_path }}
-          ACCOUNT_ID: ${{ steps.lease.outputs.account_id }}
+          ACCOUNT_ID: ${{ steps.lease.outputs.account_id || steps.reuse.outputs.account_id }}
         run: |
           set -euo pipefail
           STACK_NAME="ndx-try-${SCENARIO}"
