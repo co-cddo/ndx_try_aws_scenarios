@@ -67,6 +67,11 @@
       "groupName": "github-actions"
     },
     {
+      "description": "Hub-level CDK package (not a scenario). Its own PR so it does not mix with scenario or root-site deps.",
+      "matchFileNames": ["cloudformation/isb-hub/**"],
+      "groupName": "isb-hub"
+    },
+    {
       "matchFileNames": ["cloudformation/scenarios/ai-contact-centre/**"],
       "groupName": "scenario-ai-contact-centre"
     },
