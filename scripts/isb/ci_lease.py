@@ -81,7 +81,16 @@ def fetch_jwt_secret() -> str:
 
 def signed_admin_token(email: str) -> str:
     payload = {"user": {"email": email, "roles": ["Admin"]}}
-    return sign_jwt(payload, fetch_jwt_secret())
+    secret = fetch_jwt_secret()
+    if os.environ.get("ISB_DEBUG"):
+        # Print non-leaking fingerprints so local+CI runs can be compared
+        # without exposing the actual secret. If these match across
+        # environments, the inputs are identical — divergence indicates a
+        # real difference (e.g. AWSCURRENT vs AWSPENDING served to different
+        # IAM identities, secret encoding quirk, etc).
+        sha = hashlib.sha256(secret.encode()).hexdigest()
+        print(f"::notice::ISB_DEBUG secret_sha256={sha} length={len(secret)} payload={json.dumps(payload)}", flush=True)
+    return sign_jwt(payload, secret)
 
 
 # ── ISB API request with retries ────────────────────────────────────────────
