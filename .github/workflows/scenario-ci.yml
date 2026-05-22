@@ -73,16 +73,37 @@ jobs:
         env:
           SCENARIO: ${{ inputs.scenario }}
           OVERRIDE: ${{ inputs.template_path }}
+          BLUEPRINTS_BUCKET: ndx-try-isb-blueprints-568672915267
         run: |
+          set -uo pipefail
           if [ -n "$OVERRIDE" ]; then
             path="$OVERRIDE"
           else
-            path="cloudformation/scenarios/${SCENARIO}/template.yaml"
-          fi
-          if [ ! -f "$path" ]; then
-            echo "::error::Template not found at $path"; exit 1
+            # Hand-authored YAML scenarios have template.yaml committed.
+            # CDK-synth and SAM-style scenarios get their built template
+            # uploaded to the hub blueprints bucket by deploy-blueprints.yml.
+            # When the local file is missing, fetch from there so CI works
+            # against the same template real lease deploys use.
+            local_path="cloudformation/scenarios/${SCENARIO}/template.yaml"
+            if [ -f "$local_path" ]; then
+              path="$local_path"
+            else
+              echo "::notice::No local $local_path — fetching from s3://${BLUEPRINTS_BUCKET}/scenarios/${SCENARIO}/template.yaml"
+              # Use the hub creds for this fetch. The CI-lease role doesn't
+              # have S3 read on the blueprints bucket, but the hub OIDC
+              # role assumed below does — switch order if this becomes an
+              # issue. For now, anonymous PUBLIC-READ on the bucket key
+              # works (templateUrl in StackSet is public).
+              path="$local_path"
+              mkdir -p "cloudformation/scenarios/${SCENARIO}"
+              curl -fsSL "https://${BLUEPRINTS_BUCKET}.s3.us-east-1.amazonaws.com/scenarios/${SCENARIO}/template.yaml" -o "$path" || {
+                echo "::error::Template not found locally OR in blueprints bucket for ${SCENARIO}"
+                exit 1
+              }
+            fi
           fi
           echo "template_path=$path" >> "$GITHUB_OUTPUT"
+          echo "Using template: $path ($(wc -c <"$path") bytes)"
 
       # Assume the CI-lease OIDC role in the hub. This identity can read
       # the ISB JWT secret and assume CIDeployRole in any pool account.
