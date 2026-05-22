@@ -1,6 +1,6 @@
 # PlanX Editor - pre-built SPA served by nginx
 # Multi-stage build from the PlanX monorepo
-FROM node:24.14-alpine AS build
+FROM node:24.16.0-alpine AS build
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -34,7 +34,7 @@ ENV VITE_APP_ENV=production
 RUN cd editor.planx.uk && pnpm build
 
 # Production stage — nginx serving static files
-FROM nginx:1.27-alpine
+FROM nginx:1.31-alpine
 
 # Copy built SPA
 COPY --from=build /app/editor.planx.uk/build/ /usr/share/nginx/html/
