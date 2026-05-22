@@ -88,8 +88,25 @@ def signed_admin_token(email: str) -> str:
     return sign_jwt(payload, fetch_jwt_secret())
 
 
-def make_isb_api_request(method, path, token, body=None, query_params=None):
-    """HTTP request to the ISB API with 4-retry exponential backoff."""
+def make_isb_api_request(method, path, token, body=None, query_params=None, idempotent=None):
+    """HTTP request to the ISB API.
+
+    Retries (4× exponential backoff) only on requests we KNOW are safe to
+    repeat. GET is always idempotent. POST is only safe if the path is
+    explicitly an action-style endpoint where double-firing is harmless
+    (e.g. /leases/{id}/terminate). POST /leases (lease creation) is NOT
+    idempotent — a retry on a 5xx after the server actually created the
+    record would create a duplicate lease, which (a) eats into the
+    per-user quota and (b) leaks a real pool account. Default for POST is
+    fail-fast on 5xx; callers opt in via idempotent=True if appropriate.
+
+    Network-level failures (ConnectionResetError / socket.timeout /
+    URLError) are retried regardless of method — they happen BEFORE the
+    server saw the request, so re-firing is safe.
+    """
+    if idempotent is None:
+        idempotent = method.upper() in ("GET", "HEAD", "DELETE", "PUT")
+
     url = f"{ISB_API_BASE_URL.rstrip('/')}/{path.lstrip('/')}"
     if query_params:
         qs = "&".join(
@@ -117,7 +134,7 @@ def make_isb_api_request(method, path, token, body=None, query_params=None):
             with urllib.request.urlopen(req, timeout=30) as response:
                 return response.status, json.loads(response.read().decode())
         except urllib.error.HTTPError as e:
-            if e.code in (500, 502, 503, 504) and attempt < 3:
+            if idempotent and e.code in (500, 502, 503, 504) and attempt < 3:
                 last_transient = e
                 time.sleep(2 ** attempt)
                 continue
@@ -172,7 +189,13 @@ def op_acquire(event):
     template = _resolve_lease_template(token, template_name)
 
     create_body = {"leaseTemplateUuid": template["uuid"], "userEmail": user_email}
-    status, response = make_isb_api_request("POST", "/leases", token, body=create_body)
+    # idempotent=False is the default for POST, set explicitly here as a
+    # reminder: lease creation is NOT idempotent. A retry on a 5xx after
+    # the server actually committed the record would create a duplicate
+    # lease (eats into quota + leaks a pool account).
+    status, response = make_isb_api_request(
+        "POST", "/leases", token, body=create_body, idempotent=False
+    )
     if status != 201:
         return {
             "ok": False,
@@ -251,7 +274,11 @@ def op_release(event):
     user_email = event["user_email"]
     token = signed_admin_token(user_email)
     encoded_id = urllib.parse.quote(lease_id, safe="+=")
-    status, body = make_isb_api_request("POST", f"/leases/{encoded_id}/terminate", token)
+    # Terminate is effectively idempotent — repeated calls on an
+    # already-terminated lease return 404/409, which we treat as success.
+    status, body = make_isb_api_request(
+        "POST", f"/leases/{encoded_id}/terminate", token, idempotent=True
+    )
     if status == 200:
         return {"ok": True, "data": {"terminated": True}}
     if status in (404, 409):
