@@ -2,70 +2,66 @@
 
 CI-only helper for interacting with the Innovation Sandbox lease API.
 
+## Why a proxy
+
+GitHub-hosted Actions runners use Azure IPs, which the upstream ISB WAF
+(`AWSManagedRulesAnonymousIpList` → `HostingProviderIPList`) blocks. This
+helper does NOT call the ISB API directly. It invokes a Lambda proxy in
+the hub account (`cloudformation/isb-hub/lambda/lease-proxy/`), and the
+Lambda makes the actual HTTPS call from AWS IP space. The JWT secret is
+held by the Lambda — never exposed to the GHA OIDC role.
+
 ## ci_lease.py
 
-Single-file, no-third-party-deps Python wrapper around the ISB lease endpoints. Subcommands:
-
 ```bash
-python3 scripts/isb/ci_lease.py acquire --template empty-sandbox --user-email ci-bot@<>
-python3 scripts/isb/ci_lease.py release --lease-id <id> --user-email ci-bot@<>
-python3 scripts/isb/ci_lease.py list-orphans --owned-by ci-bot@<> --older-than-minutes 180
+python3 scripts/isb/ci_lease.py acquire --template empty-sandbox --user-email <addr>
+python3 scripts/isb/ci_lease.py release --lease-id <id> --user-email <addr>
+python3 scripts/isb/ci_lease.py list-orphans --owned-by <addr> [--older-than-minutes N]
 ```
 
-Requires only `boto3` (already on GitHub Actions ubuntu-latest runners; `pip install --user boto3` if needed). No `pyjwt`, no `requests` — we use `hmac`/`hashlib`/`urllib` from the stdlib.
-
-The script assumes the calling identity already has IAM credentials in the environment with permission to:
-- `secretsmanager:GetSecretValue` on `/InnovationSandbox/ndx/Auth/JwtSecret` in us-west-2.
-
-In GitHub Actions this is the `isb-hub-github-actions-ci-lease` OIDC role (see `cloudformation/isb-hub/lib/isb-hub-stack.ts`).
+Requires `boto3` and an AWS identity with `lambda:InvokeFunction` on
+`arn:aws:lambda:us-west-2:568672915267:function:isb-lease-proxy`. In GitHub
+Actions this is the `isb-hub-github-actions-ci-lease` role; locally it's
+your SSO `NDX/InnovationSandboxHub` profile.
 
 ### Outputs (`acquire`)
 
 When `$GITHUB_OUTPUT` is set, `acquire` writes:
 - `account_id` — the leased pool account ID.
-- `lease_id` — the Base64-encoded ID used for subsequent API calls (`release`, polling).
+- `lease_id` — the Base64-encoded ID used for subsequent API calls.
 - `lease_uuid` — the lease's UUID (for human inspection in the ISB UI).
 
-If `$GITHUB_OUTPUT` is unset, the same key=value lines go to stdout.
+### Exit codes
 
-### Exit codes (`acquire`)
-
-- `0` — Lease is Active with a non-empty account ID.
-- `2` — Failed to create the lease (POST /leases returned non-201).
-- `3` — Timed out waiting for `Provisioning` → `Active` (>30 min).
-- `4` — Lease entered a terminal status that isn't `Active` (e.g. `ProvisioningFailed`, `Frozen`, `Expired`, `Terminated`, `Failed`). Upstream `assign_lease.py` silently logged this as "Unexpected status"; we exit non-zero with the actual status name so the workflow goes red.
-- `5` — Lease is Active but `awsAccountId` is empty (ISB API contract violation).
-
-### Exit codes (`release`)
-
-- `0` — Lease terminated, or already gone (404/409 treated as idempotent success).
-- `1` — Other failure (HTTP 5xx after retries, malformed response).
+- `acquire`: `0` if lease Active with a non-empty account ID; `2` if the Lambda returned `ok: false` (reason in `::error::` line).
+- `release`: `0` on terminate or idempotent already-gone (404/409); `1` otherwise.
+- `list-orphans`: `0` on success; `1` if the Lambda returned `ok: false`.
 
 ### Retry behaviour
 
-`make_isb_api_request` retries up to 4 times with exponential backoff (1s, 2s, 4s) on:
-- `ConnectionResetError`
-- `socket.timeout`
-- `urllib.error.URLError`
-- HTTP 500/502/503/504
+Retries (up to 4× with exponential backoff on transient
+`ConnectionResetError`/`socket.timeout`/`URLError`/HTTP 5xx) live in the
+Lambda. Network egress from a Lambda is generally more reliable than from
+a GHA runner — the proxy absorbs flakes.
 
-4xx responses surface immediately (no point retrying a bad-request body or auth failure).
+## Lambda proxy (`cloudformation/isb-hub/lambda/lease-proxy/index.py`)
+
+Python 3.12 Lambda. Reads the JWT secret on cold start (cached for warm
+invocations), signs the JWT, calls the ISB API. Routes via `event["op"]`
+to `acquire`/`release`/`list-orphans`. Returns `{"ok": bool, ...}` to the
+caller. Re-deployed by the `isb-hub` CDK.
 
 ## Vendored from
 
-`innovation-sandbox-on-aws-utils` @ commit `13fc703` (2026-05-21 — `isb_common: retry transient errors in make_isb_api_request`). Refresh procedure when the upstream gains a relevant fix:
-
-1. `cd ~/httpdocs/innovation-sandbox-on-aws-utils && git pull && git rev-parse HEAD`.
-2. Read the relevant change(s) in `isb_common.py`, `assign_lease.py`, or `terminate_lease.py`.
-3. Port into `scripts/isb/ci_lease.py`. Keep the file single-file, stdlib-only, no SSO/interactive flows.
-4. Update this README's vendored-from SHA.
+The Lambda's lease-template resolution + poll loop + make_isb_api_request
+shape was vendored from `innovation-sandbox-on-aws-utils@13fc703`
+(`isb_common.py`, `assign_lease.py`, `terminate_lease.py`). Refresh
+procedure when the upstream gains a relevant fix: read the new commit,
+port any non-SSO logic into `index.py`, redeploy the hub CDK.
 
 ## Local dry-run
 
-After `cdk deploy` of the hub stack and `aws cloudformation deploy` of the orgmgmt CIDeployRole stack have both landed and the StackSet has provisioned to at least one pool account:
-
 ```bash
-# Use NDX/InnovationSandboxHub credentials to talk to Secrets Manager.
 aws sso login --profile NDX/InnovationSandboxHub
 AWS_PROFILE=NDX/InnovationSandboxHub python3 scripts/isb/ci_lease.py \
   acquire --template empty-sandbox --user-email "$USER@$(hostname -f)"
