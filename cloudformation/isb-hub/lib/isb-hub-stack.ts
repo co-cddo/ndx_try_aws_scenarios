@@ -253,7 +253,11 @@ export class IsbHubStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_12,
       handler: 'index.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '..', 'lambda', 'lease-proxy')),
-      timeout: cdk.Duration.minutes(2),
+      // 15 min = Lambda max. Acquire polls until lease is Active; manual
+      // testing shows 2-10 min typical, with cold-start scenarios (planx,
+      // localgov-drupal) closer to 15 min. Release + list-orphans return
+      // in seconds — only acquire actually uses the budget.
+      timeout: cdk.Duration.minutes(15),
       memorySize: 256,
       logGroup: leaseProxyLogGroup,
       // Tight env: secret path and region only — no embedded JWT, no roles.
