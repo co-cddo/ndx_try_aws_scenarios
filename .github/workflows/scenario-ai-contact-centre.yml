@@ -9,7 +9,12 @@ on:
       - 'scripts/isb/**'
       - 'tests/smoke/**'
   workflow_dispatch:
-
+    inputs:
+      reuse_account_id:
+        description: 'DEBUG: reuse an already-leased account (set via `isb assign` locally). Skips acquire/release.'
+        required: false
+        type: string
+        default: ''
 concurrency:
   # Repo-wide group across ALL scenario callers because ISB caps ci-bot
   # at 1 active lease at a time (maxLeasesPerUser). Concurrent dispatches
@@ -26,4 +31,5 @@ jobs:
     uses: ./.github/workflows/scenario-ci.yml
     with:
       scenario: ai-contact-centre
+      reuse_account_id: ${{ inputs.reuse_account_id || '' }}
     secrets: inherit
