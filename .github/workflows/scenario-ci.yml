@@ -103,6 +103,9 @@ jobs:
           aws-region: us-east-1
           role-duration-seconds: 21600
           role-chaining: true
+          # The default session-tag attempt requires sts:TagSession in the
+          # target role's trust policy, which CIDeployRole doesn't grant.
+          role-skip-session-tagging: true
 
       - name: Deploy scenario stack
         id: deploy
