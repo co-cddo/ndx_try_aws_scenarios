@@ -7,13 +7,13 @@
     "cdk": "cdk"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.241.0",
-    "constructs": "^10.5.1",
+    "aws-cdk-lib": "^2.257.0",
+    "constructs": "^10.6.0",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "aws-cdk": "^2.1110.0",
+    "@types/node": "^22.19.19",
+    "aws-cdk": "^2.1124.1",
     "typescript": "~5.9.3"
   }
 }
