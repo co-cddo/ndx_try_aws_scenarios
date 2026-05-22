@@ -117,12 +117,29 @@ jobs:
         env:
           SCENARIO: ${{ inputs.scenario }}
           TEMPLATE: ${{ steps.paths.outputs.template_path }}
+          ACCOUNT_ID: ${{ steps.lease.outputs.account_id }}
         run: |
           set -euo pipefail
           STACK_NAME="ndx-try-${SCENARIO}"
+          # CFN requires templates >51KB to be staged in S3. Several
+          # scenarios (council-chatbot, simply-readable, ai-contact-centre)
+          # exceed this. Create a per-account staging bucket on demand —
+          # the leased pool account is wiped between leases so we can't
+          # rely on a pre-existing bucket. mb is idempotent on existing
+          # buckets and the bucket is freshly created each lease cycle.
+          BUCKET="ndx-try-ci-cfn-stage-${ACCOUNT_ID}"
+          aws s3api create-bucket \
+            --bucket "$BUCKET" \
+            --region us-east-1 \
+            >/dev/null 2>&1 || true
+          aws s3api put-bucket-encryption \
+            --bucket "$BUCKET" \
+            --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}' \
+            >/dev/null 2>&1 || true
           aws cloudformation deploy \
             --stack-name "$STACK_NAME" \
             --template-file "$TEMPLATE" \
+            --s3-bucket "$BUCKET" \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
             --no-fail-on-empty-changeset \
             --tags Project=ndx-try Scenario="$SCENARIO" RunId="${{ github.run_id }}"
