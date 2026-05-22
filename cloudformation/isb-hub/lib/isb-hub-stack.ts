@@ -316,6 +316,21 @@ export class IsbHubStack extends cdk.Stack {
 
     leaseProxyFn.grantInvoke(ciLeaseRole);
 
+    // Read CDK-synth + SAM scenario templates from the blueprints bucket.
+    // Hand-authored scenarios have template.yaml committed in the repo;
+    // synthesized ones get uploaded to s3://blueprints/scenarios/<name>/
+    // by deploy-blueprints.yml. The CI workflow falls back to this when
+    // the local file is missing.
+    ciLeaseRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['s3:GetObject'],
+        resources: [
+          `arn:aws:s3:::${BLUEPRINTS_BUCKET_NAME}/scenarios/*/template.yaml`,
+        ],
+      }),
+    );
+
     // Assume CIDeployRole in whichever account the lease lands us in.
     // Deployed to all pool accounts by the Isb-ndx-CIDeployRole StackSet
     // owned by cloudformation/isb-hub-orgmgmt/.
