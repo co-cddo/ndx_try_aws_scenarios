@@ -170,6 +170,9 @@ jobs:
         env:
           SMOKE_STACK_NAME: ${{ steps.deploy.outputs.stack_name }}
           SMOKE_AWS_REGION: us-east-1
+          # Skips the local eleventy webServer that playwright.config.ts
+          # otherwise starts for the desktop/mobile projects.
+          PLAYWRIGHT_SUITE: smoke
           CI: 'true'
         run: |
           npx playwright test --project=smoke \
