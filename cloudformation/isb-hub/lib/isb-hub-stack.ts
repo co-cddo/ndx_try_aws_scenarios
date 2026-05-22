@@ -3,6 +3,8 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as cfn from 'aws-cdk-lib/aws-cloudformation';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -233,15 +235,66 @@ export class IsbHubStack extends cdk.Stack {
       description: 'S3 bucket for ISB blueprint templates',
     });
 
-    // CI lease role: separate identity for per-scenario CI workflows that
-    // need to (a) read the ISB API JWT secret and (b) assume the
-    // CIDeployRole inside a leased pool account. Trust is widened to any
-    // ref so PRs (not just main) can use it; access is gated at the
-    // workflow layer via the smoke-test-deploy GitHub environment (which
-    // carries the CODEOWNERS-approval policy).
+    // Lambda relay for the ISB lease API. GitHub-hosted runners' Azure IPs
+    // are blocked by the upstream ISB WAF (AWSManagedRulesAnonymousIpList
+    // -> HostingProviderIPList). CI invokes this Lambda via boto3; the
+    // Lambda makes the actual HTTPS call from AWS IP space, which the WAF
+    // allows. JWT signing happens INSIDE the Lambda so the JWT secret is
+    // never exposed to a GHA-OIDC principal — only this function reads it.
+    const leaseProxyLogGroup = new logs.LogGroup(this, 'IsbLeaseProxyLogs', {
+      logGroupName: '/aws/lambda/isb-lease-proxy',
+      retention: logs.RetentionDays.ONE_MONTH,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    const leaseProxyFn = new lambda.Function(this, 'IsbLeaseProxy', {
+      functionName: 'isb-lease-proxy',
+      description: 'Proxies ISB lease API calls from GHA CI through AWS IP space (WAF allow-listed).',
+      runtime: lambda.Runtime.PYTHON_3_12,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '..', 'lambda', 'lease-proxy')),
+      timeout: cdk.Duration.minutes(2),
+      memorySize: 256,
+      logGroup: leaseProxyLogGroup,
+      // Tight env: secret path and region only — no embedded JWT, no roles.
+      environment: {
+        ISB_JWT_SECRET_PATH: ISB_JWT_SECRET_NAME,
+        ISB_JWT_SECRET_REGION: ISB_JWT_SECRET_REGION,
+      },
+    });
+
+    // Lambda needs to read the JWT secret + decrypt via its KMS CMK.
+    leaseProxyFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [
+          `arn:aws:secretsmanager:${ISB_JWT_SECRET_REGION}:${HUB_ACCOUNT}:secret:${ISB_JWT_SECRET_NAME}*`,
+        ],
+      }),
+    );
+    leaseProxyFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['kms:Decrypt'],
+        resources: ['*'],
+        conditions: {
+          StringEquals: {
+            'kms:ViaService': `secretsmanager.${ISB_JWT_SECRET_REGION}.amazonaws.com`,
+          },
+        },
+      }),
+    );
+
+    // CI lease role: per-scenario CI workflows assume this via GHA OIDC.
+    // Permissions are tight by design — only invoke the lease-proxy Lambda
+    // and assume CIDeployRole. No direct ISB API or secret access. Trust
+    // is widened to any ref so PRs (not just main) can use it; access is
+    // gated at the workflow layer via the smoke-test-deploy GitHub
+    // environment (CODEOWNERS-approval).
     const ciLeaseRole = new iam.Role(this, 'GitHubActionsCiLeaseRole', {
       roleName: CI_LEASE_ROLE_NAME,
-      description: 'GHA OIDC role assumed by per-scenario CI workflows to acquire an ISB lease + assume CIDeployRole into the leased pool account.',
+      description: 'GHA OIDC role assumed by per-scenario CI workflows to invoke the lease-proxy Lambda and assume CIDeployRole in the leased pool account.',
       maxSessionDuration: cdk.Duration.hours(6),
       assumedBy: new iam.FederatedPrincipal(
         oidcProvider.openIdConnectProviderArn,
@@ -257,34 +310,7 @@ export class IsbHubStack extends cdk.Stack {
       ),
     });
 
-    // Read the JWT used to sign ISB API requests.
-    ciLeaseRole.addToPolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ['secretsmanager:GetSecretValue'],
-        resources: [
-          `arn:aws:secretsmanager:${ISB_JWT_SECRET_REGION}:${HUB_ACCOUNT}:secret:${ISB_JWT_SECRET_NAME}*`,
-        ],
-      }),
-    );
-
-    // The JWT secret is KMS-encrypted; GetSecretValue silently calls Decrypt
-    // on the underlying key. Without this, the API returns
-    // AccessDeniedException: Access to KMS is not allowed. ViaService
-    // condition keeps the permission scoped to secretsmanager only — the
-    // role can't directly decrypt anything else with this key.
-    ciLeaseRole.addToPolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ['kms:Decrypt'],
-        resources: ['*'],
-        conditions: {
-          StringEquals: {
-            'kms:ViaService': `secretsmanager.${ISB_JWT_SECRET_REGION}.amazonaws.com`,
-          },
-        },
-      }),
-    );
+    leaseProxyFn.grantInvoke(ciLeaseRole);
 
     // Assume CIDeployRole in whichever account the lease lands us in.
     // Deployed to all pool accounts by the Isb-ndx-CIDeployRole StackSet
@@ -302,6 +328,11 @@ export class IsbHubStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'CiLeaseRoleArn', {
       value: ciLeaseRole.roleArn,
       description: 'GHA OIDC role for per-scenario CI lease workflows',
+    });
+
+    new cdk.CfnOutput(this, 'IsbLeaseProxyFunctionName', {
+      value: leaseProxyFn.functionName,
+      description: 'Lambda function name for the ISB lease API proxy',
     });
   }
 }
