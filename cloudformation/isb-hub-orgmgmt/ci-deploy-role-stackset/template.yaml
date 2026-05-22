@@ -188,6 +188,7 @@ Resources:
                       - Effect: Allow
                         Action:
                           - 's3:*'
+                          - 's3vectors:*'
                           - 'lambda:*'
                           - 'apigateway:*'
                           - 'dynamodb:*'

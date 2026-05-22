@@ -121,6 +121,10 @@ jobs:
         run: |
           set -euo pipefail
           STACK_NAME="ndx-try-${SCENARIO}"
+          # Emit the stack name to GITHUB_OUTPUT FIRST so the Capture
+          # CFN events step (gated on stack_name) runs even if deploy
+          # fails — without the events we can't debug the failure.
+          echo "stack_name=$STACK_NAME" >> "$GITHUB_OUTPUT"
           # CFN requires templates >51KB to be staged in S3. Several
           # scenarios (council-chatbot, simply-readable, ai-contact-centre)
           # exceed this. Create a per-account staging bucket on demand —
@@ -143,7 +147,6 @@ jobs:
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
             --no-fail-on-empty-changeset \
             --tags Project=ndx-try Scenario="$SCENARIO" RunId="${{ github.run_id }}"
-          echo "stack_name=$STACK_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Run scenario smoke spec
         env:
