@@ -27,10 +27,10 @@ on:
         type: string
         default: empty-sandbox
       ci_lease_email:
-        description: Email associated with the lease. Must be an existing ISB user (ISB API returns 500 if user not found). Default uses an existing operator; for long-term, create a dedicated CI user via `isb create-user`.
+        description: Email associated with the lease. Must be an existing ISB user (ISB API returns 500 if user not found). Created via `isb create-user --firstname=NDX --lastname=CI-Bot --email=ci-bot@ndx-try.local --preapproved`.
         required: false
         type: string
-        default: chris@cns.me.uk
+        default: ci-bot@ndx-try.local
 
 permissions:
   id-token: write
