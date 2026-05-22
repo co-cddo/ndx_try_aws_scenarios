@@ -68,6 +68,17 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      # Assume the CI-lease OIDC role in the hub. This identity can read
+      # the ISB JWT secret AND read the blueprints bucket (for fetching
+      # CDK-synth / SAM scenario templates that aren't committed).
+      - uses: aws-actions/configure-aws-credentials@v6
+        id: hub-creds
+        with:
+          role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-ci-lease
+          role-session-name: scenario-ci-${{ github.run_id }}
+          aws-region: us-west-2
+          role-duration-seconds: 21600
+
       - name: Resolve template path
         id: paths
         env:
@@ -82,38 +93,23 @@ jobs:
             # Hand-authored YAML scenarios have template.yaml committed.
             # CDK-synth and SAM-style scenarios get their built template
             # uploaded to the hub blueprints bucket by deploy-blueprints.yml.
-            # When the local file is missing, fetch from there so CI works
-            # against the same template real lease deploys use.
+            # When the local file is missing, fetch from there using the
+            # hub creds (bucket isn't public — needs IAM-authenticated s3 cp).
             local_path="cloudformation/scenarios/${SCENARIO}/template.yaml"
             if [ -f "$local_path" ]; then
               path="$local_path"
             else
               echo "::notice::No local $local_path — fetching from s3://${BLUEPRINTS_BUCKET}/scenarios/${SCENARIO}/template.yaml"
-              # Use the hub creds for this fetch. The CI-lease role doesn't
-              # have S3 read on the blueprints bucket, but the hub OIDC
-              # role assumed below does — switch order if this becomes an
-              # issue. For now, anonymous PUBLIC-READ on the bucket key
-              # works (templateUrl in StackSet is public).
               path="$local_path"
               mkdir -p "cloudformation/scenarios/${SCENARIO}"
-              curl -fsSL "https://${BLUEPRINTS_BUCKET}.s3.us-east-1.amazonaws.com/scenarios/${SCENARIO}/template.yaml" -o "$path" || {
+              if ! aws s3 cp "s3://${BLUEPRINTS_BUCKET}/scenarios/${SCENARIO}/template.yaml" "$path" --region us-east-1; then
                 echo "::error::Template not found locally OR in blueprints bucket for ${SCENARIO}"
                 exit 1
-              }
+              fi
             fi
           fi
           echo "template_path=$path" >> "$GITHUB_OUTPUT"
           echo "Using template: $path ($(wc -c <"$path") bytes)"
-
-      # Assume the CI-lease OIDC role in the hub. This identity can read
-      # the ISB JWT secret and assume CIDeployRole in any pool account.
-      - uses: aws-actions/configure-aws-credentials@v6
-        id: hub-creds
-        with:
-          role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-ci-lease
-          role-session-name: scenario-ci-${{ github.run_id }}
-          aws-region: us-west-2
-          role-duration-seconds: 21600
 
       - name: Acquire ISB lease
         id: lease
