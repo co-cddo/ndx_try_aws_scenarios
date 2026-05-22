@@ -14,11 +14,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # One run per branch; cancel a superseded run in flight (the new commit
-  # will get a fresh lease — releasing the old lease happens on the
-  # cancelled run's if: always() release step, or eventually by the janitor).
-  group: scenario-council-chatbot-${{ github.ref }}
-  cancel-in-progress: true
+  # Repo-wide group across ALL scenario callers because ISB caps ci-bot
+  # at 1 active lease at a time (maxLeasesPerUser). Concurrent dispatches
+  # would 409. Serialise here so each scenario gets a turn.
+  group: scenario-ci-pool
+  cancel-in-progress: false
 
 permissions:
   id-token: write
