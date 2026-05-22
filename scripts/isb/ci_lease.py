@@ -26,14 +26,21 @@ import sys
 from typing import Any
 
 import boto3
+from botocore.config import Config
 
 LEASE_PROXY_FUNCTION = os.environ.get("ISB_LEASE_PROXY_FUNCTION", "isb-lease-proxy")
 LEASE_PROXY_REGION = os.environ.get("ISB_LEASE_PROXY_REGION", "us-west-2")
 
+# Sync Lambda Invoke can take up to 15 min for a long-polling acquire.
+# Default boto3 read_timeout is 60s — way too short. retries=0 because
+# the Lambda itself already retries the ISB API; a botocore retry on a
+# 15-min request would burn another 15 min for no gain.
+_LAMBDA_CFG = Config(read_timeout=900, connect_timeout=10, retries={"max_attempts": 0})
+
 
 def invoke_proxy(event: dict) -> dict:
     """Invoke the lease-proxy Lambda. Returns the decoded JSON response."""
-    client = boto3.client("lambda", region_name=LEASE_PROXY_REGION)
+    client = boto3.client("lambda", region_name=LEASE_PROXY_REGION, config=_LAMBDA_CFG)
     resp = client.invoke(
         FunctionName=LEASE_PROXY_FUNCTION,
         InvocationType="RequestResponse",

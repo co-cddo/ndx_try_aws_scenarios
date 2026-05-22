@@ -43,7 +43,9 @@ ISB_JWT_SECRET_REGION = os.environ.get("ISB_JWT_SECRET_REGION", "us-west-2")
 ACTIVE_STATUSES = {"Active"}
 PROVISIONING_STATUSES = {"Provisioning", "PendingApproval"}
 
-PROVISIONING_TIMEOUT_SECONDS = 30 * 60
+# Lambda max execution is 15 min. Leave ~30s buffer so we exit cleanly
+# with a useful error rather than getting killed mid-poll.
+PROVISIONING_TIMEOUT_SECONDS = 14 * 60 + 30
 POLL_INTERVAL_SECONDS = 5
 
 # Cache the secret across warm Lambda invocations to avoid hitting Secrets
