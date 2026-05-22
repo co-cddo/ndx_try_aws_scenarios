@@ -252,7 +252,20 @@ export class IsbHubStack extends cdk.Stack {
       description: 'Proxies ISB lease API calls from GHA CI through AWS IP space (WAF allow-listed).',
       runtime: lambda.Runtime.PYTHON_3_12,
       handler: 'index.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '..', 'lambda', 'lease-proxy')),
+      // Bundled install pins boto3 (see lambda/lease-proxy/requirements.txt)
+      // instead of relying on the Lambda runtime's floating boto3 version.
+      // Renovate tracks the requirements.txt; updates flow through PR review
+      // (the smoke-test-deploy environment gates bot PRs).
+      code: lambda.Code.fromAsset(path.join(__dirname, '..', 'lambda', 'lease-proxy'), {
+        bundling: {
+          image: lambda.Runtime.PYTHON_3_12.bundlingImage,
+          command: [
+            'bash',
+            '-c',
+            'pip install -r requirements.txt -t /asset-output --no-cache-dir && cp -a . /asset-output',
+          ],
+        },
+      }),
       // 15 min = Lambda max. Acquire polls until lease is Active; manual
       // testing shows 2-10 min typical, with cold-start scenarios (planx,
       // localgov-drupal) closer to 15 min. Release + list-orphans return
