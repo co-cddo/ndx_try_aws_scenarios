@@ -56,9 +56,9 @@ jobs:
     environment: smoke-test-deploy
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '22'
           cache: 'npm'
@@ -71,7 +71,7 @@ jobs:
       # Assume the CI-lease OIDC role in the hub. This identity can read
       # the ISB JWT secret AND read the blueprints bucket (for fetching
       # CDK-synth / SAM scenario templates that aren't committed).
-      - uses: aws-actions/configure-aws-credentials@v6
+      - uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6
         id: hub-creds
         with:
           role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-ci-lease
@@ -130,7 +130,7 @@ jobs:
       # configure-aws-credentials to sigv4-sign from the already-loaded
       # hub creds (sts:AssumeRole) instead of trying OIDC against the
       # leased account (which has no OIDC provider).
-      - uses: aws-actions/configure-aws-credentials@v6
+      - uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6
         id: lease-creds
         with:
           role-to-assume: arn:aws:iam::${{ steps.lease.outputs.account_id || steps.reuse.outputs.account_id }}:role/InnovationSandbox-ndx-CIDeployRole
@@ -209,7 +209,7 @@ jobs:
 
       - name: Upload artefacts
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: scenario-${{ inputs.scenario }}-${{ github.run_id }}
           path: |
@@ -238,7 +238,7 @@ jobs:
       # Switch back to the hub-side identity to call the ISB API for release.
       # The lease-creds identity is only valid for ops inside the pool account;
       # the release POST goes to the hub API.
-      - uses: aws-actions/configure-aws-credentials@v6
+      - uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6
         if: always() && steps.lease.outputs.lease_id != ''
         with:
           role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-ci-lease
