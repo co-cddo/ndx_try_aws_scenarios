@@ -69,9 +69,9 @@ jobs:
           - name: digital-planning-register
             stack: DigitalPlanningRegisterStack
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '22'
 
@@ -100,7 +100,7 @@ jobs:
       - name: Retention-policy lint
         run: ./scripts/lint-retention-policies.sh cloudformation/scenarios/${{ matrix.scenario.name }}/template.yaml
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ matrix.scenario.name }}-template
           path: cloudformation/scenarios/${{ matrix.scenario.name }}/template.yaml
@@ -109,9 +109,9 @@ jobs:
   synth-simply-readable:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '22'
 
@@ -186,19 +186,19 @@ jobs:
             console.log('Zipped ' + assetEntries.length + ' Lambda assets');
           "
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: simply-readable-template
           path: cloudformation/scenarios/simply-readable/template.yaml
           retention-days: 1
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: simply-readable-assets
           path: cloudformation/scenarios/simply-readable/dist/asset-zips/
           retention-days: 1
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: simply-readable-website
           path: cloudformation/scenarios/simply-readable/website-build/
@@ -210,7 +210,7 @@ jobs:
   lint-committed-templates:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install yq (for real-YAML template parsing)
         run: |
@@ -239,59 +239,59 @@ jobs:
       - lint-committed-templates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: localgov-drupal-template
           path: cloudformation/scenarios/localgov-drupal
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: localgov-ims-template
           path: cloudformation/scenarios/localgov-ims
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: minute-template
           path: cloudformation/scenarios/minute
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: fixmystreet-template
           path: cloudformation/scenarios/fixmystreet
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: paperless-ngx-template
           path: cloudformation/scenarios/paperless-ngx
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: simply-readable-template
           path: cloudformation/scenarios/simply-readable
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: simply-readable-assets
           path: cloudformation/scenarios/simply-readable/dist/asset-zips
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: simply-readable-website
           path: cloudformation/scenarios/simply-readable/website-build
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: planx-template
           path: cloudformation/scenarios/planx
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: bops-planning-template
           path: cloudformation/scenarios/bops-planning
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: digital-planning-register-template
           path: cloudformation/scenarios/digital-planning-register
@@ -299,13 +299,13 @@ jobs:
       - name: Build planning-ai template (inject PDF + text into template)
         run: python3 cloudformation/scenarios/planning-ai/build-template.py -o cloudformation/scenarios/planning-ai/template.yaml
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: cloudformation/isb-hub/package-lock.json
 
-      - uses: aws-actions/configure-aws-credentials@v6
+      - uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6
         with:
           role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-deploy
           aws-region: us-west-2
