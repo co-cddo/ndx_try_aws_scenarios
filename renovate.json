@@ -55,9 +55,8 @@
       ]
     },
     {
-      "description": "Root web page — Eleventy site + tooling. One PR for all root npm deps (dev + prod).",
-      "matchManagers": ["npm"],
-      "matchFileNames": ["package.json"],
+      "description": "Root web page — Eleventy site + tooling + Node engine pin. One PR for all root npm deps (dev + prod) and .nvmrc.",
+      "matchFileNames": ["package.json", ".nvmrc"],
       "groupName": "npm-web"
     },
     {
