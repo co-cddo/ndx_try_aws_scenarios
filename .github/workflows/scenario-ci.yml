@@ -218,22 +218,12 @@ jobs:
             test-results/
           retention-days: 14
 
-      # Delete the scenario stack so leased accounts don't accumulate
-      # VPCs, ELBs, etc. across runs. In acquire mode (no reuse), this is
-      # belt-and-braces because ISB nuke wipes the account anyway. In
-      # reuse mode (same lease used for multiple scenarios), this is
-      # required to stay under per-account quotas (5 VPCs/region by default).
-      # Wait synchronously so the next scenario doesn't race the cleanup,
-      # but cap at 20 minutes so a stuck delete doesn't block everything.
-      - name: Delete scenario stack
-        if: always() && steps.deploy.outputs.stack_name != ''
-        env:
-          STACK: ${{ steps.deploy.outputs.stack_name }}
-        run: |
-          aws cloudformation delete-stack --stack-name "$STACK" || true
-          echo "::notice::Waiting up to 20m for $STACK to delete"
-          timeout 1200 aws cloudformation wait stack-delete-complete --stack-name "$STACK" \
-            || echo "::warning::$STACK delete didn't finish in 20m; ISB nuke will catch it at lease end"
+      # No explicit stack delete: ISB nuke wipes the leased account at
+      # lease termination, which handles cleanup faster than waiting on a
+      # synchronous CFN delete-stack (which can take 10-20 min for stacks
+      # with VPCs/ALBs). reuse_account_id mode (debug-only) accepts
+      # the trade-off of accumulating resources across runs in the same
+      # lease; if that hits a quota, terminate and re-acquire.
 
       # Switch back to the hub-side identity to call the ISB API for release.
       # The lease-creds identity is only valid for ops inside the pool account;
