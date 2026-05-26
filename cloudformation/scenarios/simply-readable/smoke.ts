@@ -94,7 +94,7 @@ runSmoke({
     // distinguish this run's job from older ones (the admin user persists
     // job history across smoke runs against the same lease).
     const uniqueName = `smoke-${Date.now()}.docx`;
-    const fixturePath = resolve(here, '../../../tests/smoke/fixtures/translate-test.docx');
+    const fixturePath = resolve(here, 'fixtures/translate-test.docx');
     await page.locator('input[type=file]').setInputFiles({
       name: uniqueName,
       mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
