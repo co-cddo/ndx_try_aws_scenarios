@@ -41,16 +41,6 @@ on:
         required: false
         type: string
         default: ''
-      parameter_overrides:
-        description: |
-          Space-separated CFN parameter overrides (KEY=VALUE pairs) appended
-          to `aws cloudformation deploy --parameter-overrides`. Used for
-          scenarios that must opt out of expensive defaults during smoke,
-          e.g. ai-contact-centre passes ExistingPhoneNumberArn=DUMMY to skip
-          claiming a real GB DID (quota 5/30days).
-        required: false
-        type: string
-        default: ''
 
 permissions:
   id-token: write
@@ -172,7 +162,6 @@ jobs:
           SCENARIO: ${{ inputs.scenario }}
           TEMPLATE: ${{ steps.paths.outputs.template_path }}
           ACCOUNT_ID: ${{ steps.lease.outputs.account_id || steps.reuse.outputs.account_id }}
-          PARAMETER_OVERRIDES: ${{ inputs.parameter_overrides }}
         run: |
           set -euo pipefail
           STACK_NAME="ndx-try-${SCENARIO}"
@@ -216,19 +205,13 @@ jobs:
             echo "Using packaged template: $TEMPLATE"
           fi
 
-          deploy_args=(
-            --stack-name "$STACK_NAME"
-            --template-file "$TEMPLATE"
-            --s3-bucket "$BUCKET"
-            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-            --no-fail-on-empty-changeset
+          aws cloudformation deploy \
+            --stack-name "$STACK_NAME" \
+            --template-file "$TEMPLATE" \
+            --s3-bucket "$BUCKET" \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+            --no-fail-on-empty-changeset \
             --tags Project=ndx-try Scenario="$SCENARIO" RunId="${{ github.run_id }}"
-          )
-          if [ -n "${PARAMETER_OVERRIDES:-}" ]; then
-            # shellcheck disable=SC2206 — intentional word-split into argv pairs
-            deploy_args+=(--parameter-overrides $PARAMETER_OVERRIDES)
-          fi
-          aws cloudformation deploy "${deploy_args[@]}"
 
       - name: Run scenario smoke spec
         env:

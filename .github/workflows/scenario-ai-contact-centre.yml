@@ -1,8 +1,5 @@
 name: Scenario / ai-contact-centre
 
-# NAP-564: scenario-ci.yml runs `sam package` before deploy for SAM scenarios;
-# CIDeployRole grants ds:*, kinesis:*, cases:*, voiceid:* for Connect (retry).
-
 on:
   pull_request:
     paths:
@@ -22,10 +19,7 @@ concurrency:
   # Repo-wide group across ALL scenario callers because ISB caps ci-bot
   # at 1 active lease at a time (maxLeasesPerUser). Concurrent dispatches
   # would 409. Serialise here so each scenario gets a turn.
-  # TEMPORARY (NAP-564): per-branch suffix to dodge a zombie pending run
-  # from the 2026-05-26 GH Actions incident that we can neither cancel nor
-  # garbage-collect. Revert to plain `scenario-ci-pool` before merge.
-  group: scenario-ci-pool-${{ github.ref }}
+  group: scenario-ci-pool
   cancel-in-progress: false
 
 permissions:
