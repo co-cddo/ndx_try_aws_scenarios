@@ -126,6 +126,15 @@ jobs:
           echo "::notice::Reusing already-leased account ${{ inputs.reuse_account_id }} — acquire+release skipped"
           echo "account_id=${{ inputs.reuse_account_id }}" >> "$GITHUB_OUTPUT"
 
+      # SAM-style scenarios (Transform: AWS::Serverless-*) need `sam package`
+      # to rewrite relative CodeUri values to s3:// URIs before CFN can
+      # process them. Install the SAM CLI unconditionally; the package step
+      # below is gated on the transform header. Cheap to install (~5s) and
+      # avoids forking the workflow on scenario type.
+      - uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
+        with:
+          use-installer: true
+
       # Now assume the in-lease CIDeployRole. role-chaining=true tells
       # configure-aws-credentials to sigv4-sign from the already-loaded
       # hub creds (sts:AssumeRole) instead of trying OIDC against the
@@ -175,6 +184,27 @@ jobs:
             --bucket "$BUCKET" \
             --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}' \
             >/dev/null 2>&1 || true
+
+          # SAM scenarios (Transform: AWS::Serverless-*) ship templates
+          # with relative CodeUri paths. CFN rejects those at changeset
+          # time — `sam package` zips each Lambda CodeUri, uploads to the
+          # staging bucket, and rewrites the template to use s3:// URIs.
+          # Detection: grep the raw template header for the Serverless
+          # transform. Non-SAM templates skip the package step.
+          if grep -qE '^Transform:.*AWS::Serverless' "$TEMPLATE"; then
+            echo "::notice::SAM transform detected in $TEMPLATE — running sam package"
+            PACKAGED="$(dirname "$TEMPLATE")/dist/ci-packaged.yaml"
+            mkdir -p "$(dirname "$PACKAGED")"
+            sam package \
+              --template-file "$TEMPLATE" \
+              --output-template-file "$PACKAGED" \
+              --s3-bucket "$BUCKET" \
+              --s3-prefix "scenarios/${SCENARIO}/assets" \
+              --region us-east-1
+            TEMPLATE="$PACKAGED"
+            echo "Using packaged template: $TEMPLATE"
+          fi
+
           aws cloudformation deploy \
             --stack-name "$STACK_NAME" \
             --template-file "$TEMPLATE" \

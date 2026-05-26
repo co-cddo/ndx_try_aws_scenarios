@@ -219,6 +219,18 @@ Resources:
                           - 'kms:*'
                           - 'wafv2:*'
                           - 'connect:*'
+                          # AWS::Connect::Instance internally calls
+                          # ds:CheckAlias / CreateAlias / CreateIdentityPoolDirectory
+                          # etc. — see AWS Connect IAM docs. Without these the
+                          # resource handler 400s with "User is not authorized
+                          # to perform Check Alias operation".
+                          - 'ds:*'
+                          - 'profile:*'
+                          # Amazon Connect Cases (IaCasesDomain in AICC) needs
+                          # cases:* and validation reaches into voiceid: for
+                          # Customer Profile integration.
+                          - 'cases:*'
+                          - 'voiceid:*'
                           - 'lex:*'
                           - 'wisdom:*'
                           - 'polly:*'
@@ -229,6 +241,8 @@ Resources:
                           - 'glue:*'
                           - 'athena:*'
                           - 'firehose:*'
+                          - 'kinesis:*'
+                          - 'kinesisanalytics:*'
                           - 'cognito-identity:*'
                           - 'cognito-idp:*'
                           - 'cognito-sync:*'
