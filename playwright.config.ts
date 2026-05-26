@@ -70,6 +70,11 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.1,
+      // Long-form pages occasionally jitter by 1px between renders (lazy
+      // images settling, scroll-anchor, sub-pixel layout). The default 5s
+      // stability window isn't enough; give the consecutive-stable-screenshot
+      // retry loop more headroom before it gives up.
+      timeout: 30_000,
     },
   },
 });
