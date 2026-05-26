@@ -14,12 +14,12 @@ runSmoke({
     AiContactCentreCompanionUrl: 'CompanionUrl',
     AiContactCentrePstnNumber: 'PstnNumber',
   },
-  // Smoke deploys AICC with a placeholder ExistingPhoneNumberArn (DUMMY string)
-  // so the `ClaimNewPhoneNumber` condition is false: no real GB DID claim, no
-  // GeoFlowAssoc. AICC's ConnectInstance + Lex + Wisdom + KB + companion UI all
-  // deploy real, persist via fix-forward. Smoke checks the companion URL HTTP
-  // status and that PstnNumber matches a +44 format string. UK DID claim quota
-  // (5/30days) is preserved entirely for production deploys.
+  // Smoke deploys AICC with the default empty ExistingPhoneNumberArn so a
+  // real GB DID is claimed via GeoNumber + PhoneNumberFlowAssoc. Smoke
+  // checks the companion URL HTTP status and that PstnNumber matches a +44
+  // format string. The Connect DID claim quota (5/30days) is account-scoped
+  // and ISB lease accounts are never recycled, so every smoke run gets a
+  // fresh quota — claiming real numbers per run is safe.
   test: async ({ page, get }) => {
     const companionUrl = get('AiContactCentreCompanionUrl');
 
