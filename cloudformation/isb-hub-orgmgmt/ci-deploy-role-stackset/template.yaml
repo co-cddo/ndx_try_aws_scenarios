@@ -203,6 +203,7 @@ Resources:
                           - 'ssm:*'
                           - 'states:*'
                           - 'events:*'
+                          - 'pipes:*'
                           - 'bedrock:*'
                           - 'sagemaker:*'
                           - 'elasticloadbalancing:*'
