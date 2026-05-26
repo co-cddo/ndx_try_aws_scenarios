@@ -226,6 +226,11 @@ Resources:
                           # to perform Check Alias operation".
                           - 'ds:*'
                           - 'profile:*'
+                          # Amazon Connect Cases (IaCasesDomain in AICC) needs
+                          # cases:* and validation reaches into voiceid: for
+                          # Customer Profile integration.
+                          - 'cases:*'
+                          - 'voiceid:*'
                           - 'lex:*'
                           - 'wisdom:*'
                           - 'polly:*'
