@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * Visual Regression Tests
@@ -7,6 +7,24 @@ import { test, expect } from '@playwright/test';
  * Compares current screenshots against baseline
  * Flags changes >10% as potential regressions
  */
+
+// Force any IntersectionObserver-driven lazy loads, then settle the layout,
+// so fullPage screenshots have a stable height across consecutive captures.
+async function stabilizePage(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const step = Math.max(window.innerHeight, 400);
+    for (let y = 0; y < scrollHeight; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    }
+    window.scrollTo(0, 0);
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+  });
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(250);
+}
 
 // Exploration pages to test for visual regression
 const explorationPages = [
@@ -37,9 +55,7 @@ test.describe('Council Chatbot Visual Regression', () => {
     test(`Visual regression: ${pageConfig.name}`, async ({ page }, testInfo) => {
       await page.goto(pageConfig.path);
       await page.waitForLoadState('networkidle');
-
-      // Wait a bit for any animations to complete
-      await page.waitForTimeout(500);
+      await stabilizePage(page);
 
       const viewport = testInfo.project.name === 'mobile' ? 'mobile' : 'desktop';
 
