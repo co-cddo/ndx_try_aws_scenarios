@@ -1,5 +1,7 @@
 name: Scenario / ai-contact-centre
 
+# NAP-564: scenario-ci.yml now sam packages SAM scenarios before deploy.
+
 on:
   pull_request:
     paths:
