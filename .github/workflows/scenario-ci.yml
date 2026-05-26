@@ -162,6 +162,13 @@ jobs:
           SCENARIO: ${{ inputs.scenario }}
           TEMPLATE: ${{ steps.paths.outputs.template_path }}
           ACCOUNT_ID: ${{ steps.lease.outputs.account_id || steps.reuse.outputs.account_id }}
+          # Per-scenario secret parameters. Mirror the `parameterKeys`
+          # entries in cloudformation/isb-hub/lib/isb-hub-stack.ts so a
+          # scenario gets the same keys whether deployed via hub StackSet
+          # or CI smoke. Each is harmless to set when the scenario doesn't
+          # need it (case statement in the run block picks the right one).
+          OS_VECTOR_TILES_API_KEY: ${{ secrets.OS_VECTOR_TILES_API_KEY }}
+          GOVUKPAY_SANDBOX_API_KEY: ${{ secrets.GOVUKPAY_SANDBOX_API_KEY }}
         run: |
           set -euo pipefail
           STACK_NAME="ndx-try-${SCENARIO}"
@@ -205,12 +212,25 @@ jobs:
             echo "Using packaged template: $TEMPLATE"
           fi
 
+          # Per-scenario CFN parameter overrides. Maps each scenario to
+          # the secrets declared via env above. Scenarios without an entry
+          # deploy with no overrides.
+          PARAM_ARGS=()
+          case "$SCENARIO" in
+            bops-planning)
+              PARAM_ARGS=(--parameter-overrides "OSVectorTilesApiKey=$OS_VECTOR_TILES_API_KEY")
+              ;;
+            localgov-ims)
+              PARAM_ARGS=(--parameter-overrides "GovUkPayApiKey=$GOVUKPAY_SANDBOX_API_KEY")
+              ;;
+          esac
           aws cloudformation deploy \
             --stack-name "$STACK_NAME" \
             --template-file "$TEMPLATE" \
             --s3-bucket "$BUCKET" \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
             --no-fail-on-empty-changeset \
+            "${PARAM_ARGS[@]}" \
             --tags Project=ndx-try Scenario="$SCENARIO" RunId="${{ github.run_id }}"
 
       - name: Run scenario smoke spec

@@ -349,5 +349,7 @@ jobs:
         run: >-
           npx cdk deploy --require-approval never
           --parameters GovUkPayApiKey=${{ secrets.GOVUKPAY_SANDBOX_API_KEY }}
+          --parameters OSVectorTilesApiKey=${{ secrets.OS_VECTOR_TILES_API_KEY }}
         env:
           GOVUKPAY_SANDBOX_API_KEY: ${{ secrets.GOVUKPAY_SANDBOX_API_KEY }}
+          OS_VECTOR_TILES_API_KEY: ${{ secrets.OS_VECTOR_TILES_API_KEY }}
