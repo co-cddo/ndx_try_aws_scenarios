@@ -21,7 +21,10 @@ concurrency:
   # Repo-wide group across ALL scenario callers because ISB caps ci-bot
   # at 1 active lease at a time (maxLeasesPerUser). Concurrent dispatches
   # would 409. Serialise here so each scenario gets a turn.
-  group: scenario-ci-pool
+  # TEMPORARY (NAP-564): per-branch suffix to dodge a zombie pending run
+  # from the 2026-05-26 GH Actions incident that we can neither cancel nor
+  # garbage-collect. Revert to plain `scenario-ci-pool` before merge.
+  group: scenario-ci-pool-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
