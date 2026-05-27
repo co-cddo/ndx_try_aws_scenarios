@@ -27,18 +27,23 @@ async function stabilizePage(page: Page): Promise<void> {
     await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
 
     // Wait for every <img> on the page to finish loading. networkidle alone
-    // doesn't catch images that finish decoding fractionally late.
+    // doesn't catch images that finish decoding fractionally late. Time-bound
+    // the wait: some images (broken URLs, lazy elements outside viewport)
+    // never fire load/error and would otherwise hang the test timeout.
     const imgs = Array.from(document.images);
-    await Promise.all(
-      imgs.map((img) =>
-        img.complete
-          ? Promise.resolve()
-          : new Promise<void>((resolve) => {
-              img.addEventListener('load', () => resolve(), { once: true });
-              img.addEventListener('error', () => resolve(), { once: true });
-            }),
+    await Promise.race([
+      Promise.all(
+        imgs.map((img) =>
+          img.complete
+            ? Promise.resolve()
+            : new Promise<void>((resolve) => {
+                img.addEventListener('load', () => resolve(), { once: true });
+                img.addEventListener('error', () => resolve(), { once: true });
+              }),
+        ),
       ),
-    );
+      new Promise<void>((resolve) => setTimeout(resolve, 5000)),
+    ]);
   });
   await page.waitForLoadState('networkidle');
   // Final settle for any post-load layout adjustments.
