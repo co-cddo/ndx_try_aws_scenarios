@@ -38,7 +38,12 @@
         "sort-packages": true,
         "optimize-autoloader": true,
         "platform": {
-            "php": "8.2"
+            "php": "8.5.6"
+        },
+        "audit": {
+            "ignore": {
+                "PKSA-dwsq-ppd2-mb1x": "symfony/polyfill-intl-idn v1.37.0 pinned by drupal/core-recommended; awaiting upstream bump"
+            }
         }
     },
     "extra": {
