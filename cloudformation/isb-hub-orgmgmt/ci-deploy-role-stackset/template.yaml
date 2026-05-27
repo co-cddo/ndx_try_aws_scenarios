@@ -191,6 +191,8 @@ Resources:
                           - 's3vectors:*'
                           - 's3files:*'
                           - 'servicecatalog:*'
+                          - 'servicecatalog-appregistry:*'
+                          - 'servicediscovery:*'
                           - 'lambda:*'
                           - 'apigateway:*'
                           - 'dynamodb:*'
