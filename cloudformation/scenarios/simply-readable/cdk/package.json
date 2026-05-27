@@ -10,19 +10,19 @@
     "synth": "cd ../.upstream/infrastructure && npx ts-node --prefer-ts-exts --project ../../cdk/tsconfig.json ../../cdk/bin/app.ts"
   },
   "devDependencies": {
-    "@types/node": "^20.9.0",
+    "@types/node": "^20.19.41",
     "ts-node": "^10.9.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@aws-cdk/aws-cognito-identitypool-alpha": "^2.153.0-alpha.0",
-    "@types/aws-lambda": "^8.10.126",
-    "aws-cdk": "^2.1013.0",
-    "aws-cdk-lib": "^2.193.0",
-    "awscdk-appsync-utils": "^0.0.271",
-    "cdk-nag": "2.27.210",
-    "constructs": "^10.3.0",
-    "esbuild": "^0.25.0",
+    "@types/aws-lambda": "^8.10.161",
+    "aws-cdk": "^2.1124.1",
+    "aws-cdk-lib": "^2.257.0",
+    "awscdk-appsync-utils": "^0.0.858",
+    "cdk-nag": "2.38.2",
+    "constructs": "^10.6.0",
+    "esbuild": "^0.28.0",
     "source-map-support": "^0.5.21"
   }
 }
