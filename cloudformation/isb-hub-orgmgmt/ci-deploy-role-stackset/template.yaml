@@ -189,6 +189,7 @@ Resources:
                         Action:
                           - 's3:*'
                           - 's3vectors:*'
+                          - 's3files:*'
                           - 'servicecatalog:*'
                           - 'lambda:*'
                           - 'apigateway:*'
