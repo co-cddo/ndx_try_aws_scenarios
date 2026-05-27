@@ -71,7 +71,7 @@ jobs:
       # Assume the CI-lease OIDC role in the hub. This identity can read
       # the ISB JWT secret AND read the blueprints bucket (for fetching
       # CDK-synth / SAM scenario templates that aren't committed).
-      - uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6
+      - uses: aws-actions/configure-aws-credentials@acca2b1b2070338fb9fd1ca27ecee81d687e58e5 # v6
         id: hub-creds
         with:
           role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-ci-lease
@@ -139,7 +139,7 @@ jobs:
       # configure-aws-credentials to sigv4-sign from the already-loaded
       # hub creds (sts:AssumeRole) instead of trying OIDC against the
       # leased account (which has no OIDC provider).
-      - uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6
+      - uses: aws-actions/configure-aws-credentials@acca2b1b2070338fb9fd1ca27ecee81d687e58e5 # v6
         id: lease-creds
         with:
           role-to-assume: arn:aws:iam::${{ steps.lease.outputs.account_id || steps.reuse.outputs.account_id }}:role/InnovationSandbox-ndx-CIDeployRole
@@ -278,7 +278,7 @@ jobs:
       # Switch back to the hub-side identity to call the ISB API for release.
       # The lease-creds identity is only valid for ops inside the pool account;
       # the release POST goes to the hub API.
-      - uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6
+      - uses: aws-actions/configure-aws-credentials@acca2b1b2070338fb9fd1ca27ecee81d687e58e5 # v6
         if: always() && steps.lease.outputs.lease_id != ''
         with:
           role-to-assume: arn:aws:iam::568672915267:role/isb-hub-github-actions-ci-lease
