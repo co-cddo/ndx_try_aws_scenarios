@@ -219,7 +219,10 @@ Resources:
                           - 'cloudfront:*'
                           - 'rds:*'
                           - 'elasticache:*'
-                          - 'efs:*'
+                          # IAM namespace for EFS is `elasticfilesystem:`, NOT
+                          # `efs:` — `efs:*` matches nothing and EFS tagging /
+                          # mount-target operations 403. Found via localgov-drupal.
+                          - 'elasticfilesystem:*'
                           - 'kms:*'
                           - 'wafv2:*'
                           - 'connect:*'
