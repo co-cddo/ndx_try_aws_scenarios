@@ -197,7 +197,7 @@ export class ComputeConstruct extends Construct {
     const dbPass = props.databaseSecret.secretValueFromJson('password').unsafeUnwrap();
 
     const paperlessContainer = this.taskDefinition.addContainer('paperless', {
-      image: ecs.ContainerImage.fromRegistry('ghcr.io/paperless-ngx/paperless-ngx:2.9@sha256:948dc7297df8259bffac23e564a7ca688bfc8f04fed9113e7fb14f6030da63dd'),
+      image: ecs.ContainerImage.fromRegistry('ghcr.io/paperless-ngx/paperless-ngx:2.20@sha256:6c86cad803970ea782683a8e80e7403444c5bf3cf70de63b4d3c8e87500db92f'),
       essential: true,
       logging: ecs.LogDrivers.awsLogs({ logGroup: this.logGroup, streamPrefix: 'paperless' }),
       portMappings: [{ containerPort: 8000, protocol: ecs.Protocol.TCP }],
