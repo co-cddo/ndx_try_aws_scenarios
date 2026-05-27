@@ -8,17 +8,17 @@
         "docs": "https://docs.localgovdrupal.org"
     },
     "require": {
-        "php": ">=8.2",
-        "composer/installers": "^2.0",
-        "drupal/core-composer-scaffold": "^11.3",
-        "drupal/core-recommended": "^10.3",
-        "localgovdrupal/localgov": "^3.0",
-        "drush/drush": "^12.0",
-        "aws/aws-sdk-php": "^3.300",
-        "drupal/office_hours": "^1.0"
+        "php": ">=8.5.6",
+        "composer/installers": "^2.3.0",
+        "drupal/core-composer-scaffold": "^11.3.10",
+        "drupal/core-recommended": "^10.6.9",
+        "localgovdrupal/localgov": "^3.3.1",
+        "drush/drush": "^12.5.3",
+        "aws/aws-sdk-php": "^3.382.1",
+        "drupal/office_hours": "^1.29.0"
     },
     "require-dev": {
-        "drupal/core-dev": "^10.3"
+        "drupal/core-dev": "^10.6.9"
     },
     "conflict": {
         "drupal/drupal": "*"
@@ -38,7 +38,12 @@
         "sort-packages": true,
         "optimize-autoloader": true,
         "platform": {
-            "php": "8.2"
+            "php": "8.5.6"
+        },
+        "audit": {
+            "ignore": {
+                "PKSA-dwsq-ppd2-mb1x": "symfony/polyfill-intl-idn v1.37.0 pinned by drupal/core-recommended; awaiting upstream bump"
+            }
         }
     },
     "extra": {

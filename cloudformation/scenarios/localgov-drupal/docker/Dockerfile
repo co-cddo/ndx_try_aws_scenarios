@@ -7,7 +7,7 @@
 # =============================================================================
 # Stage 1: Builder - Install Composer dependencies
 # =============================================================================
-FROM php:8.3-fpm-alpine AS builder
+FROM php:8.5-fpm-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache \
@@ -22,12 +22,14 @@ RUN apk add --no-cache \
     oniguruma-dev \
     $PHPIZE_DEPS
 
-# Configure and install PHP extensions (with WebP support for image styles)
+# Configure and install PHP extensions (with WebP support for image styles).
+# opcache is statically compiled into PHP 8.5 — `docker-php-ext-install opcache`
+# fails with "modules/*: No such file or directory" because there's no shared
+# .so to copy. `php -m` already shows "Zend OPcache" loaded.
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         gd \
-        opcache \
         zip \
         bcmath \
         intl \
@@ -62,7 +64,7 @@ RUN mkdir -p /var/www/drupal/web/libraries/dropzone \
 # =============================================================================
 # Stage 2: Runtime - Minimal production image
 # =============================================================================
-FROM php:8.3-fpm-alpine AS runtime
+FROM php:8.5-fpm-alpine AS runtime
 
 # Install runtime dependencies
 RUN apk add --no-cache \
@@ -91,7 +93,6 @@ RUN apk add --no-cache \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         gd \
-        opcache \
         zip \
         bcmath \
         intl \
