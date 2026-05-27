@@ -21,6 +21,7 @@
       "./node_modules/@types",
       "../.upstream/infrastructure/node_modules/@types"
     ],
+    "types": ["node"],
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
