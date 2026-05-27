@@ -10,9 +10,9 @@
     "synth": "cd ../.upstream/infrastructure && npx ts-node --prefer-ts-exts --project ../../cdk/tsconfig.json ../../cdk/bin/app.ts"
   },
   "devDependencies": {
-    "@types/node": "^20.19.41",
+    "@types/node": "^24.12.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@aws-cdk/aws-cognito-identitypool-alpha": "^2.153.0-alpha.0",
