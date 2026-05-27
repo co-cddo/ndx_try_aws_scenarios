@@ -17,6 +17,11 @@ on:
   merge_group:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      update_baselines:
+        description: 'Refresh visual-regression baselines (run on main to publish new visual-baselines artifact)'
+        type: boolean
+        default: false
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -217,9 +222,14 @@ jobs:
 
       - name: Run visual-regression (bootstrap if no baselines)
         if: always()
+        env:
+          UPDATE_BASELINES: ${{ inputs.update_baselines }}
         run: |
-          if [ -d tests/visual-regression.spec.ts-snapshots ] && \
-             [ -n "$(ls -A tests/visual-regression.spec.ts-snapshots 2>/dev/null || true)" ]; then
+          if [ "$UPDATE_BASELINES" = "true" ]; then
+            echo "::notice::workflow_dispatch input update_baselines=true; refreshing snapshots"
+            npx playwright test tests/visual-regression.spec.ts --project=desktop --update-snapshots
+          elif [ -d tests/visual-regression.spec.ts-snapshots ] && \
+               [ -n "$(ls -A tests/visual-regression.spec.ts-snapshots 2>/dev/null || true)" ]; then
             npx playwright test tests/visual-regression.spec.ts --project=desktop
           else
             echo "::warning::No baselines present; running with --update-snapshots to bootstrap"
@@ -233,6 +243,15 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 7
+
+      - name: Upload raw test-results (actual / expected / diff PNGs)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: playwright-test-results
+          path: test-results
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Upload visual baselines (main only)
         if: github.ref == 'refs/heads/main' && always()
