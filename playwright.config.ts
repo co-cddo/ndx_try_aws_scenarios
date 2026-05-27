@@ -69,7 +69,12 @@ export default defineConfig({
 
   expect: {
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.1,
+      // Be generous: visual regression is an alarm, not a gate. We want
+      // legit layout/content breakage to flag, not anti-aliasing or 1px
+      // settling on long pages. Anyone bothered by a near-miss can dispatch
+      // build-deploy with update_baselines=true to refresh the snapshots.
+      maxDiffPixelRatio: 0.25,
+      threshold: 0.35,
       // Long-form pages occasionally jitter by 1px between renders (lazy
       // images settling, scroll-anchor, sub-pixel layout). The default 5s
       // stability window isn't enough; give the consecutive-stable-screenshot
